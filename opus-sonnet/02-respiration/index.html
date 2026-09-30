@@ -660,8 +660,9 @@ function drawKrebs() {
     ctx.beginPath(); ctx.arc(np.x, np.y, 9, 0, TAU); ctx.fill(); ctx.stroke();
     if (act > 0.05) glow(np.x, np.y, 34, 'ac', 0.3 * act);
     const al = Math.cos(an), ta = al > 0.3 ? 'left' : al < -0.3 ? 'right' : 'center';
-    txt(NODE_NAMES[i], lx, ly, fs, col('tx', (0.62 + 0.38 * act) * vis), ta, 'sans', 400);
-    txt(NODE_C[i] + ' C', lx, ly + 17, 11, col('t2', 0.8 * vis), ta, 'mono', 400);
+    const sy = ch / 2 + offY + (ly - camY) * Z, lv = vis * ss(56, 84, sy); // ne pas passer sous l'en-tete
+    txt(NODE_NAMES[i], lx, ly, fs, col('tx', (0.62 + 0.38 * act) * lv), ta, 'sans', 400);
+    txt(NODE_C[i] + ' C', lx, ly + 17, 11, col('t2', 0.8 * lv), ta, 'mono', 400);
     reg(np.x, np.y, 24, NODE_NAMES[i] + ' (' + NODE_C[i] + ' C)', 'Intermédiaire du cycle de Krebs.');
   }
   // acétyl-CoA en attente / qui entre
@@ -900,7 +901,7 @@ function drawSynth() {
   const ra = -PI / 2 + th;
   ctx.strokeStyle = col('ac', 0.95 * idle); ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(I.x, I.y); ctx.lineTo(I.x + 30 * Math.cos(ra), I.y + 30 * Math.sin(ra)); ctx.stroke();
   ctx.fillStyle = col('ac', idle); ctx.beginPath(); ctx.arc(I.x, I.y, 6, 0, TAU); ctx.fill();
-  txt('vue du dessus de F1', I.x, I.y + I.r + 16, 10.5, col('t2', 0.8), 'center', 'mono', 400);
+  txt('vue du dessus de F1', I.x, I.y - I.r - 12, 10.5, col('t2', 0.8), 'center', 'mono', 400);
   reg(I.x, I.y, I.r, 'Tête F1 vue du dessus', 'Trois sites catalytiques. La tige centrale, en tournant, les fait passer tour à tour de « lie l\'ADP + Pi » à « forme l\'ATP » puis à « libère l\'ATP ».');
   // ATP qui jaillit
   for (let i = atpParts.length - 1; i >= 0; i--) {
