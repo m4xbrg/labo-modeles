@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la respiration cellulaire — Mécaniques invisibles 02</title>
+<meta name="description" content="Le mécanisme réel derrière la simulation : glycolyse, cycle de Krebs, chaîne de transport d'électrons et ATP synthase.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#c38bff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;
+--serif:'Instrument Serif',Georgia,'Times New Roman',serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 80px}
+.haut{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);letter-spacing:.08em}
+.haut a{color:var(--texte-2);text-decoration:none;transition:color .25s var(--ease)}
+.haut a:hover{color:var(--texte)}
+.serie{margin:48px 0 4px;font:400 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{margin:0 0 18px;font:400 clamp(38px,7vw,60px)/1.02 var(--serif)}
+h1 em{color:var(--accent)}
+.chapo{font-size:18px;color:var(--texte);margin:0 0 8px}
+h2{margin:52px 0 12px;padding-top:22px;border-top:1px solid var(--trait);font:400 32px/1.1 var(--serif)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:8px}
+p{margin:0 0 14px}
+ul{padding-left:20px;margin:0 0 14px}
+li{margin-bottom:8px}
+strong{font-weight:500}
+.ac{color:var(--accent)}.po{color:var(--positif)}.en{color:var(--energie)}.ne{color:var(--negatif)}
+.chiffres{list-style:none;padding:0;margin:0}
+.chiffres li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--trait);margin:0;align-items:baseline}
+.chiffres b{font:500 22px/1.2 var(--mono);color:var(--energie);letter-spacing:-.01em}
+details{border-top:1px solid var(--trait);padding:12px 0}
+details:last-of-type{border-bottom:1px solid var(--trait)}
+summary{cursor:pointer;list-style:none;font-weight:500}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--mono);color:var(--accent);display:inline-block;width:1.4em}
+details[open] summary::before{content:"\2212"}
+details p{margin:10px 0 0 1.4em;color:var(--texte-2)}
+a.cta{display:inline-block;margin-top:36px;font:500 13px var(--mono);letter-spacing:.06em;color:var(--accent);text-decoration:none;border:1px solid var(--accent);padding:10px 16px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (max-width:560px){.chiffres li{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="haut"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Série Mécaniques invisibles</a></div>
+  <p class="serie">Mécaniques invisibles — 02</p>
+  <h1>La respiration <em>cellulaire</em>, pas à pas</h1>
+  <p class="chapo">Un seul glucose, quatre étapes, une turbine. Voici ce que la simulation montre, ce qui se passe vraiment, et où le modèle triche un peu.</p>
+
+  <h2><span>01</span>Ce que tu vois</h2>
+  <p>La scène est une coupe à travers une cellule. À gauche, le <strong>cytoplasme</strong>. À droite, une <strong>mitochondrie</strong> délimitée par deux membranes : l'externe et l'interne, séparées par l'<strong>espace intermembranaire</strong>. L'intérieur est la <strong>matrice</strong>.</p>
+  <ul>
+    <li>Les billes blanches reliées sont les <strong>atomes de carbone</strong> du glucose, puis de ses dérivés.</li>
+    <li>Les pastilles violettes <span class="ac">NADH</span> et <span class="ac">FADH2</span> sont des <strong>navettes</strong> qui transportent des électrons. Vides, elles s'appellent NAD+ et FAD.</li>
+    <li>Les jetons dorés <span class="en">ATP</span> sont la monnaie d'énergie. Trois phosphates : ATP. Deux : ADP.</li>
+    <li>Les points orangés <span class="po">H+</span> sont des protons. Les paires bleues <span class="ne">O2</span> et les petits V bleus <span class="ne">H2O</span> sont l'oxygène et l'eau.</li>
+    <li>Au fond de la scène, les grands blocs <strong>I, II, III, IV</strong> forment la chaîne de transport d'électrons. Le mécanisme à droite, avec sa tige et sa tête à trois lobes, est l'<strong>ATP synthase</strong>.</li>
+  </ul>
+
+  <h2><span>02</span>Ce qui se passe vraiment</h2>
+  <p><strong>Glycolyse.</strong> Dans le cytoplasme, le glucose (6 carbones) reçoit deux phosphates, payés par 2 ATP. Ce sucre chargé est coupé en deux molécules à 3 carbones. Chacune est <em>oxydée</em>, c'est-à-dire qu'elle perd des électrons : ils sont captés par un NAD+, qui devient NADH. Elle cède aussi ses phosphates à l'ADP, pour 4 ATP en tout. Bilan net : <strong>2 ATP et 2 NADH</strong>, plus deux <strong>pyruvates</strong>.</p>
+  <p><strong>Oxydation du pyruvate.</strong> Chaque pyruvate traverse la porine, puis un transporteur de la membrane interne. Dans la matrice, l'enzyme pyruvate déshydrogénase retire un carbone (il part en <strong>CO2</strong>), charge <strong>1 NADH</strong> et lie les 2 carbones restants au coenzyme A : c'est l'<strong>acétyl-CoA</strong>.</p>
+  <p><strong>Cycle de Krebs.</strong> L'acétyl-CoA (2 C) s'ajoute à l'oxaloacétate (4 C) pour donner du citrate (6 C). Le cycle enchaîne huit transformations et retombe sur l'oxaloacétate. Par tour : <strong>3 NADH, 1 FADH2, 1 ATP</strong> (ou GTP) et <strong>2 CO2</strong>. Le glucose fournit deux acétyl-CoA, donc deux tours. Les 6 carbones du glucose sont alors tous sortis sous forme de CO2.</p>
+  <p><strong>Chaîne de transport d'électrons.</strong> Les 10 NADH et 2 FADH2 déposent leurs électrons sur la chaîne. Ces électrons passent de complexe en complexe, en descendant une pente d'énergie. Cette énergie sert à <strong>pomper des H+</strong> de la matrice vers l'espace intermembranaire : 4 au complexe I, 4 au III, 2 au IV. Le FADH2 entre au complexe II, qui ne pompe rien. À la fin, l'<strong>O2</strong> accepte les électrons (avec des H+) et devient de l'eau. Sans O2, plus personne ne reprend les électrons : la chaîne se bloque.</p>
+  <p><strong>ATP synthase.</strong> La membrane interne est étanche aux protons. Ils s'accumulent donc d'un côté et « veulent » revenir : c'est un <strong>gradient électrochimique</strong>. Le seul passage est l'ATP synthase. Chaque proton qui la traverse pousse un anneau de sous-unités c, qui fait tourner une tige. La tige déforme la tête F1, dont les trois sites fabriquent de l'ATP à partir d'ADP et de phosphate : environ <strong>3 ATP par tour</strong>.</p>
+
+  <h2><span>03</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Les échelles.</strong> Un glucose mesure environ 1 nm, une mitochondrie 1 à 2 µm. Ici, ils se côtoient à l'écran.</li>
+    <li><strong>Les quantités.</strong> Une mitochondrie contient des milliers de chaînes et de synthases. On en montre une de chaque, et un seul glucose.</li>
+    <li><strong>La vitesse.</strong> L'ATP synthase tourne à une centaine de tours par seconde. On la ralentit d'un facteur deux cents pour la voir.</li>
+    <li><strong>Les étapes.</strong> La glycolyse compte dix réactions, le cycle huit.</li>
+    <li><strong>Les NADH du cytoplasme.</strong> Ils ne traversent pas la membrane : des navettes transportent leurs électrons. Selon la navette, le rendement passe de 32 à 30 ATP. C'est pourquoi on annonce « 30 à 32 ».</li>
+    <li><strong>Le curseur d'O2.</strong> L'enzyme du complexe IV a une affinité très forte pour l'O2 : le rendement reste plein jusqu'à de très faibles concentrations. Le curseur sature donc dès 25 %. Sans O2, le cycle de Krebs s'arrêterait aussi, faute de NAD+ ; ici, seule la chaîne est bloquée.</li>
+  </ul>
+  <p><strong>Pourquoi 32 et non 36 ou 38 ?</strong> Les anciens manuels comptaient 3 ATP par NADH et 2 par FADH2. Or le NADH fait pomper 10 H+, et il en faut environ 4 par ATP (dont 1 pour importer le phosphate). Cela donne 10/4 = <strong>2,5 ATP par NADH</strong> et 6/4 = <strong>1,5 par FADH2</strong>. Le compte : 10 × 2,5 + 2 × 1,5 + 4 ATP directs = <strong>32</strong>.</p>
+
+  <h2><span>04</span>Les chiffres à retenir</h2>
+  <ul class="chiffres">
+    <li><b>~ 32 ATP</b><span>produits par glucose complet, contre 2 pour la glycolyse seule.</span></li>
+    <li><b>10 H+</b><span>pompés par NADH (6 par FADH2), pour environ 4 H+ dépensés par ATP.</span></li>
+    <li><b>~ 100 tr/s</b><span>vitesse de rotation de l'ATP synthase, soit environ 300 ATP par seconde et par enzyme.</span></li>
+    <li><b>~ 150 mV</b><span>tension de part et d'autre de la membrane interne, épaisse de quelques nanomètres seulement.</span></li>
+    <li><b>~ ta masse</b><span>en ATP recyclé chaque jour : le corps en garde très peu à la fois, il le refait sans cesse.</span></li>
+  </ul>
+
+  <h2><span>05</span>Teste-toi</h2>
+  <details><summary>Pourquoi respire-t-on de l'oxygène si le CO2 vient du glucose ?</summary><p>L'O2 ne fabrique pas le CO2 : il sert d'accepteur final des électrons, au complexe IV. Sans lui, la chaîne se bloque, le gradient de H+ s'effondre, l'ATP synthase s'arrête et les NADH ne peuvent plus être déchargés. Le CO2 vient des carbones du glucose.</p></details>
+  <details><summary>Combien de CO2, de NADH et de FADH2 un glucose donne-t-il avant la chaîne ?</summary><p>6 CO2 (2 à l'oxydation des pyruvates, 4 dans les deux tours de Krebs), 10 NADH (2 glycolyse, 2 pyruvate, 6 Krebs) et 2 FADH2 (1 par tour).</p></details>
+  <details><summary>Que se passerait-il si la membrane interne devenait perméable aux protons ?</summary><p>Les H+ pompés reviendraient dans la matrice sans passer par l'ATP synthase : le gradient ne tiendrait pas et l'ATP ne serait plus fabriqué. La chaîne continuerait de consommer de l'O2, mais l'énergie serait dissipée en chaleur.</p></details>
+
+  <a class="cta" href="index.html">Retourner à la simulation &rarr;</a>
+</div>
+</body>
+</html>

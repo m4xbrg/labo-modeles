@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre le neurone — Mécaniques invisibles 03</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#ff6fae;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;
+--serif:"Instrument Serif",Georgia,serif;--sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;--ease:cubic-bezier(0.22,1,0.36,1)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fond);color:var(--texte);font:400 16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+main{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+.kicker{font:400 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{font:400 clamp(32px,6vw,52px)/1.05 var(--serif);margin:10px 0 8px}
+h1 em{color:var(--accent)}
+.lede{color:var(--texte-2);margin:0 0 36px}
+h2{font:400 28px/1.15 var(--serif);margin:44px 0 10px;padding-top:18px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);color:var(--accent);letter-spacing:.12em;display:block;margin-bottom:6px}
+p{margin:0 0 14px}
+ul{padding-left:18px;margin:0 0 14px}li{margin-bottom:6px}
+.n{font-family:var(--mono);font-size:.92em}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.en{color:var(--energie)}.acc{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:15px}
+td{padding:9px 0;border-bottom:1px solid var(--trait);vertical-align:top}td:first-child{color:var(--texte-2);width:46%}td:last-child{font-family:var(--mono);text-align:right}
+details{border:1px solid var(--trait);border-radius:2px;margin-bottom:10px;padding:0 14px;background:var(--fond-2)}
+summary{cursor:pointer;padding:12px 0;font-weight:500;list-style:none}summary::-webkit-details-marker{display:none}
+summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details[open] summary{color:var(--energie)}details p{color:var(--texte-2)}
+nav{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:16px;border-top:1px solid var(--trait);font-size:14px}
+a{color:var(--texte);text-decoration:none}a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+<div class="kicker">Mécaniques invisibles — 03 · Document complémentaire</div>
+<h1>Le neurone : de l’impulsion à l’<em>apprentissage</em></h1>
+<p class="lede">Ce que la page montre, ce qui se passe vraiment, et où s’arrête la simulation.</p>
+
+<h2><span>1</span>Ce que tu vois</h2>
+<p>Le neurone du haut a des <b>dendrites</b> (entrées), un <b>soma</b>, un <b>cône d’implantation</b> où naît l’impulsion, un <b>axone myélinisé</b> ponctué de <b>nœuds de Ranvier</b>, puis des <b>terminaisons</b>. Les nœuds s’allument en <span class="pos">orange</span> quand leur membrane se dépolarise ; les tirets orange entre eux sont le courant qui circule dans l’axone.</p>
+<p>L’<b>oscilloscope</b> montre la tension de la membrane au point de la sonde (déplaçable en cliquant sur l’axone). Le tracé est <span class="pos">orange</span> quand la tension monte, <span class="neg">bleu</span> quand elle redescend. La vue rapprochée montre un segment de membrane : canaux Na⁺ (<span class="pos">orange</span>), canaux K⁺ (<span class="neg">bleu</span>), pompe Na⁺/K⁺ et son ATP (<span class="en">jaune</span>).</p>
+<p>À l’acte 2, la caméra suit l’impulsion jusqu’à la terminaison et plonge dans la synapse : des vésicules de glutamate (<span class="acc">magenta</span>), la fente, des récepteurs AMPA et NMDA, un ion Mg²⁺ qui bouche les NMDA, du Ca²⁺ (<span class="en">jaune</span>) et une jauge de force de la connexion.</p>
+
+<h2><span>2</span>Ce qui se passe vraiment</h2>
+<p>Au repos, la cellule maintient environ <span class="n">−70 mV</span> entre l’intérieur et l’extérieur : c’est le <b>potentiel de repos</b>, dû à des gradients de Na⁺ (abondant dehors) et de K⁺ (abondant dedans), entretenus par la <b>pompe Na⁺/K⁺</b>.</p>
+<p>Un courant dépolarisant qui amène la membrane au <b>seuil</b> (≈ <span class="n">−55 mV</span>) ouvre des <b>canaux Na⁺ voltage-dépendants</b>. Le Na⁺ entre, ce qui dépolarise davantage et ouvre d’autres canaux : c’est une rétroaction positive. La tension grimpe à environ <span class="n">+30 mV</span> : le <b>potentiel d’action</b>.</p>
+<p>En une fraction de milliseconde, les canaux Na⁺ s’<b>inactivent</b> et des canaux K⁺ s’ouvrent : le K⁺ sort, c’est la <b>repolarisation</b>. Les canaux K⁺ se ferment lentement, d’où un dépassement vers <span class="n">−80 mV</span> (<b>hyperpolarisation</b>). Pendant que les canaux Na⁺ sont inactivés, la <b>période réfractaire</b> empêche une nouvelle impulsion, ce qui l’oblige à ne se propager que vers l’avant.</p>
+<p>La loi du <b>tout ou rien</b> vient de la rétroaction : sous le seuil, la perturbation s’éteint ; au-dessus, l’amplitude est toujours la même. L’intensité d’un stimulus se code par la <i>fréquence</i> des impulsions, pas par leur taille. La <b>conduction saltatoire</b> accélère la propagation : la myéline isole, et l’impulsion est régénérée seulement aux nœuds.</p>
+<p>À la terminaison, l’impulsion libère du <b>glutamate</b>. Il se fixe sur les récepteurs <b>AMPA</b> (Na⁺ entre, dépolarisation rapide). Les récepteurs <b>NMDA</b> agissent comme un détecteur de coïncidence : ils exigent du glutamate <i>et</i> une membrane déjà dépolarisée, qui expulse le Mg²⁺. Le Ca²⁺ qui entre alors déclenche l’insertion de nouveaux AMPA : c’est la <b>potentialisation à long terme (PLT)</b>. Cela illustre la règle de Hebb : des neurones qui s’activent ensemble se connectent ensemble.</p>
+<p>Le lien avec l’étude : la connexion s’affaiblit sans répétition. Des séances <b>espacées</b> laissent le temps à la consolidation de se produire entre chaque séance, ce qui la stabilise mieux qu’une longue séance unique. C’est ce que représente la barre « stabilité ».</p>
+
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><b>Temps ralenti.</b> Un potentiel d’action dure 1 à 2 ms ; ici 1 ms dure 0,6 s (ralenti ×600). À l’acte 2, le temps est ralenti d’environ ×20.</li>
+<li><b>Modèle de Hodgkin-Huxley</b> couplé entre huit compartiments seulement, avec un petit décalage de paramètres pour obtenir un repos à −70 mV et un seuil près de −55 mV. Les nœuds réels sont plus nombreux, plus espacés, et la vitesse réelle atteint des dizaines de m/s.</li>
+<li><b>Échelles.</b> Les canaux sont dessinés des milliers de fois trop gros ; la fente synaptique (≈ 20 nm) est agrandie ; on montre une poignée d’ions là où il y en a des millions.</li>
+<li><b>Synapse.</b> Le modèle de PLT est qualitatif : un seuil de Ca²⁺, quelques constantes choisies pour l’affichage, pas de dépression à long terme, un seul type de synapse. La règle de Hebb est une simplification ; la plasticité réelle dépend aussi du moment relatif des impulsions et d’autres cellules.</li>
+<li>Le courant de stimulation est arbitraire (µA/cm²) et injecté au cône d’implantation, sans montrer les entrées dendritiques.</li>
+</ul>
+
+<h2><span>4</span>Les chiffres à retenir</h2>
+<table>
+<tr><td>Potentiel de repos</td><td>≈ −70 mV</td></tr>
+<tr><td>Seuil · pic · hyperpolarisation</td><td>≈ −55 · +30 · −80 mV</td></tr>
+<tr><td>Durée d’un potentiel d’action</td><td>≈ 1–2 ms</td></tr>
+<tr><td>Vitesse de conduction (axone myélinisé)</td><td>≈ 1–100 m/s</td></tr>
+<tr><td>Largeur de la fente synaptique</td><td>≈ 20 nm</td></tr>
+</table>
+
+<h2><span>5</span>Teste-toi</h2>
+<details><summary>1. Pourquoi une stimulation faible ne produit-elle aucune impulsion, et une forte ne produit-elle pas une impulsion plus grande ?</summary><p>Sous le seuil, trop peu de canaux Na⁺ s’ouvrent pour déclencher la rétroaction positive : la perturbation s’éteint. Au-dessus, la rétroaction s’emballe toujours de la même façon jusqu’au même pic : c’est le tout ou rien. L’intensité se code par la fréquence des impulsions.</p></details>
+<details><summary>2. Pourquoi ne peut-on pas déclencher une seconde impulsion immédiatement après la première ?</summary><p>Les canaux Na⁺ sont inactivés (période réfractaire absolue), puis les canaux K⁺ encore ouverts maintiennent la membrane sous le repos (période réfractaire relative). Il faut attendre que les canaux retrouvent leur état de repos.</p></details>
+<details><summary>3. Pourquoi une seule stimulation n’active-t-elle pas la PLT, mais une rafale, oui ?</summary><p>Les récepteurs NMDA exigent du glutamate et une membrane déjà dépolarisée pour expulser le Mg²⁺. Une rafale additionne les dépolarisations avant qu’elles retombent, ce qui débloque les NMDA, laisse entrer le Ca²⁺ et déclenche l’insertion de récepteurs AMPA.</p></details>
+
+<nav><a href="index.html">← Retour à la page interactive</a><a href="../index.html">Accueil de la série →</a></nav>
+</main>
+</body>
+</html>

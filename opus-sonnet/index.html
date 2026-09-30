@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mécaniques invisibles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--fond);color:var(--texte)}
+body{font-family:var(--sans);font-size:16px;line-height:1.55;min-height:100vh;overflow-x:hidden}
+canvas#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5}
+main{position:relative;max-width:1180px;margin:0 auto;padding:clamp(28px,6vw,72px) 16px 64px}
+.serie{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(48px,9vw,112px);line-height:.95;margin:14px 0 20px;letter-spacing:-.01em}
+h1 em{color:var(--energie)}
+.chapeau{max-width:560px;color:var(--texte-2);font-size:17px}
+ol{list-style:none;padding:0;margin-top:clamp(40px,7vw,80px);border-top:1px solid var(--trait)}
+li a{display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:baseline;padding:26px 4px;border-bottom:1px solid var(--trait);color:inherit;text-decoration:none;position:relative;transition:padding .5s var(--ease)}
+li a::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--c);transform:scaleY(0);transform-origin:top;transition:transform .5s var(--ease)}
+li a:hover,li a:focus-visible{padding-left:22px;outline:none}
+li a:hover::before,li a:focus-visible::before{transform:scaleY(1)}
+.num{font-family:var(--mono);font-size:13px;color:var(--c)}
+.titre{font-family:var(--serif);font-size:clamp(28px,4vw,42px);line-height:1.05}
+.desc{display:block;font-family:var(--sans);font-size:15px;color:var(--texte-2);margin-top:6px;max-width:560px}
+.echelle{font-family:var(--mono);font-size:12px;color:var(--texte-2);white-space:nowrap}
+footer{margin-top:48px;font-size:13px;color:var(--texte-2);max-width:620px}
+@media (max-width:640px){
+  li a{grid-template-columns:40px 1fr}
+  .echelle{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="grain" aria-hidden="true"></canvas>
+<main>
+  <p class="serie">Série de quatre planches interactives</p>
+  <h1>Mécaniques <em>invisibles</em></h1>
+  <p class="chapeau">Ce qui se passe à des échelles qu'on ne voit jamais : une cellule qui se divise, une mitochondrie qui fabrique de l'énergie, un neurone qui apprend, un champ qui pousse une charge. Chaque planche a son document « Comprendre ce qui se passe ».</p>
+  <p class="chapeau" style="margin-top:14px"><a href="prealables.html" style="color:var(--energie);font-family:var(--mono);font-size:14px">Avant de commencer : la théorie préalable &rarr;</a></p>
+  <ol>
+    <li><a href="01-mitose/index.html" style="--c:#7ee0b5">
+      <span class="num">01</span>
+      <span class="titre">La mitose<span class="desc">Des chromosomes tirés par des câbles, puis une cellule qui se pince en deux.</span></span>
+      <span class="echelle">~ 20 µm · 1 h</span></a></li>
+    <li><a href="02-respiration/index.html" style="--c:#c38bff">
+      <span class="num">02</span>
+      <span class="titre">La respiration cellulaire<span class="desc">Du glucose à l'ATP : une turbine moléculaire mue par des protons.</span></span>
+      <span class="echelle">~ 1 µm · ms</span></a></li>
+    <li><a href="03-neurone/index.html" style="--c:#ff6fae">
+      <span class="num">03</span>
+      <span class="titre">Le neurone qui apprend<span class="desc">Une impulsion électrique, puis une synapse qui se renforce à force de répétition.</span></span>
+      <span class="echelle">~ 100 mV · 2 ms</span></a></li>
+    <li><a href="04-champ-electrique/index.html" style="--c:#9fe870">
+      <span class="num">04</span>
+      <span class="titre">Le champ électrique<span class="desc">Place des charges, regarde les lignes de champ se réorganiser, lâche une charge test.</span></span>
+      <span class="echelle">k = 8,99 × 10⁹</span></a></li>
+  </ol>
+  <footer>Code couleur commun aux quatre planches : <span style="color:var(--positif)">positif / Na⁺ / H⁺</span>, <span style="color:var(--negatif)">négatif / K⁺ / O₂</span>, <span style="color:var(--energie)">énergie / ATP</span>. Construit par Opus 5.5 (direction) et quatre sous-agents Sonnet 5.5.</footer>
+</main>
+<script>
+// Fond : poussière en suspension lente, comme dans le champ d'un microscope.
+(() => {
+  const c = document.getElementById('grain'), x = c.getContext('2d');
+  const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let w, h, p = [];
+  function taille(){
+    const d = devicePixelRatio || 1;
+    w = innerWidth; h = innerHeight;
+    c.width = w * d; c.height = h * d; x.setTransform(d,0,0,d,0,0);
+    p = Array.from({length: Math.round(w*h/9000)}, () => ({
+      x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.4+.3,
+      v: Math.random()*.15+.03, a: Math.random()*Math.PI*2
+    }));
+  }
+  function image(t){
+    x.clearRect(0,0,w,h);
+    for (const q of p){
+      if (!calme){ q.a += .002; q.x += Math.cos(q.a)*q.v; q.y += Math.sin(q.a*1.3)*q.v; }
+      if (q.x<0) q.x+=w; if (q.x>w) q.x-=w; if (q.y<0) q.y+=h; if (q.y>h) q.y-=h;
+      x.fillStyle = `rgba(232,228,220,${.08 + .06*Math.sin(t/1400 + q.a*3)})`;
+      x.beginPath(); x.arc(q.x,q.y,q.r,0,7); x.fill();
+    }
+    if (!calme) requestAnimationFrame(image);
+  }
+  addEventListener('resize', taille); taille(); requestAnimationFrame(image);
+})();
+</script>
+</body>
+</html>

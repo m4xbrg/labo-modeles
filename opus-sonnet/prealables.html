@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avant de commencer — Mécaniques invisibles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:"Instrument Serif", Georgia, serif;
+  --sans:"IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--fond);color:var(--texte);font-family:var(--sans);font-size:16.5px;line-height:1.65;overflow-x:hidden}
+.page{max-width:1120px;margin:0 auto;padding:clamp(28px,6vw,64px) 16px 80px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+nav{position:sticky;top:32px;align-self:start;font-size:14px}
+nav a{display:block;color:var(--texte-2);text-decoration:none;padding:7px 0 7px 14px;border-left:1px solid var(--trait)}
+nav a:hover{color:var(--texte);border-left-color:var(--texte)}
+nav .retour{border:0;padding-left:0;margin-bottom:18px;font-family:var(--mono);font-size:12px}
+.serie{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(44px,7vw,80px);line-height:1;margin:12px 0 18px}
+h1 em{color:var(--energie)}
+.chapeau{color:var(--texte-2);max-width:62ch;font-size:17px}
+section{padding-top:64px;margin-top:56px;border-top:1px solid var(--trait)}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,46px);line-height:1.05;margin-bottom:6px}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--c);display:block;margin-bottom:10px;letter-spacing:.1em}
+.pourquoi{color:var(--texte-2);font-style:italic;margin-bottom:28px;max-width:64ch}
+h3{font-family:var(--sans);font-weight:500;font-size:17px;margin:30px 0 8px;color:var(--c)}
+p,ul{max-width:68ch}
+p+p{margin-top:12px}
+ul{padding-left:20px}
+li{margin:6px 0}
+strong{font-weight:500;color:#fff}
+code,.m{font-family:var(--mono);font-size:.92em}
+.eq{font-family:var(--mono);background:var(--fond-2);border:1px solid var(--trait);border-left:2px solid var(--c);padding:12px 16px;margin:14px 0;max-width:68ch;overflow-x:auto;white-space:nowrap}
+.analogie{border-left:2px solid var(--energie);padding:4px 0 4px 16px;margin:16px 0;max-width:66ch;color:#d9d4c8}
+.analogie b{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--energie);font-weight:400;display:block}
+table{border-collapse:collapse;margin:14px 0;font-size:15px;max-width:68ch;width:100%}
+td,th{border-bottom:1px solid var(--trait);padding:8px 10px 8px 0;text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--texte-2);font-size:13px}
+.verif{margin-top:30px;background:var(--fond-2);border:1px solid var(--trait);padding:18px 20px;max-width:68ch}
+.verif h4{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);font-weight:400;margin-bottom:8px}
+.verif li{margin:8px 0}
+.aller{display:inline-block;margin-top:24px;font-family:var(--mono);font-size:13px;color:var(--c);text-decoration:none;border-bottom:1px solid currentColor}
+@media (max-width:860px){.page{grid-template-columns:minmax(0,1fr);gap:0}nav{position:static;margin-bottom:24px}}
+</style>
+</head>
+<body>
+<div class="page">
+<nav aria-label="Sections">
+  <a class="retour" href="index.html">&larr; Accueil de la série</a>
+  <a href="#mitose">01 · La mitose</a>
+  <a href="#respiration">02 · La respiration</a>
+  <a href="#neurone">03 · Le neurone</a>
+  <a href="#champ">04 · Le champ électrique</a>
+</nav>
+<main>
+  <p class="serie">Mécaniques invisibles — préalables</p>
+  <h1>Avant de <em>commencer</em></h1>
+  <p class="chapeau">Chaque planche suppose quelques notions de base. Cette page les rassemble, dans l'ordre où tu en as besoin. Elle précède les planches ; le document « Comprendre ce qui se passe » de chaque planche vient après. Si une notion t'est déjà familière, saute-la. La petite liste « Vérifie que tu sais » à la fin de chaque section te dit si tu es prêt.</p>
+
+  <!-- ================= 01 MITOSE ================= -->
+  <section id="mitose" style="--c:#7ee0b5">
+    <h2><span class="n">01 · PRÉALABLES</span>La mitose</h2>
+    <p class="pourquoi">Pour comprendre une division, il faut savoir ce qu'on divise : l'ADN, et comment il est emballé.</p>
+
+    <h3>La cellule, en trois parties</h3>
+    <p>Une cellule animale, c'est une <strong>membrane</strong> (une enveloppe souple de lipides), un <strong>cytoplasme</strong> (le liquide et les machines qu'elle contient) et un <strong>noyau</strong>, lui-même entouré d'une enveloppe, qui garde l'ADN. Une cellule humaine typique mesure 10 à 30 µm, soit environ le tiers de l'épaisseur d'un cheveu.</p>
+
+    <h3>ADN, chromatine, chromosome : trois états du même objet</h3>
+    <ul>
+      <li><strong>ADN</strong> : une très longue molécule qui porte l'information génétique. Déroulé, l'ADN d'une seule de tes cellules mesure environ 2 mètres.</li>
+      <li><strong>Chromatine</strong> : l'ADN enroulé autour de protéines, étalé dans le noyau comme un plat de spaghettis. C'est son état de travail : on peut y lire les gènes.</li>
+      <li><strong>Chromosome</strong> : un morceau d'ADN bien défini. Juste avant la division, il se <strong>condense</strong> en un bâtonnet compact et visible au microscope. C'est son état de transport.</li>
+    </ul>
+    <div class="analogie"><b>Analogie</b>Une corde de 2 m étalée sur une table est impossible à déplacer sans nœuds. Enroulée en bobine serrée, elle se transporte facilement. La condensation, c'est la mise en bobine.</div>
+
+    <h3>Chromatides sœurs et centromère</h3>
+    <p>Avant de se diviser, la cellule <strong>copie</strong> tout son ADN : c'est la <strong>phase S</strong> (synthèse). Chaque chromosome existe alors en deux copies identiques, les <strong>chromatides sœurs</strong>, attachées l'une à l'autre au niveau du <strong>centromère</strong> par une protéine « colle », la <strong>cohésine</strong>. C'est ce qui donne la forme en X qu'on voit dans les manuels. La mitose consiste à séparer proprement ces deux copies.</p>
+
+    <h3>Le cycle cellulaire</h3>
+    <table>
+      <tr><th>Phase</th><th>Ce qui se passe</th></tr>
+      <tr><td class="m">G1</td><td>La cellule grandit et travaille.</td></tr>
+      <tr><td class="m">S</td><td>L'ADN est copié.</td></tr>
+      <tr><td class="m">G2</td><td>Vérifications, préparation.</td></tr>
+      <tr><td class="m">M</td><td>Mitose (séparation des chromosomes) puis cytocinèse (séparation du cytoplasme).</td></tr>
+    </table>
+    <p>G1, S et G2 forment l'<strong>interphase</strong>. La planche commence à la fin de l'interphase : l'ADN est déjà copié.</p>
+
+    <h3>Diploïde, 2n, homologues</h3>
+    <p>Tu as reçu un jeu de chromosomes de chaque parent. Les deux versions d'un même chromosome (celle de ta mère, celle de ton père) sont des <strong>homologues</strong>. Une cellule qui a les deux jeux est <strong>diploïde</strong>, notée <span class="m">2n</span>. Chez l'humain, <span class="m">2n = 46</span>. La planche utilise <span class="m">2n = 4</span> pour qu'on puisse suivre chaque chromosome à l'œil.</p>
+    <p>Attention à ne pas confondre : des <strong>homologues</strong> sont deux chromosomes différents (même gènes, versions possiblement différentes) ; des <strong>chromatides sœurs</strong> sont deux copies identiques d'un seul chromosome.</p>
+
+    <h3>Le cytosquelette : les câbles et les moteurs</h3>
+    <p>La cellule contient des filaments de protéines. Les <strong>microtubules</strong> sont des tubes creux qui poussent et rétrécissent en permanence en ajoutant ou en retirant des briques à leur bout. Ils partent de deux <strong>centrosomes</strong>. Des protéines <strong>motrices</strong> marchent le long d'eux. Pendant la mitose, ils forment le <strong>fuseau</strong> et s'accrochent aux chromosomes par une plaque de protéines, le <strong>kinétochore</strong>.</p>
+
+    <h3>Mitose ou méiose ?</h3>
+    <p>La <strong>mitose</strong> donne deux cellules identiques à la cellule de départ (croissance, réparation). La <strong>méiose</strong> donne quatre cellules avec la moitié des chromosomes (ovules, spermatozoïdes). La planche montre la mitose seulement.</p>
+
+    <div class="verif"><h4>Vérifie que tu sais</h4><ul>
+      <li>Quelle est la différence entre chromatine et chromosome ?</li>
+      <li>Combien de chromatides compte une cellule 2n = 4 juste avant la mitose ? (réponse : 8)</li>
+      <li>Qu'est-ce qui tient les chromatides sœurs ensemble ?</li>
+    </ul></div>
+    <a class="aller" href="01-mitose/index.html">Ouvrir la planche 01 &rarr;</a>
+  </section>
+
+  <!-- ================= 02 RESPIRATION ================= -->
+  <section id="respiration" style="--c:#c38bff">
+    <h2><span class="n">02 · PRÉALABLES</span>La respiration cellulaire</h2>
+    <p class="pourquoi">Toute la planche repose sur deux idées : l'énergie se transporte avec des électrons, et un gradient est une réserve d'énergie.</p>
+
+    <h3>L'ATP, la monnaie d'énergie</h3>
+    <p>La cellule ne brûle pas le glucose d'un coup : elle convertit son énergie en petites pièces réutilisables, les molécules d'<strong>ATP</strong> (adénosine triphosphate). Retirer le dernier phosphate libère de l'énergie utilisable :</p>
+    <div class="eq">ATP + H₂O → ADP + Pᵢ + énergie (environ 30 kJ/mol)</div>
+    <p>Recharger l'ADP en ATP demande de l'énergie : c'est précisément ce que fait la respiration. Ton corps recycle chaque jour à peu près son propre poids en ATP.</p>
+    <div class="analogie"><b>Analogie</b>Le glucose est un billet de 100 $ ; l'ATP, ce sont des pièces de 1 $. Les machines de la cellule n'acceptent que les pièces.</div>
+
+    <h3>Oxydation et réduction</h3>
+    <p>Une <strong>oxydation</strong>, c'est une perte d'électrons. Une <strong>réduction</strong>, c'est un gain d'électrons. Les deux vont toujours ensemble (réaction <strong>redox</strong>) : si une molécule en perd, une autre en gagne. Des électrons qui passent d'une molécule qui les retient mal à une molécule qui les retient bien libèrent de l'énergie, un peu comme une balle qui descend un escalier.</p>
+    <p>L'oxygène est l'accepteur le plus avide de toute la chaîne : il est tout en bas de l'escalier. C'est pour ça qu'on en a besoin.</p>
+
+    <h3>Les porteurs d'électrons : NADH et FADH₂</h3>
+    <p>Les électrons retirés du glucose ne voyagent pas seuls. Ils sont chargés sur des navettes : <span class="m">NAD⁺</span> devient <span class="m">NADH</span> quand il est chargé, <span class="m">FAD</span> devient <span class="m">FADH₂</span>. Ces navettes livrent ensuite leurs électrons à la chaîne de transport. Dans la planche, elles sont en violet.</p>
+
+    <h3>L'équation globale</h3>
+    <div class="eq">C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + énergie (ATP + chaleur)</div>
+    <p>C'est la même réaction qu'une combustion, mais découpée en une trentaine d'étapes contrôlées par des <strong>enzymes</strong> (des protéines qui accélèrent une réaction précise sans être consommées). Le CO₂ que tu expires vient du glucose ; l'eau produite vient de l'oxygène que tu inspires.</p>
+
+    <h3>La mitochondrie</h3>
+    <p>Un organite d'environ 1 à 2 µm, à <strong>deux membranes</strong>. Retiens ses quatre zones, la planche les traverse toutes :</p>
+    <ul>
+      <li><strong>Membrane externe</strong> : perméable, une simple enveloppe.</li>
+      <li><strong>Espace intermembranaire</strong> : là où les protons H⁺ s'accumulent.</li>
+      <li><strong>Membrane interne</strong> : repliée en crêtes, étanche aux protons, porte la chaîne de transport et l'ATP synthase.</li>
+      <li><strong>Matrice</strong> : l'intérieur, où tourne le cycle de Krebs.</li>
+    </ul>
+
+    <h3>Un gradient, c'est de l'énergie stockée</h3>
+    <p>Des particules plus concentrées d'un côté d'une membrane tendent à passer de l'autre côté : c'est la <strong>diffusion</strong>. Si ces particules sont chargées (comme H⁺), la différence de charge ajoute une poussée électrique. Empêcher ce passage, puis ne l'autoriser qu'à travers une turbine, permet de récolter l'énergie. Plus il y a de H⁺, plus le <strong>pH</strong> est bas : l'espace intermembranaire devient plus acide que la matrice.</p>
+    <div class="analogie"><b>Analogie</b>Un barrage hydroélectrique : on pompe l'eau en hauteur (la chaîne de transport pompe les H⁺), puis on la laisse redescendre à travers une turbine (l'ATP synthase). Tu connais Hydro-Québec : c'est le même principe, à l'échelle du nanomètre.</div>
+
+    <div class="verif"><h4>Vérifie que tu sais</h4><ul>
+      <li>Quand NAD⁺ devient NADH, est-il oxydé ou réduit ? (réponse : réduit, il gagne des électrons)</li>
+      <li>Pourquoi l'oxygène est-il indispensable à la fin de la chaîne ?</li>
+      <li>De quel côté de la membrane interne les protons sont-ils plus concentrés ?</li>
+    </ul></div>
+    <a class="aller" href="02-respiration/index.html">Ouvrir la planche 02 &rarr;</a>
+  </section>
+
+  <!-- ================= 03 NEURONE ================= -->
+  <section id="neurone" style="--c:#ff6fae">
+    <h2><span class="n">03 · PRÉALABLES</span>Le neurone</h2>
+    <p class="pourquoi">Un neurone est un circuit électrique mouillé. Si tu comprends une pile et un condensateur, tu as fait la moitié du chemin.</p>
+
+    <h3>Tension, courant, charge : rappel</h3>
+    <ul>
+      <li><strong>Charge</strong> (coulombs) : ce qui subit la force électrique. Ici, ce sont des <strong>ions</strong>, des atomes qui ont perdu ou gagné des électrons.</li>
+      <li><strong>Tension</strong> ou différence de potentiel (volts) : l'énergie par unité de charge entre deux points. Pour un neurone, on parle de millivolts (mV).</li>
+      <li><strong>Courant</strong> (ampères) : un débit de charges. Dans un neurone, ce sont des ions qui traversent la membrane, pas des électrons dans un fil.</li>
+    </ul>
+
+    <h3>Les quatre ions à connaître</h3>
+    <table>
+      <tr><th>Ion</th><th>Où il est concentré</th><th>Rôle dans la planche</th></tr>
+      <tr><td class="m" style="color:var(--positif)">Na⁺</td><td>Dehors (≈ 10× plus)</td><td>Entre et fait monter la tension : la dépolarisation.</td></tr>
+      <tr><td class="m" style="color:var(--negatif)">K⁺</td><td>Dedans (≈ 30× plus)</td><td>Sort et fait redescendre la tension : la repolarisation.</td></tr>
+      <tr><td class="m">Ca²⁺</td><td>Dehors (≈ 10 000× plus)</td><td>Signal d'alarme : déclenche la libération de neurotransmetteurs et le renforcement des synapses.</td></tr>
+      <tr><td class="m">Mg²⁺</td><td>Dehors</td><td>Bouchon qui bloque les récepteurs NMDA au repos.</td></tr>
+    </table>
+
+    <h3>La membrane est un condensateur</h3>
+    <p>La membrane est une couche isolante de 5 nm entre deux solutions conductrices : exactement la structure d'un <strong>condensateur</strong>. Un petit surplus de charges négatives juste à l'intérieur suffit à créer une tension d'environ <span class="m">-70 mV</span> : c'est le <strong>potentiel de repos</strong>. Le signe veut dire que l'intérieur est négatif par rapport à l'extérieur.</p>
+    <p>Cette tension est entretenue par la <strong>pompe Na⁺/K⁺</strong>, qui consomme de l'ATP pour sortir 3 Na⁺ et faire entrer 2 K⁺ à chaque cycle. C'est la pile du système : elle maintient les différences de concentration.</p>
+
+    <h3>Le gradient électrochimique</h3>
+    <p>Un ion subit deux poussées : la <strong>concentration</strong> (il tend à aller là où il est moins concentré) et la <strong>tension</strong> (un ion positif est attiré par le côté négatif). La somme des deux décide s'il entre ou sort quand un passage s'ouvre. Pour Na⁺, les deux poussées pointent vers l'intérieur : quand ses canaux s'ouvrent, il s'engouffre. La tension où les deux poussées s'annulent pour un ion est son <strong>potentiel d'équilibre</strong> (environ +60 mV pour Na⁺, -90 mV pour K⁺), ce qui explique les bornes du potentiel d'action.</p>
+
+    <h3>Canaux et pompes</h3>
+    <p>Un <strong>canal ionique</strong> est une porte qui laisse passer un seul type d'ion, dans le sens du gradient, sans consommer d'énergie. Certains s'ouvrent selon la tension (<strong>canaux voltage-dépendants</strong>) : ce sont eux qui fabriquent le potentiel d'action. Une <strong>pompe</strong>, elle, force les ions contre leur gradient, en consommant de l'ATP.</p>
+
+    <h3>L'anatomie du neurone</h3>
+    <ul>
+      <li><strong>Dendrites</strong> : les antennes qui reçoivent les signaux.</li>
+      <li><strong>Soma</strong> : le corps cellulaire, qui fait la somme des signaux reçus.</li>
+      <li><strong>Axone</strong> : le câble de sortie, parfois long d'un mètre. Il est souvent gainé de <strong>myéline</strong>, un isolant interrompu par les <strong>nœuds de Ranvier</strong>.</li>
+      <li><strong>Terminaisons</strong> : la sortie, qui forme une synapse avec le neurone suivant.</li>
+    </ul>
+    <div class="analogie"><b>Analogie génie</b>L'axone est un câble mal isolé qui fuit : un signal passif s'éteindrait en quelques millimètres. D'où la nécessité de régénérer le signal à chaque nœud de Ranvier, comme un répéteur sur une longue ligne.</div>
+
+    <h3>La synapse chimique</h3>
+    <p>Deux neurones ne se touchent pas : il reste une <strong>fente synaptique</strong> d'environ 20 nm. Le signal électrique devient chimique : le neurone émetteur libère un <strong>neurotransmetteur</strong> (ici le <strong>glutamate</strong>), qui traverse la fente et se fixe sur des <strong>récepteurs</strong> du neurone récepteur. Ces récepteurs sont des canaux qui s'ouvrent alors et laissent entrer des ions. Plus il y a de récepteurs, plus la réponse est forte : c'est là que se loge l'apprentissage.</p>
+
+    <div class="verif"><h4>Vérifie que tu sais</h4><ul>
+      <li>Au repos, l'intérieur du neurone est-il positif ou négatif ?</li>
+      <li>Si les canaux Na⁺ s'ouvrent, dans quel sens bouge la tension, et pourquoi ?</li>
+      <li>Quelle est la différence entre un canal et une pompe ?</li>
+    </ul></div>
+    <a class="aller" href="03-neurone/index.html">Ouvrir la planche 03 &rarr;</a>
+  </section>
+
+  <!-- ================= 04 CHAMP ================= -->
+  <section id="champ" style="--c:#9fe870">
+    <h2><span class="n">04 · PRÉALABLES</span>Le champ électrique</h2>
+    <p class="pourquoi">Deux notions portent toute la planche : le champ (une force par unité de charge) et le potentiel (une énergie par unité de charge).</p>
+
+    <h3>La charge électrique</h3>
+    <p>La charge se mesure en <strong>coulombs</strong> (C). Elle existe en deux signes ; les charges de même signe se repoussent, les charges opposées s'attirent. Elle est quantifiée : toute charge est un multiple de <span class="m">e = 1,602 × 10⁻¹⁹ C</span>. La planche utilise des nanocoulombs (nC, 10⁻⁹ C), l'ordre de grandeur de l'électricité statique d'un ballon frotté.</p>
+
+    <h3>Les vecteurs</h3>
+    <p>Une force a une grandeur et une direction : c'est un <strong>vecteur</strong>. Pour additionner deux vecteurs, on additionne leurs composantes x et y séparément. Un <strong>vecteur unitaire</strong> <span class="m">r̂</span> a une longueur de 1 et sert seulement à indiquer une direction.</p>
+
+    <h3>La loi de Coulomb</h3>
+    <div class="eq">F = k · |q₁ q₂| / r²      k = 8,99 × 10⁹ N·m²/C²</div>
+    <p>La force diminue avec le <strong>carré</strong> de la distance : deux fois plus loin, quatre fois plus faible. C'est la même forme que la gravitation de Newton.</p>
+
+    <h3>Le champ électrique</h3>
+    <p>Plutôt que de calculer la force entre chaque paire de charges, on dit que chaque charge crée autour d'elle un <strong>champ</strong> <span class="m">E</span> : la force que subirait une charge de 1 C placée là. Une charge <span class="m">q</span> placée dans ce champ subit <span class="m">F = qE</span>.</p>
+    <div class="eq">E = k · q / r²   (unité : N/C, équivalent à V/m)</div>
+    <p><strong>Superposition</strong> : avec plusieurs charges, le champ total est la somme vectorielle des champs de chacune. C'est ce que la planche calcule en chaque point.</p>
+
+    <h3>Les lignes de champ</h3>
+    <p>Des courbes toujours <strong>tangentes</strong> au champ. Règles : elles partent des charges positives et finissent sur les négatives (ou à l'infini), elles ne se croisent jamais (le champ n'a qu'une direction en un point), et leur densité indique l'intensité du champ.</p>
+
+    <h3>Le potentiel et les équipotentielles</h3>
+    <p>Le <strong>potentiel</strong> <span class="m">V</span> (volts) est l'énergie potentielle par unité de charge. C'est un nombre, pas un vecteur, donc il s'additionne simplement :</p>
+    <div class="eq">V = k · q / r   (en 1/r, pas en 1/r²)</div>
+    <p>Une <strong>équipotentielle</strong> relie les points de même potentiel, comme une courbe de niveau sur une carte topographique. Le champ pointe toujours dans le sens de la pente descendante du potentiel, <strong>perpendiculairement</strong> aux équipotentielles. Déplacer une charge le long d'une équipotentielle ne demande aucun travail.</p>
+    <div class="analogie"><b>Analogie</b>Le potentiel est l'altitude d'un relief ; les équipotentielles sont les courbes de niveau ; le champ est la direction dans laquelle une bille roulerait. Une charge positive « roule » vers les potentiels bas, une charge négative vers les potentiels hauts.</div>
+
+    <h3>Pourquoi la simulation intègre pas à pas</h3>
+    <p>Pour tracer une ligne de champ ou le trajet d'une charge test, l'ordinateur avance par petits pas : il regarde le champ ici, avance un peu dans cette direction, recommence. La méthode la plus simple (<strong>Euler</strong>) accumule des erreurs dans les virages. <strong>RK4</strong> (Runge-Kutta d'ordre 4) goûte le champ à quatre endroits dans le pas et fait une moyenne pondérée, ce qui est beaucoup plus précis. Une bonne vérification : l'énergie totale de la charge test (cinétique + potentielle) doit rester constante.</p>
+
+    <div class="verif"><h4>Vérifie que tu sais</h4><ul>
+      <li>Si tu triples la distance à une charge, par combien sont divisés E et V ? (réponse : E par 9, V par 3)</li>
+      <li>Pourquoi deux lignes de champ ne peuvent-elles jamais se croiser ?</li>
+      <li>Une charge négative lâchée au repos va-t-elle vers les potentiels hauts ou bas ?</li>
+    </ul></div>
+    <a class="aller" href="04-champ-electrique/index.html">Ouvrir la planche 04 &rarr;</a>
+  </section>
+</main>
+</div>
+</body>
+</html>

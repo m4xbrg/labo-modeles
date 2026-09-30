@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre le champ électrique — Mécaniques invisibles 04</title>
+<meta name="description" content="Ce que montre la simulation du champ électrique, le mécanisme réel, ses simplifications et les ordres de grandeur à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9fe870;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">Mécaniques invisibles — 04</p>
+  <h1>Comprendre le champ <em>électrique</em></h1>
+  <p class="lede">Une charge modifie l'espace autour d'elle, même s'il n'y a rien à cet endroit. Cette modification, c'est le champ. La simulation te permet de la voir, de la mesurer et de la tester avec une petite charge d'essai.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="pos">Disques orange</span> et <span class="neg">disques bleus</span></dt>
+    <dd>Des charges ponctuelles, positives (orange) ou négatives (bleu), de 1 à 5 nC. Les ondes qui en sortent (ou qui y rentrent) ne sont qu'un rappel du sens du champ : il s'éloigne des positives et va vers les négatives.</dd>
+    <dt>Lignes blanches</dt>
+    <dd>Des lignes de champ. En chaque point, la tangente à la ligne donne la direction de E. Chaque nC en émet six, donc le nombre de lignes est proportionnel à la valeur de la charge. Les petites impulsions qui y glissent indiquent le sens de E, pas une vitesse.</dd>
+    <dt><span class="acc">Courbes vertes</span></dt>
+    <dd>Des équipotentielles : les points où le potentiel V a la même valeur, tracées tous les 40 V. Celle qui passe sous la sonde est en pointillé, avec un petit angle droit entre elle et la flèche de E.</dd>
+    <dt>Carte de couleur</dt>
+    <dd>Le potentiel V : orange où il est positif, bleu où il est négatif, noir près de 0 V.</dd>
+    <dt><span class="acc">Point vert</span></dt>
+    <dd>La charge test (1 nC, 10 mg). Sa flèche verte est la force F = qE ; sa traînée s'estompe en trois secondes.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <p>Une charge ponctuelle <em>q</em> crée à la distance <em>r</em> un champ électrique, c'est-à-dire la force qu'elle exercerait sur une charge de 1 C placée là. Sa valeur suit la loi de Coulomb :</p>
+  <div class="eq">E = k·q / r²&nbsp;&nbsp;&nbsp;V = k·q / r<br>k ≈ 8,99×10⁹ N·m²/C²</div>
+  <p>Le champ est un <strong>vecteur</strong> (une grandeur qui a une valeur, une direction et un sens). Le potentiel V, lui, est un <strong>scalaire</strong> : un simple nombre en volts, l'énergie potentielle par coulomb.</p>
+  <p>Avec plusieurs charges, on applique la <strong>superposition</strong> : le champ total est la somme vectorielle des champs individuels, et le potentiel total, la somme ordinaire des potentiels. Déplace une charge dans la simulation : tout est recalculé parce que chaque terme de la somme change.</p>
+  <p>Les <strong>lignes de champ</strong> sont obtenues en avançant pas à pas dans la direction de E, avec une méthode d'intégration numérique de Runge-Kutta. Elles ne peuvent pas se croiser, car en un point le champ n'a qu'une direction. Elles ne sont pas tracées au hasard : elles partent de chaque charge positive à angles réguliers.</p>
+  <p>Les équipotentielles sont toujours <strong>perpendiculaires</strong> aux lignes de champ. Raison : déplacer une charge le long d'une équipotentielle ne change pas son énergie, donc E ne fait aucun travail (E·dl = 0) et E est perpendiculaire à ce déplacement. C'est aussi pourquoi, sur un conducteur à l'équilibre, le champ est perpendiculaire à la surface.</p>
+  <p>La charge test suit la deuxième loi de Newton : F = qE, donc a = qE/m. Elle accélère, gagne de l'énergie cinétique et perd autant d'énergie potentielle : E<sub>c</sub> + qV reste constante (le panneau l'affiche) tant que les charges sources ne bougent pas. Attention : sa trajectoire n'est pas une ligne de champ. La ligne indique la direction de la force, pas celle de la vitesse, et la charge a de l'inertie.</p>
+  <p><strong>Le condensateur plan.</strong> Entre deux plaques de charges opposées, chaque charge pousse ou tire à la fois vers le bas et sur le côté ; par symétrie, les composantes latérales s'annulent en s'éloignant des bords, et il reste la composante qui traverse. On obtient un champ presque uniforme, d'où des lignes parallèles et des équipotentielles également espacées. Aux bords, les lignes s'incurvent : c'est l'effet de bord.</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Échelle.</strong> 1 pixel = 1 mm. La scène mesure donc environ un mètre : les valeurs en N/C et en V sont cohérentes avec cette échelle, mais elles changeraient si on la modifiait (E varie en 1/r²).</li>
+    <li><strong>Adoucissement.</strong> Près d'une charge, E tend vers l'infini et une intégration numérique diverge. On remplace r² par r² + ε² avec ε = 2 mm : le champ reste fini. La charge test est en plus « captée » quand elle touche une charge de signe opposé, au lieu de la faire rebondir ou orbiter.</li>
+    <li><strong>Lignes en coupe.</strong> Les charges sont dans un plan et les lignes dessinées y restent (c'est exact par symétrie), mais leur nombre est proportionnel à |q| avec des angles réguliers dans le plan. Dans l'espace réel, la densité de lignes ne représente |E| qu'approximativement.</li>
+    <li><strong>Plaques.</strong> Une rangée de charges ponctuelles n'est pas une vraie plaque continue : le champ entre elles n'est pas parfaitement uniforme (il varie un peu avec la distance aux rangées). Une plaque infinie donnerait E = σ/ε₀ exactement uniforme.</li>
+    <li><strong>Électrostatique.</strong> Les charges sont fixes ou déplacées lentement, et le champ se met à jour instantanément (en réalité, l'information voyage à la vitesse de la lumière). La charge test est trop petite pour perturber les sources, ne rayonne pas et n'est pas relativiste. Pas de conducteurs ni de diélectriques.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>1 nC à 10 cm</b><span>E ≈ 900 N/C et V ≈ 90 V (k·q/r² et k·q/r). Ce sont les valeurs qu'affiche la sonde de la simulation.</span></div>
+    <div><b>≈ 6×10⁹</b><span>électrons en trop pour faire 1 nC (l'électron porte 1,6×10⁻¹⁹ C).</span></div>
+    <div><b>≈ 100 N/C</b><span>champ électrique de l'atmosphère par beau temps, dirigé vers le sol : de l'ordre de 100 V par mètre de hauteur.</span></div>
+    <div><b>≈ 3×10⁶ V/m</b><span>champ à partir duquel l'air devient conducteur et laisse jaillir une étincelle.</span></div>
+    <div><b>≈ 5×10¹¹ N/C</b><span>champ du proton à la distance de l'électron dans l'atome d'hydrogène (0,53×10⁻¹⁰ m).</span></div>
+  </div>
+
+  <h2><span>5</span>Teste-toi</h2>
+  <details><summary>Si on double la distance à une charge ponctuelle, que deviennent E et V ?</summary>
+    <p>E est divisé par 4 (il varie en 1/r²) et V par 2 (il varie en 1/r). Tu peux le vérifier avec la sonde sur une charge isolée.</p></details>
+  <details><summary>Pourquoi deux lignes de champ ne se croisent-elles jamais ?</summary>
+    <p>En un point de l'espace, le champ total a une seule direction et un seul sens. Une intersection en donnerait deux. (Aux points où E = 0, comme au milieu de deux charges identiques, il n'y a tout simplement pas de ligne qui passe.)</p></details>
+  <details><summary>Une charge test positive est lâchée au repos dans un champ non uniforme. Suit-elle exactement la ligne de champ qui passe par son point de départ ?</summary>
+    <p>Non. Elle démarre dans la direction de la ligne, mais elle acquiert une vitesse. Quand la ligne se courbe, la charge continue en partie sur son élan : sa trajectoire s'écarte de la ligne. Elles coïncident seulement si la ligne est droite.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

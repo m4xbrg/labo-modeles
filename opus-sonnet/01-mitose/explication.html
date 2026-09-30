@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La mitose expliquée — Mécaniques invisibles 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#7ee0b5;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:radial-gradient(ellipse 80% 40% at 50% 0%,#0f1620 0%,var(--fond) 70%) no-repeat,var(--fond);color:var(--texte);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 80px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;letter-spacing:.06em}
+.top a{text-decoration:none;color:var(--texte-2);border-bottom:1px solid transparent;transition:color .25s var(--ease),border-color .25s var(--ease)}
+.top a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.serie{margin-top:56px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(42px,8vw,68px);line-height:1;margin:6px 0 14px;letter-spacing:-.01em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte-2);max-width:56ch;margin:0 0 8px}
+h2{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.15;margin:56px 0 6px;padding-top:24px;border-top:1px solid var(--trait)}
+h2 .n{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em;margin-right:12px;vertical-align:middle}
+p{margin:0 0 16px}
+dl{margin:0 0 16px}
+dt{font-weight:600;margin-top:12px;display:flex;align-items:center;gap:10px}
+dt i{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
+dd{margin:2px 0 0 20px;color:var(--texte-2)}
+.term{color:var(--texte);border-bottom:1px dotted var(--texte-2)}
+.mono{font-family:var(--mono)}
+ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:0 0 16px}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 14px 44px}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:2px;font-family:var(--mono);font-size:12px;width:26px;height:26px;border:1px solid var(--trait);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.nums{display:grid;gap:0;margin:0 0 16px;border-top:1px solid var(--trait)}
+.nums div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.nums b{font-family:var(--mono);font-weight:500;font-size:19px;color:var(--energie)}
+.nums span{color:var(--texte-2);font-size:15px}
+details{border:1px solid var(--trait);margin:0 0 12px;background:var(--fond-2)}
+summary{cursor:pointer;padding:14px 16px;list-style:none;font-weight:500;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--mono);color:var(--accent);flex:none;width:1ch;transition:transform .3s var(--ease)}
+details[open] summary::before{content:"\2212"}
+summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+details p{padding:0 16px 4px 44px;color:var(--texte-2);margin:0 0 14px}
+.cta{margin-top:56px;padding-top:24px;border-top:1px solid var(--trait);display:flex;gap:24px;flex-wrap:wrap}
+.cta a{text-decoration:none;border-bottom:1px solid transparent}
+.cta a:hover{border-bottom-color:var(--accent)}
+@media (max-width:520px){
+  .nums div{grid-template-columns:1fr;gap:2px}
+  h2{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top" aria-label="Navigation">
+    <a href="index.html">&larr; Retour à la simulation</a>
+    <a href="../index.html">Toute la série</a>
+  </nav>
+
+  <div class="serie">Mécaniques invisibles — 01</div>
+  <h1>La <em>mitose</em>, expliquée</h1>
+  <p class="lede">Une cellule ne se coupe pas en deux comme un gâteau : elle trie d'abord son ADN avec une machine de câbles, puis se pince. Voici ce que la simulation montre, et où elle s'arrête.</p>
+
+  <h2><span class="n">01</span>Ce que tu vois</h2>
+  <dl>
+    <dt><i style="background:var(--accent)"></i>Les quatre bâtonnets verts</dt>
+    <dd>Les chromosomes. La cellule est diploïde avec 2n = 4 : deux paires de chromosomes homologues (A1 et A2, longs ; B1 et B2, courts), une copie de chaque paire venant de chaque parent. Chacun est déjà copié : il porte deux chromatides sœurs identiques.</dd>
+    <dt><i style="background:var(--texte)"></i>Les petites plaques crème</dt>
+    <dd>Les kinétochores, un par chromatide, posés sur le centromère. Ce sont les points d'attache des câbles.</dd>
+    <dt><i style="background:rgba(126,224,181,.5)"></i>Les fines lignes vertes</dt>
+    <dd>Les microtubules. Ceux qui s'accrochent aux kinétochores tirent ; les interpolaires se chevauchent au milieu et poussent ; les astraux rayonnent vers la périphérie.</dd>
+    <dt><i style="background:var(--texte)"></i>Les deux points lumineux à bâtonnets</dt>
+    <dd>Les centrosomes, avec leurs centrioles : ils fabriquent les microtubules et deviennent les deux pôles.</dd>
+    <dt><i style="background:var(--texte-2)"></i>Le cercle pâle, puis les fragments</dt>
+    <dd>L'enveloppe nucléaire, qui se démonte puis se reforme.</dd>
+    <dt><i style="background:var(--energie)"></i>L'éclat et le point jaunes</dt>
+    <dd>L'éclat marque la coupure de la cohésine ; le point jaune de chaque côté de l'équateur est l'anneau contractile de la cytocinèse.</dd>
+  </dl>
+
+  <h2><span class="n">02</span>Ce qui se passe vraiment</h2>
+  <p>Avant la mitose, en phase S, tout l'ADN est copié. Chaque chromosome devient donc deux <span class="term">chromatides sœurs</span>, retenues ensemble par la <span class="term">cohésine</span>, un anneau protéique. Elles se touchent surtout au <span class="term">centromère</span>. Le but de la mitose est simple : donner exactement une chromatide de chaque paire à chaque cellule fille.</p>
+  <ol class="steps">
+    <li><b>Prophase.</b> La chromatine se condense en bâtonnets compacts, plus faciles à déplacer sans les casser. Les centrosomes, dupliqués, s'écartent vers des pôles opposés et commencent à nucléer un fuseau.</li>
+    <li><b>Prométaphase.</b> L'enveloppe nucléaire se fragmente. Les microtubules, qui poussent et s'effondrent sans cesse, explorent jusqu'à ce que l'un d'eux se fixe à un kinétochore. Le but : que les deux kinétochores d'une paire soient reliés à des pôles opposés (amphitélie).</li>
+    <li><b>Métaphase.</b> Tirés également des deux côtés, les chromosomes s'alignent sur la plaque équatoriale. Un chromosome mal relié n'est pas sous tension et le <span class="term">point de contrôle du fuseau</span> bloque la suite tant que tous ne le sont pas.</li>
+    <li><b>Anaphase.</b> Quand tout est bon, le complexe APC/C déclenche la destruction d'un inhibiteur, la sécurine, ce qui libère la <span class="term">séparase</span>. Cette enzyme coupe la cohésine. Les chromatides se séparent d'un coup, chacune devenant un chromosome. Les kinétochores raccourcissent leurs microtubules et tirent (anaphase A) tandis que les pôles s'écartent (anaphase B).</li>
+    <li><b>Télophase.</b> Une enveloppe nucléaire se reforme autour de chaque lot, la chromatine se décondense, le nucléole réapparaît.</li>
+    <li><b>Cytocinèse.</b> Un anneau d'actine et de myosine II se resserre à l'équateur et pince la membrane. Le faisceau central du fuseau guide la fermeture. Il reste deux cellules filles, génétiquement identiques.</li>
+  </ol>
+
+  <h2><span class="n">03</span>Ce que la simulation simplifie</h2>
+  <p>Le modèle est fidèle à l'ordre des événements, pas à leur vitesse ni à leur quantité. Voici les raccourcis pris.</p>
+  <ul>
+    <li><b>2n = 4 au lieu de 46.</b> Quatre chromosomes rendent chaque chromatide suivable. Une cellule humaine en compte onze fois et demie plus.</li>
+    <li><b>Un plan, deux dimensions.</b> Une vraie plaque équatoriale est un disque en trois dimensions ; ici on la voit par la tranche, alignée.</li>
+    <li><b>Trois câbles par kinétochore.</b> Il y en a environ une vingtaine chez l'humain.</li>
+    <li><b>Le temps est comprimé et étiré.</b> La mitose dure environ une heure ; l'animation dure une minute, et l'anaphase y prend une place bien plus grande que dans la réalité.</li>
+    <li><b>Les phases se chevauchent moins.</b> Le sillon de division commence en fait pendant l'anaphase tardive ; ici il s'amorce en télophase.</li>
+    <li><b>La cohésine des bras</b> est retirée dès la prophase chez les animaux ; la simulation ne montre que celle du centromère, la dernière à céder.</li>
+    <li><b>Les positions des chromosomes et des fragments d'enveloppe</b> sont choisies, pas calculées par une simulation de forces. La tension est une valeur relative qualitative.</li>
+  </ul>
+
+  <h2><span class="n">04</span>Les chiffres à retenir</h2>
+  <div class="nums">
+    <div><b>10 à 30 µm</b><span>Diamètre typique d'une cellule animale ; ici, environ 20 µm (1 unité de la scène = 10 µm).</span></div>
+    <div><b>~ 1 h</b><span>Durée de la mitose dans une cellule de mammifère en culture, de la prophase à la cytocinèse.</span></div>
+    <div><b>~ 1 µm/min</b><span>Vitesse à laquelle les chromatides avancent vers les pôles en anaphase.</span></div>
+    <div><b>25 nm</b><span>Diamètre d'un microtubule, invisible au microscope optique à l'état isolé.</span></div>
+    <div><b>~ 2 m</b><span>Longueur d'ADN dans le noyau d'une cellule humaine, répartie sur 46 chromosomes.</span></div>
+  </div>
+
+  <h2><span class="n">05</span>Teste-toi</h2>
+  <details>
+    <summary>Quand le nombre de chromosomes double-t-il dans la cellule, et pourquoi pas plus tôt ?</summary>
+    <p>À l'anaphase, quand la séparase coupe la cohésine. Avant, les deux chromatides forment un seul chromosome, même si l'ADN a déjà doublé en phase S. C'est pourquoi le compteur passe de 4 à 8 chromosomes à ce moment précis.</p>
+  </details>
+  <details>
+    <summary>Pourquoi les deux cellules filles reçoivent-elles le même ADN ?</summary>
+    <p>Parce que chaque chromosome a été copié en deux chromatides identiques, et que les deux kinétochores d'une paire sont reliés à des pôles opposés. Chaque pôle reçoit donc une chromatide de chaque chromosome, soit un jeu complet.</p>
+  </details>
+  <details>
+    <summary>Que risque-t-il d'arriver si la séparase agit avant que tous les kinétochores soient attachés ?</summary>
+    <p>Une chromatide peut aller du mauvais côté : une cellule fille se retrouve avec un chromosome en trop, l'autre avec un chromosome en moins (aneuploïdie). Le point de contrôle du fuseau existe justement pour éviter cela.</p>
+  </details>
+
+  <div class="cta">
+    <a href="index.html">&larr; Revoir la simulation</a>
+    <a href="../index.html">Toute la série</a>
+  </div>
+</div>
+</body>
+</html>

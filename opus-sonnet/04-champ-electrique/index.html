@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Un seul champ dessiné, jamais décoré : les lignes portent de petites impulsions qui glissent dans le sens de E, et des ondes rayonnent des charges vers l'extérieur (+) ou vers elles (−) : le mouvement ne fait que répéter le sens du champ.
+  2. La couleur suit la charte de la série (orange = +, bleu = −, vert oscilloscope = équipotentielles et charge test) ; le blanc chaud reste aux lignes, comme une trace de craie sur un tableau noir.
+  3. Les lignes sont recalculées par intégration à chaque déplacement, avec des graines d'angle fixes, ce qui les fait bouger comme des fils souples ; le calcul lourd est allégé en glissant (grille grossière, pas plus large), puis raffiné au repos.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le champ électrique — Mécaniques invisibles 04</title>
+<meta name="description" content="Place des charges, déplace-les et observe le champ électrique, les équipotentielles et le mouvement d'une charge test.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9fe870;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.armed{cursor:cell}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:250px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:26px}
+.row.small .val{font-size:14px}
+.needle{width:22px;height:22px;flex:none;align-self:center}
+.needle line{stroke:var(--texte);stroke-width:1.6;stroke-linecap:round}
+.needle circle{fill:none;stroke:var(--trait);stroke-width:1}
+#needleG{transition:transform .35s var(--ease);transform-origin:11px 11px}
+.pv{color:var(--positif)}.nv{color:var(--negatif)}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:12px 22px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+.sgn{min-width:34px;justify-content:center;font-size:15px}
+.sgn[data-s="1"][aria-pressed="true"]{border-color:var(--positif);color:var(--positif)}
+.sgn[data-s="-1"][aria-pressed="true"]{border-color:var(--negatif);color:var(--negatif)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:108px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:52px}
+.armed-btn{color:var(--accent);border-color:var(--accent)}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:12px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  input[type=range]{width:96px}
+}
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  #needleG,.tip,.btn,.comprendre{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène interactive : charges électriques, lignes de champ, équipotentielles et charge test. Clique pour ajouter une charge, glisse pour la déplacer."></canvas>
+    <header class="head">
+      <p class="serie">Mécaniques invisibles — 04</p>
+      <h1>Le champ <em>électrique</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow">Lecture</p>
+      <h2 id="stepTitle">Le dipôle</h2>
+      <p id="stepText" aria-live="polite"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Au point sondé</p>
+      <div class="meas">
+        <div class="row"><span class="lab">|E|</span><span class="val"><b id="mE">—</b><i>N/C</i></span></div>
+        <div class="row"><span class="lab">Direction de E</span><span class="val">
+          <svg class="needle" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10"/><g id="needleG"><line x1="4" y1="11" x2="17" y2="11"/><path d="M17 11l-4-3M17 11l-4 3" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-linecap="round"/></g></svg>
+          <b id="mD">—</b><i>°</i></span></div>
+        <div class="row"><span class="lab">V</span><span class="val"><b id="mV">—</b><i>V</i></span></div>
+        <div class="row small"><span class="lab">Position</span><span class="val"><b id="mP">—</b><i>mm</i></span></div>
+      </div>
+      <p class="note">Échelle : 1 px = 1 mm. La barre en bas à gauche de la scène mesure 10 cm.</p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Sources</p>
+      <div class="meas">
+        <div class="row small"><span class="lab">Charges</span><span class="val"><b id="sN">0</b><i></i></span></div>
+        <div class="row small"><span class="lab">Charge nette</span><span class="val"><b id="sQ">0</b><i>nC</i></span></div>
+        <div class="row small"><span class="lab">Lignes tracées</span><span class="val"><b id="sL">0</b><i></i></span></div>
+      </div>
+    </section>
+
+    <section>
+      <p class="eyebrow">Charge test</p>
+      <div class="meas" id="testMeas">
+        <div class="row small"><span class="lab">Vitesse</span><span class="val"><b id="tV">—</b><i>m/s</i></span></div>
+        <div class="row small"><span class="lab">Énergie cinétique</span><span class="val"><b id="tK">—</b><i>µJ</i></span></div>
+        <div class="row small"><span class="lab">Énergie potentielle qV</span><span class="val"><b id="tU">—</b><i>µJ</i></span></div>
+        <div class="row small"><span class="lab">Somme</span><span class="val"><b id="tS">—</b><i>µJ</i></span></div>
+      </div>
+      <p class="note" id="testNote">q = 1 nC, m = 10 mg. Aucune charge test pour l'instant.</p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Gestes</p>
+      <ul class="hints">
+        <li>Clic : ajouter · Maj+clic : signe opposé</li>
+        <li>Glisser : déplacer · double-clic : supprimer</li>
+        <li>Molette sur une charge : sa valeur</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps · <kbd>R</kbd> réinitialiser</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bBack" title="Reculer dans le temps (←)" aria-label="Reculer"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bFwd" title="Avancer (→)" aria-label="Avancer"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser (R)">Réinitialiser</button>
+    </div>
+
+    <div class="grp" id="presets">
+      <span class="gl">Préréglages</span>
+      <button class="btn" data-p="dipole">Dipôle</button>
+      <button class="btn" data-p="identiques">Deux identiques</button>
+      <button class="btn" data-p="condensateur">Condensateur</button>
+      <button class="btn" data-p="quadrupole">Quadrupôle</button>
+      <button class="btn" data-p="vide">Vider</button>
+    </div>
+
+    <div class="grp">
+      <span class="gl" id="chLabel">Charge à ajouter</span>
+      <button class="btn sgn" data-s="1" aria-pressed="true" aria-label="Positive">+</button>
+      <button class="btn sgn" data-s="-1" aria-pressed="false" aria-label="Négative">&minus;</button>
+      <input type="range" id="mag" min="1" max="5" step="1" value="3" aria-label="Valeur de la charge en nanocoulombs">
+      <span class="rv" id="magV">3 nC</span>
+      <button class="btn" id="bDel" disabled>Retirer</button>
+    </div>
+
+    <div class="grp">
+      <button class="btn" id="bTest" title="Puis clique dans la scène (T)">Lâcher une charge test</button>
+      <button class="btn sgn tsgn" data-s="1" aria-pressed="true" aria-label="Charge test positive">+</button>
+      <button class="btn sgn tsgn" data-s="-1" aria-pressed="false" aria-label="Charge test négative">&minus;</button>
+    </div>
+
+    <div class="grp" id="views">
+      <span class="gl">Affichage</span>
+      <button class="btn" data-v="lines" aria-pressed="true"><span class="dot" style="color:var(--texte)"></span>Lignes</button>
+      <button class="btn" data-v="eq" aria-pressed="true"><span class="dot" style="color:var(--accent)"></span>Équipotentielles</button>
+      <button class="btn" data-v="map" aria-pressed="false"><span class="dot" style="color:var(--positif)"></span>Carte de V</button>
+      <button class="btn" data-v="vec" aria-pressed="false"><span class="dot" style="color:var(--texte-2)"></span>Vecteurs</button>
+    </div>
+
+    <div class="grp">
+      <span class="gl">Temps</span>
+      <input type="range" id="ts" min="0.1" max="2" step="0.05" value="1" aria-label="Vitesse du temps">
+      <span class="rv" id="tsV">×1,00</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Constantes physiques et échelle ----------------
+   Échelle déclarée : 1 pixel CSS = 1 mm = 1e-3 m.
+   K = k * 1e-9 : k = 8,9875517923e9 N·m²/C², charges exprimées en nC.
+   Adoucissement de Plummer : r² -> r² + ε², ε = 2 mm (évite la singularité).
+   Charge test : q = ±1 nC, m = 10 mg. */
+const K = 8.9875517923;
+const EPS2 = 2e-3 * 2e-3;
+const QT = 1e-9, MT = 1e-5;
+const QM = QT / MT;                 // C/kg
+const MAXC = 28;
+const TRAIL = 3.0;                  // secondes de traînée
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const layer = document.createElement('canvas'), lctx = layer.getContext('2d');
+const mapC = document.createElement('canvas'), mctx = mapC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie') };
+const rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RGB = { pos: rgb(C.pos), neg: rgb(C.neg), texte: rgb(C.texte), accent: rgb(C.accent), fond: rgb(C.fond), texte2: rgb(C.texte2) };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+let W = 800, H = 600, dpr = 1;
+
+/* ---------------- État ---------------- */
+let charges = [];          // {id,x,y,q}  (x,y en px, q en nC entier, signé)
+let nid = 1;
+let selected = null;
+let active = { s: 1, m: 3 };
+let views = { lines: true, eq: true, map: false, vec: false };
+let playing = true, timeScale = 1;
+let T = 0, pulseT = 0;
+let parts = [];            // charges test
+let pid = 1;
+let testSign = 1, armTest = false;
+let lastPreset = 'dipole';
+let probe = { x: 0, y: 0, in: false };
+let dirty = true, fast = false, hoverDirty = true;
+let step = { key: '' };
+
+const cx = new Float64Array(64), cy = new Float64Array(64), cqk = new Float64Array(64), cr = new Float64Array(64), cs = new Int8Array(64);
+let NC = 0;
+const radiusOf = q => 8 + 2.2 * Math.abs(q);
+function syncArrays() {
+  NC = charges.length;
+  for (let i = 0; i < NC; i++) {
+    const c = charges[i];
+    cx[i] = c.x; cy[i] = c.y; cqk[i] = K * c.q; cr[i] = radiusOf(c.q); cs[i] = c.q > 0 ? 1 : -1;
+  }
+}
+
+/* ---------------- Champ et potentiel (superposition) ----------------
+   E = Σ k q (r - ri) / (|r - ri|² + ε²)^(3/2)   [N/C]
+   V = Σ k q / sqrt(|r - ri|² + ε²)              [V]
+   (x, y) en px ; conversion en mètres par le facteur 1e-3. */
+let EX = 0, EY = 0;
+function field(x, y) {
+  let ex = 0, ey = 0;
+  for (let i = 0; i < NC; i++) {
+    const dx = x - cx[i], dy = y - cy[i];
+    const r2 = (dx * dx + dy * dy) * 1e-6 + EPS2;
+    const f = cqk[i] * 1e-3 / (r2 * Math.sqrt(r2));
+    ex += f * dx; ey += f * dy;
+  }
+  EX = ex; EY = ey;
+}
+function pot(x, y) {
+  let v = 0;
+  for (let i = 0; i < NC; i++) {
+    const dx = x - cx[i], dy = y - cy[i];
+    v += cqk[i] / Math.sqrt((dx * dx + dy * dy) * 1e-6 + EPS2);
+  }
+  return v;
+}
+
+/* ---------------- Lignes de champ ---------------- */
+let linesPath = new Path2D(), arrowsPath = new Path2D(), nLines = 0;
+let ux = 0, uy = 0;
+function unit(x, y, s) {
+  field(x, y);
+  const m = Math.hypot(EX, EY);
+  if (m < 1e-9) { ux = uy = 0; return false; }
+  ux = EX / m * s; uy = EY / m * s; return true;
+}
+function trace(sx, sy, sgn, src, quick) {
+  const ds = quick ? 6 : 4, maxSteps = quick ? 700 : 1400;
+  const pts = [sx, sy];
+  const arrows = [];
+  let x = sx, y = sy, arc = 0, nextArrow = 46, end = 'out';
+  for (let n = 0; n < maxSteps; n++) {
+    let dx, dy;
+    if (!unit(x, y, sgn)) { end = 'stall'; break; }
+    const k1x = ux, k1y = uy;
+    if (quick) {
+      if (!unit(x + k1x * ds / 2, y + k1y * ds / 2, sgn)) { end = 'stall'; break; }
+      dx = ux; dy = uy;
+    } else {
+      if (!unit(x + k1x * ds / 2, y + k1y * ds / 2, sgn)) { end = 'stall'; break; }
+      const k2x = ux, k2y = uy;
+      if (!unit(x + k2x * ds / 2, y + k2y * ds / 2, sgn)) { end = 'stall'; break; }
+      const k3x = ux, k3y = uy;
+      if (!unit(x + k3x * ds, y + k3y * ds, sgn)) { end = 'stall'; break; }
+      dx = (k1x + 2 * k2x + 2 * k3x + ux) / 6; dy = (k1y + 2 * k2y + 2 * k3y + uy) / 6;
+    }
+    x += dx * ds; y += dy * ds; arc += ds;
+    // arrivée sur une charge de signe opposé au signe de traçage
+    let hit = -1;
+    for (let i = 0; i < NC; i++) {
+      if (cs[i] === sgn || i === src) continue;
+      const ex = x - cx[i], ey = y - cy[i];
+      if (ex * ex + ey * ey < (cr[i] + 2) * (cr[i] + 2)) { hit = i; break; }
+    }
+    if (hit >= 0) {
+      const ex = x - cx[hit], ey = y - cy[hit], d = Math.hypot(ex, ey) || 1;
+      pts.push(cx[hit] + ex / d * cr[hit] * 0.9, cy[hit] + ey / d * cr[hit] * 0.9);
+      end = 'charge'; break;
+    }
+    pts.push(x, y);
+    if (arc >= nextArrow) { arrows.push(x, y, Math.atan2(dy * sgn, dx * sgn)); nextArrow += 140; }
+    if (x < -60 || x > W + 60 || y < -60 || y > H + 60) { end = 'out'; break; }
+  }
+  return { pts, arrows, end };
+}
+function addLine(L, rev, P, A) {
+  const p = L.pts;
+  if (p.length < 6) return false;
+  if (!rev) {
+    P.moveTo(p[0], p[1]);
+    for (let i = 2; i < p.length; i += 2) P.lineTo(p[i], p[i + 1]);
+  } else {
+    const n = p.length;
+    P.moveTo(p[n - 2], p[n - 1]);
+    for (let i = n - 4; i >= 0; i -= 2) P.lineTo(p[i], p[i + 1]);
+  }
+  const a = L.arrows;
+  for (let i = 0; i < a.length; i += 3) {
+    const x = a[i], y = a[i + 1], t = a[i + 2], c = Math.cos(t), s = Math.sin(t);
+    A.moveTo(x + c * 4.5, y + s * 4.5);
+    A.lineTo(x - c * 3 - s * 3.2, y - s * 3 + c * 3.2);
+    A.lineTo(x - c * 3 + s * 3.2, y - s * 3 - c * 3.2);
+    A.closePath();
+  }
+  return true;
+}
+function buildLines() {
+  const P = new Path2D(), A = new Path2D();
+  let count = 0;
+  for (let i = 0; i < NC; i++) {
+    const n = Math.round(6 * Math.abs(charges[i].q));      // lignes ∝ |q|
+    for (let j = 0; j < n; j++) {
+      const th = 2 * Math.PI * j / n + Math.PI / 2;
+      const sx = cx[i] + Math.cos(th) * cr[i] * 0.95, sy = cy[i] + Math.sin(th) * cr[i] * 0.95;
+      if (cs[i] > 0) {
+        const L = trace(sx, sy, 1, i, fast);
+        if (addLine(L, false, P, A)) count++;
+      } else {
+        // charge négative : on remonte les lignes ; seules celles qui viennent de l'infini sont ajoutées
+        // (celles qui viennent d'une charge positive sont déjà tracées depuis celle-ci)
+        const L = trace(sx, sy, -1, i, fast);
+        if (L.end === 'out' && addLine(L, true, P, A)) count++;
+      }
+    }
+  }
+  linesPath = P; arrowsPath = A; nLines = count;
+}
+
+/* ---------------- Grille de potentiel, carte, équipotentielles ---------------- */
+let V = new Float32Array(1), gnx = 1, gny = 1, gcell = 6;
+const DV = 40, NMAX = 25;
+let pathN = new Path2D(), path5 = new Path2D(), path0 = new Path2D(), hoverPath = new Path2D();
+function computeGrid(cell) {
+  gcell = cell;
+  gnx = Math.ceil(W / cell) + 2; gny = Math.ceil(H / cell) + 2;
+  if (V.length < gnx * gny) V = new Float32Array(gnx * gny);
+  let k = 0;
+  for (let j = 0; j < gny; j++) {
+    const y = j * cell;
+    for (let i = 0; i < gnx; i++) V[k++] = pot(i * cell, y);
+  }
+}
+function renderMap() {
+  mapC.width = gnx; mapC.height = gny;
+  const img = mctx.createImageData(gnx, gny), d = img.data, a3 = Math.asinh(1000 / 50);
+  for (let k = 0, n = gnx * gny; k < n; k++) {
+    const v = V[k], t = Math.asinh(v / 50) / a3, at = Math.min(1, Math.abs(t));
+    const c = t >= 0 ? RGB.pos : RGB.neg;
+    d[k * 4] = c[0]; d[k * 4 + 1] = c[1]; d[k * 4 + 2] = c[2];
+    d[k * 4 + 3] = Math.min(0.86, Math.pow(at, 0.9) * 0.9) * 255;
+  }
+  mctx.putImageData(img, 0, 0);
+}
+let PX = 0, PY = 0;
+function edge(e, i0, j0, a, b, c, d, L) {
+  switch (e) {
+    case 0: PX = (i0 + (L - a) / (b - a)) * gcell; PY = j0 * gcell; break;
+    case 1: PX = (i0 + 1) * gcell; PY = (j0 + (L - b) / (c - b)) * gcell; break;
+    case 2: PX = (i0 + (L - d) / (c - d)) * gcell; PY = (j0 + 1) * gcell; break;
+    default: PX = i0 * gcell; PY = (j0 + (L - a) / (d - a)) * gcell;
+  }
+}
+function seg(P, e1, e2, i0, j0, a, b, c, d, L) {
+  edge(e1, i0, j0, a, b, c, d, L); const x = PX, y = PY;
+  edge(e2, i0, j0, a, b, c, d, L); P.moveTo(x, y); P.lineTo(PX, PY);
+}
+/* marching squares : arêtes 0 haut, 1 droite, 2 bas, 3 gauche */
+function march(P, i0, j0, a, b, c, d, L) {
+  const idx = (a > L ? 1 : 0) | (b > L ? 2 : 0) | (c > L ? 4 : 0) | (d > L ? 8 : 0);
+  switch (idx) {
+    case 1: case 14: seg(P, 3, 0, i0, j0, a, b, c, d, L); break;
+    case 2: case 13: seg(P, 0, 1, i0, j0, a, b, c, d, L); break;
+    case 3: case 12: seg(P, 3, 1, i0, j0, a, b, c, d, L); break;
+    case 4: case 11: seg(P, 1, 2, i0, j0, a, b, c, d, L); break;
+    case 6: case 9: seg(P, 0, 2, i0, j0, a, b, c, d, L); break;
+    case 7: case 8: seg(P, 3, 2, i0, j0, a, b, c, d, L); break;
+    case 5: if ((a + b + c + d) / 4 > L) { seg(P, 0, 1, i0, j0, a, b, c, d, L); seg(P, 3, 2, i0, j0, a, b, c, d, L); }
+            else { seg(P, 3, 0, i0, j0, a, b, c, d, L); seg(P, 1, 2, i0, j0, a, b, c, d, L); } break;
+    case 10: if ((a + b + c + d) / 4 > L) { seg(P, 3, 0, i0, j0, a, b, c, d, L); seg(P, 1, 2, i0, j0, a, b, c, d, L); }
+             else { seg(P, 0, 1, i0, j0, a, b, c, d, L); seg(P, 3, 2, i0, j0, a, b, c, d, L); } break;
+  }
+}
+function buildContours() {
+  const PN = new Path2D(), P5 = new Path2D(), P0 = new Path2D();
+  for (let j = 0; j < gny - 1; j++) {
+    for (let i = 0; i < gnx - 1; i++) {
+      const a = V[j * gnx + i], b = V[j * gnx + i + 1], d = V[(j + 1) * gnx + i], c = V[(j + 1) * gnx + i + 1];
+      const mn = Math.min(a, b, c, d), mx = Math.max(a, b, c, d);
+      let n0 = Math.ceil(mn / DV), n1 = Math.floor(mx / DV);
+      if (n0 < -NMAX) n0 = -NMAX; if (n1 > NMAX) n1 = NMAX;
+      for (let n = n0; n <= n1; n++) {
+        const L = n * DV + 1e-4;
+        march(n === 0 ? P0 : (n % 5 === 0 ? P5 : PN), i, j, a, b, c, d, L);
+      }
+    }
+  }
+  pathN = PN; path5 = P5; path0 = P0;
+}
+function buildHover() {
+  hoverPath = new Path2D();
+  if (!probe.in) return;
+  const L = pot(probe.x, probe.y);
+  const P = hoverPath;
+  for (let j = 0; j < gny - 1; j++) {
+    for (let i = 0; i < gnx - 1; i++) {
+      const a = V[j * gnx + i], b = V[j * gnx + i + 1], d = V[(j + 1) * gnx + i], c = V[(j + 1) * gnx + i + 1];
+      if (Math.min(a, b, c, d) <= L && Math.max(a, b, c, d) >= L) march(P, i, j, a, b, c, d, L);
+    }
+  }
+}
+
+/* ---------------- Couche statique ---------------- */
+function arrow(g, x, y, dx, dy, len, head) {
+  const ex = x + dx * len, ey = y + dy * len;
+  g.moveTo(x, y); g.lineTo(ex, ey);
+  g.moveTo(ex, ey); g.lineTo(ex - dx * head - dy * head * 0.55, ey - dy * head + dx * head * 0.55);
+  g.moveTo(ex, ey); g.lineTo(ex - dx * head + dy * head * 0.55, ey - dy * head - dx * head * 0.55);
+}
+function drawLayer() {
+  const g = lctx;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = C.fond; g.fillRect(0, 0, W, H);
+  // repère millimétré discret : un point tous les 50 mm
+  g.fillStyle = rgba(RGB.texte, 0.07);
+  for (let y = 25; y < H; y += 50) for (let x = 25; x < W; x += 50) g.fillRect(x - 0.5, y - 0.5, 1, 1);
+
+  if (views.map) {
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.drawImage(mapC, -gcell / 2, -gcell / 2, gnx * gcell, gny * gcell);
+  }
+  if (views.eq) {
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.lineWidth = 0.9; g.strokeStyle = rgba(RGB.accent, 0.32); g.stroke(pathN);
+    g.lineWidth = 1.1; g.strokeStyle = rgba(RGB.accent, 0.62); g.stroke(path5);
+    g.lineWidth = 1.5; g.strokeStyle = rgba(RGB.accent, 0.85); g.stroke(path0);
+  }
+  if (views.vec) {
+    const sp = 38, E0 = 1000;
+    for (let y = sp / 2; y < H; y += sp) for (let x = sp / 2; x < W; x += sp) {
+      let near = false;
+      for (let i = 0; i < NC; i++) { const dx = x - cx[i], dy = y - cy[i]; if (dx * dx + dy * dy < (cr[i] + 8) * (cr[i] + 8)) { near = true; break; } }
+      if (near) continue;
+      field(x, y);
+      const m = Math.hypot(EX, EY); if (m < 1e-6) continue;
+      const r = m / (m + E0), len = 4 + 24 * r;
+      g.beginPath(); arrow(g, x - EX / m * len / 2, y - EY / m * len / 2, EX / m, EY / m, len, 4);
+      g.lineWidth = 1.2; g.strokeStyle = rgba(RGB.texte, 0.22 + 0.6 * r); g.stroke();
+    }
+  }
+  if (views.lines) {
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.lineWidth = 3.4; g.strokeStyle = rgba(RGB.texte, 0.05); g.stroke(linesPath);
+    g.lineWidth = 1.05; g.strokeStyle = rgba(RGB.texte, 0.5); g.stroke(linesPath);
+    g.fillStyle = rgba(RGB.texte, 0.75); g.fill(arrowsPath);
+  }
+}
+
+function rebuild() {
+  syncArrays();
+  const rest = Math.min(8, Math.max(4, Math.sqrt(W * H / 45000)));
+  computeGrid(fast ? rest * 1.75 : rest);
+  if (views.map) renderMap();
+  if (views.eq) buildContours();
+  if (views.lines) buildLines();
+  drawLayer();
+  hoverDirty = true; dirty = false;
+}
+
+/* ---------------- Charges test : intégration RK4 à pas adaptatif ----------------
+   dx/dt = v ; dv/dt = (q/m) E(x). Positions en m, vitesses en m/s.
+   Pas : h = min(1/300 s, 0,02 · d / |v|), d = distance (adoucie) à la charge la plus proche. */
+let AX = 0, AY = 0;
+function accel(x, y, sg) { field(x * 1000, y * 1000); AX = sg * QM * EX; AY = sg * QM * EY; }
+function cur(p) { return p.hist[p.hist.length - 1]; }
+function integrate(p, dtTot) {
+  let s = cur(p);
+  if (s.dead) return;
+  let x = s.x, y = s.y, vx = s.vx, vy = s.vy, t = s.t, left = dtTot, guard = 0, dead = false, why = '';
+  const sg = p.sg;
+  while (left > 1e-9 && guard++ < 4000) {
+    let dmin = 1e9;
+    for (let i = 0; i < NC; i++) { const d = Math.hypot(x * 1000 - cx[i], y * 1000 - cy[i]) * 1e-3; if (d < dmin) dmin = d; }
+    const sp = Math.hypot(vx, vy);
+    let h = Math.min(1 / 300, 0.02 * Math.sqrt(dmin * dmin + EPS2) / Math.max(sp, 0.05), left);
+    if (h < 2e-6) h = Math.min(2e-6, left);
+    accel(x, y, sg); const a1x = AX, a1y = AY;
+    accel(x + vx * h / 2, y + vy * h / 2, sg); const a2x = AX, a2y = AY;
+    const v2x = vx + a1x * h / 2, v2y = vy + a1y * h / 2;
+    accel(x + v2x * h / 2, y + v2y * h / 2, sg); const a3x = AX, a3y = AY;
+    const v3x = vx + a2x * h / 2, v3y = vy + a2y * h / 2;
+    accel(x + v3x * h, y + v3y * h, sg); const a4x = AX, a4y = AY;
+    const v4x = vx + a3x * h, v4y = vy + a3y * h;
+    x += h / 6 * (vx + 2 * v2x + 2 * v3x + v4x);
+    y += h / 6 * (vy + 2 * v2y + 2 * v3y + v4y);
+    vx += h / 6 * (a1x + 2 * a2x + 2 * a3x + a4x);
+    vy += h / 6 * (a1y + 2 * a2y + 2 * a3y + a4y);
+    left -= h; t += h;
+    // capture : charge test de signe opposé qui atteint le disque d'une charge
+    for (let i = 0; i < NC; i++) {
+      if (cs[i] !== -sg) continue;
+      const dx = x * 1000 - cx[i], dy = y * 1000 - cy[i];
+      if (dx * dx + dy * dy < (cr[i] * 0.8) * (cr[i] * 0.8)) { dead = true; why = 'captée'; break; }
+    }
+    if (!dead && (x * 1000 < -300 || x * 1000 > W + 300 || y * 1000 < -300 || y * 1000 > H + 300)) { dead = true; why = 'sortie'; }
+    if (dead) break;
+  }
+  p.hist.push({ t, x, y, vx, vy, dead, why });
+  if (p.hist.length > 9000) p.hist.splice(0, 1000);
+}
+function simAdvance(dt) {
+  T += dt;
+  for (const p of parts) { p.future.length = 0; integrate(p, dt); }
+}
+function stepTime(dir) {
+  const d = 0.1;
+  playing = false; syncPlay();
+  const nt = Math.max(0, T + dir * d);
+  if (dir < 0) {
+    for (const p of parts) {
+      while (p.hist.length > 1 && cur(p).t > nt) p.future.push(p.hist.pop());
+    }
+    T = nt;
+  } else {
+    syncArrays();
+    for (const p of parts) {
+      while (p.future.length && p.future[p.future.length - 1].t <= nt) p.hist.push(p.future.pop());
+      if (!p.future.length) { const s = cur(p); if (!s.dead && s.t < nt) integrate(p, nt - s.t); }
+    }
+    T = nt;
+  }
+  pulseT += dir * 0.05;
+}
+function launch(px, py) {
+  syncArrays();
+  parts.push({ id: pid++, sg: testSign, hist: [{ t: T, x: px * 1e-3, y: py * 1e-3, vx: 0, vy: 0, dead: false, why: '' }], future: [] });
+  if (parts.length > 8) parts.shift();
+  armTest = false; syncArm();
+  setStep('test', testSign > 0 ? 'La charge test suit la force' : 'La charge test, de signe négatif',
+    testSign > 0
+      ? 'Une charge test positive est poussée dans le sens de E : F = qE, puis a = F/m. Elle part du repos et prend de la vitesse ; comme elle a de l\'inertie, sa trajectoire ne colle pas exactement à une ligne de champ. Elle est captée en touchant une charge négative.'
+      : 'Une charge test négative subit une force opposée à E : elle remonte les lignes, vers les charges positives. Ce n\'est pas une ligne de champ qu\'elle dessine, mais une trajectoire : elle garde sa vitesse acquise.');
+}
+
+/* ---------------- Dessin par image ---------------- */
+function glowDisc(x, y, r, col, a) {
+  const g = ctx.createRadialGradient(x, y, r * 0.6, x, y, r * 2.8);
+  g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.8, 0, 6.2832); ctx.fill();
+}
+function drawGlyph(x, y, s, sign, col, w) {
+  ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y);
+  if (sign > 0) { ctx.moveTo(x, y - s); ctx.lineTo(x, y + s); }
+  ctx.stroke();
+}
+const fmtQ = q => (q > 0 ? '+' : '−') + Math.abs(q) + ' nC';
+
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(layer, 0, 0, W, H);
+
+  // impulsions qui glissent sur les lignes, dans le sens de E
+  if (views.lines && !reduce) {
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.lineWidth = 1.9; ctx.strokeStyle = rgba(RGB.texte, 0.55);
+    ctx.setLineDash([9, 151]);
+    for (let k = 0; k < 3; k++) { ctx.lineDashOffset = -(pulseT * 50 + k * 53.33); ctx.stroke(linesPath); }
+    ctx.restore();
+  }
+
+  // sonde : équipotentielle locale, vecteur E, angle droit
+  if (probe.in) {
+    ctx.save();
+    ctx.setLineDash([5, 4]); ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(RGB.accent, 0.95); ctx.stroke(hoverPath);
+    ctx.restore();
+    field(probe.x, probe.y);
+    const m = Math.hypot(EX, EY);
+    if (m > 1e-6) {
+      const ex = EX / m, ey = EY / m, len = 16 + 30 * m / (m + 800);
+      ctx.beginPath(); arrow(ctx, probe.x, probe.y, ex, ey, len, 6);
+      ctx.lineWidth = 1.8; ctx.strokeStyle = C.texte; ctx.stroke();
+      ctx.beginPath();
+      const a = 8, nx = -ey, ny = ex;
+      ctx.moveTo(probe.x + ex * a, probe.y + ey * a);
+      ctx.lineTo(probe.x + ex * a + nx * a, probe.y + ey * a + ny * a);
+      ctx.lineTo(probe.x + nx * a, probe.y + ny * a);
+      ctx.lineWidth = 1; ctx.strokeStyle = rgba(RGB.accent, 0.9); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.6, 0, 6.2832); ctx.fillStyle = C.texte; ctx.fill();
+  }
+
+  // charges
+  for (let i = 0; i < NC; i++) {
+    const c = charges[i], R = cr[i], pos = c.q > 0, col = pos ? RGB.pos : RGB.neg, hex = pos ? C.pos : C.neg;
+    glowDisc(c.x, c.y, R, col, 0.34);
+    if (!reduce) {
+      const amp = 16 + 5 * Math.abs(c.q);
+      for (let k = 0; k < 2; k++) {
+        const ph = ((pulseT / 3.2) + k / 2) % 1, ph2 = ph < 0 ? ph + 1 : ph;
+        const rr = pos ? R + ph2 * amp : R + (1 - ph2) * amp;
+        const al = pos ? (1 - ph2) * 0.32 : ph2 * 0.32;
+        ctx.beginPath(); ctx.arc(c.x, c.y, rr, 0, 6.2832); ctx.lineWidth = 1; ctx.strokeStyle = rgba(col, al); ctx.stroke();
+      }
+    }
+    ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, 6.2832);
+    ctx.fillStyle = C.fond; ctx.fill();
+    ctx.fillStyle = rgba(col, 0.22); ctx.fill();
+    ctx.lineWidth = 1.6; ctx.strokeStyle = hex; ctx.stroke();
+    drawGlyph(c.x, c.y, Math.min(9, 3.5 + Math.abs(c.q) * 0.9), c.q, hex, 1.7);
+    if (c === selected) {
+      ctx.save(); ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(c.x, c.y, R + 6, 0, 6.2832);
+      ctx.lineWidth = 1; ctx.strokeStyle = C.texte; ctx.stroke(); ctx.restore();
+    }
+    if (c === selected || c === hoverC) {
+      ctx.font = '500 11px "IBM Plex Mono",ui-monospace,Consolas,monospace'; ctx.textAlign = 'center'; ctx.fillStyle = C.texte;
+      ctx.fillText(fmtQ(c.q), c.x, c.y - R - 10);
+    }
+  }
+
+  // charges test
+  for (const p of parts) {
+    const h = p.hist, last = h[h.length - 1];
+    // traînée
+    let prev = null;
+    ctx.lineCap = 'round'; ctx.lineWidth = 1.8;
+    for (let i = h.length - 1; i >= 0; i--) {
+      const s = h[i], age = T - s.t;
+      if (age > TRAIL) break;
+      if (prev) {
+        ctx.strokeStyle = rgba(RGB.accent, Math.max(0, 1 - age / TRAIL) * 0.85);
+        ctx.beginPath(); ctx.moveTo(s.x * 1000, s.y * 1000); ctx.lineTo(prev.x * 1000, prev.y * 1000); ctx.stroke();
+      }
+      prev = s;
+    }
+    const px = last.x * 1000, py = last.y * 1000;
+    if (last.dead) {
+      const age = T - last.t;
+      if (age >= 0 && age < 0.6 && last.why === 'captée') {
+        const f = age / 0.6;
+        ctx.beginPath(); ctx.arc(px, py, 6 + f * 26, 0, 6.2832); ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(rgb(C.ener), (1 - f) * 0.9); ctx.stroke();
+      }
+      continue;
+    }
+    // force F = qE
+    field(px, py);
+    const m = Math.hypot(EX, EY);
+    if (m > 1e-6) {
+      const len = 12 + 26 * m / (m + 800), dx = p.sg * EX / m, dy = p.sg * EY / m;
+      ctx.beginPath(); arrow(ctx, px + dx * 8, py + dy * 8, dx, dy, len, 5);
+      ctx.lineWidth = 1.5; ctx.strokeStyle = rgba(RGB.accent, 0.9); ctx.stroke();
+    }
+    glowDisc(px, py, 6, RGB.accent, 0.45);
+    ctx.beginPath(); ctx.arc(px, py, 6, 0, 6.2832); ctx.fillStyle = C.accent; ctx.fill();
+    drawGlyph(px, py, 3, p.sg, C.fond, 1.5);
+  }
+
+  // barre d'échelle : 100 px = 100 mm = 10 cm
+  const bx = 26, by = H - 22;
+  ctx.strokeStyle = C.texte2; ctx.lineWidth = 1; ctx.beginPath();
+  ctx.moveTo(bx, by); ctx.lineTo(bx + 100, by); ctx.moveTo(bx, by - 4); ctx.lineTo(bx, by + 4); ctx.moveTo(bx + 100, by - 4); ctx.lineTo(bx + 100, by + 4); ctx.stroke();
+  ctx.font = '400 11px "IBM Plex Mono",ui-monospace,Consolas,monospace'; ctx.fillStyle = C.texte2; ctx.textAlign = 'left';
+  ctx.fillText('10 cm', bx + 108, by + 4);
+}
+
+/* ---------------- Panneau de lecture ---------------- */
+const nf0 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const nf2 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const nf3 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 3, minimumFractionDigits: 3 });
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+function sup(n) { return String(Math.abs(n)).split('').map(c => SUP[+c]).join('').replace(/^/, n < 0 ? '⁻' : ''); }
+function fmt(v, sign) {
+  const a = Math.abs(v), s = v < 0 ? '−' : (sign ? '+' : '');
+  if (a < 0.005) return '0';
+  if (a < 10) return s + nf2.format(a);
+  if (a < 100) return s + nf1.format(a);
+  if (a < 100000) return s + nf0.format(a);
+  const e = Math.floor(Math.log10(a)), m = a / Math.pow(10, e);
+  return s + nf2.format(m) + '×10' + sup(e);
+}
+const els = {}; ['mE','mD','mV','mP','sN','sQ','sL','tV','tK','tU','tS','testNote','stepTitle','stepText','needleG'].forEach(id => els[id] = document.getElementById(id));
+function setT(el, s) { if (el._s !== s) { el._s = s; el.textContent = s; } }
+let needleAng = 0;
+function updatePanel() {
+  // sonde
+  if (probe.in) {
+    field(probe.x, probe.y);
+    const m = Math.hypot(EX, EY);
+    setT(els.mE, fmt(m, false));
+    if (m > 1e-3) {
+      let ang = Math.atan2(-EY, EX) * 180 / Math.PI; if (ang < 0) ang += 360;
+      setT(els.mD, nf0.format((Math.round(ang) % 360) || 0));
+      const scr = Math.atan2(EY, EX) * 180 / Math.PI;
+      let dlt = scr - (needleAng % 360); dlt = ((dlt + 540) % 360) - 180; needleAng += dlt;
+      els.needleG.style.transform = `rotate(${needleAng}deg)`;
+    } else setT(els.mD, '—');
+    setT(els.mV, fmt(pot(probe.x, probe.y), true));
+    setT(els.mP, `x ${nf0.format(Math.round(probe.x))} · y ${nf0.format(Math.round(H - probe.y))}`);
+  }
+  setT(els.sN, String(NC));
+  let Q = 0; for (const c of charges) Q += c.q;
+  setT(els.sQ, (Q > 0 ? '+' : Q < 0 ? '−' : '') + Math.abs(Q));
+  setT(els.sL, views.lines ? String(nLines) : '—');
+  // charge test la plus récente
+  const p = parts[parts.length - 1];
+  if (p) {
+    const s = cur(p), v = Math.hypot(s.vx, s.vy);
+    syncArrays();
+    const Vt = pot(s.x * 1000, s.y * 1000);
+    const K1 = 0.5 * MT * v * v * 1e6, U = p.sg * QT * Vt * 1e6;
+    setT(els.tV, nf3.format(v)); setT(els.tK, nf3.format(K1)); setT(els.tU, (U < 0 ? '−' : '') + nf3.format(Math.abs(U))); setT(els.tS, (K1 + U < 0 ? '−' : '') + nf3.format(Math.abs(K1 + U)));
+    setT(els.testNote, `q = ${p.sg > 0 ? '+' : '−'}1 nC, m = 10 mg. ` + (s.dead ? (s.why === 'captée' ? 'Captée par une charge.' : 'Sortie de la scène.') : 'Ec + qV reste constante tant que les charges ne bougent pas.'));
+  } else {
+    ['tV','tK','tU','tS'].forEach(k => setT(els[k], '—'));
+    setT(els.testNote, 'q = ±1 nC, m = 10 mg. Aucune charge test pour l\'instant.');
+  }
+}
+function setStep(key, title, text) {
+  if (step.key === key) return;
+  step.key = key;
+  els.stepTitle.textContent = title; els.stepText.textContent = text;
+  if (!reduce) for (const e of [els.stepTitle, els.stepText]) { e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+}
+const STEPS = {
+  dipole: ['Le dipôle', 'Deux charges opposées de 3 nC. Les lignes partent de la charge positive et arrivent sur la négative ; elles se serrent entre les deux, là où E est le plus grand. Chaque équipotentielle (vert) coupe les lignes à angle droit : passe la sonde dessus.'],
+  identiques: ['Deux charges identiques', 'Deux charges positives se repoussent : les lignes ne se rejoignent jamais et fuient vers l\'extérieur. Au milieu, les deux champs s\'annulent : trouve avec la sonde le point où |E| tombe à 0, alors que V y reste élevé.'],
+  condensateur: ['Le condensateur plan', 'Entre deux rangées de charges opposées, les composantes parallèles aux plaques s\'annulent par symétrie et les composantes qui traversent s\'additionnent : les lignes deviennent parallèles et espacées également. Le champ y est quasi uniforme (les équipotentielles sont des droites régulières) ; il s\'incurve aux bords.'],
+  quadrupole: ['Le quadrupôle', 'Quatre charges alternées (+ − + −). Vu de loin, chaque paire annule presque l\'autre : le champ décroît plus vite qu\'avec un dipôle (environ en 1/r⁴ au lieu de 1/r³).'],
+  libre: ['Superposition en direct', 'En chaque point, E est la somme vectorielle des champs de toutes les charges, et V la somme de leurs potentiels. Déplace une charge : tout est recalculé à chaque image.'],
+  vide: ['Scène vide', 'Aucune charge, aucun champ. Clique dans la scène pour en placer une : Maj+clic pour une charge de signe opposé.']
+};
+
+/* ---------------- Préréglages ---------------- */
+function mk(x, y, q) { charges.push({ id: nid++, x, y, q }); }
+function applyPreset(name) {
+  charges = []; parts = []; selected = null; T = 0;
+  lastPreset = name;
+  const mx = W / 2, my = H / 2;
+  if (name === 'dipole') { const s = Math.min(240, Math.max(110, W * 0.27)); mk(mx - s / 2, my, 3); mk(mx + s / 2, my, -3); }
+  else if (name === 'identiques') { const s = Math.min(240, Math.max(110, W * 0.27)); mk(mx - s / 2, my, 3); mk(mx + s / 2, my, 3); }
+  else if (name === 'quadrupole') { const h = Math.min(120, Math.max(55, Math.min(W, H) * 0.16)); mk(mx - h, my - h, 2); mk(mx + h, my - h, -2); mk(mx + h, my + h, 2); mk(mx - h, my + h, -2); }
+  else if (name === 'condensateur') {
+    const n = W < 560 ? 7 : 10, a = Math.min(28, (W - 90) / (n - 1)), gap = Math.min(120, H * 0.3);
+    for (let i = 0; i < n; i++) { const x = mx + (i - (n - 1) / 2) * a; mk(x, my - gap / 2, 1); mk(x, my + gap / 2, -1); }
+  }
+  step.key = ''; setStep(name, ...STEPS[name]);
+  document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === name));
+  syncSelUI(); syncArm();
+  dirty = true; fast = false;
+}
+
+/* ---------------- Interaction ---------------- */
+let hoverC = null, drag = null, downE = null, lastTap = { id: 0, t: 0 }, refineTimer = 0;
+function pos(e) { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+function hitCharge(p) {
+  for (let i = charges.length - 1; i >= 0; i--) {
+    const c = charges[i], d = Math.hypot(p.x - c.x, p.y - c.y);
+    if (d <= radiusOf(c.q) + 5) return c;
+  }
+  return null;
+}
+function hitPart(p) {
+  for (const pt of parts) { const s = cur(pt); if (!s.dead && Math.hypot(p.x - s.x * 1000, p.y - s.y * 1000) < 11) return pt; }
+  return null;
+}
+function markFree(key, extra) {
+  document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  if (step.key !== key) { step.key = ''; setStep(key, ...(extra || STEPS.libre)); }
+}
+function setProbe(p) { probe.x = p.x; probe.y = p.y; probe.in = true; hoverDirty = true; }
+function tip(html, p) {
+  if (!html) { tipEl.classList.remove('on'); return; }
+  tipEl.innerHTML = html;
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = p.x + 16, y = p.y + 18;
+  if (x + w > W - 8) x = p.x - w - 14; if (y + h > H - 8) y = p.y - h - 14;
+  tipEl.style.transform = ''; tipEl.style.left = Math.max(6, x) + 'px'; tipEl.style.top = Math.max(6, y) + 'px';
+  tipEl.classList.add('on');
+}
+function updateHover(p, e) {
+  const c = hitCharge(p), pt = c ? null : hitPart(p);
+  hoverC = c;
+  cv.classList.toggle('grab', !!c && !drag); cv.classList.toggle('grabbing', !!drag && drag.moved);
+  if (c) {
+    const n = 6 * Math.abs(c.q);
+    tip(c.q > 0 ? `<b>Charge ${fmtQ(c.q)}</b><br><span>Source du champ : ${n} lignes en partent (6 par nC).</span>`
+                : `<b>Charge ${fmtQ(c.q)}</b><br><span>Puits du champ : les lignes y arrivent (6 par nC).</span>`, p);
+  } else if (pt) {
+    tip(`<b>Charge test ${pt.sg > 0 ? '+' : '−'}1 nC</b><br><span>Masse 10 mg. Subit F = qE, a = F/m.</span>`, p);
+  } else tip('', p);
+}
+function select(c) {
+  selected = c;
+  if (c) { active.s = c.q > 0 ? 1 : -1; active.m = Math.abs(c.q); }
+  syncSelUI();
+}
+function syncSelUI() {
+  document.querySelectorAll('.sgn:not(.tsgn)').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.s === active.s)));
+  $('#mag').value = active.m; $('#magV').textContent = active.m + ' nC';
+  $('#chLabel').textContent = selected ? 'Charge sélectionnée' : 'Charge à ajouter';
+  $('#bDel').disabled = !selected;
+}
+function removeCharge(c) {
+  charges = charges.filter(x => x !== c);
+  if (selected === c) selected = null;
+  hoverC = null; syncSelUI(); dirty = true; fast = true; scheduleRefine();
+  markFree('libre');
+}
+function scheduleRefine() { clearTimeout(refineTimer); refineTimer = setTimeout(() => { fast = false; dirty = true; }, 140); }
+
+cv.addEventListener('pointerdown', e => {
+  const p = pos(e);
+  setProbe(p);
+  const c = hitCharge(p);
+  if (armTest) { if (!c) launch(p.x, p.y); return; }
+  cv.setPointerCapture(e.pointerId);
+  if (c) { drag = { c, ox: p.x - c.x, oy: p.y - c.y, sx: p.x, sy: p.y, moved: false }; }
+  else downE = { x: p.x, y: p.y, moved: false, shift: e.shiftKey };
+});
+cv.addEventListener('pointermove', e => {
+  const p = pos(e);
+  if (e.pointerType === 'mouse' || drag || downE) setProbe(p);
+  if (drag) {
+    if (!drag.moved && Math.hypot(p.x - drag.sx, p.y - drag.sy) > 3) {
+      drag.moved = true; cv.classList.add('grabbing');
+      markFree('drag', ['Superposition en direct', 'Tu déplaces une charge : le champ total et le potentiel sont recalculés à chaque image, et les lignes se réorganisent. Les lignes ne se croisent jamais : en chaque point, E n\'a qu\'une direction.']);
+    }
+    if (drag.moved) {
+      drag.c.x = Math.min(W - 10, Math.max(10, p.x - drag.ox)); drag.c.y = Math.min(H - 10, Math.max(10, p.y - drag.oy));
+      dirty = true; fast = true; clearTimeout(refineTimer);
+      tip('', p);
+    }
+    return;
+  }
+  if (downE && Math.hypot(p.x - downE.x, p.y - downE.y) > 4) downE.moved = true;
+  updateHover(p, e);
+});
+function endPointer(e) {
+  const p = pos(e);
+  if (drag) {
+    const d = drag; drag = null; cv.classList.remove('grabbing');
+    if (d.moved) { scheduleRefine(); }
+    else {
+      const now = performance.now();
+      if (lastTap.id === d.c.id && now - lastTap.t < 380) { removeCharge(d.c); lastTap = { id: 0, t: 0 }; }
+      else { lastTap = { id: d.c.id, t: now }; select(d.c); }
+    }
+  } else if (downE) {
+    const d = downE; downE = null;
+    if (!d.moved) {
+      if (selected) { selected = null; syncSelUI(); }
+      else if (charges.length >= MAXC) { setStep('max' + Date.now(), 'Limite atteinte', `La scène est limitée à ${MAXC} charges pour rester fluide. Retire-en une (double-clic) avant d'en ajouter.`); }
+      else {
+        const s = d.shift ? -active.s : active.s;
+        mk(d.x, d.y, s * active.m);
+        dirty = true; fast = false;
+        markFree('ajout', ['Une charge de plus', `Chaque nC émet (ou reçoit) 6 lignes : une charge de ${active.m} nC en dessine ${6 * active.m}. Le champ de l'ensemble est la somme des champs de chaque charge : c'est le principe de superposition.`]);
+      }
+    }
+  }
+  updateHover(p, e);
+}
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', () => { drag = null; downE = null; cv.classList.remove('grabbing'); scheduleRefine(); });
+cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !drag) { hoverC = null; tip('', {x:0,y:0}); cv.classList.remove('grab'); } });
+cv.addEventListener('wheel', e => {
+  const p = pos(e), c = hitCharge(p);
+  if (!c) return;
+  e.preventDefault();
+  const m = Math.min(5, Math.max(1, Math.abs(c.q) + (e.deltaY < 0 ? 1 : -1)));
+  if (m !== Math.abs(c.q)) { c.q = Math.sign(c.q) * m; if (c === selected) { active.m = m; syncSelUI(); } dirty = true; fast = true; scheduleRefine(); updateHover(p, e); }
+}, { passive: false });
+
+/* contrôles */
+function syncPlay() {
+  $('#icPause').style.display = playing ? '' : 'none'; $('#icPlay').style.display = playing ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+}
+function syncArm() {
+  const b = $('#bTest');
+  b.classList.toggle('armed-btn', armTest);
+  b.textContent = armTest ? 'Clique dans la scène…' : 'Lâcher une charge test';
+  cv.classList.toggle('armed', armTest);
+}
+document.querySelectorAll('.sgn:not(.tsgn)').forEach(b => b.addEventListener('click', () => {
+  active.s = +b.dataset.s;
+  if (selected) { selected.q = active.s * Math.abs(selected.q); dirty = true; fast = false; }
+  syncSelUI();
+}));
+document.querySelectorAll('.tsgn').forEach(b => b.addEventListener('click', () => {
+  testSign = +b.dataset.s;
+  document.querySelectorAll('.tsgn').forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.s === testSign)));
+}));
+$('#mag').addEventListener('input', e => {
+  active.m = +e.target.value; $('#magV').textContent = active.m + ' nC';
+  if (selected) { selected.q = Math.sign(selected.q) * active.m; dirty = true; fast = true; scheduleRefine(); }
+});
+$('#ts').addEventListener('input', e => { timeScale = +e.target.value; $('#tsV').textContent = '×' + nf2.format(timeScale); });
+$('#bPlay').addEventListener('click', () => { playing = !playing; syncPlay(); });
+$('#bBack').addEventListener('click', () => stepTime(-1));
+$('#bFwd').addEventListener('click', () => stepTime(1));
+$('#bReset').addEventListener('click', () => applyPreset(lastPreset));
+$('#bDel').addEventListener('click', () => { if (selected) removeCharge(selected); });
+$('#bTest').addEventListener('click', () => {
+  armTest = !armTest; syncArm();
+  if (armTest) setStep('arm', 'Prêt à lâcher', 'Clique dans la scène : la charge test (1 nC, 10 mg) part du repos à cet endroit. Choisis son signe avec les boutons + et − à côté.');
+});
+document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.p === 'vide') { applyPreset('vide'); lastPreset = 'dipole'; } else applyPreset(b.dataset.p);
+}));
+document.querySelectorAll('#views .btn').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.v; views[k] = !views[k];
+  b.setAttribute('aria-pressed', String(views[k]));
+  dirty = true; fast = false;
+}));
+document.addEventListener('keydown', e => {
+  const t = e.target, tag = t.tagName;
+  if (tag === 'INPUT' && t.type === 'range') { if (e.key === ' ') return; if (e.key.startsWith('Arrow')) return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); playing = !playing; syncPlay(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); stepTime(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); stepTime(1); }
+  else if (e.key === 'r' || e.key === 'R') applyPreset(lastPreset);
+  else if (e.key === 't' || e.key === 'T') $('#bTest').click();
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && selected && tag !== 'INPUT') { e.preventDefault(); removeCharge(selected); }
+  else if (e.key === 'Escape') { armTest = false; syncArm(); selected = null; syncSelUI(); }
+});
+
+/* ---------------- Dimensionnement et boucle ---------------- */
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(200, Math.round(r.width)), nh = Math.max(200, Math.round(r.height)), nd = Math.min(2, window.devicePixelRatio || 1);
+  if (nw === W && nh === H && nd === dpr && cv.width) return;
+  W = nw; H = nh; dpr = nd;
+  for (const c of [cv, layer]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  for (const c of charges) { c.x = Math.min(W - 10, Math.max(10, c.x)); c.y = Math.min(H - 10, Math.max(10, c.y)); }
+  if (!probe.in) { probe.x = W * 0.5; probe.y = H * 0.32; probe.in = true; }
+  dirty = true; fast = false;
+}
+new ResizeObserver(resize).observe(sceneEl);
+window.addEventListener('resize', resize);
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (playing) { pulseT += dt; if (parts.length) simAdvance(dt * timeScale); }
+  if (dirty) { rebuild(); }
+  if (hoverDirty) { buildHover(); hoverDirty = false; }
+  draw();
+  updatePanel();
+  requestAnimationFrame(frame);
+}
+
+resize();
+applyPreset('dipole');
+syncPlay();
+requestAnimationFrame(frame);
+
+// interface de test (lecture seule, utile pour vérifier la physique)
+window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, parts: () => parts, size: () => [W, H], preset: applyPreset };
+})();
+</script>
+</body>
+</html>

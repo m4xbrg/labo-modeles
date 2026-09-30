@@ -1,0 +1,1231 @@
+<!doctype html>
+<!--
+NOTE DE DESIGN
+Une seule scène canvas, une seule caméra : l'impulsion est suivie le long de l'axone par un ressort amorti, puis la caméra plonge dans la synapse sans coupure ; les détails moléculaires n'apparaissent qu'à mesure que le grossissement les rend lisibles.
+Chaque mouvement est un état du modèle : le tracé de l'oscilloscope vient d'un vrai calcul de Hodgkin-Huxley (couplé nœud à nœud), les ions et les portes de canaux sont des fonctions de cet état, donc tout recule proprement quand on remonte le temps.
+Couleur = sens : orange pour Na+ et la dépolarisation, bleu pour K+ et la repolarisation, jaune pour l'énergie et les moments clés, magenta réservé à l'activité synaptique et à la mémoire ; le magenta n'apparaît presque pas avant l'acte 2.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le neurone — Mécaniques invisibles 03</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833; --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#ff6fae; --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte)}
+body{font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 372px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;touch-action:pan-y}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+.head{position:absolute;left:24px;top:20px;z-index:2;pointer-events:none;max-width:min(640px,calc(100% - 48px))}
+.kicker{font:400 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{margin:6px 0 0;font:400 clamp(25px,2.7vw,38px)/1.06 var(--serif);letter-spacing:-.005em}
+h1 em{font-style:italic;color:var(--accent)}
+.tip{position:absolute;z-index:4;pointer-events:none;max-width:270px;padding:9px 12px 10px;background:rgba(17,22,30,.96);border:1px solid var(--trait);border-left:2px solid var(--energie);border-radius:2px;font:400 12.5px/1.45 var(--sans);color:var(--texte);opacity:0;transform:translateY(4px);transition:opacity .25s var(--ease),transform .25s var(--ease)}
+.tip.on{opacity:1;transform:none}
+.tip b{display:block;font:500 11px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--energie);margin-bottom:3px}
+.panel{grid-column:2;grid-row:1;border-left:1px solid var(--trait);background:var(--fond-2);padding:24px 24px 18px;display:flex;flex-direction:column;gap:14px;overflow:auto;min-height:0}
+.panel .kick{font:400 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.step{margin:0;font:400 31px/1.08 var(--serif)}
+.stext{margin:0;color:var(--texte);min-height:7.4em}
+.fade{transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.fade.out{opacity:0;transform:translateY(4px)}
+.metrics{margin:0;display:grid;grid-template-columns:1fr auto;gap:0;border-top:1px solid var(--trait)}
+.metrics>div{display:contents}
+.metrics dt,.metrics dd{margin:0;padding:7px 0;border-bottom:1px solid var(--trait);font-size:13px}
+.metrics dt{color:var(--texte-2)}
+.metrics dd{font:400 13px/1.4 var(--mono);text-align:right;color:var(--texte);font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.metrics .bar{display:inline-block;width:54px;height:4px;background:var(--trait);position:relative}
+.metrics .bar b{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--texte-2)}
+.metrics .bar.pos b{background:var(--positif)}.metrics .bar.neg b{background:var(--negatif)}.metrics .bar.acc b{background:var(--accent)}.metrics .bar.en b{background:var(--energie)}
+.note{margin:0;font-size:13px;color:var(--texte-2);line-height:1.5}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font:400 11px/1.3 var(--mono);color:var(--texte-2);margin-top:auto;padding-top:6px}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:9px;height:9px;border-radius:50%;flex:none}
+.links{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--trait);padding-top:12px;font-size:13.5px}
+.links a{color:var(--texte);text-decoration:none;display:flex;justify-content:space-between;gap:12px;padding:3px 0;transition:color .3s var(--ease)}
+.links a:hover{color:var(--accent)}
+.links a span{font-family:var(--mono);color:var(--texte-2)}
+.links a.sub{color:var(--texte-2);font-size:12.5px}
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:11px 20px 13px;display:flex;flex-direction:column;gap:9px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{font:500 12px/1 var(--mono);letter-spacing:.05em;color:var(--texte);background:transparent;border:1px solid var(--trait);height:34px;padding:0 13px;border-radius:2px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:border-color .3s var(--ease),background .3s var(--ease),color .3s var(--ease);-webkit-tap-highlight-color:transparent}
+.btn:hover{border-color:var(--texte-2)}
+.btn:focus-visible,input[type=range]:focus-visible,.links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.icon{width:34px;padding:0}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.btn.go{border-color:var(--positif);color:var(--positif)}
+.btn.go:hover{background:rgba(255,138,91,.12)}
+.btn.syn{border-color:var(--accent);color:var(--accent)}
+.btn.syn:hover{background:rgba(255,111,174,.12)}
+.seg{display:inline-flex}
+.seg .btn{border-radius:0}.seg .btn+.btn{margin-left:-1px}
+.seg .btn[aria-pressed=true]{border-color:var(--texte);background:rgba(232,228,220,.07);position:relative;z-index:1}
+.kbd{font:400 10px/1 var(--mono);color:var(--texte-2);border:1px solid var(--trait);padding:2px 4px;border-radius:2px}
+.readout{font:400 12px/1 var(--mono);color:var(--texte-2);min-width:96px;font-variant-numeric:tabular-nums}
+.grow{flex:1 1 140px;min-width:110px}
+.lab{font:400 11px/1 var(--mono);color:var(--texte-2);letter-spacing:.04em;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:26px;margin:0;width:100%;cursor:pointer;--p:0%}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(to right,var(--texte-2) var(--p),var(--trait) var(--p))}
+input[type=range]::-moz-range-track{height:2px;background:var(--trait)}
+input[type=range]::-moz-range-progress{height:2px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-5.5px;border-radius:50%;background:var(--texte);border:0;transition:transform .3s var(--ease)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--texte);border:0}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.25)}
+.controls[data-act="1"] .only2,.controls[data-act="2"] .only1{display:none}
+.sp{flex:1}
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto;min-height:0}
+  .scene{height:74vh;height:74svh;min-height:560px;flex:none}
+  .controls{order:2;padding:12px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px 22px}
+  .stext{min-height:0}
+  .head{left:16px;top:16px;max-width:calc(100% - 32px)}
+}
+@media (max-width:640px){
+  .scene{height:700px}
+  .btn.hide-s .txt{display:none}
+  .readout{min-width:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .fade,.tip,.btn{transition-duration:.01s}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène interactive : un neurone, un oscilloscope de la tension de membrane, une vue rapprochée de la membrane, puis une synapse qui se renforce"></canvas>
+    <header class="head" id="head">
+      <div class="kicker">Mécaniques invisibles — 03</div>
+      <h1>Le neurone : de l’impulsion à l’<em>apprentissage</em></h1>
+    </header>
+    <div class="tip" id="tip" role="status"></div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <div class="kick" id="kick">Acte 1 — Le potentiel d’action</div>
+    <h2 class="step fade" id="stepTitle">Repos</h2>
+    <p class="stext fade" id="stepText" aria-live="polite"></p>
+    <dl class="metrics" id="metrics"></dl>
+    <p class="note" id="note"></p>
+    <div class="legend" aria-label="Code couleur de la série">
+      <span><i style="background:var(--positif)"></i>Na⁺, dépolarisation</span>
+      <span><i style="background:var(--negatif)"></i>K⁺, repolarisation</span>
+      <span><i style="background:var(--energie)"></i>énergie, moment clé</span>
+      <span><i style="background:var(--accent)"></i>synapse, mémoire</span>
+    </div>
+    <nav class="links">
+      <a href="explication.html">Comprendre ce qui se passe <span>→</span></a>
+      <a class="sub" href="../index.html"><span>←</span> Accueil de la série</a>
+    </nav>
+  </aside>
+
+  <section class="controls" id="controls" data-act="1" aria-label="Contrôles">
+    <div class="row">
+      <button class="btn icon" id="bPlay" aria-label="Lecture / pause (Espace)" title="Lecture / pause (Espace)"><svg id="iPlay" viewBox="0 0 16 16"><path d="M5 3v10M11 3v10"/></svg></button>
+      <button class="btn icon" id="bBack" aria-label="Reculer (flèche gauche)" title="Reculer (←)"><svg viewBox="0 0 16 16"><path d="M10 3L5 8l5 5"/></svg></button>
+      <button class="btn icon" id="bFwd" aria-label="Avancer (flèche droite)" title="Avancer (→)"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></button>
+      <input class="grow" type="range" id="scrub" min="0" max="1" step="1" value="0" aria-label="Remonter le temps">
+      <span class="readout" id="tRead">t = 0,00 ms</span>
+      <button class="btn" id="bSpeed" aria-label="Vitesse de lecture" title="Vitesse de lecture">×1</button>
+      <button class="btn" id="bReset" aria-label="Réinitialiser (R)" title="Réinitialiser (R)"><svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v3h3"/></svg><span class="txt">Réinit.</span></button>
+    </div>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Choisir l’acte">
+        <button class="btn" id="bAct1" aria-pressed="true">Acte 1 · Impulsion</button>
+        <button class="btn" id="bAct2" aria-pressed="false">Acte 2 · Synapse</button>
+      </div>
+      <span class="sp"></span>
+      <div class="row only1" style="gap:10px">
+        <span class="lab">intensité</span>
+        <input type="range" id="inten" min="0" max="100" value="62" step="1" style="width:130px;--p:62%" aria-label="Intensité de la stimulation">
+        <span class="lab" id="intenVal" style="min-width:74px;color:var(--texte)">50 µA/cm²</span>
+        <button class="btn go" id="bStim" title="Stimuler (S)">Stimuler <span class="kbd">S</span></button>
+      </div>
+      <div class="row only2" style="gap:10px">
+        <button class="btn syn" id="bRep" title="Envoyer un influx (S)">Répéter <span class="kbd">S</span></button>
+        <button class="btn syn" id="bBurst" title="Dix influx rapprochés">Rafale ×10</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ==================================================================
+   Utilitaires
+   ================================================================== */
+const $ = s => document.querySelector(s);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const fract = x => x - Math.floor(x);
+const sig = x => 1 / (1 + Math.exp(-x));
+const hash = (a, b) => { let h = Math.imul(a + 1, 374761393) ^ Math.imul(b + 7, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+function mulberry(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const fmtMv = (v, d = 1) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d);
+const fmtNum = (v, d = 2) => v.toFixed(d).replace('.', ',');
+
+const rootStyle = getComputedStyle(document.documentElement);
+const tok = n => rootStyle.getPropertyValue(n).trim();
+const hex2rgb = h => { h = h.replace('#', ''); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; };
+const RGB = { fond: hex2rgb(tok('--fond') || '#0a0d12'), fond2: hex2rgb(tok('--fond-2') || '#11161e'), trait: hex2rgb(tok('--trait') || '#1f2833'), texte: hex2rgb(tok('--texte') || '#e8e4dc'), texte2: hex2rgb(tok('--texte-2') || '#8a93a0'), accent: hex2rgb(tok('--accent') || '#ff6fae'), pos: hex2rgb(tok('--positif') || '#ff8a5b'), neg: hex2rgb(tok('--negatif') || '#5bb8ff'), en: hex2rgb(tok('--energie') || '#ffd166') };
+const rgba = (n, a) => { const c = RGB[n]; return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + clamp(a, 0, 1).toFixed(3) + ')'; };
+const FM = '"IBM Plex Mono", ui-monospace, Consolas, monospace';
+const FS = '"IBM Plex Sans", system-ui, sans-serif';
+const PROT = '#1b2530', PROT2 = '#2a3542', EDGE = '#3f4d5e', EDGE2 = '#5a6b7f', TUBE = '#1a222d';
+
+/* ==================================================================
+   Modèle 1 : Hodgkin-Huxley couplé nœud à nœud (acte 1)
+   Tension affichée = V_HH - 5 mV (repos -70 mV). Le taux d'activation m est
+   décalé de 3 mV pour que le seuil tombe près de -55 mV.
+   ================================================================== */
+const HH = (() => {
+  const SH = 5, MSH = 3, gNa = 120, gK = 36, gL = 0.3, ENa = 50, EK = -77, GC = 2, N = 8;
+  const g = z => Math.abs(z) < 1e-7 ? 1 : z / (1 - Math.exp(-z));
+  const r = { am: 0, bm: 0, ah: 0, bh: 0, an: 0, bn: 0 };
+  function rates(V) {
+    const vm = V - MSH;
+    r.am = g((vm + 40) / 10); r.bm = 4 * Math.exp(-(vm + 65) / 18);
+    r.an = 0.1 * g((V + 55) / 10); r.bn = 0.125 * Math.exp(-(V + 65) / 80);
+    r.ah = 0.07 * Math.exp(-(V + 65) / 20); r.bh = 1 / (1 + Math.exp(-(V + 35) / 10));
+  }
+  const Vr = -70 + SH; rates(Vr);
+  const m0 = r.am / (r.am + r.bm), h0 = r.ah / (r.ah + r.bh), n0 = r.an / (r.an + r.bn);
+  const EL = Vr + (gNa * m0 ** 3 * h0 * (Vr - ENa) + gK * n0 ** 4 * (Vr - EK)) / gL;
+  const d = new Float64Array(N * 4);
+  function step(s, dt, I0) {
+    for (let i = 0; i < N; i++) {
+      const o = i * 4, V = s[o], m = s[o+1], h = s[o+2], n = s[o+3];
+      rates(V);
+      let ax = 0; if (i > 0) ax += GC * (s[o-4] - V); if (i < N - 1) ax += GC * (s[o+4] - V);
+      const Iion = gNa * m*m*m * h * (V - ENa) + gK * n*n*n*n * (V - EK) + gL * (V - EL);
+      d[o] = -Iion + ax + (i === 0 ? I0 : 0);
+      d[o+1] = r.am * (1 - m) - r.bm * m; d[o+2] = r.ah * (1 - h) - r.bh * h; d[o+3] = r.an * (1 - n) - r.bn * n;
+    }
+    for (let k = 0; k < N * 4; k++) s[k] += dt * d[k];
+  }
+  return { SH, N, Vr, m0, h0, n0, step };
+})();
+const NN = HH.N, SH = HH.SH;
+const T1 = 0.02, SUB = 4, MS_PER_S = 1 / 0.6; // 1 ms de neurone = 0,6 s a l'ecran a vitesse 1 (ralenti x600)
+const S1 = { h: [], cur: 0, stims: [], acc: 0, probe: 4, inten: 0.62 };
+function rest1() { const a = new Float64Array(NN * 4 + 1); for (let i = 0; i < NN; i++) { a[i*4] = HH.Vr; a[i*4+1] = HH.m0; a[i*4+2] = HH.h0; a[i*4+3] = HH.n0; } return a; }
+function inj(t) { let I = 0; for (const s of S1.stims) if (t >= s.t && t < s.t + 1) I += s.amp; return I; }
+function next1(p) { const q = Float64Array.from(p); let t = p[NN * 4]; const dt = T1 / SUB; for (let k = 0; k < SUB; k++) { HH.step(q, dt, inj(t)); t += dt; } q[NN * 4] = t; return q; }
+function reset1() { S1.h = [rest1()]; S1.cur = 0; S1.stims = []; S1.acc = 0; }
+const tOf1 = s => s[NN * 4];
+const vOf = (s, i) => s[i * 4] - SH;
+function refrClass(s, i) { const h = s[i*4+2], n = s[i*4+3]; return h < 0.30 ? 2 : (h < 0.45 || n > 0.45) ? 1 : 0; }
+function adv1(dt) {
+  S1.acc += dt * speed * MS_PER_S; let n = 0;
+  while (S1.acc >= T1 && n < 60) {
+    S1.acc -= T1; n++;
+    if (S1.cur < S1.h.length - 1) S1.cur++;
+    else { S1.h.push(next1(S1.h[S1.cur])); S1.cur++; }
+  }
+  if (S1.h.length > 40000) { S1.h.splice(0, 8000); S1.cur -= 8000; S1.stims = S1.stims.filter(s => s.t > tOf1(S1.h[0]) - 20); }
+}
+function seek1(delta) {
+  let tg = S1.cur + delta; if (tg < 0) tg = 0;
+  while (tg > S1.h.length - 1) S1.h.push(next1(S1.h[S1.h.length - 1]));
+  S1.cur = tg;
+}
+function stimulate(ampOverride) {
+  if (mode !== 'a1' && mode !== 'follow') return;
+  const c = S1.h[S1.cur], t = tOf1(c);
+  if (S1.cur < S1.h.length - 1) { S1.h.length = S1.cur + 1; S1.stims = S1.stims.filter(s => s.t <= t); }
+  const amp = ampOverride != null ? ampOverride : S1.inten * 80;
+  S1.stims.push({ t, amp, res: null, why: '', refr: refrClass(c, 0) });
+  S1.acc = 0;
+}
+function resolveStims() {
+  const c = S1.h[S1.cur], tn = tOf1(c);
+  for (const s of S1.stims) {
+    if (s.res !== null || tn < s.t + 5) continue;
+    let i = S1.cur; while (i > 0 && tOf1(S1.h[i]) > s.t) i--;
+    let mx = -999; for (let k = i; k <= S1.cur; k++) mx = Math.max(mx, vOf(S1.h[k], 0));
+    s.res = mx > -20; s.why = s.res ? '' : (s.refr > 0 ? 'réfractaire' : 'sous le seuil');
+  }
+}
+/* geometrie du neurone (unites du monde, 1000 x 300) */
+const NX = i => 228 + 79.4 * i;
+const AY = x => 112 + 6 * Math.sin((x - 140) / 110);
+const SOMA = { x: 128, y: 112, r: 30 };
+const CW = { x: 905, y: 208 };
+function frontX(s) {
+  let f = -1;
+  for (let i = 0; i < NN; i++) if (vOf(s, i) > -20) f = i;
+  if (f < 0) return null;
+  if (f >= NN - 1) return NX(NN - 1) + 60;
+  const nxt = clamp((vOf(s, f + 1) + 70) / 60, 0, 0.95);
+  return lerp(NX(f), NX(f + 1), nxt);
+}
+
+/* ==================================================================
+   Modèle 2 : la synapse qui apprend (acte 2)
+   Etat : [t, D, G, C, w, s, dernierEpisode, auDessus]
+     D  depolarisation postsynaptique (mV au-dessus du repos)
+     G  glutamate dans la fente (relatif)
+     C  calcium dans l'epine (relatif)
+     w  force de la connexion (0..1)  = recepteurs AMPA inseres
+     s  stabilite (consolidation, favorisee par l'espacement)
+   Le temps est ralenti environ x20 : 1 s a l'ecran = ~50 ms reelles.
+   ================================================================== */
+const T2 = 0.02, C_TH = 0.35;
+const S2 = { h: [], cur: 0, ev: [], acc: 0, nid: 0 };
+function rest2() { return new Float64Array([0, 0, 0, 0, 0, 0, -99, 0]); }
+function reset2() { S2.h = [rest2()]; S2.cur = 0; S2.ev = []; S2.acc = 0; }
+function nAmpa(w) { return 4 + 8 * w; }
+function step2(p) {
+  const q = Float64Array.from(p), t0 = p[0], t1 = t0 + T2;
+  for (const e of S2.ev) if (e.t > t0 && e.t <= t1) { q[1] += nAmpa(q[4]) * (1 - q[1] / 40); q[2] = Math.min(1.6, q[2] + 1); }
+  const u = sig((q[1] - 10) / 2.5);
+  q[3] += T2 * (1.6 * u * q[2] - q[3] / 1.5);
+  q[1] *= Math.exp(-T2 / 0.7); q[2] *= Math.exp(-T2 / 0.35);
+  const kd = 0.02 * (1 - 0.75 * q[5]);
+  q[4] = clamp(q[4] + T2 * (0.6 * Math.max(0, q[3] - C_TH) * (1 - q[4]) - kd * q[4]), 0, 1);
+  const above = q[3] > C_TH ? 1 : 0;
+  if (above && !p[7] && t1 - q[6] > 4) { q[5] += 0.18 * (1 - q[5]); q[6] = t1; }
+  q[5] *= Math.exp(-T2 / 250);
+  q[7] = above; q[0] = t1; return q;
+}
+function adv2(dt) {
+  S2.acc += dt * speed; let n = 0;
+  while (S2.acc >= T2 && n < 60) {
+    S2.acc -= T2; n++;
+    if (S2.cur < S2.h.length - 1) S2.cur++; else { S2.h.push(step2(S2.h[S2.cur])); S2.cur++; }
+  }
+  if (S2.h.length > 40000) { S2.h.splice(0, 8000); S2.cur -= 8000; }
+  if (S2.ev.length > 500) { const t0 = S2.h[0][0] - 2; S2.ev = S2.ev.filter(e => e.t > t0); }
+}
+function seek2(delta) {
+  let tg = S2.cur + delta; if (tg < 0) tg = 0;
+  while (tg > S2.h.length - 1) S2.h.push(step2(S2.h[S2.h.length - 1]));
+  S2.cur = tg;
+}
+function truncate2() { if (S2.cur < S2.h.length - 1) { const t = S2.h[S2.cur][0]; S2.h.length = S2.cur + 1; S2.ev = S2.ev.filter(e => e.t <= t); } }
+function fireSyn() {
+  if (mode !== 'a2' && mode !== 'dive') return;
+  truncate2(); const t = S2.h[S2.cur][0];
+  S2.ev.push({ t: t + T2, id: S2.nid++ }); S2.ev.sort((a, b) => a.t - b.t); playing = true; syncPlay();
+}
+function burst() {
+  if (mode !== 'a2') return;
+  truncate2(); const t = S2.h[S2.cur][0];
+  for (let k = 0; k < 10; k++) S2.ev.push({ t: t + 0.05 + k * 0.25, id: S2.nid++ });
+  S2.ev.sort((a, b) => a.t - b.t); playing = true; syncPlay();
+}
+
+/* ==================================================================
+   Etat global, caméra
+   ================================================================== */
+let mode = 'a1';                 // a1 | follow | dive | a2 | out
+let playing = true, speed = 1, wt = 0, followT = 0, diveT = 0, pendingRelease = false, firstFrame = true;
+let u1 = 1, u2 = 0, dDetail = 0, hoverId = null, hoverShape = null, probeDrag = false;
+reset1(); reset2();
+const SP = { vx: {x:0,v:0}, vy: {x:0,v:0}, vw: {x:1,v:0}, vh: {x:1,v:0}, cx: {x:500,v:0}, cy: {x:150,v:0}, ls: {x:0,v:0} };
+function spr(o, tg, w, dt) { const n = Math.max(1, Math.ceil(dt * w / 0.25)), h = dt / n; for (let k = 0; k < n; k++) { o.v += (w*w*(tg - o.x) - 2*w*o.v) * h; o.x += o.v * h; } }
+const cam = { s: 1, ox: 0, oy: 0, vx: 0, vy: 0, vw: 1, vh: 1 };
+
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const sceneEl = $('#scene'), headEl = $('#head');
+let W = 0, H = 0, DPR = 1, narrow = false, L = null, vignette = null;
+function layout() {
+  const rect = sceneEl.getBoundingClientRect();
+  W = Math.max(280, rect.width); H = Math.max(300, rect.height); DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  narrow = W < 640;
+  const top = headEl.offsetTop + headEl.offsetHeight + 16, pad = narrow ? 16 : 22;
+  L = { full: { x: 0, y: 0, w: W, h: H } };
+  if (!narrow) {
+    const nh = Math.min((H - top - pad) * 0.42, (W - 2 * pad) * 0.31);
+    L.neuron = { x: pad, y: top, w: W - 2 * pad, h: nh };
+    const y2 = top + nh + 30, h2 = H - pad - y2, sw = (W - 2 * pad - 18) * 0.6;
+    L.scope = { x: pad, y: y2, w: sw, h: h2 }; L.memb = { x: pad + sw + 18, y: y2, w: W - 2 * pad - sw - 18, h: h2 };
+    const sh = (H - top) * 0.7;
+    L.syn = { x: 0, y: top - 6, w: W, h: sh };
+    const y3 = top - 6 + sh + 30, h3 = Math.min(H - pad - y3, 190), tw = (W - 2 * pad - 36) * 0.44, gw = (W - 2 * pad - 36) * 0.24;
+    L.trace = { x: pad, y: y3, w: tw, h: h3 }; L.gauge = { x: pad + tw + 18, y: y3, w: gw, h: h3 };
+    L.hebb = { x: pad + tw + gw + 36, y: y3, w: W - 2 * pad - tw - gw - 36, h: h3 };
+  } else {
+    L.neuron = { x: pad, y: top, w: W - 2 * pad, h: 112 };
+    const y2 = top + 112 + 28, sh2 = 178;
+    L.scope = { x: pad, y: y2, w: W - 2 * pad, h: sh2 };
+    const y2b = y2 + sh2 + 28; L.memb = { x: pad, y: y2b, w: W - 2 * pad, h: H - pad - y2b };
+    L.syn = { x: 0, y: top - 6, w: W, h: 290 };
+    const y3 = top - 6 + 290 + 26; L.trace = { x: pad, y: y3, w: W - 2 * pad, h: 84 };
+    const y3b = y3 + 84 + 26, hw = (W - 2 * pad - 14) / 2;
+    L.gauge = { x: pad, y: y3b, w: hw, h: H - pad - y3b }; L.hebb = { x: pad + hw + 14, y: y3b, w: hw, h: H - pad - y3b };
+  }
+  const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.62);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.42)'); vignette = g;
+}
+function camTargets() {
+  const fitA = r => Math.min(r.w / 1000, r.h / 300) * 0.97;
+  const sSyn = Math.min(L.syn.w * 0.94 / 60, L.syn.h / 46), sFol = Math.min(L.full.w / 320, L.full.h / 190);
+  if (mode === 'a1' || mode === 'out') return { r: L.neuron, cx: 500, cy: 150, s: fitA(L.neuron), sSyn };
+  if (mode === 'follow') {
+    const fx = frontX(S1.h[S1.cur]);
+    return { r: L.full, cx: fx == null ? NX(0) + 40 : clamp(fx + 55, 260, 860), cy: 120, s: sFol, sSyn };
+  }
+  return { r: L.syn, cx: CW.x, cy: CW.y - 6, s: sSyn, sSyn };
+}
+function updateCam(dt) {
+  const tg = camTargets(); const w = RM ? 9 : (mode === 'follow' ? 3.2 : 4.4);
+  if (firstFrame) { const set = (o, v) => { o.x = v; o.v = 0; }; set(SP.vx, tg.r.x); set(SP.vy, tg.r.y); set(SP.vw, tg.r.w); set(SP.vh, tg.r.h); set(SP.cx, tg.cx); set(SP.cy, tg.cy); set(SP.ls, Math.log(tg.s)); }
+  else {
+    const wv = RM ? 9 : 5.2;
+    spr(SP.vx, tg.r.x, wv, dt); spr(SP.vy, tg.r.y, wv, dt); spr(SP.vw, tg.r.w, wv, dt); spr(SP.vh, tg.r.h, wv, dt);
+    spr(SP.cx, tg.cx, w, dt); spr(SP.cy, tg.cy, w, dt); spr(SP.ls, Math.log(tg.s), w * 0.92, dt);
+  }
+  cam.s = Math.exp(SP.ls.x); cam.vx = SP.vx.x; cam.vy = SP.vy.x; cam.vw = SP.vw.x; cam.vh = SP.vh.x;
+  cam.ox = cam.vx + cam.vw / 2 - SP.cx.x * cam.s; cam.oy = cam.vy + cam.vh / 2 - SP.cy.x * cam.s;
+  dDetail = sstep(0.34 * tg.sSyn, 0.80 * tg.sSyn, cam.s);
+  return tg;
+}
+
+/* ==================================================================
+   Géométrie procédurale (dendrites)
+   ================================================================== */
+const DEND = (() => {
+  const rnd = mulberry(11), out = [];
+  function branch(x, y, ang, len, w, depth) {
+    const pts = [[x, y]]; let a = ang; const seg = 6;
+    for (let i = 0; i < seg; i++) { a += (rnd() - 0.5) * 0.55; x += Math.cos(a) * len / seg; y += Math.sin(a) * len / seg; pts.push([x, y]); }
+    out.push({ pts, w, ph: rnd() * TAU, amp: 1.6 - depth * 0.3 });
+    if (depth < 2) for (let k = 0; k < 2; k++) { const b = pts[3 + k]; branch(b[0], b[1], a + (k ? 1 : -1) * (0.55 + rnd() * 0.4), len * 0.62, w * 0.66, depth + 1); }
+  }
+  [[Math.PI - 1.0, 62], [Math.PI - 0.5, 74], [Math.PI, 70], [Math.PI + 0.55, 70], [Math.PI + 1.05, 60], [-1.35, 52], [1.4, 50]].forEach(([a, l]) => {
+    branch(SOMA.x + Math.cos(a) * (SOMA.r - 4), SOMA.y + Math.sin(a) * (SOMA.r - 4), a, l, 5, 0);
+  });
+  return out;
+})();
+const P_BOUTON = new Path2D('M -17 0 L 17 0 C 24 0 25 -12 21 -22 C 18 -32 8 -38 0 -38 C -8 -38 -18 -32 -21 -22 C -25 -12 -24 0 -17 0 Z');
+const P_HEAD = new Path2D('M -17 5 L 17 5 C 25 5 26 16 20 23 C 15 28 6 29 4 33 L 4 44 L -4 44 L -4 33 C -6 29 -15 28 -20 23 C -26 16 -25 5 -17 5 Z');
+/* jeux de donnees des membranes (ions d'ambiance) */
+const AMB = (() => { const rnd = mulberry(5), out = []; const cols = [0.17, 0.38, 0.59, 0.85];
+  function px() { for (;;) { const x = 0.04 + rnd() * 0.92; if (cols.every(c => Math.abs(x - c) > 0.075)) return x; } }
+  for (let i = 0; i < 15; i++) out.push({ k: 'Na', out: true, x: px(), y: rnd(), ph: rnd() * TAU });
+  for (let i = 0; i < 3; i++) out.push({ k: 'Na', out: false, x: px(), y: rnd(), ph: rnd() * TAU });
+  for (let i = 0; i < 15; i++) out.push({ k: 'K', out: false, x: px(), y: rnd(), ph: rnd() * TAU });
+  for (let i = 0; i < 3; i++) out.push({ k: 'K', out: true, x: px(), y: rnd(), ph: rnd() * TAU });
+  return out; })();
+const POOL = [[-15.5, -9], [-3, -12.5], [7, -8.5], [14, -13.5], [-16, -27], [-1, -23], [9, -21], [15.5, -27], [0.5, -32], [-8.5, -31.5]].map((a, i) => ({ x: a[0], y: a[1], ph: i * 1.7, r: 1.8 + (i % 3) * 0.1 }));
+const DOCK_X = [-10.2, -5.1, 0, 5.1, 10.2];
+const SLOT = i => (i - 7) * 2.3;                 // 15 emplacements sur la membrane postsynaptique
+const NMDA_SLOTS = [3, 7, 11];
+/* 12 emplacements AMPA (indices 0..14 sans les 3 NMDA aux indices 3, 7, 11) : 4 de base puis 8 inseres */
+const AMPA_SLOTS = [1, 5, 9, 13, 4, 10, 2, 12, 0, 14, 6, 8];
+
+/* ==================================================================
+   Dictionnaire d'identification (micro-interaction de découverte)
+   ================================================================== */
+const INFO = {
+  dend: ['Dendrites', 'Reçoivent les signaux d’autres neurones et les transmettent au corps cellulaire.'],
+  soma: ['Soma (corps cellulaire)', 'Contient le noyau et additionne les signaux reçus.'],
+  hill: ['Cône d’implantation', 'Là où l’impulsion naît quand la somme des entrées atteint le seuil. Ici, tu y injectes le courant.'],
+  myelin: ['Gaine de myéline', 'Isolant formé par des cellules gliales : le courant ne passe pas à travers, il saute au nœud suivant.'],
+  node: ['Nœud de Ranvier', 'Zone nue riche en canaux Na⁺ : l’impulsion y est régénérée. Clique pour y placer la sonde.'],
+  term: ['Terminaison axonale', 'À l’arrivée de l’impulsion, elle libère un neurotransmetteur (ici du glutamate).'],
+  nextn: ['Neurone suivant', 'Sa dendrite reçoit le signal à la synapse (acte 2).'],
+  scope: ['Oscilloscope', 'Tension de la membrane au point sondé, en fonction du temps. Le temps est ralenti.'],
+  nach: ['Canal Na⁺ voltage-dépendant', 'Sa porte d’activation s’ouvre à la dépolarisation ; une boule d’inactivation le bouche ensuite.'],
+  kch: ['Canal K⁺ voltage-dépendant', 'S’ouvre plus tard que le canal Na⁺ ; le K⁺ sort, ce qui ramène la tension vers le repos.'],
+  pump: ['Pompe Na⁺/K⁺ (ATPase)', 'Consomme de l’ATP : expulse 3 Na⁺ et fait entrer 2 K⁺. Lente, elle rétablit les gradients entre les impulsions.'],
+  lipid: ['Bicouche lipidique', 'Isolant : les ions ne la traversent que par les protéines.'],
+  ionNa: ['Ions Na⁺', 'Beaucoup plus concentrés à l’extérieur de la cellule.'],
+  ionK: ['Ions K⁺', 'Beaucoup plus concentrés à l’intérieur de la cellule.'],
+  pre: ['Terminaison présynaptique', 'Libère du glutamate quand l’impulsion arrive. Clique dessus pour envoyer un influx.'],
+  vesic: ['Vésicule synaptique', 'Petite bulle remplie de glutamate ; elle fusionne avec la membrane pour le libérer.'],
+  mito: ['Mitochondrie', 'Fournit l’ATP nécessaire au recyclage des vésicules.'],
+  cleft: ['Fente synaptique', 'Espace d’environ 20 nm que le glutamate traverse par diffusion. Ici, elle est agrandie.'],
+  glu: ['Glutamate', 'Le neurotransmetteur excitateur le plus répandu dans le cerveau.'],
+  ampa: ['Récepteur AMPA', 'S’ouvre quand le glutamate s’y fixe : du Na⁺ entre et la membrane se dépolarise.'],
+  nmda: ['Récepteur NMDA', 'Exige deux conditions : du glutamate ET une membrane déjà dépolarisée. Sinon, un ion Mg²⁺ le bouche.'],
+  mg: ['Ion Mg²⁺', 'Bouche le canal NMDA au repos ; il est expulsé quand la membrane est assez dépolarisée.'],
+  post: ['Épine postsynaptique', 'Reçoit le signal. Sa force dépend du nombre de récepteurs AMPA à sa surface.'],
+  endo: ['Récepteurs AMPA en réserve', 'Des vésicules internes les insèrent dans la membrane quand le Ca²⁺ entre.'],
+  trace: ['Réponse postsynaptique', 'Petite variation de tension à chaque influx (en magenta). Le Ca²⁺ est en jaune.'],
+  gauge: ['Force de la connexion', 'Reflète le nombre de récepteurs AMPA. Monte avec la répétition, redescend lentement.'],
+  hebb: ['Règle de Hebb', '« Des neurones qui s’activent ensemble se connectent ensemble ». Une simplification utile.']
+};
+
+/* ==================================================================
+   Dessin : outils
+   ================================================================== */
+let hits = [];
+const hc = (id, x, y, r) => hits.push({ id, k: 0, x, y, r });
+const hr = (id, x, y, w, h) => hits.push({ id, k: 1, x, y, w, h });
+function txt(s, x, y, o) {
+  o = o || {}; ctx.font = (o.font || ('400 ' + (o.size || 10.5) + 'px ' + FM)); ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.base || 'alphabetic';
+  ctx.fillStyle = o.color || rgba('texte2', o.a == null ? 1 : o.a); if ('letterSpacing' in ctx) ctx.letterSpacing = o.ls || '0px'; ctx.fillText(s, x, y); if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+}
+function plate(r, cap, a) {
+  if (a < 0.02) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = rgba('texte2', 0.5); ctx.lineWidth = 1; const k = 7;
+  ctx.beginPath();
+  ctx.moveTo(r.x, r.y + k); ctx.lineTo(r.x, r.y); ctx.lineTo(r.x + k, r.y);
+  ctx.moveTo(r.x + r.w - k, r.y); ctx.lineTo(r.x + r.w, r.y); ctx.lineTo(r.x + r.w, r.y + k);
+  ctx.moveTo(r.x, r.y + r.h - k); ctx.lineTo(r.x, r.y + r.h); ctx.lineTo(r.x + k, r.y + r.h);
+  ctx.moveTo(r.x + r.w - k, r.y + r.h); ctx.lineTo(r.x + r.w, r.y + r.h); ctx.lineTo(r.x + r.w, r.y + r.h - k);
+  ctx.stroke();
+  txt(cap, r.x + 2, r.y - 8, { size: 10, ls: '0.1em' });
+  ctx.restore();
+}
+function smoothPath(pts) {
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length - 1; i++) { const mx = (pts[i][0] + pts[i+1][0]) / 2, my = (pts[i][1] + pts[i+1][1]) / 2; ctx.quadraticCurveTo(pts[i][0], pts[i][1], mx, my); }
+  const l = pts[pts.length - 1]; ctx.lineTo(l[0], l[1]);
+}
+
+/* ==================================================================
+   Dessin : monde (neurone + synapse), sous caméra
+   ================================================================== */
+function drawWorld() {
+  const s = cam.s, snap = S1.h[S1.cur], t1 = tOf1(snap), wob = RM ? 0 : 1;
+  const ov = 1 - 0.0 * dDetail;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(cam.vx, cam.vy, cam.vw, cam.vh); ctx.clip();
+  ctx.translate(cam.ox, cam.oy); ctx.scale(s, s);
+  const lw = px => px / s;
+  const reg = dDetail < 0.5 && (mode === 'a1');
+  const S = (x, y) => [cam.ox + x * s, cam.oy + y * s];
+
+  /* neurone postsynaptique (arrière-plan) */
+  const shaft = [[700, 296], [830, 283], [905, 274], [1010, 262]];
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = EDGE; ctx.lineWidth = 16.6; ctx.beginPath(); smoothPath(shaft); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(905, 240); ctx.lineTo(905, 276); ctx.lineWidth = 9.6; ctx.stroke();
+  [[790, 286, 786, 270], [975, 268, 982, 252]].forEach(a => { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(a[2], a[3]); ctx.lineWidth = 6.6; ctx.stroke(); });
+  ctx.strokeStyle = TUBE; ctx.lineWidth = 15; ctx.beginPath(); smoothPath(shaft); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(905, 240); ctx.lineTo(905, 276); ctx.lineWidth = 8; ctx.stroke();
+  [[790, 286, 786, 270], [975, 268, 982, 252]].forEach(a => { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(a[2], a[3]); ctx.lineWidth = 5; ctx.stroke(); });
+  if (reg) { hr('nextn', ...S(700, 268), 300 * s, 34 * s); }
+
+  /* dendrites */
+  ctx.strokeStyle = EDGE;
+  const dp = DEND.map(b => b.pts.map((p, i) => [p[0] + wob * Math.sin(wt * 0.55 + i * 0.9 + b.ph) * b.amp * (i / 6), p[1] + wob * Math.cos(wt * 0.5 + i * 0.7 + b.ph) * b.amp * (i / 6)]));
+  DEND.forEach((b, k) => { ctx.lineWidth = b.w + 1.4; ctx.beginPath(); smoothPath(dp[k]); ctx.stroke(); });
+  ctx.strokeStyle = TUBE;
+  DEND.forEach((b, k) => { ctx.lineWidth = b.w; ctx.beginPath(); smoothPath(dp[k]); ctx.stroke(); });
+  if (reg) hr('dend', ...S(10, 25), 100 * s, 165 * s);
+
+  /* soma */
+  ctx.beginPath();
+  for (let a = 0; a <= TAU + 0.01; a += 0.12) {
+    const r = SOMA.r * (1 + wob * (0.04 * Math.sin(3 * a + wt * 0.4) + 0.025 * Math.sin(5 * a - wt * 0.6 + 1)));
+    const x = SOMA.x + Math.cos(a) * r, y = SOMA.y + Math.sin(a) * r * 0.94; a === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  const gs = ctx.createRadialGradient(SOMA.x - 6, SOMA.y - 6, 2, SOMA.x, SOMA.y, SOMA.r);
+  gs.addColorStop(0, '#222c39'); gs.addColorStop(1, '#141b25'); ctx.fillStyle = gs; ctx.fill();
+  ctx.strokeStyle = EDGE; ctx.lineWidth = 1.4; ctx.stroke();
+  ctx.beginPath(); ctx.arc(SOMA.x - 3, SOMA.y + 2, 11, 0, TAU); ctx.fillStyle = 'rgba(232,228,220,.045)'; ctx.fill(); ctx.strokeStyle = rgba('texte2', 0.35); ctx.lineWidth = lw(1); ctx.stroke();
+  ctx.beginPath(); ctx.arc(SOMA.x - 6, SOMA.y - 1, 3, 0, TAU); ctx.fillStyle = rgba('texte2', 0.3); ctx.fill();
+  if (reg) hc('soma', ...S(SOMA.x, SOMA.y), SOMA.r * s);
+
+  /* axone : noyau + cone d'implantation */
+  const ax0 = SOMA.x + SOMA.r - 3, axN = NX(NN - 1);
+  const axisPts = []; for (let x = NX(0); x <= axN; x += 20) axisPts.push([x, AY(x)]); axisPts.push([axN, AY(axN)]);
+  ctx.beginPath(); ctx.moveTo(ax0, AY(ax0) - 10); ctx.lineTo(NX(0), AY(NX(0)) - 2.3); ctx.lineTo(NX(0), AY(NX(0)) + 2.3); ctx.lineTo(ax0, AY(ax0) + 10); ctx.closePath();
+  ctx.fillStyle = TUBE; ctx.fill(); ctx.strokeStyle = EDGE; ctx.lineWidth = 1.1; ctx.stroke();
+  if (reg) hr('hill', ...S(ax0, AY(ax0) - 12), (NX(0) - ax0 + 8) * s, 24 * s);
+  const term = [[axN, AY(axN)]]; const bez = (p0, p1, p2, p3, t) => { const m = 1 - t; return [m*m*m*p0[0] + 3*m*m*t*p1[0] + 3*m*t*t*p2[0] + t*t*t*p3[0], m*m*m*p0[1] + 3*m*m*t*p1[1] + 3*m*t*t*p2[1] + t*t*t*p3[1]]; };
+  const B0 = [axN, AY(axN)], B1 = [axN + 60, AY(axN) + 2], B2 = [905, 118], B3 = [905, 170];
+  for (let t = 0.1; t <= 1.0001; t += 0.1) term.push(bez(B0, B1, B2, B3, t));
+  ctx.strokeStyle = EDGE; ctx.lineWidth = 4.8; ctx.beginPath(); smoothPath(axisPts.concat(term)); ctx.stroke();
+  ctx.strokeStyle = '#26303c'; ctx.lineWidth = 3.2; ctx.beginPath(); smoothPath(axisPts.concat(term)); ctx.stroke();
+  /* branches terminales decoratives */
+  [[[888, 148], [871, 160], [856, 168], 6.5], [[908, 150], [930, 158], [957, 166], 6.5]].forEach(b => {
+    ctx.strokeStyle = EDGE; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(b[0][0], b[0][1]); ctx.quadraticCurveTo(b[1][0], b[1][1], b[2][0], b[2][1]); ctx.stroke();
+    ctx.strokeStyle = '#26303c'; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(b[0][0], b[0][1]); ctx.quadraticCurveTo(b[1][0], b[1][1], b[2][0], b[2][1]); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(b[2][0], b[2][1] + 3, b[3], b[3] - 1, 0, 0, TAU); ctx.fillStyle = '#161d27'; ctx.fill(); ctx.strokeStyle = EDGE; ctx.lineWidth = 1; ctx.stroke();
+  });
+
+  /* gaines de myeline */
+  for (let i = 0; i < NN - 1; i++) {
+    const x0 = NX(i) + 6.5, x1 = NX(i + 1) - 6.5, M = 26;
+    ctx.beginPath();
+    for (let k = 0; k <= M; k++) { const t = k / M, x = lerp(x0, x1, t), hw = 6.8 * Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(2 * t - 1), 10))) * (0.9 + 0.1 * Math.sin(t * Math.PI)); k ? ctx.lineTo(x, AY(x) - hw) : ctx.moveTo(x, AY(x) - hw); }
+    for (let k = M; k >= 0; k--) { const t = k / M, x = lerp(x0, x1, t), hw = 6.8 * Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(2 * t - 1), 10))) * (0.9 + 0.1 * Math.sin(t * Math.PI)); ctx.lineTo(x, AY(x) + hw); }
+    ctx.closePath(); ctx.fillStyle = '#18202b'; ctx.fill(); ctx.strokeStyle = '#33404f'; ctx.lineWidth = 1.1; ctx.stroke();
+    ctx.strokeStyle = 'rgba(90,107,127,.28)'; ctx.lineWidth = lw(0.8);
+    for (const f of [-0.55, 0.55]) { ctx.beginPath(); for (let k = 2; k <= M - 2; k++) { const t = k / M, x = lerp(x0, x1, t), hw = 6.8 * f * Math.sqrt(Math.max(0, 1 - Math.pow(Math.abs(2 * t - 1), 10))); k > 2 ? ctx.lineTo(x, AY(x) + hw) : ctx.moveTo(x, AY(x) + hw); } ctx.stroke(); }
+    if (reg) hr('myelin', ...S(x0, AY((x0 + x1) / 2) - 8), (x1 - x0) * s, 16 * s);
+  }
+
+  /* courant axial interne (le long de l'axone, sur les internoeuds) */
+  for (let i = 0; i < NN - 1; i++) {
+    const dv = vOf(snap, i) - vOf(snap, i + 1), a = clamp(Math.abs(dv) / 22, 0, 1);
+    if (a < 0.05) continue;
+    const x0 = NX(i) + 3, x1 = NX(i + 1) - 3;
+    ctx.save(); ctx.strokeStyle = rgba('pos', a * 0.95); ctx.lineWidth = 1.5; ctx.setLineDash([3.2, 4.6]);
+    const dir = dv > 0 ? 1 : -1; ctx.lineDashOffset = -dir * t1 * 60 * 1.0;
+    ctx.beginPath(); ctx.moveTo(x0, AY(x0)); ctx.lineTo(x1, AY(x1)); ctx.stroke(); ctx.restore();
+  }
+
+  /* noeuds de Ranvier */
+  for (let i = 0; i < NN; i++) {
+    const x = NX(i), y = AY(x), V = vOf(snap, i), ex = clamp((V + 66) / 92, 0, 1), hy = clamp((-72 - V) / 10, 0, 1);
+    if (ex > 0.03) { const g = ctx.createRadialGradient(x, y, 1, x, y, 26); g.addColorStop(0, rgba('pos', 0.62 * ex)); g.addColorStop(1, rgba('pos', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 26, 0, TAU); ctx.fill(); }
+    if (hy > 0.03) { const g = ctx.createRadialGradient(x, y, 1, x, y, 14); g.addColorStop(0, rgba('neg', 0.34 * hy)); g.addColorStop(1, rgba('neg', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, TAU); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(x, y, 3.9, 0, TAU);
+    const cr = lerp(58, 255, ex), cg = lerp(71, 138, ex), cb = lerp(86, 91, ex); ctx.fillStyle = 'rgb(' + (cr|0) + ',' + (cg|0) + ',' + (cb|0) + ')'; ctx.fill();
+    ctx.strokeStyle = i === S1.probe ? rgba('texte', 0.95) : 'rgba(232,228,220,.35)'; ctx.lineWidth = i === S1.probe ? 1.5 : 0.9; ctx.stroke();
+    if (reg) hc(i === 0 ? 'hill' : 'node', ...S(x, y), 9 * s);
+  }
+  /* courant injecte */
+  for (const st of S1.stims) {
+    const dt = t1 - st.t; if (dt < -0.01 || dt > 1.4) continue;
+    const a = (dt < 1 ? 1 : 1 - (dt - 1) / 0.4) * clamp(st.amp / 40, 0.2, 1);
+    ctx.strokeStyle = rgba('en', 0.85 * a); ctx.lineWidth = 1.6; const x = NX(0), y = AY(x);
+    for (let k = 0; k < 3; k++) { const r = 8 + k * 6 + dt * 4; ctx.beginPath(); ctx.arc(x, y, r, Math.PI * 0.7, Math.PI * 1.3); ctx.globalAlpha = a * (1 - k * 0.3); ctx.stroke(); ctx.globalAlpha = 1; }
+  }
+  /* sonde */
+  { const x = NX(S1.probe), y = AY(x) - 12; ctx.fillStyle = rgba('texte', 0.95); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 4.2, y - 9); ctx.lineTo(x + 4.2, y - 9); ctx.closePath(); ctx.fill(); ctx.strokeStyle = rgba('texte', 0.6); ctx.lineWidth = lw(1); ctx.beginPath(); ctx.moveTo(x, y - 9); ctx.lineTo(x, y - 22); ctx.stroke(); }
+
+  /* bouton terminal + tete postsynaptique (formes communes aux deux vues) */
+  const ev = S2.ev, t2 = S2.h[S2.cur][0]; let recent = 0;
+  for (let i = ev.length - 1; i >= 0 && i > ev.length - 12; i--) if (ev[i].t <= t2) recent = Math.max(recent, Math.exp(-(t2 - ev[i].t) / 0.5));
+  ctx.save(); ctx.translate(CW.x, CW.y);
+  const pv = P_BOUTON, ph = P_HEAD;
+  ctx.fillStyle = '#161d27'; ctx.fill(pv); ctx.lineWidth = 1.3; ctx.strokeStyle = EDGE; ctx.stroke(pv);
+  ctx.fillStyle = '#161d27'; ctx.fill(ph); ctx.stroke(ph);
+  const ex7 = clamp((vOf(snap, NN - 1) + 66) / 92, 0, 1);
+  if (ex7 > 0.03 && dDetail < 0.9) { const g = ctx.createRadialGradient(0, -18, 2, 0, -18, 34); g.addColorStop(0, rgba('pos', 0.34 * ex7)); g.addColorStop(1, rgba('pos', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, -18, 34, 0, TAU); ctx.fill(); }
+  if (recent > 0.02) { const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 30); g.addColorStop(0, rgba('accent', 0.35 * recent * (1 - dDetail * 0.6))); g.addColorStop(1, rgba('accent', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 30, 0, TAU); ctx.fill(); }
+  ctx.restore();
+  if (reg) { hc('term', ...S(CW.x, CW.y - 20), 22 * s); }
+
+  /* détail synaptique */
+  if (dDetail > 0.01) drawSyn(dDetail);
+  ctx.restore();
+
+  /* étiquettes de planche (espace écran) */
+  const la = u1 * (1 - dDetail);
+  if (la > 0.03 && mode === 'a1') {
+    const lab = (t, x, y, al, o) => { const p = S(x, y); txt(t, p[0], p[1], Object.assign({ size: 10.5, a: la * 0.85, align: al || 'left' }, o)); };
+    const small = cam.s < 0.5;
+    lab('dendrites', 22, 24); lab('soma', SOMA.x, SOMA.y + 25, 'center'); lab('cône d’implantation', 158, 150);
+    lab('axone myélinisé', 380, 136); if (!small) lab('nœud de Ranvier', NX(3), 84, 'center'); else lab('nœud', NX(3), 84, 'center');
+    lab('terminaisons', 975, 128, 'right'); lab('neurone suivant', 690, 262);
+    const p = S(NX(3), 88); ctx.strokeStyle = rgba('texte2', la * 0.5); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p[0], p[1] + 3); ctx.lineTo(p[0], S(0, AY(NX(3)) - 6)[1]); ctx.stroke();
+  }
+}
+
+/* détail de la synapse (coordonnées locales : contact en (0,0), 1 unité = 1 unité du monde) */
+function drawSyn(d) {
+  const p = S2.h[S2.cur], t = p[0], D = p[1], G = Math.min(1, p[2]), C = p[3], w = p[4];
+  const u = sig((D - 10) / 2.5), s = cam.s, lw = px => px / s;
+  const wob = RM ? 0 : 1;
+  const S = (x, y) => [cam.ox + (CW.x + x) * s, cam.oy + (CW.y + y) * s];
+  const reg = d > 0.6 && (mode === 'a2');
+  ctx.save(); ctx.translate(CW.x, CW.y); ctx.globalAlpha = d;
+
+  /* fente */
+  const gc = ctx.createLinearGradient(0, 0, 0, 5); gc.addColorStop(0, rgba('accent', 0.03 + 0.14 * G)); gc.addColorStop(1, rgba('accent', 0.03 + 0.14 * G));
+  ctx.fillStyle = gc; ctx.fillRect(-21, 0, 42, 5);
+  ctx.strokeStyle = rgba('texte2', 0.14); ctx.lineWidth = lw(1); ctx.setLineDash([lw(3), lw(5)]); ctx.beginPath(); ctx.moveTo(-21, 2.5); ctx.lineTo(21, 2.5); ctx.stroke(); ctx.setLineDash([]);
+  if (reg) hr('cleft', ...S(-26, 0.4), 52 * s, 4.2 * s);
+
+  /* interieur presynaptique */
+  ctx.save(); ctx.clip(P_BOUTON); ctx.fillStyle = '#131a23'; ctx.fillRect(-30, -40, 60, 40);
+  /* mitochondrie */
+  { const mx = -9.5, my = -19; ctx.save(); ctx.translate(mx, my); ctx.rotate(-0.25); ctx.beginPath(); ctx.ellipse(0, 0, 5.4, 2.6, 0, 0, TAU); ctx.fillStyle = rgba('en', 0.05); ctx.fill(); ctx.strokeStyle = rgba('en', 0.5); ctx.lineWidth = lw(1.2); ctx.stroke();
+    ctx.strokeStyle = rgba('en', 0.32); ctx.lineWidth = lw(0.9); for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(k * 1.3, -2.1 + Math.abs(k) * 0.12); ctx.quadraticCurveTo(k * 1.3 + 0.5, 0, k * 1.3, 2.1 - Math.abs(k) * 0.12); ctx.stroke(); } ctx.restore(); if (reg) hc('mito', ...S(mx, my), 6 * s); }
+  /* vésicules de reserve */
+  POOL.forEach((v, i) => { const x = v.x + wob * Math.sin(wt * 0.7 + v.ph) * 0.7, y = v.y + wob * Math.cos(wt * 0.6 + v.ph * 1.3) * 0.6; if (Math.abs(x + 9.5) < 6.5 && Math.abs(y + 19) < 3.5) return; ves(x, y, v.r, 0.6, v.ph); if (reg && i < 4) hc('vesic', ...S(x, y), v.r * s * 1.2); });
+  /* vésicules amarrées et libération */
+  const ev = S2.ev; const last = [null, null, null, null, null];
+  for (let i = ev.length - 1; i >= 0; i--) { const e = ev[i]; if (e.t > t) continue; const j = e.id % 5; if (!last[j]) last[j] = e; if (last.every(Boolean)) break; }
+  for (let j = 0; j < 5; j++) {
+    const e = last[j]; const x = DOCK_X[j], y = -2.05; let tau = e ? t - e.t : 99;
+    if (tau < 0.18) { const f = sstep(0, 0.18, tau); ctx.save(); ctx.translate(x, 0); ctx.scale(1 + 0.9 * f, 1 - 0.85 * f); ves(0, -2.05, 1.9, 1 - f * 0.7, j); ctx.restore(); if (tau >= 0 && tau < 0.3) { ctx.strokeStyle = rgba('accent', 0.9 * (1 - tau / 0.3)); ctx.lineWidth = lw(2); ctx.beginPath(); ctx.moveTo(x - 1.8 * (1 + tau * 3), 0); ctx.lineTo(x + 1.8 * (1 + tau * 3), 0); ctx.stroke(); } }
+    else if (tau < 1.4) { /* vide */ }
+    else { const f = sstep(1.4, 2.4, tau); if (f > 0.01) ves(x, y, 1.9 * (0.4 + 0.6 * f), f, j); }
+    if (reg && (tau > 1.4 || tau < 0)) hc('vesic', ...S(x, y), 2.2 * s);
+  }
+  ctx.restore();
+  /* membrane présynaptique */
+  ctx.strokeStyle = EDGE2; ctx.lineWidth = lw(2.2); ctx.beginPath(); ctx.moveTo(-17, 0); ctx.lineTo(17, 0); ctx.stroke();
+  ctx.strokeStyle = 'rgba(90,107,127,.35)'; ctx.lineWidth = lw(1); ctx.beginPath(); ctx.moveTo(-17, -0.5); ctx.lineTo(17, -0.5); ctx.stroke();
+  if (reg) hr('pre', ...S(-22, -36), 44 * s, 34 * s);
+
+  /* glutamate en diffusion */
+  let gluHit = null;
+  for (let i = ev.length - 1; i >= 0 && i > ev.length - 30; i--) {
+    const e = ev[i]; const tau = t - e.t; if (tau < 0) continue; if (tau > 1.6) break;
+    for (let k = 0; k < 8; k++) {
+      const h1 = hash(e.id, k * 5 + 1), h2 = hash(e.id, k * 5 + 2), h3 = hash(e.id, k * 5 + 3), h4 = hash(e.id, k * 5 + 4), h5 = hash(e.id, k * 5 + 5);
+      const x0 = DOCK_X[e.id % 5] + (h1 - 0.5) * 1.8, tgt = SLOT(AMPA_SLOTS[Math.floor(h2 * 4)]) + (h3 - 0.5) * 0.4, T = 0.35 + h3 * 0.35;
+      const pp = clamp(tau / T, 0, 1), es = 1 - (1 - pp) * (1 - pp);
+      const x = lerp(x0, tgt, es) + wob * Math.sin(tau * 11 + h4 * 6) * 0.45 * (1 - pp), y = lerp(-0.4, 3.0, es) + wob * Math.sin(tau * 9 + h5 * 6) * 0.3 * (1 - pp);
+      const a = tau < T ? 1 : 1 - sstep(T + 0.4, T + 0.95, tau); if (a < 0.02) continue;
+      ctx.beginPath(); ctx.arc(x, y, 0.36, 0, TAU); ctx.fillStyle = rgba('accent', a); ctx.fill();
+      if (!gluHit && a > 0.5) gluHit = [x, y];
+    }
+  }
+  if (reg && gluHit) hc('glu', ...S(gluHit[0], gluHit[1]), 2.2 * s);
+
+  /* tête postsynaptique */
+  ctx.save(); ctx.clip(P_HEAD);
+  const dp = clamp(D / 26, 0, 1); ctx.fillStyle = '#131a23'; ctx.fillRect(-30, 4, 60, 44);
+  if (dp > 0.01) { const g = ctx.createLinearGradient(0, 5, 0, 30); g.addColorStop(0, rgba('pos', 0.30 * dp)); g.addColorStop(1, rgba('pos', 0.02 * dp)); ctx.fillStyle = g; ctx.fillRect(-30, 4, 60, 44); }
+  /* nuage de calcium */
+  if (C > 0.03) NMDA_SLOTS.forEach(k => { const x = SLOT(k), r = 3 + C * 5.5; const g = ctx.createRadialGradient(x, 8.5, 0.2, x, 8.5, r); g.addColorStop(0, rgba('en', clamp(C * 0.75, 0, 0.7))); g.addColorStop(1, rgba('en', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, 8.5, r, 0, TAU); ctx.fill(); });
+  /* endosomes AMPA en route */
+  AMPA_SLOTS.forEach((k, idx) => { if (idx < 4) return; const pr = clamp(w * 8 - (idx - 4), 0, 1); if (pr <= 0 || pr >= 0.72) return; const x = SLOT(k); const y = lerp(13, 7.2, sstep(0, 0.62, pr)); ctx.beginPath(); ctx.arc(x + wob * Math.sin(wt + idx) * 0.15, y, 0.85 * (1 - sstep(0.5, 0.72, pr) * 0.5), 0, TAU); ctx.fillStyle = rgba('texte2', 0.28); ctx.fill(); ctx.strokeStyle = rgba('texte2', 0.85 * (1 - sstep(0.55, 0.72, pr))); ctx.lineWidth = lw(1); ctx.stroke(); ctx.fillStyle = rgba('accent', 0.9); ctx.beginPath(); ctx.arc(x, y, 0.28, 0, TAU); ctx.fill(); });
+  /* réserve d'endosomes (decor, en profondeur) */
+  [[-11, 15.5], [-2.5, 18], [9, 16], [15, 12]].forEach((e, i) => { const y = e[1] + wob * Math.sin(wt * 0.6 + i * 2) * 0.4; ctx.beginPath(); ctx.arc(e[0], y, 0.85, 0, TAU); ctx.strokeStyle = rgba('texte2', 0.4); ctx.lineWidth = lw(1); ctx.stroke(); if (reg && i === 1) hc('endo', ...S(e[0], y), 2 * s); });
+  ctx.restore();
+  /* membrane postsynaptique */
+  ctx.strokeStyle = EDGE2; ctx.lineWidth = lw(2.2); ctx.beginPath(); ctx.moveTo(-17, 5); ctx.lineTo(17, 5); ctx.stroke();
+  if (reg) hr('post', ...S(-20, 14), 40 * s, 14 * s);
+
+  /* recepteurs */
+  const openAmpa = clamp(G * 1.6, 0, 1), openN = clamp(u * G * 1.8, 0, 1);
+  AMPA_SLOTS.forEach((k, idx) => {
+    const pr = idx < 4 ? 1 : clamp(w * 8 - (idx - 4) - 0.35, 0, 1) / 0.65; const sc = idx < 4 ? 1 : sstep(0, 1, clamp(pr, 0, 1)); if (sc < 0.02) return;
+    const x = SLOT(k); ctx.save(); ctx.translate(x, 5); ctx.scale(sc, sc); ctx.translate(-x, -5);
+    chan(x, 1.7, 2.7, 6.9, 0.12 + 0.75 * openAmpa, 'accent', G);
+    ctx.restore();
+    if (G > 0.04 && sc > 0.9) for (let m = 0; m < 2; m++) { const ph = fract(t * 2.4 + m * 0.5 + k * 0.13); ctx.beginPath(); ctx.arc(x, lerp(1.0, 8.6, ph), 0.34, 0, TAU); ctx.fillStyle = rgba('pos', Math.min(1, G * 1.5) * Math.sin(Math.PI * ph)); ctx.fill(); }
+    if (reg && idx < 4 && k === 1) hc('ampa', ...S(x, 4.5), 2.2 * s);
+    if (reg && idx >= 4 && sc > 0.9 && idx === 4) hc('ampa', ...S(x, 4.5), 2.2 * s);
+  });
+  NMDA_SLOTS.forEach((k, i) => {
+    const x = SLOT(k); chan(x, 2.4, 2.2, 7.5, 0.14 + 0.9 * openN, 'en', G);
+    const mgx = lerp(x, x + 3.1, sstep(0.25, 0.75, u)), mgy = lerp(4.9, 0.7, sstep(0.25, 0.75, u)), mga = 1 - 0.55 * sstep(0.55, 0.95, u);
+    ctx.beginPath(); ctx.arc(mgx + wob * Math.sin(wt * 3 + i) * 0.05, mgy, 0.68, 0, TAU); ctx.fillStyle = rgba('texte', 0.95 * mga); ctx.fill(); ctx.strokeStyle = 'rgba(10,13,18,.9)'; ctx.lineWidth = lw(1.2); ctx.stroke();
+    if (u * G > 0.03) for (let m = 0; m < 3; m++) { const ph = fract(t * 1.8 + m / 3 + i * 0.3); ctx.beginPath(); ctx.arc(x + Math.sin(ph * 7 + m) * 0.3, lerp(0.8, 9.5, ph), 0.4, 0, TAU); ctx.fillStyle = rgba('en', Math.min(1, u * G * 2.2) * Math.sin(Math.PI * ph)); ctx.fill(); }
+    if (reg) { hc('nmda', ...S(x, 5), 2.5 * s); hc('mg', ...S(mgx, mgy), 1.0 * s); }
+  });
+  ctx.restore();
+}
+function drawSynLabels() {
+  const d = dDetail, s = cam.s;
+  if (d <= 0.5 || mode !== 'a2') return;
+  const S = (x, y) => [cam.ox + (CW.x + x) * s, cam.oy + (CW.y + y) * s];
+  const a = (d - 0.5) * 2 * u2, vis = (cam.vw / 2) / s;
+  if (vis > 40) {
+    const lab = (tx, x, y, al, lx, ly) => { const p = S(x, y); txt(tx, p[0], p[1], { size: 10.5, a: a * 0.9, align: al || 'left', base: 'middle' }); if (lx != null) { const q = S(lx, ly); ctx.strokeStyle = rgba('texte2', a * 0.4); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p[0] + (al === 'right' ? 6 : -6), p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); } };
+    lab('terminaison présynaptique', 27, -24, 'left', 21, -22); lab('vésicule de glutamate', 27, -9, 'left', 12.2, -2.6); lab('fente synaptique', 27, 2.5, 'left', 21, 2.5);
+    lab('récepteurs AMPA', 27, 10, 'left', SLOT(13) + 0.8, 6.4); lab('récepteur NMDA', 27, 15.5, 'left', SLOT(11) + 1.2, 7);
+    lab('épine postsynaptique', -27, 15, 'right', -20, 15);
+  }
+  const leg = [['accent', 'glutamate'], ['pos', 'Na⁺'], ['en', 'Ca²⁺'], ['texte', 'Mg²⁺']];
+  const bx = cam.vx + 18, by = cam.vy + cam.vh - 18 - (leg.length - 1) * 16;
+  leg.forEach((g, i) => { ctx.beginPath(); ctx.arc(bx + 4, by + i * 16, 3.4, 0, TAU); ctx.fillStyle = rgba(g[0], a); ctx.fill(); txt(g[1], bx + 14, by + i * 16, { size: 10.5, a: a * 0.9, base: 'middle' }); });
+}
+function ves(x, y, r, a, ph) {
+  ctx.save(); ctx.globalAlpha *= a; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = rgba('accent', 0.13); ctx.fill(); ctx.strokeStyle = rgba('accent', 0.85); ctx.lineWidth = 0.16; ctx.stroke();
+  for (let k = 0; k < 6; k++) { const an = k * 1.05 + ph + wt * (RM ? 0 : 0.35), rr = r * (0.28 + 0.22 * ((k * 7) % 3) / 2); ctx.beginPath(); ctx.arc(x + Math.cos(an) * rr, y + Math.sin(an) * rr, r * 0.15, 0, TAU); ctx.fillStyle = rgba('accent', 0.95); ctx.fill(); }
+  ctx.restore();
+}
+function chan(x, w, y0, y1, gap, hue, G) {
+  const g = Math.min(gap, w - 0.3);
+  ctx.fillStyle = PROT2; ctx.strokeStyle = EDGE2; ctx.lineWidth = 0.1; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.rect(x - w / 2, y0, w / 2 - g / 2, y1 - y0); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.rect(x + g / 2, y0, w / 2 - g / 2, y1 - y0); ctx.fill(); ctx.stroke();
+  if (G > 0.02) { const r = ctx.createRadialGradient(x, y0 + 0.2, 0, x, y0 + 0.2, w); r.addColorStop(0, rgba(hue, 0.55 * G)); r.addColorStop(1, rgba(hue, 0)); ctx.fillStyle = r; ctx.beginPath(); ctx.arc(x, y0 + 0.2, w, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = rgba('accent', 0.4 + 0.6 * G); for (const sx of [-1, 1]) { ctx.beginPath(); ctx.arc(x + sx * (w / 2 - 0.3), y0 + 0.35, 0.2, 0, TAU); ctx.fill(); }
+}
+
+/* ==================================================================
+   Dessin : oscilloscope
+   ================================================================== */
+const WIN = 14, XNOW = 0.86, VMIN = -100, VMAX = 50;
+function drawScope(r, a) {
+  if (a < 0.02) return;
+  const snap = S1.h[S1.cur], tn = tOf1(snap), pi = S1.probe;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = '#070a0e'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.strokeStyle = rgba('trait', 1); ctx.lineWidth = 1; ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
+  const px = r.x + 44, pw = r.w - 44 - 12, py = r.y + 30, ph = r.h - 30 - 34;
+  const X = t => px + (t - (tn - WIN * XNOW)) / WIN * pw, Y = v => py + (VMAX - v) / (VMAX - VMIN) * ph;
+  ctx.save(); ctx.beginPath(); ctx.rect(px, py - 4, pw, ph + 8); ctx.clip();
+  /* grille temporelle qui defile */
+  ctx.lineWidth = 1; const t0 = tn - WIN * XNOW;
+  for (let t = Math.ceil(t0 / 2) * 2; t <= tn + WIN * (1 - XNOW); t += 2) { const x = Math.round(X(t)) + 0.5; ctx.strokeStyle = rgba('trait', t % 4 === 0 ? 0.95 : 0.5); ctx.beginPath(); ctx.moveTo(x, py); ctx.lineTo(x, py + ph); ctx.stroke(); }
+  ctx.restore();
+  for (let v = VMIN; v <= VMAX; v += 25) { const y = Math.round(Y(v)) + 0.5; ctx.strokeStyle = rgba('trait', v === 0 ? 1 : 0.6); ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px + pw, y); ctx.stroke(); txt(v === 0 ? '0' : (v < 0 ? '−' : '+') + Math.abs(v), px - 8, y, { size: 10, align: 'right', base: 'middle' }); }
+  txt('mV', r.x + 8, py + 3, { size: 10 });
+  /* repères repos / seuil */
+  ctx.save(); ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
+  ctx.strokeStyle = rgba('texte2', 0.7); ctx.beginPath(); ctx.moveTo(px, Y(-70)); ctx.lineTo(px + pw, Y(-70)); ctx.stroke();
+  ctx.strokeStyle = rgba('en', 0.65); ctx.beginPath(); ctx.moveTo(px, Y(-55)); ctx.lineTo(px + pw, Y(-55)); ctx.stroke(); ctx.restore();
+  txt('repos −70 mV', px + pw - 4, Y(-70) + 12, { size: 9.5, align: 'right' }); txt('seuil ≈ −55 mV', px + pw - 4, Y(-55) - 5, { size: 9.5, align: 'right', color: rgba('en', 0.95) });
+  txt('−80 mV : hyperpolarisation', px + 6, Y(-84) + 4, { size: 9.5, a: 0.55 });
+  /* trace */
+  let i0 = S1.cur; while (i0 > 0 && tOf1(S1.h[i0]) > t0) i0--;
+  const path = [new Path2D(), new Path2D(), new Path2D()];
+  ctx.save(); ctx.beginPath(); ctx.rect(px, r.y + 1, pw, r.h - 2); ctx.clip();
+  /* bandes refractaires */
+  let runS = -1, runC = 0;
+  const flush = (iEnd) => { if (runS >= 0) { const xa = X(tOf1(S1.h[runS])), xb = X(tOf1(S1.h[iEnd])); ctx.fillStyle = rgba('texte2', runC === 2 ? 0.55 : 0.22); ctx.fillRect(xa, py + ph + 4, Math.max(1, xb - xa), 4); } runS = -1; };
+  for (let i = i0; i <= S1.cur; i++) {
+    const c = refrClass(S1.h[i], pi); if (c !== runC) { flush(i); runC = c; if (c > 0) runS = i; }
+    if (i > i0) { const va = vOf(S1.h[i-1], pi), vb = vOf(S1.h[i], pi), sl = (vb - va) / T1, k = sl > 22 ? 0 : sl < -22 ? 1 : 2; path[k].moveTo(X(tOf1(S1.h[i-1])), Y(va)); path[k].lineTo(X(tOf1(S1.h[i])), Y(vb)); }
+  }
+  flush(S1.cur);
+  const cols = ['pos', 'neg', 'texte'];
+  ctx.lineCap = 'round';
+  cols.forEach((c, k) => { ctx.strokeStyle = rgba(c, 0.13); ctx.lineWidth = 6; ctx.stroke(path[k]); });
+  cols.forEach((c, k) => { ctx.strokeStyle = rgba(c, 1); ctx.lineWidth = 1.9; ctx.shadowColor = rgba(c, 0.75); ctx.shadowBlur = 7; ctx.stroke(path[k]); });
+  ctx.shadowBlur = 0;
+  /* stimulations */
+  for (const st of S1.stims) {
+    if (st.t + 1 < t0 || st.t > tn + 1) continue;
+    const xa = X(st.t), xb = X(st.t + 1), hh = clamp(st.amp / 80, 0.03, 1) * 22, yb = py + ph + 34 - 4;
+    ctx.fillStyle = rgba('en', 0.5); ctx.strokeStyle = rgba('en', 0.95); ctx.lineWidth = 1; ctx.fillRect(xa, yb - hh, xb - xa, hh); ctx.strokeRect(xa + 0.5, yb - hh, xb - xa, hh);
+    let lab = 'stim. ' + Math.round(st.amp) + (st.res === null ? '' : st.res ? ' → impulsion' : ' → rien ne part (' + st.why + ')');
+    txt(lab, xb + 5, yb - 4, { size: 9.5, color: st.res === false ? rgba('texte', 0.9) : rgba('en', 0.95) });
+  }
+  ctx.restore();
+  /* tete du faisceau */
+  { const x = X(tn), y = Y(vOf(snap, pi)); const g = ctx.createRadialGradient(x, y, 0, x, y, 14); g.addColorStop(0, rgba('texte', 0.55)); g.addColorStop(1, rgba('texte', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(x, y, 2.4, 0, TAU); ctx.fillStyle = rgba('texte', 1); ctx.fill(); }
+  /* graduations temps */
+  for (let t = Math.ceil(t0 / 4) * 4; t <= tn + 1; t += 4) { const x = X(t); if (x < px + 6 || x > px + pw - 6) continue; if (t >= 0) txt(String(t), x, r.y + r.h - 6, { size: 9.5, align: 'center', a: 0.85 }); }
+  txt('temps (ms)', r.x + 8, r.y + r.h - 6, { size: 9.5, a: 0.7 });
+  /* legendes */
+  txt('Potentiel de membrane — ' + (pi === 0 ? 'cône d’implantation' : 'nœud ' + pi), px, r.y + 17, { size: 10.5, color: rgba('texte', 0.95) });
+  if (r.w > 380) {
+    txt('Ralenti ×' + Math.round(1000 * 0.6 / speed) + ' : 1 ms réelle = ' + fmtNum(0.6 / speed, 2) + ' s', r.x + r.w - 10, r.y + 17, { size: 10, align: 'right', a: 0.9 });
+    const lx = r.x + r.w - 10, ly = r.y + 46; ctx.fillStyle = rgba('texte2', 0.55); ctx.fillRect(lx - 150, ly - 6, 8, 4); txt('réfract. absolue', lx - 138, ly - 1, { size: 9.5, a: 0.8 }); ctx.fillStyle = rgba('texte2', 0.22); ctx.fillRect(lx - 60, ly - 6, 8, 4); txt('relative', lx - 48, ly - 1, { size: 9.5, a: 0.8 });
+  } else txt('ralenti ×' + Math.round(600 / speed), r.x + r.w - 10, r.y + 17, { size: 10, align: 'right', a: 0.9 });
+  ctx.restore();
+  hr('scope', r.x, r.y, r.w, r.h);
+}
+
+/* ==================================================================
+   Dessin : membrane rapprochée
+   ================================================================== */
+function drawMembrane(r, a) {
+  if (a < 0.02) return;
+  const snap = S1.h[S1.cur], tn = tOf1(snap), pi = S1.probe, V = vOf(snap, pi);
+  const m = snap[pi*4+1], h = snap[pi*4+2], n = snap[pi*4+3];
+  const gNaF = clamp(m*m*m * h / 0.42, 0, 1), gKF = clamp(n*n*n*n / 0.34, 0, 1);
+  const u = clamp(Math.min(r.w / 340, r.h / 230), 0.62, 1.3);
+  const yc = r.y + r.h * 0.5, xf = f => r.x + r.w * f, wv = RM ? 0 : wt;
+  ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+  ctx.fillStyle = 'rgba(17,22,30,.55)'; ctx.fillRect(r.x, r.y, r.w, r.h);
+  const gt = ctx.createLinearGradient(0, r.y, 0, yc); gt.addColorStop(0, rgba('pos', 0.05)); gt.addColorStop(1, rgba('pos', 0)); ctx.fillStyle = gt; ctx.fillRect(r.x, r.y, r.w, yc - r.y);
+  const gb = ctx.createLinearGradient(0, yc, 0, r.y + r.h); gb.addColorStop(0, rgba('neg', 0)); gb.addColorStop(1, rgba('neg', 0.05)); ctx.fillStyle = gb; ctx.fillRect(r.x, yc, r.w, r.y + r.h - yc);
+  ctx.strokeStyle = rgba('trait', 1); ctx.lineWidth = 1; ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
+  const PX = [xf(0.17), xf(0.38), xf(0.59), xf(0.85)], PW = [26 * u, 22 * u, 26 * u, 40 * u];
+  /* bicouche */
+  const ho = yc - 9.5 * u, hi = yc + 9.5 * u, sp = 9.4 * u;
+  for (let x = r.x + 5 * u; x < r.x + r.w - 3; x += sp) {
+    if (PX.some((p, i) => Math.abs(x - p) < PW[i] / 2 + 4 * u)) continue;
+    const wy = Math.sin(wv * 1.3 + x * 0.09) * 0.8 * u;
+    ctx.strokeStyle = '#26313d'; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(x - 1.3 * u, ho + wy + 3 * u); ctx.lineTo(x - 1.6 * u, yc - 1.5 * u); ctx.moveTo(x + 1.3 * u, ho + wy + 3 * u); ctx.lineTo(x + 1.6 * u, yc - 1.5 * u); ctx.moveTo(x - 1.3 * u, hi - wy - 3 * u); ctx.lineTo(x - 1.6 * u, yc + 1.5 * u); ctx.moveTo(x + 1.3 * u, hi - wy - 3 * u); ctx.lineTo(x + 1.6 * u, yc + 1.5 * u); ctx.stroke();
+    ctx.fillStyle = PROT2; ctx.strokeStyle = EDGE; ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.arc(x, ho + wy, 3.2 * u, 0, TAU); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(x, hi - wy, 3.2 * u, 0, TAU); ctx.fill(); ctx.stroke();
+  }
+  hr('lipid', r.x + 4, yc - 12 * u, PX[0] - PW[0] / 2 - r.x - 8, 24 * u);
+  /* charges */
+  const alp = clamp(Math.abs(V + 0) / 45, 0, 1) * 0.95, signOut = V < 0 ? 1 : -1;
+  for (let x = r.x + 10 * u; x < r.x + r.w - 6; x += 17 * u) {
+    if (PX.some((p, i) => Math.abs(x - p) < PW[i] / 2 + 6 * u)) continue;
+    charge(x, yc - 20 * u, signOut, alp, u); charge(x, yc + 20 * u, -signOut, alp, u);
+  }
+  /* ions d'ambiance */
+  for (const io of AMB) {
+    const x = r.x + r.w * io.x + Math.sin(wv * 0.7 + io.ph) * 6 * u, top = io.out;
+    const ry = top ? r.y + 24 + (yc - 56 * u - (r.y + 24)) * io.y : yc + 42 * u + (r.y + r.h - 16 - (yc + 42 * u)) * io.y;
+    const y = ry + Math.cos(wv * 0.6 + io.ph * 1.7) * 5 * u;
+    ctx.beginPath(); ctx.arc(x, y, 3.3 * u, 0, TAU); ctx.fillStyle = rgba(io.k === 'Na' ? 'pos' : 'neg', 0.78); ctx.fill();
+    ctx.strokeStyle = 'rgba(10,13,18,.75)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 1.5 * u, y); ctx.lineTo(x + 1.5 * u, y); ctx.moveTo(x, y - 1.5 * u); ctx.lineTo(x, y + 1.5 * u); ctx.stroke();
+    if (io.out === (io.k === 'Na') ) hc(io.k === 'Na' ? 'ionNa' : 'ionK', x, y, 6 * u);
+  }
+  /* canaux et pompe */
+  naChannel(PX[0], yc, u, m, h, gNaF, tn, 0); kChannel(PX[1], yc, u, n, gKF, tn); naChannel(PX[2], yc, u, m, h, gNaF, tn, 1); pump(PX[3], yc, u, tn);
+  hr('nach', PX[0] - 15 * u, yc - 22 * u, 30 * u, 44 * u); hr('kch', PX[1] - 13 * u, yc - 22 * u, 26 * u, 44 * u); hr('nach', PX[2] - 15 * u, yc - 22 * u, 30 * u, 44 * u); hr('pump', PX[3] - 22 * u, yc - 24 * u, 44 * u, 48 * u);
+  /* étiquettes */
+  const ly = yc - 38 * u; if (r.h > 150) { txt('canal Na⁺', PX[0], ly - 2, { size: 9.5, align: 'center', a: 0.85 }); txt('canal K⁺', PX[1], ly - 2, { size: 9.5, align: 'center', a: 0.85 }); txt('canal Na⁺', PX[2], ly - 2, { size: 9.5, align: 'center', a: 0.85 }); txt('pompe Na⁺/K⁺', PX[3], ly - 2, { size: 9.5, align: 'center', a: 0.85 }); }
+  txt('EXTÉRIEUR · Na⁺ abondant', r.x + 10, r.y + 16, { size: 9.5, ls: '0.06em', a: 0.9 });
+  txt('INTÉRIEUR · K⁺ abondant', r.x + 10, r.y + r.h - 10, { size: 9.5, ls: '0.06em', a: 0.9 });
+  txt('Vm', r.x + r.w - 10, r.y + 16, { size: 9.5, align: 'right', a: 0.0 });
+  txt(fmtMv(V) + ' mV', r.x + r.w - 10, r.y + r.h - 10, { size: 12, align: 'right', color: rgba('texte', 0.95), font: '500 12px ' + FM });
+  ctx.restore();
+}
+function charge(x, y, sign, a, u) {
+  if (a < 0.04) return; ctx.strokeStyle = rgba(sign > 0 ? 'pos' : 'neg', a); ctx.lineWidth = 1.6; const k = 3.3 * u;
+  ctx.beginPath(); ctx.moveTo(x - k, y); ctx.lineTo(x + k, y); if (sign > 0) { ctx.moveTo(x, y - k); ctx.lineTo(x, y + k); } ctx.stroke();
+}
+function poly(pts, c, u) { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(c[0] + p[0] * u, c[1] + p[1] * u) : ctx.moveTo(c[0] + p[0] * u, c[1] + p[1] * u)); ctx.closePath(); }
+function naChannel(x, yc, u, m, h, flux, tn, seed) {
+  const waist = lerp(0.5, 2.8, m), body = [[-13, -17], [-5, -17], [-3.8, -8], [-waist, 0], [-3.6, 8], [-4.4, 17], [-13, 17]];
+  const open = flux > 0.08;
+  ctx.save();
+  if (open) { ctx.shadowColor = rgba('pos', 0.7); ctx.shadowBlur = 10 * flux; }
+  ctx.fillStyle = PROT; ctx.strokeStyle = open ? rgba('pos', 0.9) : EDGE; ctx.lineWidth = 1.3;
+  poly(body, [x, yc], u); ctx.fill(); ctx.stroke();
+  poly(body.map(p => [-p[0], p[1]]), [x, yc], u); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  /* boule d'inactivation */
+  const q = sstep(0.12, 0.88, 1 - h), bx = x + lerp(-11, 0, q) * u, by = yc + lerp(31, 12.5, q) * u;
+  ctx.strokeStyle = rgba('texte2', 0.55); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 9 * u, yc + 17 * u); ctx.quadraticCurveTo(x - 12 * u, yc + 27 * u, bx, by); ctx.stroke();
+  ctx.beginPath(); ctx.arc(bx, by, 3.7 * u, 0, TAU); ctx.fillStyle = q > 0.6 ? rgba('texte', 0.85) : rgba('texte2', 0.75); ctx.fill(); ctx.strokeStyle = 'rgba(10,13,18,.8)'; ctx.stroke();
+  /* flux Na+ vers l'intérieur */
+  if (flux > 0.03) for (let k = 0; k < 5; k++) { const ph = fract(tn * 1.35 + k * 0.2 + seed * 0.11), y = yc + lerp(-40, 40, ph) * u, inP = Math.abs(lerp(-40, 40, ph)) < 17; const xx = x + Math.sin(ph * 6 + k * 2) * (inP ? 0.6 : 3) * u; ctx.beginPath(); ctx.arc(xx, y, 3.3 * u, 0, TAU); ctx.fillStyle = rgba('pos', clamp(flux * 1.5, 0, 1) * Math.sin(Math.PI * ph)); ctx.fill(); }
+}
+function kChannel(x, yc, u, n, flux, tn) {
+  const waist = lerp(0.5, 2.6, sstep(0.05, 0.9, flux)), body = [[-11, -17], [-4.6, -17], [-3.5, -8], [-waist, 0], [-3.5, 8], [-4.6, 17], [-11, 17]];
+  const open = flux > 0.1;
+  ctx.save(); if (open) { ctx.shadowColor = rgba('neg', 0.7); ctx.shadowBlur = 10 * flux; }
+  ctx.fillStyle = PROT; ctx.strokeStyle = open ? rgba('neg', 0.9) : EDGE; ctx.lineWidth = 1.3;
+  poly(body, [x, yc], u); ctx.fill(); ctx.stroke(); poly(body.map(p => [-p[0], p[1]]), [x, yc], u); ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.fillStyle = rgba('texte2', 0.5); for (const sx of [-1, 1]) ctx.fillRect(x + sx * 9 * u - 1.5 * u, yc + 6 * u, 3 * u, 8 * u);
+  if (flux > 0.03) for (let k = 0; k < 5; k++) { const ph = fract(tn * 1.05 + k * 0.2 + 0.3), y = yc + lerp(40, -40, ph) * u, inP = Math.abs(lerp(40, -40, ph)) < 17; const xx = x + Math.sin(ph * 6 + k * 2) * (inP ? 0.6 : 3) * u; ctx.beginPath(); ctx.arc(xx, y, 3.3 * u, 0, TAU); ctx.fillStyle = rgba('neg', clamp(flux * 1.5, 0, 1) * Math.sin(Math.PI * ph)); ctx.fill(); }
+}
+function pump(x, yc, u, tn) {
+  const th = fract(tn * 0.12), go = sstep(0.18, 0.36, th) * (1 - sstep(0.5, 0.68, th)), gO = 1.2 + 6 * go, gI = 1.2 + 6 * (1 - go);
+  const body = [[-20, -17], [-gO - 2, -17], [-gO, -6], [-4, 0], [-gI, 6], [-gI - 2, 17], [-20, 17]];
+  ctx.fillStyle = PROT; ctx.strokeStyle = EDGE; ctx.lineWidth = 1.3; poly(body, [x, yc], u); ctx.fill(); ctx.stroke(); poly(body.map(p => [-p[0], p[1]]), [x, yc], u); ctx.fill(); ctx.stroke();
+  /* 3 Na+ vers l'exterieur, puis 2 K+ vers l'interieur */
+  const pa = sstep(0.05, 0.45, th);
+  if (th < 0.5) for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.arc(x + (k - 1) * 5.2 * u, yc + lerp(24, -34, pa) * u + Math.abs(k - 1) * 2 * u, 3.1 * u, 0, TAU); ctx.fillStyle = rgba('pos', 0.9 * (th < 0.08 ? th / 0.08 : th > 0.42 ? 1 - (th - 0.42) / 0.08 : 1)); ctx.fill(); }
+  const pb = sstep(0.55, 0.95, th);
+  if (th >= 0.5) for (let k = 0; k < 2; k++) { ctx.beginPath(); ctx.arc(x + (k - 0.5) * 6 * u, yc + lerp(-34, 26, pb) * u, 3.1 * u, 0, TAU); ctx.fillStyle = rgba('neg', 0.9 * (th < 0.58 ? (th - 0.5) / 0.08 : th > 0.92 ? 1 - (th - 0.92) / 0.08 : 1)); ctx.fill(); }
+  /* ATP */
+  const at = Math.exp(-Math.pow((th - 0.1) / 0.06, 2)) ;
+  ctx.beginPath(); ctx.arc(x + 12 * u, yc + 26 * u, 3.4 * u, 0, TAU); ctx.fillStyle = rgba('en', 0.25 + 0.6 * at); ctx.fill(); ctx.strokeStyle = rgba('en', 0.9); ctx.lineWidth = 1; ctx.stroke();
+  txt('ATP', x + 12 * u, yc + 40 * u, { size: 8.5, align: 'center', color: rgba('en', 0.9) });
+}
+
+/* ==================================================================
+   Dessin : acte 2 (panneaux du bas)
+   ================================================================== */
+function drawTrace(r, a) {
+  if (a < 0.02) return;
+  const p = S2.h[S2.cur], tn = p[0], WIN2 = 12, XN = 0.88, VLO = -75, VHI = -45;
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#070a0e'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.strokeStyle = rgba('trait', 1); ctx.lineWidth = 1; ctx.strokeRect(r.x + .5, r.y + .5, r.w - 1, r.h - 1);
+  const px = r.x + 36, pw = r.w - 36 - 10, py = r.y + 24, ph = r.h - 24 - 14;
+  const X = t => px + (t - (tn - WIN2 * XN)) / WIN2 * pw, Y = v => py + (VHI - v) / (VHI - VLO) * ph, t0 = tn - WIN2 * XN;
+  for (const v of [-70, -60, -50]) { const y = Math.round(Y(v)) + .5; ctx.strokeStyle = rgba('trait', .7); ctx.beginPath(); ctx.moveTo(px, y); ctx.lineTo(px + pw, y); ctx.stroke(); txt('−' + Math.abs(v), px - 6, y, { size: 9.5, align: 'right', base: 'middle' }); }
+  txt('mV', r.x + 6, py - 8, { size: 9.5 });
+  ctx.save(); ctx.setLineDash([4, 5]); ctx.strokeStyle = rgba('texte2', .6); ctx.beginPath(); ctx.moveTo(px, Y(-60)); ctx.lineTo(px + pw, Y(-60)); ctx.stroke(); ctx.restore();
+  if (r.w > 250) txt('Mg²⁺ expulsé (≈ −60 mV)', px + 6, Y(-60) - 4, { size: 9, a: 0.85 });
+  ctx.save(); ctx.beginPath(); ctx.rect(px, py - 2, pw, ph + 4); ctx.clip();
+  let i0 = S2.cur; while (i0 > 0 && S2.h[i0][0] > t0) i0--;
+  const pe = new Path2D(), pc = new Path2D(); let first = true; let lastX = px;
+  for (let i = i0; i <= S2.cur; i++) { const x = X(S2.h[i][0]); const ye = Y(-70 + S2.h[i][1]), yc2 = py + ph - clamp(S2.h[i][3] / 1.1, 0, 1) * ph * 0.9; if (first) { pe.moveTo(x, ye); pc.moveTo(x, py + ph); pc.lineTo(x, yc2); first = false; } else { pe.lineTo(x, ye); pc.lineTo(x, yc2); } lastX = x; }
+  pc.lineTo(lastX, py + ph); pc.closePath();
+  ctx.fillStyle = rgba('en', 0.13); ctx.fill(pc);
+  ctx.strokeStyle = rgba('accent', 0.16); ctx.lineWidth = 6; ctx.lineJoin = 'round'; ctx.stroke(pe);
+  ctx.strokeStyle = rgba('accent', 1); ctx.lineWidth = 1.7; ctx.shadowColor = rgba('accent', .7); ctx.shadowBlur = 6; ctx.stroke(pe); ctx.shadowBlur = 0;
+  for (const e of S2.ev) { if (e.t < t0 || e.t > tn) continue; const x = X(e.t); ctx.strokeStyle = rgba('accent', .8); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, py + ph - 1); ctx.lineTo(x, py + ph + 7); ctx.stroke(); }
+  ctx.restore();
+  { const x = X(tn), y = Y(-70 + p[1]); ctx.beginPath(); ctx.arc(x, y, 2.6, 0, TAU); ctx.fillStyle = rgba('accent', 1); ctx.fill(); }
+  txt('Réponse postsynaptique', px, r.y + 15, { size: 10.5, color: rgba('accent', .95) });
+  txt('Ca²⁺', r.x + r.w - 10, r.y + 15, { size: 10.5, align: 'right', color: rgba('en', .95) });
+  txt('temps (s)', r.x + 8, r.y + r.h - 3, { size: 9, a: .7 });
+  ctx.restore(); hr('trace', r.x, r.y, r.w, r.h);
+}
+function drawGauge(r, a) {
+  if (a < 0.02) return;
+  const p = S2.h[S2.cur], w = p[4], s = p[5];
+  ctx.save(); ctx.globalAlpha = a;
+  const nar = r.w < 200;
+  txt('Force de la connexion', r.x, r.y + 12, { size: nar ? 9.5 : 10.5, color: rgba('texte', .92) });
+  txt(Math.round(w * 100) + ' %', r.x, r.y + 42, { font: '500 ' + (nar ? 20 : 26) + 'px ' + FM, color: rgba('accent', 1) });
+  const by = r.y + (nar ? 52 : 60), bw = r.w;
+  ctx.fillStyle = rgba('trait', 1); ctx.fillRect(r.x, by, bw, 8);
+  if (w > 0.002) { const g = ctx.createLinearGradient(r.x, 0, r.x + bw, 0); g.addColorStop(0, rgba('accent', .45)); g.addColorStop(1, rgba('accent', 1)); ctx.save(); ctx.shadowColor = rgba('accent', .3 + .6 * w); ctx.shadowBlur = 4 + 12 * w; ctx.fillStyle = g; ctx.fillRect(r.x, by, bw * w, 8); ctx.restore(); }
+  ctx.strokeStyle = rgba('texte2', .6); ctx.lineWidth = 1; for (let k = 0; k <= 4; k++) { const x = Math.round(r.x + bw * k / 4) + .5; ctx.beginPath(); ctx.moveTo(x, by + 8); ctx.lineTo(x, by + 12); ctx.stroke(); }
+  txt('0', r.x, by + 23, { size: 9 }); txt('100', r.x + bw, by + 23, { size: 9, align: 'right' });
+  if (r.h > 100) { const sy = by + 40; txt('stabilité', r.x, sy - 6, { size: 9.5 }); ctx.fillStyle = rgba('trait', 1); ctx.fillRect(r.x, sy, bw, 3); ctx.fillStyle = rgba('texte2', .95); ctx.fillRect(r.x, sy, bw * clamp(s, 0, 1), 3); }
+  ctx.restore(); hr('gauge', r.x, r.y, r.w, r.h);
+}
+function drawHebb(r, a) {
+  if (a < 0.02) return;
+  const p = S2.h[S2.cur], t = p[0], w = p[4], D = p[1], G = Math.min(1, p[2]), u = sig((D - 10) / 2.5), ev = S2.ev;
+  let fa = 0; for (let i = ev.length - 1; i >= 0 && i > ev.length - 8; i--) if (ev[i].t <= t) fa = Math.max(fa, Math.exp(-(t - ev[i].t) / 0.28));
+  const fb = clamp(u * (0.35 + G) , 0, 1) * (u > 0.2 ? 1 : 0);
+  ctx.save(); ctx.globalAlpha = a;
+  const cy = r.y + (r.h > 110 ? 46 : 34), ax = r.x + r.w * 0.16, bx = r.x + r.w * 0.84, wob = RM ? 0 : 1;
+  /* lien */
+  const lwid = 1 + 6.5 * w; ctx.save(); ctx.lineCap = 'round';
+  ctx.strokeStyle = rgba('accent', .1 + .35 * w); ctx.lineWidth = lwid + 6; ctx.beginPath(); ctx.moveTo(ax + 10, cy); ctx.bezierCurveTo(ax + r.w * .2, cy - 10 * wob * Math.sin(wt * .8) - 4, bx - r.w * .2, cy + 8, bx - 10, cy); ctx.stroke();
+  ctx.shadowColor = rgba('accent', .9); ctx.shadowBlur = 3 + 14 * w; ctx.strokeStyle = rgba('accent', .3 + .7 * w); ctx.lineWidth = lwid; ctx.beginPath(); ctx.moveTo(ax + 10, cy); ctx.bezierCurveTo(ax + r.w * .2, cy - 10 * wob * Math.sin(wt * .8) - 4, bx - r.w * .2, cy + 8, bx - 10, cy); ctx.stroke(); ctx.restore();
+  const neu = (x, f, lab) => {
+    ctx.strokeStyle = EDGE; ctx.lineWidth = 1.2; for (let k = 0; k < 5; k++) { const an = (k / 5) * TAU + 0.5 + wob * Math.sin(wt * .5 + k) * .08, dir = x < r.x + r.w / 2 ? -1 : 1; if (Math.cos(an) * dir > 0.5) continue; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * 8, cy + Math.sin(an) * 8); ctx.lineTo(x + Math.cos(an) * 17, cy + Math.sin(an) * 17); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(x, cy, 8.5, 0, TAU); ctx.fillStyle = '#161d27'; ctx.fill(); ctx.strokeStyle = f > .05 ? rgba('accent', .9) : EDGE; ctx.lineWidth = 1.3; ctx.stroke();
+    if (f > 0.02) { const g = ctx.createRadialGradient(x, cy, 1, x, cy, 24); g.addColorStop(0, rgba('accent', .75 * f)); g.addColorStop(1, rgba('accent', 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, 24, 0, TAU); ctx.fill(); }
+    txt(lab, x, cy + 22, { size: 9.5, align: 'center' });
+  };
+  neu(ax, fa, 'A · pré'); neu(bx, fb, 'B · post');
+  txt('Règle de Hebb (simplifiée)', r.x, r.y + 12, { size: 10.5, color: rgba('texte', .92) });
+  if (r.h > 92) { const words = 'Si A et B s’activent ensemble, le lien entre eux se renforce.'.split(' '); let line = '', y = r.y + r.h - (r.w < 200 ? 24 : 12); const lines = []; ctx.font = '400 10px ' + FM; for (const wd of words) { const tst = line ? line + ' ' + wd : wd; if (ctx.measureText(tst).width > r.w && line) { lines.push(line); line = wd; } else line = tst; } lines.push(line); y = cy + 40 + (r.w < 200 ? 4 : 10); lines.forEach((l, i) => txt(l, r.x, y + i * 12, { size: 10, a: .9 })); }
+  ctx.restore(); hr('hebb', r.x, r.y, r.w, r.h);
+}
+
+/* ==================================================================
+   Panneau de lecture
+   ================================================================== */
+const STEP1 = {
+  repos: ['Repos', 'La membrane est polarisée : l’intérieur de la cellule est à environ −70 mV par rapport à l’extérieur. Les canaux Na⁺ et K⁺ sensibles à la tension sont fermés ; la pompe Na⁺/K⁺ maintient les différences de concentration. Appuie sur « Stimuler ».'],
+  sub: ['Réponse locale', 'Le courant injecté dépolarise la membrane, mais sans atteindre le seuil (≈ −55 mV). Les canaux Na⁺ ne s’ouvrent pas en cascade et la perturbation s’éteint. Loi du tout ou rien : ici, rien ne part.'],
+  depol: ['Dépolarisation', 'Le seuil est franchi : des canaux Na⁺ s’ouvrent, le Na⁺ entre, ce qui en ouvre d’autres. Cette rétroaction positive pousse la tension vers +30 mV en une fraction de milliseconde.'],
+  pic: ['Pic', 'Les canaux Na⁺ s’inactivent et les canaux K⁺ commencent à s’ouvrir. Le pic atteint environ +30 mV, toujours le même, quelle que soit l’intensité de la stimulation.'],
+  repol: ['Repolarisation', 'Le K⁺ sort de la cellule et la tension redescend. Les canaux Na⁺ restent inactivés : c’est la période réfractaire absolue, aucune nouvelle impulsion n’est possible.'],
+  hyper: ['Hyperpolarisation', 'Les canaux K⁺ se referment lentement : trop de K⁺ est sorti et la tension passe sous le repos, vers −80 mV. Une nouvelle impulsion demande une stimulation plus forte (période réfractaire relative).'],
+  retour: ['Retour au repos', 'Les canaux K⁺ se referment, les canaux Na⁺ sortent de l’inactivation. La membrane retrouve −70 mV et redevient pleinement excitable.']
+};
+const STEP2 = {
+  idle: ['Synapse au repos', 'Appuie sur « Répéter » (ou clique sur la terminaison) pour envoyer des influx. Un seul influx libère du glutamate et ne donne qu’une petite réponse.'],
+  release: ['Libération de glutamate', 'Des vésicules fusionnent avec la membrane et libèrent leur glutamate dans la fente. Il se fixe sur les récepteurs AMPA : du Na⁺ entre et la membrane postsynaptique se dépolarise un peu.'],
+  sum: ['Sommation', 'Des influx rapprochés s’additionnent : la dépolarisation n’a pas le temps de retomber. Les récepteurs NMDA sont encore bouchés par le Mg²⁺.'],
+  nmda: ['Le Mg²⁺ est expulsé', 'La membrane est assez dépolarisée : le Mg²⁺ quitte le canal NMDA. Avec le glutamate fixé, le canal laisse enfin passer du Ca²⁺.'],
+  ca: ['Signal calcique', 'Le Ca²⁺ active des enzymes dans l’épine, qui insèrent de nouveaux récepteurs AMPA dans la membrane. La connexion se renforce : c’est la potentialisation à long terme (PLT).'],
+  learned: ['Connexion renforcée', 'Le même influx donne maintenant une réponse plus grande, car la membrane compte plus de récepteurs AMPA. Sans répétition, la connexion s’affaiblit lentement ; des séances espacées la stabilisent mieux.']
+};
+const M1 = [['vm', 'Tension Vm'], ['loc', 'Position de la sonde'], ['na', 'Conductance Na⁺', 'pos'], ['k', 'Conductance K⁺', 'neg'], ['ref', 'Période réfractaire'], ['t', 'Temps du modèle']];
+const M2 = [['w', 'Force de la connexion', 'acc'], ['ampa', 'Récepteurs AMPA'], ['nmda', 'Récepteurs NMDA'], ['ca', 'Ca²⁺ dans l’épine', 'en'], ['psp', 'Potentiel postsynaptique'], ['amp', 'Réponse au prochain influx']];
+const metricsEl = $('#metrics'), noteEl = $('#note'), stepT = $('#stepTitle'), stepX = $('#stepText'), kickEl = $('#kick');
+const mref = {};
+function buildMetrics(list, pre) {
+  list.forEach(([id, lab, bar]) => {
+    const row = document.createElement('div'); row.dataset.act = pre;
+    const dt = document.createElement('dt'); dt.textContent = lab; const dd = document.createElement('dd');
+    if (bar) { const b = document.createElement('span'); b.className = 'bar ' + bar; b.appendChild(document.createElement('b')); dd.appendChild(b); }
+    const v = document.createElement('span'); dd.appendChild(v); row.appendChild(dt); row.appendChild(dd); metricsEl.appendChild(row);
+    mref[pre + id] = { row, v, b: bar ? dd.querySelector('b') : null, last: '' };
+  });
+}
+buildMetrics(M1, '1'); buildMetrics(M2, '2');
+let curStep = '', panelAct = 1, panelTimer = 0;
+function setMetric(pre, id, text, frac) { const m = mref[pre + id]; if (m.last !== text) { m.v.textContent = text; m.last = text; } if (m.b) m.b.style.width = (clamp(frac || 0, 0, 1) * 100).toFixed(0) + '%'; }
+function setStep(key, title, text) {
+  if (key === curStep) return; curStep = key;
+  stepT.classList.add('out'); stepX.classList.add('out');
+  clearTimeout(panelTimer);
+  panelTimer = setTimeout(() => { stepT.textContent = title; stepX.textContent = text; stepT.classList.remove('out'); stepX.classList.remove('out'); }, curStep === '' || RM ? 0 : 170);
+}
+function phase1() {
+  const c = S1.h[S1.cur], pv = S1.h[Math.max(0, S1.cur - 5)], i = S1.probe, V = vOf(c, i), dV = (V - vOf(pv, i)) / (5 * T1);
+  const refr = refrClass(c, i), h = c[i*4+2];
+  if (V > 12) return dV > 60 ? 'depol' : dV < -60 ? 'repol' : 'pic';
+  if (V > -50) return dV > 0 ? 'depol' : 'repol';
+  if (V < -71.5 && refr > 0) return 'hyper';
+  if (dV < -12 && refr > 0) return 'repol';
+  if (refr > 0 && Math.abs(V + 70) < 2.5) return 'retour';
+  if (V > -68.6 && refr === 0) return 'sub';
+  if (refr > 0) return V < -68 ? 'hyper' : 'retour';
+  return 'repos';
+}
+function phase2() {
+  const p = S2.h[S2.cur], t = p[0], D = p[1], G = p[2], C = p[3], w = p[4], u = sig((D - 10) / 2.5);
+  if (C > 0.25 && u > 0.3) return 'ca'; if (u > 0.3 && G > 0.05) return 'nmda'; if (D > 7.5) return 'sum'; if (G > 0.15) return 'release'; if (w > 0.2) return 'learned'; return 'idle';
+}
+let panelClock = 0;
+function updatePanel(force) {
+  const act = (mode === 'a2' || mode === 'dive') ? 2 : 1;
+  if (act !== panelAct || force) {
+    panelAct = act; curStep = '';
+    kickEl.textContent = act === 1 ? 'Acte 1 — Le potentiel d’action' : 'Acte 2 — La synapse qui apprend';
+    for (const k in mref) mref[k].row.style.display = (k[0] === String(act)) ? 'contents' : 'none';
+    noteEl.textContent = act === 1
+      ? 'Conduction saltatoire : la myéline isole l’axone et l’impulsion est régénérée seulement aux nœuds de Ranvier, ce qui la fait « sauter » de l’un à l’autre. Le temps est ralenti d’un facteur 600 environ.'
+      : 'Le temps est ralenti d’environ ×20 : deux clics par seconde équivalent à ~40 influx par seconde. Une rafale ×10 correspond à ~80 Hz, la fréquence qui induit vraiment la PLT.';
+  }
+  if (act === 1) {
+    const k = phase1(); setStep('1' + k, STEP1[k][0], STEP1[k][1]);
+    const c = S1.h[S1.cur], i = S1.probe, V = vOf(c, i), m = c[i*4+1], h = c[i*4+2], n = c[i*4+3], rc = refrClass(c, i);
+    setMetric('1', 'vm', fmtMv(V) + ' mV'); setMetric('1', 'loc', i === 0 ? 'cône d’implantation' : 'nœud ' + i + ' / ' + (NN - 1));
+    const gna = m*m*m*h, gk = n*n*n*n; setMetric('1', 'na', Math.round(gna * 100) + ' %', gna / 0.42); setMetric('1', 'k', Math.round(gk * 100) + ' %', gk / 0.34);
+    setMetric('1', 'ref', rc === 2 ? 'absolue' : rc === 1 ? 'relative' : 'aucune'); setMetric('1', 't', fmtNum(tOf1(c), 2) + ' ms');
+  } else {
+    const k = phase2(); setStep('2' + k, STEP2[k][0], STEP2[k][1]);
+    const p = S2.h[S2.cur], D = p[1], C = p[3], w = p[4], u = sig((D - 10) / 2.5);
+    setMetric('2', 'w', Math.round(w * 100) + ' %', w); setMetric('2', 'ampa', Math.round(nAmpa(w)) + ' / 12');
+    setMetric('2', 'nmda', u < 0.25 ? 'bouchés (Mg²⁺)' : u < 0.6 ? 'partiellement libres' : 'débloqués'); setMetric('2', 'ca', Math.round(clamp(C, 0, 1) * 100) + ' %', C);
+    setMetric('2', 'psp', fmtMv(-70 + D) + ' mV'); setMetric('2', 'amp', '+' + fmtNum(nAmpa(w), 1) + ' mV');
+  }
+}
+
+/* ==================================================================
+   Interaction : survol, sonde, clavier
+   ================================================================== */
+const tipEl = $('#tip');
+function pick(px, py) {
+  for (let i = hits.length - 1; i >= 0; i--) {
+    const h = hits[i];
+    if (h.k === 0) { const dx = px - h.x, dy = py - h.y; if (dx * dx + dy * dy <= h.r * h.r) return h; }
+    else if (px >= h.x && px <= h.x + h.w && py >= h.y && py <= h.y + h.h) return h;
+  }
+  return null;
+}
+function showTip(h, px, py) {
+  if (!h || !INFO[h.id]) { tipEl.classList.remove('on'); hoverId = null; hoverShape = null; return; }
+  const [n, d] = INFO[h.id]; if (hoverId !== h.id) { tipEl.innerHTML = ''; const b = document.createElement('b'); b.textContent = n; tipEl.appendChild(b); tipEl.appendChild(document.createTextNode(d)); }
+  hoverId = h.id; hoverShape = h; tipEl.classList.add('on');
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight; let x = px + 16, y = py + 16;
+  if (x + tw > W - 8) x = px - tw - 16; if (y + th > H - 8) y = py - th - 16; tipEl.style.left = Math.max(8, x) + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
+}
+let tipTimer = 0;
+function ptr(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+function nearestNode(wx) { let b = 0, bd = 1e9; for (let i = 0; i < NN; i++) { const d = Math.abs(NX(i) - wx); if (d < bd) { bd = d; b = i; } } return b; }
+function setProbeFrom(px, py, start) {
+  const wx = (px - cam.ox) / cam.s, wy = (py - cam.oy) / cam.s;
+  if (start && !(wx > 150 && wx < 840 && Math.abs(wy - AY(clamp(wx, 150, 840))) < 26)) return false;
+  S1.probe = nearestNode(clamp(wx, NX(0), NX(NN - 1))); return true;
+}
+cv.addEventListener('pointerdown', e => {
+  const [px, py] = ptr(e);
+  if (mode === 'a1') { if (setProbeFrom(px, py, true)) { probeDrag = true; cv.setPointerCapture(e.pointerId); } }
+  if (mode === 'a2') { const h = pick(px, py); if (h && (h.id === 'pre' || h.id === 'vesic')) fireSyn(); }
+  if (e.pointerType === 'touch') { showTip(pick(px, py), px, py); clearTimeout(tipTimer); tipTimer = setTimeout(() => showTip(null), 3200); }
+});
+cv.addEventListener('pointermove', e => {
+  const [px, py] = ptr(e);
+  if (probeDrag) { setProbeFrom(px, py, false); return; }
+  if (e.pointerType === 'touch') return;
+  const h = (mode === 'a1' || mode === 'a2') ? pick(px, py) : null; showTip(h, px, py);
+  cv.style.cursor = h ? ((h.id === 'pre' || h.id === 'vesic' || h.id === 'node' || h.id === 'myelin') ? 'pointer' : 'help') : 'crosshair';
+});
+cv.addEventListener('pointerup', () => { probeDrag = false; });
+cv.addEventListener('pointercancel', () => { probeDrag = false; });
+cv.addEventListener('pointerleave', () => { if (!probeDrag) showTip(null); });
+
+const bPlay = $('#bPlay'), iPlay = $('#iPlay'), scrub = $('#scrub'), tRead = $('#tRead'), bSpeed = $('#bSpeed'), inten = $('#inten'), intenVal = $('#intenVal'), ctl = $('#controls');
+function syncPlay() { iPlay.innerHTML = playing ? '<path d="M5 3v10M11 3v10"/>' : '<path d="M5 3l8 5-8 5z"/>'; bPlay.setAttribute('aria-label', playing ? 'Pause (Espace)' : 'Lecture (Espace)'); }
+function viewAct() { return (mode === 'a2' || mode === 'dive') ? 2 : 1; }
+function controlsReady() { return mode === 'a1' || mode === 'a2'; }
+function step(dir) {
+  if (!controlsReady()) return; playing = false; syncPlay();
+  if (viewAct() === 1) seek1(dir * 50); else seek2(dir * 25);
+}
+function togglePlay() { playing = !playing; syncPlay(); }
+function doReset() {
+  if (!controlsReady()) return;
+  if (viewAct() === 1) reset1(); else reset2(); playing = true; syncPlay();
+}
+function setAct(n) {
+  $('#bAct1').setAttribute('aria-pressed', n === 1 ? 'true' : 'false'); $('#bAct2').setAttribute('aria-pressed', n === 2 ? 'true' : 'false'); ctl.dataset.act = String(n);
+  if (n === 2 && (mode === 'a1' || mode === 'out')) {
+    S1.cur = S1.h.length - 1; playing = true; syncPlay(); followT = 0;
+    let c = S1.h[S1.cur], live = false; for (let i = 0; i < NN; i++) if (vOf(c, i) > -30) live = true;
+    if (!live) { let g = 0; while (refrClass(S1.h[S1.cur], 0) > 0 && g++ < 40) seek1(25); stimulate(80); }
+    mode = RM ? 'dive' : 'follow'; pendingRelease = true; diveT = 0;
+  } else if (n === 1 && (mode === 'a2' || mode === 'dive' || mode === 'follow')) { mode = 'out'; pendingRelease = false; }
+  showTip(null);
+}
+$('#bAct1').addEventListener('click', () => setAct(1)); $('#bAct2').addEventListener('click', () => setAct(2));
+bPlay.addEventListener('click', togglePlay); $('#bBack').addEventListener('click', () => step(-1)); $('#bFwd').addEventListener('click', () => step(1)); $('#bReset').addEventListener('click', doReset);
+const SPEEDS = [0.25, 0.5, 1, 2];
+bSpeed.addEventListener('click', () => { const i = (SPEEDS.indexOf(speed) + 1) % SPEEDS.length; speed = SPEEDS[i]; bSpeed.textContent = '×' + (speed === 0.25 ? '¼' : speed === 0.5 ? '½' : speed); });
+let wasPlaying = true;
+scrub.addEventListener('pointerdown', () => { wasPlaying = playing; playing = false; syncPlay(); });
+const endScrub = () => { if (wasPlaying && !playing) { playing = true; syncPlay(); } wasPlaying = false; };
+scrub.addEventListener('pointerup', endScrub); scrub.addEventListener('pointercancel', endScrub);
+scrub.addEventListener('input', () => { if (!controlsReady()) return; const v = +scrub.value; if (viewAct() === 1) { S1.cur = clamp(v, 0, S1.h.length - 1); S1.acc = 0; } else { S2.cur = clamp(v, 0, S2.h.length - 1); S2.acc = 0; } });
+inten.addEventListener('input', () => { S1.inten = inten.value / 100; inten.style.setProperty('--p', inten.value + '%'); intenVal.textContent = Math.round(S1.inten * 80) + ' µA/cm²'; });
+$('#bStim').addEventListener('click', () => { if (mode === 'a1') { stimulate(); playing = true; syncPlay(); } });
+$('#bRep').addEventListener('click', fireSyn); $('#bBurst').addEventListener('click', burst);
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target, tag = tg && tg.tagName;
+  if (e.code === 'Space') { if (tag === 'BUTTON' && tg.id !== 'bPlay') return; if (tag === 'A') return; e.preventDefault(); if (tag !== 'BUTTON') togglePlay(); else if (tg.id === 'bPlay') togglePlay(); return; }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { if (tag === 'INPUT') return; e.preventDefault(); step(e.key === 'ArrowLeft' ? -1 : 1); return; }
+  if (e.key === 'r' || e.key === 'R') { doReset(); return; }
+  if (e.key === 's' || e.key === 'S') { if (viewAct() === 1) { if (mode === 'a1') { stimulate(); playing = true; syncPlay(); } } else fireSyn(); }
+});
+
+/* ==================================================================
+   Boucle principale
+   ================================================================== */
+let lastTs = 0, hudClock = 0;
+function update(dt) {
+  if (playing) wt += dt;
+  const tg = updateCam(dt);
+  if (mode === 'follow') {
+    followT += dt;
+    if (S1.h[S1.cur] && (vOf(S1.h[S1.cur], NN - 1) > -30 || followT > 12)) { mode = 'dive'; diveT = 0; }
+  }
+  if (mode === 'dive') {
+    diveT += dt;
+    if (pendingRelease && dDetail > 0.5) { pendingRelease = false; fireSyn(); }
+    if (diveT > 0.6 && dDetail > 0.985 && Math.abs(SP.ls.x - Math.log(tg.s)) < 0.03) mode = 'a2';
+  }
+  if (mode === 'out') { if (Math.abs(SP.vw.x - L.neuron.w) < 2 && Math.abs(SP.ls.x - Math.log(tg.s)) < 0.02 && Math.abs(SP.vh.x - L.neuron.h) < 2) mode = 'a1'; }
+  if (playing) {
+    if (mode === 'a1' || mode === 'follow' || mode === 'dive' || mode === 'out') adv1(dt);
+    if (mode === 'dive' || mode === 'a2') adv2(dt);
+  }
+  resolveStims();
+  const t1 = (mode === 'a1' || mode === 'out') ? 1 : 0, t2 = mode === 'a2' ? 1 : 0;
+  u1 += (t1 - u1) * (1 - Math.exp(-dt * (mode === 'out' ? 3 : 7))); u2 += (t2 - u2) * (1 - Math.exp(-dt * 5));
+  if (mode === 'out' || mode === 'a1') { /* les volets se rouvrent */ }
+}
+function draw() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = rgba('fond', 1); ctx.fillRect(0, 0, W, H);
+  hits = [];
+  drawWorld(); drawSynLabels();
+  /* panneaux acte 1 */
+  const a1 = u1 * (1 - dDetail);
+  plate(L.neuron, 'FIG. 1 — LE NEURONE', a1);
+  plate(L.scope, 'FIG. 2 — OSCILLOSCOPE', a1); drawScope(L.scope, a1);
+  plate(L.memb, 'FIG. 3 — MEMBRANE, ' + (S1.probe === 0 ? 'CÔNE' : 'NŒUD ' + S1.probe), a1); drawMembrane(L.memb, a1);
+  /* panneaux acte 2 */
+  const a2 = u2;
+  plate(L.trace, 'FIG. 4 — PPSE ET CALCIUM', a2); drawTrace(L.trace, a2);
+  plate(L.gauge, 'FIG. 5 — FORCE', a2); drawGauge(L.gauge, a2);
+  plate(L.hebb, 'FIG. 6 — RÈGLE DE HEBB', a2); drawHebb(L.hebb, a2);
+  /* survol */
+  if (hoverShape && hoverId && (mode === 'a1' || mode === 'a2')) {
+    const h = hoverShape; ctx.save(); ctx.strokeStyle = rgba('en', 0.8); ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+    if (h.k === 0) { ctx.beginPath(); ctx.arc(h.x, h.y, h.r + 2, 0, TAU); ctx.stroke(); } else if (h.id !== 'scope' && h.id !== 'lipid') ctx.strokeRect(h.x - 1.5, h.y - 1.5, h.w + 3, h.h + 3);
+    ctx.restore();
+  }
+  ctx.fillStyle = vignette; ctx.fillRect(0, 0, W, H);
+}
+function syncHud(dt) {
+  hudClock += dt; if (hudClock < 0.09) return; hudClock = 0;
+  const a = viewAct();
+  if (a === 1) {
+    const lo = Math.max(0, S1.h.length - 1 - 3000); if (scrub.min !== String(lo)) scrub.min = lo; if (scrub.max !== String(S1.h.length - 1)) scrub.max = S1.h.length - 1; if (+scrub.value !== S1.cur) scrub.value = S1.cur;
+    tRead.textContent = 't = ' + fmtNum(tOf1(S1.h[S1.cur]), 2) + ' ms';
+  } else {
+    const lo = Math.max(0, S2.h.length - 1 - 3000); if (scrub.min !== String(lo)) scrub.min = lo; if (scrub.max !== String(S2.h.length - 1)) scrub.max = S2.h.length - 1; if (+scrub.value !== S2.cur) scrub.value = S2.cur;
+    tRead.textContent = 't = ' + fmtNum(S2.h[S2.cur][0], 1) + ' s';
+  }
+  const mx = +scrub.max, mn = +scrub.min; scrub.style.setProperty('--p', (mx > mn ? (scrub.value - mn) / (mx - mn) * 100 : 0).toFixed(1) + '%');
+  scrub.disabled = !controlsReady();
+  updatePanel(false);
+}
+function frame(ts) {
+  const dt = Math.min(0.05, lastTs ? (ts - lastTs) / 1000 : 0.016); lastTs = ts;
+  update(dt); draw(); syncHud(dt); firstFrame = false;
+  requestAnimationFrame(frame);
+}
+new ResizeObserver(() => { layout(); }).observe(sceneEl);
+window.addEventListener('resize', layout);
+layout(); syncPlay(); inten.dispatchEvent(new Event('input')); updatePanel(true);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => layout());
+if (!RM) setTimeout(() => { if (mode === 'a1' && S1.stims.length === 0) { stimulate(72); } }, 1400);
+requestAnimationFrame(frame);
+/* ouverture de test / débogage minimal */
+window.__neurone = { S1, S2, HH, seek1, reset1, vOf, tOf1, get mode() { return mode; }, setAct, stimulate, fireSyn, burst };
+})();
+</script>
+</body>
+</html>

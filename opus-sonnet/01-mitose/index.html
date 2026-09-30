@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La mitose — Mécaniques invisibles 01</title>
+<meta name="description" content="Une cellule qui se divise est une machine : chromosomes, câbles de microtubules, anneau qui pince. Simulation interactive de la mitose.">
+<!--
+NOTE DE DESIGN
+1. Un seul plan noir, une seule cellule : la scène est la vedette, le texte est une planche annotée. Le vert de l'accent est réservé à l'ADN et au fuseau ; le jaune (energie) n'apparaît que pour la coupure de la cohésine et l'anneau contractile, les deux moments où quelque chose se déchire ou se serre.
+2. Toute l'image est une fonction pure de t : aucune variable d'état accumulée, donc le scrubber avance et recule sans saut. Le seul mouvement qui n'est pas dans t est l'agitation lente de la membrane et de la chromatine, qui figure le mouvement brownien.
+3. Le climax est l'anaphase : un éclat bref à la rupture de la cohésine, puis une traction en ressort amorti (sous-amorti à 85 %), les bras des chromatides traînant derrière le centromère comme dans les vraies images de microscopie.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#7ee0b5;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.mono{font-family:var(--mono)}
+button{font:inherit;color:inherit}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:minmax(0,1fr) auto;grid-template-areas:"stage panel" "controls panel";height:100vh;height:100dvh;min-height:560px}
+
+/* SCENE */
+.stage{grid-area:stage;position:relative;overflow:hidden;
+  background:
+   radial-gradient(ellipse 70% 75% at 50% 50%, #0f1620 0%, var(--fond) 78%),
+   var(--fond);
+  touch-action:manipulation}
+.stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--trait) 1px,transparent 1px),linear-gradient(90deg,var(--trait) 1px,transparent 1px);
+  background-size:56px 56px;background-position:center;
+  -webkit-mask-image:radial-gradient(ellipse 60% 62% at 50% 50%,#000 0%,transparent 100%);mask-image:radial-gradient(ellipse 60% 62% at 50% 50%,#000 0%,transparent 100%)}
+#cv{position:absolute;left:0;top:0;display:block;cursor:default}
+.title{position:absolute;left:28px;top:22px;pointer-events:none;z-index:2}
+.title .serie{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+.title h1{margin:2px 0 0;font-family:var(--serif);font-weight:400;font-size:44px;line-height:1;letter-spacing:-.01em}
+.title h1 em{color:var(--accent)}
+.tip{position:absolute;z-index:3;pointer-events:none;max-width:250px;padding:8px 11px;background:rgba(10,13,18,.94);border:1px solid var(--trait);border-left:2px solid var(--accent);
+  opacity:0;transform:translateY(4px);transition:opacity .18s var(--ease),transform .18s var(--ease)}
+.tip.on{opacity:1;transform:none}
+.tip b{display:block;font-weight:600;font-size:13px;color:var(--texte)}
+.tip span{display:block;font-size:12.5px;line-height:1.4;color:var(--texte-2)}
+
+/* CONTROLES */
+.controls{grid-area:controls;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:18px;align-items:center;padding:12px 28px 16px;border-top:1px solid var(--trait);background:linear-gradient(0deg,var(--fond) 0%,rgba(10,13,18,.6) 100%)}
+.btn{appearance:none;background:transparent;border:1px solid var(--trait);color:var(--texte);height:38px;min-width:38px;padding:0 12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;transition:border-color .25s var(--ease),color .25s var(--ease),background .25s var(--ease)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible,#rng:focus-visible,.chip:focus-visible,.foot a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.btn svg{width:14px;height:14px;fill:currentColor}
+#play{width:44px;border-color:var(--accent);color:var(--accent);border-radius:50%;height:44px;padding:0}
+#play:hover{background:rgba(126,224,181,.1)}
+.speed{display:inline-flex;border:1px solid var(--trait)}
+.speed button{appearance:none;background:transparent;border:0;border-right:1px solid var(--trait);height:36px;padding:0 11px;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--texte-2);transition:color .2s,background .2s}
+.speed button:last-child{border-right:0}
+.speed button:hover{color:var(--texte)}
+.speed button[aria-checked="true"]{color:var(--fond);background:var(--accent)}
+.speed button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+.scrub{position:relative;height:56px;min-width:0}
+.segs{position:absolute;left:0;right:0;top:12px;height:3px;display:flex;gap:3px}
+.seg{position:relative;background:var(--trait);height:3px;transition:background .3s var(--ease)}
+.seg.on{background:#2c4a40}
+.seg i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);width:0}
+.marks{position:absolute;left:0;right:0;top:26px;height:24px;pointer-events:none}
+.marks>span{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;color:var(--texte-2);white-space:nowrap;transition:color .3s var(--ease)}
+.marks>span.on{color:var(--accent)}
+.marks .n{display:none}
+#rng{position:absolute;left:-7px;right:-7px;width:calc(100% + 14px);top:0;height:28px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+#rng::-webkit-slider-runnable-track{height:28px;background:transparent}
+#rng::-moz-range-track{height:28px;background:transparent}
+#rng::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:6.5px;border-radius:50%;background:var(--fond);border:2px solid var(--accent);box-shadow:0 0 0 4px rgba(126,224,181,.14)}
+#rng::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:2px solid var(--accent);box-shadow:0 0 0 4px rgba(126,224,181,.14)}
+
+/* PANNEAU */
+.panel{grid-area:panel;border-left:1px solid var(--trait);background:var(--fond-2);padding:26px 26px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:0}
+.step{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+.step b{color:var(--accent);font-weight:500}
+.panel h2{font-family:var(--serif);font-weight:400;font-size:38px;line-height:1.05;margin:6px 0 10px}
+.swap{transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.swap.out{opacity:0;transform:translateY(6px)}
+#phTxt{margin:0 0 10px}
+.real{font-family:var(--sans);font-size:12.5px;color:var(--texte-2);margin:0 0 16px;padding-left:10px;border-left:1px solid var(--trait)}
+.count{font-family:var(--mono);font-size:13px;padding:11px 0;border-top:1px solid var(--trait);border-bottom:1px solid var(--trait);color:var(--texte);letter-spacing:.01em}
+.count .sep{color:var(--texte-2);margin:0 .4em}
+.count.flash{animation:flash .9s var(--ease)}
+@keyframes flash{0%{color:var(--energie)}100%{color:var(--texte)}}
+.meas{margin:14px 0 0;display:grid;grid-template-columns:1fr auto;gap:7px 12px;font-size:12.5px}
+.meas dt{color:var(--texte-2)}
+.meas dd{margin:0;font-family:var(--mono);text-align:right;color:var(--texte)}
+.bar{grid-column:1/-1;height:3px;background:var(--trait);position:relative;margin-top:-2px}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);width:0}
+.bar.en i{background:var(--energie)}
+.h3{margin:20px 0 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);font-family:var(--mono);font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{appearance:none;background:transparent;border:1px solid var(--trait);height:32px;padding:0 11px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--mono);font-size:12px;transition:border-color .25s var(--ease),background .25s var(--ease)}
+.chip i{width:9px;height:9px;border-radius:50%;display:block}
+.chip:hover{border-color:var(--texte-2)}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:rgba(126,224,181,.08)}
+.follow{font-size:13px;color:var(--texte-2);margin:10px 0 0;min-height:4.2em}
+.follow b{color:var(--texte);font-weight:500}
+.hint{font-size:12.5px;color:var(--texte-2);margin:auto 0 0;padding-top:16px}
+.hint kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--trait);padding:0 5px;color:var(--texte)}
+.key{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:12px;color:var(--texte-2);margin:0}
+.key i{display:block;width:16px;height:3px;margin-top:9px}
+.foot{display:flex;flex-direction:column;gap:6px;margin-top:18px;padding-top:16px;border-top:1px solid var(--trait)}
+.foot a{text-decoration:none;font-size:14px;color:var(--accent);border-bottom:1px solid transparent;align-self:flex-start;transition:border-color .25s var(--ease)}
+.foot a:hover{border-bottom-color:var(--accent)}
+.foot a.sub{color:var(--texte-2);font-size:13px}
+.foot a.sub:hover{border-bottom-color:var(--texte-2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* TELEPHONE / TABLETTE */
+@media (max-width:900px){
+  .app{display:block;height:auto;min-height:0}
+  .stage{height:min(78vw,430px);min-height:290px}
+  .title{left:16px;top:14px}
+  .title h1{font-size:34px}
+  .controls{grid-template-columns:auto minmax(0,1fr);gap:10px 14px;padding:12px 16px 14px;position:sticky;bottom:0;z-index:5;background:var(--fond)}
+  .scrub{grid-column:1/-1;grid-row:2;height:44px;margin:0 6px}
+  .marks{top:24px}
+  .marks .t{display:none}
+  .marks .n{display:inline}
+  .speed{justify-self:end}
+  #reset{display:none}
+  .panel{border-left:0;border-top:1px solid var(--trait);padding:22px 16px 30px}
+  .panel h2{font-size:34px}
+}
+@media (max-width:900px) and (min-width:620px){
+  .marks .t{display:inline}
+  .marks .n{display:none}
+}
+@media (max-width:420px){
+  .controls{gap:8px 10px}
+  .speed button{padding:0 9px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="stage" id="stage">
+    <header class="title">
+      <div class="serie">Mécaniques invisibles — 01</div>
+      <h1>La <em>mitose</em></h1>
+    </header>
+    <canvas id="cv" aria-label="Simulation de la mitose d'une cellule animale (2n = 4). Les étapes sont décrites dans le panneau de lecture." role="img"></canvas>
+    <div class="tip" id="tip" role="tooltip"><b></b><span></span></div>
+  </main>
+
+  <section class="controls" aria-label="Contrôles">
+    <button class="btn" id="play" aria-label="Lecture">
+      <svg id="icPlay" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z"/></svg>
+      <svg id="icPause" viewBox="0 0 14 14" aria-hidden="true" style="display:none"><path d="M2.5 1.5h3v11h-3zM8.5 1.5h3v11h-3z"/></svg>
+    </button>
+    <div class="scrub" id="scrub">
+      <div class="segs" id="segs"></div>
+      <input type="range" id="rng" min="0" max="1000" value="0" step="1" aria-label="Instant de la division">
+      <div class="marks" id="marks"></div>
+    </div>
+    <div class="speed" role="radiogroup" aria-label="Vitesse">
+      <button role="radio" aria-checked="false" data-s="0.5">0,5x</button>
+      <button role="radio" aria-checked="true" data-s="1">1x</button>
+      <button role="radio" aria-checked="false" data-s="2">2x</button>
+    </div>
+    <button class="btn" id="reset" aria-label="Réinitialiser">
+      <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.2a5.8 5.8 0 1 0 5.6 7.2h-1.6A4.2 4.2 0 1 1 7 2.8c1 0 1.9.4 2.6 1L7.7 5.7H13V.4l-1.8 1.8A5.8 5.8 0 0 0 7 1.2z"/></svg>
+      <span>R</span>
+    </button>
+  </section>
+
+  <aside class="panel" id="panel">
+    <div class="step mono">Étape <b id="stepN">1</b> / 7</div>
+    <h2 class="swap" id="phName">Interphase</h2>
+    <p class="swap" id="phTxt"></p>
+    <p class="real swap" id="phReal"></p>
+    <div class="count mono" id="count"></div>
+    <dl class="meas">
+      <dt>Condensation de l'ADN</dt><dd id="mCond">0 %</dd>
+      <dt>Longueur de la cellule</dt><dd id="mLen">22 µm</dd>
+      <dt>Distance entre les pôles</dt><dd id="mPole">1 µm</dd>
+      <dt>Kinétochores attachés</dt><dd id="mKin">0 / 8</dd>
+      <dt>Tension (relative)</dt><dd id="mTen">0</dd>
+      <div class="bar en" aria-hidden="true"><i id="bTen"></i></div>
+    </dl>
+    <h3 class="h3">Suivre un chromosome</h3>
+    <div class="chips" id="chips"></div>
+    <p class="follow" id="follow">Clique sur un chromosome dans la scène, ou choisis-en un ici, pour suivre ses deux chromatides jusqu'aux cellules filles.</p>
+    <h3 class="h3">Repères</h3>
+    <dl class="key">
+      <i style="background:var(--accent)"></i><span>ADN : chromatides sœurs (une teinte par chromosome)</span>
+      <i style="background:rgba(126,224,181,.45)"></i><span>Fuseau : microtubules, fins</span>
+      <i style="background:var(--texte)"></i><span>Kinétochores et centrioles</span>
+      <i style="background:var(--energie)"></i><span>Énergie : cohésine coupée, anneau</span>
+    </dl>
+    <p class="hint">Survole une structure pour l'identifier. <kbd>Espace</kbd> lecture, <kbd>←</kbd> <kbd>→</kbd> pas, <kbd>R</kbd> départ, <kbd>1</kbd>–<kbd>7</kbd> étapes. Échelle : 5 µm en bas à gauche.</p>
+    <nav class="foot">
+      <a href="explication.html">Comprendre ce qui se passe</a>
+      <a class="sub" href="../index.html">Retour à la série</a>
+    </nav>
+  </aside>
+</div>
+<div class="sr" id="live" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const TAU = Math.PI * 2;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sm = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- donnees ---------- */
+const PHASES = [
+  { id: 'interphase', name: 'Interphase', tail: '(fin)', t0: 0, t1: .08, short: 'Interphase', n: 'I',
+    txt: "La phase S est terminée : chaque molécule d'ADN a été copiée. La chromatine est encore diffuse dans le noyau, et le centrosome, dupliqué, forme deux paires côte à côte.",
+    real: "Le centrosome se duplique une seule fois par cycle, en même temps que l'ADN." },
+  { id: 'prophase', name: 'Prophase', t0: .08, t1: .24, short: 'Prophase', n: 'P',
+    txt: "La chromatine se condense : chaque chromosome apparaît en deux chromatides sœurs identiques, unies au centromère. Les centrosomes migrent vers des pôles opposés et le fuseau commence à s'assembler.",
+    real: "Le nucléole se désassemble : la cellule cesse de fabriquer des ribosomes pendant la division." },
+  { id: 'prometaphase', name: 'Prométaphase', t0: .24, t1: .38, short: 'Prométaphase', n: 'PM',
+    txt: "L'enveloppe nucléaire se fragmente et libère les chromosomes. Des microtubules issus des pôles explorent le cytoplasme, s'accrochent aux kinétochores et tirent chaque chromosome vers le centre.",
+    real: "Chaque kinétochore capte une vingtaine de microtubules chez l'humain (trois seulement ici)." },
+  { id: 'metaphase', name: 'Métaphase', t0: .38, t1: .50, short: 'Métaphase', n: 'M',
+    txt: "Les chromosomes sont alignés sur la plaque équatoriale, les deux kinétochores de chaque paire tournés vers des pôles opposés. Les microtubules sont tendus des deux côtés : cette tension signale que tout est prêt.",
+    real: "Le point de contrôle du fuseau retarde l'anaphase tant qu'un kinétochore reste libre ou non tendu." },
+  { id: 'anaphase', name: 'Anaphase', t0: .50, t1: .68, short: 'Anaphase', n: 'A',
+    txt: "La séparase coupe la cohésine : les chromatides sœurs se séparent d'un coup et deviennent des chromosomes à part entière. Les kinétochores raccourcissent leurs microtubules pendant que les pôles s'écartent et que la cellule s'allonge.",
+    real: "En vrai, l'anaphase ne dure que quelques minutes ; les chromatides avancent d'environ 1 µm par minute." },
+  { id: 'telophase', name: 'Télophase', t0: .68, t1: .82, short: 'Télophase', n: 'T',
+    txt: "À chaque pôle, une enveloppe nucléaire se reforme autour du lot de chromosomes, qui se décondensent. Le fuseau se démantèle, sauf un faisceau central entre les deux futurs noyaux.",
+    real: "Les nucléoles réapparaissent quand l'ADN des ribosomes redevient actif." },
+  { id: 'cytocinese', name: 'Cytocinèse', t0: .82, t1: 1.0001, short: 'Cytocinèse', n: 'C',
+    txt: "Un anneau d'actine et de myosine se resserre autour de l'équateur et pince la membrane : c'est le sillon de division. Il reste deux cellules filles génétiquement identiques, chacune avec 4 chromosomes.",
+    real: "Les organites, répartis dans le cytoplasme, sont partagés entre les deux cellules filles." }
+];
+const CH = [
+  { id: 'A1', L: .36, col: '#9af0c8', home: [-.17, -.13], za: 1,  py: -.50, px: -.015, tilt: .07,  thp: Math.PI / 2 + .75, m0: .270 },
+  { id: 'A2', L: .36, col: '#4fd6a0', home: [ .17, -.10], za: -1, py:  .50, px:  .012, tilt: -.05, thp: Math.PI / 2 - .55, m0: .295 },
+  { id: 'B1', L: .24, col: '#c7f2a0', home: [-.13,  .17], za: 1,  py: -.16, px:  .020, tilt: -.09, thp: Math.PI / 2 - 1.0, m0: .280 },
+  { id: 'B2', L: .24, col: '#3cb8a8', home: [ .17,  .15], za: -1, py:  .16, px: -.018, tilt: .10,  thp: Math.PI / 2 + .45, m0: .285 }
+];
+CH.forEach((c, k) => {
+  c.rgb = hex(c.col);
+  c.mvS = c.m0 + .02; c.mvE = c.mvS + .075;
+  c.xo = [.05, -.05, -.05, .05][k];
+  c.att = [c.m0, c.m0 + .02]; // [sœur a, sœur b]
+});
+const FOND = [10, 13, 18];
+function hex(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function mixc(rgb, a, k = 1) { // couleur opaque melangee avec le fond
+  const r = Math.round(lerp(FOND[0], rgb[0] * k, a)), g = Math.round(lerp(FOND[1], rgb[1] * k, a)), b = Math.round(lerp(FOND[2], rgb[2] * k, a));
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+const ACC = hex('#7ee0b5'), CREME = hex('#e8e4dc'), ENE = hex('#ffd166');
+const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+
+const T_CLEAVE = .50;
+const NSEG = 24;
+const NP = 48;
+
+/* ---------- etat ---------- */
+const st = { t: 0, playing: !reduced, speed: 1, sel: -1, hov: null, dragging: false, wasPlaying: false, mx: -1, my: -1, inside: false };
+let now = 0;
+
+/* ---------- canvas ---------- */
+const stage = document.getElementById('stage');
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W = 800, H = 600, S = 250, CX = 400, CY = 300, dpr = 1;
+function resize() {
+  const r = stage.getBoundingClientRect();
+  W = Math.max(200, r.width); H = Math.max(200, r.height);
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  const small = W < 640;
+  const topPad = small ? 52 : 0;
+  S = Math.min(W / 3.2, (H - topPad) / 2.42);
+  CX = W / 2; CY = topPad + (H - topPad) / 2 - (small ? 6 : 8);
+}
+window.addEventListener('resize', resize);
+const X = x => CX + S * x, Y = y => CY + S * y;
+
+/* ---------- modele : tout est fonction de t ---------- */
+function spring(tau) {
+  if (tau <= 0) return 0;
+  const z = .85, w = 22, wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * tau) * (Math.cos(wd * tau) + (z * w / wd) * Math.sin(wd * tau));
+}
+function centro(side, m, poleX) {
+  const al = Math.PI / 2 - side * m * Math.PI / 2;
+  const r = lerp(.60, poleX, m);
+  return [r * Math.cos(al) + side * .045 * (1 - m), r * Math.sin(al), al];
+}
+function tension(t) { return sm(.30, .40, t) * (1 - sm(.50, .512, t)); }
+
+function model(t) {
+  const M = { t };
+  M.R = sm(.08, .30, t); M.B = sm(.51, .71, t); M.q = sm(.74, 1, t);
+  M.a = (1.10 - .10 * M.R) + .36 * M.B;
+  M.b = .88 + .08 * M.R - .16 * M.B - .08 * M.q;
+  M.c = .74 * M.q; M.ad = M.a - M.c;
+  M.poleX = .88 + .30 * M.B;
+  M.m = sm(.08, .24, t);
+  M.cent = { '-1': centro(-1, M.m, M.poleX), '1': centro(1, M.m, M.poleX) };
+  M.kappa = sm(.09, .23, t) * (1 - sm(.70, .84, t));
+  M.T = tension(t);
+  M.s = spring(t - T_CLEAVE);
+  M.eOld = 1 - sm(.24, .31, t); // enveloppe ancienne
+  M.eNew = sm(.72, .80, t);
+  return M;
+}
+
+/* ---------- construction de la membrane ---------- */
+function cellShape(M) {
+  const { b, c, ad } = M;
+  const amp = reduced ? 0 : .010;
+  const path = new Path2D();
+  const pts = [];
+  const r = c / ad;
+  const w = (ph, phi) => amp * (Math.sin(3 * phi + now * .9 + ph) + .6 * Math.sin(5 * phi - now * .7 + ph * 2) + .4 * Math.sin(2 * phi + now * .5 - ph));
+  const P = (X0, ph, phi) => { const k = 1 + w(ph, phi); const x = X0 + ad * Math.cos(phi) * k, y = b * Math.sin(phi) * k; pts.push(X(x), Y(y)); return [X(x), Y(y)]; };
+  let neck = 0;
+  if (r >= .996) {
+    for (const s of [1, -1]) {
+      const n = 80;
+      for (let i = 0; i <= n; i++) {
+        const phi = i / n * TAU; const p = P(s * c, s > 0 ? 0 : 2.1, phi);
+        if (i === 0) path.moveTo(p[0], p[1]); else path.lineTo(p[0], p[1]);
+      }
+      path.closePath();
+    }
+  } else {
+    const phL = 2.1 * sm(.9, .999, r);
+    const phi0 = Math.acos(-r);
+    const delta = .16 * sm(0, .3, r);
+    const pe = phi0 - delta;
+    neck = b * Math.sin(phi0);
+    const n = 70;
+    for (let i = 0; i <= n; i++) {
+      const phi = -pe + 2 * pe * i / n; const p = P(c, 0, phi);
+      if (i === 0) path.moveTo(p[0], p[1]); else path.lineTo(p[0], p[1]);
+    }
+    path.quadraticCurveTo(X(0), Y(neck), ...P(-c, phL, Math.PI - pe));
+    for (let i = 1; i <= n; i++) {
+      const phi = Math.PI - pe + 2 * pe * i / n; const p = P(-c, phL, phi);
+      path.lineTo(p[0], p[1]);
+    }
+    path.quadraticCurveTo(X(0), Y(-neck), X(c + ad * Math.cos(-pe)), Y(b * Math.sin(-pe)));
+    path.closePath();
+  }
+  return { path, neck, sep: r >= .996, pts };
+}
+
+/* ---------- chromatides ---------- */
+function tangle(k, j, u, H0, R) {
+  const sd = k * 2 + j + 1;
+  const w = reduced ? 0 : now * .35;
+  const p0 = hash(sd) * TAU, p1 = hash(sd + .3) * TAU, p2 = hash(sd + .6) * TAU, p3 = hash(sd + .9) * TAU;
+  const x = H0[0] + R * (.62 * Math.sin(TAU * (1.4 + .5 * hash(sd + 2)) * u + p0 + .5 * Math.sin(w + p2)) + .38 * Math.sin(TAU * 3.2 * u + p1 + w * .7));
+  const y = H0[1] + R * (.62 * Math.sin(TAU * (1.6 + .5 * hash(sd + 3)) * u + p2 + .5 * Math.sin(w * .8 + p0)) + .38 * Math.sin(TAU * 2.7 * u + p3 - w * .6));
+  return [x, y];
+}
+function chromatid(M, k, j) {
+  const t = M.t, c = CH[k];
+  const zeta = j === 0 ? c.za : -c.za;
+  const kap = M.kappa;
+  const mv = sm(c.mvS, c.mvE, t);
+  const th = lerp(c.thp, Math.PI / 2 + c.tilt, mv);
+  const ax = Math.cos(th), ay = Math.sin(th), nx = Math.sin(th), ny = -Math.cos(th);
+  // centre du chromosome
+  let cbx = lerp(c.home[0], c.px, mv) + Math.sin(Math.PI * mv) * .035 * (k % 2 ? 1 : -1);
+  let cby = lerp(c.home[1], c.py, mv);
+  const wM = sm(.36, .40, t) * (1 - sm(.485, .50, t));
+  cbx += .009 * Math.sin(TAU * 9 * t + k * 1.7) * wM;
+  cby += .006 * Math.sin(TAU * 7 * t + k * 2.3) * wM;
+  const gap = .020 + .008 * M.T;
+  // centromere de cette chromatide (avant separation)
+  let cx0 = cbx + zeta * nx * gap, cy0 = cby + zeta * ny * gap;
+  const s = M.s;
+  const xT = M.poleX - .36 + c.xo * .8;
+  const dx = zeta * xT, dy = c.py * .60;
+  const Cx = lerp(cx0, dx, s), Cy = lerp(cy0, dy, s);
+  const kb = .95 * sm(.12, .6, s) * (1 - .45 * sm(.8, 1, s));
+  const L = c.L;
+  const home0 = t < .6 ? [c.home[0] + (j ? .03 : -.03) * (1 - 2 * hash(k * 3 + 1)), c.home[1] + (j ? -.03 : .03) * (1 - 2 * hash(k * 3 + 2))]
+    : [zeta * .70 + c.home[0] * .5, c.home[1] * .9 + (j ? .03 : -.03)];
+  const Rt = (c.L > .3 ? .15 : .11) * (t < .6 ? 1 : .85);
+  const pts = [], wd = [];
+  const w0 = lerp(.0065, .040, kap);
+  let mx = 0, my = 0;
+  for (let i = 0; i <= NSEG; i++) {
+    const su = 2 * i / NSEG - 1, sg = su < 0 ? -1 : 1, al = Math.abs(su);
+    let dxv = sg * ax + (-zeta) * kb, dyv = sg * ay; // (-zeta) : les bras trainent vers l'equateur
+    const dl = Math.hypot(dxv, dyv); dxv /= dl; dyv /= dl;
+    const spl = .016 * Math.pow(al, 1.4) * kap * (1 - s);
+    const rx = Cx + dxv * al * L / 2 + zeta * nx * spl, ry = Cy + dyv * al * L / 2 + zeta * ny * spl;
+    let x = rx, y = ry;
+    if (kap < 1) {
+      const tg = tangle(k, j, i / NSEG, home0, Rt);
+      x = lerp(tg[0], rx, kap); y = lerp(tg[1], ry, kap);
+    }
+    pts.push(x, y);
+    wd.push(w0 * (1 - .40 * kap * Math.exp(-(su * su) / .012)));
+    mx += x; my += y;
+  }
+  mx /= (NSEG + 1); my /= (NSEG + 1);
+  // kinetochore
+  const sig = zeta;
+  let kdx = zeta * nx * (1 - s) + sig * s, kdy = zeta * ny * (1 - s);
+  const kl = Math.hypot(kdx, kdy); kdx /= kl; kdy /= kl;
+  const vk = sm(.20, .26, t) * kap * (1 - sm(.70, .78, t));
+  const K = { x: Cx + kdx * .026, y: Cy + kdy * .026, dx: kdx, dy: kdy, v: vk };
+  return { k, j, zeta, pts, wd, kap, C: [Cx, Cy], Cb: [cbx, cby], ax, ay, nx, ny, K, anchor: [mx + zeta * .09, my - .02], mid: [mx, my] };
+}
+
+/* ---------- panneau ---------- */
+const $ = id => document.getElementById(id);
+const el = { stepN: $('stepN'), phName: $('phName'), phTxt: $('phTxt'), phReal: $('phReal'), count: $('count'), mCond: $('mCond'), mLen: $('mLen'), mPole: $('mPole'), mKin: $('mKin'), mTen: $('mTen'), bTen: $('bTen'), follow: $('follow'), live: $('live'), tip: $('tip'), rng: $('rng'), play: $('play'), icPlay: $('icPlay'), icPause: $('icPause') };
+let curPhase = -1, lastCount = '', cache = {};
+function setText(node, key, v) { if (cache[key] !== v) { cache[key] = v; node.textContent = v; } }
+function phaseAt(t) { for (let i = PHASES.length - 1; i >= 0; i--) if (t >= PHASES[i].t0) return i; return 0; }
+function setPhase(i) {
+  if (i === curPhase) return;
+  const first = curPhase < 0; curPhase = i;
+  const P = PHASES[i];
+  const apply = () => {
+    el.stepN.textContent = i + 1;
+    el.phName.innerHTML = P.name === 'Interphase' ? 'Interphase <span style="color:var(--texte-2);font-size:.5em;font-style:italic">(fin)</span>' : P.name;
+    el.phTxt.textContent = P.txt; el.phReal.textContent = P.real;
+    [el.phName, el.phTxt, el.phReal].forEach(n => n.classList.remove('out'));
+  };
+  if (first || reduced) apply();
+  else { [el.phName, el.phTxt, el.phReal].forEach(n => n.classList.add('out')); setTimeout(apply, 170); }
+  el.live.textContent = 'Étape ' + (i + 1) + ' sur 7 : ' + P.name;
+  document.querySelectorAll('.seg').forEach((s, n) => s.classList.toggle('on', n === i));
+  document.querySelectorAll('.marks > span').forEach((s, n) => s.classList.toggle('on', n === i));
+}
+function updatePanel(M, chs, cell) {
+  const t = M.t;
+  setPhase(phaseAt(t));
+  // scrubber : remplissage des segments
+  segFill.forEach((f, n) => { const P = PHASES[n]; f.style.width = (clamp((t - P.t0) / (Math.min(P.t1, 1) - P.t0)) * 100).toFixed(1) + '%'; });
+  // compteur
+  let cnt;
+  const closed = cell.sep;
+  if (closed) cnt = '<span>2 cellules</span><span class="sep">×</span><span>4 chromosomes</span>';
+  else if (t >= T_CLEAVE) cnt = '<span>chromosomes : 8</span><span class="sep">|</span><span>chromatides : 8</span>';
+  else cnt = '<span>chromosomes : 4</span><span class="sep">|</span><span>chromatides : 8</span>';
+  if (cnt !== lastCount) {
+    const flash = lastCount !== '';
+    lastCount = cnt; el.count.innerHTML = cnt;
+    if (flash && !reduced) { el.count.classList.remove('flash'); void el.count.offsetWidth; el.count.classList.add('flash'); }
+  }
+  setText(el.mCond, 'cond', Math.round(M.kappa * 100) + ' %');
+  setText(el.mLen, 'len', Math.round(2 * (M.c + M.ad) * 10) + ' µm');
+  const pd = (M.cent['1'][0] - M.cent['-1'][0]) * 10, pdy = (M.cent['1'][1] - M.cent['-1'][1]) * 10;
+  setText(el.mPole, 'pole', '≈ ' + (Math.hypot(pd, pdy) < 10 ? Math.hypot(pd, pdy).toFixed(1).replace('.', ',') : Math.round(Math.hypot(pd, pdy))) + ' µm');
+  let att = 0;
+  CH.forEach(c => c.att.forEach(a => { if (t >= a) att++; }));
+  setText(el.mKin, 'kin', (t >= .70 ? '—' : att + ' / 8'));
+  setText(el.mTen, 'ten', M.T.toFixed(2).replace('.', ','));
+  el.bTen.style.width = (M.T * 100).toFixed(1) + '%';
+  // suivi
+  let f;
+  if (st.sel < 0) f = null;
+  else {
+    const c = CH[st.sel];
+    const sideA = c.za > 0 ? 'droite' : 'gauche', sideB = c.za > 0 ? 'gauche' : 'droite', pA = c.za > 0 ? 'droit' : 'gauche', pB = c.za > 0 ? 'gauche' : 'droit';
+    if (t < T_CLEAVE) f = '<b>' + c.id + '</b> : deux chromatides sœurs, <b>a</b> et <b>b</b>, encore soudées au centromère. Chacune finira dans une cellule fille différente.';
+    else if (!closed) f = '<b>' + c.id + '</b> : <b>a</b> part vers le pôle ' + pA + ', <b>b</b> vers le pôle ' + pB + '. Chacune est maintenant un chromosome complet.';
+    else f = '<b>' + c.id + '</b> : <b>a</b> est dans la cellule fille de ' + sideA + ', <b>b</b> dans celle de ' + sideB + '. Les deux cellules ont le même ADN.';
+  }
+  const fk = f === null ? 'none' : f;
+  if (cache.follow !== fk) {
+    cache.follow = fk;
+    el.follow.innerHTML = f === null ? "Clique sur un chromosome dans la scène, ou choisis-en un ici, pour suivre ses deux chromatides jusqu'aux cellules filles." : f;
+  }
+}
+
+/* ---------- dessin ---------- */
+let hits = [];
+function addHit(h) { hits.push(h); }
+function segDist(px, py, x0, y0, x1, y1) {
+  const dx = x1 - x0, dy = y1 - y0, l = dx * dx + dy * dy;
+  let u = l ? ((px - x0) * dx + (py - y0) * dy) / l : 0; u = clamp(u);
+  return Math.hypot(px - (x0 + u * dx), py - (y0 + u * dy));
+}
+function polyDist(px, py, a) {
+  let d = 1e9;
+  for (let i = 0; i + 3 < a.length; i += 2) d = Math.min(d, segDist(px, py, a[i], a[i + 1], a[i + 2], a[i + 3]));
+  return d;
+}
+function strokePoly(a, w, col, alpha) {
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]);
+  for (let i = 2; i < a.length; i += 2) ctx.lineTo(a[i], a[i + 1]);
+  ctx.lineWidth = w; ctx.strokeStyle = col; ctx.globalAlpha = alpha; ctx.stroke(); ctx.globalAlpha = 1;
+}
+function quadPts(x0, y0, cx, cy, x1, y1, u0, u1, n) {
+  const a = [];
+  for (let i = 0; i <= n; i++) {
+    const u = lerp(u0, u1, i / n), v = 1 - u;
+    a.push(v * v * x0 + 2 * v * u * cx + u * u * x1, v * v * y0 + 2 * v * u * cy + u * u * y1);
+  }
+  return a;
+}
+const rot = (x, y, a) => [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+
+function render() {
+  const t = st.t;
+  hits = [];
+  const M = model(t);
+  const cell = cellShape(M);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  /* --- cellule --- */
+  const g = ctx.createRadialGradient(X(0), Y(0), 0, X(0), Y(0), S * 1.5);
+  g.addColorStop(0, '#17212b'); g.addColorStop(1, '#0f161d');
+  ctx.fillStyle = g; ctx.fill(cell.path);
+  ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(232,228,220,.55)'; ctx.lineJoin = 'round'; ctx.stroke(cell.path);
+  // membrane : zone de survol
+  addHit({ tier: 5, type: 'poly', a: cell.pts.concat(cell.pts.slice(0, 2)), r: 7, name: 'Membrane plasmique', role: t >= .74 ? "Elle se pince à l'équateur jusqu'à séparer les deux cellules filles." : "Enveloppe de la cellule ; elle s'arrondit avant la division." });
+
+  ctx.save();
+  ctx.clip(cell.path);
+
+  /* organites (cytoplasme) */
+  for (let i = 0; i < 46; i++) {
+    const right = i % 2, X0 = right ? M.c : -M.c;
+    const rho = Math.sqrt(hash(i + .5)) * .86, ang = hash(i * 1.7) * TAU;
+    const dr = reduced ? 0 : 1;
+    const x = X0 + rho * Math.cos(ang) * M.ad + dr * .014 * Math.sin(now * .6 + i * 2.1);
+    const y = rho * Math.sin(ang) * M.b + dr * .014 * Math.cos(now * .5 + i * 1.3);
+    const rr = (.007 + .011 * hash(i * 3.3)) * S;
+    ctx.fillStyle = i % 5 === 0 ? 'rgba(138,147,160,.22)' : 'rgba(138,147,160,.13)';
+    ctx.beginPath();
+    if (i % 5 === 0) ctx.ellipse(X(x), Y(y), rr * 1.9, rr * .9, hash(i) * TAU, 0, TAU); else ctx.arc(X(x), Y(y), rr, 0, TAU);
+    ctx.fill();
+  }
+
+  /* noyaux : remplissage */
+  if (M.eOld > .01) {
+    const gg = ctx.createRadialGradient(X(0), Y(0), 0, X(0), Y(0), S * .44);
+    gg.addColorStop(0, rgba([70, 90, 110], .30 * M.eOld)); gg.addColorStop(1, rgba([50, 70, 90], .22 * M.eOld));
+    ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(X(0), Y(0), S * .42, 0, TAU); ctx.fill();
+    const nu = M.eOld * (1 - sm(.10, .18, t));
+    if (nu > .01) { ctx.fillStyle = rgba([20, 28, 36], .8 * nu); ctx.beginPath(); ctx.arc(X(.06), Y(.07), S * .075, 0, TAU); ctx.fill(); ctx.strokeStyle = rgba([138, 147, 160], .35 * nu); ctx.lineWidth = 1; ctx.stroke(); }
+  }
+  if (M.eNew > .01) {
+    for (const sg of [-1, 1]) {
+      const gg = ctx.createRadialGradient(X(sg * .70), Y(0), 0, X(sg * .70), Y(0), S * .28);
+      gg.addColorStop(0, rgba([70, 90, 110], .30 * M.eNew)); gg.addColorStop(1, rgba([50, 70, 90], .22 * M.eNew));
+      ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(X(sg * .70), Y(0), S * .27, 0, TAU); ctx.fill();
+      const nu = sm(.84, .98, t);
+      if (nu > .01) { ctx.fillStyle = rgba([20, 28, 36], .8 * nu); ctx.beginPath(); ctx.arc(X(sg * .70 + sg * .05), Y(.04), S * .045, 0, TAU); ctx.fill(); }
+    }
+  }
+
+  /* microtubules astraux */
+  const cents = [-1, 1].map(sd => ({ sd, p: M.cent[sd] }));
+  const astA = .30 * (1 - sm(.86, .95, t)) * sm(.02, .10, t + .08);
+  cents.forEach(({ sd, p }, ci) => {
+    const out = Math.atan2(p[1], p[0]);
+    const fan = lerp(Math.PI, 1.25, sm(.08, .22, t));
+    const n = 11;
+    for (let i = 0; i < n; i++) {
+      const an = out + fan * (i / (n - 1) * 2 - 1) * .92 + .05 * Math.sin(now * .6 + i + ci);
+      const len = (.15 + .12 * hash(i * 2.3 + ci)) * (reduced ? 1 : 1 + .06 * Math.sin(now * 1.1 + i));
+      const x1 = p[0] + Math.cos(an) * len, y1 = p[1] + Math.sin(an) * len;
+      const arr = [X(p[0]), Y(p[1]), X(x1), Y(y1)];
+      strokePoly(arr, 1, rgba(ACC, 1), astA);
+      if (i % 3 === 0 && astA > .05) addHit({ tier: 4, type: 'poly', a: arr, r: 5, name: 'Microtubule astral', role: 'Rayonne vers la périphérie et aide à positionner le fuseau dans la cellule.' });
+    }
+  });
+
+  /* fuseau : microtubules interpolaires */
+  const ovx = .14 - .06 * M.B;
+  const interA = .34 * (1 - sm(.69, .76, t));
+  if (interA > .01) {
+    for (const sd of [-1, 1]) {
+      const p = M.cent[sd];
+      for (let j = 0; j < 10; j++) {
+        const lam = (j + .5) / 5 - 1, sgn = lam < 0 ? -1 : 1, al = Math.abs(lam);
+        const ws = .62 - .22 * sm(.5, .72, t);
+        const ym = sgn * (M.eOld * (.49 + .05 * al) + (1 - M.eOld) * al * ws);
+        const h1 = hash(j * 1.9 + (sd > 0 ? 7 : 0));
+        let fr = sm(.10 + .05 * h1, .22 + .06 * h1, t);
+        fr = Math.min(fr, lerp(.45, 1, sm(.25, .33, t)));
+        if (lam < 0) fr *= sm(.6, .95, M.m);
+        if (fr < .01) continue;
+        const tipx = -sd * ovx, tipy = ym * .92;
+        const cx1 = (p[0] + tipx) / 2 + (p[0] - tipx) * .10, cy1 = ym * 1.15;
+        const a = quadPts(X(p[0]), Y(p[1]), X(cx1), Y(cy1), X(tipx), Y(tipy), 0, fr, 14);
+        strokePoly(a, 1, rgba(ACC, 1), interA);
+        if (j % 2 === 0) addHit({ tier: 4, type: 'poly', a, r: 4, name: 'Microtubule interpolaire', role: "Chevauche celui du pôle opposé ; en glissant, il écarte les pôles à l'anaphase." });
+      }
+    }
+  }
+  /* faisceau central (fuseau central) */
+  const midA = sm(.66, .74, t) * (1 - sm(.86, .94, t));
+  if (midA > .02) {
+    const hw = Math.min(.05, cell.neck ? cell.neck * .55 : .05);
+    const ext = .38 * (1 - .3 * M.q);
+    for (let i = 0; i < 5; i++) {
+      const y = (i - 2) / 2 * hw;
+      const arr = [X(-ext), Y(y), X(ext), Y(y)];
+      strokePoly(arr, 1.2, rgba(ACC, 1), .55 * midA);
+      if (i === 2) addHit({ tier: 4, type: 'poly', a: arr, r: 6, name: 'Fuseau central', role: "Faisceau de microtubules resté entre les deux noyaux ; il guide l'anneau de division." });
+    }
+  }
+  ctx.restore();
+
+  /* enveloppe nucléaire (fragments) */
+  const pieces = [];
+  for (let i = 0; i < NP; i++) {
+    const sg = i % 2 ? 1 : -1;
+    const al = i / NP * TAU;
+    const wob = reduced ? 0 : .012 * Math.sin(3 * al + now * .8);
+    const pI = [(.42 * (1 + wob)) * Math.cos(al), (.42 * (1 + wob)) * Math.sin(al)], tI = al + Math.PI / 2;
+    const vs = [sg * (.24 + .55 * hash(i * 3.1)) + (reduced ? 0 : .012 * Math.sin(now * .5 + i)), (hash(i * 5.7) - .5) * 1.25 + (reduced ? 0 : .012 * Math.cos(now * .4 + i * 1.7))];
+    const tV = hash(i * 7.3) * Math.PI;
+    const ii = Math.floor(i / 2), ad2 = ii / (NP / 2) * TAU;
+    const wobD = reduced ? 0 : .012 * Math.sin(3 * ad2 + now * .8 + 1);
+    const pD = [sg * .70 + .27 * (1 + wobD) * Math.cos(ad2), .27 * (1 + wobD) * Math.sin(ad2)], tD = ad2 + Math.PI / 2;
+    const bt = .24 + .07 * hash(i * 1.3), b = sm(bt, bt + .02, t);
+    const rt = .72 + .07 * hash(i * 2.9), r = sm(rt, rt + .03, t);
+    const px = lerp(lerp(pI[0], vs[0], b), pD[0], r), py = lerp(lerp(pI[1], vs[1], b), pD[1], r);
+    const tt = lerp(lerp(tI, tV + Math.round((tI - tV) / Math.PI) * Math.PI, b), tD, r);
+    const len = lerp(lerp(TAU * .42 / NP * 1.05, TAU * .42 / NP * .5, b), TAU * .27 / (NP / 2) * 1.05, r) * (1 - .0);
+    const lf = lerp(1, .55, b * (1 - r));
+    const vis = (t < .24) ? 1 : (t < .31 + .02 ? 1 : (t < .72 ? (1) : 1));
+    // fragments visibles seulement si non disperses hors phase de vesicules : ils restent, plus petits
+    const dx = Math.cos(tt) * len * lf / 2, dy = Math.sin(tt) * len * lf / 2;
+    const isVes = b * (1 - r) > .5;
+    pieces.push([X(px - dx), Y(py - dy), X(px + dx), Y(py + dy), isVes, px, py]);
+  }
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(190,205,225,.78)';
+  ctx.lineWidth = 1.7;
+  ctx.beginPath();
+  pieces.forEach(p => { ctx.moveTo(p[0], p[1]); ctx.lineTo(p[2], p[3]); });
+  ctx.stroke();
+  {
+    const nm = t < .72 ? (t < .24 ? "Enveloppe nucléaire" : "Fragment d'enveloppe nucléaire") : "Enveloppe nucléaire";
+    const role = t < .24 ? "Double membrane qui isole l'ADN dans le noyau." : (t < .72 ? "L'enveloppe se démonte en vésicules pour laisser les microtubules atteindre les chromosomes." : "Elle se reforme autour de chaque lot de chromosomes.");
+    pieces.forEach((p, i) => { if (i % 1 === 0) addHit({ tier: 3, type: 'circ', x: (p[0] + p[2]) / 2, y: (p[1] + p[3]) / 2, r: 8, name: nm, role }); });
+  }
+
+  /* chromatides */
+  const chs = [];
+  for (let k = 0; k < 4; k++) for (let j = 0; j < 2; j++) chs.push(chromatid(M, k, j));
+
+  /* microtubules kinetochoriens */
+  const kA = (1 - sm(.66, .73, t));
+  if (t >= .24 && kA > .01) {
+    ctx.save(); ctx.clip(cell.path);
+    chs.forEach(h => {
+      const c = CH[h.k];
+      const P = M.cent[h.zeta > 0 ? '1' : '-1'];
+      const att = c.att[h.j];
+      const K = h.K;
+      const sel = st.sel < 0 || st.sel === h.k;
+      const al = kA * (sel ? 1 : .35);
+      if (t < att) {
+        // exploration : microtubules dynamiques qui cherchent le kinétochore
+        const u = clamp((t - (att - .035)) / .035);
+        const vx = K.x - P[0], vy = K.y - P[1], d = Math.hypot(vx, vy);
+        for (let q = 0; q < 2; q++) {
+          const dev = (1 - u) * (.55 + .25 * q) * Math.sin((reduced ? 0 : 0) + t * 260 + q * 2.1 + h.k * 1.3 + h.j * 3);
+          const [rx, ry] = rot(vx, vy, dev);
+          const len = (1 - u) * (.45 + .30 * Math.sin(t * 190 + q * 1.4 + h.k)) + u;
+          const arr = [X(P[0]), Y(P[1]), X(P[0] + rx * Math.min(1, len)), Y(P[1] + ry * Math.min(1, len))];
+          strokePoly(arr, 1, rgba(ACC, 1), .38 * al);
+        }
+      } else {
+        const Tk = sm(att, c.mvE, t) * (t < T_CLEAVE ? 1 : .55);
+        for (let f = -1; f <= 1; f++) {
+          const sx = P[0] + 0.0, sy = P[1] + f * .022;
+          const ex = K.x - K.dy * f * .014, ey = K.y + K.dx * f * .014;
+          const vx = ex - sx, vy = ey - sy, d = Math.hypot(vx, vy) || 1;
+          const slack = (1 - Tk) * .10 * (f === 0 ? 1 : -.7);
+          const shim = reduced ? 0 : .004 * Math.sin(now * 19 + f * 2 + h.k) * Tk;
+          const cx1 = (sx + ex) / 2 - vy / d * (slack + shim), cy1 = (sy + ey) / 2 + vx / d * (slack + shim);
+          const arr = quadPts(X(sx), Y(sy), X(cx1), Y(cy1), X(ex), Y(ey), 0, 1, 10);
+          strokePoly(arr, 1.1, rgba(ACC, 1), (.34 + .4 * Tk) * al);
+          if (f === 0) addHit({ tier: 4, type: 'poly', a: arr, r: 5, name: 'Microtubule kinétochorien', role: 'Relie un pôle à un kinétochore ; il raccourcit pour tirer la chromatide.' });
+        }
+      }
+    });
+    ctx.restore();
+  }
+
+  /* chromatides : dessin */
+  chs.forEach(h => {
+    const c = CH[h.k];
+    const sel = st.sel < 0 ? 1 : (st.sel === h.k ? 2 : 0);
+    const a = (.50 + .50 * h.kap) * (sel === 0 ? .32 : 1);
+    const k = h.j === 0 ? 1 : .84;
+    const col = mixc(c.rgb, a, k);
+    const pts = h.pts, wd = h.wd;
+    const scr = [];
+    for (let i = 0; i <= NSEG; i++) scr.push(X(pts[2 * i]), Y(pts[2 * i + 1]));
+    if (sel === 2) {
+      ctx.lineCap = 'round';
+      for (let i = 0; i < NSEG; i++) { ctx.beginPath(); ctx.moveTo(scr[2 * i], scr[2 * i + 1]); ctx.lineTo(scr[2 * i + 2], scr[2 * i + 3]); ctx.lineWidth = wd[i] * S * 2.6 + 5; ctx.strokeStyle = rgba(ACC, .16); ctx.stroke(); }
+    }
+    ctx.lineCap = 'round';
+    for (let i = 0; i < NSEG; i++) {
+      ctx.beginPath(); ctx.moveTo(scr[2 * i], scr[2 * i + 1]); ctx.lineTo(scr[2 * i + 2], scr[2 * i + 3]);
+      ctx.lineWidth = Math.max(1, (wd[i] + wd[i + 1]) / 2 * S); ctx.strokeStyle = col; ctx.stroke();
+    }
+    if (h.kap > .45) {
+      const hl = mixc([255, 255, 255], .30 * (sel === 0 ? .3 : 1) * h.kap, 1);
+      for (let i = 0; i < NSEG; i++) {
+        ctx.beginPath(); ctx.moveTo(scr[2 * i], scr[2 * i + 1]); ctx.lineTo(scr[2 * i + 2], scr[2 * i + 3]);
+        ctx.lineWidth = Math.max(.6, (wd[i] + wd[i + 1]) / 2 * S * .34); ctx.strokeStyle = hl; ctx.globalAlpha = .55; ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    const nm = h.kap < .5 ? 'Chromatine (ADN déployé)' : 'Chromosome ' + c.id + (M.s > .02 ? ' — chromatide ' + (h.j ? 'b' : 'a') + ', devenue chromosome' : ' — chromatide sœur ' + (h.j ? 'b' : 'a'));
+    const rl = h.kap < .5 ? "Un chromosome déroulé : illisible au microscope, mais son ADN est déjà copié en double." : (M.s > .02 ? "Séparée de sa sœur, elle est tirée vers un pôle, centromère en tête." : "Copie identique de l'autre chromatide, soudée à elle par la cohésine au centromère.");
+    addHit({ tier: 2, type: 'poly', a: scr, r: Math.max(6, wd[6] * S / 2 + 4), name: nm, role: rl, ch: h.k });
+  });
+
+  /* cohesine + éclat */
+  const tau = t - T_CLEAVE;
+  for (let k = 0; k < 4; k++) {
+    const h = chs[k * 2], h2 = chs[k * 2 + 1];
+    const mx = (h.C[0] + h2.C[0]) / 2, my = (h.C[1] + h2.C[1]) / 2;
+    const ringA = h.kap * (t < T_CLEAVE ? 1 : 1 - sm(0, .010, tau)) * sm(.15, .24, t) * (st.sel < 0 || st.sel === k ? 1 : .35);
+    if (ringA > .02) {
+      const glimmer = sm(-.012, 0, tau);
+      const col = glimmer > 0 && tau < 0 ? rgba([255, 209, 102], .5 + .5 * glimmer) : (tau >= 0 ? rgba(ENE, 1) : rgba(CREME, .85));
+      for (let r = -1; r <= 1; r++) {
+        ctx.beginPath(); ctx.arc(X(mx + h.ax * r * .022), Y(my + h.ay * r * .022), .0105 * S, 0, TAU);
+        ctx.lineWidth = 1.2; ctx.strokeStyle = col; ctx.globalAlpha = ringA; ctx.stroke(); ctx.globalAlpha = 1;
+      }
+      if (t < T_CLEAVE && t > .3) addHit({ tier: 0, type: 'circ', x: X(mx), y: Y(my), r: Math.max(8, .035 * S), name: 'Cohésine', role: "Anneaux de protéines qui retiennent les chromatides sœurs ; la séparase les coupe à l'anaphase." });
+    }
+    if (tau > 0 && tau < .045) {
+      const u = tau / .045, I = Math.pow(1 - u, 2);
+      const rr = (.03 + .16 * Math.sqrt(u)) * S;
+      const gr = ctx.createRadialGradient(X(mx), Y(my), 0, X(mx), Y(my), rr);
+      gr.addColorStop(0, rgba(ENE, .95 * I)); gr.addColorStop(.4, rgba(ENE, .35 * I)); gr.addColorStop(1, rgba(ENE, 0));
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(X(mx), Y(my), rr, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(X(mx), Y(my), rr * .9, 0, TAU); ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(ENE, .5 * I); ctx.stroke();
+    }
+  }
+
+  /* kinétochores */
+  chs.forEach(h => {
+    const K = h.K; if (K.v < .02) return;
+    const sel = st.sel < 0 || st.sel === h.k;
+    const cx1 = X(K.x), cy1 = Y(K.y), an = Math.atan2(K.dy, K.dx);
+    ctx.save(); ctx.translate(cx1, cy1); ctx.rotate(an);
+    ctx.fillStyle = rgba(CREME, K.v * (sel ? .95 : .35));
+    const w1 = Math.max(2.4, .012 * S), h1 = Math.max(5, .058 * S);
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-w1 / 2, -h1 / 2, w1, h1, w1 / 2) : ctx.rect(-w1 / 2, -h1 / 2, w1, h1); ctx.fill();
+    ctx.restore();
+    if (K.v > .5) addHit({ tier: 0, type: 'circ', x: cx1, y: cy1, r: Math.max(9, .04 * S), name: 'Kinétochore', role: "Complexe de protéines sur le centromère : le point d'ancrage des microtubules." });
+  });
+
+  /* centrosomes */
+  cents.forEach(({ sd, p }, ci) => {
+    const x = X(p[0]), y = Y(p[1]);
+    const gr = ctx.createRadialGradient(x, y, 0, x, y, .09 * S);
+    gr.addColorStop(0, rgba(ACC, .30)); gr.addColorStop(1, rgba(ACC, 0));
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, .09 * S, 0, TAU); ctx.fill();
+    const an = p[2] + (sd > 0 ? 0 : 0) + ci * .4;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(p[1], p[0]) + .4);
+    ctx.fillStyle = rgba(CREME, .92);
+    const lw = Math.max(2.6, .016 * S), ll = Math.max(6, .05 * S);
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-ll / 2, -lw / 2 - .012 * S, ll, lw, lw / 2) : ctx.rect(-ll / 2, -lw / 2 - .012 * S, ll, lw); ctx.fill();
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-lw / 2 + .018 * S, .004 * S, lw, ll * .85, lw / 2) : ctx.rect(-lw / 2 + .018 * S, .004 * S, lw, ll * .85); ctx.fill();
+    ctx.restore();
+    addHit({ tier: 1, type: 'circ', x, y, r: Math.max(13, .06 * S), name: 'Centrosome', role: 'Organisateur du fuseau : deux centrioles et un nuage de protéines qui fabriquent les microtubules.' });
+  });
+
+  /* anneau contractile */
+  if (M.q > .01 && !cell.sep) {
+    const ra = sm(.0, .05, M.q) * (1 - sm(.88, .97, M.q));
+    const yy = Math.max(0, cell.neck - .035);
+    const pulse = reduced ? 0 : .12 * Math.sin(now * 3);
+    for (const sg of [-1, 1]) {
+      const cx1 = X(0), cy1 = Y(sg * yy);
+      const gr = ctx.createRadialGradient(cx1, cy1, 0, cx1, cy1, .10 * S);
+      gr.addColorStop(0, rgba(ENE, (.5 + pulse) * ra)); gr.addColorStop(1, rgba(ENE, 0));
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx1, cy1, .10 * S, 0, TAU); ctx.fill();
+      ctx.fillStyle = rgba(ENE, .95 * ra); ctx.beginPath(); ctx.ellipse(cx1, cy1, .045 * S, .016 * S, 0, 0, TAU); ctx.fill();
+      // filaments d'actine
+      ctx.strokeStyle = rgba(ENE, .7 * ra); ctx.lineWidth = 1;
+      for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(cx1 + i * .02 * S, cy1 - sg * .016 * S); ctx.lineTo(cx1 + i * .02 * S + .012 * S, cy1 - sg * .05 * S); ctx.stroke(); }
+      addHit({ tier: 1, type: 'circ', x: cx1, y: cy1, r: Math.max(14, .07 * S), name: 'Anneau contractile', role: "Actine et myosine II : il se resserre comme un cordon de bourse et pince la membrane." });
+    }
+  }
+
+  /* etiquettes du chromosome suivi */
+  if (st.sel >= 0) {
+    ctx.font = '500 11px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    [0, 1].forEach(j => {
+      const h = chs[st.sel * 2 + j];
+      const x = X(h.anchor[0]), y = Y(h.anchor[1]);
+      ctx.fillStyle = 'rgba(10,13,18,.85)'; ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.fill();
+      ctx.strokeStyle = rgba(ACC, .9); ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = rgba(ACC, 1); ctx.fillText(j ? 'b' : 'a', x, y + .5);
+    });
+  }
+
+  /* barre d'echelle : 0,5 unite = 5 micrometres */
+  {
+    const x0 = 28, y0 = H - 22, len = .5 * S;
+    ctx.strokeStyle = 'rgba(232,228,220,.6)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(x0, y0 - 4); ctx.lineTo(x0, y0 + 4); ctx.moveTo(x0, y0); ctx.lineTo(x0 + len, y0); ctx.moveTo(x0 + len, y0 - 4); ctx.lineTo(x0 + len, y0 + 4); ctx.stroke();
+    ctx.fillStyle = 'rgba(138,147,160,1)'; ctx.font = '11px "IBM Plex Mono", ui-monospace, monospace'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    ctx.fillText('5 µm', x0, y0 - 8);
+  }
+
+  /* survol */
+  let hov = null;
+  if (st.inside) hov = pick(st.mx, st.my);
+  st.hov = hov;
+  if (hov) {
+    if (hov.type === 'circ') { ctx.beginPath(); ctx.arc(hov.x, hov.y, Math.min(hov.r, 16), 0, TAU); ctx.strokeStyle = rgba(CREME, .7); ctx.lineWidth = 1; ctx.stroke(); }
+    showTip(hov);
+  } else hideTip();
+  cv.style.cursor = hov && hov.ch !== undefined ? 'pointer' : 'default';
+  updatePanel(M, chs, cell);
+}
+
+function pick(mx, my) {
+  let best = null, bt = 99, br = 9;
+  for (const h of hits) {
+    let d;
+    if (h.type === 'circ') d = Math.hypot(mx - h.x, my - h.y); else d = polyDist(mx, my, h.a);
+    if (d <= h.r) {
+      const ratio = d / h.r;
+      if (h.tier < bt || (h.tier === bt && ratio < br)) { best = h; bt = h.tier; br = ratio; }
+    }
+  }
+  return best;
+}
+let tipKey = '';
+function showTip(h) {
+  const key = h.name + h.role;
+  if (key !== tipKey) { tipKey = key; el.tip.firstElementChild.textContent = h.name; el.tip.lastElementChild.textContent = h.role; }
+  const tw = el.tip.offsetWidth || 220, th = el.tip.offsetHeight || 50;
+  let x = st.mx + 16, y = st.my + 16;
+  if (x + tw > W - 8) x = st.mx - tw - 16;
+  if (y + th > H - 8) y = st.my - th - 16;
+  el.tip.style.left = Math.max(6, x) + 'px'; el.tip.style.top = Math.max(6, y) + 'px';
+  el.tip.classList.add('on');
+}
+function hideTip() { el.tip.classList.remove('on'); tipKey = ''; }
+
+/* ---------- entrees ---------- */
+cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); st.mx = e.clientX - r.left; st.my = e.clientY - r.top; st.inside = true; });
+cv.addEventListener('pointerleave', () => { st.inside = false; });
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(); st.mx = e.clientX - r.left; st.my = e.clientY - r.top; st.inside = true;
+  const h = pick(st.mx, st.my);
+  select(h && h.ch !== undefined ? h.ch : -1, true);
+  if (e.pointerType !== 'mouse') { render(); setTimeout(() => { st.inside = false; }, 1600); }
+});
+const chipsBox = $('chips');
+CH.forEach((c, k) => {
+  const b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = '<i style="background:' + c.col + '"></i>' + c.id;
+  b.addEventListener('click', () => select(st.sel === k ? -1 : k, false));
+  chipsBox.appendChild(b);
+});
+function select(k, fromCanvas) {
+  if (fromCanvas && k === st.sel) k = -1;
+  st.sel = k;
+  [...chipsBox.children].forEach((b, i) => b.setAttribute('aria-pressed', i === k ? 'true' : 'false'));
+}
+
+/* scrubber */
+const segsBox = $('segs'), marksBox = $('marks');
+const segFill = [];
+PHASES.forEach((P, i) => {
+  const w = (Math.min(P.t1, 1) - P.t0) * 100;
+  const s = document.createElement('div'); s.className = 'seg'; s.style.width = 'calc(' + w + '% - 3px)'; s.style.flex = 'none';
+  const f = document.createElement('i'); s.appendChild(f); segsBox.appendChild(s); segFill.push(f);
+  const m = document.createElement('span'); m.style.left = ((P.t0 + Math.min(P.t1, 1)) / 2 * 100) + '%';
+  m.innerHTML = '<span class="t">' + P.short + '</span><span class="n">' + P.n + '</span>';
+  marksBox.appendChild(m);
+});
+// les etiquettes sont des span imbriques : on aplatit pour le style
+[...marksBox.children].forEach(m => { const t1 = m.querySelector('.t'), n1 = m.querySelector('.n'); });
+const rng = el.rng;
+rng.addEventListener('pointerdown', () => { st.dragging = true; st.wasPlaying = st.playing; setPlaying(false); });
+window.addEventListener('pointerup', () => { if (st.dragging) { st.dragging = false; if (st.wasPlaying && st.t < 1) setPlaying(true); } });
+rng.addEventListener('input', () => { st.t = rng.value / 1000; });
+
+function setPlaying(p) {
+  st.playing = p;
+  el.icPlay.style.display = p ? 'none' : ''; el.icPause.style.display = p ? '' : 'none';
+  el.play.setAttribute('aria-label', p ? 'Pause' : (st.t >= 1 ? 'Rejouer' : 'Lecture'));
+}
+function toggle() { if (!st.playing && st.t >= 1) st.t = 0; setPlaying(!st.playing); }
+function reset() { st.t = 0; setPlaying(false); select(-1); }
+function step(d) { st.t = clamp(st.t + d); }
+el.play.addEventListener('click', toggle);
+$('reset').addEventListener('click', reset);
+document.querySelectorAll('.speed button').forEach(b => b.addEventListener('click', () => {
+  st.speed = parseFloat(b.dataset.s);
+  document.querySelectorAll('.speed button').forEach(x => x.setAttribute('aria-checked', x === b ? 'true' : 'false'));
+}));
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat) toggle(); }
+  else if (k === 'ArrowRight') { e.preventDefault(); step(e.shiftKey ? .05 : .01); }
+  else if (k === 'ArrowLeft') { e.preventDefault(); step(e.shiftKey ? -.05 : -.01); }
+  else if (k === 'r' || k === 'R') { reset(); }
+  else if (k >= '1' && k <= '7') { st.t = PHASES[+k - 1].t0 + .002; }
+});
+document.addEventListener('keyup', e => { if (e.key === ' ') e.preventDefault(); });
+
+/* ---------- boucle ---------- */
+let last = performance.now();
+function loop(ts) {
+  const dt = Math.min(.1, (ts - last) / 1000); last = ts;
+  if (!reduced) now += dt;
+  if (st.playing) {
+    st.t += dt * st.speed / 60;
+    if (st.t >= 1) { st.t = 1; setPlaying(false); }
+  }
+  if (!st.dragging) rng.value = Math.round(st.t * 1000);
+  render();
+  requestAnimationFrame(loop);
+}
+resize();
+setPlaying(st.playing);
+if ('ResizeObserver' in window) new ResizeObserver(resize).observe(stage);
+requestAnimationFrame(loop);
+window.__mitose = { st, render, resize };
+})();
+</script>
+</body>
+</html>
