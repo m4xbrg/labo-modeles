@@ -10,10 +10,10 @@ Pour Astra (sans accès à tes fichiers), utilise plutôt `astra-neurone.md`, qu
 Tu construis une page web interactive de vulgarisation scientifique, qui fait partie d'une série de quatre.
 
 Lis d'abord, en entier :
-1. C:\Users\m4xbr\Documents\labo-modeles\prompts\00-direction-artistique.md  (charte commune, obligatoire)
-2. C:\Users\m4xbr\Documents\labo-modeles\prompts\XX-projet.md  (brief du projet)
+1. <dossier du projet>\prompts\00-direction-artistique.md  (charte commune, obligatoire)
+2. <dossier du projet>\prompts\XX-projet.md  (brief du projet)
 
-Livre dans C:\Users\m4xbr\Documents\labo-modeles\MODELE\XX-projet\ :
+Livre dans <dossier du projet>\MODELE\XX-projet\ :
 - index.html : la page interactive, autonome (CSS et JS inline).
 - explication.html : le document complémentaire décrit dans la charte.
 

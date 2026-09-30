@@ -8,8 +8,8 @@ Ouvre une nouvelle session Claude Code dans `labo-modeles`, choisis **Opus 5.5**
 Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web interactive de vulgarisation scientifique sur la mitose. Tu ne codes pas toi-même l'essentiel : tu diriges des sous-agents Sonnet 5.5, puis tu intègres et tu vérifies. Le but est de tester ce duo Opus + Sonnet.
 
 1. Lis en entier :
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/00-direction-artistique.md (charte commune, obligatoire)
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/01-mitose.md (brief du projet)
+   - <dossier du projet>/prompts/00-direction-artistique.md (charte commune, obligatoire)
+   - <dossier du projet>/prompts/01-mitose.md (brief du projet)
 
 2. Planifie. Découpe le travail en 2 à 4 lots indépendants (par exemple : moteur de simulation et scène, contrôles et panneau de lecture, document explication.html, passe finale de motion). Pour chaque lot, écris un brief précis : contrat d'interface (noms de fonctions, format des données, variables CSS), critères d'acceptation, exactitude scientifique attendue.
 
@@ -19,7 +19,7 @@ Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web inte
 
 5. Vérifie. node --check sur le JS extrait ; si Playwright est disponible (channel: 'msedge', sans télécharger de navigateur), ouvre la page, capture les erreurs console et des captures à 1440 px et 375 px. Corrige ce que tu trouves. Si tu ne peux pas vérifier dans un navigateur, dis-le.
 
-Dossier de sortie : C:/Users/m4xbr/Documents/labo-modeles/opus-orchestre/01-mitose/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
+Dossier de sortie : <dossier du projet>/opus-orchestre/01-mitose/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
 
 Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a livré, combien d'allers-retours de correction, ce que tu as vérifié et comment, les simplifications scientifiques assumées, et ton avis honnête sur ce que la délégation a apporté ou coûté.
 ```
@@ -30,8 +30,8 @@ Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a l
 Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web interactive de vulgarisation scientifique sur la respiration cellulaire. Tu ne codes pas toi-même l'essentiel : tu diriges des sous-agents Sonnet 5.5, puis tu intègres et tu vérifies. Le but est de tester ce duo Opus + Sonnet.
 
 1. Lis en entier :
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/00-direction-artistique.md (charte commune, obligatoire)
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/02-respiration.md (brief du projet)
+   - <dossier du projet>/prompts/00-direction-artistique.md (charte commune, obligatoire)
+   - <dossier du projet>/prompts/02-respiration.md (brief du projet)
 
 2. Planifie. Découpe le travail en 2 à 4 lots indépendants (par exemple : moteur de simulation et scène, contrôles et panneau de lecture, document explication.html, passe finale de motion). Pour chaque lot, écris un brief précis : contrat d'interface (noms de fonctions, format des données, variables CSS), critères d'acceptation, exactitude scientifique attendue.
 
@@ -41,7 +41,7 @@ Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web inte
 
 5. Vérifie. node --check sur le JS extrait ; si Playwright est disponible (channel: 'msedge', sans télécharger de navigateur), ouvre la page, capture les erreurs console et des captures à 1440 px et 375 px. Corrige ce que tu trouves. Si tu ne peux pas vérifier dans un navigateur, dis-le.
 
-Dossier de sortie : C:/Users/m4xbr/Documents/labo-modeles/opus-orchestre/02-respiration/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
+Dossier de sortie : <dossier du projet>/opus-orchestre/02-respiration/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
 
 Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a livré, combien d'allers-retours de correction, ce que tu as vérifié et comment, les simplifications scientifiques assumées, et ton avis honnête sur ce que la délégation a apporté ou coûté.
 ```
@@ -52,8 +52,8 @@ Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a l
 Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web interactive de vulgarisation scientifique sur le neurone. Tu ne codes pas toi-même l'essentiel : tu diriges des sous-agents Sonnet 5.5, puis tu intègres et tu vérifies. Le but est de tester ce duo Opus + Sonnet.
 
 1. Lis en entier :
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/00-direction-artistique.md (charte commune, obligatoire)
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/03-neurone.md (brief du projet)
+   - <dossier du projet>/prompts/00-direction-artistique.md (charte commune, obligatoire)
+   - <dossier du projet>/prompts/03-neurone.md (brief du projet)
 
 2. Planifie. Découpe le travail en 2 à 4 lots indépendants (par exemple : moteur de simulation et scène, contrôles et panneau de lecture, document explication.html, passe finale de motion). Pour chaque lot, écris un brief précis : contrat d'interface (noms de fonctions, format des données, variables CSS), critères d'acceptation, exactitude scientifique attendue.
 
@@ -63,7 +63,7 @@ Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web inte
 
 5. Vérifie. node --check sur le JS extrait ; si Playwright est disponible (channel: 'msedge', sans télécharger de navigateur), ouvre la page, capture les erreurs console et des captures à 1440 px et 375 px. Corrige ce que tu trouves. Si tu ne peux pas vérifier dans un navigateur, dis-le.
 
-Dossier de sortie : C:/Users/m4xbr/Documents/labo-modeles/opus-orchestre/03-neurone/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
+Dossier de sortie : <dossier du projet>/opus-orchestre/03-neurone/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
 
 Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a livré, combien d'allers-retours de correction, ce que tu as vérifié et comment, les simplifications scientifiques assumées, et ton avis honnête sur ce que la délégation a apporté ou coûté.
 ```
@@ -74,8 +74,8 @@ Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a l
 Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web interactive de vulgarisation scientifique sur le champ électrique. Tu ne codes pas toi-même l'essentiel : tu diriges des sous-agents Sonnet 5.5, puis tu intègres et tu vérifies. Le but est de tester ce duo Opus + Sonnet.
 
 1. Lis en entier :
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/00-direction-artistique.md (charte commune, obligatoire)
-   - C:/Users/m4xbr/Documents/labo-modeles/prompts/04-champ-electrique.md (brief du projet)
+   - <dossier du projet>/prompts/00-direction-artistique.md (charte commune, obligatoire)
+   - <dossier du projet>/prompts/04-champ-electrique.md (brief du projet)
 
 2. Planifie. Découpe le travail en 2 à 4 lots indépendants (par exemple : moteur de simulation et scène, contrôles et panneau de lecture, document explication.html, passe finale de motion). Pour chaque lot, écris un brief précis : contrat d'interface (noms de fonctions, format des données, variables CSS), critères d'acceptation, exactitude scientifique attendue.
 
@@ -85,7 +85,7 @@ Tu es l'orchestrateur (Claude Opus 5.5) d'un petit projet : une planche web inte
 
 5. Vérifie. node --check sur le JS extrait ; si Playwright est disponible (channel: 'msedge', sans télécharger de navigateur), ouvre la page, capture les erreurs console et des captures à 1440 px et 375 px. Corrige ce que tu trouves. Si tu ne peux pas vérifier dans un navigateur, dis-le.
 
-Dossier de sortie : C:/Users/m4xbr/Documents/labo-modeles/opus-orchestre/04-champ-electrique/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
+Dossier de sortie : <dossier du projet>/opus-orchestre/04-champ-electrique/ . Ne touche à rien d'autre. Pas de git. Pas d'emoji.
 
 Rapport final (moins de 250 mots) : ton découpage, ce que chaque sous-agent a livré, combien d'allers-retours de correction, ce que tu as vérifié et comment, les simplifications scientifiques assumées, et ton avis honnête sur ce que la délégation a apporté ou coûté.
 ```
