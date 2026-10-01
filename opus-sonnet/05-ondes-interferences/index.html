@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. La scène est une cuve à ondes vue de dessus : la hauteur de l'eau est calculée en chaque point (somme exacte de deux ondes circulaires), crête orange, creux bleu, niveau zéro dans le noir de la page ; l'intensité moyenne, elle, prend le jaune de l'énergie.
+  2. Le mouvement ne dit qu'une chose : la forme voyage, la matière non. Les fronts avancent à la vitesse c, les sources s'allument avec un front doux, et le passage de l'image instantanée aux franges d'énergie est un fondu continu, jamais un saut.
+  3. Le calcul est analytique par cellule : distances, amplitudes et phases sont précalculées quand une source bouge, de sorte que chaque image ne fait que mélanger deux termes ; les repères (hyperboles, sondes) sont calculés, jamais placés à l'œil.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ondes et interférences — L’invisible en mouvement 05</title>
+<meta name="description" content="Deux sources, deux ondes qui se croisent : observe où elles se renforcent, où elles s'annulent, et où va l'énergie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#b9c6ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head{isolation:isolate}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:var(--vo,.6);background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.strip{position:absolute;left:0;right:0;bottom:0;height:108px;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease);background:linear-gradient(0deg,rgba(10,13,18,.97) 0%,rgba(10,13,18,.93) 80%,rgba(10,13,18,0) 100%)}
+.strip.on{opacity:1;transform:none}
+#stCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:250px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:26px}
+.row.small .val{font-size:14px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px}
+#scope{display:block;width:100%;height:124px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:6px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:4px;flex:1 1 420px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+.tools[hidden]{display:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:48px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:110px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.strip,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Cuve à ondes vue de dessus : deux sources ponctuelles émettent des ondes circulaires qui s'additionnent. Les crêtes sont orange, les creux bleus."></canvas>
+    <div class="strip" id="strip"><canvas id="stCv" aria-hidden="true"></canvas></div>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — 05</p>
+      <h1>Ondes et <em>interférences</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VI</p>
+      <h2 id="stepTitle">Une source</h2>
+      <p id="stepText" aria-live="polite"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="mEye">Mesures · sonde <b id="mName">R</b></p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Oscilloscope : déplacement de l'eau à la sonde en fonction du temps, onde 1, onde 2 et leur somme."></canvas></div>
+      <p class="leg">
+        <span><svg viewBox="0 0 20 6"><line x1="0" y1="3" x2="20" y2="3" stroke="#8a93a0" stroke-width="1.4"/></svg>onde 1</span>
+        <span><svg viewBox="0 0 20 6"><line x1="0" y1="3" x2="20" y2="3" stroke="#b9c6ff" stroke-width="1.4" stroke-dasharray="4 3"/></svg>onde 2</span>
+        <span><svg viewBox="0 0 20 6"><line x1="0" y1="3" x2="20" y2="3" stroke="#e8e4dc" stroke-width="2.4"/></svg>somme</span>
+      </p>
+    </section>
+
+    <section>
+      <div class="meas">
+        <div class="row small"><span class="lab">Différence de marche Δ</span><span class="val"><b id="mD">—</b><i>λ</i></span></div>
+        <div class="row small"><span class="lab">Déphasage à l'arrivée</span><span class="val"><b id="mPh">—</b><i>°</i></span></div>
+        <div class="row small"><span class="lab">Amplitude de la somme</span><span class="val"><b id="mA">—</b><i>0–2</i></span></div>
+        <div class="row small"><span class="lab">Intensité moyenne</span><span class="val"><b id="mI">—</b><i>I₀</i></span></div>
+      </div>
+      <p class="note" id="mNote">Échelle verticale fixe : ±2 A. Δ = r₂ − r₁, distances de la sonde aux deux sources.</p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>6</kbd> aller à l'acte</li>
+        <li><kbd>R</kbd> réinitialiser l'acte</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les six actes">
+      <button class="seg" data-a="0" title="Acte I — Une source"><b>I</b><span>Une source</span></button>
+      <button class="seg" data-a="1" title="Acte II — Deux impulsions"><b>II</b><span>Impulsions</span></button>
+      <button class="seg" data-a="2" title="Acte III — Renforcement et annulation"><b>III</b><span>Annulation</span></button>
+      <button class="seg" data-a="3" title="Acte IV — Où va l'énergie ?"><b>IV</b><span>Énergie</span></button>
+      <button class="seg" data-a="4" title="Acte V — Onde stationnaire"><b>V</b><span>Stationnaire</span></button>
+      <button class="seg" data-a="5" title="Acte VI — À toi"><b>VI</b><span>À toi</span></button>
+    </div>
+
+    <div class="tools" id="tools" hidden>
+      <div class="grp">
+        <span class="gl">λ</span>
+        <input type="range" id="rLam" min="30" max="90" step="1" value="48" aria-label="Longueur d'onde en pixels">
+        <span class="rv" id="vLam">48 px</span>
+      </div>
+      <div class="grp">
+        <span class="gl">Phase de S2</span>
+        <input type="range" id="rPh" min="0" max="360" step="15" value="0" aria-label="Déphasage de la source S2 en degrés">
+        <span class="rv" id="vPh">0°</span>
+      </div>
+      <div class="grp">
+        <span class="gl">Vue</span>
+        <button class="btn" id="bInst" aria-pressed="true"><span class="dot" style="color:var(--positif)"></span>Instantané</button>
+        <button class="btn" id="bInt" aria-pressed="false"><span class="dot" style="color:var(--energie)"></span>Intensité moyenne</button>
+        <button class="btn" id="bCut" aria-pressed="false">Coupe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Modèle ----------------
+   Onde scalaire 2D (cuve à ondes). Source i : u_i = A_i(r_i) · g_i · sin(k r_i − ωt + φ_i)
+   A(r) = 1 / sqrt(1 + r/r0), r0 = λ. g_i : front qui avance à c = C0 (rampe douce de λ/2).
+   u = u1 + u2 (superposition exacte). Intensité moyenne : I = ½A1² + ½A2² + A1A2 cos(kΔ + φ2 − φ1)
+   (convention sin(kr − ωt + φ) : le terme de phase est φ2 − φ1). Δ = r2 − r1.
+   Échelle arbitraire : λ de 30 à 90 px, C0 = 80 px/s (onde très ralentie). */
+const C0 = 80;
+const TWO_PI = Math.PI * 2;
+const PULSE_PERIOD = 6.5;           // s entre deux émissions (acte II)
+const STRIP_H = 108;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TS = reduce ? 0.25 : 1;       // ralentissement du temps de l'onde
+
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const off = document.createElement('canvas'), octx = off.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const stCv = $('#stCv'), stx = stCv.getContext('2d');
+const headEl = document.querySelector('.head');
+const sceneEl = $('#scene'), tipEl = $('#tip'), stripEl = $('#strip');
+
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RF = rgb(C.fond), RP = rgb(C.pos), RN = rgb(C.neg), RE = rgb(C.ener);
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RTX = rgb(C.texte), RT2 = rgb(C.texte2), RAC = rgb(C.accent);
+const mono = px => `${px}px ${C.mono}`;
+// Texte sur petit fond sombre (aucun pointillé ne le barre)
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.75)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+
+/* ---------------- Tables de couleur ---------------- */
+const GAIN = 0.8;
+const lutP = new Uint8Array(256 * 3), lutN = new Uint8Array(256 * 3), lutI = new Uint8Array(512 * 3);
+(function buildLuts() {
+  for (let i = 0; i < 256; i++) {
+    const m = Math.pow(i / 255, 0.78);               // zones faibles relevées
+    for (let c = 0; c < 3; c++) {
+      lutP[i*3+c] = RF[c] + (RP[c] - RF[c]) * m;
+      lutN[i*3+c] = RF[c] + (RN[c] - RF[c]) * m;
+    }
+  }
+  const warm = [255, 244, 214];
+  for (let i = 0; i < 512; i++) {
+    const x = i / 256;                               // I_rel = I / (½A1² + ½A2²), de 0 à 2
+    const d = Math.pow(x / 2, 0.9);                  // 1 : jaune moyen, 2 : jaune vif / blanc chaud
+    const w = Math.max(0, (d - 0.8) / 0.2);
+    for (let c = 0; c < 3; c++) {
+      const base = 4 + (RE[c] - 4) * Math.min(1, d / 0.8);
+      lutI[i*3+c] = base + (warm[c] - base) * w * 0.45;
+    }
+  }
+})();
+
+/* ---------------- État ---------------- */
+let W = 800, H = 600, dpr = 1;
+let lam = 48, lamDef = 48, dphi = 0, k = TWO_PI / 48, om = k * C0, IHL = 2 / 48;
+let t = 0, ph = 0, playing = true;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, waveA = 1;
+let pulse = false, s2on = false, ton1 = 0, ton2 = Infinity;
+const s1 = { x: 0, y: 0, tx: 0, ty: 0 }, s2 = { x: 0, y: 0, tx: 0, ty: 0 };
+let s2vis = 0, nodalA = 0, nodalT = 0, ventA = 0;
+const P = { x: 0, y: 0 }, Q = { x: 0, y: 0 }, R = { x: 0, y: 0 }, X = { x: 0, y: 0 };
+let probeSel = 'P';
+let mix = 0, mixT = 0, cutOn = false, stripOn = false;
+let yS = 400, Aref = 1;
+let dirty = true, dirtyGeom = true, lastMove = 0;
+let stepFine = 3, step = 3, gw = 0, gh = 0, cap = 0;
+let slowCount = 0, ema = 4, frames = 0;
+let hover = null, drag = null, ptr = { x: -99, y: -99, in: false };
+let Qdelta = 0, axT = 0.5;
+const frac = { s1: [0.4, 0.25], s2: [0.6, 0.25], X: [0.5, 0.5] };
+function saveFrac() { frac.s1 = [s1.tx / W, s1.ty / H]; frac.s2 = [s2.tx / W, s2.ty / H]; frac.X = [X.x / W, X.y / H]; }
+const Ax = { x: 0, y: 0 };
+function setAx() { Ax.x = s1.x + (s2.x - s1.x) * axT; Ax.y = s1.y + (s2.y - s1.y) * axT; }
+
+/* Tableaux par cellule (précalculés quand la géométrie change) */
+let r1a, r2a, P1, Q1, P2, Q2, H1, H2, Cc, A1a, A2a, U, Ia, img = null;
+function alloc(n) {
+  cap = n;
+  [r1a, r2a, P1, Q1, P2, Q2, H1, H2, Cc, A1a, A2a, U, Ia] = Array.from({ length: 13 }, () => new Float32Array(n));
+}
+
+const amp = r => 1 / Math.sqrt(1 + r / lam);
+const smooth = x => { x *= IHL; return x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x); };
+function pulseShape(x) {            // un cycle de sinus fenêtré (Hann), front = crête
+  if (x <= 0 || x >= lam) return 0;
+  const z = Math.PI * x / lam, s = Math.sin(z);
+  return Math.sin(2 * z) * s * s * 1.54;
+}
+
+/* ---------------- Mise en page et géométrie ---------------- */
+function setLam(v) { lam = v; k = TWO_PI / lam; om = k * C0; IHL = 2 / lam; }
+let defD = 192, defCx = 0, defY = 150;
+function layoutDefaults() {
+  defD = Math.min(4 * lam, W * 0.56);
+  defCx = W / 2;
+  defY = Math.max(130, H * 0.25);
+  yS = H - STRIP_H - 24;
+  // Q : même distance à l'axe que P, sur la ligne nodale Δ = 1,5 λ (m = 1). Résolution numérique ;
+  // on descend les deux sondes si l'écart P–Q est inférieur à 90 px.
+  const tgt = 1.5 * lam, f = defD / 2, hMax = Math.max(90, yS - defY - 12);
+  let h = Math.max(90, Math.min(1.25 * defD, (yS - defY) * 0.78)), qx = 0;
+  const solve = hh => {
+    const del = x => Math.hypot(x - f, hh) - Math.hypot(x + f, hh);
+    let lo = -6 * defD, hi = 0;
+    for (let n = 0; n < 70; n++) { const m = (lo + hi) / 2; if (del(m) > tgt) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  };
+  qx = solve(h);
+  while (-qx < 90 && h < hMax) { h = Math.min(hMax, h + 8); qx = solve(h); }
+  P.x = defCx; P.y = defY + h;
+  Q.x = defCx + qx; Q.y = defY + h;
+  Qdelta = (Math.hypot(Q.x - (defCx + f), Q.y - defY) - Math.hypot(Q.x - (defCx - f), Q.y - defY)) / lam;
+  R.x = defCx + 60; R.y = defY + Math.min(3.4 * lam, (yS - defY) * 0.8);
+  Aref = amp(Math.hypot(P.x - defCx, P.y - defY));
+}
+function applyTargets(n, force) {
+  if (n === 0) {
+    s1.tx = defCx; s1.ty = defY; s2.tx = defCx + defD / 2; s2.ty = defY;
+  } else if (n < 5 || force) {
+    s1.tx = defCx - defD / 2; s1.ty = defY; s2.tx = defCx + defD / 2; s2.ty = defY;
+  }
+}
+const clampX = v => Math.max(16, Math.min(W - 16, v));
+const clampY = v => Math.max(16, Math.min(H - 16, v));
+
+function rebuild() {
+  step = (performance.now() - lastMove < 160) ? Math.max(5, stepFine) : stepFine;
+  const ngw = Math.ceil(W / step) + 2, ngh = Math.ceil(H / step) + 2;
+  if (ngw * ngh > cap) alloc(Math.ceil(W / stepFine + 3) * Math.ceil(H / stepFine + 3));
+  if (ngw !== gw || ngh !== gh || !img) {
+    gw = ngw; gh = ngh; off.width = gw; off.height = gh; img = octx.createImageData(gw, gh);
+    const d = img.data; for (let i = 3; i < d.length; i += 4) d[i] = 255;
+  }
+  for (let j = 0; j < gh; j++) {
+    const y = j * step, dy1 = y - s1.y, dy2 = y - s2.y;
+    for (let i = 0; i < gw; i++) {
+      const x = i * step, idx = j * gw + i;
+      const dx1 = x - s1.x, dx2 = x - s2.x;
+      const r1 = Math.sqrt(dx1 * dx1 + dy1 * dy1), r2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+      const a1 = 1 / Math.sqrt(1 + r1 / lam), a2 = 1 / Math.sqrt(1 + r2 / lam);
+      const b1 = k * r1, b2 = k * r2 + dphi;
+      r1a[idx] = r1; r2a[idx] = r2; A1a[idx] = a1; A2a[idx] = a2;
+      P1[idx] = a1 * Math.sin(b1); Q1[idx] = a1 * Math.cos(b1);
+      P2[idx] = a2 * Math.sin(b2); Q2[idx] = a2 * Math.cos(b2);
+      H1[idx] = 0.5 * a1 * a1; H2[idx] = 0.5 * a2 * a2;
+      Cc[idx] = a1 * a2 * Math.cos(b2 - b1);
+    }
+  }
+  dirtyGeom = false;
+}
+
+/* ---------------- Évaluation en un point (sondes, oscilloscope, coupes) ---------------- */
+let eU1 = 0, eU2 = 0, eAmp = 0, eI = 0, eR1 = 0, eR2 = 0, eAm = 1;
+function ev(x, y, tau) {
+  const tt = t - tau, phh = ph - om * tau;
+  const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y);
+  const a1 = amp(r1), a2 = amp(r2);
+  const F1 = C0 * (tt - ton1), F2 = s2on ? C0 * (tt - ton2) : -Infinity;
+  eR1 = r1; eR2 = r2;
+  eAm = s2on ? (a1 + a2) / 2 : a1;
+  if (pulse) {
+    eU1 = a1 * pulseShape(F1 - r1); eU2 = s2on ? a2 * pulseShape(F2 - r2) : 0;
+    eAmp = 0; eI = 0;
+    return;
+  }
+  const g1 = smooth(F1 - r1), g2 = s2on ? smooth(F2 - r2) : 0;
+  eU1 = a1 * g1 * Math.sin(k * r1 - phh);
+  eU2 = a2 * g2 * Math.sin(k * r2 - phh + dphi);
+  const q1 = a1 * g1, q2 = a2 * g2;
+  eAmp = Math.sqrt(Math.max(0, q1 * q1 + q2 * q2 + 2 * q1 * q2 * Math.cos(k * (r2 - r1) + dphi)));
+  eI = 0.5 * eAmp * eAmp;
+}
+
+/* ---------------- Rendu de l'onde ---------------- */
+const SHADE = 34;
+function render() {
+  const cw = Math.cos(ph), sw = Math.sin(ph);
+  const F1 = C0 * (t - ton1), F2 = s2on ? C0 * (t - ton2) : -Infinity;
+  const N = gw * gh;
+  if (!pulse) {
+    for (let i = 0; i < N; i++) {
+      let g1 = (F1 - r1a[i]) * IHL; g1 = g1 <= 0 ? 0 : g1 >= 1 ? 1 : g1 * g1 * (3 - 2 * g1);
+      let g2 = (F2 - r2a[i]) * IHL; g2 = g2 <= 0 ? 0 : g2 >= 1 ? 1 : g2 * g2 * (3 - 2 * g2);
+      U[i] = g1 * (cw * P1[i] - sw * Q1[i]) + g2 * (cw * P2[i] - sw * Q2[i]);
+      if (mix > 0.001) Ia[i] = g1 * g1 * H1[i] * 1 + g2 * g2 * H2[i] + g1 * g2 * Cc[i];
+    }
+  } else {
+    for (let i = 0; i < N; i++) {
+      let u = 0;
+      const x1 = F1 - r1a[i]; if (x1 > 0 && x1 < lam) u += A1a[i] * pulseShape(x1);
+      if (s2on) { const x2 = F2 - r2a[i]; if (x2 > 0 && x2 < lam) u += A2a[i] * pulseShape(x2); }
+      U[i] = u;
+    }
+  }
+  const m = pulse ? 0 : mix, needI = m > 0.001, needInst = m < 0.999;
+  const sh = SHADE * (1 - m);
+  // I_ref : intensité maximale d'une frange à l'écran (4 × ½ A²)
+  const Rs = Math.hypot(defCx - ((s1.x + s2.x) / 2), yS - (s1.y + s2.y) / 2);
+  const invHref = 1 / (amp(Math.max(60, Rs)) ** 2);
+  const d = img.data;
+  for (let j = 0; j < gh; j++) {
+    const edgeJ = j > 0 && j < gh - 1;
+    for (let i = 0; i < gw; i++) {
+      const idx = j * gw + i, p = idx * 4;
+      let R_, G_, B_;
+      if (needInst) {
+        const u = U[idx], v = Math.abs(u) * GAIN, li = v >= 1 ? 765 : ((v * 255) | 0) * 3;
+        const L = u >= 0 ? lutP : lutN;
+        R_ = L[li]; G_ = L[li + 1]; B_ = L[li + 2];
+        if (edgeJ && i > 0 && i < gw - 1) {
+          const s = (U[idx - gw + 1] - U[idx + gw - 1]) * sh;
+          R_ += s; G_ += s; B_ += s;
+        }
+      }
+      if (needI) {
+        const hs = H1[idx] + H2[idx] + 1e-9, x = Ia[idx] / hs, li = x >= 1.99 ? 1533 : ((x * 256) | 0) * 3;
+        const hq = hs * invHref, att = 0.6 + 0.4 * (hq > 1 ? 1 : hq);
+        const Ri = lutI[li] * att, Gi = lutI[li + 1] * att, Bi = lutI[li + 2] * att;
+        if (needInst) { R_ += (Ri - R_) * m; G_ += (Gi - G_) * m; B_ += (Bi - B_) * m; }
+        else { R_ = Ri; G_ = Gi; B_ = Bi; }
+      }
+      d[p] = R_; d[p + 1] = G_; d[p + 2] = B_;
+    }
+  }
+  octx.putImageData(img, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  ctx.globalAlpha = waveA;
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(off, -step / 2, -step / 2, gw * step, gh * step);
+  ctx.globalAlpha = 1;
+}
+
+/* ---------------- Repères : hyperboles ---------------- */
+function hyper(delta, N) {          // points où r2 − r1 = delta ; retourne un tableau [x,y,...]
+  const dx = s2.x - s1.x, dy = s2.y - s1.y, d = Math.hypot(dx, dy);
+  if (d < 2) return null;
+  const ex = dx / d, ey = dy / d, nx = -ey, ny = ex, mx = (s1.x + s2.x) / 2, my = (s1.y + s2.y) / 2;
+  const a = Math.abs(delta) / 2, f = d / 2, Ym = 1.4 * Math.max(W, H);
+  if (a >= f - 0.5) return null;
+  const pts = [];
+  if (a < 0.4) { pts.push(mx - nx * Ym, my - ny * Ym, mx + nx * Ym, my + ny * Ym); return pts; }
+  const b = Math.sqrt(f * f - a * a), smax = Math.asinh(Ym / b), sg = delta > 0 ? -1 : 1;
+  for (let n = -N; n <= N; n++) {
+    const s = smax * n / N, XX = sg * a * Math.cosh(s), YY = b * Math.sinh(s);
+    pts.push(mx + XX * ex + YY * nx, my + XX * ey + YY * ny);
+  }
+  return pts;
+}
+function deltasFor(node) {
+  const d = Math.hypot(s2.x - s1.x, s2.y - s1.y), out = [], M = Math.ceil(d / lam) + 2;
+  for (let m = -M; m <= M; m++) {
+    const dl = lam * ((node ? m + 0.5 : m) - dphi / TWO_PI);
+    if (Math.abs(dl) < d - 1) out.push(dl);
+  }
+  return out;
+}
+function drawLines(deltas, style, dash, width, alpha) {
+  if (alpha < 0.01) return;
+  ctx.save();
+  ctx.strokeStyle = style; ctx.globalAlpha = alpha; ctx.lineWidth = width; ctx.setLineDash(dash);
+  ctx.beginPath();
+  for (const dl of deltas) {
+    const pts = hyper(dl, 48);
+    if (!pts) continue;
+    ctx.moveTo(pts[0], pts[1]);
+    for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
+  }
+  ctx.stroke(); ctx.restore();
+}
+
+/* ---------------- Superpositions graphiques ---------------- */
+function probeList() {
+  if (act === 0) return [{ id: 'R', p: R, label: '' }];
+  if (act === 1) return [{ id: 'P', p: P, label: '' }];
+  if (act === 5) return [{ id: 'X', p: X, label: 'sonde' }];
+  if (act === 4) { setAx(); return [{ id: 'A', p: Ax, label: 'sonde sur l\u2019axe' }]; }
+  return [{ id: 'P', p: P, label: 'P · renforcement' }, { id: 'Q', p: Q, label: 'Q · annulation' }];
+}
+function curProbe() {
+  if (act === 0) return R; if (act === 1) return P; if (act === 5) return X; if (act === 4) { setAx(); return Ax; }
+  return probeSel === 'Q' ? Q : P;
+}
+function curProbeId() { return act === 0 ? 'R' : act === 1 ? 'P' : act === 5 ? 'X' : act === 4 ? 'A' : probeSel; }
+
+function drawSource(s, name, a) {
+  if (a < 0.02) return;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = C.fond; ctx.strokeStyle = C.accent; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, TWO_PI); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = C.accent; ctx.beginPath(); ctx.arc(s.x, s.y, 2.6, 0, TWO_PI); ctx.fill();
+  if (act === 5) { ctx.globalAlpha = a * 0.5; ctx.setLineDash([2, 3]); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(s.x, s.y, 13, 0, TWO_PI); ctx.stroke(); ctx.setLineDash([]); }
+  ctx.globalAlpha = a; ctx.font = mono(12);
+  tagText(ctx, name, s.x, s.y - 12, 'center', 'bottom', C.texte);
+  ctx.restore();
+}
+function drawProbe(pr, active, label) {
+  ev(pr.p.x, pr.p.y, 0);
+  const ar = eAm || 1, u = eU1 + eU2, den = 2 * ar;
+  const dy = -Math.max(-1, Math.min(1, u / den)) * 18;
+  const x = pr.p.x, y0 = pr.p.y;
+  ctx.save();
+  ctx.strokeStyle = rgba(RT2, 0.7); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x, y0 - 22); ctx.lineTo(x, y0 + 22); ctx.moveTo(x - 4, y0 - 22); ctx.lineTo(x + 4, y0 - 22); ctx.moveTo(x - 4, y0 + 22); ctx.lineTo(x + 4, y0 + 22); ctx.stroke();
+  const col = u >= 0 ? RP : RN, al = Math.min(1, Math.abs(u) / ar);
+  ctx.fillStyle = C.fond; ctx.strokeStyle = active ? C.texte : C.accent; ctx.lineWidth = active ? 2.2 : 1.6;
+  ctx.beginPath(); ctx.arc(x, y0 + dy, 7.5, 0, TWO_PI); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = rgba(col, 0.25 + 0.75 * al); ctx.beginPath(); ctx.arc(x, y0 + dy, 4, 0, TWO_PI); ctx.fill();
+  if (active && act >= 2 && act <= 4) { ctx.strokeStyle = rgba(RT2, 0.6); ctx.setLineDash([2, 3]); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y0, 24, 0, TWO_PI); ctx.stroke(); ctx.setLineDash([]); }
+  if (label) { const left = pr.id === 'Q'; ctx.font = mono(11); const tw = ctx.measureText(label).width; tagText(ctx, label, left ? Math.max(8, x - 16 - tw) : Math.min(x + 16, W - tw - 8), y0 + 32, 'left', 'middle', active ? C.texte : C.texte2); }
+  ctx.restore();
+}
+const nodePos = [];                 // positions des nœuds sur l'axe S1–S2, en px depuis S1
+function computeNodes() {
+  nodePos.length = 0;
+  const d = Math.hypot(s2.x - s1.x, s2.y - s1.y);
+  // nœud où k(d − 2x) + dphi = (2m+1)π
+  const M = Math.ceil(d / lam) + 3;
+  for (let m = -M; m <= M; m++) {
+    const x = (d - ((2 * m + 1) * Math.PI - dphi) / k) / 2;
+    if (x > 2 && x < d - 2) nodePos.push(x);
+  }
+  nodePos.sort((a, b) => a - b);
+}
+function drawOverlay() {
+  const showCutLine = act === 3 || (act === 5 && cutOn);
+  if (showCutLine) {
+    ctx.save(); ctx.strokeStyle = rgba(RTX, 0.7); ctx.lineWidth = 1.2; ctx.setLineDash([7, 5]);
+    ctx.beginPath(); ctx.moveTo(44, yS); ctx.lineTo(W - 12, yS); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = mono(11);
+    tagText(ctx, 'écran', W - 14, yS - 5, 'right', 'bottom', C.texte); ctx.restore();
+  }
+  if (act === 4) {
+    computeNodes();
+    ctx.save(); ctx.strokeStyle = rgba(RTX, 0.85); ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
+    const dx = s2.x - s1.x, dy = s2.y - s1.y, d = Math.hypot(dx, dy) || 1, ex = dx / d, ey = dy / d;
+    ctx.strokeStyle = C.ener; ctx.lineWidth = 1.6;
+    for (const x of nodePos) { const px = s1.x + ex * x, py = s1.y + ey * x; ctx.beginPath(); ctx.moveTo(px - ey * 7, py + ex * 7); ctx.lineTo(px + ey * 7, py - ex * 7); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (nodalA > 0.01 && !pulse && s2on) {
+    drawLines(deltasFor(true), C.texte2, [3, 5], 1.2, nodalA * (1 - 0.35 * mix));
+    drawLines(deltasFor(false), C.ener, [], 1, ventA * 0.28);
+  }
+  const a1 = act === 0 ? 1 : 1;
+  drawSource(s1, 'S1', a1);
+  drawSource(s2, 'S2', s2vis);
+  const pl = probeList(), cur = curProbeId();
+  for (const pr of pl) drawProbe(pr, pl.length === 1 || pr.id === cur, pr.label);
+}
+
+/* ---------------- Oscilloscope ---------------- */
+function scopePanel(pr, y0, hh, title, active, stacked) {
+  const w = scopeC.width / dpr;
+  const T = lam / C0, Tw = (pulse ? 4 : 3) * T, ns = 150, pad = 8;
+  const mid = hh / 2, sc = (hh / 2 - 9) / 2;       // ±2 A_ref sur toute la hauteur utile
+  sctx.save(); sctx.beginPath(); sctx.rect(0, y0, w, hh); sctx.clip(); sctx.translate(0, y0);
+  ev(pr.x, pr.y, 0);
+  const Ar = eAm || 1;
+  sctx.strokeStyle = C.trait; sctx.lineWidth = 1;
+  sctx.beginPath(); sctx.moveTo(0, mid); sctx.lineTo(w, mid); sctx.stroke();
+  sctx.setLineDash([2, 4]);
+  for (const q of [-1, 1]) { sctx.beginPath(); sctx.moveTo(0, mid + q * sc); sctx.lineTo(w, mid + q * sc); sctx.stroke(); }
+  sctx.setLineDash([]);
+  for (let n = 1; n <= (pulse ? 4 : 3); n++) { const x = pad + (w - 2 * pad) * (1 - n * T / Tw); sctx.beginPath(); sctx.moveTo(x, hh - 5); sctx.lineTo(x, hh); sctx.stroke(); }
+  const tr = (sel, color, width, dash) => {
+    sctx.beginPath();
+    for (let i = 0; i <= ns; i++) {
+      const tau = Tw * (1 - i / ns);
+      ev(pr.x, pr.y, tau);
+      const v = sel === 0 ? eU1 : sel === 1 ? eU2 : eU1 + eU2;
+      const y = mid - Math.max(-2.1, Math.min(2.1, v / Ar)) * sc, x = pad + (w - 2 * pad) * i / ns;
+      i ? sctx.lineTo(x, y) : sctx.moveTo(x, y);
+    }
+    sctx.strokeStyle = color; sctx.lineWidth = width; sctx.setLineDash(dash); sctx.stroke(); sctx.setLineDash([]);
+  };
+  tr(0, C.texte2, 1.2, []);
+  if (s2on) tr(1, C.accent, 1.3, [4, 3]);
+  tr(2, C.texte, 2.2, []);
+  sctx.font = mono(10);
+  if (stacked) {
+    tagText(sctx, title, 8, 3, 'left', 'top', active ? C.texte : C.texte2);
+    tagText(sctx, '+2A', w - 5, 3, 'right', 'top', C.texte2);
+    tagText(sctx, '−2A', w - 5, hh - 3, 'right', 'bottom', C.texte2);
+    if (active) { sctx.fillStyle = C.accent; sctx.fillRect(0, 0, 2.5, hh); }
+  } else {
+    tagText(sctx, '+2A', 5, 3, 'left', 'top', C.texte2);
+    tagText(sctx, '−2A', 5, hh - 3, 'left', 'bottom', C.texte2);
+    tagText(sctx, 'maintenant', w - 5, 3, 'right', 'top', C.texte2);
+  }
+  sctx.restore();
+}
+function drawScope() {
+  const w = scopeC.width / dpr, h = scopeC.height / dpr;
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  sctx.clearRect(0, 0, w, h);
+  if (act === 2) {
+    const hh = h / 2;
+    scopePanel(P, 0, hh, 'P · renforcement', probeSel === 'P', true);
+    scopePanel(Q, hh, hh, 'Q · annulation', probeSel === 'Q', true);
+    sctx.strokeStyle = C.texte2; sctx.lineWidth = 1; sctx.beginPath(); sctx.moveTo(0, hh); sctx.lineTo(w, hh); sctx.stroke();
+  } else scopePanel(curProbe(), 0, h, '', true, false);
+}
+
+/* ---------------- Bande de coupe ---------------- */
+function drawStrip() {
+  const w = stCv.width / dpr, h = stCv.height / dpr;
+  stx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  stx.clearRect(0, 0, w, h);
+  const x0 = 44, x1 = W - 12, top = 24, bot = h - 16, ph_ = bot - top;
+  stx.font = mono(10.5); stx.lineWidth = 1;
+  if (act === 4) {
+    // Axe S1–S2, cas idéal : deux ondes progressives de même amplitude a = a(d/2)
+    const d = Math.hypot(s2.x - s1.x, s2.y - s1.y) || 1;
+    const a = amp(d / 2), ns = 220, cy = top + ph_ / 2, sy = (ph_ / 2) / (2.1 * a);
+    const xs = i => x0 + (x1 - x0) * i / ns;
+    stx.strokeStyle = C.trait; stx.beginPath(); stx.moveTo(x0, cy); stx.lineTo(x1, cy); stx.stroke();
+    const line = (fn, color, width, dash) => {
+      stx.beginPath();
+      for (let i = 0; i <= ns; i++) { const x = d * i / ns, v = fn(x); i ? stx.lineTo(xs(i), cy - v * sy) : stx.moveTo(xs(i), cy - v * sy); }
+      stx.strokeStyle = color; stx.lineWidth = width; stx.setLineDash(dash); stx.stroke(); stx.setLineDash([]);
+    };
+    const env = x => a * Math.sqrt(Math.max(0, 2 + 2 * Math.cos(k * (d - 2 * x) + dphi)));
+    line(env, rgba(RE, 0.85), 1.1, [2, 3]);
+    line(x => -env(x), rgba(RE, 0.85), 1.1, [2, 3]);
+    line(x => a * Math.sin(k * x - ph), C.texte2, 1.1, []);
+    line(x => a * Math.sin(k * (d - x) - ph + dphi), C.accent, 1.2, [4, 3]);
+    line(x => a * (Math.sin(k * x - ph) + Math.sin(k * (d - x) - ph + dphi)), C.texte, 2.2, []);
+    stx.strokeStyle = C.ener; stx.lineWidth = 1.6;
+    for (const x of nodePos) { const sx = x0 + (x1 - x0) * x / d; stx.beginPath(); stx.moveTo(sx, cy - 8); stx.lineTo(sx, cy + 8); stx.stroke(); }
+    if (nodePos.length >= 2) {
+      const n0 = Math.floor(nodePos.length / 2) - 1, xa = x0 + (x1 - x0) * nodePos[n0] / d, xb = x0 + (x1 - x0) * nodePos[n0 + 1] / d, yy = bot + 3;
+      stx.strokeStyle = C.texte; stx.lineWidth = 1; stx.beginPath(); stx.moveTo(xa, yy); stx.lineTo(xb, yy); stx.moveTo(xa, yy - 3); stx.lineTo(xa, yy + 3); stx.moveTo(xb, yy - 3); stx.lineTo(xb, yy + 3); stx.stroke();
+      stx.fillStyle = C.texte; stx.textAlign = 'center'; stx.textBaseline = 'bottom'; stx.fillText('λ/2', (xa + xb) / 2, yy - 4);
+    }
+    stx.fillStyle = C.texte2; stx.textAlign = 'left'; stx.textBaseline = 'top';
+    stx.fillText('S1', 6, top - 12); stx.textAlign = 'right'; stx.fillText('S2', w - 4, top - 12);
+    stx.textAlign = 'center'; stx.fillText(W < 600 ? 'S1–S2 · amplitudes égales, cas idéal' : 'coupe le long de S1–S2 · nœuds immobiles · amplitudes égales, cas idéal', (x0 + x1) / 2, top - 12);
+  } else {
+    // Profil d'intensité I(x) le long de l'écran (en I0) ; tireté : I1 + I2, sans interférence
+    const ns = Math.max(60, Math.floor((x1 - x0) / 2));
+    const Rs = Math.hypot(W / 2 - (s1.x + s2.x) / 2, yS - (s1.y + s2.y) / 2);
+    const I0 = 0.5 * amp(Math.max(60, Rs)) ** 2, ymax = 4.3;
+    const yv = v => bot - Math.min(ymax, v) / ymax * ph_;
+    stx.strokeStyle = C.trait; stx.beginPath(); stx.moveTo(x0, bot); stx.lineTo(x1, bot); stx.stroke();
+    stx.strokeStyle = rgba(RT2, 0.9); stx.setLineDash([5, 4]); stx.beginPath();
+    for (let i = 0; i <= ns; i++) {
+      const x = x0 + (x1 - x0) * i / ns; ev(x, yS, 0);
+      const v = 0.5 * (amp(eR1) ** 2 + amp(eR2) ** 2) / I0; i ? stx.lineTo(x, yv(v)) : stx.moveTo(x, yv(v));
+    }
+    stx.stroke(); stx.setLineDash([]);
+    stx.beginPath();
+    for (let i = 0; i <= ns; i++) {
+      const x = x0 + (x1 - x0) * i / ns; ev(x, yS, 0);
+      const v = eI / I0; i ? stx.lineTo(x, yv(v)) : stx.moveTo(x, yv(v));
+    }
+    stx.strokeStyle = C.ener; stx.lineWidth = 1.8; stx.stroke();
+    stx.lineTo(x1, bot); stx.lineTo(x0, bot); stx.fillStyle = rgba(RE, 0.12); stx.fill();
+    stx.fillStyle = C.texte2; stx.textAlign = 'right'; stx.textBaseline = 'middle';
+    stx.fillText('0', x0 - 6, bot); stx.fillText('2 I₀', x0 - 6, yv(2)); stx.fillText('4 I₀', x0 - 6, yv(4));
+    stx.textAlign = 'left'; stx.textBaseline = 'top';
+    stx.fillText(W < 600 ? 'I(x) · tireté : I₁ + I₂ sans interférence' : 'intensité I(x) le long de l\u2019écran · tireté : I₁ + I₂, ce que donneraient les deux sources sans interférence', x0, 8);
+  }
+}
+
+/* ---------------- Mesures du panneau ---------------- */
+const fmt = (n, d) => n.toFixed(d).replace('.', ',').replace('-', '−');
+const el = { name: $('#mName'), D: $('#mD'), Ph: $('#mPh'), A: $('#mA'), I: $('#mI'), note: $('#mNote') };
+function setText(e, s) { if (e.textContent !== s) e.textContent = s; }
+function readouts() {
+  const pr = curProbe();
+  setText(el.name, ({ A: 'sur l’axe', X: 'libre' })[curProbeId()] || curProbeId());
+  ev(pr.x, pr.y, 0);
+  const D = (eR2 - eR1) / lam;
+  if (!s2on) { setText(el.D, '—'); setText(el.Ph, '—'); setText(el.A, fmt(eAmp / (eAm || 1), 2)); setText(el.I, fmt(eI / (0.5 * eAm * eAm || 1), 2)); return; }
+  setText(el.D, fmt(D, 2));
+  let deg = ((k * (eR2 - eR1) + dphi) * 180 / Math.PI) % 360; if (deg < 0) deg += 360;
+  setText(el.Ph, String(Math.round(deg) % 360));
+  if (pulse) { setText(el.A, '—'); setText(el.I, '—'); return; }
+  const a = eAmp / (eAm || 1), I = eI / (0.5 * eAm * eAm || 1);
+  setText(el.A, fmt(a, 2)); setText(el.I, fmt(I, 2));
+}
+
+/* ---------------- Actes ---------------- */
+const ROM = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const ACTS = [
+  { t: 'Une source', x: 'S1 s’allume et des cercles s’éloignent. Regarde la sonde : elle monte et descend sur place. L’onde transporte une forme et de l’énergie, pas la matière.' },
+  { t: 'Deux impulsions se croisent', x: 'Chaque source émet un seul cycle. Là où les anneaux se chevauchent, les hauteurs s’additionnent ; après le croisement, chacun repart comme si l’autre n’existait pas.' },
+  { t: 'Renforcement et annulation', x: 'Deux sources en phase. En P, les ondes arrivent crête avec crête : l’eau bouge deux fois plus. En Q (Δ = 1,5 λ, un nombre impair de demi-longueurs d’onde), elles arrivent en opposition : l’eau ne bouge presque plus. Clique une sonde pour la mesurer.' },
+  { t: 'Où va l’énergie ?', x: 'On passe de l’image instantanée à l’intensité moyenne. L’énergie n’est pas détruite : elle quitte les lignes sombres et s’accumule dans les franges. En moyenne, autant d’énergie que les deux sources séparées.' },
+  { t: 'Onde stationnaire', x: 'Entre les sources, les deux ondes vont en sens contraires. Leur somme ne se déplace plus : elle oscille sur place, avec des nœuds immobiles espacés de λ/2. Clique l\u2019axe pour déplacer la sonde.' },
+  { t: 'À toi', x: 'Glisse S1, S2 et la sonde. Change λ et la phase de S2. À 180°, la médiatrice devient une ligne nodale.' }
+];
+const SEED = [0, 0, 130, 330, 220, 330];
+const $tools = $('#tools');
+function fire() { ton1 = t; ton2 = t; }
+function enterAct(n, restart) {
+  const prev = act;
+  act = n;
+  if (n < 5 || restart) { setLam(lamDef); dphi = 0; syncTools(); layoutDefaults(); }
+  applyTargets(n, restart || prev < 5);
+  if (n === 5 && (restart || prev < 5)) { X.x = P.x; X.y = P.y; mixT = 0; cutOn = false; syncTools(); frac.s1 = [s1.tx / W, s1.ty / H]; frac.s2 = [s2.tx / W, s2.ty / H]; frac.X = [X.x / W, X.y / H]; }
+  if (n < 5) { snap(); }
+  const keep1 = !restart && prev !== 1 && prev !== undefined && n !== 1 && n !== 0 && prev !== 0;
+  pulse = n === 1;
+  s2on = n >= 1;
+  if (n === 0) { ton1 = t; ton2 = Infinity; }
+  else if (n === 1) { fire(); }
+  else {
+    let R_ = SEED[n];
+    if (n === 2) { const f_ = defD / 2; for (const pp of [P, Q]) R_ = Math.max(R_, Math.hypot(pp.x - (defCx - f_), pp.y - defY), Math.hypot(pp.x - (defCx + f_), pp.y - defY) + 0); R_ += 2.5 * lam; }
+    const had1 = !restart && prev !== 1 && prev !== -1;
+    const had2 = !restart && prev >= 2;
+    ton1 = had1 ? Math.min(ton1, t - R_ / C0) : t - R_ / C0;
+    ton2 = had2 ? Math.min(ton2, t - R_ / C0) : t - R_ / C0;
+  }
+  mixT = n === 3 ? 1 : n === 5 ? mixT : 0;
+  if (reduce) mix = mixT;
+  nodalT = n >= 2 ? 1 : 0; if (n < 2) nodalA = 0;
+  probeSel = 'P'; axT = 0.5;
+  if (n === 2 || restart) nodalStart = performance.now();
+  dirty = dirtyGeom = true; lastMove = 0;
+}
+let nodalStart = 0;
+function snap() { s1.x = s1.tx; s1.y = s1.ty; s2.x = s2.tx; s2.y = s2.ty; }
+function sizeScope(n) {
+  scopeC.style.height = (n === 2 ? 214 : 124) + 'px';
+  const sr = scopeC.getBoundingClientRect();
+  scopeC.width = Math.max(10, Math.round(sr.width * dpr)); scopeC.height = Math.max(10, Math.round(sr.height * dpr));
+}
+let uiAct = 0;
+function updateUI(n) {
+  uiAct = n; hideTip(); sizeScope(n);
+  document.querySelectorAll('.seg').forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VI`;
+  $('#stepTitle').textContent = ACTS[n].t;
+  $('#stepText').textContent = ACTS[n].x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $tools.hidden = n !== 5;
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === 5;
+  $('#mNote').textContent = n === 1
+    ? 'Impulsions : les grandeurs du régime continu (amplitude, intensité) ne s’appliquent pas.'
+    : n === 2 ? 'Mesures de la sonde choisie (clique P, Q ou son oscilloscope). Échelle verticale fixe : ±2 A.'
+    : 'Échelle verticale fixe : ±2 A. Δ = r₂ − r₁, distances de la sonde aux deux sources.';
+}
+function goAct(n, restart) {
+  n = Math.max(0, Math.min(5, n));
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; waveA = 1; }
+  else fade = -1;
+  dirty = true;
+}
+function syncTools() {
+  $('#rLam').value = lam; $('#vLam').textContent = Math.round(lam) + ' px';
+  $('#rPh').value = Math.round(dphi * 180 / Math.PI); $('#vPh').textContent = Math.round(dphi * 180 / Math.PI) + '°';
+  setView(mixT > 0.5); $('#bCut').setAttribute('aria-pressed', cutOn);
+}
+function setView(inten) {
+  $('#bInt').setAttribute('aria-pressed', inten); $('#bInst').setAttribute('aria-pressed', !inten);
+}
+function stripWanted() { return act === 3 || act === 4 || (act === 5 && cutOn); }
+
+/* ---------------- Tailles ---------------- */
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(240, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  stCv.width = Math.round(W * dpr); stCv.height = Math.round(STRIP_H * dpr);
+  sizeScope(uiAct);
+  layoutDefaults();
+  if (act < 5) { applyTargets(act, true); snap(); }
+  else {
+    s1.x = s1.tx = clampX(frac.s1[0] * W); s1.y = s1.ty = clampY(frac.s1[1] * H);
+    s2.x = s2.tx = clampX(frac.s2[0] * W); s2.y = s2.ty = clampY(frac.s2[1] * H);
+    X.x = clampX(frac.X[0] * W); X.y = clampY(frac.X[1] * H); separate(null);
+  }
+  dirty = dirtyGeom = true;
+}
+
+/* ---------------- Interaction : survol, glisser ---------------- */
+function separate(o) {              // S1 et S2 restent à au moins λ/2 l'une de l'autre
+  const a = o === s2 ? s2 : s1, b = a === s1 ? s2 : s1, dm = lam / 2;
+  let dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+  if (d >= dm) return;
+  if (d < 1e-3) { dx = 1; dy = 0; d = 1; }
+  a.x = clampX(b.x + dx / d * dm); a.y = clampY(b.y + dy / d * dm);
+  a.tx = a.x; a.ty = a.y;
+}
+function nodalHit(x, y) {
+  if (nodalA < 0.2 || pulse || !s2on) return null;
+  const r1 = Math.hypot(x - s1.x, y - s1.y), r2 = Math.hypot(x - s2.x, y - s2.y);
+  if (r1 < 12 || r2 < 12) return null;
+  const psi = k * (r2 - r1) + dphi, m = Math.round((psi - Math.PI) / TWO_PI), tgt = (2 * m + 1) * Math.PI;
+  const ux = (x - s1.x) / r1, uy = (y - s1.y) / r1, vx = (x - s2.x) / r2, vy = (y - s2.y) / r2;
+  const g = Math.hypot(vx - ux, vy - uy) || 1e-6;
+  const dist = Math.abs(psi - tgt) / k / g;
+  if (dist > 9) return null;
+  const d = Math.hypot(s2.x - s1.x, s2.y - s1.y);
+  const dl = (tgt - dphi) / k;
+  if (Math.abs(dl) >= d) return null;
+  return dl / lam;
+}
+function hit(x, y, rad) {
+  const cands = [];
+  if (act === 5) { cands.push({ id: 'S1', o: s1 }, { id: 'S2', o: s2 }, { id: 'X', o: X }); }
+  else {
+    cands.push({ id: 'S1', o: s1 }); if (s2vis > 0.5) cands.push({ id: 'S2', o: s2 });
+    for (const pr of probeList()) cands.push({ id: pr.id, o: pr.p });
+  }
+  let best = null, bd = rad;
+  for (const c of cands) { const d = Math.hypot(x - c.o.x, y - c.o.y); if (d < bd) { bd = d; best = c; } }
+  return best;
+}
+let tipKey = '';
+function showTip(key, name, role, x, y) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = x + 14, ty = y + 16; if (tx + tw > W - 6) tx = x - tw - 12; if (ty + th > H - 6) ty = y - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function pdelta(pr) { return fmt((Math.hypot(pr.x - s2.x, pr.y - s2.y) - Math.hypot(pr.x - s1.x, pr.y - s1.y)) / lam, 2); }
+function updateHover(x, y) {
+  const h = hit(x, y, 22);
+  cv.className = '';
+  if (h) {
+    cv.className = act === 5 ? 'grab' : (h.id === 'P' || h.id === 'Q' ? 'hand' : '');
+    if (h.id === 'S1') showTip('S1', 'Source S1', 'Émet une onde circulaire de phase 0°. Le front avance à la vitesse c.', x, y);
+    else if (h.id === 'S2') showTip('S2' + dphi, 'Source S2', `Même fréquence et même amplitude que S1, phase ${Math.round(dphi * 180 / Math.PI)}°.`, x, y);
+    else if (h.id === 'P') showTip('P', 'Sonde P', `Sur la médiatrice : Δ = ${pdelta(P)} λ. Les ondes arrivent en phase.`, x, y);
+    else if (h.id === 'Q') showTip('Q', 'Sonde Q', `Sur une ligne nodale (m = 1) : Δ = ${pdelta(Q)} λ. Les ondes arrivent en opposition : l\u2019eau n\u2019y bouge presque plus.`, x, y);
+    else if (h.id === 'R') showTip('R', 'Sonde', 'Un petit anneau qui monte et descend sur place : l’eau ne voyage pas.', x, y);
+    else if (h.id === 'A') showTip('A', 'Sonde sur l\u2019axe', 'Au milieu de l\u2019axe : un ventre, l\u2019eau y oscille au maximum. Clique l\u2019axe pour la déplacer.', x, y);
+    else showTip('X', 'Sonde', 'Glisse-la : l’oscilloscope et les mesures la suivent.', x, y);
+    return;
+  }
+  if ((act === 3 || (act === 5 && cutOn)) && Math.abs(y - yS) < 9 && x > 40) { showTip('cut', 'Écran', 'Ligne de coupe : on mesure l’intensité le long de cette ligne (bande du bas).', x, y); return; }
+  if (act === 4) {
+    const dx = s2.x - s1.x, dy = s2.y - s1.y, d = Math.hypot(dx, dy) || 1;
+    const tproj = ((x - s1.x) * dx + (y - s1.y) * dy) / d, dist = Math.abs(((x - s1.x) * dy - (y - s1.y) * dx) / d);
+    if (dist < 9 && tproj > 0 && tproj < d) { showTip('axe', 'Axe S1–S2', 'Ligne de coupe : les ondes y vont en sens contraires (bande du bas).', x, y); return; }
+  }
+  const nd = nodalHit(x, y);
+  if (nd !== null) { showTip('nod' + nd.toFixed(2), 'Ligne nodale', `Δ = ${fmt(nd, 2)} λ : crête et creux s’annulent, l’eau y reste immobile. Repère calculé, pas un objet physique.`, x, y); return; }
+  hideTip();
+}
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  ptr = { x, y, in: true };
+  if (drag) {
+    const o = drag.o; o.x = clampX(x - drag.dx); o.y = clampY(y - drag.dy);
+    if (o === s1 || o === s2) { o.tx = o.x; o.ty = o.y; separate(o); lastMove = performance.now(); dirtyGeom = true; }
+    saveFrac();
+    dirty = true; hideTip(); return;
+  }
+  if (e.pointerType === 'mouse' || e.pointerType === 'pen') updateHover(x, y);
+});
+cv.addEventListener('pointerleave', () => { ptr.in = false; if (!drag) { hideTip(); cv.className = ''; } });
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const h = hit(x, y, e.pointerType === 'touch' ? 30 : 24);
+  if (act === 4 && !h) {
+    const dx = s2.x - s1.x, dy = s2.y - s1.y, d = Math.hypot(dx, dy) || 1;
+    const tp = ((x - s1.x) * dx + (y - s1.y) * dy) / d, dist = Math.abs(((x - s1.x) * dy - (y - s1.y) * dx) / d);
+    if (dist < 14 && tp > 0 && tp < d) { axT = tp / d; dirty = true; }
+    return;
+  }
+  if (!h) return;
+  if (act >= 2 && act <= 3 && (h.id === 'P' || h.id === 'Q')) { probeSel = h.id; dirty = true; return; }
+  if (act === 5) {
+    drag = { o: h.o, dx: x - h.o.x, dy: y - h.o.y }; hideTip();
+    cv.setPointerCapture(e.pointerId); cv.className = 'grabbing'; e.preventDefault();
+  }
+});
+const endDrag = e => { if (drag) { drag = null; lastMove = performance.now(); dirtyGeom = true; dirty = true; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} } };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p; dirty = true;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goAct(+b.dataset.a); e.currentTarget.blur(); }));
+scopeC.addEventListener('pointerdown', e => { if (act !== 2) return; const r = scopeC.getBoundingClientRect(); probeSel = (e.clientY - r.top) < r.height / 2 ? 'P' : 'Q'; dirty = true; });
+$('#rLam').addEventListener('input', e => { setLam(+e.target.value); separate(s2); saveFrac(); $('#vLam').textContent = Math.round(lam) + ' px'; lastMove = performance.now(); dirtyGeom = dirty = true; });
+$('#rPh').addEventListener('input', e => { dphi = +e.target.value * Math.PI / 180; $('#vPh').textContent = e.target.value + '°'; lastMove = performance.now(); dirtyGeom = dirty = true; });
+$('#bInst').addEventListener('click', () => { mixT = 0; setView(false); dirty = true; });
+$('#bInt').addEventListener('click', () => { mixT = 1; setView(true); dirty = true; });
+$('#bCut').addEventListener('click', () => { cutOn = !cutOn; $('#bCut').setAttribute('aria-pressed', cutOn); dirty = true; });
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-6]$/.test(e.key) && !isRange) goAct(+e.key - 1);
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+let last = 0, lastRead = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (document.hidden) { last = 0; return; }
+  const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+
+  if (fade !== 0) {                                   // fondu entre actes
+    dirty = true;
+    if (fade < 0) { waveA -= dt / 0.2; if (waveA <= 0.2) { waveA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { waveA += dt / 0.5; if (waveA >= 1) { waveA = 1; fade = 0; } }
+  }
+  if (Math.abs(mixT - mix) > 0.002) { mix = reduce ? mixT : mix + (mixT - mix) * (1 - Math.exp(-dt * 2.6)); dirty = true; } else if (mix !== mixT) { mix = mixT; dirty = true; }
+  const ke = reduce ? 1 : 1 - Math.exp(-dt * 6);
+  for (const s of [s1, s2]) {
+    if (Math.abs(s.tx - s.x) > 0.3 || Math.abs(s.ty - s.y) > 0.3) { s.x += (s.tx - s.x) * ke; s.y += (s.ty - s.y) * ke; lastMove = performance.now(); dirtyGeom = dirty = true; }
+    else if (s.x !== s.tx || s.y !== s.ty) { s.x = s.tx; s.y = s.ty; dirtyGeom = dirty = true; }
+  }
+  const sv = s2on ? 1 : 0; if (Math.abs(sv - s2vis) > 0.01) { s2vis += (sv - s2vis) * (reduce ? 1 : 1 - Math.exp(-dt * 5)); dirty = true; } else s2vis = sv;
+  // lignes nodales : fondu après ~2 s dans l'acte III (immédiat si on arrive directement plus loin)
+  const wantN = nodalT && (act > 2 || performance.now() - nodalStart > 2000) ? 1 : 0;
+  if (Math.abs(wantN - nodalA) > 0.005) { nodalA += (wantN - nodalA) * (reduce ? 1 : 1 - Math.exp(-dt * 2.5)); dirty = true; } else nodalA = wantN;
+  const wantV = (act === 3 || (act === 5 && mixT > 0.5)) ? 1 : 0;
+  if (Math.abs(wantV - ventA) > 0.005) { ventA += (wantV - ventA) * (reduce ? 1 : 1 - Math.exp(-dt * 2.5)); dirty = true; } else ventA = wantV;
+  headEl.style.setProperty('--vo', (0.6 + 0.4 * mix).toFixed(2));
+  const sw = stripWanted(); if (sw !== stripOn) { stripOn = sw; stripEl.classList.toggle('on', sw); dirty = true; }
+
+  if (playing) {
+    const d = dt * TS; t += d; ph = (ph + om * d) % TWO_PI; dirty = true;
+    if (pulse && t - ton1 >= PULSE_PERIOD) fire();
+  }
+  if (!dirty && !dirtyGeom) return;
+  const t0 = performance.now();
+  const refine = step !== stepFine && now - lastMove >= 0 && performance.now() - lastMove >= 160 && !drag;
+  if (dirtyGeom || refine) rebuild();
+  if (stepFine !== step && performance.now() - lastMove < 160) dirty = true;
+  render();
+  drawOverlay();
+  drawScope();
+  if (stripOn) drawStrip();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+  dirty = false;
+  if (step !== stepFine) dirty = true;               // un dernier passage fin
+  const ms = performance.now() - t0;
+  ema += (ms - ema) * 0.05; frames++;
+  window.__ondes.ms = ema; window.__ondes.frames = frames; window.__ondes.step = step;
+  if (ema > 9 && stepFine < 5 && frames > 30 && !drag && ++slowCount > 40) { stepFine++; slowCount = 0; dirtyGeom = true; }
+}
+
+window.__ondes = { ms: 0, frames: 0, step: 3, get state() { return { act, lam, dphi, W, H, t, mix, nodalA, P: { ...P }, Q: { ...Q }, Qdelta, yS, s1: { x: s1.x, y: s1.y }, s2: { x: s2.x, y: s2.y } }; },
+  go: n => goAct(n), setLam: v => { setLam(v); dirtyGeom = dirty = true; } };
+
+resize();
+setLam(window.innerWidth < 600 ? 40 : 48); lamDef = lam;
+layoutDefaults(); applyTargets(0, true); snap();
+enterAct(0, true); updateUI(0); syncTools();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
