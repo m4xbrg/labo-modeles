@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les oscillations et les ondes — Fondations 6 · 14 · 15</title>
+<meta name="description" content="Ce que montre la planche Oscillations et ondes : cycle, phase, oscillateur, résonance, corde, interférences, modes et Doppler, avec leurs simplifications et leurs ordres de grandeur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#8fe3d1;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">Fondations — modules 6 · 14 · 15</p>
+  <h1>Comprendre les oscillations et les <em>ondes</em></h1>
+  <p class="lede">Cette planche ne montre pas un phénomène : elle montre un langage. Un cycle, une phase, un oscillateur, une onde. Les mêmes outils décrivent un ressort, une corde de guitare et la lumière, et tu les manipules ici sur dix paillasses qui gardent le même cadran, le même oscilloscope et les mêmes mesures.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">Le cadran de phase</span></dt>
+    <dd>Un point tourne sur un cercle à la pulsation ω = 2πf. Sa hauteur est y = A sin φ. L'arc rempli est la phase : une position dans le cycle, pas une durée. Aux chapitres B et C, le même cadran montre l'état de l'oscillateur ou celui d'une perle de la corde.</dd>
+    <dt><span class="acc">L'oscilloscope déroulant</span></dt>
+    <dd>La trace garde en mémoire les derniers instants : le présent est au bord gauche, le passé s'éloigne vers la droite. Trait fin plein pour la première oscillation, tireté pour la seconde, trait fort pour une somme.</dd>
+    <dt>Les rangées A, f, T, φ</dt>
+    <dd>Amplitude, fréquence, période, phase, toujours dans cet ordre. Quand tu changes f, T = 1/f se met à jour avec elle.</dd>
+    <dt><span class="acc">Le ressort</span> et <span class="ener">la masse</span></dt>
+    <dd>Le ressort luit en vert d'eau quand il emmagasine de l'énergie potentielle ; la masse luit en jaune quand elle va vite. Les jauges de droite donnent les deux parts, et leur somme en contour.</dd>
+    <dt>La corde</dt>
+    <dd>Une ligne lisse portée par des perles, <span class="pos">orange</span> au-dessus du repos, <span class="neg">bleu</span> au-dessous. La perle témoin, soulignée d'un tireté, monte et descend sur place. La règle de 1 m fait foi pour les longueurs ; l'échelle verticale est exagérée deux fois.</dd>
+    <dt>Les observateurs du chapitre D3</dt>
+    <dd>Deux carrés immobiles qui comptent les fronts reçus et s'allument à chaque arrivée.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <p><strong>Cycle et phase.</strong> Une oscillation sinusoïdale s'écrit y = A sin(2πft + φ). La période est T = 1/f. Deux oscillations de même fréquence décalées de Δφ sont décalées dans le temps de Δt = (Δφ/360°)·T : 90° s'appelle <em>quadrature</em>, 180° <em>opposition de phase</em>.</p>
+  <p><strong>L'oscillateur.</strong> Un ressort idéal exerce la force −kx (loi de Hooke). Avec un frottement proportionnel à la vitesse et une poussée périodique, la masse obéit à :</p>
+  <div class="eq">m·ẍ = −k·x − b·ẋ + F₀·cos(Ωt)</div>
+  <p>Sans frottement ni poussée, la solution est un sinus de pulsation <span class="m">ω₀ = √(k/m)</span>, et le point (x, v/ω₀) décrit le cercle du chapitre A. L'énergie cinétique <span class="m">½mv²</span> et l'énergie potentielle <span class="m">½kx²</span> s'échangent deux fois par période, leur somme est constante. Le frottement la transforme en chaleur, ∫b·v² dt. Le facteur de qualité <span class="m">Q = ω₀/(2β)</span>, avec β = b/2m, mesure la finesse de la résonance : en libre, l'amplitude est divisée par e ≈ 2,7 en Q/π oscillations environ.</p>
+  <p><strong>Résonance.</strong> Une fois le régime transitoire éteint, la masse oscille à la fréquence de la force avec l'amplitude <span class="m">A(Ω) = (F₀/m) / √((ω₀² − Ω²)² + (2βΩ)²)</span> et un retard de phase δ de 0° bien en dessous de ω₀, 90° à la résonance, 180° au-dessus. À Ω ≈ ω₀, la force pousse toujours dans le sens de la vitesse : elle ajoute de l'énergie à chaque cycle, jusqu'à ce que l'amortissement en retire autant.</p>
+  <p><strong>L'onde.</strong> Sur une corde tendue, chaque segment tire sur ses voisins. Pour de petits angles, cela donne <span class="m">∂²y/∂t² = c²·∂²y/∂x²</span> avec <span class="m">c = √(T/μ)</span>, T étant la tension et μ la masse par mètre. Une perturbation avance à c sans se déformer, et λ = c/f. Aux extrémités : une corde fixe renvoie l'onde <em>inversée</em>, une extrémité libre la renvoie sans inversion, une extrémité absorbante ne renvoie rien, une main impose le mouvement.</p>
+  <p><strong>Superposition.</strong> L'équation est linéaire : deux ondes qui se croisent s'additionnent, puis repartent intactes. Deux ondes de même amplitude A et déphasées de Δφ donnent une somme d'amplitude 2A·|cos(Δφ/2)| : double à 0°, nulle à 180°. Les flèches du cadran, mises bout à bout, le montrent. Une onde et son retour forment une <strong>onde stationnaire</strong> aux fréquences propres <span class="m">fₙ = n·c/(2L)</span> : c'est la résonance du chapitre B, pour une onde qui fait des allers-retours. Entre deux nœuds voisins, il y a λ/2.</p>
+  <p><strong>Doppler.</strong> La source émet un front par période. Si elle avance, chaque front part d'un point plus proche du précédent : les fronts se tassent devant elle et s'étirent derrière. Un observateur immobile devant mesure <span class="m">f′ = f/(1 − v/c)</span>, derrière <span class="m">f′ = f/(1 + v/c)</span>.</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Ressort idéal :</strong> sans masse, parfaitement linéaire, valable pour de petits déplacements (approximation harmonique). Un vrai ressort trop étiré cesse d'obéir à Hooke.</li>
+    <li><strong>Frottement visqueux :</strong> force exactement proportionnelle à la vitesse. Le frottement sec et la traînée de l'air se comportent autrement.</li>
+    <li><strong>Corde très lâche :</strong> c = 0,5 m/s pour qu'on voie la forme avancer, filmée au ralenti. Une vraie corde de guitare est plusieurs centaines de fois plus rapide.</li>
+    <li><strong>Petits angles, tension uniforme, pas de raideur :</strong> sinon les ondes se déforment (dispersion).</li>
+    <li><strong>Schéma numérique :</strong> 200 segments avec un nombre de Courant égal à 1. À cette valeur précise, le schéma est exact pour l'équation sans amortissement : aucune dispersion numérique. Avec l'amortissement de D2, c'est une très bonne approximation.</li>
+    <li><strong>Amortissement de la corde :</strong> seulement en D2 (γ = 0,1 s⁻¹), pour que la résonance ait une hauteur finie.</li>
+    <li><strong>D1 est analytique :</strong> deux ondes parfaites, sans bords. Aucune simulation numérique n'y tourne.</li>
+    <li><strong>Doppler :</strong> milieu au repos, source mobile, observateurs fixes, v &lt; c.</li>
+    <li><strong>Illustratif :</strong> les lueurs, la traîne du portrait de phase et les fondus entre étapes n'ont pas de contrepartie physique.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>82 à 330 Hz</b><span>fréquence fondamentale d'une corde de guitare, avec une vitesse d'onde de 100 à 400 m/s.</span></div>
+    <div><b>343 m/s</b><span>vitesse du son dans l'air à 20 °C.</span></div>
+    <div><b>≈ 78 cm</b><span>longueur d'onde d'un la₄ à 440 Hz dans l'air (λ = c/f).</span></div>
+    <div><b>10³ à 10⁴</b><span>facteur de qualité d'un diapason : des milliers d'oscillations avant l'extinction.</span></div>
+    <div><b>400 à 700 nm</b><span>longueurs d'onde de la lumière visible, du violet au rouge.</span></div>
+  </div>
+
+  <h2><span>5</span>Où tu reverras ce langage</h2>
+  <ul>
+    <li><strong>Acoustique :</strong> les modes d'une corde de guitare sont les fₙ de D2.</li>
+    <li><strong>Fourier :</strong> presque tout signal peut s'écrire comme une somme de sinus ; D1 et D2 en additionnent deux.</li>
+    <li><strong>Optique :</strong> les interférences de la planche 05 sont la même addition, en deux dimensions.</li>
+    <li><strong>Circuits RLC :</strong> même équation que B, avec L ↔ m, 1/C ↔ k et R ↔ b.</li>
+    <li><strong>Électromagnétisme :</strong> une onde lumineuse obéit à la même équation d'onde, avec c = 1/√(μ₀ε₀).</li>
+    <li><strong>Mécanique quantique :</strong> les états stationnaires d'une particule dans une boîte ressemblent aux modes de D2.</li>
+  </ul>
+
+  <h2><span>6</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu'effleurées et méritent leur propre étude : le <strong>sur-amortissement</strong> (si β dépasse ω₀, la masse revient sans osciller), la <strong>dispersion</strong>, les <strong>ondes en deux et trois dimensions</strong>, le <strong>Doppler avec observateur mobile</strong>, le <strong>mur du son</strong> et l'<strong>analyse de Fourier</strong>.</p>
+
+  <h2><span>7</span>Teste-toi</h2>
+  <details><summary>À 180°, la corde de D1 ne bouge plus. Où est passée l’énergie des deux ondes ?</summary>
+    <p>Il n’y en a pas : deux ondes identiques en opposition de phase, qui vont dans le même sens sur la même corde, font exactement une corde au repos. Si deux mains au même bout essayaient de les produire, chacune annulerait le travail de l’autre et aucune énergie n’entrerait dans la corde. Avec deux sources séparées dans l’espace (planche 05), l’énergie se redistribue vers les franges claires.</p></details>
+  <details><summary>Si on quadruple la masse sans toucher au ressort, que devient la fréquence propre ?</summary>
+    <p>Elle est divisée par deux : f₀ = (1/2π)·√(k/m), et √4 = 2. Un oscillateur plus lourd est plus lent.</p></details>
+  <details><summary>Une source de 1 Hz avance à v = 0,5 c. Quelle fréquence mesure un observateur devant, puis derrière ?</summary>
+    <p>Devant, f′ = 1/(1 − 0,5) = 2 Hz. Derrière, f′ = 1/(1 + 0,5) ≈ 0,67 Hz. La source, elle, émet toujours à 1 Hz.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
