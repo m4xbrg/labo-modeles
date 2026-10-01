@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les ondes et interférences — L’invisible en mouvement 05</title>
+<meta name="description" content="Ce que montre la simulation des ondes et des interférences, le mécanisme réel, ses simplifications et les ordres de grandeur à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#b9c6ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — 05</p>
+  <h1>Comprendre les ondes et <em>interférences</em></h1>
+  <p class="lede">Deux ondes qui traversent le même endroit ne se bousculent pas : elles s'additionnent. Selon leur décalage, la somme est double ou nulle. La simulation te laisse voir les deux cas côte à côte.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>La surface colorée</dt>
+    <dd>Une cuve à ondes vue de dessus. En chaque point, la couleur donne la hauteur de l'eau : <span class="pos">orange</span> pour une crête, <span class="neg">bleu</span> pour un creux, noir pour le niveau de repos.</dd>
+    <dt><span class="acc">S1 et S2</span></dt>
+    <dd>Deux sources ponctuelles, de même fréquence et de même amplitude, qui émettent des ondes circulaires. Le bord de chaque onde avance à la vitesse c.</dd>
+    <dt>Les sondes</dt>
+    <dd>Un petit anneau qui monte et descend avec l'eau, et l'oscilloscope du panneau qui trace son déplacement. La trace fine grise est l'onde 1 seule, la tiretée est l'onde 2 seule, la trace forte est leur somme.</dd>
+    <dt>Les lignes pointillées</dt>
+    <dd>Les lignes nodales, où l'eau reste immobile. Ce sont des repères calculés (voir plus bas).</dd>
+    <dt><span class="ener">Le jaune</span></dt>
+    <dd>L'intensité moyenne : l'énergie que l'onde transporte, en moyenne sur une période. Elle est proportionnelle au carré de l'amplitude.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <p>La contribution d'une source à la distance <em>r</em> est une oscillation qui se propage : <span class="m">u = A·sin(kr − ωt + φ)</span>, avec le nombre d'onde <span class="m">k = 2π/λ</span> et la pulsation <span class="m">ω = 2πf</span>. La longueur d'onde λ, la fréquence f et la vitesse c sont liées par <span class="m">c = λf</span>.</p>
+  <p>Le principe de <strong>superposition</strong> dit que, pour de faibles amplitudes, le déplacement total est la somme des déplacements : <span class="m">u = u₁ + u₂</span>. Rien d'autre. Après leur croisement, les ondes repartent intactes, comme le montre l'acte II.</p>
+  <p>Tout dépend alors de la <strong>différence de marche</strong> <span class="m">Δ = r₂ − r₁</span>, la distance supplémentaire parcourue par l'une des ondes. Elle crée un déphasage <span class="m">kΔ</span>. Pour deux sources en phase :</p>
+  <div class="eq">Δ = mλ  →  renforcement (crête avec crête)<br>Δ = (m + ½)λ  →  annulation (crête avec creux)</div>
+  <p>Les points où Δ est constant forment des <strong>hyperboles</strong> dont les foyers sont S1 et S2 : ce sont les lignes nodales et ventrales. Si S2 est déphasée de 180°, la condition se décale d'un demi-λ, et la médiatrice (Δ = 0) devient une ligne d'annulation.</p>
+  <p>L'<strong>intensité moyenne</strong> se calcule directement, sans moyenner d'images :</p>
+  <div class="eq">I = ½A₁² + ½A₂² + A₁A₂·cos(kΔ + φ₂ − φ₁)</div>
+  <p>Avec deux amplitudes égales, I varie de 0 à quatre fois l'intensité d'une source seule (4 I₀). Sa valeur moyenne dans l'espace est 2 I₀, exactement ce que donneraient deux sources sans interférence : l'énergie n'est ni créée ni détruite, elle est <strong>redistribuée</strong> des lignes sombres vers les franges claires.</p>
+  <p>Entre les deux sources, les ondes vont en sens contraires. Leur somme est une <strong>onde stationnaire</strong> : elle oscille sur place, avec des <strong>nœuds</strong> immobiles espacés de λ/2 (la moitié de la longueur d'onde), parce que la différence de marche change de λ quand on avance de λ/2.</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <p><strong>Simplifications physiques.</strong> Le modèle est volontairement idéal :</p>
+  <ul>
+    <li>Cuve infinie : pas de réflexion sur les bords, pas de dispersion (c ne dépend pas de λ), pas d'amortissement autre que géométrique.</li>
+    <li>L'amplitude décroît en 1/√(1 + r/λ), forme valable loin de la source ; la vraie solution fait intervenir une fonction de Hankel.</li>
+    <li>Loin du centre, les deux ondes n'ont pas exactement la même amplitude (l'atténuation dépend de la distance à chaque source) : l'annulation en Q est donc quasi totale, pas parfaite.</li>
+    <li>Dans la bande de coupe de l'acte V, les deux ondes progressives ont la même amplitude (cas idéal). Dans la cuve, l'amplitude décroît avec la distance : les nœuds proches des sources ne sont donc pas parfaitement immobiles.</li>
+    <li>Amplitudes faibles : la linéarité est parfaite. Une grosse vague n'est plus linéaire.</li>
+    <li>Sources parfaitement cohérentes (fréquence identique, phase fixe). Deux ampoules ordinaires ne le sont pas : leurs phases changent au hasard, les franges se brouillent et on ne voit que la moyenne.</li>
+    <li>Échelle et vitesse arbitraires : λ de 30 à 90 pixels, onde très ralentie.</li>
+  </ul>
+  <p><strong>Éléments purement illustratifs.</strong> Ils n'ont pas de contrepartie physique :</p>
+  <ul>
+    <li>Le relief lumineux qui donne l'aspect « eau » (ombrage calculé à partir de la pente de u).</li>
+    <li>Les hyperboles en pointillé : des repères calculés, pas un objet physique.</li>
+    <li>Les couleurs : orange et bleu pour le signe de u, jaune pour l'énergie, suivant le code de la série.</li>
+    <li>Le fondu entre les actes et la répétition des impulsions toutes les 6,5 secondes.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>400 à 700 nm</b><span>longueurs d'onde de la lumière visible, du violet au rouge. Avec des fentes distantes d'un demi-millimètre et un écran à 1 m, les franges sont espacées d'environ un millimètre.</span></div>
+    <div><b>≈ 1 m</b><span>longueur d'onde d'un son de 340 Hz dans l'air (vitesse du son ≈ 340 m/s, λ = c/f).</span></div>
+    <div><b>≈ 1 cm</b><span>longueur d'onde typique dans une cuve à ondes de laboratoire.</span></div>
+    <div><b>1801 à 1803</b><span>Thomas Young décrit puis montre des franges d'interférence avec la lumière et en conclut qu'elle se comporte comme une onde.</span></div>
+    <div><b>≈ 10⁻¹⁸ m</b><span>variation de longueur détectée par interférométrie à LIGO, environ mille fois moins que le diamètre d'un proton.</span></div>
+  </div>
+
+  <h2><span>5</span>Teste-toi</h2>
+  <details><summary>Si S2 est déphasée de 180°, que voit-on au milieu, sur la médiatrice ?</summary>
+    <p>Une ligne d'annulation : Δ = 0, mais les ondes partent en opposition, donc crête et creux s'y rencontrent toujours. L'eau y reste immobile. Les franges de renforcement et d'annulation échangent leur place.</p></details>
+  <details><summary>Pourquoi deux lampes ordinaires ne produisent-elles pas de franges ?</summary>
+    <p>Leurs lumières ne sont pas cohérentes : la phase relative change au hasard, très vite. Les franges se déplacent trop rapidement pour être vues et seule l'intensité moyenne, sans interférence (I₁ + I₂), subsiste. Il faut des sources cohérentes, comme deux fentes éclairées par une même onde, ou un laser.</p></details>
+  <details><summary>Si λ diminue, les franges se resserrent-elles ou s'écartent-elles ?</summary>
+    <p>Elles se resserrent. Les lignes se situent où Δ = mλ ou (m + ½)λ : un λ plus petit rapproche ces valeurs, donc les hyperboles. Loin des sources, l'espacement des franges à l'écran est proportionnel à λ.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

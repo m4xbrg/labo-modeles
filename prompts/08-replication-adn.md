@@ -1,6 +1,6 @@
-# Projet 06 — La réplication de l'ADN
+# Projet 08 — La réplication de l'ADN
 
-Dossier de sortie : `opus-sonnet/06-replication-adn/`. Accent : `--accent: #4fe0d2;` (turquoise : l'ADN **neuf**). Couleur propre à la page : `--arn: #ff7b9c;` (rose : les **amorces d'ARN**). Brins parentaux en blanc cassé atténué (`--texte` à ~70 %).
+Dossier de sortie : `opus-sonnet/08-replication-adn/`. Accent : `--accent: #4fe0d2;` (turquoise : l'ADN **neuf**). Couleur propre à la page : `--arn: #ff7b9c;` (rose : les **amorces d'ARN**). Brins parentaux en blanc cassé atténué (`--texte` à ~70 %).
 
 ## Intention
 Suivre **une fourche de réplication** comme une petite machine en marche, et faire **voir** une seule idée : la réplication est asymétrique, parce que les deux brins ne peuvent pas être copiés de la même manière. Le texte est minimal ; c'est le mouvement qui démontre.
@@ -60,7 +60,7 @@ IV. **Coudre** — Les amorces sont remplacées par de l'ADN, la ligase scelle c
 V. **La vraie machine** — Vue trombone : les deux polymérases côte à côte près de l'hélicase ; la matrice du brin retardé forme une boucle qui grandit pendant la synthèse d'un fragment, puis est relâchée. Tout fonctionne en même temps. (Peut être dessiné de façon plus schématique, mais la topologie doit être juste : la polymérase du retardé synthétise toujours 5′→3′, la boucle contient le fragment en cours.)
 
 ## Interface (conventions de la série)
-- Scène en vedette (canvas), titre discret en haut à gauche : `Mécaniques invisibles — 06`, puis « La réplication de l'*ADN* ».
+- Scène en vedette (canvas), titre discret en haut à gauche : `L’invisible en mouvement — 08`, puis « La réplication de l'*ADN* ».
 - Panneau de lecture à droite (≥ 901 px) / en bas (mobile) : acte et titre, 1 à 3 phrases, puis mesures en direct en IBM Plex Mono : nucléotides copiés, fragments d'Okazaki (formés / scellés), amorces posées (directeur : 1 ; retardé : n), et le **graphe distance à la fourche** (actes III à V ; vide grisé aux actes I-II).
 - Légende couleur compacte, ligne clavier, lien « Comprendre ce qui se passe → » et « ← Retour à la série ».
 - Barre de contrôles en bas : lecture/pause, segments des cinq actes, vitesse (×0,5 / ×1 / ×2), réinitialiser. Pas de curseur : aucun paramètre libre n'aide ici à comprendre.

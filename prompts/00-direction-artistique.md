@@ -1,6 +1,6 @@
-# Série « Mécaniques invisibles » — direction artistique commune
+# Série « L'invisible en mouvement » — direction artistique commune
 
-Quatre pages interactives qui rendent visible ce qui se passe à une échelle qu'on ne voit pas : une cellule qui se divise, une mitochondrie qui produit de l'énergie, un neurone qui apprend, un champ électrique. Les quatre doivent se lire comme une même collection, pas comme quatre démos séparées.
+Cinq pages interactives qui rendent visible ce qui se passe à une échelle qu'on ne voit pas : une cellule qui se divise, une mitochondrie qui produit de l'énergie, un neurone qui apprend, un champ électrique, deux ondes qui interfèrent. Les cinq doivent se lire comme une même collection, pas comme cinq démos séparées.
 
 Public : un étudiant curieux (niveau cégep, sciences et génie) qui veut **comprendre**, pas seulement regarder. Chaque page doit enseigner quelque chose de vrai.
 
@@ -24,7 +24,7 @@ Public : un étudiant curieux (niveau cégep, sciences et génie) qui veut **com
 --energie:     #ffd166;  /* ATP, énergie libérée, moments clés */
 ```
 
-Les couleurs `--positif`, `--negatif` et `--energie` ont le **même sens dans les quatre pages**. C'est une convention pédagogique : l'étudiant apprend un code couleur une seule fois.
+Les couleurs `--positif`, `--negatif` et `--energie` ont le **même sens dans toutes les pages**. C'est une convention pédagogique : l'étudiant apprend un code couleur une seule fois.
 
 ## Typographie
 
@@ -33,10 +33,10 @@ Les couleurs `--positif`, `--negatif` et `--energie` ont le **même sens dans le
 - Valeurs numériques, unités, étiquettes de mesure : **IBM Plex Mono**.
 - Prévoir des polices de repli système : la page doit rester lisible hors ligne.
 
-## Structure de page (identique pour les quatre)
+## Structure de page (identique pour toutes)
 
 1. **Scène** : occupe l'essentiel de l'écran (canvas ou SVG). C'est la vedette.
-2. **Titre discret** en haut à gauche : nom de la série en petit (`Mécaniques invisibles — 02`), titre de la page dessous.
+2. **Titre discret** en haut à gauche : nom de la série en petit (`L'invisible en mouvement — 02`), titre de la page dessous.
 3. **Panneau de lecture** (à droite sur grand écran, en bas sur téléphone) : l'étape en cours, 1 à 3 phrases d'explication, les valeurs mesurées en direct.
 4. **Contrôles** en bas : lecture/pause, scrubber ou curseurs, bouton de réinitialisation. Sobres, fins, alignés.
 5. Lien **« Comprendre ce qui se passe »** vers `explication.html`.
