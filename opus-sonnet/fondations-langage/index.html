@@ -10,7 +10,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Langage scientifique — L’invisible en mouvement, Fondations 01·03</title>
+<title>Langage scientifique — L’invisible en mouvement, Fondations 1·2·3</title>
 <meta name="description" content="Quatre petits laboratoires pour lire les planches : échelles et unités, graphiques, vecteurs, position-vitesse-accélération.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +135,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <main class="scene" id="scene">
     <div id="stage"></div>
     <header class="head" id="head">
-      <p class="serie" id="serie">Fondations 01·03 — A · Échelles</p>
+      <p class="serie" id="serie">Fondations 1·2·3 — A · Échelles</p>
       <h1 id="titre">Puissances <em>de dix</em></h1>
       <a class="back" href="../index.html">&larr; Accueil de la série</a>
     </header>
@@ -2854,10 +2854,10 @@ const FX = (() => {
     document.querySelectorAll('.extra-hint').forEach(n => n.remove());
     ctrl = new AbortController(); cur = t;
     tabsEl.querySelectorAll('.tab').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
-    $('#serie').textContent = `Fondations 01·03 — ${t.num} · ${t.titre}`;
+    $('#serie').textContent = `Fondations 1·2·3 — ${t.num} · ${t.titre}`;
     $('#titre').innerHTML = t.titreHtml || t.titre;
     $('#lienComprendre').href = `explication.html#${t.id}`;
-    document.title = `${t.titre} — L’invisible en mouvement, Fondations 01·03`;
+    document.title = `${t.titre} — L’invisible en mouvement, Fondations 1·2·3`;
     if (t.hints) $('#hints').insertAdjacentHTML('beforeend', t.hints.map(h => `<li class="extra-hint">${h}</li>`).join(''));
     t.mount({ scene: stage, panel, controls, signal: ctrl.signal });
     FX.tex(panel); FX.tex(controls);

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la matière, la chaleur et le transport — L’invisible en mouvement 07</title>
+<meta name="description" content="Ce que montre la simulation de la matière, de la chaleur et du transport, le mécanisme réel, ses simplifications et les ordres de grandeur à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#78d7e0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:400 22px/1.2 var(--serif);margin:32px 0 8px}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.lil{color:#b9a3ff}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — 07</p>
+  <h1>Comprendre la matière, la <em>chaleur</em> et le transport</h1>
+  <p class="lede">Une seule boîte de molécules, neuf situations. Température, pression, diffusion, osmose, chaleur : ce sont des moyennes sur un immense nombre de chocs aléatoires. Aucune molécule ne « sait » où aller.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>Les molécules</dt>
+    <dd>Des disques en mouvement dont la couleur donne la vitesse : gris-bleu sombre pour les lentes, <span class="ener">jaune</span> pour les rapides. L'agitation est de l'énergie.</dd>
+    <dt>Les traits et les anneaux qui clignotent</dt>
+    <dd>Aux actes I et II, chaque trait jaune sur une paroi marque un choc réellement compté ; à l'acte I, chaque petit anneau blanc marque un choc entre deux molécules. Ce sont ces événements que la page additionne pour obtenir la pression.</dd>
+    <dt>Les parois et le piston</dt>
+    <dd>Les murs de la boîte repoussent les molécules. Le piston est un mur mobile : on le pousse pour changer le volume.</dd>
+    <dt>Le grain brownien</dt>
+    <dd>Un gros disque blanc, bien plus lourd que les molécules, avec sa trace. Il est poussé de tous côtés par des chocs qu'on ne voit pas toujours.</dd>
+    <dt>La cloison, les molécules <span class="acc">A</span> et <span class="lil">B</span></dt>
+    <dd>Au départ, la cloison sépare les A (cyan) des B (lilas). Une fois retirée, les deux espèces se mélangent.</dd>
+    <dt>La bande de profil</dt>
+    <dd>Sous la boîte, la concentration (ou la température) le long de l'axe horizontal. Sa pente est le gradient, et la flèche indique le flux net mesuré.</dd>
+    <dt>La membrane et son ressort</dt>
+    <dd>Une paroi mobile, perméable à l'eau (<span class="acc">cyan</span>) mais pas au soluté (<span class="lil">lilas</span>), retenue par un ressort.</dd>
+    <dt>Les parois chaude et froide</dt>
+    <dd>Elles imposent leur température aux molécules qui les touchent. L'énergie qu'elles injectent ou retirent est comptée : c'est la chaleur échangée.</dd>
+    <dt>L'amas de l'acte VIII</dt>
+    <dd>Des molécules qui s'attirent. Les liaisons s'affichent entre voisines proches ; elles disparaissent à mesure que l'amas fond.</dd>
+    <dt>Les scènes de convection et de rayonnement</dt>
+    <dd>Deux scènes compactes et illustratives : un rouleau de fluide qui monte au chaud et descend au froid, et des « photons » entre un corps chaud et un corps froid.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+
+  <h3>Température</h3>
+  <p>La <strong>température</strong> mesure l'énergie cinétique moyenne par molécule. Dans la simulation, en 2D : <span class="m">kT = ⟨½mv²⟩</span>, où k est la constante de Boltzmann. Une molécule seule n'a pas de température : la grandeur n'existe que pour une population. Les vitesses ne sont pas toutes égales ; elles suivent la distribution de Maxwell-Boltzmann (formule 2D) :</p>
+  <div class="eq">f(v) = (m·v / kT) · exp(−m·v² / 2kT)</div>
+
+  <h3>Pression</h3>
+  <p>La <strong>pression</strong> est l'effet moyen d'innombrables chocs sur les parois. En 2D, c'est une force par unité de longueur. Pour un gaz idéal, <span class="m">P·A = N·kT</span> (en 3D : <span class="m">PV = NkT = nRT</span>). Deux relations qualitatives suffisent : si V diminue à T constante, P augmente, car les chocs sont plus nombreux par seconde et par unité de paroi ; si T augmente à V constant, P augmente, car les chocs sont plus fréquents et plus violents. Comprimer un gaz isolé le réchauffe : le piston qui avance renvoie les molécules plus vite qu'elles ne sont arrivées.</p>
+
+  <h3>Mouvement brownien</h3>
+  <p>Le grain reçoit des chocs de tous côtés. Leur somme n'est jamais exactement nulle : elle fluctue, et le grain bouge au hasard. Plus il est lourd, plus il est lent : sa vitesse typique varie comme √(m/M), avec m la masse d'une molécule et M celle du grain. Le déplacement quadratique moyen est proportionnel au temps. En 1905, Einstein l'a calculé ; en 1908, Perrin l'a mesuré : c'est la preuve que les molécules existent.</p>
+
+  <h3>Diffusion, gradient et flux</h3>
+  <p>Un <strong>gradient</strong> est la pente d'une grandeur le long d'une direction. Un <strong>flux</strong> est la quantité nette qui traverse une ligne par unité de temps. Chaque molécule fait une marche aléatoire, sans préférence. Mais là où les A sont nombreux, il y en a davantage qui traversent une ligne donnée vers la droite que vers la gauche : le flux net va de la forte vers la faible concentration, proportionnellement à la pente. C'est la loi de Fick (en 1D seulement) :</p>
+  <div class="eq">J = −D · dc/dx</div>
+  <p>D est le coefficient de diffusion. La version générale (champs scalaires et vectoriels, gradient en plusieurs dimensions, divergence) fait l'objet d'un autre module, pas de celui-ci.</p>
+
+  <h3>Entropie</h3>
+  <p>Oublie « désordre » : l'entropie compte des configurations. Répartis N molécules entre la gauche et la droite. Le nombre de façons d'en avoir n à gauche est <span class="m">Ω(n) = C(N, n)</span>. Les lois du mouvement sont réversibles : rien n'interdit que toutes les molécules retournent du même côté. Mais la probabilité en est 2<sup>−N</sup>. Avec 4 molécules, on le voit souvent ; avec 200, jamais (2<sup>−200</sup> ≈ 10<sup>−60</sup>) ; avec 10²³, jamais dans l'âge de l'univers. Boltzmann a résumé ce décompte :</p>
+  <div class="eq">S = k · ln Ω</div>
+  <p>Le système évolue vers les états macroscopiques compatibles avec immensément plus de configurations. C'est une introduction, pas la thermodynamique statistique complète.</p>
+
+  <h3>Osmose</h3>
+  <p>Une membrane semi-perméable laisse passer l'eau, mais pas le soluté. L'eau traverse dans les deux sens au hasard ; le soluté, lui, rebondit et pousse la membrane. Dans la simulation, la membrane mobile retenue par un ressort recule, l'eau suit statistiquement, et le flux net va vers le côté du soluté. L'équilibre est atteint quand la pression du soluté égale la force de rappel du ressort. Selon van 't Hoff :</p>
+  <div class="eq">π = c · R · T   (ou c<sub>s</sub> · kT par molécule)</div>
+  <p>Aucune molécule d'eau ne « sait » où aller. Dans les vraies cellules, c'est la pression hydrostatique ou la paroi qui joue le rôle du ressort. Honnêteté : dans un liquide réel, l'explication fine fait intervenir les interactions eau-soluté ; le modèle cinétique de van 't Hoff donne toutefois la bonne loi pour les solutions diluées.</p>
+
+  <h3>Chaleur et conduction</h3>
+  <p>La <strong>chaleur</strong> est un transfert d'énergie dû à une différence de température ; la température, elle, décrit un état. La capacité thermique relie les deux : <span class="m">C = Q/ΔT</span>. Par conduction, les molécules rapides du côté chaud transmettent de l'énergie par chocs à leurs voisines plus lentes. La loi de Fourier (1D) a la même forme que celle de Fick :</p>
+  <div class="eq">q = −κ · dT/dx</div>
+  <p>Dans un solide, ce sont les vibrations des atomes qui transportent l'énergie (et, dans un métal, les électrons).</p>
+
+  <h3>Changement de phase</h3>
+  <p>Pendant la fusion ou la vaporisation, l'énergie apportée sert à briser des liaisons (énergie potentielle) plutôt qu'à augmenter l'agitation : la température plafonne. C'est le palier, et l'énergie en cause est la chaleur latente. Pour l'eau : 334 kJ/kg pour fondre, 2 260 kJ/kg pour vaporiser, contre 4,18 kJ/(kg·K) pour chauffer l'eau liquide.</p>
+
+  <h3>Convection et rayonnement</h3>
+  <p>La <strong>convection</strong> transporte l'énergie par un mouvement d'ensemble du fluide : le fluide chaud, moins dense, monte. Le <strong>rayonnement</strong> la transporte par des ondes électromagnétiques, même dans le vide ; la puissance émise est proportionnelle à T⁴ (Stefan-Boltzmann, σ = 5,67×10⁻⁸ W·m⁻²·K⁻⁴).</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <p><strong>Réellement simulé.</strong></p>
+  <ul>
+    <li>Les trajectoires et les chocs, par dynamique moléculaire 2D (intégration de Verlet vitesse, unités réduites).</li>
+    <li>La température (énergie cinétique moyenne) et la pression (force sur les parois, divisée par le périmètre).</li>
+    <li>La diffusion, le mouvement brownien, les flux de molécules et de chaleur, comptés directement.</li>
+    <li>L'osmose et le palier de changement de phase.</li>
+  </ul>
+  <p><strong>Simplifié.</strong></p>
+  <ul>
+    <li>Le monde est en 2D et compte de 4 à 450 molécules, au lieu d'environ 10²³.</li>
+    <li>L'échelle kT = 1 correspond à 300 K, pour une substance fictive. Le temps est très ralenti.</li>
+    <li>Un thermostat de Berendsen règle l'énergie ; des parois de Langevin imposent les températures de l'acte VII.</li>
+    <li>Le potentiel de Lennard-Jones est générique : purement répulsif, sauf à l'acte VIII où l'attraction est activée.</li>
+    <li>Le rapport PA/NkT reste un peu au-dessus de 1, à cause du volume propre des molécules. Aux actes I et II, les molécules sont plus petites (diamètre 0,7 au lieu de 1) pour rester proches du gaz idéal ; l'écart réapparaît quand on comprime fort, comme pour un gaz réel.</li>
+    <li>La membrane est idéale et le ressort remplace la pression hydrostatique. La solution est idéale elle aussi : l'eau et le soluté ne se heurtent pas entre eux, seule la membrane les distingue (c'est le cadre où la loi de van 't Hoff est exacte). La membrane mobile subit un léger frottement et l'agitation thermique correspondante, pour ne pas refroidir le soluté.</li>
+    <li>Le palier de phase est arrondi, car l'amas est petit.</li>
+  </ul>
+  <p><strong>Illustratif.</strong></p>
+  <ul>
+    <li>Les couleurs de vitesse et de température, les flèches de flux et les bandes de profil.</li>
+    <li>Le rouleau de convection, imposé : son champ de vitesse n'est pas calculé.</li>
+    <li>Les photons du rayonnement, simplement dessinés.</li>
+  </ul>
+  <p>La page ne couvre pas la mécanique des fluides, les équations de Navier-Stokes, les champs vectoriels généraux, la divergence ni la thermodynamique formelle.</p>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 2,7×10¹⁹</b><span>molécules par cm³ d'air, dans les conditions normales.</span></div>
+    <div><b>≈ 500 m/s</b><span>vitesse moyenne d'une molécule de O₂ ou de N₂ à 20 °C.</span></div>
+    <div><b>≈ 70 nm</b><span>libre parcours moyen dans l'air : la distance entre deux chocs successifs.</span></div>
+    <div><b>10⁹ à 10¹⁰ /s</b><span>collisions par seconde subies par chaque molécule (environ 500 m/s divisés par 70 nm).</span></div>
+    <div><b>≈ 10⁻⁹ m²/s</b><span>coefficient de diffusion d'une petite molécule dans l'eau. Avec t ≈ x²/2D : environ 8 minutes pour 1 mm, environ 2 mois pour 10 cm. La diffusion est rapide sur de courtes distances et très lente sur de longues.</span></div>
+  </div>
+
+  <h2><span>5</span>Teste-toi</h2>
+  <details><summary>Pourquoi un pneu gonflé en hiver semble-t-il dégonflé ?</summary>
+    <p>Le volume du pneu est à peu près constant et le nombre de molécules ne change pas. Quand T baisse, les molécules sont moins rapides : chocs moins fréquents et moins violents, donc P diminue. L'air n'a pas fui, il pousse simplement moins fort.</p></details>
+  <details><summary>Pourquoi un mélange ne se « démélange »-t-il jamais spontanément, alors que rien ne l'interdit ?</summary>
+    <p>Les lois du mouvement sont réversibles, donc le démélange est permis. Mais les configurations mélangées sont immensément plus nombreuses que les configurations séparées : le retour a une probabilité de l'ordre de 2<sup>−N</sup>, qui devient astronomiquement faible pour un nombre réaliste de molécules.</p></details>
+  <details><summary>Pourquoi l'eau qui bout reste-t-elle à 100 °C malgré le feu ?</summary>
+    <p>L'énergie apportée sert à briser les liaisons entre molécules (chaleur latente de vaporisation, 2 260 kJ/kg) et non à augmenter l'agitation. L'énergie cinétique moyenne ne change pas, donc la température non plus, jusqu'à ce que tout le liquide soit vaporisé.</p></details>
+  <details><summary>Une cellule végétale dans de l'eau pure : que se passe-t-il, et pourquoi ?</summary>
+    <p>L'intérieur contient des solutés, pas l'extérieur. L'eau traverse la membrane dans les deux sens, mais le flux net entre dans la cellule, qui gonfle. La paroi cellulaire joue le rôle du ressort : elle résiste, la pression interne monte jusqu'à égaler la pression osmotique, et la cellule devient turgescente sans éclater.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

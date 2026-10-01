@@ -1,11 +1,11 @@
 # Fondations — Langage scientifique fondamental
 
-Dossier de sortie : `opus-sonnet/fondations-langage/` (modules canoniques 1 à 3, numérotés « Fondations 01·03 » ; les quatre toys sont A à D). Une seule page `index.html` (quatre toys internes, navigation par onglets) et une seule `explication.html` commune. Accent : `--accent: #6fd6c8;` (sarcelle craie : l'outil de mesure, le repère, l'interface).
+Dossier de sortie : `opus-sonnet/fondations-langage/` (modules canoniques 1 à 3, numérotés « Fondations 1·2·3 » ; les quatre toys sont A à D). Une seule page `index.html` (quatre toys internes, navigation par onglets) et une seule `explication.html` commune. Accent : `--accent: #6fd6c8;` (sarcelle craie : l'outil de mesure, le repère, l'interface).
 
 La charte `00-direction-artistique.md` s'applique, avec trois adaptations propres aux fondations :
 - les toys sont plus petits et plus didactiques que les planches : une idée claire par scène, texte court, retour immédiat ;
 - pas de stepper narratif obligatoire : chaque toy a 3 ou 4 **modes** (boutons segmentés) qui sont autant de « regards » sur la même scène ;
-- le titre discret dit `Fondations 01·03 — A · Échelles` (A à D) au lieu de `L'invisible en mouvement — 0N`.
+- le titre discret dit `Fondations 1·2·3 — A · Échelles` (A à D) au lieu de `L'invisible en mouvement — 0N`.
 
 ## Intention
 
