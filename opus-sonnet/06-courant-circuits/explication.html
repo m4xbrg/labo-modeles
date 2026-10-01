@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre le courant et les circuits — L’invisible en mouvement 06</title>
+<meta name="description" content="Ce que montre la simulation du courant et des circuits : loi d'Ohm, condensateur qui se charge et se décharge, oscillation LC. Mécanisme réel, simplifications et ordres de grandeur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#8fe9d9;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --magnetique:#c9a7ff;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:400 22px/1.2 var(--serif);margin:34px 0 8px;color:var(--texte)}
+h3 b{font:400 11px var(--mono);letter-spacing:.14em;color:var(--accent);margin-right:10px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.mag{color:var(--magnetique)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+table{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:15px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--trait)}
+th{font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2)}
+td:first-child{font-family:var(--mono);font-size:.92em}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}th,td{padding:8px 6px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — 06</p>
+  <h1>Comprendre le courant et les <em>circuits</em></h1>
+  <p class="lede">Quand on relie deux points de potentiels différents par un conducteur, les charges se mettent en mouvement. Cette planche prolonge l'électrostatique de la <a href="../04-champ-electrique/index.html">planche 04</a> : la tension pousse, la résistance freine, le condensateur stocke, la bobine résiste aux changements.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">La boucle de fil</span></dt>
+    <dd>Les fils sont colorés selon leur potentiel : sombre à 0 V, <span class="pos">orange</span> à la tension de la pile. Dans la résistance, la couleur change progressivement : c'est la chute de potentiel.</dd>
+    <dt><span class="neg">Les points bleus</span></dt>
+    <dd>Les électrons, à densité constante. Ils vont dans le sens opposé au <span class="acc">courant conventionnel</span>, que montrent les petits triangles turquoise (du + vers le −, à l'extérieur de la pile).</dd>
+    <dt>La résistance, le voltmètre, l'ampèremètre</dt>
+    <dd>La résistance (zigzag) rayonne une lueur <span class="ener">jaune</span> qui suit la puissance dissipée. Le voltmètre est branché aux bornes de R, l'ampèremètre en série : l'un mesure une différence de potentiel, l'autre un débit de charges.</dd>
+    <dt>Le condensateur</dt>
+    <dd>Deux armatures : des charges <span class="pos">+</span> d'un côté, autant de <span class="neg">−</span> de l'autre, avec des lignes de champ entre elles. Leur nombre suit la charge Q.</dd>
+    <dt><span class="mag">La bobine et ses boucles violettes</span></dt>
+    <dd>Les spires stockent de l'énergie quand elles sont traversées par un courant. L'opacité des boucles suit |I|, sans aucune valeur de champ magnétique.</dd>
+    <dt>Les courbes et les barres</dt>
+    <dd>En pointillé, ce qui va arriver ; en trait plein, ce qui est arrivé. Les repères (63 %, τ, tangente, t½) sont calculés. Les barres comparent l'énergie fournie, stockée et dissipée.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+
+  <h3><b>Acte I</b>Ohm et puissance</h3>
+  <p>Un <strong>courant</strong> est un débit de charges : des coulombs par seconde. Dans une boucle simple, il est le même partout, car les charges ne s'accumulent nulle part. La pile maintient entre ses bornes une <strong>tension</strong> V (une différence de potentiel, comme une différence d'altitude). Dans la résistance de longueur L, le champ est uniforme, <span class="m">E = V/L</span>, comme entre deux plaques de la planche 04 : c'est lui qui pousse les charges.</p>
+  <div class="eq">I = V / R<br>P = V·I = R·I² = V²/R</div>
+  <p>Dans la scène, <span class="m">I = V/R</span> est la pente de la droite du graphique : changer R la fait pivoter. <span class="m">P</span> est l'énergie convertie en chaleur chaque seconde : c'est l'intensité de la lueur.</p>
+
+  <h3><b>Acte II</b>Le condensateur se charge</h3>
+  <p>Un <strong>condensateur</strong> stocke de la charge séparée : <span class="m">Q = C·V_C</span>, avec +Q sur une armature et −Q sur l'autre (charge totale nulle). Il stocke l'énergie <span class="m">U = ½·C·V_C²</span>. Le champ qui grandit entre les armatures s'oppose à la pile : le courant diminue à mesure que V_C approche V₀.</p>
+  <div class="eq">dV_C/dt = (V₀ − V_C) / τ  ·  τ = R·C<br>V_C(t) = V₀·(1 − e^(−t/τ))</div>
+  <p>La vitesse de charge est proportionnelle à ce qu'il reste à faire : c'est ce qui donne une exponentielle. À t = τ, V_C vaut 63 % de V₀ ; la tangente à l'origine atteint exactement V₀ à t = τ ; puis 86 % à 2τ, 95 % à 3τ, 99 % à 5τ. Bilan d'énergie : la pile fournit <span class="m">Q·V₀ = C·V₀²</span>, le condensateur garde la moitié, la résistance dissipe l'autre, <strong>quelle que soit R</strong>.</p>
+
+  <h3><b>Acte III</b>Le condensateur se décharge</h3>
+  <p>La pile sort du circuit et C se vide dans R. Le courant change de sens : sa valeur devient négative et les électrons repartent à l'envers.</p>
+  <div class="eq">V_C(t) = V₀·e^(−t/τ)  ·  t½ = τ·ln 2 ≈ 0,69 τ</div>
+  <p>La jauge « écart restant » et la flèche « vitesse » rétrécissent ensemble : la vitesse vaut toujours l'écart divisé par τ. À chaque intervalle τ, l'écart est multiplié par 1/e ≈ 0,37. C'est la même loi que la décroissance radioactive ou le refroidissement d'une tasse : ce qui reste diminue d'une même fraction par unité de temps.</p>
+
+  <h3><b>Acte IV</b>Bobine et oscillation</h3>
+  <p>Une <strong>inductance</strong> s'oppose aux variations du courant : <span class="m">V_L = L·dI/dt</span>. En RC, c'est la tension du condensateur qui ne peut pas sauter ; en RL, c'est le courant dans la bobine. Au premier instant, I = 0 et toute la tension de la pile se retrouve aux bornes de la bobine.</p>
+  <div class="eq">τ = L/R  ·  I(t) = (V₀/R)·(1 − e^(−t/τ))<br>V_L(t) = V₀·e^(−t/τ)</div>
+  <p>Avec un condensateur et une bobine, l'énergie passe de l'un à l'autre : le condensateur se vide, le courant monte, puis recharge le condensateur à l'envers (signes des armatures inversés), et ainsi de suite, comme une masse sur un ressort. La résistance fait fondre l'oscillation.</p>
+  <div class="eq">L·dI/dt + R·I + q/C = 0  ·  I = dq/dt<br>ω₀ = 1/√(LC) = 1000 rad/s  ·  R critique = 2√(L/C) = 20 Ω</div>
+  <table>
+    <thead><tr><th>Circuit LC</th><th>Masse sur un ressort</th></tr></thead>
+    <tbody>
+      <tr><td>q (charge)</td><td>x (position)</td></tr>
+      <tr><td>I = dq/dt</td><td>v = dx/dt (vitesse)</td></tr>
+      <tr><td>L (inductance)</td><td>m (masse)</td></tr>
+      <tr><td>C (1/C = raideur)</td><td>k (ressort)</td></tr>
+      <tr><td>R (résistance)</td><td>frottement</td></tr>
+      <tr><td>½·q²/C · ½·L·I²</td><td>½·k·x² · ½·m·v²</td></tr>
+    </tbody>
+  </table>
+  <p>Sous 20 Ω, l'oscillation est amortie ; à 20 Ω, le retour à zéro est le plus rapide sans dépassement (amortissement critique) ; au-dessus, il est lent et sans oscillation. Pourquoi une bobine réagit ainsi aux variations de courant : c'est l'induction, sujet d'une planche à venir.</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Composants idéaux.</strong> Fils sans résistance, pile sans résistance interne, condensateur sans fuite, bobine sans résistance propre.</li>
+    <li><strong>Vitesse de dérive très exagérée.</strong> Les électrons font le tour du schéma en quelques secondes ; leur vraie vitesse moyenne est de l'ordre de 0,1 mm/s, si bien qu'un électron mettrait des heures à faire le tour d'un vrai circuit de table. Leur vitesse visuelle suit I, avec une saturation douce pour rester lisible.</li>
+    <li><strong>Ralentis ×10 et ×500.</strong> Le circuit RL (τ = 0,1 s) est ralenti dix fois, l'oscillation LC (T₀ ≈ 6,3 ms) cinq cents fois, pour qu'on puisse les voir. Le ralenti est affiché en permanence.</li>
+    <li><strong>Qui voyage vraiment ?</strong> Le courant s'établit à la vitesse de propagation du champ dans le fil, une fraction notable de la vitesse de la lumière, et non à celle des électrons : tous se mettent en mouvement presque en même temps, d'où la densité constante.</li>
+    <li><strong>Pas de rayonnement.</strong> Un circuit oscillant rayonne un peu d'énergie sous forme d'ondes ; on l'ignore, seule R dissipe.</li>
+    <li><strong>Calcul exact, pas d'Euler.</strong> Chaque image applique l'exponentielle (ou la solution analytique de l'oscillateur) sur toute la durée écoulée : les résultats ne dépendent pas de la cadence d'affichage.</li>
+    <li><strong>Choix d'affichage.</strong> Les couleurs, la lueur, le nombre de charges dessinées sur les armatures et les boucles violettes sont des repères visuels, pas des mesures.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 0,1 mm/s</b><span>vitesse de dérive des électrons pour 1 A dans un fil de cuivre de 1 mm².</span></div>
+    <div><b>≈ 6,2 × 10¹⁸</b><span>électrons par seconde pour 1 A (1 C ÷ 1,6 × 10⁻¹⁹ C).</span></div>
+    <div><b>≈ 1 J sous ≈ 300 V</b><span>énergie stockée dans le condensateur d'un flash photographique (½·C·V² avec C de l'ordre de 20 à 100 µF).</span></div>
+    <div><b>1 s</b><span>τ = RC du circuit de la planche par défaut (10 kΩ × 100 µF). À 5τ, la charge est complète à moins de 1 %.</span></div>
+    <div><b>≈ 1 µF/cm²</b><span>capacité de la membrane d'un neurone, par unité de surface : la même physique RC que cette planche (<a href="../03-neurone/index.html">planche 03</a>).</span></div>
+  </div>
+
+  <h2><span>5</span>Teste-toi</h2>
+  <details><summary>Si on double R, que devient l'énergie dissipée au total pendant la charge complète d'un condensateur ?</summary>
+    <p>Elle ne change pas : elle vaut toujours ½·C·V₀², la moitié de ce que la pile fournit. Doubler R double τ (la charge est deux fois plus lente) mais divise par deux le courant : l'énergie perdue sur toute la charge reste la même.</p></details>
+  <details><summary>Pourquoi le courant est-il négatif pendant la décharge ?</summary>
+    <p>Le sens positif est défini par la charge : le courant va vers l'armature du haut. Pendant la décharge, les charges repartent de cette armature vers l'autre à travers R : le courant conventionnel circule à l'inverse, donc I = (V_s − V_C)/R est négatif (V_s = 0). Les électrons, eux, changent aussi de sens.</p></details>
+  <details><summary>Dans le circuit LC, où est l'énergie quand le courant est maximal ?</summary>
+    <p>Dans la bobine, sous forme de ½·L·I². À cet instant V_C passe par zéro : le condensateur est vide. Un quart de période plus tard, tout est de nouveau dans le condensateur, avec des armatures inversées (moins ce que R a dissipé).</p></details>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

@@ -4,10 +4,11 @@ Banc d'essai perso pour comparer des modèles d'IA sur un même brief. Hors du S
 
 ## Essai 1 : « L'invisible en mouvement » (2026-09-29)
 
-Cinq planches scientifiques interactives : mitose, respiration cellulaire, neurone, champ électrique, ondes et interférences. La série s'appelait d'abord « Mécaniques invisibles » ; `prompts/astra-neurone.md` garde l'ancien nom, tel qu'il a été donné à Astra.
+Six planches scientifiques interactives : mitose, respiration cellulaire, neurone, champ électrique, ondes et interférences, courant et circuits. La série s'appelait d'abord « Mécaniques invisibles » ; `prompts/astra-neurone.md` garde l'ancien nom, tel qu'il a été donné à Astra.
 
 - `prompts/` : la charte commune (`00-direction-artistique.md`), un brief par projet, `PROMPT-SESSION.md` (prompt à coller dans une autre session) et `astra-neurone.md` (tout-en-un pour Astra).
 - `opus-sonnet/` : Opus 5.5 écrit la direction, des sous-agents Sonnet 5.5 construisent (quatre en parallèle pour 01 à 04 ; un constructeur et un relecteur QA pour 05, ajoutée le 2026-10-01). Ouvrir `opus-sonnet/index.html`.
+- Fondations électricité (modules 21-22, 2026-10-01) : la planche 04 est prolongée (tension entre deux points A–B, force F = qE sur 1 nC, forces de Coulomb entre charges, lectures commentées des vues, tableau charge / champ / force / potentiel / tension / énergie dans l'explication) et une planche 06 « Courant et circuits » est ajoutée (Ohm et puissance, charge et décharge RC, aperçu RL et LC amorti ; brief `prompts/06-courant-circuits.md`, construite par Sonnet). Les préalables gagnent une section 06 et un paragraphe sur la tension.
 - `astra/03-neurone/` : GPT-6 Astra, même brief, en solo, projet 03 seulement.
 
 ## Grille de comparaison
