@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre forces, énergie et conservation — L’invisible en mouvement, Fondations 10·11</title>
+<meta name="description" content="Ce que montre le laboratoire de mécanique : forces et lois de Newton, travail et énergie, quantité de mouvement et collisions, avec les simplifications du modèle.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#d6c4ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour au laboratoire</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — Fondations 10·11</p>
+  <h1>Comprendre forces, énergie et <em>conservation</em></h1>
+  <p class="lede">Une force ne fait pas avancer un objet : elle change sa vitesse. L'énergie ne s'use pas : elle change de forme. La quantité de mouvement d'un système isolé ne change pas du tout. Le laboratoire montre ces trois idées sur le même mouvement, au même instant.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>Le bloc, les chariots, la piste</dt>
+    <dd>Des corps traités comme des points : seule compte la position de leur centre le long d'une ligne. Aux actes I et II, la caméra suit le bloc : ce sont les graduations du rail, tous les 0,5 m, qui défilent et révèlent la vitesse.</dd>
+    <dt>Les flèches fines</dt>
+    <dd>Chaque force qui agit sur l'objet : poids, réaction normale du rail, forces appliquées, frottement, poussée. Le poids et la normale sont toujours là, et ils s'annulent.</dd>
+    <dt><span class="acc">La flèche épaisse lilas</span></dt>
+    <dd>La force résultante ΣF, somme de toutes les forces. La petite flèche lilas en tirets est l'accélération qu'elle produit : a = ΣF/m.</dd>
+    <dt><span class="pos">Orange</span> et <span class="neg">bleu</span></dt>
+    <dd>La quantité de mouvement p = mv, orange quand elle pointe vers la droite, bleue vers la gauche, comme le signe des charges dans les autres planches.</dd>
+    <dt><span class="ener">Le jaune</span></dt>
+    <dd>L'énergie, sous toutes ses formes : pleine pour l'énergie cinétique K, hachurée pour l'énergie potentielle U (hauteur ou ressort comprimé), pâle pour l'énergie dissipée en chaleur, en tirets pour le travail apporté de l'extérieur.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <p><strong>Inertie et première loi.</strong> La masse <em>m</em> mesure l'inertie : la résistance d'un corps à un changement de vitesse. Si la force résultante est nulle, la vitesse reste constante, qu'elle soit nulle ou non. Sur Terre, un objet qu'on cesse de pousser s'arrête parce que le frottement est une force, pas parce que le mouvement « s'épuise ». À l'acte I, sans frottement, le bloc lâché garde sa vitesse indéfiniment.</p>
+  <p><strong>Deuxième loi.</strong> La résultante fixe l'accélération, c'est-à-dire le taux de variation de la vitesse :</p>
+  <div class="eq">ΣF = m·a    (1 N = 1 kg·m/s²)</div>
+  <p>Deux forces égales et opposées donnent ΣF = 0 : l'objet garde sa vitesse. La même résultante appliquée à une masse double donne une accélération deux fois plus petite. Avec frottement, pousser exactement autant que le frottement maintient une vitesse constante : on pousse, et pourtant rien n'accélère.</p>
+  <p><strong>Troisième loi.</strong> Quand A pousse B, B pousse A avec une force égale et opposée, au même instant. Ces deux forces agissent sur des corps différents : elles ne s'annulent pas entre elles. À l'acte III, le ressort pousse les deux chariots aussi fort ; le plus léger accélère davantage.</p>
+  <p><strong>Travail et énergie.</strong> Une force qui accompagne un déplacement fait un <strong>travail</strong> W = F·d (en joules). Le travail total reçu égale la variation d'énergie cinétique K = ½mv². Le travail du poids ne dépend que de la variation de hauteur : on le range dans une énergie potentielle U = m·g·h, dont le zéro est un choix de référence. Sur la piste de l'acte IV, sans frottement ni poussée, K + U reste constant : l'énergie passe sans cesse d'une forme à l'autre. Le frottement en convertit une partie en chaleur ; la poussée en apporte de l'extérieur. Le bilan affiché vérifie à chaque instant :</p>
+  <div class="eq">K + U + E_th − W_poussée = E₀</div>
+  <p>La <strong>puissance</strong> est le débit de ce transfert : P = F·v, en watts (joules par seconde).</p>
+  <p><strong>Impulsion et quantité de mouvement.</strong> Une force appliquée pendant un temps donne une <strong>impulsion</strong> J = ∫F dt, l'aire sous la courbe F(t). Elle change la quantité de mouvement : Δp = J. Dans une collision, les deux chariots reçoivent des impulsions égales et opposées (troisième loi), donc la somme p₁ + p₂ ne change pas. C'est la <strong>conservation de la quantité de mouvement</strong>, valable pour tout système sans force extérieure résultante, que la collision soit élastique ou non.</p>
+  <p><strong>Ce que fait une collision.</strong> Pendant le contact, les pare-chocs se compriment : l'énergie cinétique se stocke en énergie élastique, puis est rendue. Le coefficient de restitution <em>e</em> dit quelle fraction de la vitesse relative revient. À e = 1 (élastique), toute l'énergie revient ; deux masses égales échangent leurs vitesses. À e = 0, les chariots repartent collés et la perte est maximale :</p>
+  <div class="eq">E perdue = (1 − e²) · ½ · µ · v_rel²,   µ = m₁m₂ / (m₁ + m₂)</div>
+  <p>L'énergie n'est pas toujours conservée sous forme mécanique ; la quantité de mouvement, elle, l'est toujours.</p>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <p><strong>Réellement calculé.</strong> Les équations du mouvement ΣF = m·a sont intégrées pas à pas (de 1/240 à 1/20 000 de seconde selon l'expérience) ; les énergies, impulsions et quantités de mouvement affichées sont celles de cette simulation, pas des valeurs recopiées d'une formule.</p>
+  <p><strong>Simplifications physiques.</strong></p>
+  <ul>
+    <li>Corps ponctuels, mouvement à une dimension : aucune rotation, aucune roue, aucun basculement.</li>
+    <li>Frottement de Coulomb simple (statique 0,20, cinétique 0,15 sur le rail ; 0,05 sur la piste). Sur la piste, la normale est prise égale à m·g·cosθ : le supplément dû à la courbure est négligé.</li>
+    <li>Aucune résistance de l'air. Rail à coussin d'air idéal pour les collisions.</li>
+    <li>Pare-chocs : ressorts sans masse au contact hystérétique (modèle de Walton-Braun), choisi parce qu'il donne exactement le coefficient de restitution demandé. Un vrai choc fait aussi vibrer et chauffer les corps de façons plus complexes.</li>
+    <li>Les butées aux extrémités de la piste arrêtent le chariot net ; l'énergie cinétique restante est comptée comme dissipée.</li>
+  </ul>
+  <p><strong>Éléments illustratifs.</strong> Les flèches et les barres sont des représentations de grandeurs, pas des objets : une force ne se voit pas, et l'énergie n'est pas une substance qu'on verserait d'une barre à l'autre. Les échelles des flèches sont fixes dans chaque acte. Le ralenti au moment du contact est un choix d'affichage : le temps indiqué reste le temps physique. Le repère CM (centre de masse) est calculé, pas matériel.</p>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 1 N</b><span>le poids d'une petite pomme de 100 g (m·g = 0,1 × 9,81).</span></div>
+    <div><b>≈ 1 J</b><span>le travail pour soulever cette pomme de 1 m.</span></div>
+    <div><b>≈ 100 W</b><span>la puissance mécanique qu'un humain soutient longtemps ; un sprinteur dépasse brièvement 1000 W.</span></div>
+    <div><b>580 kJ</b><span>l'énergie cinétique d'une voiture de 1500 kg à 100 km/h, la même qu'en tombant de 39 m. Sa quantité de mouvement : environ 42 000 kg·m/s.</span></div>
+    <div><b>≈ 0,5 ms</b><span>la durée du contact entre un bâton de golf et la balle : une force énorme, très brève, pour une impulsion modeste.</span></div>
+  </div>
+
+  <h2><span>5</span>Teste-toi</h2>
+  <details><summary>Un bloc glisse à vitesse constante sur une table. Quelle est la force résultante ?</summary>
+    <p>Nulle. Une vitesse constante signifie une accélération nulle, donc ΣF = 0. S'il y a du frottement, c'est qu'une autre force l'équilibre exactement ; sans frottement, aucune force horizontale n'est nécessaire.</p></details>
+  <details><summary>Un camion et une voiture se percutent. Lequel subit la plus grande force ?</summary>
+    <p>Aucun : les forces sont égales et opposées (troisième loi), et les impulsions aussi. Mais la voiture, moins massive, subit une plus grande variation de vitesse, donc une plus grande accélération : c'est elle qui souffre davantage.</p></details>
+  <details><summary>Deux chariots de 1 kg, l'un à 1,2 m/s, l'autre immobile, se heurtent et restent collés. Que deviennent p et K ?</summary>
+    <p>Σp reste 1,2 kg·m/s, d'où une vitesse commune de 0,6 m/s. K passe de 0,72 J à 0,36 J : la moitié de l'énergie cinétique devient chaleur et déformation, mais aucune quantité de mouvement n'est perdue.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour au laboratoire</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
