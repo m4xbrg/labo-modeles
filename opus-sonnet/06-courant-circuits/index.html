@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. La scène est un schéma d'instrument de banc : fils colorés selon leur potentiel (sombre à 0 V, orange à V), électrons bleus à densité constante qui circulent à l'envers du courant conventionnel turquoise ; les armatures, les spires et les barres d'énergie utilisent le code de la série (jaune = énergie électrique, violet = bobine).
+  2. Le mouvement ne dit que la physique : la vitesse des électrons suit I, elle s'essouffle quand le condensateur se remplit et s'inverse à la décharge ; les mises à jour du temps sont exactes (exponentielle et solution analytique de l'oscillateur), jamais de pas d'Euler, et les ralentis ×10 et ×500 sont affichés en permanence.
+  3. Les courbes se tracent en pointillé (ce qui va arriver) puis en trait plein (ce qui est arrivé), avec les repères 63 %, τ, tangente et t½ calculés, jamais placés à l'œil ; window.__circuits expose l'état en unités SI pour la vérification.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Courant et circuits — L’invisible en mouvement 06</title>
+<meta name="description" content="Un courant est un débit de charges : de la loi d'Ohm au condensateur qui se charge, puis à l'oscillation d'un circuit LC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#8fe9d9;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --magnetique:#c9a7ff;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation;cursor:default}
+#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.head::before{content:"";position:absolute;inset:-30px -90px -30px -50px;pointer-events:none;z-index:-1;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.95) 0%,rgba(10,13,18,.85) 52%,rgba(10,13,18,0) 100%)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.92;font-size:14.5px}
+#stepText a{color:var(--accent);text-underline-offset:3px}
+.flash{margin:10px 0 0;color:var(--energie);font-size:14.5px;font-weight:500;display:none}
+.flash.on{display:block}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);white-space:nowrap;text-align:right}
+.row.big .val{font-size:19px}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.eq{font:400 13.5px/1.55 var(--mono);color:var(--texte);margin:0;border-left:2px solid var(--accent);padding:4px 0 4px 12px}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+
+.stepper{display:flex;gap:4px;flex:1 1 420px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:150px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:980px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:580px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px;overflow:visible}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:120px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .controls{gap:10px 16px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Schéma de circuit électrique : pile, résistance, condensateur ou bobine, et graphiques du courant et de la tension en fonction du temps. Les électrons sont bleus et circulent en sens inverse du courant conventionnel, en turquoise."></canvas>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — 06</p>
+      <h1>Courant et <em>circuits</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur IV</p>
+      <h2 id="stepTitle">Une boucle, un courant</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="flash" id="flash">La moitié de l’énergie fournie par la pile a chauffé la résistance.</p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Mesures</p>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="note"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Équation de l’acte</p>
+      <p class="eq" id="eq"></p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>4</kbd> aller à l'acte</li>
+        <li><kbd>R</kbd> réinitialiser l'acte · <kbd>S</kbd> inverseur</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les quatre actes">
+      <button class="seg" data-a="1" title="Acte I — Une boucle, un courant"><b>I</b><span>Une boucle</span></button>
+      <button class="seg" data-a="2" title="Acte II — Le condensateur se charge"><b>II</b><span>Charge</span></button>
+      <button class="seg" data-a="3" title="Acte III — Le condensateur se décharge"><b>III</b><span>Décharge</span></button>
+      <button class="seg" data-a="4" title="Acte IV — Bobine et oscillation"><b>IV</b><span>Bobine</span></button>
+    </div>
+
+    <div class="tools" id="tools">
+      <div class="grp" id="gV1"><span class="gl">V pile</span><input type="range" id="rV1" min="1.5" max="12" step="0.5" value="6" aria-label="Tension de la pile en volts"><span class="rv" id="vV1"></span></div>
+      <div class="grp" id="gR1"><span class="gl">R</span><input type="range" id="rR1" min="10" max="200" step="5" value="60" aria-label="Résistance en ohms"><span class="rv" id="vR1"></span></div>
+      <div class="grp" id="gR2" hidden><span class="gl">R</span><input type="range" id="rR2" min="2" max="20" step="0.5" value="10" aria-label="Résistance en kilohms"><span class="rv" id="vR2"></span></div>
+      <div class="grp" id="gC2" hidden><span class="gl">C</span><input type="range" id="rC2" min="50" max="500" step="10" value="100" aria-label="Capacité en microfarads"><span class="rv" id="vC2"></span></div>
+      <div class="grp" id="gMode" hidden><span class="gl">Circuit</span>
+        <button class="btn" id="bRL" aria-pressed="true">RL</button>
+        <button class="btn" id="bLC" aria-pressed="false">LC amorti</button></div>
+      <div class="grp" id="gRrl" hidden><span class="gl">R</span><input type="range" id="rRrl" min="5" max="50" step="1" value="10" aria-label="Résistance en ohms (circuit RL)"><span class="rv" id="vRrl"></span></div>
+      <div class="grp" id="gRlc" hidden><span class="gl">R</span><input type="range" id="rRlc" min="0" max="30" step="1" value="1" aria-label="Résistance en ohms (circuit LC)"><span class="rv" id="vRlc"></span></div>
+      <div class="grp" id="gSw" hidden><span class="gl" id="swGl">Inverseur</span><button class="btn" id="bSw" title="Basculer l'inverseur (S)"><span id="swLab">charge</span></button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Modèle ----------------
+   Composants idéaux, fils sans résistance, pile idéale. Sens conventionnel : du + vers le − à l'extérieur de la pile.
+   I. I = V/R, P = VI = RI².
+   II/III. RC exact : VC(t+dt) = Vs + (VC − Vs)·e^(−dt/τ), τ = RC, I = (Vs − VC)/R.
+   IV. RL exact : I(t+dt) = Is + (I − Is)·e^(−dt/τ), τ = L/R. LC amorti : L·dI/dt + R·I + q/C = 0, solution analytique
+   (sous-amorti, critique, suramorti), énergie dissipée intégrée par Simpson sur des sous-pas ≤ T0/50. Aucun pas d'Euler. */
+const TAU = Math.PI * 2;
+const DW = 560, DH = 400;                 // boîte de dessin du schéma (unités de conception)
+const SP = 22;                            // écart entre électrons (densité constante)
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+
+const cs = getComputedStyle(document.documentElement);
+const tok = n => cs.getPropertyValue(n).trim();
+const K = { fond: tok('--fond'), trait: tok('--trait'), texte: tok('--texte'), t2: tok('--texte-2'), acc: tok('--accent'),
+            pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mag: tok('--magnetique'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RP = rgb(K.pos), RT = rgb(K.trait), RT2 = rgb(K.t2);
+const lerpC = (a, b, f) => `rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;
+const RW0 = [0,1,2].map(i => RT[i] + (RT2[i] - RT[i]) * 0.3);   // fil à 0 V : gris sombre, jamais invisible
+const alpha = (h, a) => { const c = rgb(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+
+/* ---------------- Formats ---------------- */
+const nfs = {};
+function nf(dec) { return nfs[dec] || (nfs[dec] = new Intl.NumberFormat('fr-CA', { minimumFractionDigits: dec, maximumFractionDigits: dec })); }
+function num(v, dec) { return nf(dec).format(v).replace(/-/g, '−'); }
+function si(v, unit, sig, plus) {
+  if (!isFinite(v)) return '∞ ' + unit;
+  sig = sig || 3;
+  if (Math.abs(v) < 1e-12) return '0 ' + unit;
+  const a = Math.abs(v);
+  const pr = a >= 1e3 ? [1e3, 'k'] : a >= 1 ? [1, ''] : a >= 1e-3 ? [1e-3, 'm'] : [1e-6, 'µ'];
+  const x = v / pr[0];
+  let dec = Math.max(0, sig - 1 - Math.floor(Math.log10(Math.abs(x)) + 1e-9));
+  let s = num(x, dec);
+  if (Math.abs(Number(s.replace('−','-').replace(/\s/g,'').replace(',', '.'))) >= 1000 && pr[1] === 'm') { return si(v, unit, sig, plus); }
+  if (plus && v > 0) s = '+' + s;
+  return s + ' ' + pr[1] + unit;
+}
+
+/* ---------------- État du modèle ---------------- */
+const p = { V1: 6, R1: 60, V0: 6, R2: 10000, C2: 100e-6, Rrl: 10, Lrl: 1, Rlc: 1, Clc: 100e-6, Llc: 0.01 };
+let act = 1, mode = 'RL', sw = 'charge';
+let t = 0, VC = 0, I = 0, qL = 0, Ef = 0, Ed = 0, seg = { t0: 0, a: 0, b: 0, sw: 'charge' };
+let phase = 0, playing = true, dirty = true;
+
+const Rv = () => act === 1 ? p.R1 : act < 4 ? p.R2 : (mode === 'RL' ? p.Rrl : p.Rlc);
+const Cv = () => (act === 2 || act === 3) ? p.C2 : (act === 4 && mode === 'LC' ? p.Clc : 0);
+const Lv = () => act === 4 ? (mode === 'RL' ? p.Lrl : p.Llc) : 0;
+const Vv = () => act === 1 ? p.V1 : p.V0;
+const isRC = () => act === 2 || act === 3;
+const isRL = () => act === 4 && mode === 'RL';
+const isLC = () => act === 4 && mode === 'LC';
+const hasSw = () => isRC() || isRL();
+const slow = () => act === 4 ? (mode === 'RL' ? 10 : 500) : 1;
+const Vs = () => act === 1 ? p.V1 : (sw === 'charge' ? p.V0 : 0);
+function tauV() {
+  if (isRC()) return p.R2 * p.C2;
+  if (isRL()) return p.Lrl / p.Rrl;
+  if (isLC()) return p.Rlc > 0 ? 2 * p.Llc / p.Rlc : Infinity;
+  return 0;
+}
+const w0sq = () => 1 / (p.Llc * p.Clc);
+const T0v = () => TAU / Math.sqrt(w0sq());
+const Rcrit = () => 2 * Math.sqrt(p.Llc / p.Clc);
+const qNow = () => isRC() ? p.C2 * VC : isLC() ? qL : 0;
+const VCnow = () => isRC() ? VC : isLC() ? qL / p.Clc : 0;
+const Ucv = () => { const c = Cv(); return c ? 0.5 * qNow() * qNow() / c : 0; };
+const Ulv = () => { const l = Lv(); return l ? 0.5 * l * I * I : 0; };
+const Pv = () => act === 1 ? p.V1 * I : Rv() * I * I;
+function VLnow() {
+  if (isRL()) return Vs() - Rv() * I;
+  if (isLC()) return -Rv() * I - qL / p.Clc;
+  return 0;
+}
+
+function restartSeg() {
+  seg = { t0: t, sw, a: isRC() ? VC : isRL() ? I : qL, b: I };
+}
+function initAct() {
+  t = 0; Ef = 0; Ed = 0; VC = 0; qL = 0;
+  if (act === 1) { I = p.V1 / p.R1; }
+  else if (act === 2) { sw = 'charge'; VC = 0; I = p.V0 / p.R2; }
+  else if (act === 3) { sw = 'decharge'; VC = p.V0; I = -p.V0 / p.R2; }
+  else if (mode === 'RL') { sw = 'charge'; I = 0; }
+  else { sw = 'decharge'; qL = p.Clc * p.V0; I = 0; }
+  restartSeg();
+}
+
+function lcEvolve(q0, i0, s) {
+  const L = p.Llc, C = p.Clc, R = p.Rlc, al = R / (2 * L), wo = 1 / (L * C), w2 = wo - al * al;
+  let Cf, S;
+  if (Math.abs(w2) < 1e-9 * wo) { Cf = 1 - w2 * s * s / 2; S = s * (1 - w2 * s * s / 6); }
+  else if (w2 > 0) { const w = Math.sqrt(w2); Cf = Math.cos(w * s); S = Math.sin(w * s) / w; }
+  else { const w = Math.sqrt(-w2); Cf = Math.cosh(w * s); S = Math.sinh(w * s) / w; }
+  const e = Math.exp(-al * s);
+  return [e * (q0 * Cf + (i0 + al * q0) * S), e * (i0 * Cf - (wo * q0 + al * i0) * S)];
+}
+function advance(dt) {
+  if (!(dt > 0)) return;
+  if (act === 1) {
+    I = p.V1 / p.R1; Ef += p.V1 * I * dt; Ed += p.R1 * I * I * dt; t += dt; return;
+  }
+  if (isRC()) {
+    const R = p.R2, C = p.C2, tau = R * C, vs = Vs(), a = vs - VC, e = Math.exp(-dt / tau);
+    const dq = C * a * (1 - e);
+    if (sw === 'charge') Ef += vs * dq;                       // la pile fournit V0 par coulomb déplacé
+    Ed += 0.5 * C * a * a * (1 - e * e);                      // ∫ R·I² dt exact
+    VC = vs - a * e; I = (vs - VC) / R; t += dt; return;
+  }
+  if (isRL()) {
+    const R = p.Rrl, L = p.Lrl, tau = L / R, vs = Vs(), is = vs / R, a = I - is, e = Math.exp(-dt / tau);
+    const charge = is * dt + a * tau * (1 - e);               // ∫ I dt
+    if (sw === 'charge') Ef += vs * charge;
+    Ed += R * (is * is * dt + 2 * is * a * tau * (1 - e) + a * a * (tau / 2) * (1 - e * e));
+    I = is + a * e; t += dt; return;
+  }
+  const R = p.Rlc, hmax = T0v() / 50, n = Math.min(4000, Math.max(1, Math.ceil(dt / hmax))), h = dt / n;
+  for (let k = 0; k < n; k++) {
+    const m = lcEvolve(qL, I, h / 2), f = lcEvolve(qL, I, h);
+    Ed += R * h / 6 * (I * I + 4 * m[1] * m[1] + f[1] * f[1]);
+    qL = f[0]; I = f[1];
+  }
+  t += dt;
+}
+
+/* ---------------- Géométrie du schéma (unités de conception) ---------------- */
+const XL = 70, YT = 70, YB = 330, PIV = [230, 70], AC = [150, 70], BLEN = 80, TH = 50 * Math.PI / 180;
+const BC = [PIV[0] - BLEN * Math.cos(TH), PIV[1] + BLEN * Math.sin(TH)];
+const XC = 390;
+let G = null, swK = 0;
+
+function coilPts(a, b, n, h) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+  const lead = L * 0.1, sl = (L - 2 * lead) / n, pts = [a.slice(), [a[0] + ux * lead, a[1] + uy * lead]];
+  for (let k = 0; k < n; k++) for (let j = 1; j <= 12; j++) {
+    const f = j / 12, al = lead + sl * (k + f), off = h * Math.sin(Math.PI * f);
+    pts.push([a[0] + ux * al + nx * off, a[1] + uy * al + ny * off]);
+  }
+  pts.push(b.slice());
+  return pts;
+}
+function zigPts(a, b, n, amp) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+  const lead = L * 0.12, inner = L - 2 * lead, pts = [a.slice(), [a[0] + ux * lead, a[1] + uy * lead]];
+  for (let k = 0; k < n; k++) {
+    const al = lead + inner * (k + 0.5) / n, off = (k % 2 ? -1 : 1) * amp;
+    pts.push([a[0] + ux * al + nx * off, a[1] + uy * al + ny * off]);
+  }
+  pts.push([b[0] - ux * lead, b[1] - uy * lead], b.slice());
+  return pts;
+}
+
+function buildGeo() {
+  const g = { pc: {}, order: [], hit: [], capY: [0, 0], coilC: null, coilAxis: 0 };
+  const mk = (name, pts, type) => {
+    const c = [0];
+    for (let i = 1; i < pts.length; i++) c.push(c[i-1] + Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]));
+    const o = { name, pts, type: type || 'wire', cum: c, len: c[c.length-1], v0: 0, v1: 0 };
+    g.pc[name] = o; g.order.push(name); return o;
+  };
+  if (act === 1) {
+    mk('pl', [[XL,330],[XL,214]]); mk('pile', [[XL,214],[XL,186]], 'pile');
+    mk('pu', [[XL,186],[XL,70],[400,70]]); mk('ru', [[400,70],[400,130]]);
+    mk('res', zigPts([400,130],[400,270],6,12), 'res');
+    mk('rl', [[400,270],[400,330],[252,330]]); mk('am', [[252,330],[218,330]], 'meter'); mk('bl', [[218,330],[XL,330]]);
+    g.resBox = [380, 124, 420, 276];
+    g.hit = [
+      { id: 'pile', c: [XL, 200], r: 36, n: 'Pile', d: 'Maintient une différence de potentiel V entre ses bornes (borne + au potentiel haut) : c’est elle qui pousse les charges.' },
+      { id: 'res', box: g.resBox, n: 'Résistance', d: 'Freine les charges. L’énergie électrique y devient chaleur : P = R·I².' },
+      { id: 'volt', c: [480, 200], r: 22, n: 'Voltmètre', d: 'Mesure la différence de potentiel entre deux points, ici aux bornes de R (comme le voltmètre A–B de la planche 04).' },
+      { id: 'amm', c: [235, 330], r: 20, n: 'Ampèremètre', d: 'Branché en série : il mesure le débit de charges, en coulombs par seconde (ampères).' }
+    ];
+  } else if (act < 4 || mode === 'RL') {
+    const rc = act < 4;
+    mk('rr', [[XC, rc ? 250 : 270],[XC,330],[BC[0],330]]);
+    mk('pl', [[BC[0],330],[XL,330],[XL,214]]); mk('pile', [[XL,214],[XL,186]], 'pile');
+    mk('pu', [[XL,186],[XL,70],[AC[0],70]]);
+    mk('bA', [AC, PIV], 'blade'); mk('bw', [[BC[0],330],[BC[0],BC[1]]]); mk('bB', [BC, PIV], 'blade');
+    mk('tr', [PIV,[270,70]]); mk('res', zigPts([270,70],[350,70],6,11), 'res');
+    mk('tp', [[350,70],[XC,70],[XC, rc ? 150 : 130]]);
+    g.hit = [
+      { id: 'pile', c: [XL, 200], r: 36, n: 'Pile', d: 'Maintient la tension V₀ quand elle est dans le circuit (inverseur sur « charge »).' },
+      { id: 'sw', c: [190, 100], r: 70, sw: true, n: 'Inverseur', d: 'Clique pour changer de position : « charge » (pile dans le circuit) ou « décharge » (pile hors circuit).' },
+      { id: 'res', box: [262, 52, 358, 88], n: 'Résistance', d: 'Freine les charges et dissipe l’énergie en chaleur (P = R·I²).' }
+    ];
+    if (rc) {
+      g.capY = [150, 250];
+      g.hit.push({ id: 'cap', box: [XC - 66, 140, XC + 66, 260], n: 'Condensateur', d: 'Deux armatures isolées : il stocke +Q d’un côté, −Q de l’autre, donc de l’énergie ½·C·V².' });
+    } else {
+      mk('coil', coilPts([XC,130],[XC,270],5,-11), 'coil');
+      g.coilC = [XC, 200]; g.coilAxis = Math.PI / 2;
+      g.hit.push({ id: 'coil', box: [XC - 70, 120, XC + 40, 280], n: 'Bobine', d: 'S’oppose aux variations du courant (V_L = L·dI/dt) et stocke de l’énergie ½·L·I².' });
+    }
+  } else {
+    mk('rr', [[XC,270],[XC,330],[XL,330],[XL,110]]); mk('tl', [[XL,110],[110,110]]);
+    mk('coil', coilPts([110,110],[230,110],5,-10), 'coil'); mk('tm', [[230,110],[270,110]]);
+    mk('res', zigPts([270,110],[350,110],6,11), 'res'); mk('tp', [[350,110],[XC,110],[XC,170]]);
+    g.capY = [170, 270]; g.coilC = [170, 110]; g.coilAxis = 0;
+    g.hit = [
+      { id: 'coil', box: [100, 60, 240, 160], n: 'Bobine', d: 'Le courant la traverse : elle s’oppose à ses variations et stocke ½·L·I². C’est la « masse » du circuit.' },
+      { id: 'res', box: [262, 92, 358, 128], n: 'Résistance', d: 'Le « frottement » du circuit : elle transforme peu à peu l’énergie en chaleur.' },
+      { id: 'cap', box: [XC - 66, 160, XC + 66, 280], n: 'Condensateur', d: 'Chargé au départ à 6 V : c’est le « ressort » du circuit, il stocke ½·C·V².' }
+    ];
+  }
+  G = g;
+  buildPath();
+}
+
+function mkPath(names, closed) {
+  const pts = [], hide = [], skip = [];
+  let s = 0;
+  for (const nm of names) {
+    const pc = G.pc[nm], s0 = s;
+    pc.pts.forEach((q, i) => { if (i === 0 && pts.length) return; pts.push(q); });
+    s += pc.len;
+    if (pc.type === 'pile' || pc.type === 'meter') hide.push([s0, s]);
+    if (pc.type !== 'wire') skip.push([s0, s]);
+  }
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i-1] + Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]));
+  const len = cum[cum.length - 1], arrows = [];
+  for (let s2 = 55; s2 < len - 30; s2 += 125) if (!skip.some(r => s2 > r[0] - 12 && s2 < r[1] + 12)) arrows.push(s2);
+  return { names, pts, cum, len, closed, hide, skip, arrows };
+}
+function posAt(path, s) {
+  const c = path.cum, L = path.len;
+  if (path.closed) { s %= L; if (s < 0) s += L; } else s = clamp(s, 0, L - 1e-6);
+  let lo = 0, hi = c.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (c[m] <= s) lo = m; else hi = m; }
+  const a = path.pts[lo], b = path.pts[hi], d = c[hi] - c[lo] || 1, f = (s - c[lo]) / d;
+  return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, (b[0] - a[0]) / d, (b[1] - a[1]) / d];
+}
+function buildPath() {
+  let names, closed;
+  if (act === 1) { names = ['pl','pile','pu','ru','res','rl','am','bl']; closed = true; }
+  else if (isRC()) {
+    names = sw === 'charge' ? ['rr','pl','pile','pu','bA','tr','res','tp'] : ['rr','bw','bB','tr','res','tp']; closed = false;
+  } else if (isRL()) {
+    names = sw === 'charge' ? ['coil','rr','pl','pile','pu','bA','tr','res','tp'] : ['coil','rr','bw','bB','tr','res','tp']; closed = true;
+  } else { names = ['rr','tl','coil','tm','res','tp']; closed = false; }
+  G.path = mkPath(names, closed);
+  G.idle = G.order.filter(n => !names.includes(n) && G.pc[n].type === 'wire');
+  G.bladeOn = names.includes('bA') ? 'A' : names.includes('bB') ? 'B' : null;
+}
+
+/* Potentiels le long des pièces (borne − de la pile = 0 V) */
+function setPots() {
+  const P = G.pc, v = Vv(), R = Rv();
+  const set = (n, a, b) => { if (P[n]) { P[n].v0 = a; P[n].v1 = b; } };
+  if (act === 1) {
+    set('pl', 0, 0); set('pile', 0, v); set('pu', v, v); set('ru', v, v); set('res', v, 0); set('rl', 0, 0); set('am', 0, 0); set('bl', 0, 0);
+  } else if (act < 4 || mode === 'RL') {
+    const vp = sw === 'charge' ? p.V0 : 0;
+    const vn = isRC() ? VC : vp - R * I;
+    set('rr', 0, 0); set('pl', 0, 0); set('pile', 0, p.V0); set('pu', p.V0, p.V0); set('bA', vp, vp); set('bw', 0, 0); set('bB', 0, 0);
+    set('tr', vp, vp); set('res', vp, vn); set('tp', vn, vn); set('coil', vn, 0);
+  } else {
+    const vc = qL / p.Clc, n1 = R * I + vc;
+    set('rr', 0, 0); set('tl', 0, 0); set('coil', 0, n1); set('tm', n1, n1); set('res', n1, vc); set('tp', vc, vc);
+  }
+}
+
+/* ---------------- Mises en page ---------------- */
+let W = 800, H = 600, dpr = 1, wide = true, sc = 1, scS = 1, ox = 0, oy = 0;
+let reg = { x: 0, y: 0, w: 400, h: 400 }, grc = { x: 0, y: 0, w: 400, h: 400 }, panels = [];
+const flowQ = matchMedia('(max-width:980px)');
+function panelSpec() {
+  if (act === 1) return [{ k: 'iv', w: .56, h: 200 }, { k: 'prof', w: .44, h: 160 }];
+  if (act === 2) return [{ k: 'vc', w: .42, h: 205 }, { k: 'ic', w: .30, h: 150 }, { k: 'bars', w: .28, h: 125 }];
+  if (act === 3) return [{ k: 'vc', w: .42, h: 205 }, { k: 'ic', w: .30, h: 150 }, { k: 'gauge', w: .28, h: 135 }];
+  if (mode === 'RL') return [{ k: 'rli', w: .40, h: 205 }, { k: 'rlv', w: .30, h: 150 }, { k: 'bars', w: .30, h: 125 }];
+  return [{ k: 'lc', w: .62, h: 235 }, { k: 'bars', w: .38, h: 135 }];
+}
+function resize() {
+  const flow = flowQ.matches;
+  let r = sceneEl.getBoundingClientRect();
+  const nw = Math.round(r.width);
+  const spec = panelSpec();
+  if (flow) {
+    const wd = nw >= 640;
+    let hh = 600;
+    if (!wd) {
+      const s = Math.min(1, (nw - 16) / DW);
+      hh = Math.round(88 + DH * s + 14 + spec.reduce((a, q) => a + q.h + 8, 0) + 8);
+    }
+    if (sceneEl.style.height !== hh + 'px') sceneEl.style.height = hh + 'px';
+  } else if (sceneEl.style.height) sceneEl.style.height = '';
+  r = sceneEl.getBoundingClientRect();
+  W = Math.max(240, Math.round(r.width)); H = Math.max(300, Math.round(r.height));
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  wide = flow ? nw >= 640 : true;
+  panels = spec;
+  if (wide) {
+    const sw_ = Math.max(300, Math.round(W * 0.5));
+    reg = { x: 0, y: 96, w: sw_, h: H - 96 - 8 };
+    const top = W < 780 ? 100 : 22;
+    grc = { x: sw_ + 4, y: top, w: W - sw_ - 18, h: H - top - 12 };
+  } else {
+    const s = Math.min(1, (W - 16) / DW), sh = DH * s + 14;
+    reg = { x: 0, y: 88, w: W, h: sh };
+    grc = { x: 10, y: 88 + sh, w: W - 20, h: H - 88 - sh - 8 };
+  }
+  scS = Math.min(reg.w / DW, reg.h / DH); sc = scS;
+  ox = reg.x + (reg.w - DW * scS) / 2; oy = reg.y + (reg.h - DH * scS) / 2;
+  dirty = true;
+}
+function splitPanels() {
+  const out = [], n = panels.length, gap = 8;
+  if (wide) {
+    const tot = panels.reduce((a, q) => a + q.w, 0), avail = grc.h - gap * (n - 1);
+    let y = grc.y;
+    for (const q of panels) { const h = avail * q.w / tot; out.push({ k: q.k, x: grc.x, y, w: grc.w, h }); y += h + gap; }
+  } else {
+    let y = grc.y;
+    for (const q of panels) { out.push({ k: q.k, x: grc.x, y, w: grc.w, h: q.h }); y += q.h + gap; }
+  }
+  return out;
+}
+
+/* ---------------- Dessin : utilitaires ---------------- */
+const ex = [], ey = [];                                   // positions écran des électrons (survol)
+let gx = 0;
+function tx(s, x, y, px, col, al, bl) {
+  ctx.font = `${px / sc}px ${K.mono}`; ctx.textAlign = al || 'left'; ctx.textBaseline = bl || 'middle'; ctx.fillStyle = col; ctx.fillText(s, x, y);
+}
+function seg2(a, b, col, wpx) {
+  ctx.strokeStyle = col; ctx.lineWidth = wpx / sc; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+}
+const colScale = () => act === 1 ? 12 : 6;
+const potCol = v => lerpC(RW0, RP, clamp(v / colScale(), 0, 1));
+function drawPiece(pc, wpx) {
+  for (let i = 0; i < pc.pts.length - 1; i++) {
+    const f = ((pc.cum[i] + pc.cum[i+1]) / 2) / (pc.len || 1);
+    seg2(pc.pts[i], pc.pts[i+1], potCol(pc.v0 + (pc.v1 - pc.v0) * f), wpx);
+  }
+}
+function arrowHead(x, y, ux, uy, size, col) {
+  const nx = -uy, ny = ux;
+  ctx.fillStyle = col; ctx.beginPath();
+  ctx.moveTo(x + ux * size, y + uy * size); ctx.lineTo(x - ux * size * .6 + nx * size * .6, y - uy * size * .6 + ny * size * .6);
+  ctx.lineTo(x - ux * size * .6 - nx * size * .6, y - uy * size * .6 - ny * size * .6); ctx.closePath(); ctx.fill();
+}
+const visV = i => 300 * Math.tanh(i / (act === 1 ? 0.45 : isRC() ? 0.0027 : isRL() ? 0.5 : 0.45));
+const arrowA = i => clamp(Math.abs(i) / ((act === 1 ? 0.45 : isRC() ? 0.0027 : 0.5) * 0.07), 0, 1);
+
+function drawCap(cx, y1, y2, q, qmax) {
+  const pw = 120, N = 10, f = clamp(Math.abs(q) / qmax, 0, 1), up = q >= 0;
+  const topCol = up ? K.pos : K.neg, botCol = up ? K.neg : K.pos;
+  // plaques
+  ctx.lineCap = 'butt';
+  seg2([cx - pw / 2, y1], [cx + pw / 2, y1], K.texte, 4); seg2([cx - pw / 2, y2], [cx + pw / 2, y2], K.texte, 4);
+  ctx.lineCap = 'round';
+  const order = []; for (let i = 0; i < N; i++) order.push(i); order.sort((a, b) => Math.abs(a - 4.5) - Math.abs(b - 4.5));
+  for (let r = 0; r < N; r++) {
+    const i = order[r], a = clamp(f * N - r, 0, 1); if (a <= 0.02) continue;
+    const x = cx - pw / 2 + (i + 0.5) * pw / N;
+    ctx.globalAlpha = a;
+    // ligne de champ de la charge + vers la charge −
+    const ya = up ? y1 + 15 : y2 - 15, yb = up ? y2 - 15 : y1 + 15;
+    seg2([x, ya], [x, yb], K.t2, 1.1);
+    const ym = (ya + yb) / 2, d = up ? 1 : -1;
+    arrowHead(x, ym, 0, d, 4.5 / sc, K.t2);
+    // charges
+    const sg = (y, col, plus) => { ctx.strokeStyle = col; ctx.lineWidth = 1.8 / sc; ctx.beginPath(); ctx.moveTo(x - 4.5, y); ctx.lineTo(x + 4.5, y); if (plus) { ctx.moveTo(x, y - 4.5); ctx.lineTo(x, y + 4.5); } ctx.stroke(); };
+    sg(y1 + 9, topCol, up); sg(y2 - 9, botCol, !up);
+    ctx.globalAlpha = 1;
+  }
+  if (f > 0.04) {
+    tx(up ? '+Q' : '−Q', cx - pw / 2 - 8, y1, 12, topCol, 'right');
+    tx(up ? '−Q' : '+Q', cx - pw / 2 - 8, y2, 12, botCol, 'right');
+  }
+}
+function drawPile() {
+  const x = XL, v = Vv();
+  ctx.lineCap = 'butt';
+  seg2([x, 214], [x, 208], potCol(0), 2.2); seg2([x, 192], [x, 186], potCol(v), 2.2);
+  seg2([x - 20, 192], [x + 20, 192], K.texte, 2); seg2([x - 10, 208], [x + 10, 208], K.texte, 5);
+  ctx.lineCap = 'round';
+  tx('+', x + 28, 192, 13, K.pos, 'left'); tx('−', x + 28, 208, 13, K.neg, 'left');
+  tx(si(v, 'V', 3), x + 12, 238, 12, K.texte, 'left');
+}
+function drawSwitch() {
+  const ang = swK * TH, ex_ = PIV[0] - BLEN * Math.cos(ang), ey_ = PIV[1] + BLEN * Math.sin(ang);
+  const vp = sw === 'charge' ? p.V0 : 0;
+  ctx.lineCap = 'round';
+  seg2(PIV, [ex_, ey_], K.texte, 2.6);
+  ctx.fillStyle = K.fond; ctx.strokeStyle = K.texte; ctx.lineWidth = 1.6 / sc;
+  for (const c of [AC, BC, PIV]) { ctx.beginPath(); ctx.arc(c[0], c[1], 4.2, 0, TAU); ctx.fill(); ctx.stroke(); }
+  tx('charge', AC[0], 50, 10.5, sw === 'charge' ? K.acc : K.t2, 'center');
+  tx('décharge', BC[0] - 9, BC[1] + 2, 10.5, sw === 'charge' ? K.t2 : K.acc, 'right');
+  void vp;
+}
+function drawMeter(cx, cy, r, letter) {
+  ctx.fillStyle = K.fond; ctx.strokeStyle = K.acc; ctx.lineWidth = 1.8 / sc;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fill(); ctx.stroke();
+  tx(letter, cx, cy + 1, 14, K.acc, 'center');
+}
+function drawMagLoops() {
+  if (!G.coilC) return;
+  const a = clamp(Math.abs(I) / (isRL() ? 0.6 : 0.45), 0, 1);
+  if (a < 0.02) return;
+  ctx.save(); ctx.lineWidth = 1.3 / sc;
+  [[36, 22, .9], [50, 40, .6], [64, 60, .38]].forEach(([rx, ry, k]) => {
+    ctx.strokeStyle = alpha(K.mag, a * k);
+    ctx.beginPath(); ctx.ellipse(G.coilC[0], G.coilC[1], isRL() ? ry + 20 : rx + 20, isRL() ? rx + 20 : ry, 0, 0, TAU);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+function drawElectrons() {
+  ex.length = 0; ey.length = 0;
+  const path = G.path, L = path.len, n = Math.max(1, Math.floor(L / SP)), sp = L / n;
+  ctx.fillStyle = K.neg;
+  const rr = 2.7 / sc;
+  // électrons des branches inactives : immobiles
+  ctx.globalAlpha = 0.45;
+  for (const nm of G.idle) {
+    const pc = G.pc[nm], m = Math.max(1, Math.floor(pc.len / SP));
+    const sub = { pts: pc.pts, cum: pc.cum, len: pc.len, closed: false };
+    for (let i = 0; i < m; i++) { const q = posAt(sub, (i + 0.5) * pc.len / m); ctx.beginPath(); ctx.arc(q[0], q[1], rr, 0, TAU); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+  for (let i = 0; i < n; i++) {
+    let s = (i * sp + phase) % L; if (s < 0) s += L;
+    let hid = false; for (const h of path.hide) if (s > h[0] && s < h[1]) { hid = true; break; }
+    if (hid) continue;
+    const a = path.closed ? 1 : Math.min(1, Math.min(s, L - s) / 16);
+    if (a < 0.03) continue;
+    const q = posAt(path, s);
+    ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(q[0], q[1], rr, 0, TAU); ctx.fill();
+    ex.push(ox + q[0] * scS); ey.push(oy + q[1] * scS);
+  }
+  ctx.globalAlpha = 1;
+}
+function drawArrows() {
+  const a = arrowA(I); if (a < 0.03) return;
+  const d = I >= 0 ? 1 : -1;
+  ctx.globalAlpha = a;
+  for (const s of G.path.arrows) { const q = posAt(G.path, s); arrowHead(q[0], q[1], q[2] * d, q[3] * d, 7.5 / sc, K.acc); }
+  ctx.globalAlpha = 1;
+}
+
+function drawSchem() {
+  sc = scS; setPots();
+  ctx.save(); ctx.translate(ox, oy); ctx.scale(sc, sc);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const R = Rv(), pw = Pv();
+  // lueur de la résistance
+  const pref = act === 1 ? 14.4 : isRC() ? 0.018 : isRL() ? 7.2 : 5;
+  const rc_ = G.pc.res.pts, cx = (rc_[0][0] + rc_[rc_.length - 1][0]) / 2, cy = (rc_[0][1] + rc_[rc_.length - 1][1]) / 2;
+  const ga = clamp(Math.sqrt(Math.max(0, pw) / pref), 0, 1) * 0.55;
+  if (ga > 0.01) {
+    const gr = ctx.createRadialGradient(cx, cy, 4, cx, cy, 100);
+    gr.addColorStop(0, alpha(K.ener, ga)); gr.addColorStop(1, alpha(K.ener, 0));
+    ctx.fillStyle = gr; ctx.fillRect(cx - 100, cy - 100, 200, 200);
+  }
+  drawMagLoops();
+  // fils
+  for (const nm of G.order) {
+    const pc = G.pc[nm];
+    if (pc.type === 'pile' || pc.type === 'blade') continue;
+    if (pc.type === 'meter') { ctx.setLineDash([]); drawPiece(pc, 2.2); continue; }
+    drawPiece(pc, pc.type === 'res' || pc.type === 'coil' ? 2.6 : 2.2);
+  }
+  // composants
+  drawPile();
+  if (act === 1) {
+    seg2([400,130],[480,130], K.acc, 1.2); seg2([480,130],[480,178], K.acc, 1.2); seg2([400,270],[480,270], K.acc, 1.2); seg2([480,270],[480,222], K.acc, 1.2);
+    ctx.fillStyle = K.acc; for (const c of [[400,130],[400,270]]) { ctx.beginPath(); ctx.arc(c[0], c[1], 3.4 / sc, 0, TAU); ctx.fill(); }
+    drawMeter(480, 200, 22, 'V'); drawMeter(235, 330, 17, 'A');
+    tx(si(p.V1, 'V', 3), 478, 292, 12, K.acc, 'center');
+    tx(si(I, 'A', 3), 235, 358, 12, K.acc, 'center');
+    tx('R = ' + si(R, 'Ω', 3), 414, 100, 11.5, K.t2, 'left');
+    // champ E dans R
+    const ea = 0.35 + 0.65 * p.V1 / 12;
+    ctx.globalAlpha = ea;
+    for (let i = 0; i < 4; i++) { const y = 150 + i * 30; seg2([370, y - 9], [370, y + 7], K.texte, 1.4); arrowHead(370, y + 11, 0, 1, 4.4 / sc, K.texte); }
+    ctx.globalAlpha = 1;
+    tx('E = V/L', 360, 200, 11, K.texte, 'right');
+  } else {
+    if (hasSw()) drawSwitch();
+    tx('R = ' + si(R, 'Ω', 3), 310, isLC() ? 140 : 48, 11.5, K.t2, 'center');
+    if (isRC() || isLC()) {
+      const q = qNow(), qm = Cv() * p.V0;
+      drawCap(XC, G.capY[0], G.capY[1], q, qm);
+      const mid = (G.capY[0] + G.capY[1]) / 2;
+      seg2([XC + 76, G.capY[0]], [XC + 76, G.capY[1]], K.acc, 1.2);
+      arrowHead(XC + 76, G.capY[0], 0, -1, 4.6 / sc, K.acc); arrowHead(XC + 76, G.capY[1], 0, 1, 4.6 / sc, K.acc);
+      tx('V', XC + 84, mid - 11, 11, K.acc, 'left'); tx(si(VCnow(), 'V', 3), XC + 84, mid + 4, 11.5, K.acc, 'left');
+      tx('C = ' + si(Cv(), 'F', 3), XC, 352, 11.5, K.t2, 'center');
+    }
+    if (isRL()) {
+      drawPieceCoilLabel();
+    }
+    if (isLC()) tx('L = ' + si(p.Llc, 'H', 3), 205, 192, 11.5, K.t2, 'center');
+  }
+  drawArrows();
+  drawElectrons();
+  // légende
+  ctx.globalAlpha = 0.95;
+  arrowHead(20, 372, 1, 0, 6 / sc, K.acc); tx('courant conventionnel (+ vers −)', 32, 372, 10.5, K.t2, 'left');
+  ctx.fillStyle = K.neg; ctx.beginPath(); ctx.arc(20, 388, 2.7 / sc, 0, TAU); ctx.fill(); tx('électrons (sens opposé)', 32, 388, 10.5, K.t2, 'left');
+  ctx.globalAlpha = 1;
+  if (act === 4) tx('ralenti ×' + slow(), 14, 406, 11.5, K.ener, 'left');
+  ctx.restore();
+}
+function drawPieceCoilLabel() { tx('L = ' + si(p.Lrl, 'H', 3), XC, 352, 11.5, K.t2, 'center'); }
+
+/* ---------------- Graphiques (coordonnées écran) ---------------- */
+function niceTicks(lo, hi, n) {
+  const raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  const st = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * mag, out = [];
+  for (let v = Math.ceil(lo / st - 1e-9) * st; v <= hi + st * 1e-6; v += st) out.push(Math.abs(v) < st * 1e-6 ? 0 : v);
+  return out;
+}
+function frameP(rc, o) {
+  const padL = o.padL || 54, padR = o.padR || 14, padT = o.title ? 22 : 8, padB = o.padB || 24;
+  const g = { x: rc.x + padL, y: rc.y + padT, w: Math.max(10, rc.w - padL - padR), h: Math.max(10, rc.h - padT - padB), o };
+  g.X = v => g.x + (v - o.xmin) / (o.xmax - o.xmin) * g.w;
+  g.Y = v => g.y + g.h - (v - o.ymin) / (o.ymax - o.ymin) * g.h;
+  ctx.save(); ctx.lineWidth = 1; ctx.font = `10.5px ${K.mono}`;
+  for (const q of (o.yt || [])) {
+    const y = g.Y(q.v); ctx.strokeStyle = K.trait; ctx.beginPath(); ctx.moveTo(g.x, y); ctx.lineTo(g.x + g.w, y); ctx.stroke();
+    ctx.fillStyle = K.t2; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(q.l, g.x - 6, y);
+  }
+  for (const q of (o.xt || [])) {
+    const x = g.X(q.v); ctx.strokeStyle = K.trait; ctx.beginPath(); ctx.moveTo(x, g.y); ctx.lineTo(x, g.y + g.h); ctx.stroke();
+    ctx.fillStyle = K.t2; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(q.l, x, g.y + g.h + 5);
+    if (q.l2) { ctx.fillStyle = alpha(K.t2, .75); ctx.font = `9.5px ${K.mono}`; ctx.fillText(q.l2, x, g.y + g.h + 17); ctx.font = `10.5px ${K.mono}`; }
+  }
+  if (o.ymin < 0 && o.ymax > 0) { const y = g.Y(0); ctx.strokeStyle = alpha(K.t2, .7); ctx.beginPath(); ctx.moveTo(g.x, y); ctx.lineTo(g.x + g.w, y); ctx.stroke(); }
+  ctx.strokeStyle = K.t2; ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.x, g.y + g.h); ctx.lineTo(g.x + g.w, g.y + g.h); ctx.stroke();
+  if (o.title) { ctx.fillStyle = o.titleCol || K.t2; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `500 11px ${K.mono}`; ctx.fillText(o.title, rc.x + 4, rc.y + 4); }
+  if (o.sub) { ctx.fillStyle = K.t2; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.font = `10.5px ${K.mono}`; ctx.fillText(o.sub, rc.x + rc.w - 4, rc.y + 4); }
+  ctx.restore();
+  return g;
+}
+function clipG(g) { ctx.save(); ctx.beginPath(); ctx.rect(g.x - 1, g.y - 4, g.w + 8, g.h + 8); ctx.clip(); }
+function trace(g, fn, t0, t1, n, col, lw, dash) {
+  ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.setLineDash(dash || []); ctx.beginPath();
+  for (let i = 0; i <= n; i++) { const tt = t0 + (t1 - t0) * i / n, x = g.X(tt), y = g.Y(fn(tt)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.stroke(); ctx.setLineDash([]);
+}
+function label(s, x, y, col, al, bl, px) {
+  ctx.font = `${px || 10.5}px ${K.mono}`; ctx.textAlign = al || 'left'; ctx.textBaseline = bl || 'middle';
+  const w = ctx.measureText(s).width, hh = (px || 10.5) + 3, rx = al === 'right' ? x - w : al === 'center' ? x - w / 2 : x;
+  ctx.fillStyle = 'rgba(10,13,18,0.78)'; ctx.fillRect(rx - 2, y - hh / 2, w + 4, hh);
+  ctx.fillStyle = col; ctx.fillText(s, x, y);
+}
+
+/* Courbe exponentielle f(t) = fs + (f0 − fs)·e^(−t/τ) sur 0–5τ */
+function expPanel(rc, o) {
+  const tau = o.tau, xmax = 5 * tau;
+  let lo = Math.min(0, o.f0, o.fs), hi = Math.max(0, o.f0, o.fs);
+  if (hi - lo < 1e-12) { hi = o.ref; lo = 0; }
+  const pad = (hi - lo) * 0.1; lo = lo < 0 ? lo - pad : Math.min(lo, -pad * 0.6); hi = hi + pad;
+  const xt = [1, 2, 3, 4, 5].map(k => ({ v: k * tau, l: k === 1 ? 'τ' : k + 'τ', l2: si(k * tau, 's', 2) }));
+  const yt = niceTicks(lo, hi, 4).map(v => ({ v, l: si(v, o.unit, 2) }));
+  const g = frameP(rc, { title: o.title, titleCol: o.color, xmin: 0, xmax, ymin: lo, ymax: hi, xt, yt, padB: 34, sub: o.sub });
+  const f = tt => o.fs + (o.f0 - o.fs) * Math.exp(-tt / tau);
+  const tn = clamp(o.tnow, 0, xmax);
+  clipG(g);
+  // asymptote
+  ctx.strokeStyle = alpha(K.t2, .55); ctx.setLineDash([2, 4]); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(g.x, g.Y(o.fs)); ctx.lineTo(g.x + g.w, g.Y(o.fs)); ctx.stroke(); ctx.setLineDash([]);
+  trace(g, f, 0, xmax, 120, alpha(o.color, .3), 1.3, [4, 4]);
+  if (o.tangent) {
+    ctx.strokeStyle = alpha(K.texte, .75); ctx.lineWidth = 1.1; ctx.setLineDash([6, 3]);
+    ctx.beginPath(); ctx.moveTo(g.X(0), g.Y(o.f0)); ctx.lineTo(g.X(tau), g.Y(o.fs)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = K.texte; ctx.beginPath(); ctx.arc(g.X(tau), g.Y(o.fs), 3, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+  if (o.levels) {
+    ctx.save(); ctx.lineWidth = 1;
+    for (const k of [1, 2, 3, 5]) {
+      const v = f(k * tau), x = g.X(k * tau), y = g.Y(v);
+      ctx.strokeStyle = alpha(K.ener, .45); ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(g.x, y); ctx.lineTo(x, y); ctx.moveTo(x, y); ctx.lineTo(x, g.y + g.h); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = K.ener; ctx.beginPath(); ctx.arc(x, y, 3, 0, TAU); ctx.fill();
+      const pct = Math.round(100 * v / o.ref);
+      label(pct + ' %', x - 6, y + (v > (o.f0 + o.fs) / 2 ? -9 : -9), K.ener, 'right', 'middle', 10.5);
+    }
+    ctx.restore();
+  }
+  if (o.half && o.fs < o.f0) {
+    const th = tau * Math.LN2, vh = f(th), x = g.X(th), y = g.Y(vh);
+    ctx.save(); ctx.strokeStyle = alpha(K.texte, .6); ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(g.x, y); ctx.lineTo(x, y); ctx.lineTo(x, g.y + g.h); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = K.texte; ctx.beginPath(); ctx.arc(x, y, 3, 0, TAU); ctx.fill();
+    label('t½ ≈ 0,69 τ', x + 8, y - 11, K.texte, 'left', 'middle', 10.5);
+    ctx.restore();
+  }
+  clipG(g);
+  trace(g, f, 0, tn, Math.max(2, Math.ceil(120 * tn / xmax)), o.color, 2.4);
+  ctx.restore();
+  if (tn <= xmax) {
+    ctx.save(); ctx.fillStyle = K.fond; ctx.strokeStyle = o.color; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(g.X(tn), g.Y(f(tn)), 4.2, 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  return g;
+}
+
+function ivPanel(rc) {
+  const xt = niceTicks(0, 12, 6).map(v => ({ v, l: String(v) })), yt = [0, .2, .4, .6, .8, 1, 1.2].map(v => ({ v, l: num(v, 1) }));
+  const g = frameP(rc, { title: 'I(V) de la résistance', titleCol: K.acc, xmin: 0, xmax: 12, ymin: 0, ymax: 1.2, xt, yt, padL: 38, padB: 34 });
+  ctx.save(); ctx.fillStyle = K.t2; ctx.font = `10.5px ${K.mono}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('V (volts)', g.x + g.w / 2, g.y + g.h + 18);
+  ctx.textAlign = 'left'; ctx.fillText('I (A)', rc.x + rc.w - 44, rc.y + 4); ctx.restore();
+  clipG(g);
+  const line = (R, col, lw, dash) => {
+    const xe = Math.min(12, 1.2 * R); ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.setLineDash(dash || []);
+    ctx.beginPath(); ctx.moveTo(g.X(0), g.Y(0)); ctx.lineTo(g.X(xe), g.Y(xe / R)); ctx.stroke(); ctx.setLineDash([]);
+  };
+  line(10, alpha(K.t2, .35), 1, [2, 4]); line(200, alpha(K.t2, .35), 1, [2, 4]);
+  line(p.R1, K.acc, 2.2);
+  ctx.restore();
+  ctx.save(); label('10 Ω', g.X(Math.min(12, 12)) - 4, g.Y(1.2) + 8, K.t2, 'right', 'middle', 9.5); label('200 Ω', g.X(12) - 4, g.Y(12 / 200) - 8, K.t2, 'right', 'middle', 9.5); ctx.restore();
+  const x = g.X(p.V1), y = g.Y(I);
+  ctx.save(); ctx.strokeStyle = alpha(K.texte, .6); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, g.y + g.h); ctx.lineTo(x, y); ctx.lineTo(g.x, y); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = K.fond; ctx.strokeStyle = K.ener; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.fill(); ctx.stroke();
+  label('pente 1/R = ' + si(1 / p.R1, 'S', 3), g.x + 8, g.y + 12, K.acc, 'left', 'middle', 10.5);
+  ctx.restore();
+}
+function profPanel(rc) {
+  const path = G.path, lenOf = pc => pc.type === 'pile' ? 70 : pc.len;
+  const names = path.names, tot = names.reduce((a, n) => a + lenOf(G.pc[n]), 0);
+  const yt = [0, 3, 6, 9, 12].map(v => ({ v, l: String(v) }));
+  const g = frameP(rc, { title: 'Potentiel le long de la boucle', titleCol: K.pos, xmin: 0, xmax: tot, ymin: -0.5, ymax: 13, yt, xt: [], padL: 30, padB: 16 });
+  clipG(g);
+  const pts = []; let s = 0;
+  for (const n of names) { const pc = G.pc[n], l = lenOf(pc); pts.push([s, pc.v0]); s += l; pts.push([s, pc.v1]); }
+  ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(g.X(q[0]), g.Y(q[1])) : ctx.moveTo(g.X(q[0]), g.Y(q[1])));
+  ctx.lineTo(g.X(tot), g.Y(0)); ctx.lineTo(g.X(0), g.Y(0)); ctx.fillStyle = alpha(K.pos, .13); ctx.fill();
+  ctx.strokeStyle = K.pos; ctx.lineWidth = 2.2; ctx.beginPath(); pts.forEach((q, i) => i ? ctx.lineTo(g.X(q[0]), g.Y(q[1])) : ctx.moveTo(g.X(q[0]), g.Y(q[1]))); ctx.stroke();
+  ctx.restore();
+  s = 0;
+  for (const n of names) {
+    const pc = G.pc[n], l = lenOf(pc);
+    if (pc.type === 'pile') label('pile', g.X(s + l / 2), g.y + g.h - 9, K.texte, 'left', 'middle', 10.5);
+    if (pc.type === 'res') label('résistance', g.X(s + l / 2) + 4, g.Y(p.V1 / 2) - 12, K.texte, 'left', 'middle', 10.5);
+    s += l;
+  }
+  label('fil à ' + si(p.V1, 'V', 3), g.X(tot * 0.3), g.Y(p.V1) - 11, K.t2, 'center', 'middle', 10);
+}
+function lcPanel(rc) {
+  const T0 = T0v(), win = 4 * T0, ts = t - seg.t0;
+  const x0 = Math.max(0, ts - win), x1 = x0 + win;
+  const Vm = p.V0 * 1.1, Im = p.V0 * Math.sqrt(p.Clc / p.Llc) * 1.1;
+  const xt = []; for (let k = Math.ceil(x0 / T0 - 1e-9); k * T0 <= x1 + 1e-12; k++) xt.push({ v: k * T0, l: k === 0 ? '0' : k + 'T₀', l2: si(k * T0, 's', 2) });
+  const yt = [-1, -.5, 0, .5, 1].map(f => ({ v: f * p.V0, l: si(f * p.V0, 'V', 2) }));
+  const g = frameP(rc, { title: ' ', titleCol: K.t2, xmin: x0, xmax: x1, ymin: -Vm, ymax: Vm, xt, yt, padB: 34, padR: 50, sub: '' });
+  // axe de droite : courant
+  ctx.save(); ctx.font = `10.5px ${K.mono}`; ctx.fillStyle = K.acc; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  for (const f of [-1, -.5, 0, .5, 1]) { const iv = f * Im / 1.1; ctx.fillText(si(iv, 'A', 2), g.x + g.w + 5, g.Y(f * p.V0)); }
+  ctx.fillStyle = K.pos; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `500 11px ${K.mono}`; ctx.fillText('V_C', rc.x + 4, rc.y + 4);
+  ctx.fillStyle = K.acc; ctx.fillText('I', rc.x + 34, rc.y + 4);
+  ctx.fillStyle = K.t2; ctx.font = `10.5px ${K.mono}`; ctx.textAlign = 'right'; ctx.fillText('ralenti ×500', rc.x + rc.w - 4, rc.y + 4);
+  ctx.restore();
+  const fq = tt => lcEvolve(seg.a, seg.b, tt - seg.t0);
+  clipG(g);
+  trace(g, tt => fq(tt)[0] / p.Clc, x0, Math.min(x1, t), 220, K.pos, 2.2);
+  trace(g, tt => fq(tt)[1] * (p.V0 * 1.1) / Im, x0, Math.min(x1, t), 220, K.acc, 2.2);
+  ctx.restore();
+  const tn = Math.min(x1, t), q = fq(tn);
+  ctx.save();
+  ctx.fillStyle = K.fond; ctx.lineWidth = 2;
+  ctx.strokeStyle = K.pos; ctx.beginPath(); ctx.arc(g.X(tn), g.Y(q[0] / p.Clc), 4.2, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = K.acc; ctx.beginPath(); ctx.arc(g.X(tn), g.Y(q[1] * p.V0 * 1.1 / Im), 4.2, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function barsPanel(rc, items, emax, title) {
+  ctx.save();
+  ctx.fillStyle = K.t2; ctx.font = `500 11px ${K.mono}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(title, rc.x + 4, rc.y + 4);
+  const n = items.length, lw = Math.min(120, rc.w * 0.34), vw = 74, x0 = rc.x + lw, x1 = rc.x + rc.w - vw, top = rc.y + 26, rh = Math.min(30, (rc.h - 30) / n);
+  items.forEach((it, i) => {
+    const y = top + i * rh + rh / 2;
+    ctx.font = `10.5px ${K.mono}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = K.t2; ctx.fillText(it.l, rc.x + 4, y);
+    ctx.fillStyle = K.trait; ctx.fillRect(x0, y - 6, x1 - x0, 12);
+    const f = clamp(it.v / emax, 0, 1);
+    ctx.fillStyle = it.col; ctx.globalAlpha = it.a || 1; ctx.fillRect(x0, y - 6, (x1 - x0) * f, 12); ctx.globalAlpha = 1;
+    ctx.fillStyle = K.texte; ctx.textAlign = 'right'; ctx.fillText(si(it.v, 'J', 3), rc.x + rc.w - 2, y);
+  });
+  ctx.restore();
+}
+function gaugePanel(rc) {
+  const tau = p.R2 * p.C2, vs = Vs(), gap = Math.abs(vs - VC), v = gap / tau;
+  ctx.save();
+  ctx.fillStyle = K.t2; ctx.font = `500 11px ${K.mono}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText('Pourquoi une exponentielle ?', rc.x + 4, rc.y + 4);
+  const lw = Math.min(104, rc.w * 0.3), x0 = rc.x + lw, x1 = rc.x + rc.w - 78, y1 = rc.y + 32, y2 = rc.y + 56;
+  ctx.font = `10.5px ${K.mono}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = K.t2;
+  ctx.fillText('écart restant', rc.x + 4, y1); ctx.fillText('vitesse', rc.x + 4, y2);
+  ctx.fillStyle = K.trait; ctx.fillRect(x0, y1 - 6, x1 - x0, 12); ctx.fillRect(x0, y2 - 6, x1 - x0, 12);
+  const f = clamp(gap / p.V0, 0, 1);
+  ctx.fillStyle = K.pos; ctx.fillRect(x0, y1 - 6, (x1 - x0) * f, 12);
+  const wv = (x1 - x0) * f;
+  ctx.strokeStyle = K.acc; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(x0, y2); ctx.lineTo(x0 + wv, y2); ctx.stroke();
+  if (wv > 8) { arrowHeadS(x0 + wv, y2, 1, 0, 7, K.acc); }
+  ctx.fillStyle = K.texte; ctx.textAlign = 'right'; ctx.fillText(si(gap, 'V', 3), rc.x + rc.w - 2, y1); ctx.fillText(si(v, 'V/s', 3), rc.x + rc.w - 2, y2);
+  ctx.fillStyle = K.t2; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  if (rc.h >= 96) wrapText('vitesse = écart/τ : ils rétrécissent ensemble (×1/e à chaque τ).', rc.x + 4, rc.y + 72, rc.w - 8, 13);
+  ctx.restore();
+}
+function arrowHeadS(x, y, ux, uy, size, col) { const nx = -uy, ny = ux; ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x + ux * size, y + uy * size); ctx.lineTo(x - ux * size * .6 + nx * size * .6, y - uy * size * .6 + ny * size * .6); ctx.lineTo(x - ux * size * .6 - nx * size * .6, y - uy * size * .6 - ny * size * .6); ctx.closePath(); ctx.fill(); }
+function wrapText(s, x, y, w, lh) {
+  const words = s.split(' '); let line = '', yy = y;
+  for (const wd of words) { const tst = line ? line + ' ' + wd : wd; if (ctx.measureText(tst).width > w && line) { ctx.fillText(line, x, yy); line = wd; yy += lh; } else line = tst; }
+  ctx.fillText(line, x, yy);
+}
+
+function drawGraphs() {
+  sc = 1;
+  const pn = splitPanels(), ts = t - seg.t0, R = Rv();
+  for (const q of pn) {
+    if (q.k === 'iv') ivPanel(q);
+    else if (q.k === 'prof') profPanel(q);
+    else if (q.k === 'vc') {
+      const tau = p.R2 * p.C2, vs = seg.sw === 'charge' ? p.V0 : 0;
+      expPanel(q, { title: 'V_C(t)', color: K.pos, unit: 'V', tau, f0: seg.a, fs: vs, tnow: ts, ref: p.V0, levels: true, tangent: true, half: seg.sw === 'decharge', sub: 'repères : % de V₀' });
+    } else if (q.k === 'ic') {
+      const tau = p.R2 * p.C2, vs = seg.sw === 'charge' ? p.V0 : 0, i0 = (vs - seg.a) / p.R2;
+      expPanel(q, { title: 'I(t)', color: K.acc, unit: 'A', tau, f0: i0, fs: 0, tnow: ts, ref: p.V0 / p.R2 });
+    } else if (q.k === 'rli') {
+      const tau = p.Lrl / p.Rrl, vs = seg.sw === 'charge' ? p.V0 : 0, is = vs / p.Rrl;
+      expPanel(q, { title: 'I(t)', color: K.acc, unit: 'A', tau, f0: seg.a, fs: is, tnow: ts, ref: p.V0 / p.Rrl, levels: true, tangent: true, half: false, sub: 'repères : % de V₀/R' });
+    } else if (q.k === 'rlv') {
+      const tau = p.Lrl / p.Rrl, vs = seg.sw === 'charge' ? p.V0 : 0, v0 = vs - p.Rrl * seg.a;
+      expPanel(q, { title: 'V_L(t) = V₀ − R·I', color: K.pos, unit: 'V', tau, f0: v0, fs: 0, tnow: ts, ref: p.V0 });
+    } else if (q.k === 'lc') lcPanel(q);
+    else if (q.k === 'bars') {
+      if (isRC()) barsPanel(q, [{ l: 'fournie (pile)', v: Ef, col: K.ener, a: .45 }, { l: 'stockée (U_C)', v: Ucv(), col: K.ener }, { l: 'dissipée (R)', v: Ed, col: K.t2 }], p.C2 * p.V0 * p.V0, 'Bilan d’énergie');
+      else if (isRL()) barsPanel(q, [{ l: 'fournie (pile)', v: Ef, col: K.ener, a: .45 }, { l: 'stockée (U_L)', v: Ulv(), col: K.mag }, { l: 'dissipée (R)', v: Ed, col: K.t2 }], 4.4 * p.Lrl * Math.pow(p.V0 / p.Rrl, 2), 'Bilan d’énergie');
+      else barsPanel(q, [{ l: 'U_C (électrique)', v: Ucv(), col: K.ener }, { l: 'U_L (magnétique)', v: Ulv(), col: K.mag }, { l: 'dissipée (R)', v: Ed, col: K.t2 }], 0.5 * p.Clc * p.V0 * p.V0, 'Énergie : la balançoire');
+    } else if (q.k === 'gauge') gaugePanel(q);
+  }
+  sc = scS;
+}
+
+/* ---------------- Interface : panneau, outils ---------------- */
+const ROM = ['', 'I', 'II', 'III', 'IV'];
+function actInfo() {
+  if (act === 1) return { t: 'Une boucle, un courant', x: 'Une pile maintient une différence de potentiel V entre ses bornes : c’est la tension de la <a href="../04-champ-electrique/index.html">planche 04</a>. Dans la résistance, le champ E = V/L pousse les électrons ; le même courant I = V/R traverse tous les points de la boucle, et P = V·I est l’énergie convertie en chaleur chaque seconde.', eq: 'I = V / R : pente de la droite = 1/R\nP = V·I = R·I² = V²/R' };
+  if (act === 2) return { t: 'Le condensateur se charge', x: 'Des électrons quittent l’armature du haut et s’accumulent sur celle du bas : +Q d’un côté, −Q de l’autre, charge totale nulle. Le champ entre les armatures grandit avec Q et s’oppose à la pile : le courant s’essouffle, et la tension V_C approche V₀ sans jamais tout à fait l’atteindre.', eq: 'dV_C/dt = (V₀ − V_C)/τ  ·  τ = R·C\nV_C(t) = V₀·(1 − e^(−t/τ))' };
+  if (act === 3) return { t: 'Le condensateur se décharge', x: 'La pile est sortie du circuit : le condensateur se vide dans la résistance. Le courant change de sens (I < 0) et les électrons repartent à l’envers. Plus V_C diminue, moins il y a de quoi pousser : la décharge ralentit. Clique l’inverseur pour recharger à mi-course.', eq: 'V_C(t) = V₀·e^(−t/τ) · t½ = τ·ln 2 ≈ 0,69 τ\nI = (V_s − V_C)/R : négatif en décharge' };
+  if (mode === 'RL') return { t: 'Bobine : le circuit RL', x: 'On ferme l’interrupteur. En RC, c’est la tension du condensateur qui ne peut pas sauter ; ici c’est le courant dans la bobine : elle s’oppose à ses variations, comme une masse s’oppose aux variations de vitesse. Le courant monte avec τ = L/R, et les boucles violettes grandissent avec |I|.', eq: 'V_L = L·dI/dt  ·  τ = L/R\nI(t) = (V₀/R)·(1 − e^(−t/τ))' };
+  return { t: 'Bobine : l’oscillation LC', x: 'Le condensateur se vide dans la bobine, le courant monte, puis recharge le condensateur à l’envers : l’énergie fait la balançoire entre U_C et U_L, et R la fait fondre. Analogie : C ↔ ressort, L ↔ masse, R ↔ frottement, q ↔ position, I ↔ vitesse.', eq: 'L·dI/dt + R·I + q/C = 0  ·  I = dq/dt\nω₀ = 1/√(LC) = 1000 rad/s' };
+}
+function regimeText() {
+  const R = p.Rlc, Rc = Rcrit();
+  if (Math.abs(R - Rc) < 0.005 * Rc) return 'amortissement critique';
+  if (R === 0) return 'non amorti (R = 0)';
+  return R < Rc ? 'oscillations amorties' : 'suramorti, sans oscillation';
+}
+let rowDefs = [];
+function buildRows() {
+  const S = (v, u, sg, pl) => () => si(v(), u, sg, pl);
+  const rows = [];
+  if (act === 1) rows.push(['V', 'Tension V', S(() => p.V1, 'V', 3), 1], ['I', 'Courant I', S(() => I, 'A', 3, true), 1], ['R', 'Résistance R', S(() => p.R1, 'Ω', 3)], ['P', 'Puissance P = V·I', S(() => Pv(), 'W', 3), 1]);
+  else if (act === 2) rows.push(['VC', 'Tension V_C', S(() => VC, 'V', 3), 1], ['I', 'Courant I', S(() => I, 'A', 3, true), 1], ['q', 'Charge Q = C·V_C', S(() => qNow(), 'C', 3)], ['tau', 'τ = R·C', S(() => p.R2 * p.C2, 's', 3)], ['Ef', 'Énergie fournie', S(() => Ef, 'J', 3)], ['Uc', 'Énergie stockée', S(() => Ucv(), 'J', 3)], ['Ed', 'Énergie dissipée', S(() => Ed, 'J', 3)]);
+  else if (act === 3) rows.push(['VC', 'Tension V_C', S(() => VC, 'V', 3), 1], ['I', 'Courant I', S(() => I, 'A', 3, true), 1], ['q', 'Charge Q = C·V_C', S(() => qNow(), 'C', 3)], ['tau', 'τ = R·C', S(() => p.R2 * p.C2, 's', 3)], ['th', 't½ = τ·ln 2', S(() => p.R2 * p.C2 * Math.LN2, 's', 3)], ['Uc', 'Énergie stockée', S(() => Ucv(), 'J', 3)], ['Ed', 'Énergie dissipée', S(() => Ed, 'J', 3)]);
+  else if (mode === 'RL') rows.push(['I', 'Courant I', S(() => I, 'A', 3, true), 1], ['VL', 'Tension V_L', S(() => VLnow(), 'V', 3, true), 1], ['tau', 'τ = L/R (réel)', S(() => p.Lrl / p.Rrl, 's', 3)], ['Ul', 'U_L = ½·L·I²', S(() => Ulv(), 'J', 3)], ['Ef', 'Énergie fournie', S(() => Ef, 'J', 3)], ['Ed', 'Énergie dissipée', S(() => Ed, 'J', 3)]);
+  else rows.push(['VC', 'Tension V_C', S(() => VCnow(), 'V', 3, true), 1], ['I', 'Courant I', S(() => I, 'A', 3, true), 1], ['T0', 'T₀ · f₀ (réels)', () => si(T0v(), 's', 3) + ' · ' + si(1 / T0v(), 'Hz', 3)], ['rc', 'R critique 2√(L/C)', S(() => Rcrit(), 'Ω', 3)], ['rg', 'Régime', regimeText], ['Uc', 'U_C = ½·q²/C', S(() => Ucv(), 'J', 3)], ['Ul', 'U_L = ½·L·I²', S(() => Ulv(), 'J', 3)], ['Ed', 'Énergie dissipée', S(() => Ed, 'J', 3)]);
+  rowDefs = rows;
+  $('#meas').innerHTML = rows.map(r => `<div class="row${r[3] ? ' big' : ''}"><span class="lab">${r[1]}</span><span class="val" id="m_${r[0]}">—</span></div>`).join('');
+  rows.forEach(r => { r.el = $('#m_' + r[0]); });
+}
+let lastRows = 0;
+function readouts(force) {
+  const now = performance.now();
+  if (!force && now - lastRows < 100) return; lastRows = now;
+  for (const r of rowDefs) { const s = r[2](); if (r.el.textContent !== s) r.el.textContent = s; }
+  const done = act === 2 && sw === 'charge' && seg.a === 0 && VC >= 0.99 * p.V0 && Ef > 0 && Math.abs(Ed / Ef - 0.5) < 0.03;
+  $('#flash').classList.toggle('on', done);
+}
+const tools = { gV1: [1], gR1: [1], gR2: [2, 3], gC2: [2, 3], gMode: [4], gRrl: [4, 'RL'], gRlc: [4, 'LC'], gSw: [2, 3, 4] };
+function syncTools() {
+  for (const id in tools) {
+    const a = tools[id]; let on = a.includes(act);
+    if (on && a[0] === 4 && a[1]) on = a[1] === mode;
+    if (id === 'gSw') on = act >= 2;
+    $('#' + id).hidden = !on;
+  }
+  $('#rV1').value = p.V1; $('#vV1').textContent = si(p.V1, 'V', 2);
+  $('#rR1').value = p.R1; $('#vR1').textContent = si(p.R1, 'Ω', 3);
+  $('#rR2').value = p.R2 / 1000; $('#vR2').textContent = si(p.R2, 'Ω', 3);
+  $('#rC2').value = Math.round(p.C2 * 1e6); $('#vC2').textContent = si(p.C2, 'F', 3);
+  $('#rRrl').value = p.Rrl; $('#vRrl').textContent = si(p.Rrl, 'Ω', 3);
+  $('#rRlc').value = p.Rlc; $('#vRlc').textContent = si(p.Rlc, 'Ω', 3);
+  $('#bRL').setAttribute('aria-pressed', mode === 'RL'); $('#bLC').setAttribute('aria-pressed', mode === 'LC');
+  $('#swGl').textContent = isLC() ? 'Oscillation' : 'Inverseur';
+  $('#swLab').textContent = isLC() ? 'Relancer (S)' : (sw === 'charge' ? 'charge → décharge (S)' : 'décharge → charge (S)');
+}
+let uiKey = '';
+function updateUI() {
+  const info = actInfo();
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[act]}</b> sur IV`;
+  $('#stepTitle').textContent = info.t; $('#stepText').innerHTML = info.x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#eq').innerHTML = info.eq.replace(/\n/g, '<br>');
+  $('#note').textContent = act === 4
+    ? (mode === 'RL' ? 'Ralenti ×10 : 1 s à l’écran = 0,1 s réelle. ' : 'Ralenti ×500 : 1 s à l’écran = 2 ms réelles. ') + 'Pourquoi une bobine réagit ainsi aux variations de courant : c’est l’induction, sujet d’une planche à venir.'
+    : act === 1 ? 'Composants idéaux, fils sans résistance. Vitesse des électrons exagérée (la vraie : ~0,1 mm/s).'
+    : 'Temps réel (pas de ralenti). Les courbes pointillées montrent ce qui va arriver.';
+  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === act) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#bPrev').disabled = act === 1; $('#bNext').disabled = act === 4;
+  buildRows(); syncTools(); readouts(true); hideTip();
+  uiKey = act + mode;
+}
+
+/* ---------------- Actes et paramètres ---------------- */
+let fade = 0, waveA = 1, pending = 0;
+function enterAct(n) {
+  act = n; initAct(); swK = sw === 'charge' ? 0 : 1; buildGeo(); updateUI(); resize(); dirty = true;
+}
+function goAct(n, restart) {
+  n = clamp(n, 1, 4);
+  if (n === act && !restart) return;
+  pending = n;
+  if (reduce) { enterAct(n); return; }
+  fade = -1;
+}
+function setSw(v) {
+  if (isLC()) { initAct(); dirty = true; syncTools(); return; }
+  if (!hasSw() || v === sw) return;
+  sw = v; restartSeg();
+  if (isRC()) I = (Vs() - VC) / p.R2;
+  buildPath(); syncTools(); dirty = true;
+}
+function setMode(m) {
+  if (m === mode && act === 4) return;
+  mode = m;
+  if (act === 4) { initAct(); swK = sw === 'charge' ? 0 : 1; buildGeo(); updateUI(); resize(); }
+  dirty = true;
+}
+function setParam(key, v) {
+  if (!isFinite(v)) return;
+  if (key === 'V') {
+    if (act === 1) { p.V1 = v; I = p.V1 / p.R1; } else { p.V0 = v; initAct(); }
+  } else if (key === 'R') {
+    if (act === 1) { p.R1 = v; I = p.V1 / p.R1; }
+    else if (isRC()) { p.R2 = v; I = (Vs() - VC) / v; restartSeg(); }
+    else if (isRL()) { p.Rrl = v; restartSeg(); }
+    else { p.Rlc = v; restartSeg(); }
+  } else if (key === 'C') {
+    if (isLC()) { p.Clc = v; initAct(); } else { p.C2 = v; if (isRC()) initAct(); }
+  } else if (key === 'L') {
+    if (isRL()) { p.Lrl = v; restartSeg(); } else { p.Llc = v; if (isLC()) initAct(); }
+  } else if (key === 'VC' && isRC()) { VC = clamp(v, 0, p.V0); I = (Vs() - VC) / p.R2; restartSeg(); }
+  syncTools(); readouts(true); dirty = true;
+}
+
+/* ---------------- Survol et clic ---------------- */
+let tipKey = '';
+function showTip(key, name, role, x, y) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let x1 = x + 14, y1 = y + 16; if (x1 + tw > W - 6) x1 = x - tw - 12; if (y1 + th > H - 6) y1 = y - th - 12;
+  tipEl.style.left = Math.max(4, x1) + 'px'; tipEl.style.top = Math.max(4, y1) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitTest(x, y) {
+  const dx = (x - ox) / scS, dy = (y - oy) / scS;
+  // électron le plus proche
+  let be = -1, bd = 9 * 9;
+  for (let i = 0; i < ex.length; i++) { const d = (ex[i] - x) ** 2 + (ey[i] - y) ** 2; if (d < bd) { bd = d; be = i; } }
+  if (be >= 0) return { id: 'e', n: 'Électron', d: 'Porteur de charge négative. Il va en sens opposé au courant conventionnel ; sa vitesse réelle est de l’ordre de 0,1 mm/s (ici exagérée).' };
+  for (const h of G.hit) {
+    if (h.c ? Math.hypot(dx - h.c[0], dy - h.c[1]) < h.r : (dx > h.box[0] && dx < h.box[2] && dy > h.box[1] && dy < h.box[3])) {
+      if (h.sw) {
+        if (!hasSw()) continue;
+        // seulement près de la lame, des contacts ou du pivot
+        const ang = swK * TH, bx = PIV[0] - BLEN * Math.cos(ang), by = PIV[1] + BLEN * Math.sin(ang);
+        const dd = distSeg(dx, dy, PIV[0], PIV[1], bx, by);
+        if (!(dd < 16 || Math.hypot(dx - AC[0], dy - AC[1]) < 18 || Math.hypot(dx - BC[0], dy - BC[1]) < 18)) continue;
+      }
+      return h;
+    }
+  }
+  return null;
+}
+function distSeg(px, py, ax, ay, bx, by) {
+  const vx = bx - ax, vy = by - ay, l2 = vx * vx + vy * vy || 1, t_ = clamp(((px - ax) * vx + (py - ay) * vy) / l2, 0, 1);
+  return Math.hypot(px - (ax + vx * t_), py - (ay + vy * t_));
+}
+let ptr = { x: -9, y: -9 };
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; ptr = { x, y };
+  if (e.pointerType === 'touch') return;
+  const h = hitTest(x, y);
+  cv.className = h && h.id === 'sw' ? 'hand' : '';
+  if (h) showTip(h.id, h.n, h.d, x, y); else hideTip();
+});
+cv.addEventListener('pointerleave', () => { hideTip(); cv.className = ''; });
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), h = hitTest(e.clientX - r.left, e.clientY - r.top);
+  if (h && h.id === 'sw') { setSw(sw === 'charge' ? 'decharge' : 'charge'); hideTip(); }
+  else if (h && e.pointerType === 'touch') showTip(h.id, h.n, h.d, e.clientX - r.left, e.clientY - r.top);
+  else if (e.pointerType === 'touch') hideTip();
+});
+
+/* ---------------- Commandes ---------------- */
+function setPlay(v) {
+  playing = v; dirty = true;
+  $('#icPause').style.display = v ? '' : 'none'; $('#icPlay').style.display = v ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', v ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { enterAct(act); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goAct(+b.dataset.a); e.currentTarget.blur(); }));
+$('#bSw').addEventListener('click', e => { setSw(sw === 'charge' ? 'decharge' : 'charge'); e.currentTarget.blur(); });
+$('#bRL').addEventListener('click', e => { setMode('RL'); e.currentTarget.blur(); });
+$('#bLC').addEventListener('click', e => { setMode('LC'); e.currentTarget.blur(); });
+const bind = (id, key, scale) => $(id).addEventListener('input', e => setParam(key, +e.target.value * scale));
+bind('#rV1', 'V', 1); bind('#rR1', 'R', 1); bind('#rR2', 'R', 1000); bind('#rC2', 'C', 1e-6); bind('#rRrl', 'R', 1); bind('#rRlc', 'R', 1);
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if (isRange) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); goAct((pending && fade ? pending : act) + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if (e.key === 'r' || e.key === 'R') { enterAct(act); return; }
+  if (e.key === 's' || e.key === 'S') { if (act >= 2) setSw(sw === 'charge' ? 'decharge' : 'charge'); return; }
+  if (/^[1-4]$/.test(e.key)) goAct(+e.key);
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+new ResizeObserver(() => resize()).observe(sceneEl);
+flowQ.addEventListener && flowQ.addEventListener('change', resize);
+
+/* ---------------- Boucle ---------------- */
+let last = 0, frames = 0;
+function visualStep(dtPhys) {
+  if (reduce) return;
+  phase += -visV(I) * dtPhys * slow();
+}
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (document.hidden) { last = 0; return; }
+  const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+  if (fade !== 0) {
+    dirty = true;
+    if (fade < 0) { waveA -= dt / 0.15; if (waveA <= 0.15) { waveA = 0.15; enterAct(pending); fade = 1; } }
+    else { waveA += dt / 0.35; if (waveA >= 1) { waveA = 1; fade = 0; } }
+    cv.style.opacity = waveA.toFixed(3);
+  }
+  const target = sw === 'charge' ? 0 : 1;
+  if (swK !== target) { swK = reduce ? target : swK + Math.sign(target - swK) * Math.min(Math.abs(target - swK), dt / 0.25); dirty = true; }
+  if (playing) { const d = dt / slow(); advance(d); visualStep(d); dirty = true; }
+  if (dirty) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    drawSchem(); drawGraphs();
+    dirty = false; frames++;
+  }
+  readouts(false);
+}
+
+window.__circuits = {
+  act: n => { if (n !== undefined) { fade = 0; waveA = 1; cv.style.opacity = 1; enterAct(clamp(Math.round(n), 1, 4)); } return act; },
+  state() {
+    const R = Rv(), c = Cv(), l = Lv();
+    return { act, t, V: Vv(), R, C: c, L: l, I, VC: VCnow(), q: qNow(), P: Pv(), Uc: Ucv(), Ul: Ulv(), Efournie: Ef, Edissipee: Ed,
+      mode, sw, tau: tauV(), VL: VLnow(), Vs: Vs(), slow: slow(), Etot: Ucv() + Ulv(), T0: T0v(), w0: Math.sqrt(w0sq()), Rcrit: Rcrit(), tseg: t - seg.t0, regime: isLC() ? regimeText() : null };
+  },
+  set(o) {
+    o = o || {};
+    if (o.act !== undefined) { fade = 0; waveA = 1; cv.style.opacity = 1; enterAct(clamp(Math.round(o.act), 1, 4)); }
+    if (o.mode !== undefined && (o.mode === 'RL' || o.mode === 'LC')) setMode(o.mode);
+    if (o.V !== undefined) setParam('V', o.V);
+    if (o.C !== undefined) setParam('C', o.C);
+    if (o.L !== undefined) setParam('L', o.L);
+    if (o.R !== undefined) setParam('R', o.R);
+    if (o.sw !== undefined) setSw(o.sw === 'charge' ? 'charge' : 'decharge');
+    if (o.VC !== undefined) setParam('VC', o.VC);
+    syncTools(); readouts(true); dirty = true; return this.state();
+  },
+  step(dt) { advance(dt); visualStep(dt); readouts(true); dirty = true; return this.state(); }
+};
+
+resize();
+enterAct(1);
+setPlay(true);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
