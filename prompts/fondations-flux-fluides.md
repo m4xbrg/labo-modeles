@@ -29,7 +29,7 @@ Formules : seulement quand elles résument une chose déjà vue. La notation ∇
 - **Signe** (code de la série) : `--positif` (orange) = positif, sortant, source, rotation antihoraire ; `--negatif` (bleu) = négatif, entrant, puits, rotation horaire ; gris `--texte-2` = nul.
 - **Gradient** ∇f : flèches `--accent` (rose craie). **Ce qui s'écoule** (−k∇f : chaleur, soluté, champ électrique, force de pression) : flèches `--texte`, tête creuse.
 - **Champ vectoriel** (vitesse, champ) : flèches `--texte-2` → `--texte` selon l'intensité ; traceurs : petits points `--texte` à 70 %.
-- **Cartes scalaires** : température = rampe chaleur (`#16202c` → `#5a4a36` → `--energie`, comme la planche 06) ; concentration et pression = rampe neutre (`#121821` → `#8a93a0` → `--texte`) ; potentiel électrique = divergente (`--negatif` ← `--fond` → `--positif`, comme la planche 04).
+- **Cartes scalaires** : température = rampe chaleur (`#16202c` → `#5a4a36` → `--energie`, comme la planche 07) ; concentration et pression = rampe neutre (`#121821` → `#8a93a0` → `--texte`) ; potentiel électrique = divergente (`--negatif` ← `--fond` → `--positif`, comme la planche 04).
 - **Débit, flux** : valeur en `--energie` seulement quand c'est le résultat du moment (le « nombre qui compte »).
 
 ## Contrat technique
@@ -150,7 +150,7 @@ Le fluide est coloré par sa pression (rampe neutre de la page, la même que la 
 ## Ce que l'on simplifie (à documenter dans explication.html)
 - Tout est en 2D (A, B, C) ou en modèle 1D par tranche (D) ; « surface » = segment ou courbe, flux par unité de profondeur.
 - Champs adoucis au cœur (rayon a) pour éviter l'infini.
-- A : état stationnaire imposé, pas de dynamique de diffusion (la planche 06 la montre).
+- A : état stationnaire imposé, pas de dynamique de diffusion (la planche 07 la montre).
 - C, mode 3 : Gauss sans démonstration ; mode 4 : Faraday seulement nommé.
 - D : laminaire, newtonien, permanent, tube rigide, raccords sans perte, pas de gravité dans l'écoulement (tube horizontal), pas de turbulence ; le sang n'est pas newtonien et les vaisseaux sont élastiques et ramifiés.
 - Hors champ : Navier–Stokes, turbulence, CFD, calcul vectoriel formel, démonstrations de Gauss et Stokes, fluides non newtoniens.
