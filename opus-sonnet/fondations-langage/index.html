@@ -10,7 +10,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fondations — Langage scientifique</title>
+<title>Langage scientifique — L’invisible en mouvement, Fondations 01·03</title>
 <meta name="description" content="Quatre petits laboratoires pour lire les planches : échelles et unités, graphiques, vecteurs, position-vitesse-accélération.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -135,7 +135,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <main class="scene" id="scene">
     <div id="stage"></div>
     <header class="head" id="head">
-      <p class="serie" id="serie">Fondations — 01</p>
+      <p class="serie" id="serie">Fondations 01·03 — A · Échelles</p>
       <h1 id="titre">Puissances <em>de dix</em></h1>
       <a class="back" href="../index.html">&larr; Accueil de la série</a>
     </header>
@@ -340,7 +340,7 @@ const FX = (() => {
 
 <!-- TOYS (dev : fichiers de travail, insérés en ligne à l intégration) -->
 <script>
-/* ============ Toy 01 · Échelles — « Puissances de dix » ============ */
+/* ============ Toy A · Échelles — « Puissances de dix » ============ */
 (() => {
   'use strict';
   const C = FX.C, fmt = FX.fmt, sup = FX.sup, rgba = FX.rgba;
@@ -587,7 +587,7 @@ const FX = (() => {
   }
 
   FX.register('echelles', {
-    num: '01', titre: 'Échelles', titreHtml: 'Puissances <em>de dix</em>',
+    num: 'A', titre: 'Échelles', titreHtml: 'Puissances <em>de dix</em>',
     hints: [
       '<kbd>Molette</kbd> zoom continu',
       '<kbd>+</kbd> <kbd>−</kbd> ou <kbd>↑</kbd> <kbd>↓</kbd> champ ÷10 / ×10',
@@ -1192,7 +1192,7 @@ const FX = (() => {
 })();
 </script>
 <script>
-/* ============ Toy 02 · Graphiques — « Le réservoir » ============ */
+/* ============ Toy B · Graphiques — « Le réservoir » ============ */
 (() => {
   'use strict';
   const C = FX.C, fmt = FX.fmt, fmtS = FX.fmtS, rgba = FX.rgba, sgn = FX.signColor;
@@ -1232,7 +1232,7 @@ const FX = (() => {
   }
 
   FX.register('graphiques', {
-    num: '02', titre: 'Graphiques', titreHtml: 'Le <em>réservoir</em>',
+    num: 'B', titre: 'Graphiques', titreHtml: 'Le <em>réservoir</em>',
     hints: [
       '<kbd>Espace</kbd> lecture / pause · <kbd>R</kbd> réinitialiser',
       '<kbd>↑</kbd> <kbd>↓</kbd> débit Q ± 0,5 L/min',
@@ -1778,7 +1778,7 @@ const FX = (() => {
 })();
 </script>
 <script>
-/* ============ Toy 03 · Vecteurs — « Une flèche, pas un nombre » ============ */
+/* ============ Toy C · Vecteurs — « Une flèche, pas un nombre » ============ */
 (function () {
   'use strict';
   const C = FX.C, RAD = Math.PI / 180, MAXV = 10;
@@ -1824,7 +1824,7 @@ const FX = (() => {
   };
 
   FX.register('vecteurs', {
-    num: '03', titre: 'Vecteurs', titreHtml: 'Une flèche, <em>pas un nombre</em>',
+    num: 'C', titre: 'Vecteurs', titreHtml: 'Une flèche, <em>pas un nombre</em>',
     hints: [
       '<kbd>Tab</kbd> flèche active',
       '<kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> pointe ±0,5 (m ou N)',
@@ -2347,7 +2347,7 @@ const FX = (() => {
 })();
 </script>
 <script>
-/* ============ Toy 04 · Mouvement — « Trois graphes, un seul mouvement » ============ */
+/* ============ Toy D · Mouvement — « Trois graphes, un seul mouvement » ============ */
 (function () {
   'use strict';
   const C = FX.C;
@@ -2375,7 +2375,7 @@ const FX = (() => {
   };
 
   FX.register('mouvement', {
-    num: '04', titre: 'Mouvement', titreHtml: 'Trois graphes, <em>un seul mouvement</em>',
+    num: 'D', titre: 'Mouvement', titreHtml: 'Trois graphes, <em>un seul mouvement</em>',
     hints: ['<kbd>Espace</kbd> lecture / pause', '<kbd>R</kbd> tête de lecture à 0', '<kbd>←</kbd><kbd>→</kbd> tête ±0,1 s'],
     mount(ctx) {
       const { scene, panel, controls, signal } = ctx;
@@ -2854,10 +2854,10 @@ const FX = (() => {
     document.querySelectorAll('.extra-hint').forEach(n => n.remove());
     ctrl = new AbortController(); cur = t;
     tabsEl.querySelectorAll('.tab').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
-    $('#serie').textContent = `Fondations — ${t.num} · ${t.titre}`;
+    $('#serie').textContent = `Fondations 01·03 — ${t.num} · ${t.titre}`;
     $('#titre').innerHTML = t.titreHtml || t.titre;
     $('#lienComprendre').href = `explication.html#${t.id}`;
-    document.title = `${t.titre} — Fondations ${t.num}`;
+    document.title = `${t.titre} — L’invisible en mouvement, Fondations 01·03`;
     if (t.hints) $('#hints').insertAdjacentHTML('beforeend', t.hints.map(h => `<li class="extra-hint">${h}</li>`).join(''));
     t.mount({ scene: stage, panel, controls, signal: ctrl.signal });
     FX.tex(panel); FX.tex(controls);
