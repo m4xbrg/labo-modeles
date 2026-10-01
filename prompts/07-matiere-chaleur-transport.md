@@ -1,6 +1,6 @@
 # Projet 07 — Matière, chaleur et transport
 
-Dossier de sortie : `opus-sonnet/07-matiere-chaleur/`. Accent : `--accent: #78d7e0;` (cyan d'eau froide, pour l'interface, les molécules « A » et l'eau de l'osmose).
+Dossier de sortie : `opus-sonnet/07-matiere-chaleur/`. Accent : `--accent: #dcc29a;` (sable chaud, distinct des cyans des planches 01 et 06, pour l'interface, les molécules « A » et l'eau de l'osmose).
 
 Couvre les modules canoniques **17 (monde microscopique des gaz)**, **18 (chaleur, phases et entropie)** et **19 (transport thermique et moléculaire)**. Les notions de **gradient** et de **flux** sont utilisées comme prérequis locaux (pente d'un profil le long d'un axe, débit net à travers une ligne) ; le module 16 (champs scalaires et vectoriels, divergence, rotationnel, formulation générale des flux) n'est **pas** couvert et la page ne doit pas le prétendre.
 
@@ -33,7 +33,7 @@ IX. **Convection et rayonnement** — scènes compactes et illustratives : roule
 - **Illustratif** : couleurs de vitesse et de température, flèches de flux, bandes de profil, rouleau de convection imposé, « photons » dessinés.
 
 ## Code couleur
-Vitesse et température : rampe gris-bleu sombre (lent, froid) vers `--energie` (rapide, chaud) : l'agitation est de l'énergie. Molécules A et eau : `--accent`. Molécules B et soluté : lilas `#b9a3ff`. Grain brownien : `--texte`. `--positif` et `--negatif` ne sont pas utilisés (pas de charges ici).
+Vitesse et température : rampe gris-bleu sombre (lent, froid) vers `--energie` (rapide, chaud) : l'agitation est de l'énergie. Molécules A et eau : `--accent` (sable). Molécules B et soluté : lilas `#b9a3ff`. Grain brownien : `--texte`. `--positif` et `--negatif` ne sont pas utilisés (pas de charges ici).
 
 ## Interface
 Structure de la série (comme 05) : scène, titre discret `L'invisible en mouvement — 07`, panneau de lecture avec mesures en IBM Plex Mono et un petit graphique, barre de contrôles avec stepper I–IX et outils propres à l'acte. Survol d'une molécule, d'une paroi, du piston, de la membrane ou du grain : nom et rôle. Clavier : Espace, ← →, R, 1–9.
