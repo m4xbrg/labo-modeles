@@ -4,7 +4,7 @@
 <!--
   Note de design.
   1. Une seule boîte, un seul moteur : une vraie dynamique moléculaire 2D (Verlet, Lennard-Jones) sert huit actes sur neuf ; d'un acte à l'autre on ne change que les conditions (énergie, piston, cloison, membrane, parois chaudes, attraction), jamais les lois.
-  2. La couleur d'une molécule est sa vitesse, sur une rampe qui finit dans le jaune « énergie » de la série : chauffer un gaz le fait littéralement virer au jaune. A et eau en cyan, B et soluté en lilas ; orange et bleu restent réservés aux charges.
+  2. La couleur d'une molécule est sa vitesse, sur une rampe qui finit dans le jaune « énergie » de la série : chauffer un gaz le fait littéralement virer au jaune. A et eau en sable, B et soluté en lilas ; orange et bleu restent réservés aux charges.
   3. Chaque nombre du panneau est mesuré sur les particules (chocs comptés, force sur les parois, traversées d'une ligne, énergie injectée) puis lissé ; la théorie (Maxwell, NkT/A, binomiale, van 't Hoff) n'apparaît qu'en tireté, pour comparaison.
 -->
 <meta charset="utf-8">
@@ -19,7 +19,7 @@
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
-  --accent:#78d7e0;
+  --accent:#dcc29a;
   --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
   --lilas:#b9a3ff; --froid:#4f6a86;
   --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
@@ -666,7 +666,7 @@ ACTS.push({
 /* VI. Osmose */
 ACTS.push({
   num: 'VI', title: 'Osmose', short: 'Osmose',
-  text: 'La membrane laisse passer l’eau (cyan) mais pas le soluté (lilas). Le soluté rebondit sur elle et la pousse ; elle recule contre son ressort. L’eau traverse dans les deux sens, au hasard, mais un peu plus souvent vers le côté qui s’agrandit : le <b>flux net d’eau va vers le soluté</b>. Équilibre : la poussée du soluté égale le ressort. Fige la membrane : plus de flux net, mais une différence de pression, la pression osmotique.',
+  text: 'La membrane laisse passer l’eau (sable) mais pas le soluté (lilas). Le soluté rebondit sur elle et la pousse ; elle recule contre son ressort. L’eau traverse dans les deux sens, au hasard, mais un peu plus souvent vers le côté qui s’agrandit : le <b>flux net d’eau va vers le soluté</b>. Équilibre : la poussée du soluté égale le ressort. Fige la membrane : plus de flux net, mais une différence de pression, la pression osmotique.',
   color: 'species', box: [60, 30], strip: false,
   setup() {
     st.mobile = st.mobile === undefined ? true : st.mobile; st.series = []; st.tt = 0; st.cr = [0, 0];
