@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre — Flux, gradients, champs et fluides</title>
+<meta name="description" content="Ce que montrent les quatre laboratoires : champ scalaire et gradient, champ vectoriel, divergence et rotationnel, flux à travers une surface, pression, débit et résistance dans un conduit. Puis la notation ∇ comme langage compact.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#f2b8d8;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond);scroll-behavior:smooth}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em,h2 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+.sommaire{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:36px 0 0;border-top:1px solid var(--trait)}
+.sommaire a{display:block;padding:12px 10px 12px 0;text-decoration:none;color:var(--texte-2);font:400 12px/1.35 var(--mono);border-bottom:1px solid var(--trait);transition:color .3s var(--ease)}
+.sommaire a b{display:block;color:var(--accent);font-weight:500;margin-bottom:2px}
+.sommaire a:hover{color:var(--texte)}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:500 16px var(--sans);margin:28px 0 8px;color:var(--accent)}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 16px/1.6 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.katex{font-size:1.05em;color:inherit}
+.eq .katex{font-size:1.1em}
+.tex-bloc{display:block;overflow-x:auto;overflow-y:hidden}
+.tex-bloc .katex-display{margin:4px 0}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.dim{color:var(--texte-2)}
+.piege{border:1px solid var(--trait);border-left:2px solid var(--positif);background:var(--fond-2);padding:12px 16px;margin:18px 0}
+.piege b{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--positif);display:block;margin-bottom:4px}
+.piege p{margin:0}
+table{border-collapse:collapse;width:100%;margin:0 0 18px;font-size:14.5px}
+th,td{text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--trait);vertical-align:top}
+th{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2)}
+.tw{overflow-x:auto}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+.suite{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.suite div{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.suite b{font:500 15px var(--sans);color:var(--texte)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){
+  .chiffres div,.suite div{grid-template-columns:1fr;gap:2px}
+  h2{font-size:28px}
+  .sommaire{grid-template-columns:repeat(3,minmax(0,1fr))}
+  details p{padding-left:16px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.top a,.cta{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour aux laboratoires</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">Fondations 16·20 — flux, gradients, champs et fluides</p>
+  <h1>Comprendre <em>les champs</em></h1>
+  <p class="lede">La chaleur qui fuit, un soluté qui diffuse, le courant dans un fil, le sang dans une artère, le vent, la lumière qui sort d'une étoile : tout cela se décrit avec le même petit vocabulaire spatial. Une valeur en chaque point, sa pente, une flèche en chaque point, ce qui traverse une surface. Les quatre laboratoires le construisent à la main, avant de lui donner sa notation.</p>
+  <nav class="sommaire" aria-label="Sections">
+    <a href="#scalaire"><b>A</b>Champs scalaires</a>
+    <a href="#vectoriel"><b>B</b>Champs vectoriels</a>
+    <a href="#flux"><b>C</b>Flux</a>
+    <a href="#conduit"><b>D</b>Pression et débit</a>
+    <a href="#nabla"><b>∇</b>Langage compact</a>
+  </nav>
+
+  <h2 id="scalaire"><span>A · Champs scalaires</span>Une valeur <em>partout</em></h2>
+  <h3>Ce que tu vois</h3>
+  <p>Une plaque vue de dessus, colorée selon une grandeur (température, concentration, pression ou potentiel électrique). Des foyers chauds ou froids qu'on pose et qu'on déplace. On regarde la même carte de quatre façons : les couleurs, les lignes de niveau, les flèches du gradient, puis ce qui s'écoule.</p>
+  <h3>Un nombre en chaque point</h3>
+  <p>Un <strong>champ scalaire</strong> associe un seul nombre à chaque position : <span data-tex="T(x, y)">T(x, y)</span>. La température d'une pièce, la concentration d'oxygène dans un tissu, la pression de l'air, le potentiel électrique autour d'une charge. La couleur n'est qu'un codage de ce nombre ; la sonde le lit directement.</p>
+  <p>Les <strong>lignes de niveau</strong> (isothermes, isobares, équipotentielles) relient les points de même valeur, comme les courbes d'une carte de randonnée. La vue en relief le rend évident : là où les lignes sont serrées, la pente est raide.</p>
+  <h3>Le gradient : vers où ça monte, et à quel rythme</h3>
+  <p>Debout en un point de la carte, on peut demander : « si je fais un petit pas dans la direction u, de combien la valeur change-t-elle par centimètre ? » C'est la <strong>pente dans la direction u</strong>. Elle dépend de la direction : nulle le long d'une ligne de niveau, maximale dans une direction précise, minimale (négative) dans la direction opposée. La boussole de pente du mode 3 fait tourner u et trace cette pente : une cosinusoïde.</p>
+  <p>Le <strong>gradient</strong> est la flèche qui résume tout : elle pointe vers la montée la plus raide, et sa longueur est cette pente maximale (en °C/cm, en kPa/cm…). Il est toujours <strong>perpendiculaire aux lignes de niveau</strong>, et la pente dans n'importe quelle direction s'en déduit :</p>
+  <div class="eq"><span class="tex-bloc" data-tex="\frac{df}{ds} = \lvert \text{grad}\, f \rvert \cos\theta">df/ds = |grad f| · cos θ</span><span class="dim">θ : angle entre la direction choisie et le gradient. Unité : unité de f par unité de longueur.</span></div>
+  <h3>Ce qui s'écoule descend le gradient</h3>
+  <p>Le gradient d'un champ scalaire est un champ de flèches. Et la nature a une règle très générale : <strong>ce qui diffuse va de là où il y en a plus vers là où il y en a moins</strong>, d'autant plus vite que la pente est forte. Le flux est proportionnel au gradient, en sens opposé :</p>
+  <div class="tw"><table>
+    <tr><th>Grandeur</th><th>Ce qui s'écoule</th><th>Loi</th></tr>
+    <tr><td>Température T</td><td>chaleur</td><td><span data-tex="\vec q = -k\,\text{grad}\,T">q = −k grad T</span> (Fourier)</td></tr>
+    <tr><td>Concentration c</td><td>soluté</td><td><span data-tex="\vec J = -D\,\text{grad}\,c">J = −D grad c</span> (Fick)</td></tr>
+    <tr><td>Potentiel V</td><td>(champ qui pousse les charges +)</td><td><span data-tex="\vec E = -\text{grad}\,V">E = −grad V</span></td></tr>
+    <tr><td>Pression p</td><td>(force qui pousse le fluide)</td><td><span data-tex="\vec f = -\text{grad}\,p">f = −grad p</span> (par unité de volume)</td></tr>
+  </table></div>
+  <p>Le signe moins est toute la physique : la chaleur va du chaud vers le froid, le soluté du concentré vers le dilué, le fluide des hautes vers les basses pressions. La constante (k, D…) dit seulement à quelle vitesse.</p>
+  <h3>Le modèle derrière la carte</h3>
+  <p>La carte n'est pas dessinée à la main : c'est l'état stationnaire d'une plaque mince chauffée en quelques points et qui perd sa chaleur vers l'air. Autour d'un foyer, la température suit une fonction de Bessel modifiée, <span data-tex="K_0(r/\ell)">K₀(r/ℓ)</span>, qui décroît sur une longueur ℓ = 6 cm. La même équation décrit un soluté produit par quelques cellules et consommé partout, un potentiel écranté dans un électrolyte, ou la pression autour d'un puits dans une nappe d'eau qui fuit : quatre phénomènes, un seul objet mathématique.</p>
+
+  <h2 id="vectoriel"><span>B · Champs vectoriels</span>Une flèche <em>partout</em></h2>
+  <h3>Ce que tu vois</h3>
+  <p>Un bassin vu de dessus : en chaque point, une flèche donne la vitesse de l'eau (direction et intensité, en cm/s). Des traceurs sont emportés par le courant. Une petite sonde circulaire mesure ce qui sort du cercle, ou ce qui tourne autour ; un moulinet montre si l'eau fait tourner un petit objet sur lui-même.</p>
+  <h3>Une flèche en chaque point</h3>
+  <p>Un <strong>champ vectoriel</strong> associe une flèche à chaque position : la vitesse d'un fluide, le champ électrique, une force, le flux de chaleur. Il faut deux nombres par point en 2D (trois en 3D). Les champs s'<strong>additionnent</strong> flèche par flèche : une source plus un courant uniforme donne l'écoulement autour d'un obstacle arrondi.</p>
+  <h3>Divergence : ce qui naît ici</h3>
+  <p>Trace un petit cercle et compte ce qui en sort moins ce qui y entre, par seconde. Divise par l'aire du cercle. En rétrécissant le cercle, ce rapport tend vers un nombre attaché au point : la <strong>divergence</strong> (unité : 1/s pour une vitesse). Positive, le point est une <span class="pos">source</span> (de l'eau est injectée, de la chaleur produite) ; négative, un <span class="neg">puits</span> ; nulle, tout ce qui entre ressort.</p>
+  <div class="eq"><span class="tex-bloc" data-tex="\text{div}\,\vec v = \lim_{A \to 0}\ \frac{\text{flux sortant du petit contour}}{A}">div v = (flux sortant du petit contour) / (aire), quand l'aire → 0</span></div>
+  <div class="piege"><b>Piège</b><p>Loin d'une source, les flèches s'écartent, et pourtant la divergence est nulle. Elles s'écartent mais faiblissent juste assez (en 1/r en 2D) pour que ce qui entre dans un petit cercle en ressorte. La divergence est une propriété <em>locale</em> : toute l'eau naît au cœur de la source.</p></div>
+  <h3>Rotationnel : ce qui tourne sur soi-même</h3>
+  <p>Même petit cercle, mais on additionne cette fois la composante de la vitesse <em>le long</em> du bord : c'est la <strong>circulation</strong>. Divisée par l'aire, elle tend vers le <strong>rotationnel</strong> (en 1/s). Il mesure la tendance d'un petit élément de fluide à tourner sur lui-même : un moulinet posé là tourne à la vitesse angulaire <span data-tex="\omega = \tfrac12\,\text{rot}\,\vec v">ω = ½ rot v</span>, <span class="pos">antihoraire</span> si le rotationnel est positif, <span class="neg">horaire</span> s'il est négatif.</p>
+  <div class="piege"><b>Piège</b><p>Des flèches qui font un cercle ne veulent pas dire rotationnel. Autour d'un tourbillon libre (le siphon d'une baignoire), la vitesse décroît en 1/r : le moulinet fait le tour du centre en gardant son orientation, comme une nacelle de grande roue. À l'inverse, dans un <strong>cisaillement</strong> (des couches qui glissent les unes sur les autres, plus vite en haut), les lignes de courant sont droites, et le moulinet tourne, parce que le haut de ses palettes est poussé plus fort que le bas.</p></div>
+
+  <h2 id="flux"><span>C · Flux</span>Ce qui <em>traverse</em></h2>
+  <h3>Ce que tu vois</h3>
+  <p>Une « fenêtre » (un segment, qu'on oriente) plongée dans un courant ; sa normale est la flèche rose. Les traceurs qui la franchissent sont comptés. Puis la fenêtre devient une courbe fermée, et enfin une boucle en 3D dans un champ magnétique.</p>
+  <h3>Trois facteurs</h3>
+  <p>Le <strong>flux</strong> est la quantité qui traverse une surface par unité de temps. Pour un champ uniforme, trois facteurs comptent : l'intensité du champ, la taille de la surface, et son orientation. Une fenêtre de biais n'intercepte que le tube de courant de largeur <span data-tex="L\cos\theta">L cos θ</span> ; parallèle au courant, plus rien ne passe.</p>
+  <div class="eq"><span class="tex-bloc" data-tex="\Phi = v \cdot A \cdot \cos\theta">Φ = v · A · cos θ</span><span class="dim">θ : angle entre le champ et la normale. Pour une vitesse : m/s × m² = m³/s, un débit.</span></div>
+  <p>Le flux a un <strong>signe</strong> : il dépend du côté qu'on choisit comme « sortie » (la normale). Ce qui traverse dans le sens de la normale compte <span class="pos">positivement</span>, ce qui traverse en sens inverse <span class="neg">négativement</span>. Quand le champ varie le long de la surface, on la découpe en petits morceaux et on additionne les contributions : c'est une intégrale.</p>
+  <h3>Surface fermée : seul compte ce qui est dedans</h3>
+  <p>Pour une courbe fermée, on prend la normale sortante. Le flux net sortant ne dépend <strong>ni de la forme ni de la taille</strong> du contour : seulement de ce qui est produit à l'intérieur. Une source dedans : le flux vaut son débit. Une source dehors : ce qui entre d'un côté ressort de l'autre, flux nul. Un tourbillon : rien ne naît, flux nul. C'est la divergence, additionnée sur toute la région. Appliquée au champ électrique, cette idée devient le <strong>théorème de Gauss</strong> : le flux de E sortant d'une surface fermée est proportionnel à la charge enfermée.</p>
+  <h3>Une boucle dans un champ</h3>
+  <p>La même géométrie vaut pour un champ magnétique B à travers une boucle d'aire A : <span data-tex="\Phi = B A \cos\theta">Φ = B A cos θ</span>, en webers. Quand ce flux change dans le temps (la boucle tourne, B varie), une tension apparaît dans la boucle : c'est la <strong>loi de Faraday</strong>, le principe de tous les alternateurs. Le laboratoire montre Φ(θ) ; la tension viendra avec le magnétisme.</p>
+
+  <h2 id="conduit"><span>D · Pression et débit</span>Pression <em>et débit</em></h2>
+  <h3>Ce que tu vois</h3>
+  <p>Un tube horizontal, vu en coupe, avec un rétrécissement au milieu. Le fluide est coloré par sa pression ; des tubes verticaux (piézomètres) montent à une hauteur proportionnelle à la pression locale. Trois portes comptent le débit ; un graphe trace la pression le long du tube.</p>
+  <h3>Pression</h3>
+  <p>La <strong>pression</strong> est une force par unité de surface (Pa = N/m²), qui s'exerce dans toutes les directions en un point du fluide : c'est un <strong>champ scalaire</strong>, exactement comme au laboratoire A. Une pression uniforme, si grande soit-elle, ne met rien en mouvement : les poussées se compensent. Ce qui pousse le fluide, c'est la <strong>différence</strong> de pression, son gradient. Un piézomètre la rend visible : la colonne monte à <span data-tex="h = p/(\rho g)">h = p/(ρg)</span>.</p>
+  <h3>Débit et continuité</h3>
+  <p>Le <strong>débit</strong> volumique est le volume qui traverse une section par seconde, <span data-tex="Q = V/t">Q = V/t</span>, en m³/s (ou mL/s, L/min). C'est le flux de la vitesse à travers la section, d'où, pour une vitesse moyenne v̄ :</p>
+  <div class="eq"><span class="tex-bloc" data-tex="Q = A \cdot \bar v">Q = A · v̄</span><span class="dim">m² × m/s = m³/s</span></div>
+  <p>Un liquide ne se comprime pas et ne s'accumule pas dans un tube rigide : ce qui entre par une section doit sortir par la suivante. Le débit est donc <strong>le même partout</strong> en série : <span data-tex="A_1 \bar v_1 = A_2 \bar v_2">A₁v̄₁ = A₂v̄₂</span>. Dans un rétrécissement de diamètre moitié, la section est quatre fois plus petite, le fluide va quatre fois plus vite. C'est la <strong>continuité</strong> : la conservation de la matière, écrite pour un écoulement. En langage de champ : la divergence de la vitesse est nulle.</p>
+  <h3>Résistance et viscosité</h3>
+  <p>Un fluide réel frotte sur lui-même : c'est la <strong>viscosité</strong> μ (Pa·s). Au contact de la paroi, la vitesse est nulle ; elle est maximale au centre, avec un profil en parabole. Pour un écoulement lent et régulier (laminaire), le débit est proportionnel à la différence de pression, et la <strong>résistance</strong> suit la loi de Poiseuille :</p>
+  <div class="eq"><span class="tex-bloc" data-tex="\Delta P = R \cdot Q \qquad R = \frac{8\,\mu L}{\pi r^4}">ΔP = R · Q ; R = 8μL / (π r⁴)</span><span class="dim">Pa = (Pa·s/m³) × m³/s. Comparer à la loi d'Ohm U = R · I.</span></div>
+  <p>Le rayon est à la puissance quatre : diviser le rayon par deux multiplie la résistance par seize ; le réduire de 16 % la double. C'est pourquoi un vaisseau sanguin qui se contracte un peu change beaucoup le débit, et pourquoi les résistances en série s'additionnent comme dans un circuit.</p>
+  <p>Ce modèle cesse de valoir quand l'écoulement devient turbulent. Le <strong>nombre de Reynolds</strong> <span data-tex="Re = \rho \bar v D/\mu">Re = ρv̄D/μ</span> (sans unité) compare l'inertie au frottement ; dans un tube, au-delà de 2000 environ, des tourbillons apparaissent et le débit devient plus faible que prévu. Le laboratoire le signale.</p>
+  <h3>Rétrécissement : deux raisons pour que la pression baisse</h3>
+  <p>Dans le col, la pression chute pour deux raisons. Le <strong>frottement</strong> y est plus fort (rayon petit) : cette perte est définitive, l'énergie part en chaleur. Et le fluide <strong>accélère</strong> : il faut une différence de pression pour lui donner cette vitesse, et il la rend en ralentissant à la sortie. Sans frottement, <span data-tex="p + \tfrac12 \rho v^2">p + ½ρv²</span> resterait constant le long d'un filet de fluide : c'est l'équation de <strong>Bernoulli</strong>, qui explique le creux de pression d'un col (effet Venturi). Avec l'eau, ce creux et sa remontée sont visibles ; avec le miel, presque toute la chute est visqueuse.</p>
+
+  <h2 id="nabla"><span>∇ · Langage compact</span>Le même vocabulaire, <em>en trois symboles</em></h2>
+  <p>Tout ce qui précède s'écrit avec un seul opérateur, <strong>nabla</strong>, une flèche de pentes : <span data-tex="\nabla = \left(\tfrac{\partial}{\partial x},\ \tfrac{\partial}{\partial y}\right)">∇ = (∂/∂x, ∂/∂y)</span>. Le symbole <span data-tex="\partial f/\partial x">∂f/∂x</span> est la pente de f quand on ne bouge qu'en x : une dérivée « partielle ». Rien de nouveau, seulement une sténographie de ce que les laboratoires montrent déjà.</p>
+  <div class="tw"><table>
+    <tr><th>Écriture</th><th>Se lit</th><th>Ce que c'est</th><th>Laboratoire</th></tr>
+    <tr><td><span data-tex="\nabla f">∇f</span></td><td>gradient de f</td><td>flèche vers la montée la plus raide</td><td>A, mode 3</td></tr>
+    <tr><td><span data-tex="\nabla\cdot\vec v">∇·v</span></td><td>divergence de v</td><td>ce qui naît par unité de volume (flux sortant d'un petit contour / aire)</td><td>B, mode 2</td></tr>
+    <tr><td><span data-tex="\nabla\times\vec v">∇×v</span></td><td>rotationnel de v</td><td>tendance à tourner sur soi (circulation / aire = 2ω)</td><td>B, mode 3</td></tr>
+  </table></div>
+  <p>Avec ces trois mots, des phrases entières deviennent des lignes. La continuité d'un liquide : <span data-tex="\nabla\cdot\vec v = 0">∇·v = 0</span>. Le flux de Fick : <span data-tex="\vec J = -D\,\nabla c">J = −D∇c</span>. Le théorème de Gauss : « le flux sortant d'une surface fermée est la somme des divergences à l'intérieur ».</p>
+  <p>Et surtout, on peut les enchaîner. La concentration en un point augmente si plus de soluté y entre qu'il n'en sort, c'est-à-dire si le flux <em>converge</em> (divergence négative). Et le flux descend le gradient. Mis bout à bout :</p>
+  <div class="eq"><span class="tex-bloc" data-tex="\frac{\partial c}{\partial t} = -\nabla\cdot\vec J = -\nabla\cdot(-D\,\nabla c) = D\,\nabla^2 c">∂c/∂t = −∇·J = −∇·(−D∇c) = D∇²c</span><span class="dim">l'équation de la diffusion (et de la chaleur) : ∇² = « divergence du gradient »</span></div>
+  <p>C'est la première <strong>équation aux dérivées partielles</strong> qu'on rencontre, et on peut maintenant la lire à voix haute : « ce qui s'accumule ici, c'est ce qui converge ici, et ce qui coule descend la pente ». Le régime stationnaire du laboratoire A est cette même équation, avec une perte vers l'air en plus.</p>
+
+  <h2><span>Honnêteté</span>Ce que les laboratoires simplifient</h2>
+  <ul>
+    <li><strong>Deux dimensions.</strong> Les laboratoires A, B et C sont plans : une « surface » y est un segment ou une courbe, et un flux s'entend par unité de profondeur (cm²/s plutôt que cm³/s). En 3D, une source ponctuelle décroît en 1/r² au lieu de 1/r, mais toutes les idées sont les mêmes.</li>
+    <li><strong>Cœurs adoucis.</strong> Une source ou un tourbillon ponctuels donneraient une vitesse infinie au centre. Les laboratoires répartissent la source sur un petit cœur (rayon 1 cm) : sa divergence est concentrée là, avec une traîne infime au-delà (environ un dix-millième de la valeur au cœur, à 10 cm).</li>
+    <li><strong>Cartes stationnaires.</strong> Le laboratoire A montre l'état final, pas la diffusion en train de se faire ; c'est la planche de la matière et de la chaleur qui la montre. Les traceurs du mode « Ce qui s'écoule » sont illustratifs : la chaleur n'est pas faite de grains.</li>
+    <li><strong>Gauss et Faraday nommés, pas démontrés.</strong> Les égalités du laboratoire C sont calculées numériquement (sommes sur des petits morceaux), pas déduites d'un théorème.</li>
+    <li><strong>Le tube.</strong> Écoulement laminaire, permanent, d'un fluide newtonien (viscosité constante) dans un tube rigide et horizontal ; raccords sans perte ; profil parabolique supposé établi dès l’entrée de chaque tronçon (il lui faut en réalité une longueur d’environ 0,06 · Re · D, de 1 à 2 cm ici) ; terme de Bernoulli calculé avec la vitesse moyenne, alors que pour un profil parabolique l’énergie cinétique réelle est deux fois plus grande (le creux du col est donc sous-estimé d’un facteur 2 environ) ; diamètres exagérés à l'affichage ; temps ralenti ou accéléré (le facteur est affiché). Le vrai sang n'est pas newtonien, les vaisseaux sont élastiques, ramifiés, et le cœur pulse.</li>
+    <li><strong>Hors champ.</strong> Navier–Stokes, turbulence, mécanique des fluides numérique, calcul vectoriel formel, démonstrations des théorèmes de Gauss et de Stokes, fluides non newtoniens.</li>
+  </ul>
+
+  <h2><span>Ordres de grandeur</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 25 °C/km</b><span>le gradient de température dans la croûte terrestre. Avec la conductivité des roches (≈ 3 W/(m·K)), Fourier donne un flux de chaleur d'environ 0,08 W/m² qui sort de la Terre : ce qu'on mesure.</span></div>
+    <div><b>1 mPa·s · 3,5 mPa·s · 10 Pa·s</b><span>les viscosités de l'eau, du sang et du miel. Dix mille fois plus visqueux, le miel coule dix mille fois moins vite sous la même différence de pression.</span></div>
+    <div><b>5 L/min</b><span>le débit du cœur au repos. Il passe en entier dans l'aorte (≈ 5 cm² de section, ≈ 17 cm/s) puis dans les capillaires (≈ 2500 cm² au total) : même débit, section 500 fois plus grande, vitesse 500 fois plus faible (≈ 0,3 mm/s). C'est la continuité.</span></div>
+    <div><b>r ÷ 2 → R × 16</b><span>Poiseuille : la résistance d'un tube varie comme 1/r⁴. Réduire le rayon de 16 % suffit à la doubler.</span></div>
+    <div><b>Re ≈ 2000</b><span>le seuil approximatif entre écoulement laminaire et turbulent dans un tube.</span></div>
+  </div>
+
+  <h2><span>Et ensuite</span>Ce que ce langage permettra de lire</h2>
+  <div class="suite">
+    <div><b>Diffusion et chaleur</b><span>Flux de Fick et de Fourier, ∂c/∂t = D∇²c. Dans la planche de la matière et de la chaleur, on voit le gradient émerger des collisions de molécules.</span></div>
+    <div><b>Électricité</b><span>E = −∇V : le champ descend le potentiel. <a href="../04-champ-electrique/index.html">La planche du champ électrique</a> trace lignes de champ et équipotentielles, perpendiculaires comme gradient et lignes de niveau. Dans un fil, j = σE est un flux de charges qui descend le potentiel ; U = RI est la cousine de ΔP = RQ.</span></div>
+    <div><b>Magnétisme</b><span>Le champ magnétique n'a ni source ni puits (∇·B = 0) ; un courant crée un champ qui tourne autour de lui (rotationnel) ; un flux qui varie crée une tension (Faraday).</span></div>
+    <div><b>Circulation sanguine</b><span>La pression artérielle moyenne (≈ 13 kPa, 95 mmHg) pousse 5 L/min à travers la résistance des artérioles ; la vasoconstriction joue sur r⁴.</span></div>
+    <div><b>Néphron</b><span>Dans le glomérule, une pression nette de filtration d'environ 10 mmHg pousse le plasma à travers la paroi ; le long du tubule, l'eau et les ions suivent des gradients de concentration.</span></div>
+    <div><b>Atmosphère</b><span>Le vent est poussé par le gradient de pression horizontal (≈ 1 hPa par 100 km), les isobares d'une carte météo sont des lignes de niveau ; la rotation de la Terre le dévie.</span></div>
+    <div><b>Étoiles</b><span>Dans une étoile, le gradient de pression vers l'extérieur équilibre la gravité (équilibre hydrostatique), et l'énergie produite au cœur s'écoule vers la surface en descendant le gradient de température.</span></div>
+    <div><b>Équations aux dérivées partielles</b><span>Diffusion, ondes, Laplace, Navier–Stokes, Maxwell : toutes s'écrivent avec ∇, ∇· et ∇×.</span></div>
+  </div>
+
+  <h2><span>Teste-toi</span>Cinq questions</h2>
+  <details><summary>Sur une carte météo, les isobares sont très serrées au-dessus d'une région. Qu'en déduis-tu ?</summary>
+    <p>Le gradient de pression y est fort (la pression change beaucoup sur peu de distance) : la force qui pousse l'air est grande, le vent y est fort. Le gradient est perpendiculaire aux isobares et pointe vers les hautes pressions ; l'air est poussé dans l'autre sens.</p></details>
+  <details><summary>La température en un point vaut 40 °C, et le gradient y mesure 2 °C/cm vers le nord. Quelle température à 1 mm à l'est ? à 1 mm au nord-est ?</summary>
+    <p>À l'est, on se déplace perpendiculairement au gradient, donc le long de l'isotherme : environ 40 °C. Au nord-est, θ = 45° : pente = 2 × cos 45° ≈ 1,41 °C/cm, donc environ 40,14 °C. La chaleur, elle, s'écoule vers le sud.</p></details>
+  <details><summary>Les flèches d'un champ s'écartent les unes des autres en s'éloignant d'un point. La divergence est-elle forcément positive partout ?</summary>
+    <p>Non. Ce qui compte, c'est le bilan sur un petit contour : si les flèches s'affaiblissent en s'écartant juste assez (1/r en 2D, 1/r² en 3D), ce qui entre ressort et la divergence est nulle. Elle n'est positive que là où quelque chose est réellement produit, au cœur de la source.</p></details>
+  <details><summary>Une fenêtre de 4 cm est placée dans un courant de 3 cm/s, sa normale à 60° du courant. Quel flux ? Et si on la tourne de 30° de plus ?</summary>
+    <p>Φ = 3 × 4 × cos 60° = 6 cm²/s (par cm de profondeur). Tournée à 90°, elle est parallèle au courant : cos 90° = 0, plus rien ne la traverse.</p></details>
+  <details><summary>Dans un tuyau d'arrosage, on pince le bout pour réduire la section de moitié. Que deviennent le débit et la vitesse de sortie ?</summary>
+    <p>Le pincement ajoute une petite résistance en série : le débit baisse un peu. Mais la section de sortie est divisée par deux, donc la vitesse de sortie v = Q/A presque doublée : le jet porte plus loin. Pincer davantage finit par faire chuter le débit, quand la résistance du bout pincé devient comparable à celle du tuyau.</p></details>
+
+  <a class="cta" href="index.html"><span>Retour aux laboratoires</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+<script>
+// Formules : KaTeX si disponible, sinon le texte Unicode de repli reste affiché.
+if (window.katex) document.querySelectorAll('[data-tex]').forEach(el => {
+  try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: el.classList.contains('tex-bloc'), output: 'html' }); } catch (e) {}
+});
+</script>
+</body>
+</html>
