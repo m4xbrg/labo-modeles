@@ -6,6 +6,7 @@
   1. Un seul champ dessiné, jamais décoré : les lignes portent de petites impulsions qui glissent dans le sens de E, et des ondes rayonnent des charges vers l'extérieur (+) ou vers elles (−) : le mouvement ne fait que répéter le sens du champ.
   2. La couleur suit la charte de la série (orange = +, bleu = −, vert oscilloscope = équipotentielles et charge test) ; le blanc chaud reste aux lignes, comme une trace de craie sur un tableau noir.
   3. Les lignes sont recalculées par intégration à chaque déplacement, avec des graines d'angle fixes, ce qui les fait bouger comme des fils souples ; le calcul lourd est allégé en glissant (grille grossière, pas plus large), puis raffiné au repos.
+  Ajout (fondations électricité) : un point A fixe et la sonde forment un voltmètre (U = V_B − V_A, équipotentielle de A en pointillé blanc), la vue « Forces » montre F = qE sur chaque charge en jaune, et chaque vue activée explique ce qu'elle lit de la même situation.
 -->
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
@@ -137,9 +138,21 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
           <svg class="needle" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10"/><g id="needleG"><line x1="4" y1="11" x2="17" y2="11"/><path d="M17 11l-4-3M17 11l-4 3" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-linecap="round"/></g></svg>
           <b id="mD">—</b><i>°</i></span></div>
         <div class="row"><span class="lab">V</span><span class="val"><b id="mV">—</b><i>V</i></span></div>
+        <div class="row small"><span class="lab">F sur +1 nC placé ici</span><span class="val"><b id="mF">—</b><i>µN</i></span></div>
         <div class="row small"><span class="lab">Position</span><span class="val"><b id="mP">—</b><i>mm</i></span></div>
       </div>
-      <p class="note">Échelle : 1 px = 1 mm. La barre en bas à gauche de la scène mesure 10 cm.</p>
+      <p class="note">E existe en chaque point, qu'il y ait une charge ou non. Une force n'apparaît que si une charge q est là pour la subir : F = qE. Échelle : 1 px = 1 mm ; la barre en bas à gauche mesure 10 cm.</p>
+    </section>
+
+    <section>
+      <p class="eyebrow">Tension entre A et la sonde</p>
+      <div class="meas" id="uMeas">
+        <div class="row small"><span class="lab">V au point A</span><span class="val"><b id="uA">—</b><i>V</i></span></div>
+        <div class="row small"><span class="lab">V à la sonde (B)</span><span class="val"><b id="uB">—</b><i>V</i></span></div>
+        <div class="row"><span class="lab">U = V<sub>B</sub> − V<sub>A</sub></span><span class="val"><b id="uU">—</b><i>V</i></span></div>
+        <div class="row small"><span class="lab">Travail pour amener +1 nC de A à B</span><span class="val"><b id="uW">—</b><i>µJ</i></span></div>
+      </div>
+      <p class="note" id="uNote">Bouton « Point A » (touche U), puis clic : la tension se lit entre A et la sonde.</p>
     </section>
 
     <section>
@@ -168,6 +181,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
         <li>Clic : ajouter · Maj+clic : signe opposé</li>
         <li>Glisser : déplacer · double-clic : supprimer</li>
         <li>Molette sur une charge : sa valeur</li>
+        <li><kbd>T</kbd> charge test · <kbd>U</kbd> point A (tension)</li>
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps · <kbd>R</kbd> réinitialiser</li>
       </ul>
     </section>
@@ -207,6 +221,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bTest" title="Puis clique dans la scène (T)">Lâcher une charge test</button>
       <button class="btn sgn tsgn" data-s="1" aria-pressed="true" aria-label="Charge test positive">+</button>
       <button class="btn sgn tsgn" data-s="-1" aria-pressed="false" aria-label="Charge test négative">&minus;</button>
+      <button class="btn" id="bA" title="Puis clique dans la scène (U)">Point A</button>
     </div>
 
     <div class="grp" id="views">
@@ -215,6 +230,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" data-v="eq" aria-pressed="true"><span class="dot" style="color:var(--accent)"></span>Équipotentielles</button>
       <button class="btn" data-v="map" aria-pressed="false"><span class="dot" style="color:var(--positif)"></span>Carte de V</button>
       <button class="btn" data-v="vec" aria-pressed="false"><span class="dot" style="color:var(--texte-2)"></span>Vecteurs</button>
+      <button class="btn" data-v="forces" aria-pressed="false"><span class="dot" style="color:var(--energie)"></span>Forces</button>
     </div>
 
     <div class="grp">
@@ -263,7 +279,8 @@ let charges = [];          // {id,x,y,q}  (x,y en px, q en nC entier, signé)
 let nid = 1;
 let selected = null;
 let active = { s: 1, m: 3 };
-let views = { lines: true, eq: true, map: false, vec: false };
+let views = { lines: true, eq: true, map: false, vec: false, forces: false };
+let ptA = null, armA = false;          // point de référence pour la tension U = V(B) − V(A)
 let playing = true, timeScale = 1;
 let T = 0, pulseT = 0;
 let parts = [];            // charges test
@@ -403,7 +420,7 @@ function buildLines() {
 /* ---------------- Grille de potentiel, carte, équipotentielles ---------------- */
 let V = new Float32Array(1), gnx = 1, gny = 1, gcell = 6;
 const DV = 40, NMAX = 25;
-let pathN = new Path2D(), path5 = new Path2D(), path0 = new Path2D(), hoverPath = new Path2D();
+let pathN = new Path2D(), path5 = new Path2D(), path0 = new Path2D(), hoverPath = new Path2D(), pathA = new Path2D();
 function computeGrid(cell) {
   gcell = cell;
   gnx = Math.ceil(W / cell) + 2; gny = Math.ceil(H / cell) + 2;
@@ -483,6 +500,18 @@ function buildHover() {
   }
 }
 
+function buildA() {
+  pathA = new Path2D();
+  if (!ptA) return;
+  const L = pot(ptA.x, ptA.y);
+  for (let j = 0; j < gny - 1; j++) {
+    for (let i = 0; i < gnx - 1; i++) {
+      const a = V[j * gnx + i], b = V[j * gnx + i + 1], d = V[(j + 1) * gnx + i], c = V[(j + 1) * gnx + i + 1];
+      if (Math.min(a, b, c, d) <= L && Math.max(a, b, c, d) >= L) march(pathA, i, j, a, b, c, d, L);
+    }
+  }
+}
+
 /* ---------------- Couche statique ---------------- */
 function arrow(g, x, y, dx, dy, len, head) {
   const ex = x + dx * len, ey = y + dy * len;
@@ -538,6 +567,7 @@ function rebuild() {
   if (views.eq) buildContours();
   if (views.lines) buildLines();
   drawLayer();
+  buildA();
   hoverDirty = true; dirty = false;
 }
 
@@ -665,6 +695,42 @@ function draw() {
     ctx.beginPath(); ctx.arc(probe.x, probe.y, 2.6, 0, 6.2832); ctx.fillStyle = C.texte; ctx.fill();
   }
 
+  // point A, son équipotentielle et le segment A → sonde (tension)
+  if (ptA) {
+    ctx.save();
+    ctx.setLineDash([2, 5]); ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(RGB.texte, 0.55); ctx.stroke(pathA);
+    if (probe.in) {
+      ctx.setLineDash([1, 4]); ctx.lineWidth = 1; ctx.strokeStyle = rgba(RGB.texte, 0.5);
+      ctx.beginPath(); ctx.moveTo(ptA.x, ptA.y); ctx.lineTo(probe.x, probe.y); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(ptA.x, ptA.y, 5, 0, 6.2832); ctx.fillStyle = C.fond; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = C.texte; ctx.stroke();
+    ctx.font = '500 11px "IBM Plex Mono",ui-monospace,Consolas,monospace'; ctx.fillStyle = C.texte; ctx.textAlign = 'left';
+    ctx.fillText('A', ptA.x + 8, ptA.y - 7);
+    if (probe.in) ctx.fillText('B', probe.x + 8, probe.y - 7);
+    ctx.restore();
+  }
+
+  // forces de Coulomb sur chaque charge : F = q · E (la contribution propre est nulle au centre)
+  if (views.forces) {
+    ctx.save();
+    const ener = rgb(C.ener);
+    for (let i = 0; i < NC; i++) {
+      field(cx[i], cy[i]);
+      const q = charges[i].q * 1e-9, fx = q * EX, fy = q * EY, m = Math.hypot(fx, fy);
+      if (m < 1e-12) continue;
+      const len = 14 + 46 * m / (m + 2e-6), ux1 = fx / m, uy1 = fy / m, R = cr[i];
+      ctx.beginPath(); arrow(ctx, cx[i] + ux1 * (R + 3), cy[i] + uy1 * (R + 3), ux1, uy1, len, 6);
+      ctx.lineWidth = 2; ctx.strokeStyle = rgba(ener, 0.9); ctx.stroke();
+      if (NC <= 6) {
+        ctx.font = '400 10.5px "IBM Plex Mono",ui-monospace,Consolas,monospace'; ctx.fillStyle = rgba(ener, 0.9); ctx.textAlign = 'center';
+        ctx.fillText(fmt(m * 1e6, false) + ' µN', cx[i] + ux1 * (R + len + 16), cy[i] + uy1 * (R + len + 16) + 4);
+      }
+    }
+    ctx.restore();
+  }
+
   // charges
   for (let i = 0; i < NC; i++) {
     const c = charges[i], R = cr[i], pos = c.q > 0, col = pos ? RGB.pos : RGB.neg, hex = pos ? C.pos : C.neg;
@@ -754,7 +820,7 @@ function fmt(v, sign) {
   const e = Math.floor(Math.log10(a)), m = a / Math.pow(10, e);
   return s + nf2.format(m) + '×10' + sup(e);
 }
-const els = {}; ['mE','mD','mV','mP','sN','sQ','sL','tV','tK','tU','tS','testNote','stepTitle','stepText','needleG'].forEach(id => els[id] = document.getElementById(id));
+const els = {}; ['mE','mD','mV','mF','uA','uB','uU','uW','uNote','mP','sN','sQ','sL','tV','tK','tU','tS','testNote','stepTitle','stepText','needleG'].forEach(id => els[id] = document.getElementById(id));
 function setT(el, s) { if (el._s !== s) { el._s = s; el.textContent = s; } }
 let needleAng = 0;
 function updatePanel() {
@@ -771,7 +837,19 @@ function updatePanel() {
       els.needleG.style.transform = `rotate(${needleAng}deg)`;
     } else setT(els.mD, '—');
     setT(els.mV, fmt(pot(probe.x, probe.y), true));
+    setT(els.mF, fmt(m * 1e-3, false));            // F = (1 nC)·E, converti en µN
     setT(els.mP, `x ${nf0.format(Math.round(probe.x))} · y ${nf0.format(Math.round(H - probe.y))}`);
+  }
+  if (ptA && probe.in) {
+    const va = pot(ptA.x, ptA.y), vb = pot(probe.x, probe.y), u = vb - va;
+    setT(els.uA, fmt(va, true)); setT(els.uB, fmt(vb, true)); setT(els.uU, fmt(u, true));
+    setT(els.uW, fmt(u * 1e-3, true));             // W = qU = 1e-9·U J = 1e-3·U µJ
+    setT(els.uNote, Math.abs(u) < 2
+      ? 'A et B sont sur la même équipotentielle : aucune tension entre eux, même si le champ y est intense.'
+      : (u > 0 ? 'B est plus haut que A : il faut fournir ce travail pour y monter +1 nC. ' : 'B est plus bas que A : le champ fait lui-même ce travail sur +1 nC. ') + 'Il ne dépend que de A et B, pas du chemin suivi.');
+  } else if (!ptA) {
+    ['uA','uB','uU','uW'].forEach(k => setT(els[k], '—'));
+    setT(els.uNote, 'Bouton « Point A » (touche U), puis clic : la tension se lit entre A et la sonde.');
   }
   setT(els.sN, String(NC));
   let Q = 0; for (const c of charges) Q += c.q;
@@ -806,10 +884,19 @@ const STEPS = {
   vide: ['Scène vide', 'Aucune charge, aucun champ. Clique dans la scène pour en placer une : Maj+clic pour une charge de signe opposé.']
 };
 
+/* Plusieurs lectures de la même situation (texte affiché quand on active une vue) */
+const READ = {
+  lines: ['Lecture 1 : les lignes de champ', 'Elles donnent la direction de E en chaque point, et son intensité par leur densité. Elles répondent à la question : « si je posais ici une charge +, de quel côté serait-elle poussée ? »'],
+  vec: ['Lecture 2 : les vecteurs', 'Le même champ, échantillonné sur une grille : chaque flèche est E à cet endroit (plus longue et plus claire = |E| plus grand). Un vecteur est local ; une ligne de champ enchaîne ces directions de proche en proche.'],
+  map: ['Lecture 3 : la carte du potentiel', 'Plus aucune direction : un seul nombre par point, V, l\'énergie par coulomb. Orange = potentiel haut, bleu = bas. Le champ est la pente de ce relief : il descend toujours de l\'orange vers le bleu, et il est fort là où la couleur change vite, pas là où elle est intense.'],
+  eq: ['Lecture 4 : les équipotentielles', 'Les courbes de niveau de la carte de V, tous les 40 V. Là où elles se serrent, le relief est raide et E est intense. Elles coupent toujours les lignes de champ à angle droit.'],
+  forces: ['Forces de Coulomb entre les charges', 'Chaque flèche jaune est la force totale subie par une charge, due à toutes les autres : F = qE. Même signe : répulsion ; signes opposés : attraction. Dans une paire, les deux forces sont égales et opposées. Écarte deux charges à double distance : la force est divisée par 4.']
+};
+
 /* ---------------- Préréglages ---------------- */
 function mk(x, y, q) { charges.push({ id: nid++, x, y, q }); }
 function applyPreset(name) {
-  charges = []; parts = []; selected = null; T = 0;
+  charges = []; parts = []; selected = null; T = 0; ptA = null; armA = false; pathA = new Path2D(); syncArmA();
   lastPreset = name;
   const mx = W / 2, my = H / 2;
   if (name === 'dipole') { const s = Math.min(240, Math.max(110, W * 0.27)); mk(mx - s / 2, my, 3); mk(mx + s / 2, my, -3); }
@@ -889,6 +976,7 @@ cv.addEventListener('pointerdown', e => {
   setProbe(p);
   const c = hitCharge(p);
   if (armTest) { if (!c) launch(p.x, p.y); return; }
+  if (armA) { if (!c) placeA(p.x, p.y); return; }
   cv.setPointerCapture(e.pointerId);
   if (c) { drag = { c, ox: p.x - c.x, oy: p.y - c.y, sx: p.x, sy: p.y, moved: false }; }
   else downE = { x: p.x, y: p.y, moved: false, shift: e.shiftKey };
@@ -952,11 +1040,22 @@ function syncPlay() {
   $('#icPause').style.display = playing ? '' : 'none'; $('#icPlay').style.display = playing ? 'none' : '';
   $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
 }
+function placeA(x, y) {
+  ptA = { x, y }; armA = false; syncArmA(); buildA();
+  step.key = '';
+  setStep('tension', 'Tension = différence de potentiel', 'A est fixé, la sonde est le point B. La tension U = V(B) − V(A) ne dépend que de ces deux points. Promène B sur la courbe pointillée qui passe par A (son équipotentielle) : U reste nulle. Chaque équipotentielle verte franchie ajoute 40 V.');
+}
+function syncArmA() {
+  const b = $('#bA');
+  b.classList.toggle('armed-btn', armA);
+  b.textContent = armA ? 'Clique dans la scène…' : (ptA ? 'Retirer A' : 'Point A');
+  cv.classList.toggle('armed', armA || armTest);
+}
 function syncArm() {
   const b = $('#bTest');
   b.classList.toggle('armed-btn', armTest);
   b.textContent = armTest ? 'Clique dans la scène…' : 'Lâcher une charge test';
-  cv.classList.toggle('armed', armTest);
+  cv.classList.toggle('armed', armTest || armA);
 }
 document.querySelectorAll('.sgn:not(.tsgn)').forEach(b => b.addEventListener('click', () => {
   active.s = +b.dataset.s;
@@ -977,8 +1076,14 @@ $('#bBack').addEventListener('click', () => stepTime(-1));
 $('#bFwd').addEventListener('click', () => stepTime(1));
 $('#bReset').addEventListener('click', () => applyPreset(lastPreset));
 $('#bDel').addEventListener('click', () => { if (selected) removeCharge(selected); });
+$('#bA').addEventListener('click', () => {
+  if (ptA && !armA) { ptA = null; pathA = new Path2D(); syncArmA(); return; }
+  armA = !armA; if (armA) { armTest = false; syncArm(); }
+  syncArmA();
+  if (armA) setStep('armA', 'Choisis un point A', 'Clique dans la scène pour fixer A. Ensuite, la sonde (la souris, ou ton doigt) est le point B : le panneau affiche la tension entre les deux.');
+});
 $('#bTest').addEventListener('click', () => {
-  armTest = !armTest; syncArm();
+  armTest = !armTest; if (armTest) { armA = false; syncArmA(); } syncArm();
   if (armTest) setStep('arm', 'Prêt à lâcher', 'Clique dans la scène : la charge test (1 nC, 10 mg) part du repos à cet endroit. Choisis son signe avec les boutons + et − à côté.');
 });
 document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('click', () => {
@@ -987,6 +1092,7 @@ document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('clic
 document.querySelectorAll('#views .btn').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.v; views[k] = !views[k];
   b.setAttribute('aria-pressed', String(views[k]));
+  if (views[k] && READ[k]) { step.key = ''; setStep('lecture-' + k, ...READ[k]); }
   dirty = true; fast = false;
 }));
 document.addEventListener('keydown', e => {
@@ -998,8 +1104,9 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepTime(1); }
   else if (e.key === 'r' || e.key === 'R') applyPreset(lastPreset);
   else if (e.key === 't' || e.key === 'T') $('#bTest').click();
+  else if (e.key === 'u' || e.key === 'U') $('#bA').click();
   else if ((e.key === 'Delete' || e.key === 'Backspace') && selected && tag !== 'INPUT') { e.preventDefault(); removeCharge(selected); }
-  else if (e.key === 'Escape') { armTest = false; syncArm(); selected = null; syncSelUI(); }
+  else if (e.key === 'Escape') { armTest = false; syncArm(); armA = false; syncArmA(); selected = null; syncSelUI(); }
 });
 
 /* ---------------- Dimensionnement et boucle ---------------- */
@@ -1033,7 +1140,7 @@ syncPlay();
 requestAnimationFrame(frame);
 
 // interface de test (lecture seule, utile pour vérifier la physique)
-window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, parts: () => parts, size: () => [W, H], preset: applyPreset };
+window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, parts: () => parts, size: () => [W, H], preset: applyPreset, setA: (x, y) => placeA(x, y), probe: (x, y) => setProbe({ x, y }), views: () => views };
 })();
 </script>
 </body>
