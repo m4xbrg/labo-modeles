@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La réplication de l'ADN — Mécaniques invisibles 06</title>
+<meta name="description" content="Suivre une fourche de réplication : l'hélicase ouvre la double hélice, une polymérase copie d'un trait le brin directeur, l'autre copie le brin retardé à reculons, par fragments d'Okazaki.">
+<!--
+  Note de design.
+  1. La caméra est accrochée à la fourche : l'hélicase est fixe à l'écran et c'est l'ADN qui défile, ce qui rend visible l'asymétrie (une polymérase immobile, l'autre qui file à reculons puis revient d'un bond, ressort amorti, comme une couture à points arrière).
+  2. Toute la scène est une fonction déterministe de la position de fourche F et de l'acte (fragment k : amorce en k·L, synthèse à 1,5 fois la vitesse de la fourche, remplacement puis scellement différés) : pause, changement d'acte et retour restent propres, rien n'est accumulé.
+  3. Couleurs à sens fixe (ADN neuf turquoise, amorces d'ARN rose, parental blanc cassé, éclat or réservé à la ligase qui consomme de l'ATP) ; la forme (trait continu contre segments à coupures) et le mouvement distinguent les deux brins neufs, pas la couleur.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#4fe0d2; --arn:#ff7b9c;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+.mono{font-family:var(--mono)}
+#app{display:grid;grid-template-columns:minmax(0,1fr) 384px;height:100vh;height:100dvh}
+#stage{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--trait)}
+#view{position:relative;flex:1;min-height:0;overflow:hidden}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:crosshair}
+#view::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 56% 50%,transparent 52%,rgba(10,13,18,.55) 100%)}
+.titre{position:absolute;left:22px;top:18px;z-index:2;pointer-events:none;max-width:70%}
+.titre::before{content:"";position:absolute;z-index:-1;left:-110px;top:-60px;right:-90px;bottom:-70px;background:radial-gradient(closest-side,var(--fond) 55%,rgba(10,13,18,.8) 75%,rgba(10,13,18,0) 100%);pointer-events:none}
+.serie{margin:0 0 2px;font:400 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{margin:0;font:400 34px/1.05 var(--serif);letter-spacing:.005em}
+h1 em{color:var(--accent);font-style:italic}
+#tip{position:absolute;z-index:3;pointer-events:none;max-width:250px;padding:8px 11px;background:rgba(17,22,30,.94);border:1px solid var(--trait);border-left:2px solid var(--accent);font-size:12.5px;line-height:1.4;opacity:0;transform:translateY(4px);transition:opacity .25s var(--ease),transform .25s var(--ease)}
+#tip.on{opacity:1;transform:none}
+#tip b{display:block;font:500 12px var(--mono);color:var(--texte);margin-bottom:2px}
+#tip span{color:var(--texte-2)}
+#hint{position:absolute;left:22px;bottom:14px;z-index:2;font:400 11px var(--mono);letter-spacing:.06em;color:var(--texte-2);pointer-events:none;transition:opacity .8s var(--ease)}
+.controls{border-top:1px solid var(--trait);padding:10px 20px 14px;display:flex;flex-direction:column;gap:8px;background:var(--fond)}
+.row{display:flex;align-items:center;gap:12px;min-width:0}
+.btn{font:500 11.5px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--texte);background:transparent;border:1px solid var(--trait);height:34px;padding:0 13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:border-color .25s var(--ease),color .25s var(--ease),background .25s var(--ease)}
+.btn:hover{border-color:var(--texte-2)}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.btn.play{min-width:118px;justify-content:center}
+.btn svg{width:11px;height:11px;fill:currentColor}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.tabs .btn{height:30px;padding:0 10px;font-size:10.5px}
+.tabs .btn b{font-weight:500;color:var(--texte-2)}
+.tabs .btn[aria-pressed="true"] b{color:inherit}
+#panel{overflow-y:auto;padding:26px 28px 22px;display:flex;flex-direction:column;gap:16px;min-height:0}
+#panel>*{flex-shrink:0}
+.etape{display:flex;justify-content:space-between;gap:12px;font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2)}
+.etape #etNum{color:var(--accent)}
+h2{margin:-4px 0 0;font:400 38px/1.05 var(--serif)}
+#etTexte{margin:0;color:var(--texte);font-size:14.5px;min-height:6.2em}
+#etMaint{margin:0;padding:9px 0 9px 12px;border-left:2px solid var(--accent);font-size:13.5px;color:var(--texte);min-height:4.4em}
+#etMaint small{display:block;font:400 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-bottom:2px}
+.bloc{border-top:1px solid var(--trait);padding-top:14px}
+.bloc h3{margin:0 0 10px;font:400 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+.compt{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.compt div{font:400 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--texte-2)}
+.compt strong{display:block;font:500 24px/1.15 var(--mono);letter-spacing:-.01em;text-transform:none;color:var(--texte)}
+.compt small{font-size:10.5px;text-transform:none;letter-spacing:0;color:var(--texte-2)}
+.c-n strong,.c-f strong{color:var(--accent)}
+.c-a strong{color:var(--arn)}
+.graphe{position:relative}
+#gr{width:100%;height:100px;display:block;background:var(--fond);border:1px solid var(--trait)}
+.graphe.off #gr{opacity:.28}
+.gnote{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:0 14px;font:400 11px/1.4 var(--mono);color:var(--texte-2);letter-spacing:.04em;pointer-events:none}
+.graphe.off .gnote{display:flex}
+.gleg{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:8px;font:400 11px var(--mono);color:var(--texte-2)}
+.gleg span::before{content:"";display:inline-block;width:20px;height:0;border-top:2.5px solid var(--accent);margin-right:7px;vertical-align:3px}
+.gleg .r::before{border-top:1.5px dashed var(--accent)}
+.legende{display:flex;flex-wrap:wrap;gap:6px 14px;font:400 11px var(--mono);color:var(--texte-2)}
+.legende span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:-0.5px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--trait);font:400 12px var(--mono);letter-spacing:.06em}
+.liens a{text-decoration:none;color:var(--texte-2);transition:color .25s var(--ease)}
+.liens a:hover{color:var(--texte)}
+.liens a.cta{color:var(--accent);font-size:13px}
+.kbd{margin:0;color:var(--texte-2);font:400 10.5px var(--mono);letter-spacing:.04em}
+@media (max-width:1180px){#app{grid-template-columns:minmax(0,1fr) 340px}h1{font-size:30px}}
+@media (max-width:900px){
+  #app{display:block;height:auto}
+  #stage{border-right:0}
+  #view{flex:none;height:min(58svh,520px);min-height:340px}
+  .titre{left:16px;top:12px;max-width:none;right:16px}
+  h1{font-size:25px}
+  .controls{padding:10px 16px 12px}
+  .row.r1{flex-wrap:wrap}
+  .tabs{order:3;flex-basis:100%}
+  .btn.play{min-width:0}
+  #panel{padding:22px 16px 30px;overflow:visible;border-top:1px solid var(--trait)}
+  h2{font-size:32px}
+  #hint{display:none}
+}
+@media (max-width:560px){
+  .tabs .btn .t{display:none}
+  .tabs .btn{flex:1;justify-content:center;padding:0 4px}
+}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="stage">
+    <div id="view">
+      <canvas id="c" role="img" aria-label="Fourche de réplication de l'ADN : l'hélicase ouvre la double hélice, une polymérase copie le brin directeur d'un trait, l'autre copie le brin retardé par fragments d'Okazaki."></canvas>
+      <header class="titre">
+        <p class="serie">Mécaniques invisibles — 06</p>
+        <h1>La réplication de l'<em>ADN</em></h1>
+      </header>
+      <div id="tip" role="status"></div>
+      <div id="hint">Survole ou touche un élément pour l'identifier</div>
+    </div>
+    <div class="controls">
+      <div class="row r1">
+        <button class="btn play" id="bPlay" type="button" aria-label="Lecture ou pause"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="ico" d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span id="bPlayT">Pause</span></button>
+        <div class="tabs" role="group" aria-label="Actes">
+          <button class="btn" type="button" data-a="0" aria-label="Acte 1, Ouvrir"><b>1</b><span class="t">Ouvrir</span></button>
+          <button class="btn" type="button" data-a="1" aria-label="Acte 2, Copier dans un seul sens"><b>2</b><span class="t">Un seul sens</span></button>
+          <button class="btn" type="button" data-a="2" aria-label="Acte 3, Copier à reculons"><b>3</b><span class="t">À reculons</span></button>
+          <button class="btn" type="button" data-a="3" aria-label="Acte 4, Coudre"><b>4</b><span class="t">Coudre</span></button>
+          <button class="btn" type="button" data-a="4" aria-label="Acte 5, La vraie machine"><b>5</b><span class="t">La vraie machine</span></button>
+        </div>
+        <button class="btn" id="bSpeed" type="button" aria-label="Vitesse de lecture">×1</button>
+        <button class="btn" id="bReset" type="button" aria-label="Réinitialiser">Réinit.</button>
+      </div>
+    </div>
+  </main>
+  <aside id="panel" aria-label="Panneau de lecture">
+    <div class="etape"><span id="etNum">Acte 1 / 5</span><span>Fourche</span></div>
+    <h2 id="etTitre">Ouvrir</h2>
+    <p id="etTexte"></p>
+    <p id="etMaint"><small>En ce moment</small><span id="etMaintT"></span></p>
+    <div class="bloc">
+      <h3>Mesures en direct</h3>
+      <div class="compt">
+        <div class="c-n">Nucléotides copiés<strong id="cNt">0</strong><small>ADN neuf, amorces exclues</small></div>
+        <div class="c-f">Fragments<strong id="cFr">0 / 0</strong><small>formés / scellés</small></div>
+        <div class="c-a">Amorces posées<strong id="cAm">0 · 0</strong><small>directeur · retardé</small></div>
+        <div>Coupures<strong id="cCo">0</strong><small>en attente de scellement</small></div>
+      </div>
+    </div>
+    <div class="bloc">
+      <h3>Distance de la polymérase à la fourche</h3>
+      <div class="graphe" id="grWrap">
+        <canvas id="gr" aria-label="Graphe de la distance de chaque polymérase à la fourche : ligne plate pour le brin directeur, dent de scie pour le brin retardé."></canvas>
+        <div class="gnote" id="gNote">Disponible dès l'acte 3 : une seule polymérase ne bouge pas encore.</div>
+      </div>
+      <div class="gleg"><span>directeur</span><span class="r">retardé</span></div>
+    </div>
+    <div class="legende" aria-label="Code couleur">
+      <span style="--c:rgba(232,228,220,.7)">ADN parental</span>
+      <span style="--c:var(--accent)">ADN neuf</span>
+      <span style="--c:var(--arn)">amorce d'ARN</span>
+      <span style="--c:var(--energie)">ATP (ligase)</span>
+    </div>
+    <p class="kbd">Espace : lecture. Flèches : acte précédent ou suivant. 1 à 5 : acte. R : réinitialiser.</p>
+    <nav class="liens">
+      <a class="cta" href="explication.html">Comprendre ce qui se passe &rarr;</a>
+      <a href="../index.html">&larr; Retour à la série</a>
+    </nav>
+  </aside>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const cv = $('c'), ctx = cv.getContext('2d'), gcv = $('gr'), gctx = gcv.getContext('2d');
+const TAU = Math.PI * 2, PI = Math.PI;
+const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (x, a, b) => clamp((x - a) / (b - a));
+const ss = (a, b, x) => { const t = seg(x, a, b); return t * t * (3 - 2 * t); };
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const RGB = { ac: '79,224,210', arn: '255,123,156', en: '255,209,102', tx: '232,228,220', t2: '138,147,160', tr: '31,40,51', fd: '10,13,18', f2: '17,22,30' };
+const col = (k, a) => `rgba(${RGB[k]},${a})`;
+const PAR = 0.72;                       // opacité de l'ADN parental
+const FONT = { mono: '"IBM Plex Mono",ui-monospace,Consolas,monospace' };
+function txt(s, x, y, size, color, align = 'center', weight = 400) {
+  ctx.font = `${weight} ${size}px ${FONT.mono}`;
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y);
+}
+
+/* ---------- modèle (unités : nucléotides) ---------- */
+const L = 180, P = 10, G = 40;          // fragment, amorce, ADN nu entre amorce et fourche
+const DN = 28;                          // distance de la polymérase du directeur à la fourche
+const VF = 34;                          // vitesse de la fourche, nt/s
+const UE = (L - P) / 1.5;               // durée (en nt de fourche) d'une synthèse de fragment
+const UL = UE + 8;                      // début du bond de retour
+const RW = 20, DLY = 50;                // fenêtre de remplacement d'amorce, délai avant scellement
+const D_DE = G + P + 2.5 * UE;          // distance en fin de synthèse
+const D_DR = D_DE + 18 * (1 - Math.exp(-(UL - UE) / 4));
+const F0 = [0, DN + P, 150, 594, 594];  // état de départ propre à chaque acte
+const NAMES = ['Ouvrir', 'Copier dans un seul sens', 'Copier à reculons', 'Coudre', 'La vraie machine'];
+const TEXTS = [
+  'Deux brins, deux directions opposées. L\'hélicase les sépare en avançant ; les protéines SSB empêchent les brins de se refermer.',
+  'Une polymérase n\'ajoute qu\'à une extrémité 3′, et il lui faut une amorce d\'ARN. Sur le brin du haut, elle avance avec la fourche et copie d\'un seul trait. Et le brin du bas ?',
+  'Sur le brin du bas, le sens 5′→3′ s\'éloigne de la fourche. La polymérase copie un fragment en reculant, se détache, puis revient d\'un bond à une nouvelle amorce : ce sont les fragments d\'Okazaki.',
+  'Chaque amorce d\'ARN est remplacée par de l\'ADN, ce qui laisse une coupure. La ligase la scelle (elle consomme de l\'ATP). Le résultat est le même sur les deux brins ; le chemin ne l\'était pas.',
+  'En réalité, les deux polymérases voyagent ensemble avec l\'hélicase. C\'est la matrice du brin retardé qui forme une boucle : elle grandit pendant la copie d\'un fragment, puis elle est relâchée.'
+];
+
+/* ---------- état ---------- */
+let act = 0, tau = 0, playing = true, speed = 1, T = 0, lastT = 0;
+let trans = null;                       // { to, t }
+let curF = 0;
+let cw = 800, ch = 600, dpr = 1;
+let Xf = 500, Yc = 300, U = 1, PXN = 1.1, Hb0 = 100, hb = 100, sepH = 8, Ldiv = 110, VS = 0.62, LR = 15;
+let mouse = { x: -1e9, y: -1e9 }, hover = null, tipKey = '', usedHover = false;
+let HT = [], ANCH = {}, LP = null;
+const TIPS = {
+  hel: ['Hélicase (CMG)', 'Sépare les deux brins à la pointe de la fourche et encercle le brin du haut. Consomme de l\'ATP.'],
+  polD: ['ADN polymérase du brin directeur', 'Allonge le brin neuf en continu, dans le sens de la fourche. Reste collée à l\'hélicase.'],
+  polR: ['ADN polymérase du brin retardé', 'Copie un fragment en s\'éloignant de la fourche, se détache, puis revient à une nouvelle amorce.'],
+  prim: ['Primase', 'Pose une courte amorce d\'ARN (environ 10 nt) : la polymérase ne peut pas démarrer seule.'],
+  amo: ['Amorce d\'ARN', 'Courte séquence d\'ARN qui offre l\'extrémité 3′ libre dont la polymérase a besoin. Elle sera remplacée par de l\'ADN.'],
+  fra: ['Fragment d\'Okazaki', 'Segment d\'ADN neuf (environ 180 nt) du brin retardé, copié de la droite vers la gauche.'],
+  nic: ['Coupure (nick)', 'Liaison phosphodiester manquante entre deux fragments voisins.'],
+  lig: ['ADN ligase', 'Scelle la coupure entre deux fragments. Consomme de l\'ATP.'],
+  ssb: ['Protéine SSB (RPA)', 'Recouvre l\'ADN simple brin pour l\'empêcher de se refermer ou de se replier.'],
+  par: ['Brins parentaux', 'Double hélice d\'origine : les deux brins sont antiparallèles et chacun sert de matrice.'],
+  pTop: ['Brin parental du haut', 'Matrice du brin directeur : 3′ à gauche, 5′ à droite.'],
+  pBot: ['Brin parental du bas', 'Matrice du brin retardé : 5′ à gauche, 3′ à droite.'],
+  dir: ['Brin directeur (ADN neuf)', 'Copié en continu : 5′ à gauche, 3′ à droite, dans le sens de la fourche.'],
+  boucle: ['Boucle du brin retardé', 'La matrice se replie en trombone pour que la polymérase du retardé reste près de l\'hélicase.']
+};
+
+/* ---------- géométrie ---------- */
+function resize() {
+  const r = cv.parentElement.getBoundingClientRect();
+  cw = Math.max(200, Math.round(r.width)); ch = Math.max(200, Math.round(r.height));
+  dpr = Math.min(3, window.devicePixelRatio || 1);
+  cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+  const g = $('gr').getBoundingClientRect(), gw = Math.max(50, Math.round(g.width)), gh = Math.max(50, Math.round(g.height));
+  gcv.width = Math.round(gw * dpr); gcv.height = Math.round(gh * dpr);
+  gcv._w = gw; gcv._h = gh;
+  const mob = cw <= 900;
+  Xf = cw * (mob ? 0.66 : 0.70);
+  Yc = ch * 0.53;
+  U = clamp(Math.min(cw / 960, ch / 600), 0.62, 1.1);
+  PXN = clamp(0.58 * Xf / 380, 0.36, 1.5);
+  Hb0 = clamp(ch * (mob ? 0.25 : 0.19), 56, 170);
+  VS = mob ? 0.78 : 0.62; LR = mob ? 22 : 15 * U;
+  sepH = 11 * U; Ldiv = clamp(110 * U, 60, Xf * 0.5);
+}
+
+/* ---------- sources de position ---------- */
+const yTopAt = x => Yc - sepH - hb * ss(0, 1, (Xf - x) / Ldiv);
+const yBotAt = x => Yc + sepH + hb * ss(0, 1, (Xf - x) / Ldiv);
+function dirAt(s) { return bpos(s).x - bpos(Math.max(0, s - 4)).x > 0.05 ? 1 : -1; }
+function springR(w) {
+  if (w <= 0) return 0; if (w >= 1) return 1;
+  const a = 7.5, b = 7.5;
+  const f = x => 1 - Math.exp(-a * x) * (Math.cos(b * x) + (a / b) * Math.sin(b * x));
+  return f(w) + (1 - f(1)) * w * w * w;
+}
+/* polymérase du retardé : { d (nt derrière la fourche), lift, alpha, mode, u } */
+function leap(u, dStart, liftStart, alpha) {
+  const w = (u - UL) / (L - UL), dT = (u - L) + G + P, dT0 = (UL - L) + G + P;
+  return { d: dT + (dStart - dT0) * (1 - springR(w)), lift: (liftStart + 26 * U * Math.sin(PI * w)) * (1 - ss(0.7, 1, w)), alpha, mode: 'leap', u };
+}
+function retRaw(F) {
+  const kc = Math.floor((F - G) / L); if (kc < 0 || !isFinite(F)) return null;
+  const u = F - G - kc * L;
+  if (kc === 0) return u < UL ? null : leap(u, 160, 30 * U, ss(UL, UL + 8, u));
+  if (u < UE) return { d: G + P + 2.5 * u, lift: 0, alpha: 1, mode: 'synth', u };
+  if (u < UL) { const q = u - UE; return { d: D_DE + 18 * (1 - Math.exp(-q / 4)), lift: 8 * U * ss(0, 6, q), alpha: 1, mode: 'drift', u }; }
+  return leap(u, D_DR, 8 * U, 1);
+}
+
+/* boucle de l'acte V : paramétrage par la longueur d'arc s (px) depuis l'hélicase */
+function setLoop(Spx) {
+  const A = (G + P) * PXN, r0 = LR;
+  const S = Math.max(A, Spx);
+  let r, Lx;
+  if (S >= A + PI * r0) { r = r0; Lx = (S + A - PI * r) / 2; } else { r = (S - A) / PI; Lx = A; }
+  // la polymérase du retardé reste à la hauteur du réplisome, même boucle relâchée
+  const y3 = Yc + sepH + hb, y2 = y3 - 1.6 * LR, y1 = y2 - 2 * r;
+  LP = { S, A, r, Lx, Xt: Xf - Lx, Xpr: Xf - A, y1, y2, y3, y0: Yc + sepH };
+}
+function bpos(s) {
+  if (s < 0) s = 0;
+  if (act !== 4) { const x = Xf - s; return { x, y: yBotAt(x), nx: 0, ny: 1 }; }
+  const q = LP;
+  if (s <= q.Lx) { const x = Xf - s; return { x, y: q.y0 + (q.y1 - q.y0) * ss(0, 1, (Xf - x) / Ldiv), nx: 0, ny: 1 }; }
+  if (s <= q.Lx + PI * q.r && q.r > 0.001) { const th = (s - q.Lx) / q.r; return { x: q.Xt - q.r * Math.sin(th), y: (q.y1 + q.y2) / 2 - q.r * Math.cos(th), nx: Math.sin(th), ny: Math.cos(th) }; }
+  if (s <= q.S) { const x = q.Xt + (s - q.Lx - PI * q.r); return { x, y: q.y2, nx: 0, ny: -1 }; }
+  const t = s - q.S;
+  return { x: q.Xpr - t, y: q.y2 + (q.y3 - q.y2) * ss(0, 1, t / (24 * U)), nx: 0, ny: 1 };
+}
+const topAt = c => { const x = Xf - (curF - c) * PXN; return { x, y: yTopAt(x) }; };
+const botAt = c => bpos((curF - c) * PXN);
+/* ---------- lueurs ---------- */
+const GS = {};
+['ac', 'arn', 'en'].forEach(k => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, `rgba(${RGB[k]},.85)`); gr.addColorStop(.35, `rgba(${RGB[k]},.28)`); gr.addColorStop(1, `rgba(${RGB[k]},0)`);
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128); GS[k] = c;
+});
+function glow(x, y, r, k, a) {
+  if (!(a > 0.01) || !(r > 0)) return;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(a);
+  ctx.drawImage(GS[k], x - r, y - r, 2 * r, 2 * r); ctx.restore();
+}
+const hitC = (x, y, r, key) => HT.push({ x, y, r: Math.max(r, 11), key });
+const hitR = (x0, y0, x1, y1, key) => HT.push({ x0, y0, x1, y1, key });
+function tag(s, x, y, k = 't2', a = 0.85) { txt(s, x, y, Math.max(9, 10.5 * U), col(k, a), 'center', 500); }
+
+/* ---------- briques de dessin ---------- */
+function rungStep() { return 10 * Math.max(1, Math.ceil(6.5 / (PXN * 10))); }
+function pathTop(ca, cb, off) {
+  const xa = Xf - (curF - ca) * PXN, xb = Xf - (curF - cb) * PXN;
+  const n = Math.max(2, Math.ceil(Math.abs(xb - xa) / 5));
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) { const x = xa + (xb - xa) * i / n; i ? ctx.lineTo(x, yTopAt(x) - off) : ctx.moveTo(x, yTopAt(x) - off); }
+}
+function pathBot(ca, cb, off, bb) {
+  const sa = Math.max(0, (curF - cb) * PXN), sb = Math.max(sa, (curF - ca) * PXN);
+  const n = Math.max(2, Math.ceil((sb - sa) / 5));
+  ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const p = bpos(sa + (sb - sa) * i / n), x = p.x + p.nx * off, y = p.y + p.ny * off;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    if (bb) { if (x < bb.x0) bb.x0 = x; if (x > bb.x1) bb.x1 = x; if (y < bb.y0) bb.y0 = y; if (y > bb.y1) bb.y1 = y; }
+  }
+}
+function strokeCol(k, a, lw) { ctx.strokeStyle = col(k, a); ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; }
+function polBlob(x, y, r, kind, a, dir, sx, sy, ph) {
+  if (!(a > 0.01)) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(sx, sy);
+  ctx.beginPath();
+  const br = RM ? 0 : 1;
+  for (let i = 0; i <= 36; i++) {
+    const t = i / 36 * TAU, rr = r * (1 + br * (0.07 * Math.sin(3 * t + T * 0.7 + ph) + 0.05 * Math.sin(5 * t - T * 0.5 + ph * 2)));
+    const px = Math.cos(t) * rr, py = Math.sin(t) * rr; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  const c = kind === 'prim' ? 'arn' : 'ac';
+  const g = ctx.createRadialGradient(-r * .2, -r * .25, r * .1, 0, 0, r * 1.1);
+  g.addColorStop(0, col(c, .28 * a)); g.addColorStop(1, col(c, .1 * a));
+  ctx.fillStyle = g; ctx.fill(); ctx.strokeStyle = col(c, .8 * a); ctx.lineWidth = 1.6; ctx.stroke();
+  if (kind !== 'prim') {
+    ctx.strokeStyle = col('ac', .95 * a); ctx.lineWidth = 2.1; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(-dir * r * .5, 0); ctx.lineTo(dir * r * .3, 0);
+    ctx.moveTo(dir * r * .02, -r * .3); ctx.lineTo(dir * r * .34, 0); ctx.lineTo(dir * r * .02, r * .3); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ---------- ADN parental en hélice (à droite de la fourche) ---------- */
+function drawHelix() {
+  const A = 22 * U, per = 70 * U, step = 3, x1 = cw + 12;
+  const w = X => ss(0, 1, (X - Xf) / (170 * U));
+  const ph = X => TAU * ((X - Xf) + curF * PXN) / per;
+  const ya = X => { const k = w(X); return (1 - k) * (Yc - sepH) + k * (Yc + A * Math.cos(ph(X))); };
+  const yb = X => { const k = w(X); return (1 - k) * (Yc + sepH) + k * (Yc - A * Math.cos(ph(X))); };
+  const n = Math.ceil((x1 - Xf) / step), lw = Math.max(2, 2.6 * U);
+  const pass = front => {
+    for (let s = 1; s <= 2; s++) {
+      for (let i = 0; i < n; i++) {
+        const X0 = Xf + i * step, X1 = X0 + step, Xm = X0 + step / 2, k = w(Xm), sn = Math.sin(ph(Xm));
+        const isFront = s === 1 ? sn > 0 : sn < 0;
+        if (isFront !== front) continue;
+        const f = s === 1 ? ya : yb;
+        ctx.strokeStyle = col('tx', front ? PAR : PAR * (1 - 0.5 * k)); ctx.lineWidth = front ? lw : lw * (1 - 0.3 * k); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(X0, f(X0)); ctx.lineTo(X1, f(X1)); ctx.stroke();
+      }
+    }
+  };
+  pass(false);
+  const RS = rungStep();
+  ctx.lineWidth = 1.2; ctx.lineCap = 'butt';
+  for (let c = Math.ceil(curF / RS) * RS; ; c += RS) {
+    const X = Xf + (c - curF) * PXN; if (X > x1) break; if (X < Xf + 2) continue;
+    ctx.strokeStyle = col('tx', 0.2 + 0.12 * w(X)); ctx.beginPath(); ctx.moveTo(X, ya(X)); ctx.lineTo(X, yb(X)); ctx.stroke();
+  }
+  pass(true);
+  hitR(Xf + 6, Yc - A - 8, cw, Yc + A + 8, 'par');
+}
+
+/* ---------- hélicase : anneau à 6 lobes autour du brin du haut ---------- */
+function helicase(front) {
+  const cx = Xf - 4 * U, cy = Yc - sepH, R = 14.5 * U, rr = 6 * U, a0 = RM ? 0.5 : T * 0.9, rx = 0.42 * R;
+  if (!front) {
+    glow(cx, cy, 44 * U, 'en', 0.09 + (RM ? 0 : 0.04 * Math.sin(T * 2.4)));
+    ctx.strokeStyle = col('tx', 0.35); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, R, 0, PI * 0.5, PI * 1.5); ctx.stroke();
+  }
+  for (let i = 0; i < 6; i++) {
+    const a = a0 + i * TAU / 6, z = Math.cos(a), x = cx + rx * z, y = cy + R * Math.sin(a);
+    if ((z > 0) !== front) continue;
+    const r = rr * (0.92 + 0.14 * z);
+    ctx.fillStyle = '#1a2029'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    ctx.fillStyle = `rgba(240,226,200,${0.34 + 0.2 * z})`; ctx.fill();
+    ctx.strokeStyle = col('tx', 0.95); ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  if (front) {
+    ctx.strokeStyle = col('tx', 0.5); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, R, 0, -PI * 0.5, PI * 0.5); ctx.stroke();
+    ANCH.hel = { x: cx, y: cy - R }; hitC(cx, cy, 20 * U, 'hel');
+  }
+}
+
+/* ---------- SSB ---------- */
+function covered(c) {
+  if (act < 2) return false;
+  const j = Math.ceil(c / L); if (j < 1) return false;
+  const sj = j * L, F = curF; if (F < sj + G - 30) return false;
+  const vl = F - (sj + G);
+  const xp = vl < 0 ? sj - P * seg(vl, -30, -14) : Math.max(sj - P - Math.min(1.5 * vl, L - P), sj - L);
+  return c >= xp;
+}
+function bead(x, y, a, m) {
+  const r = 4.6 * U * (0.9 + 0.2 * ((m * 7) % 3) / 2);
+  ctx.fillStyle = col('t2', 0.62 * a); ctx.strokeStyle = col('tx', 0.35 * a); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(x, y, r * 1.1, r, 0, 0, TAU); ctx.fill(); ctx.stroke();
+}
+function drawSSB() {
+  const F = curF, STEP = 14;
+  const smax = (act === 4 ? LP.S + LP.Xpr : Xf) + 30;
+  const cmin = F - smax / PXN, cmax = F - 12 / PXN;
+  for (let m = Math.ceil(cmin / STEP); m * STEP <= cmax; m++) {
+    const c = m * STEP, s = (F - c) * PXN;
+    if (covered(c)) continue;
+    const p = bpos(s); if (p.x < -10 || p.x > cw + 10) continue;
+    const a = ss(10, 44, s);
+    const o = (m % 2 ? 1 : -1) * 1.2 * U;
+    bead(p.x, p.y + p.ny * o, a, m);
+    if (s > 90 && s < 160 && !ANCH.ssb) ANCH.ssb = { x: p.x, y: p.y };
+    hitC(p.x, p.y, 7 * U, 'ssb');
+  }
+  {
+    for (let m = Math.ceil((F - Xf / PXN) / STEP); m * STEP <= cmax; m++) {
+      const c = m * STEP, s = (F - c) * PXN, x = Xf - s; if (x < -10 || (act > 0 && c >= 0)) continue;
+      bead(x, yTopAt(x), ss(10, 44, s), m + 3);
+      hitC(x, yTopAt(x), 7 * U, 'ssb');
+    }
+  }
+}
+
+/* ---------- brin directeur ---------- */
+function drawDir() {
+  if (act < 1) return;
+  const F = curF, cpol = F - DN, off = 13 * U, lw = Math.max(2, 2.6 * U), RS = rungStep();
+  const a = act === 1 ? ss(0, 0.45, tau) : 1;
+  const cEnd = cpol, cL = Math.max(0, F - (Xf + 10) / PXN);
+  const tealFrom = act >= 3 ? 0 : P;
+  if (act < 3 && cL < P) { strokeCol('arn', a, lw); pathTop(Math.max(0, cL), Math.min(P, cEnd), off); ctx.stroke(); }
+  if (cEnd > Math.max(tealFrom, cL)) { strokeCol('ac', a, lw); pathTop(Math.max(tealFrom, cL), cEnd, off); ctx.stroke(); }
+  ctx.lineWidth = 1.2; ctx.lineCap = 'butt';
+  for (let c = Math.ceil(Math.max(0, cL) / RS) * RS; c <= cEnd; c += RS) {
+    const x = Xf - (F - c) * PXN; if (x < -4) continue;
+    ctx.strokeStyle = col(c < P && act < 3 ? 'arn' : 'ac', 0.2 * a);
+    ctx.beginPath(); ctx.moveTo(x, yTopAt(x)); ctx.lineTo(x, yTopAt(x) - off); ctx.stroke();
+  }
+  const x0 = Xf - F * PXN;
+  if (x0 > 24) tag('5′', x0 - 9, yTopAt(x0) - off - 12 * U, 'ac');
+  const px = Xf - DN * PXN;
+  ANCH.dirTip = { x: px, y: yTopAt(px) - off };
+  if (act === 1 && x0 > -40) ANCH.primer = { x: x0 + P * PXN / 2, y: yTopAt(x0 + P * PXN / 2) - off };
+  ANCH.dirStrand = { x: Math.max(30, x0 + 20), y: yTopAt(Math.max(30, x0 + 20)) - off };
+}
+
+/* ---------- brin retardé : fragments ---------- */
+function drawRet() {
+  if (act < 2) return;
+  const F = curF, off = (act === 4 ? 9 : 13) * U, lw = Math.max(2, 2.6 * U), gapN = 2 * U / PXN, RS = rungStep();
+  const jmin = Math.max(1, Math.floor((F - (Xf / PXN + 420)) / L)), jmax = Math.floor((F - G + 30) / L);
+  for (let j = jmin; j <= jmax; j++) {
+    const sj = j * L, vl = F - (sj + G), q = seg(vl, -30, -14); if (q <= 0) continue;
+    const doneJ = sj + G + UE, complete = F >= doneJ, prog = vl > 0 ? Math.min(1.5 * vl, L - P) : 0;
+    const xpol = sj - P - prog;
+    const rep = act >= 3 ? ss(doneJ + L, doneJ + L + RW, F) : 0;
+    const slR = doneJ + L + RW + DLY, sealR = act >= 3 ? ss(slR - 2, slR + 4, F) : 0;
+    const repP = act >= 3 ? ss(doneJ, doneJ + RW, F) : 0;
+    const slL = doneJ + RW + DLY, sealL = act >= 3 ? ss(slL - 2, slL + 4, F) : 0;
+    const gl = (j >= 2 && complete) ? gapN * (1 - sealL) : 0;
+    const gr = F >= doneJ + L ? gapN * (1 - sealR) : 0;
+    const lo = complete ? (j >= 2 ? sj - L - P * repP : 0) : xpol;
+    const hi = sj - P * rep;
+    const pinkA = sj - P * q, pinkB = hi - gr, hasPink = pinkB > pinkA + 0.01;
+    const tealEnd = hasPink ? pinkA : hi - gr, tealStart = lo + gl;
+    // rungs
+    ctx.lineWidth = 1.2; ctx.lineCap = 'butt';
+    for (let c = Math.ceil(Math.max(tealStart, 0) / RS) * RS; c <= (hasPink ? pinkB : tealEnd); c += RS) {
+      if (c > F) break;
+      const p = botAt(c); if (p.x < -4) continue;
+      ctx.strokeStyle = col(c >= pinkA && hasPink ? 'arn' : 'ac', 0.2);
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + p.nx * off, p.y + p.ny * off); ctx.stroke();
+    }
+    // ADN neuf
+    if (tealEnd > tealStart + 0.01 && vl >= -0.001) {
+      const bb = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 };
+      strokeCol('ac', 1, lw); pathBot(tealStart, tealEnd, off, bb); ctx.stroke();
+      if (bb.x1 > -20 && bb.x0 < cw + 20) hitR(bb.x0 - 4, bb.y0 - 6, bb.x1 + 4, bb.y1 + 6, 'fra');
+      if (complete) { const m = botAt((tealStart + tealEnd) / 2); if (m.x > 60 && m.x < Xf - 40) ANCH.frag = { x: m.x, y: m.y + m.ny * off, id: j }; }
+    }
+    // amorce d'ARN
+    if (hasPink || q < 1) {
+      const bb = { x0: 1e9, y0: 1e9, x1: -1e9, y1: -1e9 };
+      strokeCol('arn', 1, lw); pathBot(pinkA, Math.max(pinkA + 0.01, hasPink ? pinkB : sj), off, bb); ctx.stroke();
+      if (bb.x1 > -20 && bb.x0 < cw + 20) hitR(bb.x0 - 4, bb.y0 - 6, bb.x1 + 4, bb.y1 + 6, 'amo');
+      const pm = botAt(sj - P / 2);
+      ANCH.primer = { x: pm.x, y: pm.y + pm.ny * off, id: j };
+      if (rep > 0.05 && rep < 0.95) { const pr = botAt(sj - P * rep); ANCH.rep = { x: pr.x, y: pr.y + pr.ny * off, id: j }; }
+    }
+    // 5′ et 3′ du fragment en cours
+    if (vl >= 0 && !complete) {
+      const p5 = botAt(sj), p3 = botAt(xpol);
+      tag('5′', p5.x + 8 * U, p5.y + p5.ny * (off + (act === 4 ? 20 : 12) * U), 'ac', 0.9);
+      tag('3′', p3.x + dirAt((F - xpol) * PXN) * 26 * U, p3.y + p3.ny * (off + 12 * U), 'ac', 0.9);
+    }
+    // coupure et ligase
+    if (F >= doneJ + L) {
+      const cn = sj - P * rep, pn = botAt(cn), gpx = (1 - sealR) * gapN * PXN;
+      if (gpx > 0.4) { hitC(pn.x, pn.y + pn.ny * off, 9 * U, 'nic'); ANCH.nick = { x: pn.x, y: pn.y + pn.ny * off, id: j }; }
+      if (act >= 3) {
+        const dl = F - slR, vis = ss(-30, -22, dl) * (1 - ss(4, 14, dl)), fl = dl >= 0 ? 1 - seg(dl, 0, 12) : 0;
+        if (vis > 0.02 || fl > 0.02) {
+          const lx = pn.x + pn.nx * off * 0.5, ly = pn.y + pn.ny * off * 0.5;
+          glow(lx, ly, 38 * U, 'en', 0.55 * fl + 0.12 * vis);
+          strokeCol('en', 0.9 * vis, 2.4 * U); ctx.beginPath(); ctx.ellipse(lx, ly, 6.5 * U, 14 * U, 0, 0, TAU); ctx.stroke();
+          if (fl > 0.02) { strokeCol('en', 0.7 * fl, 1.4); ctx.beginPath(); ctx.ellipse(lx, ly, (6.5 + 26 * (1 - fl)) * U, (14 + 26 * (1 - fl)) * U, 0, 0, TAU); ctx.stroke(); }
+          if (vis > 0.3) { hitC(lx, ly, 15 * U, 'lig'); ANCH.lig = { x: lx, y: ly, id: j }; }
+        }
+      }
+    }
+  }
+}
+
+/* ---------- polymérases et primase ---------- */
+function drawEnzymes() {
+  const F = curF;
+  // directeur
+  if (act >= 1) {
+    const px = Xf - DN * PXN, py = yTopAt(px) - 7 * U, a = act === 1 ? ss(0, 0.35, tau) : 1;
+    polBlob(px, py, 21 * U, 'dir', a, 1, 1, 1, 0);
+    if (a > 0.5) { hitC(px, py, 21 * U, 'polD'); ANCH.polD = { x: px, y: py - 19 * U }; }
+    tag('3′', px + 4 * U, py - 29 * U, 'ac', 0.9 * a);
+    if (act === 1 && tau < 1.6) {
+      const pa = ss(0, 0.3, tau) * (1 - ss(0.9, 1.6, tau)), pxx = Xf - (F - P / 2) * PXN;
+      const pyy = yTopAt(pxx) + 6 * U;
+      polBlob(pxx, pyy, 11 * U, 'prim', pa, 1, 1, 1, 2);
+      if (pa > 0.3) { hitC(pxx, pyy, 12 * U, 'prim'); ANCH.prim = { x: pxx, y: pyy + 10 * U }; }
+    }
+  }
+  if (act < 2) return;
+  // primase du retardé
+  const kk = Math.floor((F - G + 34) / L);
+  if (kk >= 1) {
+    const vl = F - (kk * L + G), a = ss(-34, -28, vl) * (1 - ss(-18, -12, vl));
+    if (a > 0.01) {
+      const p = botAt(kk * L - P / 2), x = p.x - p.nx * 12 * U, y = p.y - p.ny * 12 * U;
+      polBlob(x, y, 11 * U, 'prim', a, 1, 1, 1, 1);
+      if (a > 0.3) { hitC(x, y, 12 * U, 'prim'); ANCH.prim = { x, y: y - 10 * U }; }
+    }
+  }
+  // retardé
+  const rs = retRaw(F); if (!rs) return;
+  const r = 21 * U;
+  const place = st => {
+    if (act === 4) return { x: LP.Xpr, y: LP.y2 - 4 * U + st.lift };
+    const p = bpos(st.d * PXN); return { x: p.x, y: p.y + 7 * U + st.lift };
+  };
+  const dirR = act === 4 ? 1 : dirAt(rs.d * PXN);   // acte V : le fragment arrive par le bas de la boucle, 5′→3′ vers la droite
+  const r1 = retRaw(F + 0.5), r0 = retRaw(F - 0.5), vel = (r1 && r0) ? r1.d - r0.d : 0, sp = act === 4 ? 0 : Math.abs(vel);
+  const sx = 1 + clamp((sp - 3) / 45, 0, 0.45), sy = 1 / Math.sqrt(sx);
+  if (act !== 4 && sp > 6) {
+    [3, 6, 9].forEach((dF, i) => { const g = retRaw(F - dF); if (!g) return; const q = place(g); polBlob(q.x, q.y, r, 'ret', 0.2 * (3 - i) / 3 * rs.alpha, dirR, sx, sy, 3); });
+  }
+  const pos = place(rs);
+  if (rs.mode === 'synth' && rs.u < 14) {
+    const k = rs.u / 14; ctx.strokeStyle = col('ac', 0.5 * (1 - k)); ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, r * (1 + 1.1 * k), 0, TAU); ctx.stroke();
+  }
+  polBlob(pos.x, pos.y, r, 'ret', rs.alpha, dirR, sx, sy, 3);
+  if (rs.alpha > 0.5) { hitC(pos.x, pos.y, r, 'polR'); ANCH.polR = { x: pos.x, y: pos.y + 20 * U }; }
+}
+
+/* ---------- acte V : légende de la boucle ---------- */
+function drawLoopMarks() {
+  if (act !== 4) return;
+  const q = LP;
+  if (q.r > 4 * U) {
+    const x = q.Xt - q.r, y = (q.y1 + q.y2) / 2;
+    ANCH.loop = { x, y };
+  }
+  const dx = Xf - DN * PXN;
+  ANCH.both = { x: q.Xpr, y: q.y2 - 20 * U };
+}
+
+/* ---------- brins parentaux, tags ---------- */
+function drawTemplates() {
+  const lw = Math.max(2, 2.6 * U);
+  strokeCol('tx', PAR, lw);
+  ctx.beginPath(); for (let x = Xf; x >= -6; x -= 5) x === Xf ? ctx.moveTo(x, yTopAt(x)) : ctx.lineTo(x, yTopAt(x)); ctx.lineTo(-6, yTopAt(-6)); ctx.stroke();
+  const smax = (act === 4 ? LP.S + LP.Xpr : Xf) + 30;
+  ctx.beginPath(); for (let s = 0; s <= smax; s += 5) { const p = bpos(s); s ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); } ctx.stroke();
+}
+function drawTags() {
+  const A = 22 * U;
+  tag('5′', cw - 14, Yc - A - 12 * U, 'tx', 0.8); tag('3′', cw - 14, Yc + A + 12 * U, 'tx', 0.8);
+  tag('3′', 14, yTopAt(0) + 14 * U, 'tx', 0.8);
+  const yb = act === 4 ? LP.y3 : yBotAt(0);
+  tag('5′', 14, yb - 14 * U, 'tx', 0.8);
+}
+function drawNames() {
+  const a = act === 0 ? 0 : ss(0, 0.6, tau);
+  if (a <= 0.01) return;
+  const fs = Math.max(9.5, 10.5 * U);
+  ctx.save(); try { ctx.letterSpacing = '0.8px'; } catch (e) { }
+  txt('brin directeur', 12, yTopAt(0) - 13 * U - 40 * U, fs, col('t2', 0.9 * a), 'left');
+  const yb = (act === 4 ? LP.y3 : yBotAt(0)) + 13 * U + 32 * U;
+  txt('brin retardé', 12, yb, fs, col('t2', 0.9 * a), 'left');
+  if (act === 1) txt(Math.round(curF) + ' nt non copiés', 12, yb + 15 * U, fs, col('t2', 0.75 * a), 'left');
+  ctx.restore();
+}
+
+/* ---------- étiquettes ---------- */
+const LABELS = [
+  { a: 0, t0: 0.6, t1: 5, s: 'hélicase', k: 'hel', ox: 34, oy: -40 },
+  { a: 0, t0: 3, t1: 9, s: 'protéines SSB', k: 'ssb', ox: -16, oy: 46 },
+  { a: 1, t0: 0.3, t1: 3.8, s: 'amorce d\'ARN', k: 'primer', ox: -30, oy: -42 },
+  { a: 1, t0: 1.4, t1: 6.5, s: 'polymérase du directeur', k: 'polD', ox: 24, oy: -34 },
+  { a: 2, t0: 0.9, t1: 4.6, s: 'primase', k: 'prim', ox: -10, oy: -40 },
+  { a: 2, t0: 2.4, t1: 7.5, s: 'polymérase du retardé', k: 'polR', ox: -20, oy: 36 },
+  { a: 2, t0: 5.4, t1: 10.5, s: 'fragment d\'Okazaki', k: 'frag', ox: 0, oy: 44 },
+  { a: 3, t0: 0.3, t1: 14, s: 'amorce remplacée', k: 'rep', ox: -24, oy: -44 },
+  { a: 3, t0: 0.3, t1: 14, s: 'coupure', k: 'nick', ox: 4, oy: 46 },
+  { a: 3, t0: 0.3, t1: 14, s: 'ligase', k: 'lig', ox: 30, oy: -40 },
+  { a: 4, t0: 0.6, t1: 7, s: 'deux polymérases ensemble', k: 'both', ox: -40, oy: -24 },
+  { a: 4, t0: 3, t1: 10, s: 'boucle du brin retardé', k: 'loop', ox: -30, oy: -2 }
+];
+LABELS.forEach((l, i) => { l.al = 0; l.pos = null; l.id = null; l.ci = 0; l.pr = i; });
+function updateLabels(dt) {
+  LABELS.forEach(l => {
+    let target = 0, fast = false;
+    let an = (l.a === act && !trans) ? ANCH[l.k] : null;
+    if (an && (an.x < 10 || an.x > cw - 10)) an = null;
+    if (an && tau >= l.t0 && tau < l.t1) {
+      const id = an.id === undefined ? null : an.id;
+      if (l.id !== id && l.al > 0.05) { target = 0; fast = true; }
+      else { l.id = id; l.pos = an; target = 1; }
+    } else if (!an) fast = true;
+    l.al += (target - l.al) * Math.min(1, dt * (fast ? 9 : target > l.al ? 4 : 2.2));
+    if (l.al < 0.004) { l.al = 0; if (!an) l.pos = null; }
+  });
+}
+function buildObstacles() {
+  const ob = [];
+  const pt = (x, y, r) => ob.push({ x, y, r });
+  const off = (act === 4 ? 9 : 13) * U, rr = 7 * U;
+  for (let x = 0; x <= Xf; x += 10) { pt(x, yTopAt(x), rr); if (act >= 1) pt(x, yTopAt(x) - 13 * U, rr); }
+  const smax = (act === 4 ? LP.S + LP.Xpr : Xf) + 30;
+  for (let s = 0; s <= smax; s += 10) { const p = bpos(s); pt(p.x, p.y, rr); if (act >= 2) pt(p.x + p.nx * off, p.y + p.ny * off, rr); }
+  for (let x = Xf; x <= cw; x += 12) { pt(x, Yc, 24 * U); }
+  HT.forEach(h => { if (h.r !== undefined && h.key !== 'ssb' && h.r > 12) pt(h.x, h.y, h.r); });
+  return ob;
+}
+function rectBad(r, ob, rects) {
+  for (const o of ob) {
+    const cx = clamp(o.x, r.x0, r.x1), cy = clamp(o.y, r.y0, r.y1);
+    if ((cx - o.x) * (cx - o.x) + (cy - o.y) * (cy - o.y) < o.r * o.r) return true;
+  }
+  for (const q of rects) if (r.x0 < q.x1 && r.x1 > q.x0 && r.y0 < q.y1 && r.y1 > q.y0) return true;
+  return false;
+}
+function drawLabels() {
+  const maxL = cw < 480 ? 2 : 3;
+  const vis = LABELS.filter(l => l.al > 0.02 && l.pos).sort((a, b) => (b.al > 0.5) - (a.al > 0.5) || a.pr - b.pr);
+  const fs = Math.max(9.5, 10.5 * U);
+  ctx.save(); try { ctx.letterSpacing = '0.6px'; } catch (e) { }
+  ctx.font = `400 ${fs}px ${FONT.mono}`;
+  const ob = buildObstacles();
+  const rects = [{ x0: 0, y0: 0, x1: Math.min(cw, 300), y1: 72 }];
+  const ya = yTopAt(0) - 13 * U - 40 * U, yb = (act === 4 ? LP.y3 : yBotAt(0)) + 13 * U + 32 * U;
+  rects.push({ x0: 6, y0: ya - 9, x1: 130, y1: ya + 9 }, { x0: 6, y0: yb - 9, x1: 150, y1: yb + 26 });
+  let shown = 0;
+  vis.forEach(l => {
+    if (shown >= maxL) return;
+    const ax = l.pos.x, ay = l.pos.y, tw = ctx.measureText(l.s).width, h = fs + 6;
+    const dxs = [l.ox, -l.ox, l.ox * 0.4, -l.ox * 0.4], dys = [l.oy, -l.oy, l.oy * 1.7, -l.oy * 1.7, l.oy * 2.5, -l.oy * 2.5];
+    const cands = []; dys.forEach(dy => dxs.forEach(dx => cands.push([dx, dy])));
+    let pick = null; const order = [l.ci].concat(cands.map((_, i) => i));
+    for (const ci of order) {
+      const c = cands[ci]; if (!c) continue;
+      let tx = ax + c[0] * U, ty = clamp(ay + c[1] * U, 14, ch - 14);
+      const left = c[0] >= 0;
+      if (left && tx + tw > cw - 8) tx = cw - 8 - tw;
+      if (!left && tx - tw < 8) tx = 8 + tw;
+      const r = { x0: (left ? tx : tx - tw) - 3, x1: (left ? tx + tw : tx) + 3, y0: ty - h / 2, y1: ty + h / 2 };
+      if (!rectBad(r, ob, rects)) { pick = { tx, ty, left, r, ci }; break; }
+    }
+    if (!pick) return;
+    l.ci = pick.ci; shown++; rects.push(pick.r);
+    const ex = pick.left ? pick.tx - 4 : pick.tx + 4;
+    ctx.strokeStyle = col('t2', 0.7 * l.al); ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ex, pick.ty); ctx.stroke();
+    ctx.fillStyle = col('tx', 0.8 * l.al); ctx.beginPath(); ctx.arc(ax, ay, 1.8, 0, TAU); ctx.fill();
+    txt(l.s, pick.tx, pick.ty, fs, col('tx', 0.9 * l.al), pick.left ? 'left' : 'right');
+  });
+  ctx.restore();
+}
+
+/* ---------- scène ---------- */
+function drawScene() {
+  hb = (act === 4 ? VS : 1) * Hb0;
+  const F = curF, rs = act >= 2 ? retRaw(F) : null;
+  setLoop(act === 4 && rs ? rs.d * PXN : (G + P) * PXN);
+  if (act === 4) LP.Xf1 = LP.Xt + LP.Lx;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#0a0d12'; ctx.fillRect(0, 0, cw, ch);
+  HT.length = 0; ANCH = {};
+  if (act === 4 && LP.r > 0.5) hitR(LP.Xt - LP.r - 6, LP.y1 - 6, LP.Xt + LP.Lx, LP.y2 + 6, 'boucle');
+  helicase(false);
+  drawHelix();
+  drawTemplates();
+  drawDir();
+  drawRet();
+  drawSSB();
+  helicase(true);
+  drawEnzymes();
+  drawLoopMarks();
+  drawTags(); drawNames();
+  drawLabels();
+  // survol
+  hover = null;
+  if (mouse.x > -1e8) {
+    for (let i = HT.length - 1; i >= 0 && !hover; i--) {
+      const h = HT[i];
+      if (h.r !== undefined) { if (Math.hypot(h.x - mouse.x, h.y - mouse.y) < h.r) hover = h; }
+      else if (mouse.x >= h.x0 && mouse.x <= h.x1 && mouse.y >= h.y0 && mouse.y <= h.y1) hover = h;
+    }
+    if (!hover) hover = strandHit();
+  }
+  if (hover && hover.r !== undefined) {
+    ctx.strokeStyle = col('tx', 0.85); ctx.lineWidth = 1.2; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.arc(hover.x, hover.y, Math.min(hover.r, 40) + 3, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+  }
+  // fondu enchaîné entre actes
+  if (trans) {
+    const cov = trans.t < 0.5 ? ss(0, 0.5, trans.t) : 1 - ss(0.5, 1, trans.t);
+    ctx.fillStyle = col('fd', cov); ctx.fillRect(0, 0, cw, ch);
+  }
+}
+function strandHit() {
+  const mx = mouse.x, my = mouse.y, tol = 8 * U + 2;
+  if (act >= 1) {
+    const x0 = Xf - curF * PXN, xp = Xf - DN * PXN;
+    if (mx >= Math.max(0, x0) && mx <= xp && Math.abs(my - (yTopAt(mx) - 13 * U)) < tol) return { key: 'dir' };
+  }
+  if (mx <= Xf && Math.abs(my - yTopAt(mx)) < tol) return { key: 'pTop' };
+  if (act !== 4 && mx <= Xf && Math.abs(my - yBotAt(mx)) < tol) return { key: 'pBot' };
+  if (act === 4) {
+    for (let s = 0; s < LP.S + LP.Xpr; s += 6) { const p = bpos(s); if (Math.hypot(p.x - mx, p.y - my) < tol) return { key: 'pBot' }; }
+  }
+  return null;
+}
+/* ---------- mesures (fonctions de F et de l'acte) ---------- */
+function metrics(F) {
+  const m = { nt: 0, formed: 0, sealed: 0, laid: 0, nicks: 0, dir: act >= 1 ? 1 : 0 };
+  if (act >= 1) m.nt += Math.max(0, F - DN - P);
+  if (act >= 2) {
+    const kc = Math.floor((F - G) / L);
+    m.laid = Math.max(0, kc);
+    m.formed = Math.max(0, Math.floor((F - G - UE) / L));
+    let r = m.formed * (L - P);
+    if (kc >= 1 && kc > m.formed) r += Math.min(1.5 * (F - G - kc * L), L - P);
+    m.nt += r;
+    if (act >= 3) m.sealed = Math.max(0, Math.floor((F - G - UE - RW - DLY - 3) / L) - 1);
+    m.nicks = Math.max(0, Math.max(0, m.formed - 1) - m.sealed);
+  }
+  return m;
+}
+function boundaryEvents(F) {
+  const ev = { rep: false, lig: false, nick: false };
+  const jm = Math.floor((F - G) / L);
+  for (let j = Math.max(1, jm - 3); j <= jm; j++) {
+    const dn = (j + 1) * L + G + UE, sl = dn + RW + DLY;
+    if (F >= dn && F < dn + RW) ev.rep = true;
+    if (F >= sl - 30 && F < sl + 14) ev.lig = true;
+    if (F >= dn && F < sl + 4) ev.nick = true;
+  }
+  return ev;
+}
+function maintenant() {
+  if (act === 0) return "La fourche avance : l'hélicase ouvre la double hélice.";
+  if (act === 1) return tau < 1.5 ? "La primase vient de poser l'amorce d'ARN." : "La polymérase allonge le brin du haut sans lâcher.";
+  const F = curF, rs = retRaw(F), kk = Math.floor((F - G + 34) / L), vl = F - (kk * L + G);
+  const prim = kk >= 1 && vl >= -34 && vl < -8;
+  if (act === 2) {
+    if (prim) return "La primase pose une amorce d'ARN sur le brin du bas.";
+    if (!rs || rs.mode === 'synth') return rs && rs.u >= 10 ? 'La polymérase copie à reculons, loin de la fourche.' : "La polymérase se fixe sur l'amorce.";
+    return "Elle se détache et revient d'un bond vers la fourche.";
+  }
+  if (act === 3) {
+    const ev = boundaryEvents(F);
+    if (ev.lig) return 'La ligase scelle une coupure.';
+    if (ev.rep) return "Une amorce est remplacée par de l'ADN.";
+    if (ev.nick) return 'Une coupure attend la ligase.';
+    if (prim) return 'La primase pose une nouvelle amorce.';
+    if (rs && rs.mode !== 'synth') return "La polymérase revient d'un bond vers la fourche.";
+    return 'La polymérase copie le fragment suivant.';
+  }
+  if (rs && rs.mode === 'synth') return 'La boucle grandit pendant la copie du fragment.';
+  return 'Le fragment est terminé : la boucle est relâchée.';
+}
+
+/* ---------- interface ---------- */
+const tip = $('tip'), cache = {};
+const el = {}; ['etNum', 'etTitre', 'etTexte', 'etMaintT', 'cNt', 'cFr', 'cAm', 'cCo', 'bPlayT', 'ico', 'grWrap'].forEach(k => el[k] = $(k));
+function setT(k, v) { if (cache[k] !== v) { cache[k] = v; el[k].textContent = v; } }
+function updatePanel() {
+  setT('etNum', 'Acte ' + (act + 1) + ' / 5'); setT('etTitre', NAMES[act]); setT('etTexte', TEXTS[act]);
+  setT('etMaintT', maintenant());
+  const m = metrics(curF);
+  setT('cNt', String(Math.round(m.nt)));
+  setT('cFr', act >= 2 ? m.formed + ' / ' + m.sealed : '0 / 0');
+  setT('cAm', m.dir + ' · ' + m.laid);
+  setT('cCo', String(m.nicks));
+  setT('bPlayT', playing ? 'Pause' : 'Lecture');
+  const ic = playing ? 'M2 1h3v10H2zM7 1h3v10H7z' : 'M2 1l9 5-9 5z'; if (cache.ic !== ic) { cache.ic = ic; el.ico.setAttribute('d', ic); }
+  const off = act < 2; if (cache.off !== off) { cache.off = off; el.grWrap.classList.toggle('off', off); }
+  document.querySelectorAll('.tabs [data-a]').forEach(b => {
+    const on = +b.dataset.a === (trans ? trans.to : act); if (b.getAttribute('aria-pressed') !== String(on)) b.setAttribute('aria-pressed', on);
+  });
+}
+function updateTip() {
+  const key = hover ? hover.key : '';
+  if (key !== tipKey) {
+    tipKey = key;
+    if (hover && TIPS[key]) { tip.innerHTML = '<b></b><span></span>'; tip.firstChild.textContent = TIPS[key][0]; tip.lastChild.textContent = TIPS[key][1]; tip.classList.add('on'); if (!usedHover) { usedHover = true; $('hint').style.opacity = 0; } }
+    else tip.classList.remove('on');
+  }
+  if (hover && TIPS[key]) {
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let tx = mouse.x + 16, ty = mouse.y + 16;
+    if (tx + tw > cw - 8) tx = mouse.x - tw - 12; if (ty + th > ch - 8) ty = mouse.y - th - 12;
+    tip.style.left = Math.max(6, tx) + 'px'; tip.style.top = Math.max(6, ty) + 'px';
+  }
+}
+
+/* ---------- graphe : distance à la fourche, fenêtre glissante de 15 s ---------- */
+function drawGraph() {
+  const g = gctx, w = gcv._w || 300, h = gcv._h || 100;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = '#0a0d12'; g.fillRect(0, 0, w, h);
+  const l = 30, r = 8, t = 8, b = 16, pw = w - l - r, ph = h - t - b, YM = 360;
+  const Y = d => t + ph - clamp(d / YM, 0, 1.05) * ph;
+  g.font = `400 9px ${FONT.mono}`; g.textBaseline = 'middle';
+  g.strokeStyle = col('tr', 1); g.lineWidth = 1; g.fillStyle = col('t2', 0.9); g.textAlign = 'right';
+  [0, 100, 200, 300].forEach(v => { g.beginPath(); g.moveTo(l, Y(v) + 0.5); g.lineTo(w - r, Y(v) + 0.5); g.stroke(); g.fillText(String(v), l - 5, Y(v)); });
+  g.textAlign = 'left'; g.fillText('−15 s', l, h - 6); g.textAlign = 'right'; g.fillText('maintenant', w - r, h - 6);
+  g.save(); g.fillStyle = col('t2', 0.9); g.textAlign = 'left'; g.fillText('nt', 4, t + 2); g.restore();
+  if (act < 2) return;
+  const N = Math.max(20, Math.floor(pw / 2));
+  const line = (fn, lw, dash, alpha) => {
+    g.strokeStyle = col('ac', alpha); g.lineWidth = lw; g.setLineDash(dash); g.lineJoin = 'round'; g.lineCap = 'round';
+    g.beginPath(); let st = false, lx = 0, ly = 0;
+    for (let i = 0; i <= N; i++) {
+      const tt = tau - 15 * (1 - i / N); if (tt < 0) continue;
+      const d = fn(F0[act] + VF * tt); if (d === null) { st = false; continue; }
+      const x = l + pw * i / N, y = Y(d); st ? g.lineTo(x, y) : g.moveTo(x, y); st = true; lx = x; ly = y;
+    }
+    g.stroke(); g.setLineDash([]);
+    if (st) { g.fillStyle = col('ac', alpha); g.beginPath(); g.arc(lx, ly, lw + 0.8, 0, TAU); g.fill(); }
+  };
+  line(F => { const s = retRaw(F); return s ? s.d : null; }, 1.5, [5, 3], 0.95);
+  line(() => DN, 2.6, [], 1);
+}
+
+/* ---------- commandes ---------- */
+function resetLabels() { LABELS.forEach(l => { l.al = 0; l.pos = null; l.id = null; }); }
+function goAct(n) {
+  n = clamp(n, 0, 4);
+  if (trans) {
+    if (trans.t < 0.5) { trans.to = n; return; }
+    if (n === act) return;
+    trans = { to: n, t: 0.5 * (1 - ss(0.5, 1, trans.t)) };
+    return;
+  }
+  trans = { to: n, t: 0 };
+}
+function togglePlay() { playing = !playing; }
+function reset() { playing = true; speed = 1; $('bSpeed').textContent = '×1'; goAct(0); }
+$('bPlay').addEventListener('click', togglePlay);
+$('bReset').addEventListener('click', reset);
+$('bSpeed').addEventListener('click', () => { speed = speed === 1 ? 2 : speed === 2 ? 0.5 : 1; $('bSpeed').textContent = '×' + (speed === 0.5 ? '0,5' : speed); });
+document.querySelectorAll('.tabs [data-a]').forEach(b => b.addEventListener('click', () => goAct(+b.dataset.a)));
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) togglePlay(); }
+  else if (e.key === 'r' || e.key === 'R') reset();
+  else if (e.key === 'ArrowRight') { e.preventDefault(); goAct((trans ? trans.to : act) + 1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); goAct((trans ? trans.to : act) - 1); }
+  else if (e.key >= '1' && e.key <= '5') goAct(+e.key - 1);
+});
+document.addEventListener('keyup', e => { if (e.code === 'Space') e.preventDefault(); });
+cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+cv.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') mouse.x = mouse.y = -1e9; });
+cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+document.addEventListener('pointerdown', e => { if (e.target !== cv) mouse.x = mouse.y = -1e9; });
+new ResizeObserver(resize).observe(cv.parentElement);
+new ResizeObserver(resize).observe($('grWrap'));
+resize();
+
+/* ---------- boucle ---------- */
+function update(dt) {
+  if (trans) {
+    const before = trans.t; trans.t += dt / (RM ? 0.25 : 0.6);
+    if (before < 0.5 && trans.t >= 0.5) { act = trans.to; tau = 0; resetLabels(); }
+    if (trans.t >= 1) trans = null;
+  }
+  if (playing && !(trans && trans.t < 0.5)) tau += dt * speed * (RM ? 0.5 : 1);
+  curF = F0[act] + VF * tau;
+  updateLabels(dt);
+}
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000 || 0); lastT = now; T += dt;
+  update(dt); drawScene(); drawGraph(); updatePanel(); updateTip();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(t => { lastT = t; frame(t); });
+})();
+</script>
+</body>
+</html>

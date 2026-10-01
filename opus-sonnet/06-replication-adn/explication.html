@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la réplication de l'ADN — Mécaniques invisibles 06</title>
+<meta name="description" content="Le mécanisme réel derrière la simulation : fourche de réplication, brin directeur, brin retardé, fragments d'Okazaki.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#4fe0d2;--arn:#ff7b9c;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;
+--serif:'Instrument Serif',Georgia,'Times New Roman',serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 80px}
+.haut{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);letter-spacing:.08em}
+.haut a{color:var(--texte-2);text-decoration:none;transition:color .25s var(--ease)}
+.haut a:hover{color:var(--texte)}
+.serie{margin:48px 0 4px;font:400 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
+h1{margin:0 0 18px;font:400 clamp(38px,7vw,60px)/1.02 var(--serif)}
+h1 em{color:var(--accent)}
+.chapo{font-size:18px;color:var(--texte);margin:0 0 8px}
+h2{margin:52px 0 12px;padding-top:22px;border-top:1px solid var(--trait);font:400 32px/1.1 var(--serif)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--accent);display:block;margin-bottom:8px}
+p{margin:0 0 14px}
+ul{padding-left:20px;margin:0 0 14px}
+li{margin-bottom:8px}
+strong{font-weight:500}
+.ac{color:var(--accent)}.ar{color:var(--arn)}.po{color:var(--positif)}.en{color:var(--energie)}.ne{color:var(--negatif)}
+.chiffres{list-style:none;padding:0;margin:0}
+.chiffres li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--trait);margin:0;align-items:baseline}
+.chiffres b{font:500 22px/1.2 var(--mono);color:var(--accent);letter-spacing:-.01em}
+details{border-top:1px solid var(--trait);padding:12px 0}
+details:last-of-type{border-bottom:1px solid var(--trait)}
+summary{cursor:pointer;list-style:none;font-weight:500}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--mono);color:var(--accent);display:inline-block;width:1.4em}
+details[open] summary::before{content:"\2212"}
+details p{margin:10px 0 0 1.4em;color:var(--texte-2)}
+a.cta{display:inline-block;margin-top:36px;font:500 13px var(--mono);letter-spacing:.06em;color:var(--accent);text-decoration:none;border:1px solid var(--accent);padding:10px 16px}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (max-width:560px){.chiffres li{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="haut"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Série Mécaniques invisibles</a></div>
+  <p class="serie">Mécaniques invisibles — 06</p>
+  <h1>La réplication de l'<em>ADN</em>, pas à pas</h1>
+  <p class="chapo">Deux brins à copier, une seule règle de copie. Voici ce que la simulation montre, ce qui se passe vraiment, et pourquoi un brin se copie d'un trait alors que l'autre se copie par morceaux.</p>
+
+  <h2><span>01</span>Ce que tu vois</h2>
+  <p>La scène suit <strong>une seule fourche de réplication</strong> : le point où la double hélice s'ouvre pour être copiée. La caméra est accrochée à la fourche : c'est l'ADN qui défile.</p>
+  <ul>
+    <li>À droite, l'<strong>ADN parental</strong>, en blanc cassé, en double hélice.</li>
+    <li>À la pointe de la fourche, l'<strong>hélicase</strong> : un anneau qui sépare les brins en consommant de l'ATP.</li>
+    <li>Les <strong>SSB</strong> couvrent et protègent l'ADN simple brin exposé, surtout sur le brin du bas, qui attend d'être copié.</li>
+    <li>Les brins neufs sont <span class="ac">turquoise</span>. Même chimie, même couleur : seuls la forme et le mouvement les distinguent.</li>
+    <li>Les courts segments <span class="ar">roses</span> sont des <strong>amorces d'ARN</strong>, posées par la <strong>primase</strong>.</li>
+    <li>Les <strong>polymérases</strong> allongent le brin neuf. Leur chevron indique le sens de lecture. L'éclat <span class="en">doré</span> marque la <strong>ligase</strong> qui scelle une coupure : elle consomme de l'ATP.</li>
+  </ul>
+
+  <h2><span>02</span>Ce qui se passe vraiment</h2>
+  <p><strong>Ouverture.</strong> L'ADN est fait de deux brins appariés base à base. L'hélicase les sépare. Chez les eucaryotes, c'est un anneau (le complexe CMG) qui encercle un brin et avance le long de lui.</p>
+  <p><strong>Antiparallélisme.</strong> Chaque brin est une chaîne de nucléotides, et chaque nucléotide contient un sucre, le <strong>désoxyribose</strong>. Ses carbones sont numérotés de 1′ à 5′. Deux nucléotides voisins se lient par le carbone 5′ de l'un et le carbone 3′ de l'autre. Une chaîne a donc un bout <strong>5′</strong> et un bout <strong>3′</strong>. Dans la double hélice, les deux brins sont orientés en sens opposés : c'est l'<strong>antiparallélisme</strong>.</p>
+  <p><strong>La règle de la polymérase.</strong> Une ADN polymérase ne fait qu'une chose : ajouter un nucléotide au groupe <strong>3′-OH</strong> libre d'une chaîne existante. Le brin neuf grandit donc toujours dans le sens <strong>5′→3′</strong>, en lisant la matrice dans le sens 3′→5′. De plus, elle ne peut pas démarrer seule : il lui faut un point d'ancrage, une <strong>amorce</strong>. La <strong>primase</strong> la fournit, sous la forme d'un court bout d'ARN d'une dizaine de nucléotides.</p>
+  <p><strong>Brin directeur.</strong> Sur le brin du haut, la lecture 3′→5′ va dans le même sens que la fourche. Une seule amorce suffit : la polymérase suit ensuite la fourche et copie en continu.</p>
+  <p><strong>Brin retardé.</strong> Sur le brin du bas, le sens de copie pointe à l'opposé de la fourche. La polymérase s'en éloigne donc. Elle copie un fragment, bute sur l'amorce précédente et se détache. Puis elle repart d'une nouvelle amorce, posée près de la fourche. Chaque fragment est un <strong>fragment d'Okazaki</strong>.</p>
+  <p><strong>Finition.</strong> Les amorces d'ARN sont retirées et remplacées par de l'ADN. Il reste une coupure : une liaison manquante entre deux fragments voisins. La <strong>ligase</strong> la scelle. Chaque nouvelle double hélice contient un brin parental et un brin neuf : la réplication est dite <strong>semi-conservative</strong>.</p>
+
+  <h2><span>03</span>Pourquoi l'asymétrie</h2>
+  <p>Ce n'est pas une différence de chimie. Les deux brins neufs sont faits des mêmes briques, par les mêmes enzymes. C'est une différence de <strong>géométrie</strong>.</p>
+  <p>La polymérase ne travaille que dans le sens 5′→3′, et les brins parentaux sont antiparallèles. Pour l'un, ce sens est celui de la fourche : il la suit. Pour l'autre, il est inversé : il lui tourne le dos. D'où une copie continue d'un côté, une couture à petits points arrière de l'autre.</p>
+
+  <h2><span>04</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Vue dépliée.</strong> Aux actes I à IV, la boucle du brin retardé est dépliée à plat pour qu'on lise les directions. En réalité, les deux polymérases sont attachées au même complexe et voyagent ensemble. C'est la matrice du brin retardé qui fait une boucle, « en trombone ». L'acte V la montre.</li>
+    <li><strong>Une seule fourche.</strong> Une origine en lance deux, qui s'éloignent en formant une bulle.</li>
+    <li><strong>Hélices filles à plat.</strong> Sans torsion ; un barreau par dix nucléotides environ, comme repère.</li>
+    <li><strong>Acteurs absents.</strong> La topoisomérase (qui relâche la torsion devant la fourche), la pince coulissante (PCNA ou β-clamp) et son chargeur, les nucléosomes, la relecture par exonucléase 3′→5′, et la partie ADN de l'amorce de Pol α.</li>
+    <li><strong>Retrait des amorces compressé</strong> : l'ARN rose « fond » en ADN turquoise.</li>
+    <li><strong>Vitesses.</strong> En réalité, les deux polymérases lisent à la même vitesse. Ici, celle du retardé est environ 1,5 fois plus rapide, pour laisser voir le temps de lâcher, revenir et recharger.</li>
+    <li><strong>Formes.</strong> Les acteurs sont stylisés. Chevrons, étiquettes 5′/3′, rotation de l'anneau et graphe de distance sont des repères de lecture.</li>
+  </ul>
+  <p><strong>Bactérie ou eucaryote.</strong> La simulation suit le modèle humain : hélicase CMG, polymérases <strong>Pol ε</strong> (directeur) et <strong>Pol δ</strong> (retardé), amorces posées par <strong>Pol α-primase</strong> et retirées avec <strong>FEN1</strong> et la <strong>RNase H</strong>. Fragments d'environ 150 à 200 nt, fourche à environ 30 à 50 nt/s. Chez <em>E. coli</em>, l'hélicase <strong>DnaB</strong> encercle la matrice du retardé et avance 5′→3′ sur elle ; la polymérase principale est <strong>Pol III</strong> et <strong>Pol I</strong> retire les amorces ; les fragments font environ 1000 à 2000 nt et la fourche avance à environ 1000 nt/s.</p>
+
+  <h2><span>05</span>Les chiffres à retenir</h2>
+  <ul class="chiffres">
+    <li><b>~ 3,2 × 10⁹ pb</b><span>dans un lot haploïde de chromosomes humains. Une cellule diploïde en contient environ le double.</span></li>
+    <li><b>~ 3 à 5 × 10⁴ origines</b><span>actives par cycle chez l'humain, selon les estimations. Avec une seule origine (deux fourches à 30-50 nt/s), copier le génome prendrait de l'ordre d'un à deux ans.</span></li>
+    <li><b>30 à 50 nt/s</b><span>pour une fourche humaine, contre environ 1000 nt/s chez <em>E. coli</em>.</span></li>
+    <li><b>150 à 200 nt</b><span>par fragment d'Okazaki chez l'humain, contre 1000 à 2000 nt chez la bactérie.</span></li>
+    <li><b>~ 1 / 10⁹ à 10¹⁰</b><span>erreur par nucléotide copié, une fois la relecture et la réparation des mésappariements faites.</span></li>
+  </ul>
+
+  <h2><span>06</span>Teste-toi</h2>
+  <details><summary>Si une polymérase pouvait synthétiser 3′→5′, que deviendrait la fourche ?</summary><p>Le brin retardé pourrait être copié d'un trait, dans le sens de la fourche, comme le directeur. Plus de fragments d'Okazaki, plus d'amorces en série, plus de coutures. L'asymétrie vient de la règle 5′→3′ : sans elle, elle disparaît. (La règle a pourtant un avantage : l'énergie de chaque ajout est portée par le nucléotide entrant, pas par la chaîne. La polymérase peut donc retirer un nucléotide erroné en bout de chaîne sans bloquer la suite, ce qu'une synthèse 3′→5′ rendrait impossible.)</p></details>
+  <details><summary>Pourquoi le brin directeur n'a-t-il besoin que d'une amorce ?</summary><p>Sa polymérase avance dans le même sens que la fourche. Elle trouve toujours devant elle de la matrice à copier, et son extrémité 3′ reste libre : une fois lancée, elle n'a plus à redémarrer. Sur le brin retardé, chaque fragment doit repartir de zéro, donc d'une nouvelle amorce.</p></details>
+  <details><summary>Que se passerait-il si la ligase était absente ?</summary><p>Les fragments d'Okazaki resteraient séparés par des coupures. Le brin retardé serait fait de morceaux juxtaposés, jamais joints. Chaque coupure est un point faible : au cycle suivant, une fourche qui la rencontre peut casser le chromosome en deux.</p></details>
+
+  <a class="cta" href="index.html">Retourner à la simulation &rarr;</a>
+</div>
+</body>
+</html>
