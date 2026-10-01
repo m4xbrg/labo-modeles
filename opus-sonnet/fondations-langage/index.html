@@ -1,0 +1,2879 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Quatre petits laboratoires dans une seule page, comme quatre instruments posés sur la même paillasse : même scène, même panneau de lecture, même barre de contrôles ; on change d'instrument, pas de site.
+  2. Le code couleur de la série sert ici au signe : orange = positif, bleu = négatif, gris = nul ; le jaune d'énergie marque le repère du moment. Chaque grandeur garde sa couleur d'un toy à l'autre (x blanc cassé, v sarcelle, a lilas).
+  3. Le mouvement n'illustre que des changements de grandeur : un zoom qui franchit des puissances de dix, un volume qui monte, une flèche qu'on saisit, un mobile dont les trois graphes avancent ensemble. Rien ne bouge pour décorer.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Langage scientifique — L’invisible en mouvement, Fondations 1·2·3</title>
+<meta name="description" content="Quatre petits laboratoires pour lire les planches : échelles et unités, graphiques, vecteurs, position-vitesse-accélération.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#6fd6c8; --acc-a:#c38bff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#stage{position:absolute;inset:0}
+#stage canvas{display:block}
+
+.head{position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;z-index:2;isolation:isolate;text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond)}
+.head::before{content:"";position:absolute;inset:-36px -110px -36px -60px;pointer-events:none;z-index:-1;opacity:.75;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.88) 52%,rgba(10,13,18,0) 100%)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+#toyPanel{display:flex;flex-direction:column;gap:16px}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+.panel h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+.txt{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.txt+.txt{margin-top:8px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:baseline;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal}
+.row.small .val{font-size:14px}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.eq{font:400 13.5px/1.5 var(--mono);background:var(--fond);border-left:2px solid var(--accent);padding:8px 12px;margin:0}
+.katex{font-size:1.06em;color:inherit}
+.eq .katex{font-size:1.12em}
+.tex-bloc{display:block;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.tex-bloc .katex-display{margin:0}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.lil{color:var(--acc-a)}.dim{color:var(--texte-2)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;padding-top:6px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center}
+#toyControls{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;flex:1 1 auto;min-width:0}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.tabs{display:flex;gap:4px;flex:1 0 100%;min-width:0;padding-bottom:8px;border-bottom:1px solid var(--trait)}
+.tab{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.tab b{font-weight:500;margin-right:6px}
+.tab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.tab:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.tab[aria-selected="true"]{border-top-color:var(--accent);color:var(--texte)}
+.tab[aria-selected="true"] b{color:var(--accent)}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:400px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  input[type=range]{width:110px}
+}
+@media (max-width:640px){
+  .tab span{display:none}
+  .tab b{margin:0;font-size:13px}
+  .tab[aria-selected="true"] span{display:inline-block}
+  .tab[aria-selected="true"] b{margin-right:6px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.tab{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <div id="stage"></div>
+    <header class="head" id="head">
+      <p class="serie" id="serie">Fondations 1·2·3 — A · Échelles</p>
+      <h1 id="titre">Puissances <em>de dix</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <div id="toyPanel"></div>
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints" id="hints">
+        <li><kbd>1</kbd>–<kbd>4</kbd> changer de laboratoire</li>
+      </ul>
+    </section>
+    <nav class="liens">
+      <a class="comprendre" id="lienComprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="tabs" role="tablist" aria-label="Les quatre laboratoires" id="tabs"></div>
+    <div id="toyControls"></div>
+  </div>
+</div>
+
+<script>
+/* ============ FX : aides communes aux quatre toys ============ */
+const FX = (() => {
+  'use strict';
+  const cs = getComputedStyle(document.documentElement);
+  const tok = n => cs.getPropertyValue(n).trim();
+  const C = {
+    fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'),
+    texte: tok('--texte'), texte2: tok('--texte-2'),
+    accent: tok('--accent'), lilas: tok('--acc-a'),
+    pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'),
+    mono: tok('--mono'), sans: tok('--sans'), serif: tok('--serif'),
+  };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MINUS = '−', NNBSP = ' ';
+  const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+
+  /** rgba depuis #rrggbb */
+  function rgba(hex, a) {
+    const h = hex.replace('#','');
+    return `rgba(${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)},${a})`;
+  }
+  /** Nombre en français : virgule décimale, espace fine pour les milliers, vrai signe moins. */
+  function fmt(x, dec = 2) {
+    if (!isFinite(x)) return '—';
+    if (Math.abs(x) < 0.5 * Math.pow(10, -dec)) x = 0;
+    const s = Math.abs(x).toFixed(dec).split('.');
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, NNBSP);
+    return (x < 0 ? MINUS : '') + s.join(',');
+  }
+  /** Signe explicite : +1,50 / −1,50 / 0,00 */
+  function fmtS(x, dec = 2) { const t = fmt(x, dec); return (x > 0 && t !== fmt(0, dec)) ? '+' + t : t; }
+  /** Exposant en chiffres supérieurs : sup(-5) → ⁻⁵ */
+  function sup(n) { return String(n).split('').map(c => SUP[c] || c).join(''); }
+  /** Notation scientifique : sci(0.00002, 2) → "2,0 × 10⁻⁵" (sig chiffres significatifs) */
+  function sci(x, sig = 2) {
+    if (x === 0) return '0';
+    let e = Math.floor(Math.log10(Math.abs(x)));
+    let m = x / Math.pow(10, e);
+    if (Math.abs(+m.toFixed(sig - 1)) >= 10) { e += 1; m = x / Math.pow(10, e); }
+    return `${fmt(m, sig - 1)} × 10${sup(e)}`;
+  }
+  /** Ordre de grandeur : puissance de 10 la plus proche (arrondi du log ; 7,5 µm → 10⁻⁵ m) */
+  function ordre(x) { return Math.round(Math.log10(Math.abs(x))); }
+  /** Graduations « rondes » (1, 2, 5 × 10ⁿ) entre a et b, environ n graduations */
+  function niceTicks(a, b, n = 5) {
+    if (a === b) { a -= 1; b += 1; }
+    const span = Math.abs(b - a), raw = span / n;
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const f = raw / p, step = (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
+    const lo = Math.ceil(Math.min(a, b) / step - 1e-9) * step, out = [];
+    for (let v = lo; v <= Math.max(a, b) + step * 1e-9; v += step) out.push(Math.abs(v) < step * 1e-9 ? 0 : v);
+    out.step = step;
+    return out;
+  }
+  /** Couleur selon le signe (eps : seuil sous lequel on considère 0) */
+  function signColor(v, eps = 1e-9) { return v > eps ? C.pos : v < -eps ? C.neg : C.texte2; }
+  const mono = (px, w = 400) => `${w} ${px}px ${C.mono}`;
+  const sans = (px, w = 400) => `${w} ${px}px ${C.sans}`;
+
+  /**
+   * Canevas net en HiDPI qui suit la taille de son parent.
+   * const cv = FX.canvas(parentEl, signal, onResize) → { el, ctx, w, h } ; onResize(w, h) appelé à chaque changement.
+   * Le contexte est déjà mis à l'échelle : on dessine en pixels CSS.
+   */
+  function canvas(parent, signal, onResize, cssText = 'position:absolute;inset:0;width:100%;height:100%') {
+    const el = document.createElement('canvas');
+    el.style.cssText = cssText;
+    parent.appendChild(el);
+    const o = { el, ctx: el.getContext('2d'), w: 0, h: 0 };
+    const fit = () => {
+      const r = el.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2.5);
+      const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+      if (w === o.w && h === o.h && el.width === Math.round(w * d)) return;
+      o.w = w; o.h = h; el.width = Math.round(w * d); el.height = Math.round(h * d);
+      o.ctx.setTransform(d, 0, 0, d, 0, 0);
+      onResize && onResize(w, h);
+    };
+    const ro = new ResizeObserver(fit); ro.observe(el);
+    signal && signal.addEventListener('abort', () => ro.disconnect());
+    fit();
+    return o;
+  }
+  /** Boucle d'animation : fn(dt en s, t en s) à chaque image jusqu'à l'annulation du signal. dt plafonné à 0,05 s. */
+  function loop(fn, signal) {
+    let last = performance.now(), id = 0;
+    const step = now => {
+      if (signal && signal.aborted) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      fn(dt, now / 1000);
+      id = requestAnimationFrame(step);
+    };
+    id = requestAnimationFrame(step);
+    signal && signal.addEventListener('abort', () => cancelAnimationFrame(id));
+  }
+  /** Flèche de (x1,y1) à (x2,y2) */
+  function arrow(c, x1, y1, x2, y2, color, width = 2, head = 9) {
+    const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+    c.save(); c.strokeStyle = color; c.fillStyle = color; c.lineWidth = width; c.lineCap = 'round';
+    if (L < 0.5) { c.restore(); return; }
+    const hd = Math.min(head, L * 0.6), ux = dx / L, uy = dy / L;
+    c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - ux * hd * 0.8, y2 - uy * hd * 0.8); c.stroke();
+    c.beginPath(); c.moveTo(x2, y2);
+    c.lineTo(x2 - ux * hd - uy * hd * 0.45, y2 - uy * hd + ux * hd * 0.45);
+    c.lineTo(x2 - ux * hd + uy * hd * 0.45, y2 - uy * hd - ux * hd * 0.45);
+    c.closePath(); c.fill(); c.restore();
+  }
+  /** Étiquette sur un petit fond sombre, lisible par-dessus n'importe quel tracé */
+  function tag(c, text, x, y, color = C.texte, align = 'left', base = 'middle', px = 11) {
+    c.save(); c.font = mono(px); c.textAlign = align; c.textBaseline = base;
+    const w = c.measureText(text).width, h = px + 4;
+    let bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+    let by = base === 'middle' ? y - h / 2 : base === 'bottom' ? y - h : y;
+    c.fillStyle = rgba(C.fond, 0.82); c.fillRect(bx - 3, by, w + 6, h);
+    c.fillStyle = color; c.fillText(text, x, y + (base === 'top' ? 2 : base === 'bottom' ? -2 : 0));
+    c.restore();
+  }
+  /** Infobulle partagée : FX.tip(html, xClient, yClient) ; FX.tip(null) pour cacher */
+  const tipEl = document.getElementById('tip'), sceneEl = document.getElementById('scene');
+  function tip(html, cx, cy) {
+    if (!html) { tipEl.classList.remove('on'); return; }
+    tipEl.innerHTML = html; tipEl.classList.add('on');
+    const r = sceneEl.getBoundingClientRect(), tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+    let x = cx - r.left + 14, y = cy - r.top + 14;
+    if (x + tw > r.width - 8) x = cx - r.left - tw - 14;
+    if (y + th > r.height - 8) y = cy - r.top - th - 14;
+    tipEl.style.transform = 'none';
+    tipEl.style.left = Math.max(8, x) + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
+  }
+  /** Rectangle occupé par l'en-tête, en coordonnées du #stage (pour ne rien y placer d'important) */
+  function headRect() {
+    const s = document.getElementById('stage').getBoundingClientRect(), h = document.getElementById('head').getBoundingClientRect();
+    return { x: h.left - s.left, y: h.top - s.top, w: h.width, h: h.height, bottom: h.bottom - s.top, right: h.right - s.left };
+  }
+  /** Boutons segmentés de modes : FX.modes(parent, [{id,label,title}], actif, onChange) → { set(id) } */
+  function modes(parent, list, active, onChange, signal) {
+    const g = document.createElement('div'); g.className = 'grp'; g.setAttribute('role', 'group');
+    g.innerHTML = `<span class="gl">Mode</span>` + list.map(m => `<button class="btn" data-m="${m.id}" title="${m.title || m.label}" aria-pressed="false">${m.label}</button>`).join('');
+    parent.appendChild(g);
+    const set = id => { g.querySelectorAll('.btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === id))); };
+    g.addEventListener('click', e => { const b = e.target.closest('.btn'); if (b) { set(b.dataset.m); onChange(b.dataset.m); } }, { signal });
+    set(active);
+    return { el: g, set };
+  }
+  /** Le focus est-il dans un champ où les touches ont un sens propre ? */
+  function typing(e) { const t = e.target; return t && (t.tagName === 'INPUT' && t.type !== 'range' && t.type !== 'checkbox' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT'); }
+
+  /**
+   * Formules (KaTeX, chargé depuis cdnjs). Repli lisible en texte Unicode si KaTeX est absent (hors ligne).
+   * FX.k(String.raw`\sqrt{A_x^2 + A_y^2}`, '√(Ax² + Ay²)') → chaîne HTML à insérer dans un gabarit.
+   * FX.k(tex, repli, true) → formule en mode bloc (centrée, plus grande).
+   * FX.tex(racine) → rend tous les éléments [data-tex] (repli = leur texte actuel ; classe .tex-bloc = mode bloc).
+   * Couleurs dans une formule (String.raw`…` évite de doubler les barres obliques inverses) : \textcolor{#ff8a5b}{\Delta x}. Prévoir les formules statiques ; les valeurs
+   * qui changent à chaque image restent en texte mono à côté (plus rapide, et les chiffres ne sautent pas).
+   */
+  const hasK = () => typeof window.katex !== 'undefined';
+  function k(tex, repli = tex, bloc = false) {
+    if (!hasK()) return `<span class="m">${repli}</span>`;
+    try { return katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }); }
+    catch (e) { return `<span class="m">${repli}</span>`; }
+  }
+  function tex(root = document) {
+    if (!hasK()) return;
+    root.querySelectorAll('[data-tex]').forEach(el => {
+      if (el.dataset.texOk === el.dataset.tex) return;
+      try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: el.classList.contains('tex-bloc'), output: 'html' }); el.dataset.texOk = el.dataset.tex; }
+      catch (e) { /* le repli reste affiché */ }
+    });
+  }
+
+  const toys = [];
+  function register(id, def) { toys.push(Object.assign({ id }, def)); }
+
+  return { C, reduced, rgba, fmt, fmtS, sup, sci, ordre, niceTicks, signColor, mono, sans, canvas, loop, arrow, tag, tip, headRect, modes, typing, k, tex, register, toys };
+})();
+</script>
+
+<!-- TOYS (dev : fichiers de travail, insérés en ligne à l intégration) -->
+<script>
+/* ============ Toy A · Échelles — « Puissances de dix » ============ */
+(() => {
+  'use strict';
+  const C = FX.C, fmt = FX.fmt, sup = FX.sup, rgba = FX.rgba;
+  const TAU = Math.PI * 2;
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+  const T = a => rgba(C.texte, a), AC = a => rgba(C.accent, a), LI = a => rgba(C.lilas, a), EN = a => rgba(C.ener, a);
+
+  /** Courbe de Bézier cubique (même easing que la charte) : t ∈ [0,1] → [0,1] */
+  function bez(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const X = t => ((ax * t + bx) * t + cx) * t, Y = t => ((ay * t + by) * t + cy) * t, dX = t => (3 * ax * t + 2 * bx) * t + cx;
+    return x => {
+      if (x <= 0) return 0; if (x >= 1) return 1;
+      let t = x;
+      for (let i = 0; i < 8; i++) { const e = X(t) - x; if (Math.abs(e) < 1e-6) break; const d = dX(t); if (Math.abs(d) < 1e-6) break; t -= e / d; }
+      return Y(clamp(t, 0, 1));
+    };
+  }
+  const ease = bez(0.22, 1, 0.36, 1);
+
+  /* ---------- préfixes et formatage ---------- */
+  const PRE = { '-12': 'p', '-9': 'n', '-6': 'µ', '-3': 'm', '0': '', '3': 'k', '6': 'M', '9': 'G', '12': 'T' };
+  const pexp = x => clamp(Math.floor(Math.log10(x) / 3 + 1e-9) * 3, -12, 12);
+  const trim = s => s.replace(/,(\d*?)0+$/, (q, a) => a ? ',' + a : '');
+  /** Longueur avec préfixe : lenStr(7.5e-6) → « 7,5 µm » (sig chiffres significatifs, zéros finaux retirés) */
+  function lenStr(x, sig = 3) {
+    let p = pexp(x), m = x / Math.pow(10, p);
+    let dec = Math.max(0, sig - 1 - Math.floor(Math.log10(m) + 1e-9));
+    if (+m.toFixed(dec) >= 1000 && p < 12) { p += 3; m = x / Math.pow(10, p); dec = Math.max(0, sig - 1 - Math.floor(Math.log10(m) + 1e-9)); }
+    return trim(fmt(m, dec)) + ' ' + PRE[p] + 'm';
+  }
+  const sciM = x => FX.sci(x, 2) + ' m';
+  /** Grand nombre à 2 chiffres significatifs, lisible : 85 000 ou 1,2 × 10⁷ */
+  function nbr(x) {
+    if (x >= 1e6 || x < 0.1) return FX.sci(x, 2);
+    if (x >= 100) { const e = Math.floor(Math.log10(x)), q = Math.pow(10, e - 1); return fmt(Math.round(x / q) * q, 0); }
+    return trim(fmt(x, x >= 10 ? 0 : 1));
+  }
+
+  /* ---------- les 15 objets ---------- */
+  const lw0 = 1.15;
+  function circ(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.max(r, 0), 0, TAU); }
+  function poly(c, pts, close) { c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); if (close) c.closePath(); }
+  const hash = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+  /* Chaque draw(c, s, k) dessine en unités de s (origine au centre) ; k = { lw (px), V:{W,H} } */
+  function dAtome(c, s, k) {
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, 0.5);
+    g.addColorStop(0, AC(0.5)); g.addColorStop(0.35, AC(0.22)); g.addColorStop(1, AC(0));
+    c.fillStyle = g; circ(c, 0, 0, 0.5); c.fill();
+    c.strokeStyle = AC(0.75); c.lineWidth = k.lw / s; c.setLineDash([2 / s, 4 / s]); circ(c, 0, 0, 0.5); c.stroke(); c.setLineDash([]);
+    c.fillStyle = EN(1); circ(c, 0, 0, Math.max(2.4, 0.012 * s) / s); c.fill(); // noyau : très exagéré
+  }
+  function dAdn(c, s, k) {
+    const H = 6, P = 1.7, N = 150, M = 36;
+    const ta = y => 1 - Math.pow(Math.abs(y / (H / 2)), 3);
+    c.lineCap = 'round';
+    for (let m = 0; m < M; m++) { // barreaux
+      const y = -H / 2 + (m + 0.5) * H / M, x = 0.5 * Math.sin(y / P * TAU);
+      c.strokeStyle = T(0.4 * ta(y)); c.lineWidth = k.lw * 0.8 / s; poly(c, [[x, y], [-x, y]]); c.stroke();
+    }
+    for (const pass of [0, 1]) for (const sg of [1, -1]) {
+      c.strokeStyle = sg > 0 ? AC(1) : LI(1);
+      for (let i = 0; i < N; i++) {
+        const y0 = -H / 2 + H * i / N, y1 = -H / 2 + H * (i + 1) / N;
+        const f0 = y0 / P * TAU, f1 = y1 / P * TAU;
+        const front = sg * Math.cos((f0 + f1) / 2) > 0;
+        if ((pass === 1) !== front) continue;
+        c.globalAlpha = (front ? 1 : 0.38) * ta((y0 + y1) / 2) * (k.A == null ? 1 : k.A);
+        c.lineWidth = k.lw * (front ? 1.7 : 1) / s;
+        poly(c, [[sg * 0.5 * Math.sin(f0), y0], [sg * 0.5 * Math.sin(f1), y1]]); c.stroke();
+      }
+    }
+    c.globalAlpha = k.A == null ? 1 : k.A;
+  }
+  function dVirus(c, s, k) {
+    const n = 44;
+    c.lineWidth = k.lw / s;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * TAU + hash(i) * 0.05, r1 = 0.385, r2 = 0.46 + 0.04 * hash(i + 9);
+      c.strokeStyle = T(0.75); poly(c, [[Math.cos(a) * r1, Math.sin(a) * r1], [Math.cos(a) * r2, Math.sin(a) * r2]]); c.stroke();
+      c.fillStyle = T(0.9); circ(c, Math.cos(a) * r2, Math.sin(a) * r2, Math.max(1.3 / s, 0.006)); c.fill();
+    }
+    c.fillStyle = T(0.04); c.strokeStyle = LI(0.9); circ(c, 0, 0, 0.385); c.fill(); c.stroke();
+    c.strokeStyle = LI(0.35); c.setLineDash([2 / s, 3 / s]); circ(c, 0, 0, 0.3); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = LI(0.75);
+    for (let j = 0; j < 8; j++) { c.beginPath(); c.arc(0, 0, 0.1 + 0.03 * (j % 3), j * 0.8, j * 0.8 + 1.1); c.stroke(); }
+  }
+  function capsule(c, w, h) {
+    c.beginPath(); c.moveTo(-w / 2 + h / 2, -h / 2); c.lineTo(w / 2 - h / 2, -h / 2);
+    c.arc(w / 2 - h / 2, 0, h / 2, -Math.PI / 2, Math.PI / 2); c.lineTo(-w / 2 + h / 2, h / 2);
+    c.arc(-w / 2 + h / 2, 0, h / 2, Math.PI / 2, Math.PI * 1.5); c.closePath();
+  }
+  function dBacterie(c, s, k) {
+    c.lineWidth = k.lw / s;
+    c.strokeStyle = T(0.4); c.beginPath();
+    for (let i = 0; i <= 60; i++) { const x = -0.5 - i / 60 * 0.7, y = 0.06 * Math.sin(i / 60 * 14) * (0.4 + i / 60); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+    c.stroke(); // flagelle
+    c.fillStyle = T(0.05); c.strokeStyle = T(0.9); capsule(c, 1, 0.28); c.fill(); c.stroke();
+    c.strokeStyle = T(0.3); c.setLineDash([2 / s, 3 / s]); capsule(c, 0.93, 0.21); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = AC(0.75); c.beginPath();
+    for (let i = 0; i <= 80; i++) { const x = -0.34 + 0.68 * i / 80, y = 0.05 * Math.sin(x * 26) + 0.025 * Math.sin(x * 63 + 1); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+    c.stroke(); // nucléoïde
+  }
+  function dGlobule(c, s, k) {
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, 0.5);
+    g.addColorStop(0, T(0.03)); g.addColorStop(0.3, T(0.06)); g.addColorStop(0.62, T(0.2)); g.addColorStop(0.9, T(0.25)); g.addColorStop(1, T(0.12));
+    c.fillStyle = g; circ(c, 0, 0, 0.5); c.fill();
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.stroke();
+    c.strokeStyle = T(0.28); c.setLineDash([2 / s, 3 / s]); circ(c, 0, 0, 0.21); c.stroke(); c.setLineDash([]);
+  }
+  function dCheveu(c, s, k) {
+    const hw = (k.V.W / 2 + 10) / s;
+    c.fillStyle = T(0.04); c.fillRect(-hw, -0.5, 2 * hw, 1);
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9);
+    poly(c, [[-hw, -0.5], [hw, -0.5]]); c.stroke(); poly(c, [[-hw, 0.5], [hw, 0.5]]); c.stroke();
+    c.strokeStyle = T(0.22); c.setLineDash([3 / s, 4 / s]);
+    poly(c, [[-hw, -0.2], [hw, -0.2]]); c.stroke(); poly(c, [[-hw, 0.2], [hw, 0.2]]); c.stroke(); c.setLineDash([]);
+    const st = 0.5;
+    if (s > 10 && 2 * hw / st < 240) { // écailles de la cuticule
+      c.strokeStyle = T(0.3); c.beginPath();
+      for (let x = Math.ceil(-hw / st) * st; x < hw; x += st) { c.moveTo(x, -0.5); c.quadraticCurveTo(x + 0.24, 0, x, 0.5); }
+      c.stroke();
+    }
+  }
+  function dFourmi(c, s, k) {
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.fillStyle = T(0.06); c.lineCap = 'round';
+    for (const sd of [1, -1]) {
+      c.strokeStyle = T(0.6);
+      for (let i = 0; i < 3; i++) {
+        const x = -0.21 + i * 0.08, kx = x + (i === 0 ? -0.05 : i === 2 ? 0.07 : 0.02), fx = x + (i === 0 ? -0.1 : i === 2 ? 0.15 : 0.0);
+        poly(c, [[x, sd * 0.04], [kx, sd * 0.2], [fx, sd * 0.32]]); c.stroke();
+      }
+      poly(c, [[-0.47, sd * 0.04], [-0.56, sd * 0.12], [-0.52, sd * 0.22]]); c.stroke();
+    }
+    c.strokeStyle = T(0.9);
+    for (const e of [[-0.405, 0.095, 0.075], [-0.13, 0.145, 0.052], [0.285, 0.215, 0.115]]) {
+      c.beginPath(); c.ellipse(e[0], 0, e[1], e[2], 0, 0, TAU); c.fill(); c.stroke();
+    }
+    poly(c, [[0.015, 0], [0.07, 0]]); c.stroke();
+  }
+  function dHumain(c, s, k) {
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.lineCap = 'round'; c.lineJoin = 'round';
+    c.fillStyle = T(0.05); circ(c, 0, -0.435, 0.055); c.fill(); c.stroke();
+    poly(c, [[0, -0.38], [0, -0.355]]); c.stroke();
+    poly(c, [[-0.115, -0.345], [-0.095, -0.02], [0.095, -0.02], [0.115, -0.345], [-0.115, -0.345]]); c.stroke();
+    for (const sd of [1, -1]) {
+      poly(c, [[sd * 0.115, -0.34], [sd * 0.158, -0.14], [sd * 0.142, 0.03]]); c.stroke();
+      poly(c, [[sd * 0.095, -0.02], [sd * 0.068, 0.26], [sd * 0.072, 0.495], [sd * 0.115, 0.5]]); c.stroke();
+      poly(c, [[sd * 0.004, -0.0], [sd * 0.024, 0.26], [sd * 0.03, 0.495], [sd * 0.072, 0.495]]); c.stroke();
+    }
+  }
+  function dImmeuble(c, s, k) {
+    const w = 0.4, top = -0.44;
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.fillStyle = T(0.04);
+    c.beginPath(); c.rect(-w / 2, top, w, 0.94); c.fill(); c.stroke();
+    poly(c, [[0, top], [0, -0.5]]); c.stroke();
+    poly(c, [[-w / 2 - 0.12, 0.5], [w / 2 + 0.12, 0.5]]); c.stroke();
+    const fl = s * 0.94 / 30;
+    if (fl >= 3) {
+      c.strokeStyle = T(0.2); c.beginPath();
+      for (let i = 1; i < 30; i++) { const y = top + 0.94 * i / 30; c.moveTo(-w / 2, y); c.lineTo(w / 2, y); }
+      c.stroke();
+      if (fl >= 6) {
+        c.fillStyle = EN(0.35);
+        for (let i = 0; i < 30; i++) for (let j = 0; j < 7; j++) { if (hash(i * 7 + j) < 0.35) continue; c.fillRect(-w / 2 + 0.03 + j * (w - 0.06) / 7, top + 0.94 * (i + 0.3) / 30, (w - 0.06) / 7 * 0.55, 0.94 * 0.4 / 30); }
+      }
+    }
+  }
+  function dEverest(c, s, k) {
+    const pts = [[-0.75, 0.5], [-0.55, 0.3], [-0.42, 0.34], [-0.28, 0.1], [-0.17, 0.0], [-0.08, -0.28], [0, -0.5], [0.07, -0.36], [0.13, -0.4], [0.2, -0.2], [0.3, -0.05], [0.42, 0.12], [0.55, 0.22], [0.75, 0.5]];
+    const g = c.createLinearGradient(0, -0.5, 0, 0.5); g.addColorStop(0, T(0.14)); g.addColorStop(1, T(0.02));
+    c.fillStyle = g; poly(c, pts, true); c.fill();
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.lineJoin = 'round'; poly(c, pts); c.stroke();
+    c.strokeStyle = T(0.35); poly(c, [[-0.12, -0.18], [-0.07, -0.13], [-0.02, -0.19], [0.03, -0.12], [0.09, -0.17], [0.15, -0.1]]); c.stroke();
+    poly(c, [[-0.85, 0.5], [0.85, 0.5]]); c.stroke();
+  }
+  function dTerre(c, s, k) {
+    c.rotate(-0.41);
+    const g = c.createRadialGradient(-0.15, -0.15, 0.02, 0, 0, 0.5); g.addColorStop(0, AC(0.3)); g.addColorStop(1, AC(0.04));
+    c.fillStyle = g; circ(c, 0, 0, 0.5); c.fill();
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.9); c.stroke();
+    c.strokeStyle = T(0.22);
+    for (const a of [0, Math.PI / 6, Math.PI / 3]) { c.beginPath(); c.ellipse(0, 0, 0.5 * Math.cos(a), 0.5, 0, 0, TAU); c.stroke(); }
+    for (const y of [-0.25, 0, 0.25]) { const w = Math.sqrt(0.25 - y * y); c.beginPath(); c.ellipse(0, y, w, w * 0.2, 0, 0, Math.PI); c.stroke(); }
+    c.strokeStyle = AC(0.4); circ(c, 0, 0, 0.515); c.stroke();
+  }
+  function dMoon(c, s, k) {
+    c.lineWidth = k.lw / s; c.strokeStyle = T(0.4); c.setLineDash([3 / s, 5 / s]); circ(c, 0, 0, 1); c.stroke(); c.setLineDash([]);
+    const a = -0.5, mx = Math.cos(a), my = Math.sin(a);
+    c.strokeStyle = AC(0.5); poly(c, [[0, 0], [mx, my]]); c.stroke();
+    c.fillStyle = T(0.9); circ(c, 0, 0, Math.max(2.4 / s, 0.0165)); c.fill();
+    c.fillStyle = T(0.95); circ(c, mx, my, Math.max(2 / s, 0.0045)); c.fill();
+  }
+  function dSoleil(c, s, k) {
+    const g = c.createRadialGradient(0, 0, 0, 0, 0, 1.1);
+    g.addColorStop(0, EN(0.3)); g.addColorStop(0.45, EN(0.12)); g.addColorStop(1, EN(0));
+    c.fillStyle = g; circ(c, 0, 0, 1.1); c.fill();
+    const g2 = c.createRadialGradient(0, 0, 0, 0, 0, 0.5); g2.addColorStop(0, EN(0.55)); g2.addColorStop(0.8, EN(0.35)); g2.addColorStop(1, EN(0.18));
+    c.fillStyle = g2; circ(c, 0, 0, 0.5); c.fill();
+    c.lineWidth = k.lw / s; c.strokeStyle = EN(1); c.stroke();
+  }
+  function dOrbite(color, planet, rP, ang) {
+    return (c, s, k) => {
+      c.lineWidth = k.lw / s; c.strokeStyle = color; circ(c, 0, 0, 0.5); c.stroke();
+      c.fillStyle = EN(1); circ(c, 0, 0, Math.max(2.6 / s, 0.0023)); c.fill();
+      c.fillStyle = planet; circ(c, 0.5 * Math.cos(ang), 0.5 * Math.sin(ang), Math.max(2.2 / s, rP)); c.fill();
+    };
+  }
+
+  // kind : 'ell' | 'rect' | 'band' | 'ring' pour la détection ; hw/hh : demi-étendues (fraction de s) ; lh : demi-hauteur pour l'étiquette
+  const OBJ = [
+    { id: 'atome', size: 1e-10, name: "atome d'hydrogène", ctx: "Un électron en nuage autour d'un proton. Le noyau (10⁻¹⁵ m) est ici agrandi pour rester visible.", draw: dAtome, kind: 'ell', hw: 0.5, hh: 0.5 },
+    { id: 'adn', size: 2e-9, name: "double hélice d'ADN", ctx: "Largeur de l'hélice ; un tour complet mesure environ 3,4 nm.", draw: dAdn, kind: 'rect', hw: 0.5, hh: 3, lh: 0.5 },
+    { id: 'virus', size: 1e-7, name: 'virus de la grippe', ctx: "Une sphère hérissée de protéines, une centaine de nanomètres.", draw: dVirus, kind: 'ell', hw: 0.5, hh: 0.5 },
+    { id: 'coli', size: 2e-6, name: 'bactérie E. coli', ctx: "Un bâtonnet d'environ 2 µm de long.", draw: dBacterie, kind: 'rect', hw: 0.5, hh: 0.14 },
+    { id: 'globule', size: 7.5e-6, name: 'globule rouge', ctx: "Un disque biconcave vu de face, 7,5 µm de diamètre.", draw: dGlobule, kind: 'ell', hw: 0.5, hh: 0.5 },
+    { id: 'cheveu', size: 7e-5, name: "épaisseur d'un cheveu", ctx: "Environ 70 µm : la bande traverse tout le champ.", draw: dCheveu, kind: 'band', hw: 1e9, hh: 0.5 },
+    { id: 'fourmi', size: 5e-3, name: 'fourmi', ctx: "Environ 5 mm de la tête à l'abdomen.", draw: dFourmi, kind: 'rect', hw: 0.5, hh: 0.3 },
+    { id: 'humain', size: 1.7, name: 'humain', ctx: "La taille de référence : 1,7 m.", draw: dHumain, kind: 'rect', hw: 0.2, hh: 0.5 },
+    { id: 'immeuble', size: 100, name: 'immeuble de 30 étages', ctx: "Environ 100 m de haut.", draw: dImmeuble, kind: 'rect', hw: 0.3, hh: 0.5 },
+    { id: 'everest', size: 8.8e3, name: 'mont Everest', ctx: "8,8 km au-dessus du niveau de la mer.", draw: dEverest, kind: 'rect', hw: 0.75, hh: 0.5 },
+    { id: 'terre', size: 1.27e7, name: 'Terre', ctx: "Diamètre d'environ 12 700 km.", draw: dTerre, kind: 'ell', hw: 0.5, hh: 0.5 },
+    { id: 'lune', size: 3.84e8, name: 'distance Terre–Lune', ctx: "La Lune tourne à 384 000 km de la Terre : la Terre ne serait qu'un point au centre.", draw: dMoon, kind: 'ring', rr: 1, hw: 1, hh: 1 },
+    { id: 'soleil', size: 1.39e9, name: 'Soleil', ctx: "Diamètre d'environ 1,39 million de km : 109 Terres côte à côte.", draw: dSoleil, kind: 'ell', hw: 0.5, hh: 0.5 },
+    { id: 'orbT', size: 3.0e11, name: 'orbite de la Terre', ctx: "Diamètre de l'orbite : 2 unités astronomiques, environ 300 millions de km.", draw: dOrbite(AC(0.6), T(0.95), 0.00002, 0.8), kind: 'ring', rr: 0.5, hw: 0.5, hh: 0.5 },
+    { id: 'orbN', size: 9.0e12, name: 'orbite de Neptune', ctx: "Diamètre de l'orbite : environ 9 000 millions de km. La lumière met 4 h à franchir son rayon.", draw: dOrbite(LI(0.6), LI(1), 0.00002, -0.9), kind: 'ring', rr: 0.5, hw: 0.5, hh: 0.5 },
+  ];
+  OBJ.forEach(o => { o.sizeStr = lenStr(o.size, 3); o.logS = Math.log10(o.size); });
+  const HUMAIN = 1.7;
+  const alphaOf = f => sstep(0.008, 0.03, f) * (1 - sstep(1.5, 5, f));
+  const labelA = f => sstep(0.022, 0.034, f) * (1 - sstep(1.5, 2.2, f));
+  const tipHtml = o => `<b>${o.name}</b>${FX.sci(o.size, 2)} m (${o.sizeStr})<br><span>${o.ctx}</span>`;
+
+  /** Le point (px) est-il sur l'objet ? s = taille à l'écran, dx/dy relatifs au centre */
+  function hitTest(o, dx, dy, s) {
+    if (o.kind === 'ring') { const r = o.rr * s, d = Math.hypot(dx, dy); return Math.abs(d - r) < 9 || d < 6; }
+    if (o.kind === 'band') return Math.abs(dy) <= s / 2 + 2;
+    if (o.kind === 'ell') return Math.hypot(dx / (o.hw * s), dy / (o.hh * s)) <= 1;
+    return Math.abs(dx) <= o.hw * s && Math.abs(dy) <= o.hh * s;
+  }
+
+  FX.register('echelles', {
+    num: 'A', titre: 'Échelles', titreHtml: 'Puissances <em>de dix</em>',
+    hints: [
+      '<kbd>Molette</kbd> zoom continu',
+      '<kbd>+</kbd> <kbd>−</kbd> ou <kbd>↑</kbd> <kbd>↓</kbd> champ ÷10 / ×10',
+      '<kbd>Espace</kbd> linéaire ↔ log',
+      '<kbd>←</kbd> <kbd>→</kbd> instrument · <kbd>N</kbd> autre objet',
+    ],
+    mount(ctx) {
+      const { scene, panel, controls, signal } = ctx;
+      const LMIN = -10, LMAX = 13.3;
+      const st = {
+        mode: 'zoom', logL: -5.2, target: -5.2, tween: null, grid: true, hover: null, dragging: null,
+        ll: { lin: false, u: 1, anim: null, maxLog: Math.log10(2) },
+        pr: { inst: 'mm', len: 7.34, shown: 7.34, reveal: false },
+      };
+      const style = document.createElement('style');
+      style.textContent = `
+        .ec-pre{display:grid;grid-template-columns:repeat(9,1fr);gap:0;border:1px solid var(--trait);font:400 11px var(--mono)}
+        .ec-pre>span{display:flex;flex-direction:column;align-items:center;padding:5px 0 4px;color:var(--texte-2);border-right:1px solid var(--trait);transition:color .3s var(--ease),background .3s var(--ease)}
+        .ec-pre>span:last-child{border-right:0}
+        .ec-pre b{font:500 14px var(--mono);line-height:1.2}
+        .ec-pre i{font-style:normal;font-size:9.5px;opacity:.85;white-space:nowrap}
+        .ec-pre>span.on{color:var(--accent);background:rgba(111,214,200,.1)}
+        .ec-stack{flex-direction:column;align-items:flex-start;gap:2px}
+        .ec-stack .val{font-size:14px;white-space:normal}
+        .ec-ctl{display:contents}
+        .ec-rng{display:flex;align-items:center;gap:8px}
+        .ec-rng input{width:150px}
+        .ec-pair{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}
+        .ec-pair b{font-weight:500}
+        @media (max-width:860px){.ec-rng input{width:110px}}`;
+      panel.appendChild(style);
+      const body = document.createElement('div'); body.style.cssText = 'display:flex;flex-direction:column;gap:16px';
+      panel.appendChild(body);
+
+      /* ---------- canevas ---------- */
+      let hb = 0;
+      const refreshHead = () => { try { hb = FX.headRect().bottom; } catch (e) { hb = 100; } };
+      const cv = FX.canvas(scene, signal, () => refreshHead());
+      cv.el.style.touchAction = 'none';
+      refreshHead();
+
+      /* ---------- contrôles ---------- */
+      const modesCtl = FX.modes(controls, [
+        { id: 'zoom', label: 'Zoom', title: 'Zoomer sur des objets réels' },
+        { id: 'loglin', label: 'Linéaire ou log', title: 'Même objets sur deux axes' },
+        { id: 'prec', label: 'Précision', title: 'Mesurer et dire la précision' },
+      ], st.mode, id => setMode(id), signal);
+      const extra = document.createElement('div'); extra.className = 'ec-ctl'; controls.appendChild(extra);
+
+      let ui = {};
+      const setTxt = (el, s) => { if (el && el._v !== s) { el._v = s; el.innerHTML = s; } };
+
+      function newBtn(label, title, fn, cls = '') {
+        const b = document.createElement('button'); b.className = 'btn ' + cls; b.innerHTML = label; b.title = title || '';
+        b.addEventListener('click', e => { fn(e); if (e.detail) b.blur(); }, { signal });
+        return b;
+      }
+      function group(label) {
+        const g = document.createElement('div'); g.className = 'grp';
+        if (label) g.innerHTML = `<span class="gl">${label}</span>`;
+        extra.appendChild(g); return g;
+      }
+
+      function setMode(id) {
+        st.mode = id; modesCtl.set(id); st.hover = null; FX.tip(null);
+        const ae = document.activeElement; // après un clic, rendre les raccourcis (Espace…) à la scène
+        if (ae && ae.tagName === 'BUTTON' && !ae.matches(':focus-visible')) ae.blur();
+        extra.innerHTML = ''; ui = {};
+        refreshHead();
+        if (id === 'zoom') buildZoom(); else if (id === 'loglin') buildLL(); else buildPrec();
+        body.classList.remove('swap'); void body.offsetWidth; body.classList.add('swap');
+        updatePanel(true);
+      }
+
+      /* ====================== MODE ZOOM ====================== */
+      function zoomBy(dec) {
+        const base = st.tween ? st.tween.to : st.logL, to = clamp(base + dec, LMIN, LMAX), d = Math.abs(to - st.logL); // les appuis rapides s'additionnent
+        if (d < 1e-6) return;
+        const dur = FX.reduced ? 0.18 : 0.12 + 0.4 * d;
+        FX.tip(null); st.hover = null;
+        st.tween = { from: st.logL, to, t: 0, dur };
+      }
+      function buildZoom() {
+        body.innerHTML = `
+          <div><p class="eyebrow">Mode · <b>Zoom</b></p>
+          <h2>Un cran, c'est ×10</h2>
+          <p class="txt">Chaque cran de ×10 change la taille de tout d'un facteur 10. Trois crans, c'est un nouveau préfixe : de µm à mm, de m à km.</p></div>
+          <div class="meas">
+            <div class="row"><span class="lab">Largeur du champ</span><span class="val" data-k="dec"></span></div>
+            <div class="row"><span class="lab">Notation scientifique</span><span class="val" data-k="sci" style="font-size:16px"></span></div>
+            <div class="row"><span class="lab">Ordre de grandeur</span><span class="val" data-k="ord"></span></div>
+            <div class="row ec-stack"><span class="lab">Par rapport à un humain (1,7 m)</span><span class="val" data-k="hum"></span></div>
+          </div>
+          <div class="ec-pre" data-k="pre">${[-12, -9, -6, -3, 0, 3, 6, 9, 12].map(p => `<span data-p="${p}"><b>${p === 0 ? '·' : PRE[p]}</b><i>${FX.k(`10^{${p < 0 ? '-' : ''}${Math.abs(p)}}`, '10' + sup(p))}</i></span>`).join('')}</div>
+          <p class="note" data-k="in"></p>`;
+        body.querySelectorAll('[data-k]').forEach(e => ui[e.dataset.k] = e);
+        ui.preEls = [...body.querySelectorAll('.ec-pre>span')];
+
+        const g1 = group('Champ');
+        [['÷1000', -3], ['÷10', -1], ['×10', 1], ['×1000', 3]].forEach(([l, d]) =>
+          g1.appendChild(newBtn(l, d < 0 ? `Zoom avant : champ ${l}` : `Zoom arrière : champ ${l}`, () => zoomBy(d))));
+        const g2 = group('log₁₀ L');
+        const w = document.createElement('div'); w.className = 'ec-rng';
+        w.innerHTML = `<input type="range" min="${LMIN}" max="${LMAX}" step="0.01" aria-label="Largeur du champ, échelle logarithmique"><span class="rv" data-k="rv" style="min-width:64px"></span>`;
+        g2.appendChild(w);
+        ui.rng = w.querySelector('input'); ui.rv = w.querySelector('.rv');
+        ui.rng.addEventListener('input', () => { st.tween = null; st.logL = st.target = +ui.rng.value; }, { signal });
+        const g3 = group('');
+        ui.gridBtn = newBtn('<span class="dot"></span>Grille', 'Grille légère', () => { st.grid = !st.grid; ui.gridBtn.setAttribute('aria-pressed', String(st.grid)); });
+        ui.gridBtn.setAttribute('aria-pressed', String(st.grid));
+        g3.appendChild(ui.gridBtn);
+      }
+
+      /** Calcule position et opacité de chaque objet pour le champ courant */
+      function zoomLayout(W, H) {
+        const L = Math.pow(10, st.logL), cx = W / 2, cy = H / 2;
+        return OBJ.map(o => { const f = o.size / L; return { o, f, s: f * W, A: alphaOf(f), LA: labelA(f), cx, cy }; });
+      }
+
+      function drawZoom(c, W, H) {
+        const L = Math.pow(10, st.logL), cx = W / 2, cy = H / 2;
+        // grille : trois niveaux de puissances de dix, qui se fondent d'une décade à l'autre
+        if (st.grid) {
+          const k0 = Math.floor(st.logL);
+          for (let k = k0 - 3; k <= k0 + 2; k++) {
+            const px = Math.pow(10, k) / L * W;
+            const a = sstep(9, 42, px) * (1 - sstep(W * 0.45, W * 1.1, px)) * 0.16;
+            if (a < 0.004) continue;
+            c.strokeStyle = T(a); c.lineWidth = 1; c.beginPath();
+            const n = Math.min(120, Math.floor(Math.max(W, H) / 2 / px) + 1);
+            for (let i = -n; i <= n; i++) {
+              const x = Math.round(cx + i * px) + 0.5, y = Math.round(cy + i * px) + 0.5;
+              c.moveTo(x, 0); c.lineTo(x, H); c.moveTo(0, y); c.lineTo(W, y);
+            }
+            c.stroke();
+          }
+        }
+        // repère du centre commun
+        c.strokeStyle = T(0.25); c.lineWidth = 1; c.beginPath();
+        c.moveTo(cx - 7, cy); c.lineTo(cx + 7, cy); c.moveTo(cx, cy - 7); c.lineTo(cx, cy + 7); c.stroke();
+
+        const lay = zoomLayout(W, H);
+        const sorted = lay.slice().sort((a, b) => b.o.size - a.o.size);
+        for (const it of sorted) {
+          if (it.A < 0.01) continue;
+          const hl = st.hover === it.o.id;
+          c.save(); c.translate(cx, cy); c.scale(it.s, it.s); c.lineJoin = 'round';
+          c.globalAlpha = it.A * (hl ? 1 : 0.88);
+          it.o.draw(c, it.s, { lw: hl ? 2 : lw0, A: it.A * (hl ? 1 : 0.88), V: { W, H } });
+          c.restore();
+        }
+        // étiquettes : une rangée par objet nommé, ancrée au bord de l'objet
+        const vis = lay.filter(i => i.LA > 0.02).sort((a, b) => b.o.size - a.o.size);
+        const n = vis.length; c.font = FX.mono(W < 500 ? 10.5 : 11.5);
+        vis.forEach((it, j) => {
+          const dy = (j - (n - 1) / 2) * (W < 500 ? 22 : 24);
+          const text = `${it.o.name} · ${it.o.sizeStr}`, tw = c.measureText(text).width;
+          const lh = (it.o.lh || it.o.hh) * it.s, hw = it.o.hw * it.s;
+          let px = cx + (Math.abs(dy) < lh ? Math.min(hw, 1e5) * Math.sqrt(1 - (dy / lh) * (dy / lh)) : 0);
+          px = Math.max(px, cx + 6);
+          const lx = Math.min(px + 14, W - tw - 14), clamped = lx < px + 14;
+          const yy = cy + dy;
+          c.globalAlpha = it.LA;
+          if (!clamped) {
+            c.strokeStyle = T(0.55); c.lineWidth = 1; c.beginPath(); c.moveTo(px, yy); c.lineTo(lx - 3, yy); c.stroke();
+            c.fillStyle = EN(1); circ(c, px, yy, 2.2); c.fill();
+          }
+          FX.tag(c, text, Math.max(lx, 10), yy, st.hover === it.o.id ? C.ener : C.texte, 'left', 'middle', W < 500 ? 10.5 : 11.5);
+        });
+        c.globalAlpha = 1;
+        drawScaleBar(c, W, H, L);
+      }
+
+      function drawScaleBar(c, W, H, L) {
+        const n = Math.floor(Math.log10(0.24 * L) + 1e-9); let v = Math.pow(10, n);
+        for (const m of [5, 2]) if (m * Math.pow(10, n) <= 0.24 * L) { v = m * Math.pow(10, n); break; }
+        const px = v / L * W, x = W < 500 ? 18 : 28, y = H - 34;
+        c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath();
+        c.moveTo(x, y - 5); c.lineTo(x, y + 5); c.moveTo(x + px, y - 5); c.lineTo(x + px, y + 5); c.moveTo(x, y); c.lineTo(x + px, y); c.stroke();
+        FX.tag(c, lenStr(v, 1), x + px / 2, y - 12, C.texte, 'center', 'middle', 12);
+      }
+
+      /* ====================== MODE LINÉAIRE / LOG ====================== */
+      function setLL(lin) {
+        if (st.ll.lin === lin) return;
+        st.ll.lin = lin;
+        st.ll.anim = { from: st.ll.u, to: lin ? 0 : 1, t: 0, dur: FX.reduced ? 0.15 : 0.9 };
+        if (ui.bLin) { ui.bLin.setAttribute('aria-pressed', String(lin)); ui.bLog.setAttribute('aria-pressed', String(!lin)); ui.rng.disabled = !lin; ui.gMax.style.opacity = lin ? 1 : 0.4; }
+        updatePanel(true);
+      }
+      function buildLL() {
+        body.innerHTML = `
+          <div><p class="eyebrow">Mode · <b>Linéaire ou log</b></p>
+          <h2 data-k="h2"></h2>
+          <p class="txt">Une échelle linéaire ajoute des longueurs égales (+1 m, +1 m…). Une échelle logarithmique multiplie (×10, ×10…) : chaque décade occupe la même longueur.</p></div>
+          <div class="meas">
+            <div class="row"><span class="lab">Axe</span><span class="val" data-k="ax"></span></div>
+            <div class="row"><span class="lab">Borne max</span><span class="val" data-k="max" style="font-size:16px"></span></div>
+            <div class="row"><span class="lab">Objets sur l'axe</span><span class="val" data-k="on"></span></div>
+            <div class="row"><span class="lab">Écrasés près de 0</span><span class="val" data-k="crush"></span></div>
+            <div class="row"><span class="lab">Du plus petit au plus grand</span><span class="val" data-k="span" style="font-size:16px"></span></div>
+          </div>
+          <p class="note">C'est pourquoi les planches de la série affichent des échelles en log quand les grandeurs couvrent plusieurs ordres de grandeur.</p>`;
+        body.querySelectorAll('[data-k]').forEach(e => ui[e.dataset.k] = e);
+        const g1 = group('Axe');
+        ui.bLin = newBtn('Linéaire', 'Axe linéaire', () => setLL(true));
+        ui.bLog = newBtn('Logarithmique', 'Axe logarithmique', () => setLL(false));
+        g1.appendChild(ui.bLin); g1.appendChild(ui.bLog);
+        ui.gMax = group('Borne max (linéaire)');
+        const w = document.createElement('div'); w.className = 'ec-rng';
+        w.innerHTML = `<input type="range" min="-9" max="13" step="0.01" value="${st.ll.maxLog}" aria-label="Borne maximale de l'axe linéaire, échelle logarithmique"><span class="rv" data-k="rv" style="min-width:64px"></span>`;
+        ui.gMax.appendChild(w);
+        ui.rng = w.querySelector('input'); ui.rv = w.querySelector('.rv');
+        ui.rng.addEventListener('input', () => { st.ll.maxLog = +ui.rng.value; }, { signal });
+        ui.bLin.setAttribute('aria-pressed', String(st.ll.lin)); ui.bLog.setAttribute('aria-pressed', String(!st.ll.lin));
+        ui.rng.disabled = !st.ll.lin; ui.gMax.style.opacity = st.ll.lin ? 1 : 0.4;
+      }
+
+      function llGeom(W, H) {
+        const m = W < 500 ? 20 : 48;
+        return { x0: m, x1: W - m, axisY: W < 500 ? H - 88 : Math.round(Math.max(H - 98 - 0.1 * H, hb + 300)) };
+      }
+      /** Positions des repères pour le tracé courant */
+      function llLayout(W, H) {
+        const g = llGeom(W, H), u = st.ll.u, maxL = Math.pow(10, st.ll.maxLog), span = g.x1 - g.x0, sp = (span - (W < 500 ? 75 : 95)) / OBJ.length;
+        let rank = 0;
+        return OBJ.map((o, i) => {
+          const fl = o.size / maxL, inLin = fl <= 1 + 1e-9;
+          const xl = g.x0 + Math.min(fl, 1 + 26 / span) * span;
+          const xg = g.x0 + (o.logS + 10) / 23 * span;
+          const sLog = g.x0 + (i + 0.5) * sp;
+          const sLin = inLin ? g.x0 + (rank++ + 0.5) * sp : sLog;
+          return { o, inLin, mx: lerp(xl, xg, u), a: lerp(inLin ? 1 : 0, 1, u), sx: lerp(sLin, sLog, u), xl };
+        });
+      }
+
+      function drawLL(c, W, H) {
+        const g = llGeom(W, H), { x0, x1, axisY } = g, u = st.ll.u, span = x1 - x0, small = W < 500;
+        const maxL = Math.pow(10, st.ll.maxLog), pu = pexp(maxL), unitLin = (PRE[pu] || '') + 'm';
+        c.lineCap = 'butt';
+        // axe
+        c.strokeStyle = T(0.65); c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, axisY); c.lineTo(x1, axisY); c.stroke();
+        // graduations linéaires
+        const aLin = 1 - u, aLog = u;
+        const tk = FX.niceTicks(0, maxL / Math.pow(10, pu), 5), dec = Math.max(0, -Math.floor(Math.log10(tk.step) + 1e-9));
+        if (aLin > 0.01) {
+          c.globalAlpha = aLin; c.fillStyle = C.texte2; c.font = FX.mono(small ? 10 : 11); c.textAlign = 'center'; c.textBaseline = 'top';
+          c.strokeStyle = T(0.7); c.beginPath();
+          tk.forEach(v => { const x = x0 + v * Math.pow(10, pu) / maxL * span; c.moveTo(x, axisY); c.lineTo(x, axisY + 6); });
+          c.stroke();
+          tk.forEach(v => { const x = x0 + v * Math.pow(10, pu) / maxL * span; c.fillText(fmt(v, dec), x, axisY + 10); });
+          c.textAlign = 'right'; c.fillText(unitLin, x1 + 2, axisY - 18);
+          FX.arrow(c, x1 - 10, axisY, x1 + 8, axisY, T(0.65), 1.2, 7);
+          if (tk.length > 2) braceBelow(c, x0 + tk[1] * Math.pow(10, pu) / maxL * span, x0 + tk[2] * Math.pow(10, pu) / maxL * span, axisY + 34, '+' + fmt(tk.step, dec) + ' ' + unitLin, small);
+          c.globalAlpha = 1;
+        }
+        // graduations logarithmiques
+        if (aLog > 0.01) {
+          const pxd = span / 23, step = Math.max(1, Math.ceil((small ? 34 : 44) / pxd));
+          c.globalAlpha = aLog; c.font = FX.mono(small ? 10 : 11); c.textAlign = 'center'; c.textBaseline = 'top';
+          for (let e = -10; e <= 13; e++) {
+            const x = x0 + (e + 10) / 23 * span, lab = ((e + 10) % step === 0) || e === 13;
+            c.strokeStyle = T(lab ? 0.75 : 0.45); c.beginPath(); c.moveTo(x, axisY); c.lineTo(x, axisY + (lab ? 8 : 5)); c.stroke();
+            if (lab && !(e === 13 && step > 1 && (e + 10) % step !== 0 && (13 - (Math.floor(23 / step) * step - 10)) < step * 0.7)) { c.fillStyle = C.texte2; c.fillText('10' + sup(e), x, axisY + 11); }
+          }
+          c.textAlign = 'right'; c.fillStyle = C.texte2; c.fillText('m', x1 + 14, axisY - 18);
+          const xa = x0 + 10 / 23 * span, xb = x0 + 11 / 23 * span;
+          braceBelow(c, xa, xb, axisY + 34, '×10', small);
+          c.globalAlpha = 1;
+        }
+        // repères
+        const lay = llLayout(W, H), baseY = axisY - 40, fs = small ? 10 : 11.5;
+        c.font = FX.mono(fs);
+        lay.forEach(it => {
+          if (it.a < 0.03) return;
+          const hl = st.hover === it.o.id;
+          c.globalAlpha = it.a;
+          c.strokeStyle = hl ? EN(0.9) : T(0.38); c.lineWidth = 1;
+          c.beginPath(); c.moveTo(it.mx, axisY - 4); c.lineTo(it.sx, baseY); c.stroke();
+          c.save(); c.translate(it.sx + 2, baseY - 4); c.rotate(-0.96);
+          c.textAlign = 'left'; c.textBaseline = 'middle';
+          const t = small ? it.o.name : `${it.o.name} · ${it.o.sizeStr}`;
+          c.lineJoin = 'round'; c.lineWidth = 3.5; c.strokeStyle = C.fond; c.strokeText(t, 0, 0);
+          c.fillStyle = hl ? C.ener : C.texte; c.fillText(t, 0, 0); c.restore();
+          c.fillStyle = C.fond; c.strokeStyle = hl ? C.ener : C.accent; c.lineWidth = 1.6;
+          circ(c, it.mx, axisY, 4.2); c.fill(); c.stroke();
+        });
+        c.globalAlpha = 1;
+        // annotations de la version linéaire
+        if (aLin > 0.01) {
+          const out = lay.filter(i => !i.inLin).length, crush = lay.filter(i => i.inLin && (i.xl - x0) < 3).length;
+          c.globalAlpha = aLin; c.font = FX.mono(small ? 10.5 : 12); c.textBaseline = 'middle';
+          c.textAlign = 'right'; c.fillStyle = C.ener;
+          c.fillText(out ? `→ ${out} objet${out > 1 ? 's' : ''} hors de l'axe` : 'tout tient sur l\'axe', x1, axisY - 34 - (small ? 0 : 0) + (small ? 18 : 0) - (small ? 0 : 0));
+          if (crush > 0) {
+            c.textAlign = 'left'; c.fillStyle = C.texte2;
+            c.fillText(`${crush} objets à moins de 3 px de zéro`, x0, axisY + (small ? 64 : 70));
+          }
+          c.globalAlpha = 1;
+        }
+      }
+      function braceBelow(c, xa, xb, y, text, small) {
+        c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath();
+        c.moveTo(xa, y - 5); c.lineTo(xa, y); c.lineTo(xb, y); c.lineTo(xb, y - 5); c.stroke();
+        c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'top'; c.font = FX.mono(small ? 10.5 : 12);
+        c.fillText(text, (xa + xb) / 2, y + 4);
+      }
+
+      /* ====================== MODE PRÉCISION ====================== */
+      const INST = {
+        cm: { g: 1, d: 0, name: 'Règle au cm', gl: '1 cm' },
+        mm: { g: 0.1, d: 1, name: 'Règle au mm', gl: '1 mm' },
+        pied: { g: 0.01, d: 2, name: 'Pied à coulisse', gl: '0,1 mm' },
+      };
+      function buildPrec() {
+        body.innerHTML = `
+          <div><p class="eyebrow">Mode · <b>Précision</b></p>
+          <h2>Mesurer, c'est choisir une graduation</h2>
+          <p class="txt">La valeur mesurée est le nombre qu'on lit ; la précision dit ce que l'instrument peut distinguer : la moitié de sa plus petite graduation.</p></div>
+          <div class="meas">
+            <div class="row"><span class="lab">Plus petite graduation</span><span class="val" data-k="grad"></span></div>
+            <div class="row"><span class="lab">Lecture</span><span class="val" data-k="read"></span></div>
+            <div class="row"><span class="lab">Incertitude (½ graduation)</span><span class="val" data-k="unc"></span></div>
+            <div class="row"><span class="lab">On écrit</span><span class="val ener" data-k="wr"></span></div>
+            <div class="row"><span class="lab">Chiffres significatifs</span><span class="val" data-k="sig"></span></div>
+            <div class="row"><span class="lab">En mètres</span><span class="val" data-k="si" style="font-size:16px"></span></div>
+            <div class="row"><span class="lab">Longueur réelle</span><span class="val" data-k="real"></span></div>
+          </div>
+          <p class="eq" data-k="eq"></p>
+          <p class="note" data-k="nt"></p>`;
+        body.querySelectorAll('[data-k]').forEach(e => ui[e.dataset.k] = e);
+        const g1 = group('Instrument');
+        ui.ib = {};
+        Object.keys(INST).forEach(k => { ui.ib[k] = newBtn(INST[k].name, 'Graduation : ' + INST[k].gl, () => setInst(k)); ui.ib[k].setAttribute('aria-pressed', String(st.pr.inst === k)); g1.appendChild(ui.ib[k]); });
+        const g2 = group('Objet');
+        g2.appendChild(newBtn('autre objet', 'Tirer une autre longueur (touche N)', newObj));
+        ui.rb = newBtn('révéler la longueur', 'Afficher la vraie longueur', () => { st.pr.reveal = !st.pr.reveal; ui.rb.innerHTML = st.pr.reveal ? 'cacher la longueur' : 'révéler la longueur'; ui.rb.setAttribute('aria-pressed', String(st.pr.reveal)); });
+        ui.rb.setAttribute('aria-pressed', String(st.pr.reveal)); g2.appendChild(ui.rb);
+      }
+      function setInst(k) {
+        st.pr.inst = k; Object.keys(ui.ib || {}).forEach(i => ui.ib[i].setAttribute('aria-pressed', String(i === k)));
+      }
+      function newObj() { st.pr.len = Math.round((3 + Math.random() * 9) * 1000) / 1000; st.pr.reveal = false; if (ui.rb) { ui.rb.innerHTML = 'révéler la longueur'; ui.rb.setAttribute('aria-pressed', 'false'); } }
+      /** Quantités de lecture pour une longueur L (cm) avec l'instrument courant */
+      function readOut(L) {
+        const I = INST[st.pr.inst], r = Math.round(L / I.g + 1e-9) * I.g, u = I.g / 2;
+        const rs = fmt(r, I.d), sig = rs.replace(/[^0-9]/g, '').replace(/^0+/, '').length || 1;
+        return { I, r, u, rs, sig };
+      }
+
+      function drawPrec(c, W, H, dt) {
+        const P = st.pr; P.shown += (P.len - P.shown) * (1 - Math.exp(-dt * (FX.reduced ? 30 : 8)));
+        if (Math.abs(P.len - P.shown) < 1e-4) P.shown = P.len;
+        const L = P.shown, small = W < 500, mx = small ? 18 : 44, ppc = (W - 2 * mx) / 13.2, x0 = mx;
+        const { I, r, u } = readOut(L), caliper = P.inst === 'pied';
+        const ph = small ? 15 : 24, yP = Math.max(hb + 44, H * 0.3), rh = small ? 54 : 84, yR = yP + ph / 2 + (caliper ? 30 : 22);
+        const xL = x0 + L * ppc, X = v => x0 + v * ppc;
+        c.lineCap = 'butt'; c.lineJoin = 'miter';
+        // règle
+        c.fillStyle = T(0.05); c.fillRect(x0, yR, 13.2 * ppc, rh);
+        c.strokeStyle = T(0.55); c.lineWidth = 1; c.strokeRect(x0 + 0.5, yR + 0.5, 13.2 * ppc, rh);
+        c.strokeStyle = T(0.8); c.beginPath();
+        if (P.inst === 'cm') {
+          for (let i = 0; i <= 13; i++) { c.moveTo(Math.round(X(i)) + 0.5, yR); c.lineTo(Math.round(X(i)) + 0.5, yR + rh * 0.42); }
+        } else {
+          for (let i = 0; i <= 132; i++) {
+            const len = i % 10 === 0 ? 0.42 : i % 5 === 0 ? 0.3 : 0.18, x = Math.round(X(i / 10)) + 0.5;
+            if (ppc / 10 < 3 && i % 5 && i % 10) continue;
+            c.moveTo(x, yR); c.lineTo(x, yR + rh * len);
+          }
+        }
+        c.stroke();
+        c.fillStyle = C.texte; c.font = FX.mono(small ? 11 : 13); c.textAlign = 'center'; c.textBaseline = 'middle';
+        for (let i = 0; i <= 13; i++) c.fillText(String(i), X(i), yR + rh * (caliper ? 0.56 : 0.66));
+        c.fillStyle = C.texte2; c.textAlign = 'right'; c.font = FX.mono(11); c.fillText('cm', x0 + 13.2 * ppc - 4, yR + rh - 9);
+        // bande d'incertitude et lecture
+        const bw = Math.max(2, 2 * u * ppc);
+        c.fillStyle = EN(0.2); c.fillRect(X(r) - bw / 2, yR, bw, rh);
+        c.strokeStyle = EN(0.95); c.lineWidth = 1.2; c.beginPath(); c.moveTo(X(r) - bw / 2, yR); c.lineTo(X(r) - bw / 2, yR + rh); c.moveTo(X(r) + bw / 2, yR); c.lineTo(X(r) + bw / 2, yR + rh); c.stroke();
+        // crayon (extrémité exacte en xL)
+        const tipL = Math.min(small ? 18 : 26, (xL - x0) * 0.3);
+        c.fillStyle = EN(0.8); c.fillRect(x0, yP - ph / 2, xL - x0 - tipL, ph);
+        c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(x0, yP - ph / 2, xL - x0 - tipL, 3);
+        c.fillStyle = T(0.75); poly(c, [[xL - tipL, yP - ph / 2], [xL, yP], [xL - tipL, yP + ph / 2]], true); c.fill();
+        c.fillStyle = '#2a2f38'; poly(c, [[xL - tipL * 0.3, yP - ph * 0.15], [xL, yP], [xL - tipL * 0.3, yP + ph * 0.15]], true); c.fill();
+        c.strokeStyle = C.texte; c.lineWidth = 1; c.strokeRect(x0 + 0.5, yP - ph / 2 + 0.5, xL - x0 - tipL - 1, ph - 1);
+        // trait de visée de l'extrémité réelle
+        c.strokeStyle = T(0.6); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(xL, yP); c.lineTo(xL, yR + rh); c.stroke(); c.setLineDash([]);
+        c.strokeStyle = T(0.6); c.beginPath(); c.moveTo(x0 + 0.5, yP - ph / 2 - 4); c.lineTo(x0 + 0.5, yR + rh); c.stroke();
+        // pied à coulisse : mâchoires et vernier
+        if (caliper) {
+          c.fillStyle = C.fond2; c.strokeStyle = T(0.8);
+          c.fillRect(x0 - 9, yP - ph / 2 - 10, 9, yR + rh - (yP - ph / 2 - 10)); c.strokeRect(x0 - 8.5, yP - ph / 2 - 9.5, 8, yR + rh - (yP - ph / 2 - 9.5) - 0);
+          c.fillRect(xL, yP - ph / 2 - 10, 9, yR + rh - (yP - ph / 2 - 10)); c.strokeRect(xL + 0.5, yP - ph / 2 - 9.5, 8, yR + rh - (yP - ph / 2 - 9.5));
+          const pv = yR + rh * 0.6, pw = 9.2 * (ppc / 10) + 8;
+          c.fillStyle = AC(0.12); c.fillRect(xL, pv, pw, rh * 0.4); c.strokeStyle = AC(0.7); c.strokeRect(xL + 0.5, pv + 0.5, pw, rh * 0.4 - 1);
+          c.beginPath(); c.strokeStyle = AC(0.9);
+          for (let j = 0; j <= 10; j++) { const x = xL + j * 0.09 * ppc; c.moveTo(x, pv); c.lineTo(x, pv + rh * 0.18); }
+          c.stroke();
+        }
+        // étiquette de la lecture
+        const lab = `${fmt(r, I.d)} ± ${fmt(u, I.d + 1)} cm`;
+        FX.tag(c, lab, clamp(X(r), x0 + 70, W - mx - 70), yR + rh + 15, C.ener, 'center', 'middle', small ? 11 : 12.5);
+        const ly = yR + rh + 38;
+        if (caliper) drawLoupe(c, W, H, L, mx, ly, small);
+        else drawBars(c, W, H, I, r, u, mx, ly, small);
+      }
+
+      function drawBars(c, W, H, I, r, u, mx, ly, small) {
+        const BW = small ? 120 : 250, lab = small ? 64 : 88, bx = mx + lab, ch = small ? 11.5 : 12.5;
+        if (H - ly < 70) return;
+        c.fillStyle = C.texte2; c.font = FX.mono(11); c.textAlign = 'left'; c.textBaseline = 'middle';
+        c.fillText('Même nombre, deux messages', mx, ly);
+        const cx = bx + BW / 2;
+        [[fmt(r, I.d), 2 * u, 0], [fmt(r, I.d + 1), 2 * u / 10, 1]].forEach(([t, w, k]) => {
+          const y = ly + 26 + k * 26, ww = Math.max(2.5, w / (2 * u) * BW);
+          c.fillStyle = C.texte; c.font = FX.mono(ch); c.textAlign = 'left'; c.fillText(t + ' cm', mx, y);
+          c.fillStyle = T(0.08); c.fillRect(bx, y - 9, BW, 18);
+          c.fillStyle = k ? EN(0.95) : EN(0.55); c.fillRect(cx - ww / 2, y - 6, ww, 12);
+          c.fillStyle = C.texte2; c.font = FX.mono(11); c.fillText('± ' + fmt(k ? u / 10 : u, I.d + 1 + k), bx + BW + 10, y);
+        });
+      }
+
+      function drawLoupe(c, W, H, L, mx, ly, small) {
+        const bh = Math.min(H - ly - 30, small ? 100 : 150), w = W - 2 * mx;
+        if (bh < 70) return;
+        const Lmm = L * 10, red = Math.round(Lmm * 10 + 1e-9) / 10, M = Math.floor(red + 1e-9), n = Math.round((red - M) * 10);
+        const a = Lmm - 1.6, pxmm = w / 12, X = mm => mx + (mm - a) * pxmm;
+        c.save(); c.beginPath(); c.rect(mx, ly, w, bh); c.clip();
+        c.fillStyle = C.fond2; c.fillRect(mx, ly, w, bh);
+        const mid = ly + bh * 0.5;
+        // échelle principale (mm)
+        c.strokeStyle = T(0.8); c.lineWidth = 1; c.fillStyle = C.texte; c.font = FX.mono(small ? 10 : 11.5); c.textAlign = 'center'; c.textBaseline = 'top';
+        for (let m = Math.ceil(a); m <= a + 12; m++) {
+          const x = Math.round(X(m)) + 0.5, hit = m === M + n;
+          c.strokeStyle = hit ? C.ener : T(0.8); c.lineWidth = hit ? 1.6 : 1;
+          c.beginPath(); c.moveTo(x, ly); c.lineTo(x, mid - 6); c.stroke();
+          c.fillStyle = hit ? C.ener : C.texte; c.fillText(String(m), x, ly + 4);
+        }
+        // vernier : 10 divisions sur 9 mm, zéro au bout du crayon
+        c.fillStyle = AC(0.1); c.fillRect(X(Lmm) - 3, mid, 9 * pxmm + 6, bh * 0.5 - 2);
+        c.strokeStyle = AC(0.6); c.strokeRect(X(Lmm) - 2.5, mid + 0.5, 9 * pxmm + 5, bh * 0.5 - 3);
+        for (let j = 0; j <= 10; j++) {
+          const x = Math.round(X(Lmm + 0.9 * j)) + 0.5, hit = j === n;
+          c.strokeStyle = hit ? C.ener : AC(0.95); c.lineWidth = hit ? 1.6 : 1;
+          c.beginPath(); c.moveTo(x, mid + (hit ? -6 : 0)); c.lineTo(x, mid + 13); c.stroke();
+          if (j % 5 === 0 || hit) { c.fillStyle = hit ? C.ener : C.texte; c.textBaseline = 'top'; c.fillText(String(j), x, mid + 17); }
+        }
+        // bande d'incertitude : ± 0,05 mm
+        c.fillStyle = EN(0.2); const bw = 0.1 * pxmm, xr = X(M + n); c.fillRect(xr - bw / 2, ly, bw, bh);
+        // extrémité réelle du crayon
+        c.strokeStyle = T(0.7); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(Lmm), ly); c.lineTo(X(Lmm), mid + 2); c.stroke(); c.setLineDash([]);
+        c.restore();
+        c.strokeStyle = T(0.4); c.lineWidth = 1; c.strokeRect(mx + 0.5, ly + 0.5, w - 1, bh - 1);
+        const t = `loupe ×${Math.round(pxmm / (((W - 2 * mx) / 13.2) / 10))}  ·  ${M} mm + ${n} × 0,1 mm = ${fmt(red, 1)} mm`;
+        FX.tag(c, t, mx, ly + bh + 14, C.texte2, 'left', 'middle', small ? 10 : 11);
+      }
+
+      /* ====================== PANNEAU ====================== */
+      function updatePanel(force) {
+        if (st.mode === 'zoom') {
+          const L = Math.pow(10, st.logL), p = pexp(L);
+          setTxt(ui.dec, `${lenStr(L, 2)}`);
+          setTxt(ui.sci, sciM(L));
+          { const n = Math.round(st.logL); if (ui.ord._n !== n) { ui.ord._n = n; ui.ord.innerHTML = FX.k(String.raw`10^{${n < 0 ? '-' : ''}${Math.abs(n)}}\ \mathrm{m}`, `10${sup(n)} m`); } }
+          const r = L / HUMAIN;
+          setTxt(ui.hum, r >= 1 ? `le champ = ${nbr(r)} humain${r >= 2 ? 's' : ''}` : `1 humain = ${nbr(1 / r)} champs`);
+          ui.preEls.forEach(e => e.classList.toggle('on', +e.dataset.p === p));
+          const names = zoomLayout(cv.w, cv.h).filter(i => i.LA > 0.5).sort((a, b) => a.o.size - b.o.size).map(i => i.o.name);
+          setTxt(ui.in, names.length ? 'Dans le champ : ' + names.join(', ') + '.' : 'Rien de nommé à cette échelle : le champ est entre deux objets.');
+          if (ui.rv) setTxt(ui.rv, lenStr(L, 2));
+          if (ui.rng && document.activeElement !== ui.rng) ui.rng.value = st.logL; else if (ui.rng && st.tween) ui.rng.value = st.logL;
+        } else if (st.mode === 'loglin') {
+          const lin = st.ll.lin, maxL = Math.pow(10, st.ll.maxLog);
+          setTxt(ui.h2, lin ? 'Presque tout s\'écrase sur zéro' : 'Chaque décade a la même longueur');
+          setTxt(ui.ax, lin ? 'linéaire' : 'logarithmique');
+          setTxt(ui.max, lin ? lenStr(maxL, 2) : '10⁻¹⁰ m à 10¹³ m');
+          const on = OBJ.filter(o => lin ? o.size <= maxL : true), span = cv.w - 2 * (cv.w < 500 ? 20 : 48);
+          setTxt(ui.on, `${on.length} <i>sur 15</i>`);
+          const crush = lin ? on.filter(o => o.size / maxL * span < 3).length : 0;
+          setTxt(ui.crush, lin ? `${crush} <i>objets (&lt; 3 px)</i>` : '<i>aucun : ×10 = même longueur</i>');
+          setTxt(ui.span, FX.sci(OBJ[14].size / OBJ[0].size, 1) + ' <i>fois</i>');
+          if (ui.rv) setTxt(ui.rv, lenStr(maxL, 2));
+        } else {
+          const P = st.pr, { I, r, u, rs, sig } = readOut(P.len), d = I.d;
+          setTxt(ui.grad, I.gl);
+          setTxt(ui.read, `${rs} <i>cm</i>`);
+          setTxt(ui.unc, `± ${fmt(u, d + 1)} <i>cm</i>`);
+          setTxt(ui.wr, `${rs} ± ${fmt(u, d + 1)} <i>cm</i>`);
+          setTxt(ui.sig, String(sig));
+          setTxt(ui.si, FX.sci(r / 100, sig) + ' <i>m</i>');
+          setTxt(ui.real, P.reveal ? `${fmt(P.len, 3)} <i>cm</i>` : '<i>cachée</i>');
+          const r2 = fmt(r, d + 1), u2 = u / 10;
+          const key = rs + '|' + d;
+          if (ui.eq._k !== key) {
+            ui.eq._k = key;
+            const tx = (v, n) => fmt(v, n).replace(',', '{,}').replace('−', '-');
+            const line = (a, na, lo, hi, nn) => FX.k(String.raw`\mathbf{${tx(a, na)}}\ \mathrm{cm}\ \Rightarrow\ [\,${tx(lo, nn)}\ ;\ ${tx(hi, nn)}\,]`, `${fmt(a, na)} cm : de ${fmt(lo, nn)} à ${fmt(hi, nn)}`);
+            ui.eq.innerHTML = line(r, d, r - u, r + u, d + 1) + '<br>' + line(r, d + 1, r - u2, r + u2, d + 2) + '<br><span class="dim">Le zéro final est une information : il promet une mesure dix fois plus précise.</span>';
+          }
+          const inside = Math.abs(P.len - r) <= u + 1e-9;
+          setTxt(ui.nt, P.reveal ? `Écart réel : ${fmt(Math.abs(P.len - r), d + 2)} cm, ${inside ? 'inférieur ou égal à' : 'supérieur à'} l'incertitude ${fmt(u, d + 1)} cm.` : 'Révèle la vraie longueur pour vérifier que l\'écart reste sous l\'incertitude.');
+        }
+      }
+
+      /* ====================== ENTRÉES ====================== */
+      function wheelDelta(e) { return e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1); }
+      scene.addEventListener('wheel', e => {
+        if (st.mode !== 'zoom') return;
+        e.preventDefault(); FX.tip(null); st.hover = null; // l'infobulle ne suit pas le zoom : elle décrirait un objet disparu
+        if (st.tween) { st.target = st.logL; st.tween = null; }
+        st.target = clamp(st.target + wheelDelta(e) * 0.0025, LMIN, LMAX);
+      }, { passive: false, signal });
+
+      const pt = e => { const r = cv.el.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+      let tipTimer = 0;
+      signal.addEventListener('abort', () => clearTimeout(tipTimer));
+      function hoverAt(e, p) {
+        let html = null, id = null;
+        if (st.mode === 'zoom') {
+          const W = cv.w, H = cv.h, lay = zoomLayout(W, H).filter(i => i.A > 0.3).sort((a, b) => a.o.size - b.o.size);
+          for (const it of lay) if (hitTest(it.o, p.x - it.cx, p.y - it.cy, it.s)) { id = it.o.id; html = tipHtml(it.o); break; }
+        } else if (st.mode === 'loglin') {
+          const g = llGeom(cv.w, cv.h), near = llLayout(cv.w, cv.h).filter(i => i.a > 0.5 && Math.hypot(p.x - i.mx, p.y - g.axisY) < 11);
+          if (near.length) { id = near[0].o.id; html = near.length === 1 ? tipHtml(near[0].o) : `<b>${near.length} objets ici</b>` + near.map(i => `${i.o.name} <span>${i.o.sizeStr}</span>`).join('<br>'); }
+        }
+        st.hover = id;
+        if (html) FX.tip(html, e.clientX, e.clientY); else FX.tip(null);
+        cv.el.style.cursor = id ? 'help' : (st.mode === 'zoom' ? 'ns-resize' : 'default');
+      }
+      scene.addEventListener('pointerdown', e => {
+        if (e.button > 0 || e.target !== cv.el) return;
+        st.dragging = { y: e.clientY, id: e.pointerId, moved: false, x: e.clientX };
+        try { cv.el.setPointerCapture(e.pointerId); } catch (_) { /* sans effet */ }
+      }, { signal });
+      scene.addEventListener('pointermove', e => {
+        const d = st.dragging;
+        if (d && d.id === e.pointerId) {
+          if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) d.moved = true;
+          if (d.moved && st.mode === 'zoom') {
+            st.tween = null; st.logL = st.target = clamp(st.logL + (e.clientY - d.y) * 0.012, LMIN, LMAX); d.y = e.clientY; FX.tip(null); st.hover = null;
+          }
+          return;
+        }
+        if (e.pointerType === 'mouse' && e.target === cv.el) hoverAt(e, pt(e));
+      }, { signal });
+      const up = e => {
+        const d = st.dragging; if (!d || d.id !== e.pointerId) return;
+        st.dragging = null;
+        if (!d.moved && e.pointerType !== 'mouse') {
+          hoverAt(e, pt(e)); clearTimeout(tipTimer); tipTimer = setTimeout(() => { FX.tip(null); st.hover = null; }, 3000);
+        }
+      };
+      scene.addEventListener('pointerup', up, { signal });
+      scene.addEventListener('pointercancel', up, { signal });
+      scene.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { FX.tip(null); st.hover = null; } }, { signal });
+
+      window.addEventListener('keydown', e => {
+        if (FX.typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+        const tg = e.target, onBtn = tg.tagName === 'BUTTON', onRng = tg.tagName === 'INPUT';
+        const k = e.key;
+        if (st.mode === 'zoom' && (k === '+' || k === '=' || k === '-' || k === '_' || k === 'ArrowUp' || k === 'ArrowDown')) {
+          if (onRng && (k === 'ArrowUp' || k === 'ArrowDown')) return;
+          zoomBy(k === '+' || k === '=' || k === 'ArrowUp' ? -1 : 1); e.preventDefault();
+          // « + » = zoom avant = champ ÷10
+        } else if (k === ' ' && st.mode === 'loglin' && !onBtn && !onRng) { setLL(!st.ll.lin); e.preventDefault(); }
+        else if (st.mode === 'prec' && (k === 'n' || k === 'N')) newObj();
+        else if (st.mode === 'prec' && (k === 'ArrowLeft' || k === 'ArrowRight') && !onRng) {
+          const ks = Object.keys(INST), i = clamp(ks.indexOf(st.pr.inst) + (k === 'ArrowRight' ? 1 : -1), 0, 2); setInst(ks[i]); e.preventDefault();
+        }
+      }, { signal });
+
+      /* ====================== BOUCLE ====================== */
+      let pTick = 0;
+      FX.loop((dt) => {
+        const c = cv.ctx, W = cv.w, H = cv.h;
+        // dynamique du zoom
+        if (st.tween) {
+          const tw = st.tween; tw.t += dt;
+          const k = clamp(tw.t / tw.dur, 0, 1); st.logL = tw.from + (tw.to - tw.from) * ease(k); st.target = st.logL;
+          if (k >= 1) { st.logL = st.target = tw.to; st.tween = null; }
+        } else if (Math.abs(st.target - st.logL) > 1e-5) {
+          st.logL += (st.target - st.logL) * (1 - Math.exp(-dt * (FX.reduced ? 40 : 13)));
+        }
+        const an = st.ll.anim;
+        if (an) { an.t += dt; const k = clamp(an.t / an.dur, 0, 1); st.ll.u = lerp(an.from, an.to, ease(k)); if (k >= 1) { st.ll.u = an.to; st.ll.anim = null; } }
+
+        c.clearRect(0, 0, W, H);
+        c.save();
+        if (st.mode === 'zoom') drawZoom(c, W, H);
+        else if (st.mode === 'loglin') drawLL(c, W, H);
+        else drawPrec(c, W, H, dt);
+        c.restore();
+        pTick += dt;
+        if (pTick > 0.05 || st.tween) { pTick = 0; updatePanel(false); }
+      }, signal);
+
+      setMode('zoom');
+    },
+    unmount() { /* tout est attaché au signal d'annulation */ },
+  });
+})();
+</script>
+<script>
+/* ============ Toy B · Graphiques — « Le réservoir » ============ */
+(() => {
+  'use strict';
+  const C = FX.C, fmt = FX.fmt, fmtS = FX.fmtS, rgba = FX.rgba, sgn = FX.signColor;
+  const TAU = Math.PI * 2;
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const CAP = 100, TMAX = 10, KT = 2.5; // capacité (L), durée de l'axe (min), coefficient de vidange (L^½/min)
+  const V4 = 100;                       // volume de départ du mode non linéaire
+  const V3 = 50;                        // volume de départ du mode aire
+
+  /** Nombre pour KaTeX : virgule décimale, vrai signe moins */
+  const tx = (v, d = 1) => fmt(v, d).replace(',', '{,}').replace('−', '-');
+  const col = c => c.replace('#', '');
+  const kc = (c, s) => String.raw`\textcolor{#${col(c)}}{${s}}`;
+
+  /* ---------- le modèle : volume V(t) et débit effectif Q(t) ---------- */
+  const P = { // réglages propres à chaque mode
+    prop: { Q: 5, t1: 3 },
+    pente: { V0: 30, Q: 6 },
+    aire: { Q: 4 },
+  };
+  /** Volume (L) à l'instant t pour les modes en forme fermée ; borné à [0, CAP] */
+  function Vclosed(mode, t) {
+    if (mode === 'prop') return clamp(P.prop.Q * t, 0, CAP);
+    if (mode === 'pente') return clamp(P.pente.V0 + P.pente.Q * t, 0, CAP);
+    const s = Math.max(0, Math.sqrt(V4) - KT * t / 2); // solution exacte : √V = √V₀ − k t / 2
+    return s * s;
+  }
+  /** Débit effectif : tombe à 0 quand le réservoir est plein ou vide */
+  function Qclosed(mode, t) {
+    if (mode === 'prop' || mode === 'pente') {
+      const p = P[mode], raw = (mode === 'prop' ? 0 : p.V0) + p.Q * t;
+      if (p.Q > 0 && raw < CAP) return p.Q;
+      if (p.Q < 0 && raw > 0) return p.Q;
+      return 0;
+    }
+    return Vclosed('non', t) > 1e-9 ? -KT * Math.sqrt(Vclosed('non', t)) : 0;
+  }
+
+  FX.register('graphiques', {
+    num: 'B', titre: 'Graphiques', titreHtml: 'Le <em>réservoir</em>',
+    hints: [
+      '<kbd>Espace</kbd> lecture / pause · <kbd>R</kbd> réinitialiser',
+      '<kbd>↑</kbd> <kbd>↓</kbd> débit Q ± 0,5 L/min',
+      '<kbd>←</kbd> <kbd>→</kbd> reculer / avancer dans le temps',
+      '<span data-gr-clic>Clic ou glisser sur le graphe</span>',
+    ],
+    mount(ctx) {
+      const { scene, panel, controls, signal } = ctx;
+      const st = {
+        mode: 'prop', t: 0, playing: !FX.reduced, phase: 0,
+        // mode « aire » : historique des pas (instant, débit effectif sur le pas, volume)
+        h: { t: [0], q: [0], v: [V3] },
+        qNow: 0, hover: null, drag: false,
+      };
+      let hb = 100;
+      const refreshHead = () => { try { hb = FX.headRect().bottom; } catch (e) { hb = 100; } };
+      const cv = FX.canvas(scene, signal, () => refreshHead());
+      cv.el.style.touchAction = 'none';
+      refreshHead();
+
+      /* ---------- style local ---------- */
+      const style = document.createElement('style');
+      style.textContent = `
+        .gr-rng{display:flex;align-items:center;gap:8px}
+        .gr-rng input{width:140px}
+        .gr-ctl{display:contents}
+        .gr-eq{display:flex;flex-direction:column;gap:3px}
+        .gr-eq .dim{font-size:12.5px}
+        @media (max-width:860px){.gr-rng input{width:104px}}`;
+      panel.appendChild(style);
+      const body = document.createElement('div'); body.style.cssText = 'display:flex;flex-direction:column;gap:16px';
+      panel.appendChild(body);
+
+      const modeList = [
+        { id: 'prop', label: 'Proportionnalité', title: 'V = Q · t, une droite par l\'origine' },
+        { id: 'pente', label: 'Pente', title: 'La pente est un débit' },
+        { id: 'aire', label: 'Aire', title: 'L\'aire sous Q(t) est un volume' },
+        { id: 'non', label: 'Non linéaire', title: 'Un réservoir qui se vide par un trou' },
+      ];
+      const modesCtl = FX.modes(controls, modeList, st.mode, id => setMode(id), signal);
+      const extra = document.createElement('div'); extra.className = 'gr-ctl'; controls.appendChild(extra);
+
+      let ui = {}, sliders = [];
+      const setTxt = (el, s) => { if (el && el._v !== s) { el._v = s; el.innerHTML = s; } };
+      const setKey = (el, key, build) => { if (el && el._k !== key) { el._k = key; el.innerHTML = build(); } };
+
+      /* ---------- contrôles ---------- */
+      const ICON = {
+        play: '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z"/></svg>',
+        pause: '<svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2.5" y="1.5" width="3.2" height="11"/><rect x="8.3" y="1.5" width="3.2" height="11"/></svg>',
+        reset: '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1.5V0L4 2.6 7 5.2V3.5A3.9 3.9 0 1 1 3.1 7.4H1.2A5.8 5.8 0 1 0 7 1.5z"/></svg>',
+      };
+      function btn(html, title, fn, cls = '') {
+        const b = document.createElement('button'); b.className = 'btn ' + cls; b.innerHTML = html; b.title = title; b.setAttribute('aria-label', title);
+        b.addEventListener('click', e => { fn(e); if (e.detail) b.blur(); }, { signal });
+        return b;
+      }
+      function group(label) { const g = document.createElement('div'); g.className = 'grp'; if (label) g.innerHTML = `<span class="gl">${label}</span>`; extra.appendChild(g); return g; }
+      function slider(g, label, min, max, step, get, set, unit, dec = 1) {
+        const w = document.createElement('div'); w.className = 'gr-rng';
+        w.innerHTML = `<input type="range" min="${min}" max="${max}" step="${step}" aria-label="${label}"><span class="rv" style="min-width:76px"></span>`;
+        const inp = w.querySelector('input'), rv = w.querySelector('.rv');
+        const sync = () => { if (document.activeElement !== inp || true) inp.value = get(); rv.textContent = fmt(get(), dec) + ' ' + unit; };
+        inp.addEventListener('input', () => { set(+inp.value); sync(); }, { signal });
+        g.appendChild(w); sliders.push(sync); sync();
+        return sync;
+      }
+      function syncSliders() { sliders.forEach(f => f()); }
+
+      function setPlaying(v) {
+        st.playing = v;
+        if (ui.play) { ui.play.innerHTML = (v ? ICON.pause : ICON.play); ui.play.title = v ? 'Pause (Espace)' : 'Lecture (Espace)'; ui.play.setAttribute('aria-label', ui.play.title); }
+      }
+      function togglePlay() {
+        if (!st.playing && st.t >= endTime() - 1e-6) reset();
+        setPlaying(!st.playing);
+      }
+      const endTime = () => st.mode === 'non' ? 8 : TMAX; // la vidange se termine à 8 min
+      function reset() {
+        st.t = 0; st.h = { t: [0], q: [0], v: [V3] }; st.qNow = 0;
+        setPlaying(!FX.reduced);
+      }
+
+      function setMode(id) {
+        st.mode = id; modesCtl.set(id); st.hover = null; FX.tip(null);
+        const ae = document.activeElement; if (ae && ae.tagName === 'BUTTON' && !ae.matches(':focus-visible')) ae.blur();
+        extra.innerHTML = ''; ui = {}; sliders = [];
+        refreshHead();
+        // aide « clic sur le graphe » : son effet dépend du mode, et le mode Aire n'en a pas
+        const hc = document.querySelector('[data-gr-clic]');
+        if (hc) {
+          const txt = { prop: 'Clic sur le graphe : déplacer le repère t₁', pente: 'Clic ou glisser sur le graphe : choisir l\'instant', non: 'Glisser sur la courbe : déplacer la sonde' }[id];
+          hc.parentElement.style.display = txt ? '' : 'none'; if (txt) hc.textContent = txt;
+        }
+        const gp = group('Temps');
+        ui.play = btn(ICON.pause, 'Pause (Espace)', togglePlay, 'ico');
+        gp.appendChild(ui.play);
+        gp.appendChild(btn(ICON.reset, 'Réinitialiser (R)', reset, 'ico'));
+        ui.tl = document.createElement('span'); ui.tl.className = 'rv'; ui.tl.style.minWidth = '86px'; gp.appendChild(ui.tl);
+        if (id === 'prop') {
+          slider(group('Débit Q'), 'Débit Q en litres par minute', 1, 10, 0.5, () => P.prop.Q, v => P.prop.Q = v, 'L/min');
+        } else if (id === 'pente') {
+          slider(group('Volume initial V₀'), 'Volume initial en litres', 0, 100, 1, () => P.pente.V0, v => P.pente.V0 = v, 'L', 0);
+          slider(group('Débit Q'), 'Débit Q en litres par minute', -10, 10, 0.5, () => P.pente.Q, v => P.pente.Q = v, 'L/min');
+        } else if (id === 'aire') {
+          slider(group('Débit Q'), 'Débit Q en litres par minute, actif pendant la lecture', -10, 10, 0.5, () => P.aire.Q, v => P.aire.Q = v, 'L/min');
+        }
+        buildPanel(id);
+        reset();
+        body.classList.remove('swap'); void body.offsetWidth; body.classList.add('swap');
+        updatePanel();
+      }
+
+      /* ---------- panneau ---------- */
+      function buildPanel(id) {
+        const heads = {
+          prop: ['Proportionnalité', 'Le temps double, le volume double', 'Le réservoir part vide et le robinet débite toujours Q. Le volume est donc proportionnel au temps : une droite qui passe par l\'origine.'],
+          pente: ['Pente', 'La pente est un débit', 'Entre deux instants, le volume change de ΔV pendant Δt. Leur rapport est la pente, et son unité est celle de V divisée par celle de t.'],
+          aire: ['Aire', 'L\'aire, c\'est le volume ajouté', 'Le graphe montre maintenant le débit Q(t). Change Q pendant la lecture : la courbe fait des marches, et l\'aire sous elle, de 0 à t, est le volume ajouté.'],
+          non: ['Non linéaire', 'Une pente qui change', 'Un trou vide le réservoir : plus le niveau baisse, moins l\'eau est poussée. Plus la courbe est raide, plus le volume change vite ; la pente change d\'un point à l\'autre.'],
+        };
+        const rows = {
+          prop: [['q', 'Débit Q'], ['t1', 'Repère t₁'], ['v1', 'V(t₁)'], ['v2', 'V(2t₁)'], ['ratio', 'V ÷ t'], ['now', 'Maintenant']],
+          pente: [['v0', 'Ordonnée à l\'origine V₀'], ['q', 'Débit Q'], ['slope', 'Pente ΔV / Δt'], ['v', 'Volume V(t)'], ['ratio', 'V ÷ t']],
+          aire: [['q', 'Débit Q maintenant'], ['t', 'Temps t'], ['area', 'Aire signée = ΔV'], ['split', 'au-dessus / dessous'], ['v', 'Volume V']],
+          non: [['t', 'Temps t'], ['v', 'Volume V'], ['slope', 'Pente de la tangente'], ['k', 'Coefficient k']],
+        };
+        const h = heads[id];
+        body.innerHTML = `
+          <div><p class="eyebrow">Mode · <b>${h[0]}</b></p><h2>${h[1]}</h2><p class="txt">${h[2]}</p></div>
+          <div class="meas">${rows[id].map(r => `<div class="row"><span class="lab">${r[1]}</span><span class="val" data-k="${r[0]}"></span></div>`).join('')}</div>
+          <div class="eq gr-eq" data-k="eq"></div>
+          <p class="note" data-k="nt"></p>`;
+        body.querySelectorAll('[data-k]').forEach(e => ui[e.dataset.k] = e);
+      }
+
+      const unit = (v, u) => `${v} <i>${u}</i>`;
+      const colored = (v, s) => `<span style="color:${sgn(v, 1e-9)}">${s}</span>`;
+
+      function updatePanel() {
+        const m = st.mode, t = st.t, end = endTime();
+        if (ui.tl) setTxt(ui.tl, `t = ${fmt(t, 1)} min`);
+        if (m === 'prop') {
+          const Q = P.prop.Q, t1 = P.prop.t1, v1 = Vclosed('prop', t1), v2 = Vclosed('prop', 2 * t1);
+          setTxt(ui.q, unit(fmt(Q, 1), 'L/min'));
+          setTxt(ui.t1, unit(fmt(t1, 1), 'min'));
+          setTxt(ui.v1, unit(fmt(v1, 1), 'L'));
+          setTxt(ui.v2, unit(fmt(v2, 1), 'L'));
+          setTxt(ui.ratio, unit(fmt(v1 / t1, 1) + ' = ' + fmt(v2 / (2 * t1), 1), 'L/min'));
+          setTxt(ui.now, `${fmt(t, 1)} <i>min</i> · ${fmt(Vclosed('prop', t), 1)} <i>L</i>`);
+          setKey(ui.eq, `${Q}|${t1}`, () =>
+            FX.k(String.raw`V = Q \cdot t`, 'V = Q · t') +
+            FX.k(String.raw`t:\ ${tx(t1)} \to ${tx(2 * t1)}\ \mathrm{min}\ \Rightarrow\ V:\ ${tx(v1)} \to ${tx(v2)}\ \mathrm{L}`, `t : ${fmt(t1, 1)} → ${fmt(2 * t1, 1)} min ⇒ V : ${fmt(v1, 1)} → ${fmt(v2, 1)} L`) +
+            `<span class="dim">Le temps double, le volume double : ×2.</span>`);
+          setTxt(ui.nt, 'Clique sur le graphe pour déplacer t₁. Le rapport V ÷ t reste égal à Q partout sur la droite : c\'est ce qui définit la proportionnalité.');
+        } else if (m === 'pente') {
+          const { V0, Q } = P.pente, ta = clamp(t, 0, TMAX - 1), dV = Vclosed('pente', ta + 1) - Vclosed('pente', ta), V = Vclosed('pente', t);
+          setTxt(ui.v0, unit(fmt(V0, 0), 'L'));
+          setTxt(ui.q, unit(fmt(Q, 1), 'L/min'));
+          setTxt(ui.slope, colored(dV, unit(fmtS(dV, 1), 'L/min')));
+          setTxt(ui.v, unit(fmt(V, 1), 'L'));
+          setTxt(ui.ratio, t > 0.05 ? unit(fmt(V / t, 1), 'L/min') : '<i>—</i>');
+          setKey(ui.eq, `${dV.toFixed(2)}`, () =>
+            FX.k(String.raw`\text{pente} = \dfrac{\Delta V}{\Delta t}`, 'pente = ΔV / Δt') +
+            FX.k(String.raw`= \dfrac{${kc(sgn(dV), tx(dV) + String.raw`\ \mathrm{L}`)}}{1\ \mathrm{min}} = ${kc(sgn(dV), tx(dV) + String.raw`\ \mathrm{L/min}`)}`, `= ${fmt(dV, 1)} L / 1 min = ${fmt(dV, 1)} L/min`));
+          setTxt(ui.nt, V0 === 0 ? 'V₀ = 0 : la droite passe par l\'origine, la relation est proportionnelle (V ÷ t reste égal à Q).' :
+            'V₀ ≠ 0 : la relation est linéaire, mais pas proportionnelle. V ÷ t change au fil du temps, alors que la pente, elle, reste égale à Q.' +
+            (Math.abs(dV - Q) > 0.01 ? ' Ici, le réservoir se remplit ou se vide à fond : le niveau ne peut plus bouger, la pente est plus faible, voire nulle.' : ''));
+        } else if (m === 'aire') {
+          const h = st.h, n = h.t.length, V = h.v[n - 1], A = V - V3;
+          let ap = 0, an = 0;
+          for (let i = 1; i < n; i++) { const dq = h.q[i] * (h.t[i] - h.t[i - 1]); if (dq > 0) ap += dq; else an += dq; }
+          setTxt(ui.q, colored(st.qNow, unit(fmtS(st.qNow, 1), 'L/min')));
+          setTxt(ui.t, unit(fmt(t, 1), 'min'));
+          setTxt(ui.area, colored(A, unit(fmtS(A, 1), 'L')));
+          setTxt(ui.split, `<span style="color:${C.pos}">${fmtS(ap, 1)}</span> / <span style="color:${C.neg}">${fmtS(an, 1)}</span> <i>L</i>`);
+          setTxt(ui.v, unit(fmt(V, 1), 'L'));
+          setKey(ui.eq, 'a', () =>
+            FX.k(String.raw`\text{aire} = Q \times \Delta t`, 'aire = Q × Δt') +
+            FX.k(String.raw`\dfrac{\mathrm{L}}{\mathrm{min}} \times \mathrm{min} = \mathrm{L}`, 'L/min × min = L'));
+          setTxt(ui.nt, 'Le réservoir part de 50 L. Au-dessus de l\'axe l\'aire ajoute de l\'eau (orange), en dessous elle en retire (bleu). Si le réservoir se remplit ou se vide, le débit effectif tombe à 0.');
+        } else {
+          const V = Vclosed('non', t), Q = Qclosed('non', t);
+          setTxt(ui.t, unit(fmt(t, 1), 'min'));
+          setTxt(ui.v, unit(fmt(V, 1), 'L'));
+          setTxt(ui.slope, colored(Q, unit(fmtS(Q, 1), 'L/min')));
+          setTxt(ui.k, unit('2,5', 'L<sup>½</sup>/min'));
+          setKey(ui.eq, 'n', () =>
+            FX.k(String.raw`Q = -k\sqrt{V}`, 'Q = −k √V') +
+            FX.k(String.raw`\sqrt{V} = \sqrt{V_0} - \dfrac{k}{2}\,t`, '√V = √V₀ − k t / 2'));
+          setTxt(ui.nt, 'Glisse la sonde sur la courbe (ou ← →). La pente de la tangente est le débit à cet instant : raide au début (−25 L/min), presque plate à la fin. Vidange complète en 8 min.');
+        }
+      }
+
+      /* ====================== MISE EN PAGE ====================== */
+      function layout(W, H) {
+        const wide = W >= 700, L = { wide };
+        if (wide) {
+          const zw = Math.round(W * 0.4);
+          const tw = clamp(zw * 0.5, 120, 200);
+          let th = clamp(H - 250, 200, 460), ty = Math.max(hb + 104, Math.round((H - th) / 2) + 20);
+          if (ty + th > H - 84) th = H - 84 - ty;
+          L.tank = { x: Math.round((zw - tw) / 2) + 18, y: ty, w: tw, h: Math.max(th, 140) };
+          const px = zw + 62, pw = W - px - 28;
+          let ph = Math.min(H - 110, pw * 0.85); ph = Math.max(ph, 220);
+          L.plot = { x: px, y: Math.round((H - ph) / 2) - 8, w: pw, h: ph };
+        } else {
+          const tzh = clamp(0.34 * (H - hb), 112, 200), th = clamp(tzh - 66, 52, 130);
+          L.tank = { x: 50, y: hb + 52, w: clamp(Math.round(W * 0.34), 100, 150), h: th };
+          const py = hb + tzh + 30;
+          L.plot = { x: 46, y: py, w: W - 46 - 16, h: Math.max(100, H - py - 36) };
+        }
+        return L;
+      }
+
+      /* ====================== RÉSERVOIR ====================== */
+      function stream(c, x, y0, y1, w, color) {
+        if (y1 - y0 < 1 || w < 0.4) return;
+        c.fillStyle = rgba(color, 0.5); c.fillRect(x - w / 2, y0, w, y1 - y0);
+        c.strokeStyle = rgba(C.texte, 0.55); c.lineWidth = Math.max(0.8, w * 0.22); c.setLineDash([6, 9]); c.lineDashOffset = -st.phase * 70;
+        c.beginPath(); c.moveTo(x, y0); c.lineTo(x, y1); c.stroke(); c.setLineDash([]); c.lineDashOffset = 0;
+      }
+      const wFlow = q => 1 + 0.6 * Math.abs(q);
+
+      function currentState() {
+        const m = st.mode;
+        if (m === 'aire') { const h = st.h, n = h.t.length; return { V: h.v[n - 1], Q: st.qNow }; }
+        return { V: Vclosed(m, st.t), Q: Qclosed(m, st.t) };
+      }
+
+      function drawTank(c, L, W, H) {
+        const T = L.tank, { V, Q } = currentState(), m = st.mode, small = !L.wide;
+        const bx = T.x, by = T.y + T.h, bw = T.w, th = T.h;
+        const yOf = v => by - v / CAP * th;
+        const yL = yOf(V);
+        const nx = bx + bw * 0.5; // axe du robinet et de l'évacuation
+        // eau
+        if (V > 0.05) {
+          const amp = Math.min(2.6, 0.6 + 0.5 * Math.sqrt(Math.abs(Q))), w = st.phase * 5;
+          const g = c.createLinearGradient(0, yL, 0, by); g.addColorStop(0, rgba(C.accent, 0.38)); g.addColorStop(1, rgba(C.accent, 0.14));
+          c.fillStyle = g; c.beginPath(); c.moveTo(bx + 1, by - 1);
+          for (let x = bx + 1; x <= bx + bw - 1; x += 3) c.lineTo(x, yL + (Math.abs(Q) > 0.01 ? amp * Math.sin(x * 0.09 + w) : 0));
+          c.lineTo(bx + bw - 1, by - 1); c.closePath(); c.fill();
+          c.strokeStyle = rgba(C.accent, 0.95); c.lineWidth = 1.5; c.beginPath();
+          for (let x = bx + 1; x <= bx + bw - 1; x += 3) { const y = yL + (Math.abs(Q) > 0.01 ? amp * Math.sin(x * 0.09 + w) : 0); x === bx + 1 ? c.moveTo(x, y) : c.lineTo(x, y); }
+          c.stroke();
+        }
+        // repères propres au mode
+        c.font = FX.mono(small ? 9.5 : 10.5); c.textBaseline = 'middle';
+        const mark = (v, label, color, alpha, dash) => {
+          c.strokeStyle = rgba(color, alpha); c.lineWidth = 1; if (dash) c.setLineDash([3, 3]);
+          c.beginPath(); c.moveTo(bx, yOf(v)); c.lineTo(bx + bw, yOf(v)); c.stroke(); c.setLineDash([]);
+          c.fillStyle = rgba(color, Math.min(1, alpha + 0.2)); c.textAlign = 'left'; c.fillText(label, bx + bw + 6, yOf(v));
+        };
+        if (m === 'prop') {
+          const t1 = P.prop.t1;
+          mark(Vclosed('prop', t1), 'V(t₁)', C.ener, st.t >= t1 ? 0.9 : 0.3, true);
+          mark(Vclosed('prop', 2 * t1), 'V(2t₁)', C.ener, st.t >= 2 * t1 ? 0.9 : 0.3, true);
+        } else if (m === 'pente') {
+          mark(P.pente.V0, 'V₀', C.texte2, 0.9, true);
+        } else if (m === 'aire') {
+          const y0 = yOf(V3), y1 = yL, cc = sgn(V - V3, 0.02);
+          c.strokeStyle = rgba(C.texte2, 0.7); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(bx - 8, y0); c.lineTo(bx + bw + 8, y0); c.stroke(); c.setLineDash([]);
+          if (Math.abs(y1 - y0) > 1) {
+            const xb = bx + bw + 12;
+            c.strokeStyle = cc; c.lineWidth = 2; c.beginPath(); c.moveTo(xb, y0); c.lineTo(xb, y1); c.stroke();
+            c.fillStyle = cc; c.textAlign = 'left'; c.fillText('ΔV = ' + fmtS(V - V3, 1) + ' L', xb + 6, (y0 + y1) / 2);
+          }
+        }
+        // parois et graduations (réservoir ouvert dessus)
+        c.strokeStyle = rgba(C.texte, 0.9); c.lineWidth = 1.6; c.lineJoin = 'round';
+        c.beginPath(); c.moveTo(bx, T.y - 4); c.lineTo(bx, by); c.lineTo(bx + bw, by); c.lineTo(bx + bw, T.y - 4); c.stroke();
+        c.fillStyle = C.texte2; c.font = FX.mono(small ? 9.5 : 10.5); c.textAlign = 'right'; c.textBaseline = 'middle';
+        const step = small ? 50 : 20;
+        for (let v = 0; v <= CAP; v += step) {
+          const y = yOf(v); c.strokeStyle = rgba(C.texte, 0.55); c.lineWidth = 1; c.beginPath(); c.moveTo(bx - 6, y); c.lineTo(bx, y); c.stroke();
+          c.fillText(String(v), bx - 9, y);
+        }
+        c.textAlign = 'right'; c.fillText('L', bx - 9, T.y - 14);
+        // robinet : tuyau, buse, volant (il tourne avec le débit positif)
+        const open = m === 'non' ? 0 : clamp(Q / 10, 0, 1), py = T.y - (small ? 24 : 40), pxL = bx - (small ? 8 : 26);
+        c.strokeStyle = rgba(C.texte, 0.9); c.lineWidth = 1.6; c.fillStyle = C.fond;
+        c.beginPath(); c.moveTo(pxL - (small ? 22 : 40), py - 5); c.lineTo(nx - 6, py - 5); c.lineTo(nx - 6, py + 5); c.lineTo(pxL - (small ? 22 : 40), py + 5); c.stroke();
+        c.beginPath(); c.moveTo(nx - 8, py + 5); c.lineTo(nx - 8, py + 12); c.lineTo(nx + 8, py + 12); c.lineTo(nx + 8, py - 5); c.lineTo(nx - 6, py - 5); c.stroke();
+        const hx = pxL + (small ? 6 : 8), hy = py - 14, ang = (m === 'non' ? 0 : Math.max(0, Q)) / 10 * Math.PI * 0.9;
+        c.beginPath(); c.moveTo(hx, hy + 9); c.lineTo(hx, py - 5); c.stroke();
+        c.save(); c.translate(hx, hy); c.rotate(ang); c.strokeStyle = rgba(open > 0 ? C.accent : C.texte2, 1); c.beginPath(); c.moveTo(-9, 0); c.lineTo(9, 0); c.stroke(); c.restore();
+        // orifice d'évacuation au fond
+        c.strokeStyle = rgba(C.texte, 0.9); c.lineWidth = 1.6;
+        c.beginPath(); c.moveTo(nx - 5, by); c.lineTo(nx - 5, by + 10); c.moveTo(nx + 5, by); c.lineTo(nx + 5, by + 10); c.stroke();
+        // filets : épaisseur proportionnelle à |Q|
+        if (Q > 0.01) stream(c, nx, py + 12, Math.max(py + 12, V > 0.05 ? yL : by), wFlow(Q), C.accent);
+        if (Q < -0.01) stream(c, nx, by + 10, Math.min(H - 20, by + 10 + (small ? 18 : 56)), wFlow(Q), C.accent);
+        // étiquettes de lecture
+        const fs = small ? 10.5 : 12;
+        if (small) FX.tag(c, `Q = ${fmtS(Q, 1)} L/min`, nx + 16, py + 2, sgn(Q, 1e-9), 'left', 'middle', fs);
+        else if (m !== 'non') FX.tag(c, `Q = ${fmtS(Q, 1)} L/min`, bx - 20, py - 38, sgn(Q, 1e-9), 'left', 'middle', fs);
+        else FX.tag(c, `Q = ${fmtS(Q, 1)} L/min`, bx + bw + 8, by + 22, sgn(Q, 1e-9), 'left', 'middle', fs);
+        const vy = clamp(yL, T.y + 8, by - 8);
+        if (small) FX.tag(c, `V = ${fmt(V, 1)} L`, bx + bw + 8, by - 10, C.texte, 'left', 'middle', fs); else FX.tag(c, `V = ${fmt(V, 1)} L`, bx, by + 30, C.texte, 'left', 'middle', fs);
+        L.hit = { x: bx - 40, y: T.y - 70, w: bw + 80, h: th + 100, tank: { x: bx, y: T.y, w: bw, h: th }, nozzle: { x: pxL - 40, y: py - 24, w: nx - pxL + 56, h: 48 } };
+      }
+
+      /* ====================== GRAPHE ====================== */
+      /** Cadre : grille, axes, graduations rondes, titres avec unités */
+      function frame(c, r, ymin, ymax, ticks, ytitle, xlabels, small) {
+        const X = t => r.x + t / TMAX * r.w, Y = v => r.y + r.h - (v - ymin) / (ymax - ymin) * r.h;
+        c.lineWidth = 1; c.strokeStyle = rgba(C.trait, 1);
+        c.beginPath();
+        FX.niceTicks(0, TMAX, 5).forEach(t => { const x = Math.round(X(t)) + 0.5; c.moveTo(x, r.y); c.lineTo(x, r.y + r.h); });
+        ticks.forEach(v => { const y = Math.round(Y(v)) + 0.5; c.moveTo(r.x, y); c.lineTo(r.x + r.w, y); });
+        c.stroke();
+        c.strokeStyle = rgba(C.texte, 0.75); c.beginPath(); c.moveTo(r.x + 0.5, r.y - 4); c.lineTo(r.x + 0.5, r.y + r.h + 0.5); c.lineTo(r.x + r.w + 4, r.y + r.h + 0.5); c.stroke();
+        c.fillStyle = C.texte2; c.font = FX.mono(small ? 10 : 11);
+        c.textAlign = 'right'; c.textBaseline = 'middle';
+        ticks.forEach(v => c.fillText(fmt(v, 0), r.x - 7, Y(v)));
+        if (xlabels) { c.textAlign = 'center'; c.textBaseline = 'top'; FX.niceTicks(0, TMAX, 5).forEach(t => c.fillText(fmt(t, 0), X(t), r.y + r.h + 7)); }
+        c.fillStyle = C.texte; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.font = FX.mono(small ? 11 : 12);
+        c.fillText(ytitle, r.x - (small ? 40 : 46), r.y - 10);
+        if (xlabels) { c.textAlign = 'right'; c.textBaseline = 'top'; c.fillText('t (min)', r.x + r.w, r.y + r.h + (small ? 22 : 26)); }
+        return { X, Y };
+      }
+      function trace(c, f, X, Y, t0, t1, n = 140) {
+        c.beginPath();
+        for (let i = 0; i <= n; i++) { const t = t0 + (t1 - t0) * i / n, x = X(t), y = Y(f(t)); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+      }
+      function dot(c, x, y, r, color, ring) {
+        c.fillStyle = ring ? C.fond : color; c.strokeStyle = color; c.lineWidth = 1.8; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.stroke();
+      }
+
+      function drawGraph(c, L, W, H) {
+        const m = st.mode, r = L.plot, small = !L.wide, t = st.t;
+        c.save(); c.lineJoin = 'round';
+        if (m === 'aire') drawAire(c, L, small);
+        else {
+          const yt = FX.niceTicks(0, CAP, 5), { X, Y } = frame(c, r, 0, 104, yt, 'V (L)', true, small);
+          L.X = X; L.Y = Y; L.ymin = 0; L.ymax = 104;
+          const f = tt => Vclosed(m, tt), end = endTime();
+          // courbe complète (modèle), puis la partie déjà parcourue
+          c.strokeStyle = rgba(C.texte, 0.28); c.lineWidth = 1.6; c.setLineDash([4, 5]); trace(c, f, X, Y, 0, m === 'non' ? 8 : TMAX); c.stroke(); c.setLineDash([]);
+          c.strokeStyle = C.texte; c.lineWidth = 2.4; trace(c, f, X, Y, 0, Math.min(t, TMAX), Math.max(2, Math.round(160 * t / TMAX))); c.stroke();
+          // réservoir plein ou vide : pente nulle, dite honnêtement
+          if (m !== 'non') {
+            const p = P[m], V0 = m === 'prop' ? 0 : p.V0;
+            if (p.Q !== 0) {
+              const ts = p.Q > 0 ? (CAP - V0) / p.Q : (0 - V0) / p.Q;
+              if (ts > 0.05 && ts < TMAX - 0.1) FX.tag(c, p.Q > 0 ? 'plein : pente nulle' : 'vide : pente nulle', X(ts) + 8, Y(p.Q > 0 ? CAP : 0) + (p.Q > 0 ? 14 : -12), C.texte2, 'left', 'middle', small ? 10 : 11);
+              if (ts > 0.05 && ts < TMAX - 0.1) dot(c, X(ts), Y(p.Q > 0 ? CAP : 0), 3, C.texte2, true);
+            } else if (V0 === 0 && m === 'pente') { /* droite horizontale à 0 */ }
+          }
+          if (m === 'prop') drawProp(c, L, X, Y, small);
+          else if (m === 'pente') drawPente(c, L, X, Y, small);
+          else drawNon(c, L, X, Y, small);
+          // tête de lecture
+          if (t > 0) { c.strokeStyle = rgba(C.ener, 0.55); c.lineWidth = 1; c.beginPath(); c.moveTo(X(t), r.y); c.lineTo(X(t), r.y + r.h); c.stroke(); }
+          if (m !== 'non') dot(c, X(t), Y(f(t)), 4.5, C.ener, false);
+        }
+        c.restore();
+      }
+
+      function drawProp(c, L, X, Y, small) {
+        const t1 = P.prop.t1, r = L.plot, fs = small ? 10 : 11.5;
+        for (const [k, tt] of [[1, t1], [2, 2 * t1]]) {
+          const v = Vclosed('prop', tt), x = X(tt), y = Y(v), on = st.t >= tt;
+          c.strokeStyle = rgba(C.ener, on ? 0.95 : 0.5); c.lineWidth = 1; c.setLineDash([3, 4]);
+          c.beginPath(); c.moveTo(x, r.y + r.h); c.lineTo(x, y); c.lineTo(r.x, y); c.stroke(); c.setLineDash([]);
+          dot(c, x, y, 4, C.ener, !on);
+          FX.tag(c, `${fmt(v, 1)} L`, r.x + 6, y - 11, C.ener, 'left', 'middle', fs);
+          FX.tag(c, k === 1 ? `t₁ = ${fmt(tt, 1)}` : `2t₁ = ${fmt(tt, 1)}`, x, r.y + r.h - 12, C.ener, 'center', 'middle', fs);
+        }
+        // flèche « ×2 » entre les deux repères
+        const ya = Y(Vclosed('prop', t1)), yb = Y(Vclosed('prop', 2 * t1)), xm = X(2 * t1) + 14;
+        if (xm < r.x + r.w - 60) FX.tag(c, '×2 sur t, ×2 sur V', xm, (ya + yb) / 2 + 18, C.texte, 'left', 'middle', fs);
+      }
+
+      function drawPente(c, L, X, Y, small) {
+        const { V0, Q } = P.pente, ta = clamp(st.t, 0, TMAX - 1), fs = small ? 10 : 11.5;
+        const va = Vclosed('pente', ta), vb = Vclosed('pente', ta + 1), dV = vb - va, cc = sgn(dV, 1e-9);
+        // ordonnée à l'origine
+        dot(c, X(0), Y(V0), 4, C.texte, true);
+        FX.tag(c, `V₀ = ${fmt(V0, 0)} L`, X(0) + 10, Y(V0) + (Q > 0 ? 16 : -16), C.texte, 'left', 'middle', fs);
+        // triangle de pente : Δt = 1 min, ΔV
+        c.fillStyle = rgba(cc, 0.2); c.beginPath(); c.moveTo(X(ta), Y(va)); c.lineTo(X(ta + 1), Y(va)); c.lineTo(X(ta + 1), Y(vb)); c.closePath(); c.fill();
+        c.lineWidth = 1.6; c.strokeStyle = rgba(C.texte2, 1); c.beginPath(); c.moveTo(X(ta), Y(va)); c.lineTo(X(ta + 1), Y(va)); c.stroke();
+        c.strokeStyle = cc; c.lineWidth = 2.2; c.beginPath(); c.moveTo(X(ta + 1), Y(va)); c.lineTo(X(ta + 1), Y(vb)); c.stroke();
+        const up = dV >= 0;
+        FX.tag(c, 'Δt = 1 min', X(ta + 0.5), Y(va) + (up ? 13 : -13), C.texte2, 'center', 'middle', fs);
+        const flip = X(ta + 1) + 110 > L.plot.x + L.plot.w;
+        FX.tag(c, `ΔV = ${fmtS(dV, 1)} L`, X(ta + 1) + (flip ? -8 : 8), (Y(va) + Y(vb)) / 2 + (flip ? (up ? -16 : 16) : 0), cc, flip ? 'right' : 'left', 'middle', fs);
+      }
+
+      function drawNon(c, L, X, Y, small) {
+        const t = st.t, V = Vclosed('non', t), Q = Qclosed('non', t), r = L.plot, cc = sgn(Q, 1e-9), fs = small ? 10 : 11.5;
+        // tangente : segment centré sur la sonde, longueur fixe en pixels
+        const sx = r.w / TMAX, sy = r.h / (L.ymax - L.ymin), dx = sx, dy = -Q * sy, nn = Math.hypot(dx, dy), half = small ? 40 : 62;
+        const x = X(t), y = Y(V);
+        c.save(); c.beginPath(); c.rect(r.x, r.y - 6, r.w + 6, r.h + 8); c.clip();
+        c.strokeStyle = cc; c.lineWidth = 2.4; c.lineCap = 'round'; c.beginPath(); c.moveTo(x - dx / nn * half, y - dy / nn * half); c.lineTo(x + dx / nn * half, y + dy / nn * half); c.stroke();
+        c.restore();
+        c.strokeStyle = rgba(C.ener, 0.55); c.lineWidth = 1; c.beginPath(); c.moveTo(x, r.y); c.lineTo(x, r.y + r.h); c.stroke();
+        dot(c, x, y, 5.5, C.ener, false);
+        const lx = x + 12 + (small ? 0 : 6), flip = lx + 150 > r.x + r.w;
+        FX.tag(c, `pente = ${fmtS(Q, 1)} L/min`, flip ? x - 14 : lx, y - (Q < -8 ? -22 : 22) * (flip ? 1 : 1) + (Q < -8 ? 0 : 0), cc, flip ? 'right' : 'left', 'middle', fs);
+        if (t < 0.15) FX.tag(c, 'glisse la sonde', x + 14, y + 40, C.texte2, 'left', 'middle', fs);
+      }
+
+      function drawAire(c, L, small) {
+        const r = L.plot, h = st.h, n = h.t.length, t = st.t, fs = small ? 10 : 11.5;
+        const hm = Math.round(r.h * (small ? 0.58 : 0.62)), gap = small ? 30 : 38;
+        const r1 = { x: r.x, y: r.y, w: r.w, h: hm }, r2 = { x: r.x, y: r.y + hm + gap, w: r.w, h: r.h - hm - gap };
+        // débit Q(t)
+        const f1 = frame(c, r1, -10.5, 10.5, [-10, -5, 0, 5, 10], 'Q (L/min)', false, small);
+        const f2 = frame(c, r2, 0, 104, FX.niceTicks(0, CAP, small ? 2 : 4), 'V (L)', true, small);
+        L.f1 = f1; L.r1 = r1; L.f2 = f2; L.r2 = r2;
+        const { X, Y } = f1;
+        // aire signée sous Q(t)
+        for (let i = 1; i < n; i++) {
+          const q = h.q[i]; if (Math.abs(q) < 1e-9) continue;
+          const x0 = X(h.t[i - 1]), x1 = X(h.t[i]);
+          c.fillStyle = rgba(q > 0 ? C.pos : C.neg, 0.42); c.fillRect(x0, Math.min(Y(0), Y(q)), Math.max(1, x1 - x0 + 0.6), Math.abs(Y(q) - Y(0)));
+        }
+        c.strokeStyle = rgba(C.texte, 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(r1.x, Y(0) + 0.5); c.lineTo(r1.x + r1.w, Y(0) + 0.5); c.stroke();
+        // projection du débit commandé (pointillés), puis l'escalier réel
+        c.strokeStyle = rgba(C.accent, 0.4); c.lineWidth = 1.6; c.setLineDash([4, 5]); c.beginPath(); c.moveTo(X(t), Y(P.aire.Q)); c.lineTo(X(TMAX), Y(P.aire.Q)); c.stroke(); c.setLineDash([]);
+        c.strokeStyle = C.accent; c.lineWidth = 2.4; c.beginPath();
+        for (let i = 1; i < n; i++) {
+          const q = h.q[i], xa = X(h.t[i - 1]), xb = X(h.t[i]);
+          if (i === 1) c.moveTo(xa, Y(q)); else c.lineTo(xa, Y(q));
+          c.lineTo(xb, Y(q));
+        }
+        c.stroke();
+        // volume V(t) en vignette
+        const fV = f2;
+        c.strokeStyle = rgba(C.texte, 0.28); c.lineWidth = 1.2; c.setLineDash([4, 5]); c.beginPath(); c.moveTo(fV.X(0), fV.Y(V3)); c.lineTo(fV.X(TMAX), fV.Y(V3)); c.stroke(); c.setLineDash([]);
+        c.strokeStyle = C.texte; c.lineWidth = 2.2; c.beginPath();
+        for (let i = 0; i < n; i++) { const x = fV.X(h.t[i]), y = fV.Y(h.v[i]); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+        c.stroke();
+        // tête de lecture et liens entre les deux graphes
+        c.strokeStyle = rgba(C.ener, 0.55); c.lineWidth = 1; c.beginPath(); c.moveTo(X(t), r1.y); c.lineTo(X(t), r2.y + r2.h); c.stroke();
+        const V = h.v[n - 1], A = V - V3;
+        if (n > 1) dot(c, X(t), Y(st.qNow), 4.5, C.ener, false);
+        dot(c, fV.X(t), fV.Y(V), 4.5, C.ener, false);
+        c.strokeStyle = sgn(A, 0.02); c.lineWidth = 2; c.beginPath(); c.moveTo(fV.X(t) + 7, fV.Y(V3)); c.lineTo(fV.X(t) + 7, fV.Y(V)); c.stroke();
+        FX.tag(c, `aire = ${fmtS(A, 1)} L`, r1.x + r1.w - 6, r1.y + 14, sgn(A, 0.02), 'right', 'middle', small ? 11 : 12.5);
+      }
+
+      /* ====================== ENTRÉES ====================== */
+      const pt = e => { const r = cv.el.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+      const inPlot = (L, p) => { const r = L.plot; return p.x >= r.x - 14 && p.x <= r.x + r.w + 10 && p.y >= r.y - 6 && p.y <= r.y + r.h + 40; };
+      const timeAt = (L, x) => clamp((x - L.plot.x) / L.plot.w * TMAX, 0, TMAX);
+
+      function applyPointer(e) {
+        const L = layout(cv.w, cv.h), p = pt(e);
+        const t = timeAt(L, p.x), m = st.mode;
+        if (m === 'prop') { P.prop.t1 = clamp(Math.round(t * 4) / 4, 0.5, 5); }
+        else if (m === 'pente') { st.t = clamp(t, 0, TMAX); setPlaying(false); }
+        else if (m === 'non') { st.t = clamp(t, 0, 8); setPlaying(false); }
+      }
+      scene.addEventListener('pointerdown', e => {
+        if (e.button > 0 || e.target !== cv.el) return;
+        const L = layout(cv.w, cv.h), p = pt(e);
+        if (!inPlot(L, p) || st.mode === 'aire') return;
+        st.drag = e.pointerId; try { cv.el.setPointerCapture(e.pointerId); } catch (_) { /* sans effet */ }
+        applyPointer(e); FX.tip(null);
+      }, { signal });
+      scene.addEventListener('pointermove', e => {
+        if (st.drag === e.pointerId) { applyPointer(e); return; }
+        if (e.pointerType !== 'mouse' || e.target !== cv.el) return;
+        hover(e);
+      }, { signal });
+      const end = e => { if (st.drag === e.pointerId) st.drag = false; };
+      scene.addEventListener('pointerup', end, { signal });
+      scene.addEventListener('pointercancel', end, { signal });
+      scene.addEventListener('pointerleave', () => { FX.tip(null); }, { signal });
+
+      /** Infobulles : réservoir, robinet, et lecture sur le graphe */
+      function hover(e) {
+        const L = layout(cv.w, cv.h), p = pt(e), cur = currentState(), inR = (r) => r && p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+        let html = null, cursor = 'default';
+        if (L.hit && inR(L.hit.nozzle)) html = `<b>Robinet</b>Débit Q = ${fmtS(cur.Q, 1)} L/min<br><span>Plus le filet est épais, plus le débit est grand. Q est positif quand l'eau entre.</span>`;
+        else if (L.hit && inR(L.hit.tank)) html = `<b>Réservoir · 100 L</b>V = ${fmt(cur.V, 1)} L<br><span>Le volume est borné entre 0 et 100 L : à ces limites, le débit effectif est nul.</span>`;
+        else if (inPlot(L, p)) {
+          const t = timeAt(L, p.x), m = st.mode;
+          if (m === 'aire') { const h = st.h, i = h.t.findIndex(x => x >= t); if (i > 0 && t <= st.t) html = `<b>t = ${fmt(t, 1)} min</b>Q = ${fmtS(h.q[i], 1)} L/min<br>V = ${fmt(h.v[i], 1)} L`; }
+          else if (t <= (m === 'non' ? 8 : TMAX)) html = `<b>t = ${fmt(t, 1)} min</b>V = ${fmt(Vclosed(m, t), 1)} L<br><span>${m === 'non' ? 'Débit ' + fmtS(Qclosed(m, t), 1) + ' L/min' : 'Clique pour ' + (m === 'prop' ? 'placer t₁' : 'placer la tête de lecture')}</span>`;
+          cursor = m === 'aire' ? 'default' : 'crosshair';
+        }
+        cv.el.style.cursor = cursor;
+        if (html) FX.tip(html, e.clientX, e.clientY); else FX.tip(null);
+      }
+
+      const nudgeQ = d => {
+        const k = st.mode === 'prop' ? P.prop : st.mode === 'pente' ? P.pente : st.mode === 'aire' ? P.aire : null; if (!k) return;
+        const lo = st.mode === 'prop' ? 1 : -10; k.Q = clamp(Math.round((k.Q + d) * 2) / 2, lo, 10); syncSliders();
+      };
+      window.addEventListener('keydown', e => {
+        if (FX.typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+        const tg = e.target, onBtn = tg.tagName === 'BUTTON', onRng = tg.tagName === 'INPUT', k = e.key;
+        if (k === ' ' || k === 'Spacebar') { if (onBtn || onRng) return; togglePlay(); e.preventDefault(); }
+        else if (k === 'r' || k === 'R') { reset(); }
+        else if ((k === 'ArrowUp' || k === 'ArrowDown') && !onRng) { nudgeQ(k === 'ArrowUp' ? 0.5 : -0.5); e.preventDefault(); }
+        else if ((k === 'ArrowLeft' || k === 'ArrowRight') && !onRng) {
+          const d = k === 'ArrowRight' ? 0.25 : -0.25;
+          if (st.mode === 'prop') P.prop.t1 = clamp(P.prop.t1 + d, 0.5, 5);
+          else if (st.mode === 'pente' || st.mode === 'non') { st.t = clamp(st.t + d, 0, endTime()); setPlaying(false); }
+          else return;
+          e.preventDefault();
+        }
+      }, { signal });
+
+      /* ====================== BOUCLE ====================== */
+      let pTick = 0;
+      FX.loop(dt => {
+        const c = cv.ctx, W = cv.w, H = cv.h, m = st.mode;
+        st.phase += dt;
+        // avance du temps du modèle : 1 min du modèle = 1 s réelle
+        if (st.playing) {
+          const end = endTime(), t0 = st.t, t1 = Math.min(end, t0 + dt);
+          if (m === 'aire') {
+            const h = st.h, n = h.t.length, V = h.v[n - 1], q = P.aire.Q, dtm = t1 - t0;
+            const Vn = clamp(V + q * dtm, 0, CAP), qe = dtm > 1e-9 ? (Vn - V) / dtm : 0;
+            if (dtm > 1e-9) { h.t.push(t1); h.q.push(qe); h.v.push(Vn); st.qNow = qe; }
+          }
+          st.t = t1;
+          if (t1 >= end - 1e-9) setPlaying(false);
+        }
+        if (m === 'aire') { // débit effectif courant, même à l'arrêt : celui qui s'appliquerait maintenant
+          const h = st.h, V = h.v[h.t.length - 1], q = P.aire.Q;
+          if (!st.playing) st.qNow = (q > 0 && V >= CAP) || (q < 0 && V <= 0) ? 0 : q;
+        }
+        c.clearRect(0, 0, W, H);
+        const L = layout(W, H); st._L = L;
+        drawTank(c, L, W, H);
+        drawGraph(c, L, W, H);
+        updatePanel();
+      }, signal);
+
+      setMode('prop');
+      if (FX.reduced) setPlaying(false);
+    },
+    unmount() { /* tout est attaché au signal d'annulation */ },
+  });
+})();
+</script>
+<script>
+/* ============ Toy C · Vecteurs — « Une flèche, pas un nombre » ============ */
+(function () {
+  'use strict';
+  const C = FX.C, RAD = Math.PI / 180, MAXV = 10;
+  const f1 = x => FX.fmt(x, 1), s1 = x => FX.fmtS(x, 1);
+  const vec = (x, y) => `(${s1(x)} ; ${s1(y)})`;
+  let cleanup = null;
+
+  /** Courbe de Bézier cubique CSS (même easing que la charte) */
+  function bez(x1, y1, x2, y2) {
+    return t => {
+      if (t <= 0) return 0; if (t >= 1) return 1;
+      const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+      const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+      let u = t;
+      for (let i = 0; i < 8; i++) {
+        const x = ((ax * u + bx) * u + cx) * u - t, d = (3 * ax * u + 2 * bx) * u + cx;
+        if (Math.abs(x) < 1e-6 || Math.abs(d) < 1e-6) break;
+        u -= x / d;
+      }
+      return ((ay * u + by) * u + cy) * u;
+    };
+  }
+  const ease = bez(0.22, 1, 0.36, 1);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const wrap180 = a => { a = (a + 180) % 360; if (a < 0) a += 360; return a - 180; };
+  function distSeg(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1, L2 = dx * dx + dy * dy;
+    const t = L2 ? clamp(((px - x1) * dx + (py - y1) * dy) / L2, 0, 1) : 0;
+    return Math.hypot(px - x1 - t * dx, py - y1 - t * dy);
+  }
+
+  const MODES = [
+    { id: 'scalaire', label: 'Scalaire ou vecteur', title: 'Un nombre, ou une flèche ?' },
+    { id: 'composantes', label: 'Composantes', title: 'Les deux pattes d\'une flèche' },
+    { id: 'addition', label: 'Addition', title: 'A + B, bout à bout' },
+    { id: 'projection', label: 'Projection', title: 'La part de la force le long du rail' },
+  ];
+  const TXT = {
+    scalaire: ['Un nombre ne suffit pas', '« 5 m depuis ici » laisse une infinité d\'arrivées possibles : tout le cercle. Une flèche en choisit une seule, car elle ajoute une direction.'],
+    composantes: ['Deux pattes, une flèche', 'Une flèche se décrit par deux nombres : sa part le long de x et sa part le long de y. Les pattes pointillées montrent le chemin depuis l\'origine.'],
+    addition: ['Bout à bout', 'On glisse B à la pointe de A : la flèche de l\'origine à la pointe de B est la résultante R = A + B. Les composantes s\'additionnent.'],
+    projection: ['L\'ombre sur le rail', 'Seule la part de la force le long du rail fait avancer le wagon. À 90°, elle est nulle : le wagon ne bouge pas.'],
+  };
+
+  FX.register('vecteurs', {
+    num: 'C', titre: 'Vecteurs', titreHtml: 'Une flèche, <em>pas un nombre</em>',
+    hints: [
+      '<kbd>Tab</kbd> flèche active',
+      '<kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> pointe ±0,5 (m ou N)',
+      '<kbd>G</kbd> aimant de grille',
+    ],
+    mount(ctx) {
+      const { scene, panel, controls, signal } = ctx;
+      const st = {
+        mode: 'scalaire', snap: true, active: 0, dirty: true, drag: null, hover: null,
+        d: 5, fixed: true, P: [3, 4],                       // mode 1
+        A: [4, 3], B: [3, -2], k: 0, joined: false, para: false, kAnim: null,   // modes 2-3
+        F: [5, 5], phi: 20, phase: 0, fAnim: null,           // mode 4
+      };
+      const g = { ox: 0, oy: 0, s: 20, w: 0, h: 0 };
+
+      /* ---------- DOM : panneau ---------- */
+      panel.innerHTML = `<div id="vHead"></div><div class="meas" id="vMeas"></div>
+        <div id="vBarsWrap" style="position:relative;height:128px;display:none"></div>
+        <div id="vEq"></div><p class="note" id="vNote"></p>`;
+      const elHead = panel.querySelector('#vHead'), elMeas = panel.querySelector('#vMeas'),
+        elBarsWrap = panel.querySelector('#vBarsWrap'), elEq = panel.querySelector('#vEq'), elNote = panel.querySelector('#vNote');
+      let lastMeas = '', lastEq = '', lastNote = '';
+
+      /* ---------- Canevas ---------- */
+      const cv = FX.canvas(scene, signal, (w, h) => { g.w = w; g.h = h; layout(); st.dirty = true; });
+      const c = cv.ctx, el = cv.el;
+      el.style.touchAction = 'none'; el.tabIndex = 0; el.setAttribute('aria-label', 'Plan des vecteurs : saisir la pointe d\'une flèche, flèches du clavier pour la déplacer');
+      el.style.outline = 'none';
+      let bars = null;
+      bars = FX.canvas(elBarsWrap, signal, () => { st.dirty = true; });
+
+      /* Mise en page : le plan carré [-10,5 ; +10,5] se range en bas à droite, hors de la zone de l'en-tête */
+      function layout() {
+        const w = g.w, h = g.h, hr = FX.headRect(), m = 8, R = 10.5;
+        const right = w - m, bottom = h - m;
+        let s = Math.min(right - m, bottom - m) / (2 * R);
+        const top = bottom - 2 * R * s, left = right - 2 * R * s;
+        if (top < hr.bottom + 4 && left < hr.right + 8) {
+          const sx = (right - hr.right - 8) / (2 * R), sy = (bottom - hr.bottom - 4) / (2 * R);
+          s = Math.max(sx, sy);
+        }
+        s = Math.max(s, 8);
+        g.s = s; g.ox = right - R * s; g.oy = bottom - R * s;
+      }
+      document.fonts && document.fonts.ready.then(() => { layout(); st.dirty = true; });
+      const tl = setTimeout(() => { layout(); st.dirty = true; }, 400);
+      signal.addEventListener('abort', () => clearTimeout(tl));
+
+      const X = x => g.ox + x * g.s, Y = y => g.oy - y * g.s;
+      const wx = px => (px - g.ox) / g.s, wy = py => (g.oy - py) / g.s;
+      const unit = () => st.mode === 'projection' ? 'N' : 'm';
+      const snapV = v => st.snap ? Math.round(v * 2) / 2 : v;
+      const lim = v => clamp(v, -MAXV, MAXV);
+      const railU = () => [Math.cos(st.phi * RAD), Math.sin(st.phi * RAD)];
+
+      /* ---------- Poignées (pointe des flèches) ---------- */
+      function setP(x, y) {
+        if (st.fixed) {
+          const L = Math.hypot(x, y); if (L < 1e-6) return;
+          let a = Math.atan2(y, x);
+          if (st.snap) a = Math.round(a / (5 * RAD)) * 5 * RAD;
+          st.P = [st.d * Math.cos(a), st.d * Math.sin(a)];
+        } else st.P = [lim(snapV(x)), lim(snapV(y))];
+      }
+      function setRail(x, y, kb) {
+        if (Math.hypot(x, y) < 0.5) return;
+        let a = Math.atan2(y, x) / RAD;
+        if (st.snap) {
+          const r = Math.round(a / 5) * 5;
+          a = (kb && r === Math.round(st.phi / 5) * 5 && Math.abs(a - st.phi) > 0.1) ? st.phi + 5 * Math.sign(wrap180(a - st.phi)) : r;
+        }
+        st.phi = wrap180(a); syncAngle();
+      }
+      function handles() {
+        switch (st.mode) {
+          case 'scalaire': return [{ id: 'P', color: C.accent, get: () => st.P, set: setP }];
+          case 'composantes': return [{ id: 'A', color: C.accent, get: () => st.A, set: (x, y) => { st.A = [lim(snapV(x)), lim(snapV(y))]; } }];
+          case 'addition': return [
+            { id: 'A', color: C.accent, get: () => st.A, set: (x, y) => { st.A = [lim(snapV(x)), lim(snapV(y))]; } },
+            { id: 'B', color: C.lilas, get: () => [st.k * st.A[0] + st.B[0], st.k * st.A[1] + st.B[1]],
+              set: (x, y) => { st.B = [lim(snapV(x - st.k * st.A[0])), lim(snapV(y - st.k * st.A[1]))]; } }];
+          default: { const u = railU(); return [
+            { id: 'F', color: C.accent, get: () => st.F, set: (x, y) => { st.fAnim = null; st.F = [lim(snapV(x)), lim(snapV(y))]; } },
+            { id: 'rail', color: C.texte, get: () => [8.5 * u[0], 8.5 * u[1]], set: setRail }]; }
+        }
+      }
+      const hpos = h => { const p = h.get(); return [X(p[0]), Y(p[1])]; };
+
+      /* ---------- Aide à la lecture (survol) ---------- */
+      function hoverAt(px, py, touch) {
+        const hs = handles(), rad = touch ? 28 : 20;
+        let best = -1, bd = rad;
+        hs.forEach((h, i) => { const [hx, hy] = hpos(h), d = Math.hypot(px - hx, py - hy); if (d < bd) { bd = d; best = i; } });
+        if (best >= 0) return { handle: best, html: handleTip(hs[best].id) };
+        const o = [X(0), Y(0)];
+        const nearSeg = (x1, y1, x2, y2, r = 8) => distSeg(px, py, X(x1), Y(y1), X(x2), Y(y2)) < r;
+        if (Math.hypot(px - o[0], py - o[1]) < 9) return { html: `<b>Origine O</b><span>Point de départ (0 ; 0)</span>` };
+        if (st.mode === 'scalaire') {
+          const d = Math.hypot(px - o[0], py - o[1]);
+          if (nearSeg(0, 0, st.P[0], st.P[1])) return { html: `<b>Déplacement</b><span>Une grandeur (${f1(Math.hypot(...st.P))} m) et une direction</span>` };
+          if (Math.abs(d - st.d * g.s) < 8) return { html: `<b>Cercle de rayon ${f1(st.d)} m</b><span>Toutes les arrivées possibles pour « ${f1(st.d)} m »</span>` };
+        } else if (st.mode === 'composantes') {
+          const [ax, ay] = st.A;
+          if (nearSeg(0, 0, ax, 0)) return { html: `<b>Composante Ax</b><span>La part de A le long de x : ${s1(ax)} m</span>` };
+          if (nearSeg(ax, 0, ax, ay)) return { html: `<b>Composante Ay</b><span>La part de A le long de y : ${s1(ay)} m</span>` };
+          if (nearSeg(0, 0, ax, ay)) return { html: `<b>Vecteur A</b><span>Norme ${f1(Math.hypot(ax, ay))} m, direction ${FX.fmt(Math.atan2(ay, ax) / RAD, 1)}°</span>` };
+          const d = Math.hypot(px - o[0], py - o[1]), r = Math.min(34, Math.hypot(ax, ay) * g.s * 0.45);
+          if (Math.abs(d - r) < 7) return { html: `<b>Angle θ</b><span>Direction de A, mesurée depuis +x</span>` };
+        } else if (st.mode === 'addition') {
+          const [ax, ay] = st.A, tb = [st.k * ax, st.k * ay], rx = ax + st.B[0], ry = ay + st.B[1];
+          if (st.k > 0.3 || st.para) if (nearSeg(0, 0, rx, ry)) return { html: `<b>Résultante R</b><span>R = A + B, norme ${f1(Math.hypot(rx, ry))} m</span>` };
+          if (nearSeg(tb[0], tb[1], tb[0] + st.B[0], tb[1] + st.B[1])) return { html: `<b>Vecteur B</b><span>Même flèche où qu'on la pose : seule compte sa grandeur et sa direction</span>` };
+          if (nearSeg(0, 0, ax, ay)) return { html: `<b>Vecteur A</b><span>Norme ${f1(Math.hypot(ax, ay))} m</span>` };
+        } else {
+          const u = railU(), F = st.F, par = F[0] * u[0] + F[1] * u[1];
+          if (nearSeg(0, 0, par * u[0], par * u[1], 9)) return { html: `<b>F∥, projection sur le rail</b><span>La part de F qui fait avancer le wagon : ${s1(par)} N</span>` };
+          if (nearSeg(0, 0, F[0] - par * u[0], F[1] - par * u[1])) return { html: `<b>F⊥, part perpendiculaire</b><span>Appuie sur le rail : n'avance pas le wagon</span>` };
+          if (nearSeg(0, 0, F[0], F[1])) return { html: `<b>Force F</b><span>Norme ${f1(Math.hypot(...F))} N, appliquée au wagon</span>` };
+          if (Math.abs(px - o[0]) < 20 && Math.abs(py - o[1]) < 20) return { html: `<b>Wagon</b><span>Il glisse le long du rail selon F∥ seulement</span>` };
+          if (distSeg(px, py, X(-14 * u[0]), Y(-14 * u[1]), X(14 * u[0]), Y(14 * u[1])) < 8) return { html: `<b>Rail</b><span>Le wagon ne peut aller que dans cette direction</span>` };
+        }
+        return null;
+      }
+      function handleTip(id) {
+        const L = (x, y) => f1(Math.hypot(x, y));
+        switch (id) {
+          case 'P': return `<b>Pointe de la flèche</b><span>L'arrivée choisie : ${L(...st.P)} m, direction ${FX.fmt(Math.atan2(st.P[1], st.P[0]) / RAD, 0)}°</span>`;
+          case 'A': return `<b>Pointe de A</b><span>Vecteur ${vec(...st.A)} m, norme ${L(...st.A)} m</span>`;
+          case 'B': return `<b>Pointe de B</b><span>Vecteur ${vec(...st.B)} m, norme ${L(...st.B)} m</span>`;
+          case 'F': return `<b>Pointe de F</b><span>Force ${vec(...st.F)} N, norme ${L(...st.F)} N</span>`;
+          default: return `<b>Extrémité du rail</b><span>Saisir pour tourner le rail (sens positif)</span>`;
+        }
+      }
+
+      /* ---------- Pointeur ---------- */
+      const local = e => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+      el.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        const [px, py] = local(e); el.focus({ preventScroll: true });
+        const hv = hoverAt(px, py, e.pointerType === 'touch');
+        if (hv && hv.handle !== undefined) {
+          st.drag = hv.handle; st.active = hv.handle; el.setPointerCapture(e.pointerId);
+          el.style.cursor = 'grabbing'; FX.tip(null); syncActive(); st.dirty = true;
+          drag(px, py);
+        }
+      }, { signal });
+      el.addEventListener('pointermove', e => {
+        const [px, py] = local(e);
+        if (st.drag !== null) { drag(px, py); return; }
+        const hv = hoverAt(px, py, e.pointerType === 'touch');
+        st.hover = hv && hv.handle !== undefined ? hv.handle : null;
+        el.style.cursor = st.hover !== null ? 'grab' : 'default';
+        if (hv && e.pointerType !== 'touch') FX.tip(hv.html, e.clientX, e.clientY); else FX.tip(null);
+        st.dirty = true;
+      }, { signal });
+      const end = () => { if (st.drag !== null) { st.drag = null; el.style.cursor = 'default'; st.dirty = true; } };
+      el.addEventListener('pointerup', end, { signal });
+      el.addEventListener('pointercancel', end, { signal });
+      el.addEventListener('pointerleave', () => { if (st.drag === null) { FX.tip(null); st.hover = null; st.dirty = true; } }, { signal });
+      function drag(px, py) {
+        const h = handles()[st.drag]; if (!h) return;
+        h.set(wx(px), wy(py)); st.dirty = true;
+      }
+
+      /* ---------- Clavier ---------- */
+      addEventListener('keydown', e => {
+        if (e.ctrlKey || e.metaKey || e.altKey || FX.typing(e)) return;
+        const hs = handles(), onCv = e.target === el;
+        if (e.key === 'Tab' && onCv && hs.length > 1) {
+          const n = st.active + (e.shiftKey ? -1 : 1);
+          if (n >= 0 && n < hs.length) { e.preventDefault(); st.active = n; syncActive(); st.dirty = true; }
+          return;
+        }
+        if (e.key === 'g' || e.key === 'G') { toggleSnap(); e.preventDefault(); return; }
+        const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+        if (d && e.target.tagName !== 'INPUT') {
+          const h = hs[Math.min(st.active, hs.length - 1)], p = h.get();
+          if (h.id === 'rail') setRail(p[0] + d[0] * 0.5, p[1] + d[1] * 0.5, true); else h.set(p[0] + d[0] * 0.5, p[1] + d[1] * 0.5);
+          e.preventDefault(); st.dirty = true;
+        }
+      }, { signal });
+
+      /* ---------- Contrôles ---------- */
+      const mg = FX.modes(controls, MODES, st.mode, setMode, signal);
+      const opts = document.createElement('div'); opts.className = 'grp'; opts.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center';
+      controls.appendChild(opts);
+      let elAngle = null, elAngleV = null;
+      function toggleBtn(label, on) { return `<button class="btn" aria-pressed="${on}" type="button"><span class="dot"></span>${label}</button>`; }
+      function renderOpts() {
+        const m = st.mode;
+        let h = `<div class="grp"><button class="btn" id="oSnap" aria-pressed="${st.snap}" type="button" title="Aimant de grille, pas de 0,5 (touche G)"><span class="dot"></span>Aimant de grille</button></div>`;
+        if (m === 'scalaire') h += `<div class="grp"><span class="gl">Distance</span><input type="range" id="oDist" min="1" max="9" step="0.5" value="${st.d}" aria-label="Distance"><span class="rv acc" id="oDistV">${f1(st.d)} m</span>
+          <button class="btn" id="oFix" aria-pressed="${st.fixed}" type="button" title="La flèche garde la distance du curseur : on ne change que la direction"><span class="dot"></span>Longueur fixée</button></div>`;
+        if (m === 'addition' || m === 'projection') h += `<div class="grp"><span class="gl">Flèche active</span>` +
+          (m === 'addition' ? ['A', 'B'] : ['F', 'Rail']).map((n, i) => `<button class="btn" data-act="${i}" aria-pressed="${st.active === i}" type="button">${n}</button>`).join('') + `</div>`;
+        if (m === 'addition') h += `<div class="grp"><button class="btn" id="oJoin" type="button">${st.joined ? 'Remettre à l\'origine' : 'Mettre bout à bout'}</button>` +
+          toggleBtn('Parallélogramme', st.para).replace('<button class="btn"', '<button class="btn" id="oPara"') + `</div>`;
+        if (m === 'projection') h += `<div class="grp"><span class="gl">Angle du rail</span><input type="range" id="oAng" min="-180" max="180" step="5" value="${Math.round(st.phi / 5) * 5}" aria-label="Angle du rail"><span class="rv" id="oAngV"></span>
+          <button class="btn" id="oPerp" type="button">α = 90°</button></div>`;
+        opts.innerHTML = h;
+        elAngle = opts.querySelector('#oAng'); elAngleV = opts.querySelector('#oAngV'); syncAngle();
+      }
+      function syncAngle() { if (elAngle) { elAngle.value = Math.round(st.phi / 5) * 5; elAngleV.textContent = FX.fmt(st.phi, 0) + '°'; } st.dirty = true; }
+      function syncActive() { opts.querySelectorAll('[data-act]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.act === st.active))); }
+      function toggleSnap() { st.snap = !st.snap; const b = opts.querySelector('#oSnap'); if (b) b.setAttribute('aria-pressed', String(st.snap)); }
+      opts.addEventListener('click', e => {
+        const b = e.target.closest('.btn'); if (!b) return;
+        if (b.id === 'oSnap') toggleSnap();
+        else if (b.id === 'oFix') { st.fixed = !st.fixed; b.setAttribute('aria-pressed', String(st.fixed)); if (st.fixed) rescaleP(); }
+        else if (b.id === 'oPara') { st.para = !st.para; b.setAttribute('aria-pressed', String(st.para)); }
+        else if (b.id === 'oJoin') { st.joined = !st.joined; b.textContent = st.joined ? 'Remettre à l\'origine' : 'Mettre bout à bout'; animK(st.joined ? 1 : 0); }
+        else if (b.id === 'oPerp') perp();
+        else if (b.dataset.act !== undefined) { st.active = +b.dataset.act; syncActive(); }
+        st.dirty = true;
+      }, { signal });
+      opts.addEventListener('input', e => {
+        if (e.target.id === 'oDist') { st.d = +e.target.value; opts.querySelector('#oDistV').textContent = f1(st.d) + ' m'; if (st.fixed) rescaleP(); }
+        else if (e.target.id === 'oAng') { st.phi = +e.target.value; elAngleV.textContent = FX.fmt(st.phi, 0) + '°'; }
+        st.dirty = true;
+      }, { signal });
+      function rescaleP() { const L = Math.hypot(...st.P) || 1; st.P = L < 1e-6 ? [st.d, 0] : [st.P[0] / L * st.d, st.P[1] / L * st.d]; }
+
+      function setMode(id) {
+        st.mode = id; st.active = 0; FX.tip(null); st.drag = null;
+        if (id === 'scalaire' && st.fixed) rescaleP();
+        const t = TXT[id], i = MODES.findIndex(m => m.id === id);
+        elHead.innerHTML = `<p class="eyebrow"><b>Mode ${i + 1}</b> sur 4 · ${MODES[i].label}</p><h2>${t[0]}</h2><p class="txt">${t[1]}</p>`;
+        elBarsWrap.style.display = id === 'addition' ? 'block' : 'none';
+        lastMeas = lastEq = lastNote = '';
+        renderOpts(); st.dirty = true;
+      }
+
+      /* ---------- Animations ---------- */
+      function animK(to) {
+        if (FX.reduced) { st.k = to; return; }
+        st.kAnim = { from: st.k, to, t0: performance.now(), dur: 800 };
+      }
+      function perp() {
+        const th = Math.atan2(st.F[1], st.F[0]) / RAD, d = wrap180(th - st.phi);
+        const target = st.phi + (d >= 0 ? 90 : -90), L = Math.hypot(...st.F) || 5;
+        const r = Math.min(L < 1 ? 5 : L, MAXV); // reste dans le cadre : sinon l'écrêtage fausse la perpendiculaire
+        const fin = [lim(r * Math.cos(target * RAD)), lim(r * Math.sin(target * RAD))];
+        const a0 = Math.atan2(st.F[1], st.F[0]), da = wrap180(target - a0 / RAD) * RAD;
+        if (FX.reduced) { st.F = fin; return; }
+        st.fAnim = { a0, da, r, fin, t0: performance.now(), dur: 600 };
+      }
+
+      /* ---------- Dessin ---------- */
+      function lineW(x1, y1, x2, y2, col, w, dash) {
+        c.save(); c.strokeStyle = col; c.lineWidth = w; if (dash) c.setLineDash(dash); c.lineCap = 'round';
+        c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+      }
+      function handleDot(x, y, color, active, hot) {
+        c.save();
+        c.beginPath(); c.arc(x, y, active || hot ? 15 : 13, 0, 7);
+        c.fillStyle = FX.rgba(color, hot ? 0.24 : 0.14); c.fill();
+        c.strokeStyle = FX.rgba(color, active ? 0.95 : 0.5); c.lineWidth = active ? 1.6 : 1; c.stroke();
+        c.beginPath(); c.arc(x, y, 6, 0, 7); c.fillStyle = color; c.fill();
+        c.strokeStyle = C.fond; c.lineWidth = 2; c.stroke();
+        c.restore();
+      }
+      function vecArrow(x1, y1, x2, y2, color, w = 2.6) { FX.arrow(c, X(x1), Y(y1), X(x2), Y(y2), color, w, 10); }
+      /** Patte pointillée avec petite pointe */
+      function leg(x1, y1, x2, y2, col) {
+        const p1 = [X(x1), Y(y1)], p2 = [X(x2), Y(y2)], L = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+        if (L < 1) return;
+        lineW(p1[0], p1[1], p2[0], p2[1], col, 2, [5, 4]);
+        const u = [(p2[0] - p1[0]) / L, (p2[1] - p1[1]) / L], l = Math.min(12, L);
+        FX.arrow(c, p2[0] - u[0] * l, p2[1] - u[1] * l, p2[0], p2[1], col, 2, 7);
+      }
+
+      function drawPlane() {
+        const { ox, oy, s } = g, R = 10.5, x0 = X(-R), x1 = X(R), y0 = Y(R), y1 = Y(-R);
+        c.fillStyle = C.fond2; c.fillRect(x0, y0, x1 - x0, y1 - y0);
+        c.lineWidth = 1;
+        for (let i = -10; i <= 10; i++) {
+          c.strokeStyle = i % 5 === 0 ? FX.rgba(C.texte2, 0.22) : FX.rgba(C.trait, 0.9);
+          c.beginPath(); c.moveTo(X(i) + 0.5, y0); c.lineTo(X(i) + 0.5, y1); c.moveTo(x0, Y(i) + 0.5); c.lineTo(x1, Y(i) + 0.5); c.stroke();
+        }
+        c.strokeStyle = FX.rgba(C.texte2, 0.35); c.strokeRect(x0 + 0.5, y0 + 0.5, x1 - x0 - 1, y1 - y0 - 1);
+        // axes
+        lineW(x0, oy, x1 - 6, oy, C.texte2, 1.4); lineW(ox, y1, ox, y0 + 6, C.texte2, 1.4);
+        FX.arrow(c, x1 - 12, oy, x1 - 1, oy, C.texte2, 1.4, 7); FX.arrow(c, ox, y0 + 12, ox, y0 + 1, C.texte2, 1.4, 7);
+        // graduations
+        const step = s >= 26 ? 2 : 5, u = unit();
+        c.save(); c.font = FX.mono(10); c.fillStyle = C.texte2;
+        for (let v = step; v <= 10; v += step) for (const sg of [1, -1]) {
+          const t = sg * v, lab = FX.fmt(t, 0);
+          c.strokeStyle = C.texte2; c.beginPath(); c.moveTo(X(t), oy - 3); c.lineTo(X(t), oy + 3); c.moveTo(ox - 3, Y(t)); c.lineTo(ox + 3, Y(t)); c.stroke();
+          c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText(lab, X(t), oy + 6);
+          c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(lab, ox - 7, Y(t));
+        }
+        c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillStyle = C.texte; c.font = FX.mono(11);
+        c.fillText(`x (${u})`, x1 - 16, oy - 5);
+        c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText(`y (${u})`, ox + 8, y0 + 5);
+        c.restore();
+        c.beginPath(); c.arc(ox, oy, 3.2, 0, 7); c.fillStyle = C.texte; c.fill();
+        c.font = FX.mono(10); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillText('O', ox - 6, oy + 6);
+      }
+
+      function drawScalaire() {
+        const { ox, oy, s } = g, r = st.d * s, P = st.P;
+        c.save(); c.beginPath(); c.arc(ox, oy, r, 0, 7); c.fillStyle = FX.rgba(C.accent, 0.05); c.fill();
+        c.setLineDash([4, 5]); c.strokeStyle = FX.rgba(C.accent, 0.7); c.lineWidth = 1.5; c.stroke(); c.restore();
+        // quelques autres arrivées possibles (fantômes)
+        for (let i = 0; i < 16; i++) {
+          const a = i * Math.PI / 8 + 0.2, x = ox + r * Math.cos(a), y = oy - r * Math.sin(a);
+          lineW(ox, oy, x, y, FX.rgba(C.texte2, 0.22), 1);
+          c.beginPath(); c.arc(x, y, 2.4, 0, 7); c.fillStyle = FX.rgba(C.accent, 0.55); c.fill();
+        }
+        { // étiquette du cercle, rabattue vers la gauche si elle sortirait du cadre
+          const lbl = `tous les points à ${f1(st.d)} m`; c.font = FX.mono(11);
+          const lx = Math.min(ox + r * 0.7071 + 6, c.canvas.clientWidth - c.measureText(lbl).width - 8);
+          FX.tag(c, lbl, lx, oy + r * 0.7071 + 6, C.accent, 'left', 'top', 11);
+        }
+        vecArrow(0, 0, P[0], P[1], C.accent, 3);
+        const L = Math.hypot(P[0], P[1]);
+        if (L > 0.3) {
+          const nx = -(Y(P[1]) - Y(0)) / (L * s), ny = (X(P[0]) - X(0)) / (L * s);
+          FX.tag(c, `${f1(L)} m`, (X(0) + X(P[0])) / 2 + nx * 14, (Y(0) + Y(P[1])) / 2 + ny * 14, C.accent, 'center', 'middle', 11);
+        }
+        FX.tag(c, 'départ', ox + 8, oy + 18, C.texte2, 'left', 'middle', 10);
+      }
+
+      function drawComposantes() {
+        const [ax, ay] = st.A, L = Math.hypot(ax, ay), cx = FX.signColor(ax), cy = FX.signColor(ay);
+        leg(0, 0, ax, 0, cx); leg(ax, 0, ax, ay, cy);
+        vecArrow(0, 0, ax, ay, C.accent, 3);
+        // étiquettes des composantes
+        FX.tag(c, `Ax = ${s1(ax)} m`, X(ax / 2), Y(0) + (ay >= 0 ? 17 : -17), cx, 'center', 'middle', 11);
+        FX.tag(c, `Ay = ${s1(ay)} m`, X(ax) + (ax >= 0 ? 10 : -10), Y(ay / 2), cy, ax >= 0 ? 'left' : 'right', 'middle', 11);
+        if (L > 0.2) {
+          const th = Math.atan2(ay, ax), r = Math.min(34, L * g.s * 0.45);
+          c.save(); c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.arc(g.ox, g.oy, r, 0, -th, th > 0); c.stroke(); c.restore();
+          FX.tag(c, `θ = ${FX.fmtS(th / RAD, 1)}°`, g.ox + (r + 10) * Math.cos(th / 2), g.oy - (r + 10) * Math.sin(th / 2), C.texte, Math.abs(th) > 2.2 ? 'right' : 'left', 'middle', 11);
+          // étiquette de la norme, décalée sur le côté de la flèche (normale en pixels)
+          FX.tag(c, `|A| = ${f1(L)} m`, X(ax / 2) - ay / L * 20, Y(ay / 2) - ax / L * 20, C.accent, 'center', 'middle', 11);
+        }
+        tipName('A', ax, ay, C.accent);
+      }
+
+      function tipName(n, x, y, col) {
+        const L = Math.hypot(x, y) || 1, d = 24;
+        FX.tag(c, n, X(x) + x / L * d, Y(y) - y / L * d, col, 'center', 'middle', 12);
+      }
+
+      function drawAddition() {
+        const [ax, ay] = st.A, [bx, by] = st.B, k = st.k, tb = [k * ax, k * ay], rx = ax + bx, ry = ay + by;
+        if (st.para) {
+          const f = FX.rgba;
+          leg2(bx, by, rx, ry, f(C.accent, 0.6)); if (k < 0.99) leg2(ax, ay, rx, ry, f(C.lilas, 0.6));
+        }
+        const ra = Math.max(k, st.para ? 0.5 : 0);
+        if (ra > 0.02) { c.save(); c.globalAlpha = ra; vecArrow(0, 0, rx, ry, C.ener, 3.2); c.restore(); }
+        // lignes de rappel de la translation de B
+        if (k > 0.001 && k < 0.999) lineW(X(0), Y(0), X(tb[0]), Y(tb[1]), FX.rgba(C.lilas, 0.4), 1, [2, 4]);
+        vecArrow(0, 0, ax, ay, C.accent, 3);
+        vecArrow(tb[0], tb[1], tb[0] + bx, tb[1] + by, C.lilas, 3);
+        tipName('A', ax, ay, C.accent);
+        { const Lb = Math.hypot(bx, by) || 1; FX.tag(c, 'B', X(tb[0] + bx / 2) - by / Lb * 16, Y(tb[1] + by / 2) - bx / Lb * 16, C.lilas, 'center', 'middle', 12); }
+        if (ra > 0.5) { c.save(); c.globalAlpha = Math.min(1, ra * 1.2); tipName('R', rx, ry, C.ener); c.restore(); }
+      }
+      function leg2(x1, y1, x2, y2, col) { lineW(X(x1), Y(y1), X(x2), Y(y2), col, 1.6, [4, 4]); }
+
+      function drawProjection() {
+        const u = railU(), F = st.F, par = F[0] * u[0] + F[1] * u[1], pc = FX.signColor(par, 1e-6);
+        const perp = [F[0] - par * u[0], F[1] - par * u[1]];
+        c.save(); c.beginPath(); const R = 10.5; c.rect(X(-R), Y(R), 2 * R * g.s, 2 * R * g.s); c.clip();
+        // rail + traverses qui défilent
+        const sp = 1.5, off = ((st.phase % sp) + sp) % sp, nx = -u[1], ny = u[0];
+        for (let p = -16; p <= 16; p += sp) {
+          const q = p - off, hx = X(q * u[0]), hy = Y(q * u[1]);
+          lineW(hx - nx * 6, hy + ny * 6, hx + nx * 6, hy - ny * 6, FX.rgba(C.texte2, 0.5), 2);
+        }
+        lineW(X(-16 * u[0]), Y(-16 * u[1]), X(16 * u[0]), Y(16 * u[1]), C.texte2, 2.2);
+        c.restore();
+        // wagon
+        c.save(); c.translate(g.ox, g.oy); c.rotate(-st.phi * RAD);
+        c.fillStyle = C.fond; c.strokeStyle = C.texte; c.lineWidth = 1.5;
+        c.beginPath(); c.rect(-17, -11, 34, 14); c.fill(); c.stroke();
+        c.fillStyle = C.texte2; c.beginPath(); c.arc(-9, 4.5, 3, 0, 7); c.arc(9, 4.5, 3, 0, 7); c.fill();
+        c.restore();
+        // ombre de F sur le rail
+        lineW(X(F[0]), Y(F[1]), X(par * u[0]), Y(par * u[1]), FX.rgba(C.texte, 0.7), 1.4, [4, 4]);
+        // F⊥ (gris discret)
+        FX.arrow(c, g.ox, g.oy, X(perp[0]), Y(perp[1]), FX.rgba(C.texte2, 0.75), 2, 8);
+        // F∥ sur le rail
+        if (Math.abs(par) > 0.05) FX.arrow(c, g.ox, g.oy, X(par * u[0]), Y(par * u[1]), pc, 4.5, 11);
+        vecArrow(0, 0, F[0], F[1], C.accent, 3);
+        // angle α
+        const th = Math.atan2(F[1], F[0]) / RAD, d = wrap180(th - st.phi), Lf = Math.hypot(...F);
+        if (Lf > 0.3) {
+          const r = 30;
+          c.save(); c.strokeStyle = C.texte; c.lineWidth = 1.4; c.beginPath(); c.arc(g.ox, g.oy, r, -st.phi * RAD, -(st.phi + d) * RAD, d > 0); c.stroke(); c.restore();
+          const m = (st.phi + d / 2) * RAD;
+          FX.tag(c, `α = ${FX.fmt(Math.abs(d), 0)}°`, g.ox + (r + 10) * Math.cos(m), g.oy - (r + 10) * Math.sin(m), C.texte, Math.cos(m) < 0 ? 'right' : 'left', 'middle', 11);
+        }
+        if (Math.abs(par) > 0.4) {
+          // étiquette du côté opposé à F⊥
+          const Lp = Math.hypot(...perp), pn = Lp > 1e-6 ? [perp[0] / Lp, -perp[1] / Lp] : [u[1], u[0]];
+          FX.tag(c, `F∥ = ${s1(par)} N`, X(par * u[0] * 0.8) - pn[0] * 24, Y(par * u[1] * 0.8) - pn[1] * 24, pc, 'center', 'middle', 11);
+        }
+        // extrémité du rail : sens positif
+        tipName('F', F[0], F[1], C.accent);
+        const e = [8.5 * u[0], 8.5 * u[1]];
+        FX.tag(c, 'rail (+)', X(e[0]) + u[1] * 24, Y(e[1]) + u[0] * 24, C.texte2, 'center', 'middle', 10);
+        const Lp = Math.hypot(...perp);
+        if (Lp > 0.4) FX.tag(c, `F⊥ = ${f1(Lp)} N`, X(perp[0]) + perp[0] / Lp * 30, Y(perp[1]) - perp[1] / Lp * 14, C.texte2, perp[0] >= 0 ? 'left' : 'right', 'middle', 10);
+      }
+
+      function drawBars() {
+        const b = bars; if (st.mode !== 'addition' || b.w < 40) return;
+        const q = b.ctx; q.clearRect(0, 0, b.w, b.h);
+        const Lm = 18, Rm = 10, W = b.w - Lm - Rm, z = Lm + W / 2;
+        // échelle commune aux deux lignes, ajustée à la plus grande extension
+        const ext = Math.max(5, Math.abs(st.A[0]), Math.abs(st.A[0] + st.B[0]), Math.abs(st.A[1]), Math.abs(st.A[1] + st.B[1])), sc = W / (2 * ext * 1.12);
+        const rows = [['x', st.A[0], st.B[0]], ['y', st.A[1], st.B[1]]], rh = b.h / 2;
+        rows.forEach(([n, a, bb], i) => {
+          // trois voies : A, puis B qui part du bout de A (jamais superposées, même de signes opposés), puis R sous un trait
+          const y0 = i * rh + 2, ly = y0 + 2, lh = 13, by = y0 + 17, ry = y0 + 38;
+          q.font = FX.mono(11); q.fillStyle = C.texte2; q.textAlign = 'left'; q.textBaseline = 'middle'; q.fillText(n, 0, y0 + 24);
+          q.strokeStyle = FX.rgba(C.texte2, 0.5); q.lineWidth = 1; q.beginPath(); q.moveTo(Lm, y0 + 34.5); q.lineTo(b.w - Rm, y0 + 34.5); q.stroke();
+          q.beginPath(); q.moveTo(z + 0.5, y0); q.lineTo(z + 0.5, y0 + 54); q.stroke();
+          const seg = (from, val, yy, hh, col, name) => {
+            const x1 = z + from * sc, x2 = z + (from + val) * sc, lo = Math.min(x1, x2), w = Math.abs(x2 - x1);
+            if (w < 0.5) return;
+            q.fillStyle = FX.rgba(FX.signColor(val), 0.5); q.fillRect(lo, yy, w, hh);
+            q.strokeStyle = col; q.lineWidth = 1.5; q.strokeRect(lo + 0.5, yy + 0.5, w - 1, hh - 1);
+            if (w > 14) { q.fillStyle = C.texte; q.font = FX.mono(10); q.textAlign = 'center'; q.fillText(name, lo + w / 2, yy + hh / 2 + 0.5); }
+          };
+          seg(0, a, ly, lh, C.accent, 'A' + n); seg(a, bb, by, lh, C.lilas, 'B' + n);
+          // raccord pointillé : B commence là où A finit
+          if (Math.abs(a) * sc > 0.5 && Math.abs(bb) * sc > 0.5) { const xj = z + a * sc + 0.5; q.save(); q.setLineDash([2, 2]); q.strokeStyle = FX.rgba(C.texte2, 0.8); q.beginPath(); q.moveTo(xj, ly + lh); q.lineTo(xj, by); q.stroke(); q.restore(); } seg(0, a + bb, ry, lh, C.ener, 'R' + n);
+        });
+      }
+
+      function draw() {
+        c.clearRect(0, 0, cv.w, cv.h);
+        drawPlane();
+        c.save(); c.beginPath(); c.rect(X(-10.5), Y(10.5), 21 * g.s, 21 * g.s); c.clip();
+        if (st.mode === 'scalaire') drawScalaire(); else if (st.mode === 'composantes') drawComposantes();
+        else if (st.mode === 'addition') drawAddition(); else drawProjection();
+        c.restore();
+        handles().forEach((h, i) => { const [hx, hy] = hpos(h); handleDot(hx, hy, h.color, i === st.active && handles().length > 1 || st.drag === i, st.hover === i); });
+        drawBars();
+      }
+
+      /* ---------- Panneau : mesures en direct ---------- */
+      const row = (lab, val, unitS, cls = '') => `<div class="row"><span class="lab">${lab}</span><span class="val ${cls}">${val}${unitS ? `<i>${unitS}</i>` : ''}</span></div>`;
+      const tn = v => FX.fmt(v, 1).replace(',', '{,}'), tns = v => FX.fmtS(v, 1).replace(',', '{,}');
+      const tnp = v => v < 0 ? `\\left(${tn(v)}\\right)` : tn(v), tnq = v => v < 0 ? `\\left(${tn(v)}\\right)` : tn(v);
+      const col = (hex, t) => String.raw`\textcolor{${hex}}{${t}}`;
+      const sCls = (v, e = 1e-9) => { const k = FX.signColor(v, e); return k === C.pos ? 'pos' : k === C.neg ? 'neg' : 'dim'; };
+      function updatePanel() {
+        let meas = '', eqKey = '', eqFn = null, note = '';
+        const th = (x, y) => FX.fmtS(Math.atan2(y, x) / RAD, 1) + '°';
+        if (st.mode === 'scalaire') {
+          const P = st.P, L = Math.hypot(...P);
+          meas = row('distance (un nombre)', f1(st.d), 'm', 'acc') + row('longueur de la flèche', f1(L), 'm') + row('arrivée (x ; y)', vec(...P), 'm') + row('direction θ', th(...P), '');
+          eqKey = 'sv';
+          eqFn = () => `<p class="eq"><span class="dim">scalaires :</span> température 20 °C, masse 70 kg, durée 3 s, énergie 50 J<br><span class="dim">vecteurs :</span> déplacement, vitesse, force, champ électrique<br><span class="acc">un vecteur = une grandeur + une direction</span></p>`;
+          note = st.fixed ? 'Longueur fixée : on ne change que la direction. Le nombre seul ne dit pas où l\'on arrive.' : 'Longueur libre : la flèche peut sortir du cercle, donc changer de distance.';
+        } else if (st.mode === 'composantes') {
+          const [ax, ay] = st.A, L = Math.hypot(ax, ay);
+          meas = row('Ax (le long de x)', s1(ax), 'm', sCls(ax)) + row('Ay (le long de y)', s1(ay), 'm', sCls(ay))
+            + row('norme |A|', f1(L), 'm', 'acc') + row('direction θ (depuis +x)', th(ax, ay), '');
+          eqKey = 'co' + ax + ',' + ay;
+          eqFn = () => `<p class="eq">${FX.k(String.raw`\lvert\vec A\rvert = \sqrt{A_x^2 + A_y^2} = \sqrt{${tnp(ax)}^2 + ${tnp(ay)}^2}`,
+            `|A| = √(Ax² + Ay²) = √(${f1(ax)}² + ${f1(ay)}²)`)}<br>${FX.k(String.raw`= ${col(C.accent, tn(L) + String.raw`\ \mathrm{m}`)}`, `= ${f1(L)} m`)}</p>
+            <p class="eq" style="margin-top:8px">(Ax, Ay) = ${vec(ax, ay)} m<br>(|A|, θ) = (${f1(L)} m ; ${th(ax, ay)})<br><span class="dim">deux descriptions de la même flèche</span></p>`;
+          note = 'θ se mesure depuis +x, entre −180° et +180° : positif vers le haut, négatif vers le bas.';
+        } else if (st.mode === 'addition') {
+          const [ax, ay] = st.A, [bx, by] = st.B, rx = ax + bx, ry = ay + by, nA = Math.hypot(ax, ay), nB = Math.hypot(bx, by), nR = Math.hypot(rx, ry);
+          meas = row('Rx', s1(rx), 'm', sCls(rx)) + row('Ry', s1(ry), 'm', sCls(ry)) + row('|A| + |B|', f1(nA + nB), 'm') + row('|R|', f1(nR), 'm', 'ener');
+          eqKey = 'ad' + [ax, ay, bx, by];
+          eqFn = () => `<p class="eq">${FX.k(String.raw`R_x = A_x + B_x = ${tns(ax)} + ${tnq(bx)} = ${tns(rx)}\ \mathrm{m}`, `Rx = Ax + Bx = ${s1(ax)} + (${s1(bx)}) = ${s1(rx)} m`)}<br>
+            ${FX.k(String.raw`R_y = A_y + B_y = ${tns(ay)} + ${tnq(by)} = ${tns(ry)}\ \mathrm{m}`, `Ry = Ay + By = ${s1(ay)} + (${s1(by)}) = ${s1(ry)} m`)}</p>`;
+          const al = Math.abs(ax * by - ay * bx) < 1e-6 * (1 + nA * nB) && ax * bx + ay * by > 0;
+          note = al ? 'Ici A et B sont alignées et de même sens : les normes s\'additionnent, |R| = |A| + |B|.' : 'Les normes ne s\'additionnent pas : |R| < |A| + |B|, sauf si les flèches sont alignées et de même sens.';
+        } else {
+          const u = railU(), F = st.F, Lf = Math.hypot(...F), par = F[0] * u[0] + F[1] * u[1], pe = Math.abs(F[0] * u[1] - F[1] * u[0]);
+          const al = Lf < 1e-6 ? 0 : Math.acos(clamp(par / Lf, -1, 1)) / RAD, cls = sCls(par, 1e-6), hex = FX.signColor(par, 1e-6);
+          meas = row('norme |F|', f1(Lf), 'N', 'acc') + row('angle α (F, rail)', FX.fmt(al, 0) + '°', '') + row('F∥', s1(par), 'N', cls) + row('F⊥', f1(pe), 'N', 'dim');
+          eqKey = 'pr' + f1(Lf) + FX.fmt(al, 0) + s1(par);
+          eqFn = () => `<p class="eq">${FX.k(String.raw`F_\parallel = \lvert\vec F\rvert\cos\alpha = ${tn(Lf)} \times \cos ${FX.fmt(al, 0)}^\circ = ${col(hex, tns(par) + String.raw`\ \mathrm{N}`)}`,
+            `F∥ = |F| cos α = ${f1(Lf)} × cos ${FX.fmt(al, 0)}° = ${s1(par)} N`)}</p>`;
+          note = Math.abs(par) < 0.05 ? 'F ⊥ rail : F∥ = 0, le wagon reste immobile malgré la force.' : par > 0 ? 'F∥ positive : elle pousse dans le sens du rail (orange).' : 'F∥ négative : elle pousse à contresens du rail (bleu).';
+        }
+        if (meas !== lastMeas) { elMeas.innerHTML = meas; lastMeas = meas; }
+        if (eqKey !== lastEq) { elEq.innerHTML = eqFn(); lastEq = eqKey; }
+        if (note !== lastNote) { elNote.textContent = note; lastNote = note; }
+      }
+
+      /* ---------- Boucle ---------- */
+      FX.loop(dt => {
+        const now = performance.now();
+        if (st.kAnim) {
+          const q = Math.min(1, (now - st.kAnim.t0) / st.kAnim.dur);
+          st.k = st.kAnim.from + (st.kAnim.to - st.kAnim.from) * ease(q);
+          if (q >= 1) st.kAnim = null; st.dirty = true;
+        }
+        if (st.fAnim) {
+          const a = st.fAnim, q = Math.min(1, (now - a.t0) / a.dur), ang = a.a0 + a.da * ease(q);
+          st.F = q >= 1 ? a.fin : [a.r * Math.cos(ang), a.r * Math.sin(ang)];
+          if (q >= 1) st.fAnim = null; st.dirty = true;
+        }
+        if (st.mode === 'projection') {
+          const u = railU(), par = st.F[0] * u[0] + st.F[1] * u[1];
+          if (Math.abs(par) > 1e-6 && !FX.reduced) { st.phase -= 0.35 * par * dt; st.dirty = true; }
+        }
+        if (st.dirty) { st.dirty = false; draw(); updatePanel(); }
+      }, signal);
+
+      setMode('scalaire');
+      layout(); draw(); updatePanel();
+      cleanup = () => { FX.tip(null); };
+    },
+    unmount() { if (cleanup) { cleanup(); cleanup = null; } },
+  });
+})();
+</script>
+<script>
+/* ============ Toy D · Mouvement — « Trois graphes, un seul mouvement » ============ */
+(function () {
+  'use strict';
+  const C = FX.C;
+  const T = 10, NSEG = 5, SEGLEN = 2, AMAX = 3;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const f1 = v => FX.fmt(v, 1), f2 = v => FX.fmt(v, 2), s1 = v => FX.fmtS(v, 1), s2 = v => FX.fmtS(v, 2);
+  const cls = (v, e = 1e-6) => { const k = FX.signColor(v, e); return k === C.pos ? 'pos' : k === C.neg ? 'neg' : 'dim'; };
+  let cleanup = null;
+
+  const PRESETS = [
+    { id: 'immobile', label: 'Immobile', x0: 0, v0: 0, a: [0, 0, 0, 0, 0] },
+    { id: 'constante', label: 'Vitesse constante', x0: -10, v0: 2, a: [0, 0, 0, 0, 0] },
+    { id: 'depart', label: 'Départ arrêté', x0: -10, v0: 0, a: [0.5, 0.5, 0.5, 0.5, 0.5] },
+    { id: 'freinage', label: 'Freinage', x0: -8, v0: 4, a: [-0.5, -0.5, -0.5, -0.5, 0] },
+    { id: 'retour', label: 'Aller-retour', x0: 0, v0: 4, a: [-1, -1, -1, -1, -1] },
+    { id: 'repart', label: 'Ralentir, s\'arrêter, repartir', x0: -8, v0: 3, a: [-1.5, 0, 0, 1.5, 0] },
+  ];
+
+  /* Texte du panneau selon les deux regards (bascules indépendantes) */
+  const HEAD = {
+    '00': ['Aucun', 'Un mouvement, trois lectures', 'Glisse un palier de a(t) : v(t) et x(t) se recalculent aussitôt. Sur le mobile, la flèche de v (sarcelle) et celle de a (lilas) pointent dans le sens de leur signe : en 1D, le signe est la direction.'],
+    '10': ['Pente', 'La pente raconte la vitesse', 'La vitesse est la pente de la position ; l\'accélération est la pente de la vitesse. Réduis Δt : la sécante se confond avec la tangente.'],
+    '01': ['Aire', 'L\'aire raconte le déplacement', 'Le déplacement est l\'aire sous la vitesse ; la variation de vitesse est l\'aire sous l\'accélération. Orange au-dessus de zéro, bleu au-dessous.'],
+    '11': ['Pente + aire', 'Dériver, puis intégrer', 'La pente passe de x à v à a ; l\'aire fait le chemin inverse, de a à v à x. Les deux lectures se défont l\'une l\'autre.'],
+  };
+
+  FX.register('mouvement', {
+    num: 'D', titre: 'Mouvement', titreHtml: 'Trois graphes, <em>un seul mouvement</em>',
+    hints: ['<kbd>Espace</kbd> lecture / pause', '<kbd>R</kbd> tête de lecture à 0', '<kbd>←</kbd><kbd>→</kbd> tête ±0,1 s'],
+    mount(ctx) {
+      const { scene, panel, controls, signal } = ctx;
+      const S = { x0: 0, v0: 4, acc: [-1, -1, -1, -1, -1], t: 4, playing: false, pente: false, aire: false,
+        sDt: Math.log(0.5) / Math.log(0.025), dragA: -1, scrub: false, hoverA: -1, hoverHead: false };
+      const segs = []; let zeros = [];
+      const tgt = { x: [0, 1], v: [0, 1], trk: [0, 1] }, view = { x: [0, 1], v: [0, 1], trk: [0, 1], a: [-3.6, 3.6] };
+      let first = true;
+
+      /* ---------- Modèle exact : a constante par morceaux ---------- */
+      function rebuild() {
+        let v = S.v0, x = S.x0;
+        for (let i = 0; i < NSEG; i++) {
+          segs[i] = { t0: i * SEGLEN, a: S.acc[i], v0: v, x0: x };
+          x += v * SEGLEN + 0.5 * S.acc[i] * SEGLEN * SEGLEN; v += S.acc[i] * SEGLEN;
+        }
+        segs.endX = x; segs.endV = v;
+        // passages de v par zéro avec changement de signe (extrémums de x)
+        zeros = [];
+        segs.forEach(s => {
+          if (Math.abs(s.a) < 1e-12) return;
+          const tz = s.t0 - s.v0 / s.a;
+          if (tz < s.t0 - 1e-9 || tz > s.t0 + SEGLEN + 1e-9 || tz < 0.002 || tz > T - 0.002) return;
+          if (at(tz - 0.002).v * at(tz + 0.002).v < 0 && !zeros.some(z => Math.abs(z.t - tz) < 1e-6)) zeros.push({ t: tz, max: at(tz - 0.002).v > 0 });
+        });
+        // cadrages visés
+        let xs = [S.x0, segs.endX], vs = [S.v0, segs.endV];
+        segs.forEach(s => { const a = s.t0 + SEGLEN; vs.push(s.v0 + s.a * SEGLEN); xs.push(s.x0 + s.v0 * SEGLEN + 0.5 * s.a * SEGLEN * SEGLEN); });
+        zeros.forEach(z => xs.push(at(z.t).x));
+        const xr = niceRange(Math.min(...xs), Math.max(...xs), 5, 5), vr = niceRange(Math.min(...vs), Math.max(...vs), 1, 4);
+        tgt.x = xr; tgt.v = vr;
+        let lo = Math.min(...xs), hi = Math.max(...xs), sp = hi - lo;
+        if (sp < 10) { const m = (lo + hi) / 2; lo = m - 5; hi = m + 5; sp = 10; }
+        tgt.trk = [lo - sp * 0.08, hi + sp * 0.08];
+        if (first) { first = false; Object.assign(view, { x: xr.slice(), v: vr.slice(), trk: tgt.trk.slice() }); }
+      }
+      function niceRange(lo, hi, m, n) {
+        lo = Math.min(lo, -m); hi = Math.max(hi, m);
+        const sp = hi - lo; lo -= sp * 0.05; hi += sp * 0.05;
+        const st = FX.niceTicks(lo, hi, n).step;
+        return [Math.floor(lo / st + 1e-9) * st, Math.ceil(hi / st - 1e-9) * st];
+      }
+      function at(t) {
+        t = clamp(t, 0, T);
+        const i = Math.min(NSEG - 1, Math.floor(t / SEGLEN + 1e-12)), s = segs[i], d = t - s.t0;
+        return { x: s.x0 + s.v0 * d + 0.5 * s.a * d * d, v: s.v0 + s.a * d, a: s.a, i };
+      }
+      const xAt = t => at(t).x, vAt = t => at(t).v, aAt = t => at(t).a;
+      /** Aire signée sous v de 0 à t, par trapèzes (v est affine par morceaux : exact), indépendante de x(t) */
+      function areaV(t) {
+        let A = 0;
+        for (let i = 0; i < NSEG; i++) {
+          const t0 = i * SEGLEN, t1 = Math.min(t, t0 + SEGLEN); if (t1 <= t0) break;
+          A += (vAt(t0) + vAt(t1)) / 2 * (t1 - t0);
+        }
+        return A;
+      }
+      /** Aire signée sous a de 0 à t (rectangles) */
+      function areaA(t) {
+        let A = 0;
+        for (let i = 0; i < NSEG; i++) { const t0 = i * SEGLEN, t1 = Math.min(t, t0 + SEGLEN); if (t1 <= t0) break; A += S.acc[i] * (t1 - t0); }
+        return A;
+      }
+      const curDt = () => 2 * Math.pow(0.025, S.sDt);
+      function secant(fn) {
+        const dt = curDt(), back = S.t + dt > T + 1e-9, tA = back ? S.t - dt : S.t, tB = back ? S.t : S.t + dt;
+        return { dt, back, tA, tB, yA: fn(tA), yB: fn(tB), slope: (fn(tB) - fn(tA)) / dt };
+      }
+
+      /* ---------- DOM : panneau ---------- */
+      panel.innerHTML = `<div id="mHead"></div><div class="meas" id="mMeas"></div><div id="mEq"></div><p class="note" id="mNote"></p>`;
+      const elHead = panel.querySelector('#mHead'), elMeas = panel.querySelector('#mMeas'), elEq = panel.querySelector('#mEq'), elNote = panel.querySelector('#mNote');
+      let lastMeas = '', lastNote = '';
+
+      /* ---------- DOM : contrôles ---------- */
+      const icoPlay = '<svg viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z"/></svg>', icoPause = '<svg viewBox="0 0 14 14"><path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/></svg>';
+      controls.innerHTML = `
+        <div class="grp"><button class="btn ico" id="bPlay" type="button" title="Lecture / pause (Espace)" aria-label="Lecture">${icoPlay}</button>
+          <button class="btn" id="bRst" type="button" title="Tête de lecture à 0 (R)">Début</button></div>
+        <div class="grp"><span class="gl">Regard</span>
+          <button class="btn" id="bPente" type="button" aria-pressed="false"><span class="dot"></span>Pente</button>
+          <button class="btn" id="bAire" type="button" aria-pressed="false"><span class="dot"></span>Aire</button></div>
+        <div class="grp" id="gDt" style="opacity:.4"><span class="gl">Δt</span><input type="range" id="sDt" min="0" max="1" step="0.002" aria-label="Δt de la sécante"><span class="rv" id="vDt"></span></div>
+        <div class="grp"><span class="gl">x₀</span><input type="range" id="sX0" min="-20" max="20" step="0.5" aria-label="Position initiale"><span class="rv" id="vX0"></span></div>
+        <div class="grp"><span class="gl">v₀</span><input type="range" id="sV0" min="-6" max="6" step="0.5" aria-label="Vitesse initiale"><span class="rv" id="vV0"></span></div>
+        <div class="grp"><span class="gl">Préréglages</span>${PRESETS.map(p => `<button class="btn" type="button" data-p="${p.id}">${p.label}</button>`).join('')}</div>`;
+      const $ = s => controls.querySelector(s);
+      const bPlay = $('#bPlay'), sDt = $('#sDt'), sX0 = $('#sX0'), sV0 = $('#sV0');
+      function syncControls() {
+        sDt.value = S.sDt; $('#vDt').textContent = f2(curDt()) + ' s'; $('#vDt').className = 'rv ' + 'dim';
+        sX0.value = S.x0; $('#vX0').textContent = f1(S.x0) + ' m'; sV0.value = S.v0; $('#vV0').textContent = f1(S.v0) + ' m/s';
+        $('#vX0').className = 'rv'; $('#vV0').className = 'rv acc';
+        bPlay.innerHTML = S.playing ? icoPause : icoPlay; bPlay.setAttribute('aria-label', S.playing ? 'Pause' : 'Lecture');
+        $('#bPente').setAttribute('aria-pressed', String(S.pente)); $('#bAire').setAttribute('aria-pressed', String(S.aire));
+        $('#gDt').style.opacity = S.pente ? 1 : 0.4;
+        controls.querySelectorAll('[data-p]').forEach(b => {
+          const p = PRESETS.find(q => q.id === b.dataset.p);
+          b.setAttribute('aria-pressed', String(p.x0 === S.x0 && p.v0 === S.v0 && p.a.every((a, i) => a === S.acc[i])));
+        });
+      }
+      function renderHead() {
+        const h = HEAD[(S.pente ? '1' : '0') + (S.aire ? '1' : '0')];
+        const eq = S.pente && S.aire
+          ? [String.raw`v \approx \frac{\Delta x}{\Delta t}\quad a \approx \frac{\Delta v}{\Delta t}\quad \Delta x = \int_0^t v\,dt`, 'v ≈ Δx/Δt · a ≈ Δv/Δt · Δx = ∫v dt']
+          : S.pente ? [String.raw`v = \frac{dx}{dt} \approx \frac{\Delta x}{\Delta t}\qquad a = \frac{dv}{dt} \approx \frac{\Delta v}{\Delta t}`, 'v = dx/dt ≈ Δx/Δt · a = dv/dt ≈ Δv/Δt']
+          : S.aire ? [String.raw`\Delta x = \int_0^t v\,dt\qquad \Delta v = \int_0^t a\,dt\qquad \mathrm{m/s} \times \mathrm{s} = \mathrm{m}`, 'Δx = ∫v dt · Δv = ∫a dt · m/s × s = m']
+          : [String.raw`v = v_0 + a\,t \qquad x = x_0 + v_0 t + \tfrac{1}{2}a\,t^2`, 'v = v₀ + a t · x = x₀ + v₀ t + ½ a t²'];
+        elHead.innerHTML = `<p class="eyebrow"><b>Regard</b> · ${h[0]}</p><h2>${h[1]}</h2><p class="txt">${h[2]}</p>`;
+        elEq.innerHTML = `<p class="eq">${FX.k(eq[0], eq[1])}</p>` + (S.aire || !S.pente ? '' : '');
+        if (!S.pente && !S.aire) elEq.innerHTML += `<p class="note" style="margin-top:6px">valable sur chaque palier de 2 s, avec t compté depuis son début</p>`;
+        lastMeas = '';
+      }
+
+      /* ---------- Canevas ---------- */
+      const g = { w: 0, h: 0, L: 50, R: 18, PW: 100, trk: { y: 0, h: 64 }, gr: [{}, {}, {}], small: false };
+      const cv = FX.canvas(scene, signal, (w, h) => { g.w = w; g.h = h; layout(); });
+      const c = cv.ctx, el = cv.el;
+      el.style.touchAction = 'none'; el.style.outline = 'none'; el.tabIndex = 0;
+      el.setAttribute('aria-label', 'Trois graphes : x(t), v(t), a(t). Glisser un palier de a(t) ou la tête de lecture.');
+      function layout() {
+        const w = g.w, h = g.h, hr = FX.headRect(), small = w < 560;
+        g.small = small; g.L = small ? 34 : 52; g.R = small ? 10 : 20; g.PW = Math.max(60, w - g.L - g.R);
+        const top = hr.bottom + (small ? 4 : 8), bottom = h - (small ? 30 : 36), gap = small ? 6 : 12;
+        let Ht = clamp(h * 0.11, small ? 54 : 66, 80);
+        const room = bottom - top - Ht - 8 - 2 * gap;
+        if (room / 3 < (small ? 62 : 80)) Ht = Math.max(small ? 46 : 54, Ht - ((small ? 62 : 80) - room / 3) * 3);
+        g.trk = { y: top, h: Ht };
+        const gTop = top + Ht + 8, gh = (bottom - gTop - 2 * gap) / 3;
+        for (let i = 0; i < 3; i++) g.gr[i] = { y: gTop + i * (gh + gap), h: gh };
+      }
+      document.fonts && document.fonts.ready.then(layout);
+      const tl = setTimeout(layout, 400); signal.addEventListener('abort', () => clearTimeout(tl));
+
+      const PX = t => g.L + t / T * g.PW;
+      const tOf = px => clamp((px - g.L) / g.PW * T, 0, T);
+      const KEYS = ['x', 'v', 'a'];
+      const Yg = (gi, v) => { const G = g.gr[gi], r = view[KEYS[gi]]; return G.y + G.h * (r[1] - v) / (r[1] - r[0]); };
+      const vOfY = (gi, py) => { const G = g.gr[gi], r = view[KEYS[gi]]; return r[1] - (py - G.y) / G.h * (r[1] - r[0]); };
+      const TX = m => g.L + (m - view.trk[0]) / (view.trk[1] - view.trk[0]) * g.PW;
+
+      /* ---------- Interactions ---------- */
+      const local = e => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+      function hitAt(px, py, touch) {
+        const rad = touch ? 26 : 15, G = g.gr[2];
+        // paliers de a(t) : la poignée, ou la ligne du palier
+        for (let i = 0; i < NSEG; i++) {
+          const hx = PX(i * SEGLEN + 1), hy = Yg(2, S.acc[i]);
+          const onLine = px >= PX(i * SEGLEN) && px <= PX((i + 1) * SEGLEN) && Math.abs(py - hy) < (touch ? 16 : 9);
+          if (Math.hypot(px - hx, py - hy) < rad || onLine) return { type: 'step', i };
+        }
+        if (px >= g.L - 10 && px <= g.w - g.R + 10 && py >= g.gr[0].y - 4 && py <= G.y + G.h + 22) return { type: 'scrub' };
+        return null;
+      }
+      el.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        const [px, py] = local(e), h = hitAt(px, py, e.pointerType === 'touch'); if (!h) return;
+        el.setPointerCapture(e.pointerId); el.focus({ preventScroll: true }); FX.tip(null);
+        if (h.type === 'step') { S.dragA = h.i; dragStep(py); el.style.cursor = 'ns-resize'; }
+        else { S.scrub = true; S.playing = false; syncControls(); setT(tOf(px)); el.style.cursor = 'ew-resize'; }
+      }, { signal });
+      el.addEventListener('pointermove', e => {
+        const [px, py] = local(e);
+        if (S.dragA >= 0) { dragStep(py); return; }
+        if (S.scrub) { setT(tOf(px)); return; }
+        const h = hitAt(px, py, e.pointerType === 'touch');
+        S.hoverA = h && h.type === 'step' ? h.i : -1;
+        el.style.cursor = !h ? 'default' : h.type === 'step' ? 'ns-resize' : 'ew-resize';
+        const tip = tipAt(px, py, h);
+        if (tip && e.pointerType !== 'touch') FX.tip(tip, e.clientX, e.clientY); else FX.tip(null);
+      }, { signal });
+      const end = () => { S.dragA = -1; S.scrub = false; el.style.cursor = 'default'; };
+      el.addEventListener('pointerup', end, { signal }); el.addEventListener('pointercancel', end, { signal });
+      el.addEventListener('pointerleave', () => { FX.tip(null); S.hoverA = -1; }, { signal });
+      function dragStep(py) {
+        const v = clamp(Math.round(vOfY(2, py) * 2) / 2, -AMAX, AMAX);
+        if (v !== S.acc[S.dragA]) { S.acc[S.dragA] = v; rebuild(); syncControls(); }
+      }
+      function setT(t) { S.t = clamp(t, 0, T); }
+      function togglePlay() { if (!S.playing && S.t >= T - 1e-9) S.t = 0; S.playing = !S.playing; syncControls(); }
+
+      addEventListener('keydown', e => {
+        if (e.ctrlKey || e.metaKey || e.altKey || FX.typing(e)) return;
+        if (e.key === ' ' || e.code === 'Space') { togglePlay(); e.preventDefault(); }
+        else if (e.key === 'r' || e.key === 'R') { S.t = 0; S.playing = false; syncControls(); }
+        else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && e.target.tagName !== 'INPUT') {
+          S.playing = false; setT(Math.round((S.t + (e.key === 'ArrowRight' ? 0.1 : -0.1)) * 100) / 100); syncControls(); e.preventDefault();
+        }
+      }, { signal });
+      addEventListener('keyup', e => { if (e.code === 'Space' && e.target.tagName === 'BUTTON') e.preventDefault(); }, { signal });
+
+      $('#bPlay').addEventListener('click', togglePlay, { signal });
+      $('#bRst').addEventListener('click', () => { S.t = 0; S.playing = false; syncControls(); }, { signal });
+      $('#bPente').addEventListener('click', () => { S.pente = !S.pente; syncControls(); renderHead(); }, { signal });
+      $('#bAire').addEventListener('click', () => { S.aire = !S.aire; syncControls(); renderHead(); }, { signal });
+      sDt.addEventListener('input', () => { S.sDt = +sDt.value; syncControls(); }, { signal });
+      sX0.addEventListener('input', () => { S.x0 = +sX0.value; rebuild(); syncControls(); }, { signal });
+      sV0.addEventListener('input', () => { S.v0 = +sV0.value; rebuild(); syncControls(); }, { signal });
+      controls.addEventListener('click', e => {
+        const b = e.target.closest('[data-p]'); if (!b) return;
+        const p = PRESETS.find(q => q.id === b.dataset.p);
+        S.x0 = p.x0; S.v0 = p.v0; S.acc = p.a.slice(); rebuild(); syncControls();
+        if (FX.reduced) Object.assign(view, { x: tgt.x.slice(), v: tgt.v.slice(), trk: tgt.trk.slice() });
+      }, { signal });
+
+      function tipAt(px, py, h) {
+        if (h && h.type === 'step') { const i = h.i; return `<b>Palier a${FX.sup(i + 1)}</b><span>a = ${s1(S.acc[i])} m/s² de ${i * 2} à ${i * 2 + 2} s. Glisser vers le haut ou le bas.</span>`; }
+        const st = at(S.t), cx = TX(st.x), tr = g.trk, lineY = trackLine();
+        if (Math.abs(px - cx) < 20 && py > lineY - 26 && py < lineY + 4) return `<b>Mobile</b><span>Position x = ${s1(st.x)} m, v = ${s1(st.v)} m/s</span>`;
+        if (Math.abs(py - (lineY - 27)) < 6 && px > Math.min(cx, cx + st.v * vScale()) - 4 && px < Math.max(cx, cx + st.v * vScale()) + 4) return `<b>Flèche de vitesse</b><span>Sens = signe de v : ${s1(st.v)} m/s</span>`;
+        if (Math.abs(py - (lineY - 27 - rowGap())) < 6 && px > Math.min(cx, cx + st.a * aScale()) - 4 && px < Math.max(cx, cx + st.a * aScale()) + 4) return `<b>Flèche d'accélération</b><span>Sens = signe de a : ${s1(st.a)} m/s²</span>`;
+        if (Math.abs(px - PX(S.t)) < 6 && py >= g.gr[0].y && py <= g.gr[2].y + g.gr[2].h) return `<b>Tête de lecture</b><span>t = ${f2(S.t)} s, commune aux trois graphes. Glisser pour la déplacer.</span>`;
+        for (const z of zeros) {
+          const zx = PX(z.t);
+          if (Math.abs(px - zx) < 8 && (Math.abs(py - Yg(1, 0)) < 8 || Math.abs(py - Yg(0, at(z.t).x)) < 8)) return `<b>v = 0</b><span>t = ${f2(z.t)} s : la vitesse change de signe, x atteint un ${z.max ? 'maximum' : 'minimum'} (${s1(at(z.t).x)} m).</span>`;
+        }
+        const t = tOf(px);
+        if (px >= g.L && px <= g.w - g.R) {
+          const names = [['x(t) : position', 'Sa pente est la vitesse.', xAt, 'm'], ['v(t) : vitesse', 'Sa pente est l\'accélération ; son aire est le déplacement.', vAt, 'm/s']];
+          for (let gi = 0; gi < 2; gi++) if (Math.abs(py - Yg(gi, names[gi][2](t))) < 8) return `<b>${names[gi][0]}</b><span>${names[gi][1]}</span>`;
+        }
+        return null;
+      }
+
+      /* ---------- Dessin ---------- */
+      const FS = () => g.small ? 9 : 10.5;
+      const trackLine = () => g.trk.y + g.trk.h - (g.small ? 14 : 16);
+      const rowGap = () => g.trk.h >= 66 ? 12 : 9;
+      const vScale = () => Math.min(13, g.PW / 70) * (g.small ? 0.8 : 1), aScale = () => Math.min(22, g.PW / 40) * (g.small ? 0.8 : 1);
+      function line(x1, y1, x2, y2, col, w = 1, dash = null) {
+        c.save(); c.strokeStyle = col; c.lineWidth = w; if (dash) c.setLineDash(dash); c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+      }
+      function dot(x, y, r, fill, stroke) {
+        c.beginPath(); c.arc(x, y, r, 0, 7); c.fillStyle = fill; c.fill(); if (stroke) { c.strokeStyle = stroke; c.lineWidth = 1.5; c.stroke(); }
+      }
+
+      function drawTrack() {
+        const st = at(S.t), ly = trackLine(), L = g.L, R = g.w - g.R, small = g.small;
+        c.fillStyle = C.fond2; c.fillRect(L, g.trk.y, g.PW, g.trk.h);
+        // graduation de la piste
+        const ticks = FX.niceTicks(view.trk[0], view.trk[1], small ? 5 : 8);
+        c.save(); c.beginPath(); c.rect(L, g.trk.y, g.PW, g.trk.h + 14); c.clip();
+        c.font = FX.mono(FS()); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+        ticks.forEach(m => { const x = TX(m); line(x + 0.5, ly - 3, x + 0.5, ly + 3, C.texte2); c.fillText(f1(m).replace(',0', ''), x, ly + 6); });
+        // origine x = 0
+        line(TX(0) + 0.5, g.trk.y, TX(0) + 0.5, ly, FX.rgba(C.texte2, 0.25), 1, [2, 4]);
+        // départ x₀ et extremums
+        const x0p = TX(S.x0); line(x0p + 0.5, ly - 7, x0p + 0.5, ly + 3, C.texte, 1.5);
+        c.restore();
+        line(L, ly + 0.5, R, ly + 0.5, C.texte2, 1.5);
+        FX.tag(c, 'm', R - 2, ly - 10, C.texte2, 'right', 'middle', 10);
+        // chariot
+        const cx = TX(st.x), bw = small ? 22 : 28, bh = small ? 10 : 13, top = ly - 5 - bh;
+        c.save(); c.beginPath(); c.rect(L, g.trk.y - 2, g.PW, g.trk.h + 4); c.clip();
+        c.fillStyle = C.fond; c.strokeStyle = C.texte; c.lineWidth = 1.5;
+        c.beginPath(); c.rect(cx - bw / 2, top, bw, bh); c.fill(); c.stroke();
+        dot(cx - bw / 4, ly - 3, 2.6, C.texte2); dot(cx + bw / 4, ly - 3, 2.6, C.texte2);
+        // flèches v et a (longueur proportionnelle, sens = signe)
+        const rg = rowGap(), yv = top - 9, ya = yv - rg;
+        const lv = st.v * vScale(), la = st.a * aScale();
+        if (Math.abs(lv) > 1.5) FX.arrow(c, cx, yv, cx + lv, yv, C.accent, 2.4, 8); else dot(cx, yv, 2.5, C.accent);
+        if (Math.abs(la) > 1.5) FX.arrow(c, cx, ya, cx + la, ya, C.lilas, 2.4, 8); else dot(cx, ya, 2.5, C.lilas);
+        c.restore();
+        const lab = (txt, col, x, y, len) => FX.tag(c, txt, clamp(x + (len >= 0 ? 7 : -7), L + 8, R - 8), y, col, len >= 0 ? 'left' : 'right', 'middle', 10);
+        lab('v', C.accent, cx + lv, yv, lv || 1); lab('a', C.lilas, cx + la, ya, la || 1);
+        FX.tag(c, 'piste', L + 4, g.trk.y + 9, C.texte2, 'left', 'middle', 10);
+      }
+
+      function frameGraph(gi) {
+        const G = g.gr[gi], key = KEYS[gi], r = view[key], L = g.L, small = g.small;
+        c.fillStyle = C.fond2; c.fillRect(L, G.y, g.PW, G.h);
+        for (let k = 0; k <= T; k++) line(PX(k) + 0.5, G.y, PX(k) + 0.5, G.y + G.h, k % 2 ? FX.rgba(C.trait, 0.9) : FX.rgba(C.texte2, 0.2));
+        const ticks = FX.niceTicks(r[0], r[1], clamp(Math.round(G.h / (small ? 26 : 32)), 2, 6));
+        c.save(); c.font = FX.mono(FS()); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'middle';
+        ticks.forEach(v => {
+          const y = Yg(gi, v);
+          if (y < G.y - 1 || y > G.y + G.h + 1) return;
+          if (v !== 0) line(L, y + 0.5, L + g.PW, y + 0.5, FX.rgba(C.trait, 0.9));
+          c.fillText(FX.fmt(v, ticks.step < 1 ? 1 : 0), L - 5, y);
+        });
+        c.restore();
+        // zéro bien marqué
+        const y0 = Yg(gi, 0); line(L, y0 + 0.5, L + g.PW, y0 + 0.5, FX.rgba(C.texte, 0.6), 1.4);
+        c.strokeStyle = FX.rgba(C.texte2, 0.35); c.lineWidth = 1; c.strokeRect(L + 0.5, G.y + 0.5, g.PW - 1, G.h - 1);
+        const names = [['x', 'm', C.texte], ['v', 'm/s', C.accent], ['a', 'm/s²', C.lilas]][gi];
+        FX.tag(c, `${names[0]}(t)  ${names[1]}`, L + 6, G.y + 9, names[2], 'left', 'middle', small ? 9 : 10.5);
+      }
+      const clipPlot = gi => { const G = g.gr[gi]; c.save(); c.beginPath(); c.rect(g.L, G.y, g.PW, G.h); c.clip(); };
+
+      function curves() {
+        // x(t) : arcs de parabole exacts (courbes de Bézier quadratiques)
+        clipPlot(0); c.beginPath(); c.lineWidth = 2.4; c.strokeStyle = C.texte; c.lineJoin = 'round';
+        segs.forEach((s, i) => {
+          if (i === 0) c.moveTo(PX(0), Yg(0, s.x0));
+          const xe = s.x0 + s.v0 * SEGLEN + 0.5 * s.a * SEGLEN * SEGLEN;
+          c.quadraticCurveTo(PX(s.t0 + SEGLEN / 2), Yg(0, s.x0 + s.v0 * SEGLEN / 2), PX(s.t0 + SEGLEN), Yg(0, xe));
+        });
+        c.stroke(); c.restore();
+        // v(t) : droites
+        clipPlot(1); c.beginPath(); c.lineWidth = 2.4; c.strokeStyle = C.accent; c.lineJoin = 'round';
+        segs.forEach((s, i) => { if (i === 0) c.moveTo(PX(0), Yg(1, s.v0)); c.lineTo(PX(s.t0 + SEGLEN), Yg(1, s.v0 + s.a * SEGLEN)); });
+        c.stroke(); c.restore();
+        // a(t) : escalier
+        clipPlot(2); c.beginPath(); c.lineWidth = 2.4; c.strokeStyle = C.lilas; c.lineJoin = 'round';
+        segs.forEach((s, i) => { if (i === 0) c.moveTo(PX(0), Yg(2, s.a)); else c.lineTo(PX(s.t0), Yg(2, s.a)); c.lineTo(PX(s.t0 + SEGLEN), Yg(2, s.a)); });
+        c.stroke(); c.restore();
+        // poignées des paliers
+        segs.forEach((s, i) => {
+          const hx = PX(s.t0 + 1), hy = Yg(2, s.a), hot = S.hoverA === i || S.dragA === i;
+          c.beginPath(); c.arc(hx, hy, hot ? 9 : 7.5, 0, 7); c.fillStyle = hot ? FX.rgba(C.lilas, 0.28) : FX.rgba(C.lilas, 0.14); c.fill();
+          c.strokeStyle = FX.rgba(C.lilas, hot ? 1 : 0.7); c.lineWidth = 1.5; c.stroke();
+          dot(hx, hy, 3.2, C.lilas);
+          if (S.dragA === i || S.hoverA === i) FX.tag(c, `a${FX.sup(i + 1)} = ${s1(s.a)}`, hx, hy + (s.a > 0 ? 17 : -17), C.lilas, 'center', 'middle', 10);
+        });
+      }
+
+      /** Aire signée remplie sous une courbe affine ou en escalier de 0 à t, orange au-dessus de 0, bleu au-dessous */
+      function fillArea(gi, pts) {
+        const y0 = Yg(gi, 0), G = g.gr[gi];
+        const poly = () => { c.beginPath(); c.moveTo(PX(0), y0); pts.forEach(p => c.lineTo(PX(p[0]), Yg(gi, p[1]))); c.lineTo(PX(pts[pts.length - 1][0]), y0); c.closePath(); };
+        clipPlot(gi);
+        c.save(); c.beginPath(); c.rect(g.L, G.y, g.PW, y0 - G.y); c.clip(); poly(); c.fillStyle = FX.rgba(C.pos, 0.3); c.fill(); c.restore();
+        c.save(); c.beginPath(); c.rect(g.L, y0, g.PW, G.y + G.h - y0); c.clip(); poly(); c.fillStyle = FX.rgba(C.neg, 0.3); c.fill(); c.restore();
+        c.restore();
+      }
+      function areaPtsV(t) {
+        const p = [[0, S.v0]];
+        for (let i = 0; i < NSEG; i++) { const t1 = Math.min(t, (i + 1) * SEGLEN); if (t1 <= i * SEGLEN) break; p.push([t1, vAt(t1)]); }
+        return p;
+      }
+      function areaPtsA(t) {
+        const p = [];
+        for (let i = 0; i < NSEG; i++) { const t0 = i * SEGLEN, t1 = Math.min(t, t0 + SEGLEN); if (t1 <= t0) break; p.push([t0, S.acc[i]], [t1, S.acc[i]]); }
+        return p;
+      }
+      /** Accolade verticale à la tête de lecture, du niveau initial à la valeur courante */
+      function brace(gi, vStart, vNow, label) {
+        const x = PX(S.t), ya = Yg(gi, vStart), yb = Yg(gi, vNow), col = FX.signColor(vNow - vStart, 1e-9), dy = Math.abs(yb - ya);
+        if (dy < 1.5 || x - g.L < 4) return;
+        clipPlot(gi);
+        line(PX(0), ya + 0.5, x, ya + 0.5, FX.rgba(col, 0.55), 1.2, [3, 4]);
+        c.restore();
+        const bx = Math.max(g.L + 6, x - 9);
+        c.save(); c.strokeStyle = col; c.lineWidth = 2; c.lineCap = 'round'; c.beginPath();
+        c.moveTo(bx + 5, ya); c.lineTo(bx, ya); c.lineTo(bx, yb); c.lineTo(bx + 5, yb); c.stroke(); c.restore();
+        if (dy > 14 && x - g.L > 66) FX.tag(c, label, bx - 6, (ya + yb) / 2, col, 'right', 'middle', g.small ? 9 : 10.5);
+      }
+      /** Sécante sur [t, t+Δt], tangente et petit triangle Δ / Δt */
+      function secantOverlay(gi, fn, slopeT, nameD, unit) {
+        const q = secant(fn), col = FX.signColor(q.slope, 1e-6), t = S.t;
+        const P = (tt, val) => [PX(tt), Yg(gi, val)], A = P(q.tA, q.yA), B = P(q.tB, q.yB);
+        clipPlot(gi);
+        // tangente (pente exacte)
+        const y = fn(t), e = 1.4;
+        const t1 = P(t - e, y - slopeT * e), t2 = P(t + e, y + slopeT * e);
+        line(t1[0], t1[1], t2[0], t2[1], FX.rgba(C.texte, 0.65), 1.2, [5, 4]);
+        // triangle
+        line(A[0], A[1], B[0], A[1], FX.rgba(col, 0.9), 1.3, [3, 3]); line(B[0], A[1], B[0], B[1], FX.rgba(col, 0.9), 1.3, [3, 3]);
+        // sécante : prolongement léger puis segment entre les deux points
+        const ex = 0.7, a0 = P(q.tA - ex, q.yA - q.slope * ex), b0 = P(q.tB + ex, q.yB + q.slope * ex);
+        line(a0[0], a0[1], b0[0], b0[1], FX.rgba(col, 0.35), 1.6);
+        line(A[0], A[1], B[0], B[1], col, 3);
+        dot(A[0], A[1], 3.2, C.fond, col); dot(B[0], B[1], 3.2, col);
+        c.restore();
+        if (B[0] - A[0] > 38) FX.tag(c, `Δt = ${f2(q.dt)} s`, (A[0] + B[0]) / 2, A[1] + (B[1] <= A[1] ? 11 : -11), col, 'center', 'middle', 9.5);
+        if (Math.abs(B[1] - A[1]) > 24 && B[0] - A[0] > 14) FX.tag(c, `${nameD} sur Δt = ${s2(q.yB - q.yA)} ${unit}`, B[0] + 6, (A[1] + B[1]) / 2, col, 'left', 'middle', 9.5);
+      }
+
+      function drawZeros() {
+        zeros.forEach(z => {
+          const x = PX(z.t), yv = Yg(1, 0), yx = Yg(0, at(z.t).x);
+          line(x + 0.5, yx, x + 0.5, yv, FX.rgba(C.ener, 0.35), 1, [2, 4]);
+          [[x, yv], [x, yx]].forEach(p => { c.save(); c.translate(p[0], p[1]); c.rotate(Math.PI / 4); c.fillStyle = C.fond; c.strokeStyle = C.ener; c.lineWidth = 1.6; c.fillRect(-3.8, -3.8, 7.6, 7.6); c.strokeRect(-3.8, -3.8, 7.6, 7.6); c.restore(); });
+          FX.tag(c, 'v = 0', x + 8, yv - 11, C.ener, 'left', 'middle', 9.5);
+          FX.tag(c, `${z.max ? 'x max' : 'x min'} = ${f1(at(z.t).x)} m`, x + 8, yx + (z.max ? -10 : 10), C.ener, 'left', 'middle', 9.5);
+        });
+      }
+
+      function drawAll() {
+        c.clearRect(0, 0, g.w, g.h);
+        drawTrack();
+        for (let i = 0; i < 3; i++) frameGraph(i);
+        const t = S.t, st = at(t);
+        if (S.aire) {
+          fillArea(1, areaPtsV(t)); if (t > 0) fillArea(2, areaPtsA(t));
+        }
+        curves();
+        drawZeros();
+        if (S.aire) { brace(0, S.x0, st.x, `Δx = ${s1(st.x - S.x0)} m`); brace(1, S.v0, st.v, `Δv = ${s1(st.v - S.v0)} m/s`); }
+        if (S.pente) { secantOverlay(0, xAt, st.v, 'Δx', 'm'); secantOverlay(1, vAt, st.a, 'Δv', 'm/s'); }
+        // tête de lecture et points sur les courbes
+        const X = PX(t), y0 = g.gr[0].y - 3, y1 = g.gr[2].y + g.gr[2].h + 3;
+        line(X, y0, X, y1, C.ener, 1.6);
+        dot(X, y0, 3.5, C.ener); dot(X, y1, 3.5, C.ener);
+        [[0, st.x, C.texte, 'm'], [1, st.v, C.accent, 'm/s'], [2, st.a, C.lilas, 'm/s²']].forEach(([gi, val, col, u]) => {
+          const Y = Yg(gi, val); dot(X, Y, 4.5, col, C.ener);
+          if (S.pente && gi < 2) return;   // la sécante porte déjà ses étiquettes
+          const right = X < g.w - g.R - 92 - (g.small ? 0 : 20);
+          FX.tag(c, `${s1(val)} ${g.small ? '' : u}`.trim(), X + (right ? 9 : -9), clamp(Y, g.gr[gi].y + 8, g.gr[gi].y + g.gr[gi].h - 8), col, right ? 'left' : 'right', 'middle', g.small ? 9 : 10);
+        });
+        // axe du temps
+        c.save(); c.font = FX.mono(FS()); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+        for (let k = 0; k <= T; k += 2) c.fillText(String(k), PX(k), y1 + 3);
+        c.restore();
+        if (X < g.w - g.R - (g.small ? 62 : 92)) FX.tag(c, 't (s)', g.w - 4, y1 + (g.small ? 9 : 11), C.texte2, 'right', 'top', g.small ? 9.5 : 10.5); // sinon « t = … s » porte déjà l'unité
+        FX.tag(c, `t = ${f2(t)} s`, clamp(X, g.L + 2, g.w - 40), y1 + (g.small ? 9 : 11), C.ener, 'center', 'top', g.small ? 9.5 : 10.5);
+      }
+
+      /* ---------- Panneau : mesures et remarques ---------- */
+      const row = (lab, val, unit, k = '', small = false) => `<div class="row${small ? ' small' : ''}"><span class="lab">${lab}</span><span class="val ${k}">${val}<i>${unit}</i></span></div>`;
+      function updatePanel() {
+        const t = S.t, st = at(t);
+        let m = row('t', f2(t), 's', 'ener') + row('x', s2(st.x), 'm') + row('v', s2(st.v), 'm/s', 'acc') + row('a', s2(st.a), 'm/s²', 'lil');
+        if (S.pente) {
+          const qx = secant(xAt), qv = secant(vAt);
+          m += row(`Δx/Δt, [${f2(qx.tA)} ; ${f2(qx.tB)}] s`, s2(qx.slope), 'm/s', cls(qx.slope), true) + row('v(t) lue sur le graphe', s2(st.v), 'm/s', 'acc', true)
+            + row(`Δv/Δt, Δt = ${f2(qv.dt)} s`, s2(qv.slope), 'm/s²', cls(qv.slope), true) + row('a(t) lue sur le graphe', s2(st.a), 'm/s²', 'lil', true);
+        }
+        if (S.aire) {
+          const dx = st.x - S.x0, av = areaV(t), dv = st.v - S.v0, aa = areaA(t);
+          m += row('aire sous v  (m/s × s)', s2(av), 'm', cls(av), true) + row('Δx = x(t) − x₀', s2(dx), 'm', cls(dx), true)
+            + row('aire sous a  (m/s² × s)', s2(aa), 'm/s', cls(aa), true) + row('Δv = v(t) − v₀', s2(dv), 'm/s', cls(dv), true);
+        }
+        if (m !== lastMeas) { elMeas.innerHTML = m; lastMeas = m; }
+        const n = remark(st);
+        if (n !== lastNote) { elNote.textContent = n; lastNote = n; }
+      }
+      /** Remarque qualitative sur l'état à l'instant t */
+      function remark(st) {
+        const eps = 0.0049, v = st.v, a = st.a;
+        if (Math.abs(v) < eps) {
+          const vb = at(S.t - 0.01).v, va = at(S.t + 0.01).v;
+          if (vb * va < 0) return `v = 0 : le mobile s'arrête et fait demi-tour. x atteint un ${vb > 0 ? 'maximum' : 'minimum'}, la pente de x est nulle.`;
+          if (Math.abs(a) < eps) return 'v = 0 et a = 0 : le mobile est à l\'arrêt, x ne change pas.';
+          return 'v = 0 un instant, sans demi-tour : x a une pente nulle mais n\'atteint pas d\'extremum.';
+        }
+        if (Math.abs(a) < eps) return `a = 0 : la vitesse reste constante (${s1(v)} m/s), x est une droite.`;
+        return a * v < 0 ? 'a et v de signes opposés : le mobile ralentit.' : 'a et v de même signe : le mobile accélère.';
+      }
+
+      /* ---------- Boucle ---------- */
+      FX.loop(dt => {
+        if (S.playing) { S.t += dt; if (S.t >= T) { S.t = T; S.playing = false; syncControls(); } }
+        // transition douce des cadrages
+        const k = FX.reduced ? 1 : 1 - Math.exp(-dt * 9);
+        for (const key of ['x', 'v', 'trk']) for (let i = 0; i < 2; i++) { const d = tgt[key][i] - view[key][i]; view[key][i] += Math.abs(d) < 1e-4 ? d : d * k; }
+        drawAll(); updatePanel();
+      }, signal);
+
+      rebuild(); syncControls(); renderHead(); layout();
+      cleanup = () => { FX.tip(null); };
+    },
+    unmount() { if (cleanup) { cleanup(); cleanup = null; } },
+  });
+})();
+</script>
+
+<script>
+/* ============ Coquille : onglets, montage et démontage des toys ============ */
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const tabsEl = $('#tabs'), stage = $('#stage'), panel = $('#toyPanel'), controls = $('#toyControls');
+  const ordre = ['echelles', 'graphiques', 'vecteurs', 'mouvement'];
+  const toys = ordre.map(id => FX.toys.find(t => t.id === id)).filter(Boolean);
+  let cur = null, ctrl = null;
+
+  tabsEl.innerHTML = toys.map((t, i) =>
+    `<button class="tab" role="tab" data-i="${i}" aria-selected="false" title="${t.num} · ${t.titre} (${i + 1})"><b>${t.num}</b><span>${t.titre}</span></button>`).join('');
+
+  function show(i, push = true) {
+    const t = toys[i]; if (!t || t === cur) return;
+    if (ctrl) ctrl.abort();
+    if (cur && cur.unmount) { try { cur.unmount(); } catch (e) { console.error(e); } }
+    FX.tip(null);
+    stage.innerHTML = ''; panel.innerHTML = ''; controls.innerHTML = '';
+    document.querySelectorAll('.extra-hint').forEach(n => n.remove());
+    ctrl = new AbortController(); cur = t;
+    tabsEl.querySelectorAll('.tab').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
+    $('#serie').textContent = `Fondations 1·2·3 — ${t.num} · ${t.titre}`;
+    $('#titre').innerHTML = t.titreHtml || t.titre;
+    $('#lienComprendre').href = `explication.html#${t.id}`;
+    document.title = `${t.titre} — L’invisible en mouvement, Fondations 1·2·3`;
+    if (t.hints) $('#hints').insertAdjacentHTML('beforeend', t.hints.map(h => `<li class="extra-hint">${h}</li>`).join(''));
+    t.mount({ scene: stage, panel, controls, signal: ctrl.signal });
+    FX.tex(panel); FX.tex(controls);
+    panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
+    if (push) history.replaceState(null, '', '#' + t.id);
+  }
+
+  tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) show(+b.dataset.i); });
+  addEventListener('keydown', e => {
+    if (FX.typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = +e.key; if (k >= 1 && k <= toys.length) { show(k - 1); e.preventDefault(); }
+  });
+  addEventListener('hashchange', () => { const i = toys.findIndex(t => '#' + t.id === location.hash); if (i >= 0) show(i, false); });
+  const i0 = toys.findIndex(t => '#' + t.id === location.hash);
+  show(i0 >= 0 ? i0 : 0, false);
+})();
+</script>
+</body>
+</html>
