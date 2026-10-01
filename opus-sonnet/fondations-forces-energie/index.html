@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Trois paillasses reliées par un seul code visuel : forces en flèches fines, résultante ΣF en lilas épais sous l'objet, quantité de mouvement orange (vers la droite) ou bleue (vers la gauche), énergie en jaune dont la texture dit la forme (plein, hachuré, pâle, tirets) ; rien n'est décoratif.
+  2. Le mouvement ne sert qu'à montrer que seule une résultante change la vitesse : la caméra suit le bloc et les graduations défilent ; à la collision, le temps ralentit ×10 et tout (chariots, flèches, p, énergie, F(t)) lit le même enregistrement, qu'on peut remonter.
+  3. Le moteur est une pile de fonctions pures (objet Phys) à pas fixes, séparé du dessin ; les flèches, barres et aires sont des représentations à échelle fixe par acte, jamais des objets, et la page le dit.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forces, énergie et conservation — L’invisible en mouvement, Fondations 10·11</title>
+<meta name="description" content="Trois paillasses de mécanique : force résultante, travail et énergie, collision. Observe ce qui change la vitesse, où va l'énergie et ce qui se conserve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#d6c4ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:36px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden]{display:none}
+#scope,#bars{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0}
+.sg[data-g=A]{flex:3 1 0}.sg[data-g=B]{flex:1 1 0}.sg[data-g=C]{flex:2 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Paillasse de mécanique : un bloc ou des chariots avec leurs forces, vitesses, quantités de mouvement et énergies dessinés en flèches et en barres."></canvas>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — Fondations 10·11</p>
+      <h1>Forces, énergie et <em>conservation</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VI</p>
+      <h2 id="stepTitle">Inertie</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de la paillasse en fonction du temps."></canvas></div>
+      <p class="leg" id="leg"></p>
+      <div class="scopeBox" id="barsBox" hidden style="margin-top:12px"><canvas id="bars" role="img" aria-label="Barres de quantité de mouvement p1, p2 et Σp, et barre d'énergie empilée."></canvas></div>
+      <p class="leg" id="leg2"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>6</kbd> aller à l'acte</li>
+        <li><kbd>R</kbd> réinitialiser l'acte · <kbd>A</kbd> / <kbd>D</kbd> pousser (actes I et IV)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les six actes">
+      <div class="sg" data-g="A"><span class="sgl"><span class="long">Paillasse A · rail</span><span class="short">A</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Acte I — Inertie"><b>I</b><span>Inertie</span></button>
+        <button class="seg" data-a="1" title="Acte II — Force résultante et masse"><b>II</b><span>Résultante</span></button>
+        <button class="seg" data-a="2" title="Acte III — Action-réaction"><b>III</b><span>Action-réaction</span></button>
+      </div></div>
+      <div class="sg" data-g="B"><span class="sgl"><span class="long">Paillasse B · piste</span><span class="short">B</span></span><div class="sgs">
+        <button class="seg" data-a="3" title="Acte IV — Travail et énergie"><b>IV</b><span>Énergie</span></button>
+      </div></div>
+      <div class="sg" data-g="C"><span class="sgl"><span class="long">Paillasse C · collision</span><span class="short">C</span></span><div class="sgs">
+        <button class="seg" data-a="4" title="Acte V — Collision"><b>V</b><span>Collision</span></button>
+        <button class="seg" data-a="5" title="Acte VI — À toi"><b>VI</b><span>À toi</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <div class="grp" data-acts="0 3">
+        <span class="gl">Poussée</span>
+        <button class="btn" id="bPushL" title="Maintenir pour pousser vers la gauche (A)">&larr; Pousser</button>
+        <button class="btn" id="bPushR" title="Maintenir pour pousser vers la droite (D)">Pousser &rarr;</button>
+      </div>
+      <div class="grp" data-acts="1"><span class="gl">F₁ →</span><input type="range" id="rF1" min="0" max="10" step="0.5" value="4" aria-label="Force F1 vers la droite en newtons"><span class="rv" id="vF1"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">← F₂</span><input type="range" id="rF2" min="0" max="10" step="0.5" value="0" aria-label="Force F2 vers la gauche en newtons"><span class="rv" id="vF2"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">m</span><input type="range" id="rMA" min="0.5" max="5" step="0.5" value="2" aria-label="Masse du bloc en kilogrammes"><span class="rv" id="vMA"></span></div>
+      <div class="grp" data-acts="1"><button class="btn" id="bV3" title="Donner une vitesse de 3 m/s">v = 3 m/s</button><button class="btn" id="bV0" title="Arrêter le bloc">Arrêter</button></div>
+      <div class="grp" data-acts="3"><span class="gl">m</span><input type="range" id="rMB" min="0.5" max="5" step="0.5" value="2" aria-label="Masse du chariot en kilogrammes"><span class="rv" id="vMB"></span></div>
+      <div class="grp" data-acts="1 3"><button class="btn" id="bFric" aria-pressed="false"><span class="dot"></span>Frottement</button></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bDrop">Lâcher</button></div>
+      <div class="grp" data-acts="2"><span class="gl">m₁</span><input type="range" id="rM1r" min="0.5" max="4" step="0.5" value="1" aria-label="Masse du chariot 1"><span class="rv" id="vM1r"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">m₂</span><input type="range" id="rM2r" min="0.5" max="4" step="0.5" value="1" aria-label="Masse du chariot 2"><span class="rv" id="vM2r"></span></div>
+      <div class="grp" data-acts="2"><button class="btn go" id="bRel">Relâcher</button></div>
+      <div class="grp" data-acts="4"><span class="gl">Préréglages</span>
+        <button class="btn" data-pre="0">Égales, élastique</button><button class="btn" data-pre="1">Lourd sur léger</button><button class="btn" data-pre="2">Léger sur lourd</button><button class="btn" data-pre="3">Collées (e = 0)</button></div>
+      <div class="grp" data-acts="5"><span class="gl">m₁</span><input type="range" id="rM1" min="0.5" max="3" step="0.5" value="1" aria-label="Masse du chariot 1"><span class="rv" id="vM1"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">m₂</span><input type="range" id="rM2" min="0.5" max="3" step="0.5" value="1" aria-label="Masse du chariot 2"><span class="rv" id="vM2"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">v₁</span><input type="range" id="rV1" min="-2" max="2" step="0.1" value="1.2" aria-label="Vitesse initiale du chariot 1"><span class="rv" id="vV1"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">v₂</span><input type="range" id="rV2" min="-2" max="2" step="0.1" value="0" aria-label="Vitesse initiale du chariot 2"><span class="rv" id="vV2"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">e</span><input type="range" id="rE" min="0" max="1" step="0.05" value="1" aria-label="Coefficient de restitution"><span class="rv" id="vE"></span></div>
+      <div class="grp" data-acts="4 5"><button class="btn go" id="bLaunch">Lancer</button></div>
+      <div class="grp" data-acts="2 4 5"><span class="gl">Temps</span><input type="range" id="rT" min="0" max="1" step="0.001" value="0" aria-label="Remonter ou avancer dans l'enregistrement" style="width:170px"><span class="rv" id="vT">0,000 s</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* PHYS-BEGIN */
+/* ================= Moteur physique : fonctions pures, sans DOM ================= */
+const Phys = (() => {
+  const g = 9.81;
+
+  /* ---- Paillasse A : point sur rail, mise à jour exacte à force constante ---- */
+  const A = { dt: 1 / 240, muK: 0.15, muS: 0.20, eps: 1e-4, Fp: 6 };
+  // s = {x, v}; F = force horizontale appliquée (hors frottement). Retourne le nouvel état.
+  function stepA(s, m, F, fric, dt) {
+    const x = s.x; let v = s.v, Ff = 0;
+    const N = m * g;
+    if (fric) {
+      if (Math.abs(v) <= A.eps) {
+        if (Math.abs(F) <= A.muS * N) return { x, v: 0, a: 0, Ff: -F, Fnet: 0 };   // statique : le frottement égale la force
+        v = 0; Ff = -Math.sign(F) * A.muK * N;
+      } else Ff = -Math.sign(v) * A.muK * N;
+    }
+    const a = (F + Ff) / m;
+    if (fric && v !== 0 && (v + a * dt) * v < 0) {                                  // le frottement seul arrêterait le bloc : v = 0 exactement
+      const ts = -v / a;
+      return { x: x + v * ts + 0.5 * a * ts * ts, v: 0, a, Ff, Fnet: F + Ff };
+    }
+    return { x: x + v * dt + 0.5 * a * dt * dt, v: v + a * dt, a, Ff, Fnet: F + Ff };
+  }
+  // Simulation complète à force constante : renvoie l'état final et l'accélération mesurée
+  function runA(p) {
+    const dt = A.dt, n = Math.round(p.seconds / dt);
+    let s = { x: p.x0 || 0, v: p.v0 || 0 }, last = null;
+    const F = p.F, v0 = s.v;
+    for (let i = 0; i < n; i++) { last = stepA(s, p.m, F, !!p.fric, dt); s = { x: last.x, v: last.v }; }
+    return { x: s.x, v: s.v, a: last ? last.a : 0, aMeasured: (s.v - v0) / p.seconds, K: 0.5 * p.m * s.v * s.v, p: p.m * s.v };
+  }
+
+  /* ---- Paillasse B : piste en profil ---- */
+  const T = (() => {
+    const X0 = -5, X1 = 5, NF = 40000, DS = 0.002;
+    const gau = x => Math.exp(-Math.pow((x - 0.3) / 0.8, 2));
+    const hr = x => 0.1 * x * x + 0.55 * gau(x) + 0.03 * x;
+    const dh = x => 0.2 * x + 0.55 * gau(x) * (-2 * (x - 0.3) / 0.64) + 0.03;
+    const xf = new Float64Array(NF + 1), cum = new Float64Array(NF + 1);
+    let hmin = Infinity;
+    for (let i = 0; i <= NF; i++) { xf[i] = X0 + (X1 - X0) * i / NF; hmin = Math.min(hmin, hr(xf[i])); }
+    for (let i = 1; i <= NF; i++) cum[i] = cum[i - 1] + Math.hypot(xf[i] - xf[i - 1], hr(xf[i]) - hr(xf[i - 1]));
+    const L = cum[NF], N = Math.floor(L / DS);
+    const Xs = new Float64Array(N + 2), Hs = new Float64Array(N + 2), Sn = new Float64Array(N + 2), Cs = new Float64Array(N + 2);
+    let j = 0;
+    for (let i = 0; i <= N + 1; i++) {
+      const s = Math.min(i * DS, L);
+      while (j < NF - 1 && cum[j + 1] < s) j++;
+      const f = (s - cum[j]) / (cum[j + 1] - cum[j] || 1), x = xf[j] + (xf[j + 1] - xf[j]) * f;
+      Xs[i] = x; Hs[i] = hr(x) - hmin;
+      const d = dh(x), q = Math.sqrt(1 + d * d); Sn[i] = d / q; Cs[i] = 1 / q;
+    }
+    const interp = (tab, s) => {
+      if (s <= 0) return tab[0]; if (s >= L) return tab[N];
+      const u = s / DS, i = Math.floor(u), f = u - i;
+      return tab[i] + (tab[i + 1] - tab[i]) * f;
+    };
+    return {
+      L, DS, X0, X1,
+      x: s => interp(Xs, s), h: s => interp(Hs, s), sin: s => interp(Sn, s), cos: s => interp(Cs, s),
+      sOfX(x) { let lo = 0, hi = N; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (Xs[m] < x) lo = m; else hi = m; } return Math.min(L, Math.max(0, lo * DS)); },
+      hMax: Math.max(hr(X0), hr(X1)) - hmin
+    };
+  })();
+  const B = { dt: 1 / 1000, mu: 0.05, Fp: 6, eps: 1e-4 };
+  const energyB = (st, m) => ({ K: 0.5 * m * st.v * st.v, U: m * g * T.h(st.s) });
+  // st = {s, v, Eth, W}; Fp = poussée le long de la tangente (+ vers les x croissants) ; mu = 0 : sans frottement
+  function stepB(st, m, dt, Fp, mu) {
+    const s = st.s, v = st.v, sn = T.sin(s), cs = T.cos(s);
+    const drive = -m * g * sn + Fp, Fmax = mu * m * g * cs;
+    let Ff = 0, a0;
+    if (mu > 0) {
+      if (Math.abs(v) <= B.eps) {
+        if (Math.abs(drive) <= Fmax) return { s, v: 0, Eth: st.Eth, W: st.W, a: 0, Ff: -drive, sn, cs, Fnet: 0 };
+        Ff = -Math.sign(drive) * Fmax;
+      } else Ff = -Math.sign(v) * Fmax;
+    }
+    a0 = (drive + Ff) / m;
+    let s1 = s + v * dt + 0.5 * a0 * dt * dt, hit = false;
+    if (s1 <= 0) { s1 = 0; hit = true; } else if (s1 >= T.L) { s1 = T.L; hit = true; }
+    const sn1 = T.sin(s1), cs1 = T.cos(s1), drive1 = -m * g * sn1 + Fp, Fmax1 = mu * m * g * cs1;
+    const vp = v + a0 * dt;
+    const Ff1 = mu > 0 ? -Math.sign(vp || drive1) * Fmax1 : 0;
+    const a1 = (drive1 + Ff1) / m;
+    let v1 = v + 0.5 * (a0 + a1) * dt;
+    if (mu > 0 && (v1 * v < 0 || (Math.abs(v1) <= B.eps && Math.abs(drive1) <= Fmax1))) v1 = 0;
+    const ds = s1 - s;
+    let Eth = st.Eth + (mu > 0 ? 0.5 * (Fmax + Fmax1) * Math.abs(ds) : 0), W = st.W + Fp * ds;
+    if (hit) { Eth += 0.5 * m * Math.max(0, v * v + 2 * a0 * ds); v1 = 0; }          // butée : l'énergie cinétique restante (à l'arrivée) devient chaleur
+    return { s: s1, v: v1, Eth, W, a: a0, Ff, sn, cs, Fnet: drive + Ff };
+  }
+  function trackRun(p) {
+    const m = p.m, mu = p.mu || 0, Fp = p.Fp || 0, dt = B.dt, n = Math.round(p.seconds / dt);
+    let st = { s: T.sOfX(p.x0), v: 0, Eth: 0, W: 0 };
+    const e0 = energyB(st, m), E0 = e0.K + e0.U;
+    let maxDrift = 0, maxBal = 0;
+    for (let i = 0; i < n; i++) {
+      st = stepB(st, m, dt, Fp, mu);
+      if (i % 20 === 0) {
+        const e = energyB(st, m), bal = e.K + e.U + st.Eth - st.W - E0;
+        maxBal = Math.max(maxBal, Math.abs(bal));
+        if (mu === 0 && Fp === 0) maxDrift = Math.max(maxDrift, Math.abs(e.K + e.U - E0));
+      }
+    }
+    const e = energyB(st, m), bal = e.K + e.U + st.Eth - st.W - E0;
+    return { E0, K: e.K, U: e.U, Eth: st.Eth, W: st.W, balance: bal, maxBalance: maxBal, driftRel: maxDrift / E0, endDriftRel: (e.K + e.U - E0) / E0, s: st.s, v: st.v };
+  }
+
+  /* ---- Paire de chariots : ressort (acte III) ou pare-chocs de Walton-Braun (actes V, VI) ---- */
+  const C = { k1: 1500, Lb: 0.16, hw: 0.25, dt: 1 / 20000, every: 10 };
+  C.tip = 2 * C.hw + 2 * C.Lb;
+  const R = { k: 300, c0: 0.12, Lnat: 0.5, dt: 1 / 2000 };
+  // cfg : {kind:'spring'|'contact', m1, m2, x1, x2, v1, v2, e, tEnd}. Verlet vitesse, pas fixe.
+  function simPair(cfg) {
+    const contact = cfg.kind === 'contact';
+    const dt = cfg.dt || (contact ? C.dt : R.dt), every = cfg.every || (contact ? C.every : 1);
+    const n = Math.round(cfg.tEnd / dt), m1 = cfg.m1, m2 = cfg.m2, e = cfg.e == null ? 1 : cfg.e;
+    const lockMode = contact && e < 0.02;
+    let x1 = cfg.x1, x2 = cfg.x2, v1 = cfg.v1, v2 = cfg.v2, t = 0;
+    let dmax = 0, locked = false, detached = false, Wc = 0, J = 0, Fn = 0, En = 0, del = 0;
+    let tStart = -1, tEndC = -1, Emax = 0, Fmax = 0;
+    const rec = { dt: dt * every, n: 0, t: [], x1: [], x2: [], v1: [], v2: [], F: [], Eel: [], Eth: [], J: [], del: [] };
+    function force() {
+      if (contact) {
+        del = C.tip - (x2 - x1);
+        if (locked) { Fn = 0; En = 0; return; }
+        if (del <= 0) { dmax = 0; Fn = 0; En = 0; return; }
+        if (del > dmax) dmax = del;
+        if (lockMode) { Fn = C.k1 * del; En = 0.5 * C.k1 * del * del; return; }
+        const d0 = dmax * (1 - e * e), k2 = C.k1 / (e * e);
+        Fn = Math.max(0, Math.min(C.k1 * del, k2 * (del - d0)));
+        En = del >= dmax - 1e-15 ? 0.5 * C.k1 * del * del : (del > d0 ? 0.5 * k2 * (del - d0) * (del - d0) : 0);
+      } else {
+        del = R.Lnat - (x2 - x1 - 2 * C.hw);
+        if (del <= 0) detached = true;
+        if (detached) { Fn = 0; En = 0; return; }
+        Fn = R.k * del; En = 0.5 * R.k * del * del;
+      }
+    }
+    force();
+    let Fo = Fn, Ecur = En, delo = Math.max(del, 0);
+    const push = i => {
+      rec.t.push(i * dt); rec.x1.push(x1); rec.x2.push(x2); rec.v1.push(v1); rec.v2.push(v2);
+      rec.F.push(Fo); rec.Eel.push(Ecur); rec.Eth.push(contact ? Wc - Ecur : 0); rec.J.push(J); rec.del.push(del); rec.n++;
+    };
+    for (let i = 0; i <= n; i++) {
+      if (i % every === 0) push(i);
+      if (i === n) break;
+      const a1 = -Fo / m1, a2 = Fo / m2;
+      x1 += v1 * dt + 0.5 * a1 * dt * dt; x2 += v2 * dt + 0.5 * a2 * dt * dt;
+      force();
+      v1 += 0.5 * (a1 - Fn / m1) * dt; v2 += 0.5 * (a2 + Fn / m2) * dt;
+      if (contact) { const dc = Math.max(del, 0); Wc += 0.5 * (Fo + Fn) * (dc - delo); delo = dc; }
+      J += 0.5 * (Fo + Fn) * dt;
+      if (lockMode && !locked && del > 0 && v1 - v2 <= 0) {                           // e = 0 : fin de la compression, vitesse commune exacte
+        const vc = (m1 * v1 + m2 * v2) / (m1 + m2);
+        J += m2 * (vc - v2); Wc += 0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2 - 0.5 * (m1 + m2) * vc * vc;   // impulsion et énergie du raccord comptées
+        v1 = vc; v2 = vc; locked = true; Fn = 0; En = 0;
+      }
+      t = (i + 1) * dt;
+      if (Fn > 0) { if (tStart < 0) tStart = t; tEndC = t; }
+      if (En > Emax) Emax = En; if (Fn > Fmax) Fmax = Fn;
+      Fo = Fn; Ecur = En;
+    }
+    return { rec, tStart, tEnd: tEndC, Emax, Fmax, J, v1f: v1, v2f: v2, Eth: contact ? Wc - Ecur : 0, Wc, locked };
+  }
+  // Configuration d'une collision : le contact a lieu vers t = tc, au centre de la scène
+  function contactCfg(p) {
+    const tc = 1.0, vr = p.v1 - p.v2;
+    const cfg = { kind: 'contact', m1: p.m1, m2: p.m2, v1: p.v1, v2: p.v2, e: p.e };
+    if (vr > 1e-6) { cfg.x1 = -0.41 - p.v1 * tc; cfg.x2 = 0.41 - p.v2 * tc; cfg.tEnd = tc + 2.0; }
+    else { cfg.x1 = -0.9; cfg.x2 = 0.9; cfg.tEnd = 3.0; }
+    return cfg;
+  }
+  function releaseCfg(p) {
+    const half = (R.Lnat - R.c0 + 2 * C.hw) / 2;
+    return { kind: 'spring', m1: p.m1, m2: p.m2, x1: -half, x2: half, v1: 0, v2: 0, e: 1, tEnd: 1.4 };
+  }
+  function collide(p) {
+    const r = simPair(Object.assign(contactCfg(p), p.tEnd ? { tEnd: p.tEnd } : {}));
+    const rec = r.rec, last = rec.n - 1;
+    const pb = p.m1 * p.v1 + p.m2 * p.v2, pa = p.m1 * r.v1f + p.m2 * r.v2f;
+    const K0 = 0.5 * p.m1 * p.v1 * p.v1 + 0.5 * p.m2 * p.v2 * p.v2;
+    const Kf = 0.5 * p.m1 * r.v1f * r.v1f + 0.5 * p.m2 * r.v2f * r.v2f;
+    return {
+      v1f: r.v1f, v2f: r.v2f, J: r.J, Jcheck: p.m2 * (r.v2f - p.v2), Emax_el: r.Emax, Eth: r.Eth, Fmax: r.Fmax,
+      pTotBefore: pb, pTotAfter: pa, contactTime: r.tStart >= 0 ? r.tEnd - r.tStart : 0, contact: r.tStart >= 0,
+      eMeasured: p.v1 !== p.v2 ? -(r.v2f - r.v1f) / (p.v2 - p.v1) : NaN,
+      Etot0: K0, EtotEnd: Kf + rec.Eel[last] + rec.Eth[last], dissipated: K0 - Kf, rec
+    };
+  }
+  function release(p) {
+    const r = simPair(releaseCfg(p)), rec = r.rec;
+    return { v1f: r.v1f, v2f: r.v2f, J: r.J, pTot: p.m1 * r.v1f + p.m2 * r.v2f, K: 0.5 * p.m1 * r.v1f * r.v1f + 0.5 * p.m2 * r.v2f * r.v2f, E0: 0.5 * R.k * R.c0 * R.c0, tDetach: r.tEnd, rec };
+  }
+  // Interpolation linéaire d'un enregistrement
+  function sampleAt(rec, t) {
+    const u = Math.max(0, Math.min(rec.n - 1, t / rec.dt)), i = Math.min(rec.n - 2, Math.floor(u)), f = u - i, o = { t };
+    for (const k of ['x1', 'x2', 'v1', 'v2', 'F', 'Eel', 'Eth', 'J', 'del']) o[k] = rec[k][i] + (rec[k][i + 1] - rec[k][i]) * f;
+    return o;
+  }
+  return { g, A, B, C, R, T, stepA, runA, energyB, stepB, trackRun, simPair, contactCfg, releaseCfg, collide, release, sampleAt };
+})();
+/* PHYS-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const barsC = $('#bars'), bctx = barsC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RE = rgb(C.ener), RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RP = rgb(C.pos), RN = rgb(C.neg);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, g = Phys.g;
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function arrow(c, x0, y0, x1, y1, col, lw, dash, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 7, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill();
+  c.restore();
+}
+function hatch(c, x, y, w, h, col, gap) {
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.strokeStyle = col; c.lineWidth = 1; c.beginPath();
+  for (let k = -h; k < w; k += gap || 5) { c.moveTo(x + k, y + h); c.lineTo(x + k + h, y); }
+  c.stroke(); c.restore();
+}
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0;
+const SC = { A: 14, B: 14 };
+// Réglages (par acte)
+const prm = {};
+function resetPrm(n) {
+  if (n === 1) Object.assign(prm, { F1: 4, F2: 0, mA: 2, fricA: false });
+  if (n === 3) Object.assign(prm, { mB: 2, fricB: false, x0B: -3.6 });
+  if (n === 2) Object.assign(prm, { m1r: 1, m2r: 1 });
+  if (n === 4) prm.pv = Object.assign({}, PRE[0]);
+  if (n === 5) prm.ps = { m1: 2, m2: 1, v1: 1.5, v2: -0.5, e: 0.6 };
+}
+const PRE = [
+  { m1: 1, m2: 1, v1: 1.2, v2: 0, e: 1 }, { m1: 3, m2: 0.5, v1: 1.2, v2: 0, e: 1 },
+  { m1: 0.5, m2: 3, v1: 1.2, v2: 0, e: 1 }, { m1: 1, m2: 1, v1: 1.2, v2: 0, e: 0 }
+];
+[1, 2, 3, 4, 5].forEach(resetPrm);
+
+/* Paillasse A */
+const a = { x: 0, v: 0, m: 2, a: 0, Ff: 0, Fnet: 0, Fapp: 0, t: 0, acc: 0, rec: [], tRel: 0, wasPush: false, scV: 4, ptr: 0 };
+let pushBtn = 0, pushKey = 0;
+const pushNow = () => clamp(pushBtn + pushKey + (act === 0 ? a.ptr : 0), -1, 1);
+function resetA() { a.m = act === 0 ? 2 : prm.mA; a.x = 0; a.v = 0; a.a = 0; a.Ff = 0; a.Fnet = 0; a.Fapp = 0; a.t = 0; a.acc = 0; a.rec = []; a.tRel = 0; a.wasPush = false; a.scV = 4; }
+function advanceA(dt) {
+  a.acc += dt; let n = 0; const h = Phys.A.dt;
+  const fric = act === 1 && prm.fricA, push = act === 0 ? pushNow() : 0;
+  const F = act === 0 ? push * Phys.A.Fp : prm.F1 - prm.F2;
+  a.Fapp = F;
+  while (a.acc >= h && n++ < 24) {
+    const r = Phys.stepA({ x: a.x, v: a.v }, a.m, F, fric, h);
+    a.x = r.x; a.v = r.v; a.a = r.a; a.Ff = r.Ff; a.Fnet = r.Fnet; a.acc -= h; a.t += h;
+  }
+  if (a.acc > 0.2) a.acc = 0;
+  if (act === 0) { if (push === 0 && a.wasPush) a.tRel = 0; if (push === 0) a.tRel += dt; a.wasPush = push !== 0; }
+  a.rec.push({ t: a.t, F: a.Fnet, v: a.v });
+  while (a.rec.length && a.rec[0].t < a.t - 10.5) a.rec.shift();
+}
+function aMeasured() {
+  const r = a.rec; if (r.length < 3) return 0;
+  const last = r[r.length - 1]; let i = r.length - 1;
+  while (i > 0 && r[i].t > last.t - 0.3) i--;
+  return last.t - r[i].t > 0.05 ? (last.v - r[i].v) / (last.t - r[i].t) : 0;
+}
+
+/* Paillasse B */
+const b = { s: 0, v: 0, Eth: 0, W: 0, E0: 0, m: 2, held: true, acc: 0, t: 0, hist: [], a: 0, Ff: 0, sn: 0, cs: 1, Fnet: 0, Fp: 0, scE: 10, drag: false, x0: -3.6 };
+function bInit(x0) {
+  b.m = prm.mB; b.x0 = x0; b.s = Phys.T.sOfX(x0); b.v = 0; b.Eth = 0; b.W = 0; b.held = true; b.acc = 0; b.t = 0; b.hist = []; b.a = 0; b.Ff = 0; b.Fnet = 0; b.Fp = 0;
+  const e = Phys.energyB(b, b.m); b.E0 = e.K + e.U; b.sn = Phys.T.sin(b.s); b.cs = Phys.T.cos(b.s); b.scE = Math.max(5, b.E0 * 1.2);
+}
+function advanceB(dt) {
+  const push = pushNow();
+  if (b.held && push === 0) return;
+  b.held = false;
+  b.acc += dt; let n = 0; const h = Phys.B.dt, mu = prm.fricB ? Phys.B.mu : 0;
+  const Fp = push * Phys.B.Fp; b.Fp = Fp;
+  while (b.acc >= h && n++ < 90) {
+    const r = Phys.stepB(b, b.m, h, Fp, mu);
+    b.s = r.s; b.v = r.v; b.Eth = r.Eth; b.W = r.W; b.a = r.a; b.Ff = r.Ff; b.sn = r.sn; b.cs = r.cs; b.Fnet = r.Fnet; b.acc -= h; b.t += h;
+  }
+  if (b.acc > 0.2) b.acc = 0;
+  const e = Phys.energyB(b, b.m);
+  b.hist.push({ t: b.t, K: e.K, U: e.U, Eth: b.Eth, W: b.W });
+  while (b.hist.length && b.hist[0].t < b.t - 20.5) b.hist.shift();
+}
+const bEnergy = () => { const e = Phys.energyB(b, b.m); return { K: e.K, U: e.U, Eth: b.Eth, W: b.W, bal: e.K + e.U + b.Eth - b.W - b.E0 }; };
+
+/* Paires de chariots (actes III, V, VI) */
+const pb = { rec: null, tp: 0, launched: false, tEnd: 1, c0: -1, c1: -1, contact: false, m1: 1, m2: 1, v1: 0, v2: 0, e: 1, pmax: 1, Etot: 1, Fmax: 1, J: 0, kind: 'contact', cfg: null, dragT: false, res: null };
+function pbParams() {
+  if (act === 2) return { m1: prm.m1r, m2: prm.m2r, v1: 0, v2: 0, e: 1 };
+  return act === 4 ? prm.pv : prm.ps;
+}
+function pbReady() {
+  const p = pbParams();
+  pb.kind = act === 2 ? 'spring' : 'contact';
+  pb.cfg = pb.kind === 'spring' ? Phys.releaseCfg(p) : Phys.contactCfg(p);
+  pb.res = Phys.simPair(pb.cfg);
+  const r = pb.res, rec = r.rec;
+  pb.rec = rec; pb.tEnd = pb.cfg.tEnd; pb.c0 = r.tStart; pb.c1 = r.tEnd; pb.contact = r.tStart >= 0;
+  pb.m1 = p.m1; pb.m2 = p.m2; pb.v1 = p.v1; pb.v2 = p.v2; pb.e = p.e; pb.J = r.J; pb.Fmax = Math.max(1, r.Fmax);
+  let pm = 0.3, Et = 0;
+  for (let i = 0; i < rec.n; i += 4) { pm = Math.max(pm, Math.abs(p.m1 * rec.v1[i]), Math.abs(p.m2 * rec.v2[i]), Math.abs(p.m1 * rec.v1[i] + p.m2 * rec.v2[i])); }
+  Et = 0.5 * p.m1 * rec.v1[0] ** 2 + 0.5 * p.m2 * rec.v2[0] ** 2 + rec.Eel[0];
+  pb.pmax = pm * 1.08; pb.Etot = Math.max(Et, 1e-6);
+  pb.tp = 0; pb.launched = false;
+  const rt = $('#rT'); rt.max = pb.tEnd.toFixed(3); rt.value = 0; $('#vT').textContent = '0,000 s';
+}
+function pbLaunch() { pb.tp = 0; pb.launched = true; setPlay(true); }
+function pbRate() {
+  if (!pb.contact) return 1;
+  const lo = pb.c0 - 0.15, hi = pb.c1 + 0.15;
+  const d = pb.tp < lo ? lo - pb.tp : pb.tp > hi ? pb.tp - hi : 0;
+  return 0.1 + 0.9 * sstep(d / 0.12);
+}
+function pbAdvance(dt) {
+  if (!pb.launched || pb.tp >= pb.tEnd) return;
+  pb.tp = Math.min(pb.tEnd, pb.tp + dt * pbRate());
+  if (pb.tp >= pb.tEnd) pb.launched = false;
+}
+const pbS = () => Phys.sampleAt(pb.rec, pb.tp);
+function pbAfter() { return pb.contact && pb.tp > pb.c1 + 0.002; }
+
+/* ---------------- Mises en page ---------------- */
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+function sizePanelCanvases() {
+  const pair = act === 2 || act >= 4;
+  $('#barsBox').hidden = !pair;
+  sizeCanvas(scopeC, pair ? 160 : 158);
+  if (pair) sizeCanvas(barsC, 176);
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases();
+}
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [], zonesBars = [];
+function zone(list, x0, y0, x1, y1, key, name, role) { list.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function azone(x0, y0, x1, y1, key, name, role) { const p = 7; zone(zones, Math.min(x0, x1) - p, Math.min(y0, y1) - p, Math.max(x0, x1) + p, Math.max(y0, y1) + p, key, name, role); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1) return z; } return null; }
+
+/* ---------------- Scène A : bloc sur rail, caméra liée au bloc ---------------- */
+const blockPx = m => 46 + 14 * Math.sqrt(m);
+function railTicks(c, camX, cx, yR, pxm, v, showLabels) {
+  const wl = camX - cx / pxm - 1, wr = camX + (W - cx) / pxm + 1;
+  c.save();
+  c.strokeStyle = rgba(RT2, 0.13); c.lineWidth = 1; c.setLineDash([2, 5]); c.beginPath();
+  for (let k = Math.ceil(wl); k <= wr; k++) { const sx = Math.round(cx + (k - camX) * pxm) + 0.5; c.moveTo(sx, 0); c.lineTo(sx, H); }
+  c.stroke(); c.setLineDash([]);
+  c.fillStyle = '#131a24'; c.fillRect(0, yR, W, 9);
+  c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, yR + 0.5); c.lineTo(W, yR + 0.5); c.stroke();
+  const streak = Math.min(30, Math.abs(v) * pxm / 60), sg = v >= 0 ? 1 : -1;
+  c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.2; c.beginPath();
+  for (let i = Math.ceil(wl * 2); i <= wr * 2; i++) {
+    const wx = i / 2, sx = cx + (wx - camX) * pxm, big = i % 2 === 0;
+    c.moveTo(sx, yR + 9); c.lineTo(sx, yR + 9 + (big ? 10 : 6));
+    if (streak > 1.5) { c.moveTo(sx, yR + 9); c.lineTo(sx + sg * streak, yR + 9); }
+  }
+  c.stroke();
+  if (showLabels) {
+    c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'middle';
+    const ev = pxm >= 44 ? 1 : 2;
+    for (let k = Math.ceil(wl); k <= wr; k++) if (k % ev === 0) c.fillText(k + ' m', cx + (k - camX) * pxm, yR + 33);
+  }
+  c.restore();
+}
+function drawA() {
+  const c = ctx, pxm = clamp(W / 9, 52, 108), cx = Math.round(W * 0.5), yR = Math.round(H * 0.58);
+  const bw = blockPx(a.m), cy = yR - bw / 2;
+  const sx = 12, sv = act === 0 ? 14 : 12, sa = act === 0 ? 14 : 4, sF = 1.8;
+  railTicks(c, a.x, cx, yR, pxm, a.v, true);
+  azone(0, yR - 2, W, yR + 40, 'rail', 'Rail et graduations', 'Les graduations défilent : c’est elles qui montrent la vitesse. La caméra suit le bloc, pas le contraire.');
+  // bloc
+  c.save(); c.fillStyle = rgba(RT, 0.07); c.strokeStyle = C.texte; c.lineWidth = 1.5;
+  c.beginPath(); c.roundRect(cx - bw / 2, yR - bw, bw, bw, 3); c.fill(); c.stroke();
+  c.font = mono(11); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'middle'; c.fillText(fmt(a.m, 1) + ' kg', cx - bw / 2 - 8, cy);
+  c.restore();
+  zone(zones, cx - bw / 2, yR - bw, cx + bw / 2, yR, 'bloc', 'Bloc · m = ' + fmt(a.m, 1) + ' kg', 'L’objet étudié. Sa vitesse ne change que si la force résultante n’est pas nulle.');
+  // poids et normale (s'annulent)
+  const wv = a.m * g * sF;
+  arrow(c, cx - 10, cy, cx - 10, cy + wv, C.texte, 1.3, null, 6); arrow(c, cx + 10, cy, cx + 10, cy - wv, C.texte, 1.3, null, 6);
+  c.font = mono(10.5);
+  tagText(c, 'P', cx - 16, cy + wv + 4, 'right', 'top', C.texte); tagText(c, 'N', cx + 16, cy - wv - 4, 'left', 'bottom', C.texte);
+  azone(cx - 10, cy, cx - 10, cy + wv, 'poids', 'Poids P = m·g = ' + fmt(a.m * g, 1) + ' N', 'Attraction de la Terre, vers le bas. Annulé par la normale : la résultante verticale est nulle.');
+  azone(cx + 10, cy, cx + 10, cy - wv, 'norm', 'Normale N = ' + fmt(a.m * g, 1) + ' N', 'Poussée du rail vers le haut. Égale au poids, donc rien n’accélère verticalement.');
+  // forces horizontales, tête-bêche au-dessus du bloc
+  const yTop = yR - bw - 24, list = [];
+  if (act === 0) { const p = pushNow(); if (p) list.push({ k: 'push', lab: 'F', v: p * Phys.A.Fp, name: 'Poussée F = ' + fmt(Math.abs(p) * Phys.A.Fp, 0) + ' N', role: 'Ta poussée sur le bloc, tant que tu maintiens le bouton.' }); }
+  else {
+    list.push({ k: 'F1', lab: 'F₁', v: prm.F1, name: 'Force F₁ = ' + fmt(prm.F1, 1) + ' N', role: 'Force appliquée vers la droite.' });
+    list.push({ k: 'F2', lab: 'F₂', v: -prm.F2, name: 'Force F₂ = ' + fmt(prm.F2, 1) + ' N', role: 'Force appliquée vers la gauche.' });
+    if (prm.fricA && Math.abs(a.Ff) > 1e-6) list.push({ k: 'ff', lab: 'f', v: a.Ff, name: 'Frottement f = ' + fmt(Math.abs(a.Ff), 2) + ' N', role: a.v === 0 ? 'Statique : égale la force appliquée, tant qu’elle ne dépasse pas µs·m·g.' : 'Cinétique µk·m·g, opposé à la vitesse.' });
+  }
+  let xs = cx, i = 0;
+  for (const f of list) {
+    const y = yTop - i * 18, x1 = xs + f.v * sx;
+    if (Math.abs(f.v) > 0.01) {
+      arrow(c, xs, y, x1, y, C.texte, 1.4, null, 6);
+      c.font = mono(10.5); tagText(c, f.lab + ' = ' + fmt(Math.abs(f.v), 1) + ' N', (xs + x1) / 2, y - 6, 'center', 'bottom', C.texte);
+      azone(xs, y, x1, y, f.k, f.name, f.role);
+    }
+    xs = x1; i++;
+  }
+  if (list.length > 1 && Math.abs(a.Fnet) < 0.005 && (Math.abs(list[0].v) > 0.01)) { c.font = mono(10.5); tagText(c, 'la tête retombe sur la queue : ΣF = 0', cx, yTop - 92, 'center', 'bottom', C.accent); }
+  // vitesse
+  const vL = clamp(a.v * sv, -W * 0.44, W * 0.44), yv = yTop - 64;
+  if (Math.abs(a.v) > 0.02) {
+    arrow(c, cx, yv, cx + vL, yv, C.texte2, 1.5, null, 7);
+    c.font = mono(10.5); tagText(c, 'v = ' + fmt(a.v, 2) + ' m/s', cx + vL / 2, yv - 6, 'center', 'bottom', C.texte2);
+    azone(cx, yv, cx + vL, yv, 'v', 'Vitesse v', 'Un nombre signé : vers la droite si positif. Elle ne change que sous une résultante non nulle.');
+  }
+  // résultante et accélération, sous l'objet
+  const yS = yR + 60, FL = a.Fnet * sx;
+  if (Math.abs(a.Fnet) > 0.01) {
+    arrow(c, cx, yS, cx + FL, yS, C.accent, 3.6, null, 10);
+    c.font = mono(11); tagText(c, 'ΣF = ' + fmt(a.Fnet, 1) + ' N', cx + FL / 2, yS + 7, 'center', 'top', C.accent);
+    azone(cx, yS, cx + FL, yS, 'sf', 'Force résultante ΣF', 'Somme vectorielle de toutes les forces. C’est elle, et elle seule, qui change la vitesse.');
+    const am = a.Fnet / a.m, AL = am * sa;
+    arrow(c, cx, yS + 28, cx + AL, yS + 28, C.accent, 2, [5, 4], 7);
+    c.font = mono(10.5); tagText(c, 'a = ' + fmt(am, 2) + ' m/s²', cx + AL / 2, yS + 35, 'center', 'top', C.accent);
+    azone(cx, yS + 28, cx + AL, yS + 28, 'acc', 'Accélération a = ΣF/m', 'Plus courte quand la masse est grande : à même résultante, un objet lourd accélère moins.');
+  } else if (act === 0 || act === 1) {
+    c.font = mono(11); tagText(c, 'ΣF = 0', cx, yS, 'center', 'middle', C.accent);
+  }
+  // message au relâchement (acte I)
+  if (act === 0 && pushNow() === 0 && Math.abs(a.v) > 0.05) {
+    const al = clamp(a.tRel / 0.35, 0, 1);
+    c.save(); c.globalAlpha = al; c.font = mono(13);
+    tagText(c, 'ΣF = 0 · v constante', cx, yv - 34, 'center', 'bottom', C.accent); c.restore();
+  } else if (act === 0 && Math.abs(a.v) < 0.05) {
+    c.font = mono(12); tagText(c, 'maintiens « Pousser » (ou A / D, ou appuie sur un côté de la scène)', cx, yv - 8, 'center', 'bottom', C.texte2);
+  }
+  c.font = mono(10.5);
+  if (W >= 620) tagText(c, `échelles : 1 N = ${sx} px · 1 N (poids, normale) = ${fmt(sF, 1)} px · 1 m/s = ${sv} px` + (act === 0 ? '' : ` · 1 m/s² = ${sa} px`), 14, H - 10, 'left', 'bottom', C.texte2);
+  else { tagText(c, `1 N = ${sx} px · 1 m/s = ${sv} px` + (act === 0 ? '' : ` · 1 m/s² = ${sa} px`), 14, H - 10, 'left', 'bottom', C.texte2); tagText(c, `poids, normale : 1 N = ${fmt(sF, 1)} px`, 14, H - 28, 'left', 'bottom', C.texte2); }
+}
+
+/* ---------------- Scène B : piste en profil ---------------- */
+function bGeo() {
+  const pxm = Math.min((W - 80) / 10.4, (H * 0.5) / 2.9), ox = W / 2, y0 = Math.round(H * 0.8);
+  return { pxm, ox, y0 };
+}
+function drawBar(c, kind, x, yb, w, h, label) {
+  c.save();
+  if (kind === 'K') { c.fillStyle = rgba(RE, 0.92); c.fillRect(x, yb - h, w, h); }
+  else if (kind === 'U') { c.fillStyle = rgba(RE, 0.07); c.fillRect(x, yb - h, w, h); hatch(c, x, yb - h, w, h, rgba(RE, 0.65), 5); c.strokeStyle = C.ener; c.lineWidth = 1.3; c.strokeRect(x + 0.5, yb - h + 0.5, w - 1, h - 1); }
+  else if (kind === 'T') { c.fillStyle = rgba(RE, 0.35); c.fillRect(x, yb - h, w, h); }
+  c.restore();
+}
+function drawB() {
+  const c = ctx, { pxm, ox, y0 } = bGeo(), T = Phys.T, e = bEnergy();
+  zone(zones, ox - 5.3 * pxm, y0 - 5, ox + 5.3 * pxm, y0 + 22, 'ref', 'Référence h = 0', 'Un choix : on place le zéro de U au point le plus bas. Seules les différences de U comptent.');
+  // piste
+  c.save(); c.beginPath();
+  const n = Math.ceil(10 * pxm / 3);
+  c.moveTo(ox + T.X0 * pxm, y0 + 26);
+  for (let i = 0; i <= n; i++) { const x = T.X0 + 10 * i / n, h = T.h(T.sOfX(x)); c.lineTo(ox + x * pxm, y0 - h * pxm); }
+  c.lineTo(ox + T.X1 * pxm, y0 + 26); c.closePath(); c.fillStyle = '#121923'; c.fill();
+  c.beginPath();
+  for (let i = 0; i <= n; i++) { const x = T.X0 + 10 * i / n, h = T.h(T.sOfX(x)); const px = ox + x * pxm, py = y0 - h * pxm; i ? c.lineTo(px, py) : c.moveTo(px, py); }
+  c.strokeStyle = C.texte; c.lineWidth = 1.8; c.stroke(); c.restore();
+  // référence h = 0 (au-dessus du remplissage)
+  c.save(); c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 1; c.setLineDash([6, 5]); c.beginPath(); c.moveTo(ox - 5.3 * pxm, y0 + 0.5); c.lineTo(ox + 5.3 * pxm, y0 + 0.5); c.stroke(); c.restore();
+  c.font = mono(10.5); tagText(c, 'h = 0 · référence choisie', ox - 5.3 * pxm + 4, y0 + 6, 'left', 'top', C.texte2);
+  c.strokeStyle = C.texte; c.lineWidth = 2.4; c.beginPath();
+  for (const sg of [-1, 1]) { const x = ox + sg * 5 * pxm, hh = T.h(sg < 0 ? 0 : T.L); c.moveTo(x, y0 - hh * pxm); c.lineTo(x, y0 - hh * pxm - 12); }
+  c.stroke();
+  zone(zones, ox + T.X0 * pxm - 10, y0 - T.hMax * pxm - 14, ox + T.X0 * pxm + 8, y0, 'but', 'Butée', 'Au bout de la piste le chariot s’arrête net : son énergie cinétique restante devient chaleur (E_th).');
+  zone(zones, ox + T.X1 * pxm - 8, y0 - T.hMax * pxm - 14, ox + T.X1 * pxm + 10, y0, 'but2', 'Butée', 'Au bout de la piste le chariot s’arrête net : son énergie cinétique restante devient chaleur (E_th).');
+  // chariot
+  const x = T.x(b.s), h = T.h(b.s), sn = T.sin(b.s), cs = T.cos(b.s), px = ox + x * pxm, py = y0 - h * pxm, ang = Math.atan2(sn, cs);
+  c.save(); c.translate(px, py); c.rotate(-ang);
+  c.fillStyle = rgba(RT, 0.12); c.strokeStyle = b.held ? C.accent : C.texte; c.lineWidth = 1.5;
+  c.beginPath(); c.roundRect(-16, -15, 32, 11, 2); c.fill(); c.stroke();
+  c.fillStyle = C.fond; c.strokeStyle = C.texte; c.beginPath(); c.arc(-9, -2, 3, 0, TAU); c.arc(9, -2, 3, 0, TAU); c.fill(); c.stroke();
+  c.restore();
+  const ccx = px - sn * 9, ccy = py - cs * 9;
+  zone(zones, px - 20, py - 24, px + 20, py + 4, 'cart', 'Chariot · m = ' + fmt(b.m, 1) + ' kg', 'Glisse sur la piste. Attrape-le et fais-le glisser le long de la piste pour choisir son point de départ.');
+  // flèches : tangente t = (cs, -sn), normale vers le haut n = (-sn, -cs)
+  const sf = 2.4, tx = cs, ty = -sn, nx = -sn, ny = -cs;
+  const wv = b.m * g * sf;
+  arrow(c, ccx, ccy, ccx, ccy + wv, C.texte, 1.3, null, 6); tagText(c, 'P = ' + fmt(b.m * g, 1) + ' N', ccx + 6, ccy + wv + 2, 'left', 'top', C.texte);
+  azone(ccx, ccy, ccx, ccy + wv, 'poidsB', 'Poids P = m·g', 'Vers le bas. Sa composante le long de la piste accélère ou freine le chariot ; l’autre composante est annulée par la piste.');
+  const stx = ccx - nx * 16, sty = ccy - ny * 16;
+  if (Math.abs(b.Fnet) > 0.05) {
+    arrow(c, stx, sty, stx + tx * b.Fnet * sf, sty + ty * b.Fnet * sf, C.accent, 3.4, null, 9);
+    azone(stx, sty, stx + tx * b.Fnet * sf, sty + ty * b.Fnet * sf, 'sfB', 'Résultante le long de la piste', 'ΣF = −m·g·sinθ + poussée − frottement. Elle donne l’accélération tangentielle.');
+  }
+  if (Math.abs(b.Fp) > 0.01) {
+    const ux = ccx + nx * 14, uy = ccy + ny * 14;
+    arrow(c, ux, uy, ux + tx * b.Fp * sf, uy + ty * b.Fp * sf, C.texte, 1.5, null, 6);
+    tagText(c, 'poussée', ux + tx * b.Fp * sf * 0.5, uy + ty * b.Fp * sf * 0.5 + (ny * 0) - 10, 'center', 'bottom', C.texte);
+    azone(ux, uy, ux + tx * b.Fp * sf, uy + ty * b.Fp * sf, 'pushB', 'Poussée F = ' + fmt(Math.abs(b.Fp), 0) + ' N', 'Force venue de l’extérieur, le long de la piste. Elle apporte de l’énergie : travail W = F·d.');
+  }
+  if (prm.fricB && Math.abs(b.v) > 1e-3) {
+    const fx = ccx - nx * 30, fy = ccy - ny * 30, fl = -Math.sign(b.v) * Phys.B.mu * b.m * g * b.cs * sf * 3;
+    arrow(c, fx, fy, fx + tx * fl, fy + ty * fl, C.texte, 1.2, null, 5);
+    azone(fx, fy, fx + tx * fl, fy + ty * fl, 'ffB', 'Frottement f = µ·m·g·cosθ', 'Opposé à la vitesse (flèche agrandie ×3). Il transforme de l’énergie en chaleur : E_th augmente.');
+  }
+  // barres d'énergie, coin supérieur droit
+  const bwid = W < 620 ? 18 : 28, gap = W < 620 ? 10 : 16, hMax = clamp(H * 0.22, 64, 170), full = b.m * g * Phys.T.hMax;
+  const baseY = Math.round(34 + hMax), x0 = W - 18 - (bwid * 4 + gap * 3);
+  const sc = hMax / full, hh = v => clamp(v * sc, 0, hMax);
+  const cols = [['K', e.K, 'K', 'Énergie cinétique K = ½mv²', 'Énergie du mouvement : elle est maximale au fond de la vallée.'], ['U', e.U, 'U', 'Énergie potentielle U = m·g·h', 'Énergie de position dans le champ de pesanteur, mesurée depuis la référence h = 0.'], ['T', e.Eth, 'E_th', 'Énergie dissipée E_th', 'Chaleur produite par le frottement et la butée. Elle ne revient pas en K ni en U.']];
+  c.font = mono(10); c.textAlign = 'center';
+  cols.forEach((col, i) => {
+    const bx = x0 + i * (bwid + gap);
+    drawBar(c, col[0], bx, baseY, bwid, hh(col[1]));
+    tagText(c, col[2], bx + bwid / 2, baseY + 5, 'center', 'top', C.texte2);
+    tagText(c, fmt(col[1], 1), bx + bwid / 2, baseY - hh(col[1]) - 3, 'center', 'bottom', C.texte);
+    zone(zones, bx - 3, baseY - hMax, bx + bwid + 3, baseY + 18, 'bar' + col[0], col[3], col[4]);
+  });
+  const bx = x0 + 3 * (bwid + gap), h0 = hh(b.E0), hw = hh(b.W);
+  c.fillStyle = rgba(RE, 0.16); c.fillRect(bx, baseY - h0, bwid, h0);
+  c.strokeStyle = C.ener; c.lineWidth = 1.2; c.strokeRect(bx + 0.5, baseY - h0 + 0.5, bwid - 1, h0 - 1);
+  if (hw > 0.5) { c.save(); c.strokeStyle = C.ener; c.setLineDash([4, 3]); c.lineWidth = 1.4; c.strokeRect(bx + 0.5, baseY - h0 - hw + 0.5, bwid - 1, Math.max(0, hw - 1)); c.restore(); }
+  tagText(c, 'E₀+W', bx + bwid / 2, baseY + 5, 'center', 'top', C.texte2);
+  tagText(c, fmt(b.E0 + b.W, 1), bx + bwid / 2, baseY - h0 - hw - 3, 'center', 'bottom', C.texte);
+  zone(zones, bx - 3, baseY - hMax, bx + bwid + 3, baseY + 18, 'barT', 'Total : E₀ + W', 'Énergie de départ (plein pâle) plus le travail W de la poussée (tirets, entré de l’extérieur). K + U + E_th doit toujours valoir ce total.');
+  c.font = mono(10); tagText(c, 'pleine hauteur = ' + fmt(full, 0) + ' J', W - 18, baseY + 22, 'right', 'top', C.texte2);
+  c.font = mono(10.5);
+  if (b.held) tagText(c, 'retenu · glisse le chariot ou appuie sur « Lâcher »', W / 2, y0 - T.hMax * pxm - 28 < 120 ? 124 : y0 - T.hMax * pxm - 28, 'center', 'bottom', C.texte2);
+  tagText(c, (W < 620 ? '' : 'échelles : ') + '1 N = ' + fmt(sf, 1) + ' px · barres : ' + fmt(full / hMax, 2) + ' J par px', 14, H - 10, 'left', 'bottom', C.texte2);
+}
+
+/* ---------------- Scènes C et III : chariots ---------------- */
+function bodies(c, s, pxm, ox, yR, hh, full) {
+  const hw = Phys.C.hw * pxm, y1 = yR - hh;
+  const x1p = ox + s.x1 * pxm, x2p = ox + s.x2 * pxm;
+  c.save();
+  for (const [xp, col, lab] of [[x1p, C.texte, '1'], [x2p, C.texte, '2']]) {
+    c.fillStyle = rgba(RT, 0.07); c.strokeStyle = col; c.lineWidth = 1.5;
+    c.beginPath(); c.roundRect(xp - hw, y1, 2 * hw, hh, 3); c.fill(); c.stroke();
+    if (full) {
+      c.fillStyle = C.fond; c.beginPath(); c.arc(xp - hw * 0.55, yR - 1, 3.2, 0, TAU); c.arc(xp + hw * 0.55, yR - 1, 3.2, 0, TAU); c.fill(); c.stroke();
+    }
+  }
+  if (full && pxm >= 80) {
+    c.font = mono(11); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(fmt(pb.m1, 1) + ' kg', x1p, y1 + hh * 0.38); c.fillText(fmt(pb.m2, 1) + ' kg', x2p, y1 + hh * 0.38);
+  }
+  const ym = y1 + hh / 2, amp = Math.max(3, 0.02 * pxm);
+  const zig = (xa, xb) => {
+    const n = 7; c.beginPath(); c.moveTo(xa, ym);
+    for (let i = 1; i < n; i++) c.lineTo(xa + (xb - xa) * (i - 0.5) / (n - 1), ym + (i % 2 ? -amp : amp));
+    c.lineTo(xb, ym); c.stroke();
+  };
+  c.strokeStyle = C.texte; c.lineWidth = 1.4;
+  let t1 = 0, t2 = 0;
+  if (pb.kind === 'contact') {
+    const d = Math.max(0, s.del) / 2, Lb = Phys.C.Lb;
+    t1 = x1p + hw + (Lb - d) * pxm; t2 = x2p - hw - (Lb - d) * pxm;
+    zig(x1p + hw, t1); zig(t2, x2p - hw);
+  } else {
+    const L = (Phys.R.Lnat - Math.max(0, s.del)) * pxm;
+    t1 = x1p + hw + L; t2 = x2p - hw; zig(x1p + hw, t1);
+  }
+  c.restore();
+  return { x1p, x2p, t1, t2, hw };
+}
+function drawPair() {
+  const c = ctx, s = pbS(), spring = pb.kind === 'spring';
+  const pxm = spring ? clamp(W / 7.6, 56, 120) : clamp(W / 7, 52, 120), ox = Math.round(W / 2), yR = Math.round(H * (spring ? 0.5 : 0.44)), hh = Math.max(24, 0.3 * pxm);
+  railTicks(c, 0, ox, yR, pxm, 0, true);
+  const geo = bodies(c, s, pxm, ox, yR, hh, true);
+  const { x1p, x2p, t1, t2, hw } = geo;
+  zone(zones, x1p - hw, yR - hh, x1p + hw, yR, 'c1', 'Chariot 1 · m₁ = ' + fmt(pb.m1, 1) + ' kg', 'Sur coussin d’air : aucun frottement. Seul le contact le fait changer de vitesse.');
+  zone(zones, x2p - hw, yR - hh, x2p + hw, yR, 'c2', 'Chariot 2 · m₂ = ' + fmt(pb.m2, 1) + ' kg', 'Sur coussin d’air : aucun frottement. Seul le contact le fait changer de vitesse.');
+  if (spring) {
+    zone(zones, x1p + hw, yR - hh, x2p - hw, yR, 'ress', 'Ressort · k = 300 N/m', 'Réservoir d’énergie : comprimé de 0,12 m, il pousse chaque chariot avec la même force k·c, puis se décolle.');
+    if (!pb.launched && pb.tp === 0) tagText(c, 'verrouillé', (x1p + x2p) / 2, yR - hh - 6, 'center', 'bottom', C.texte2);
+  } else {
+    zone(zones, Math.min(t1, t2) - 14, yR - hh, Math.max(t1, t2) + 14, yR, 'bump', 'Pare-chocs · k = 1 500 N/m, L = 0,16 m', 'Ressort sans masse devant chaque chariot : modèle du contact. Il stocke l’énergie puis en rend la fraction e² ; le reste devient chaleur.');
+  }
+  // CM
+  if (!spring) {
+    const xcm = ox + (pb.m1 * s.x1 + pb.m2 * s.x2) / (pb.m1 + pb.m2) * pxm;
+    c.save(); c.fillStyle = C.texte; c.beginPath(); c.moveTo(xcm, yR + 1); c.lineTo(xcm + 5, yR + 5); c.lineTo(xcm, yR + 9); c.lineTo(xcm - 5, yR + 5); c.closePath(); c.fill(); c.restore();
+    c.font = mono(10); tagText(c, 'CM', xcm, yR + 24, 'center', 'middle', C.texte);
+    zone(zones, xcm - 9, yR, xcm + 9, yR + 32, 'cm', 'Centre de masse (CM)', 'Repère calculé, pas un objet : (m₁x₁+m₂x₂)/(m₁+m₂). Sa vitesse reste constante, même pendant le choc.');
+  }
+  // forces
+  const sF = spring ? 1.5 : (act === 4 ? 1.6 : 0.6), sa = spring ? 1.0 : 1, F = s.F, yF = yR - hh - 16, xI = spring ? null : (t1 + t2) / 2;
+  c.font = mono(10.5);
+  if (F > 0.3) {
+    const a2x = spring ? x2p - hw : xI, a1x = spring ? x1p + hw : xI, L = Math.min(F * sF, W * 0.3);
+    arrow(c, a2x, yF, a2x + L, yF, C.texte, 1.5, null, 6); arrow(c, a1x, yF, a1x - L, yF, C.texte, 1.5, null, 6);
+    tagText(c, 'F₁→₂ = ' + fmt(F, 0) + ' N', a2x + L / 2 + 6, yF - 5, 'left', 'bottom', C.texte); tagText(c, 'F₂→₁ = ' + fmt(F, 0) + ' N', a1x - L / 2 - 6, yF - 5, 'right', 'bottom', C.texte);
+    azone(a2x, yF, a2x + L, yF, 'f12', 'Force F₁→₂', 'Ce que le chariot 1 exerce sur le 2. Toujours égale en grandeur et opposée à F₂→₁ (troisième loi), à chaque instant.');
+    azone(a1x, yF, a1x - L, yF, 'f21', 'Force F₂→₁', 'Ce que le chariot 2 exerce sur le 1. Égale et opposée à F₁→₂ : ces deux forces agissent sur des objets différents.');
+    // résultantes
+    const yS = yR + 56;
+    arrow(c, x2p, yS, x2p + Math.min(F * sF, W * 0.3), yS, C.accent, 3.4, null, 9); arrow(c, x1p, yS, x1p - Math.min(F * sF, W * 0.3), yS, C.accent, 3.4, null, 9);
+    c.font = mono(10.5); tagText(c, 'ΣF₂ = ' + fmt(F, 0) + ' N', x2p + Math.min(F * sF, W * 0.3) / 2, yS + 7, 'center', 'top', C.accent); tagText(c, 'ΣF₁ = −' + fmt(F, 0) + ' N', x1p - Math.min(F * sF, W * 0.3) / 2, yS + 7, 'center', 'top', C.accent);
+    azone(x2p, yS, x2p + F * sF, yS, 'sf2', 'Résultante ΣF sur le chariot 2', 'Une seule force horizontale agit : elle est la résultante. Poids et normale s’annulent.');
+    azone(x1p, yS, x1p - F * sF, yS, 'sf1', 'Résultante ΣF sur le chariot 1', 'Une seule force horizontale agit : elle est la résultante. Poids et normale s’annulent.');
+    if (spring) {
+      const yA = yS + 24;
+      arrow(c, x2p, yA, x2p + F / pb.m2 * sa, yA, C.accent, 2, [5, 4], 7); arrow(c, x1p, yA, x1p - F / pb.m1 * sa, yA, C.accent, 2, [5, 4], 7);
+      tagText(c, 'a₂ = ' + fmt(F / pb.m2, 1) + ' m/s²', x2p + F / pb.m2 * sa + 6, yA, 'left', 'middle', C.accent); tagText(c, 'a₁ = ' + fmt(F / pb.m1, 1) + ' m/s²', x1p - F / pb.m1 * sa - 6, yA, 'right', 'middle', C.accent);
+      azone(x2p, yA, x2p + F / pb.m2 * sa, yA, 'a2', 'Accélération a₂ = F/m₂', 'Même force, masses différentes : le plus léger accélère le plus.');
+      azone(x1p, yA, x1p - F / pb.m1 * sa, yA, 'a1', 'Accélération a₁ = F/m₁', 'Même force, masses différentes : le plus léger accélère le plus.');
+    }
+  }
+  // vitesses
+  const vs = 26, yv = yR - hh - 44;
+  for (const [xp, v, lab] of [[x1p, s.v1, 'v₁'], [x2p, s.v2, 'v₂']]) {
+    if (Math.abs(v) < 0.02) continue;
+    arrow(c, xp, yv, xp + clamp(v * vs, -W * 0.3, W * 0.3), yv, C.texte2, 1.4, null, 6);
+    if (W >= 520) tagText(c, lab + ' = ' + fmt(v, 2), xp + v * vs / 2, yv - 6, 'center', 'bottom', C.texte2);
+    azone(xp, yv, xp + v * vs, yv, 'v' + lab, 'Vitesse ' + lab, 'Constante tant qu’aucune force n’agit : elle ne change que pendant le contact.');
+  }
+  // lentille sur les pare-chocs (actes V, VI)
+  let lensInfo = null;
+  if (!spring) {
+    const K = 5, Lw = Math.min(300, W - 32), Lh = 92, lx = Math.round(W / 2 - Lw / 2), ly = H - 28 - Lh;
+    const xc = (s.x1 + s.x2) / 2, pxl = pxm * K, hhl = 0.3 * pxl;
+    c.save(); c.beginPath(); c.rect(lx, ly, Lw, Lh); c.clip();
+    c.fillStyle = 'rgba(17,22,30,0.92)'; c.fillRect(lx, ly, Lw, Lh);
+    bodies(c, s, pxl, lx + Lw / 2 - xc * pxl, ly + Lh / 2 + hhl / 2, hhl, false);
+    c.restore();
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(lx + 0.5, ly + 0.5, Lw - 1, Lh - 1);
+    c.font = mono(10); tagText(c, 'pare-chocs ×5 · compression δ = ' + fmt(Math.max(0, s.del) * 100, 2) + ' cm', lx + 6, ly + Lh - 5, 'left', 'bottom', C.texte2);
+    zone(zones, lx, ly, lx + Lw, ly + Lh, 'lens', 'Loupe ×5 sur les pare-chocs', 'La compression réelle n’atteint que quelques centimètres : on l’agrandit pour la voir. La scène principale est à l’échelle vraie.');
+    lensInfo = true;
+  }
+  // ralenti et temps
+  const rate = pbRate(), sl = clamp((1 - rate) / 0.9, 0, 1);
+  if (sl > 0.02 && (pb.launched || pb.tp > 0)) { c.save(); c.globalAlpha = sl; c.font = mono(14); tagText(c, 'ralenti ×10', W / 2, 104, 'center', 'top', C.ener); c.restore(); }
+  c.font = mono(10.5);
+  const narrow = W < 620, sTxt = spring ? 'échelles : 1 N = 1,5 px · 1 m/s = 26 px · 1 m/s² = 1 px' : `échelles : 1 N = ${fmt(sF, 1)} px · 1 m/s = 26 px`;
+  tagText(c, 't = ' + fmt(pb.tp, 3) + ' s' + (narrow ? '' : ' (temps physique)'), 14, H - 10, 'left', 'bottom', C.texte2);
+  if (narrow) { if (spring) tagText(c, sTxt, 14, H - 28, 'left', 'bottom', C.texte2); else tagText(c, sTxt, W - 14, H - 10, 'right', 'bottom', C.texte2); }
+  else tagText(c, sTxt, W - 14, H - 10, 'right', 'bottom', C.texte2);
+  if (!spring && !pb.contact) { c.font = mono(13); tagText(c, 'les chariots ne se rencontrent jamais', W / 2, yR + 100, 'center', 'top', C.accent); }
+  if (!pb.launched && pb.tp === 0) { c.font = mono(12); tagText(c, spring ? 'appuie sur « Relâcher »' : 'appuie sur « Lancer »', W / 2, yR - hh - 70, 'center', 'bottom', C.texte2); }
+}
+
+/* ---------------- Enregistreurs du panneau ---------------- */
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+function drawScopeA() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 40, padR = 40, padT = 14, padB = 16, pw = w - padL - padR, ph = h - padT - padB, mid = padT + ph / 2;
+  const tR = a.t, tL = tR - 10, FM = 12;
+  let vm = 0; for (const r of a.rec) vm = Math.max(vm, Math.abs(r.v));
+  const target = Math.max(4, Math.ceil(vm / 2) * 2); a.scV += (target - a.scV) * (target > a.scV ? 0.25 : 0.04);
+  const yF = f => mid - f / FM * (ph / 2), yV = v => mid - v / a.scV * (ph / 2), xT = t => padL + (t - tL) / 10 * pw;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(padL, mid); c.lineTo(padL + pw, mid); c.stroke();
+  c.setLineDash([2, 4]); c.beginPath(); for (const q of [-1, 1]) { c.moveTo(padL, mid + q * ph / 2); c.lineTo(padL + pw, mid + q * ph / 2); } c.stroke(); c.setLineDash([]);
+  c.font = mono(10); c.textBaseline = 'middle';
+  c.fillStyle = C.accent; c.textAlign = 'right'; c.fillText('+12', padL - 5, padT + 2); c.fillText('0', padL - 5, mid); c.fillText('−12', padL - 5, padT + ph - 2);
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('+' + fmt(a.scV, 0), padL + pw + 5, padT + 2); c.fillText('0', padL + pw + 5, mid); c.fillText('−' + fmt(a.scV, 0), padL + pw + 5, padT + ph - 2);
+  c.textAlign = 'left'; c.fillStyle = C.accent; c.fillText('ΣF (N)', 2, 6); c.textAlign = 'right'; c.fillStyle = C.texte2; c.fillText('v (m/s)', w - 2, 6);
+  c.textAlign = 'center'; c.fillStyle = C.texte2; c.fillText('10 s', padL + 12, h - 5); c.fillText('maintenant', padL + pw - 22, h - 5);
+  c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+  const line = (sel, col, lw) => { c.beginPath(); let first = true; for (const r of a.rec) { const x = xT(r.t), y = sel === 'F' ? yF(r.F) : yV(r.v); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; } c.strokeStyle = col; c.lineWidth = lw; c.stroke(); };
+  line('v', C.texte2, 1.5); line('F', C.accent, 2.2);
+  c.restore();
+}
+function drawScopeB() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 40, padR = 8, padT = 14, padB = 16, pw = w - padL - padR, ph = h - padT - padB, base = padT + ph;
+  const tR = b.t, tL = tR - 20, hs = b.hist;
+  let mx = b.E0 + b.W; for (const r of hs) mx = Math.max(mx, r.K + r.U + r.Eth);
+  const target = Math.max(5, mx * 1.12); b.scE += (target - b.scE) * (target > b.scE ? 0.3 : 0.03);
+  const yE = e => base - e / b.scE * ph, xT = t => padL + (t - tL) / 20 * pw;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(padL, base); c.lineTo(padL + pw, base); c.stroke();
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'middle';
+  c.fillText('0', padL - 5, base); c.fillText(fmt(b.scE, 0) + ' J', padL - 5, padT + 2);
+  c.textAlign = 'left'; c.fillText('énergie empilée K + U + E_th (J)', 4, 4); c.textAlign = 'center'; c.fillText('20 s', padL + 12, h - 5); c.fillText('maintenant', padL + pw - 22, h - 5);
+  if (hs.length > 1) {
+    c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+    const layer = (lo, hi, fill, hat, stroke) => {
+      c.beginPath(); hs.forEach((r, i) => { const x = xT(r.t), y = yE(hi(r)); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      for (let i = hs.length - 1; i >= 0; i--) c.lineTo(xT(hs[i].t), yE(lo(hs[i])));
+      c.closePath(); c.fillStyle = fill; c.fill();
+      if (hat) { c.save(); c.clip(); c.strokeStyle = rgba(RE, 0.6); c.lineWidth = 1; c.beginPath(); for (let k = -ph; k < pw + padL; k += 6) { c.moveTo(k, base); c.lineTo(k + ph, base - ph); } c.stroke(); c.restore(); }
+      if (stroke) { c.beginPath(); hs.forEach((r, i) => { const x = xT(r.t), y = yE(hi(r)); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.strokeStyle = C.ener; c.lineWidth = 1.3; c.stroke(); }
+    };
+    layer(r => 0, r => r.K, rgba(RE, 0.92), false, false);
+    layer(r => r.K, r => r.K + r.U, rgba(RE, 0.07), true, true);
+    layer(r => r.K + r.U, r => r.K + r.U + r.Eth, rgba(RE, 0.35), false, false);
+    c.setLineDash([5, 4]); c.strokeStyle = C.texte; c.lineWidth = 1.3; c.beginPath(); hs.forEach((r, i) => { const x = xT(r.t), y = yE(b.E0 + r.W); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); c.setLineDash([]);
+    c.restore();
+  } else { c.fillStyle = C.texte2; c.textAlign = 'center'; c.fillText('lâche le chariot pour lancer l’enregistrement', padL + pw / 2, padT + ph / 2); }
+}
+function drawScopePair() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 40, padR = 10, padT = 18, padB = 32, pw = w - padL - padR, ph = h - padT - padB, base = padT + ph;
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillText('force de contact F (N)', 4, 6);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(padL, base); c.lineTo(padL + pw, base); c.moveTo(padL, padT); c.lineTo(padL, base); c.stroke();
+  if (!pb.contact) { c.textAlign = 'center'; c.fillText('aucun contact : F = 0', padL + pw / 2, padT + ph / 2); return; }
+  const spring = pb.kind === 'spring';
+  const t0 = spring ? 0 : Math.max(0, pb.c0 - 0.03), t1 = pb.c1 + (spring ? 0.03 : 0.03), span = t1 - t0;
+  const FM = pb.Fmax * 1.12, xT = t => padL + (t - t0) / span * pw, yF = f => base - f / FM * ph;
+  c.textAlign = 'right'; c.fillText(fmt(FM, 0), padL - 5, padT + 2); c.fillText('0', padL - 5, base);
+  c.textAlign = 'center';
+  const stepMs = span > 0.1 ? 20 : 10, org = pb.c0 * 1000, tick0 = Math.ceil((t0 * 1000 - org) / stepMs) * stepMs;
+  for (let ms = tick0; ms + org <= t1 * 1000 + 1e-6; ms += stepMs) { const x = xT((ms + org) / 1000); c.strokeStyle = C.trait; c.beginPath(); c.moveTo(x, base); c.lineTo(x, base + 4); c.stroke(); c.fillText(fmt(ms, 0), x, base + 12); }
+  c.fillText('t (ms) depuis le début du contact', padL + pw / 2, h - 4);
+  const rec = pb.rec, i0 = Math.max(0, Math.floor(t0 / rec.dt)), i1 = Math.min(rec.n - 1, Math.ceil(Math.min(pb.tp, t1) / rec.dt));
+  c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+  if (i1 > i0) {
+    c.beginPath(); c.moveTo(xT(rec.t[i0]), base);
+    for (let i = i0; i <= i1; i++) c.lineTo(xT(rec.t[i]), yF(rec.F[i]));
+    c.lineTo(xT(rec.t[i1]), base); c.closePath(); c.fillStyle = rgba(RA, 0.26); c.fill();
+    c.beginPath(); for (let i = i0; i <= i1; i++) { const x = xT(rec.t[i]), y = yF(rec.F[i]); i === i0 ? c.moveTo(x, y) : c.lineTo(x, y); }
+    c.strokeStyle = C.accent; c.lineWidth = 2; c.stroke();
+  }
+  const xc = xT(clamp(pb.tp, t0, t1)); c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(xc, padT); c.lineTo(xc, base); c.stroke(); c.setLineDash([]);
+  c.restore();
+  const s = pbS(); c.font = mono(11); c.fillStyle = C.accent; c.textAlign = 'right'; c.fillText('aire = J = ' + fmt(s.J, 2) + ' N·s', padL + pw - 2, padT + 6);
+}
+
+function drawBarsPair() {
+  const w = barsC.width / dpr, h = barsC.height / dpr, c = bctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  zonesBars = [];
+  const s = pbS(), m1 = pb.m1, m2 = pb.m2, p1 = m1 * s.v1, p2 = m2 * s.v2, pt = p1 + p2;
+  const lab = 30, x0 = lab + (w - lab - 8) / 2, half = (w - lab - 8) / 2 - 3, sc = half / pb.pmax;
+  c.font = mono(10); c.textBaseline = 'middle';
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('quantité de mouvement p = mv (N·s)', 4, 8);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 0.5, 18); c.lineTo(x0 + 0.5, 92); c.stroke();
+  const row = (v, y, hgt, name, key, role, thick) => {
+    const col = v >= 0 ? RP : RN, wpx = v * sc;
+    c.fillStyle = rgba(col, thick ? 0.95 : 0.8); c.fillRect(Math.min(x0, x0 + wpx), y - hgt / 2, Math.abs(wpx), hgt);
+    if (thick) { c.strokeStyle = C.texte; c.lineWidth = 1.2; c.strokeRect(Math.min(x0, x0 + wpx) + 0.5, y - hgt / 2 + 0.5, Math.max(Math.abs(wpx) - 1, 0), hgt - 1); if (Math.abs(wpx) < 1) { c.fillStyle = C.texte; c.fillRect(x0 - 1, y - hgt / 2, 2, hgt); } }
+    c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText(name, 4, y);
+    zone(zonesBars, 0, y - hgt / 2 - 2, w, y + hgt / 2 + 2, key, role[0], role[1]);
+  };
+  row(p1, 32, 12, 'p₁', 'p1', ['p₁ = m₁v₁ = ' + fmt(p1, 2) + ' N·s', 'Quantité de mouvement du chariot 1. Orange vers la droite, bleu vers la gauche.']);
+  row(p2, 52, 12, 'p₂', 'p2', ['p₂ = m₂v₂ = ' + fmt(p2, 2) + ' N·s', 'Quantité de mouvement du chariot 2. Pendant le choc, p₁ se vide dans p₂.']);
+  row(pt, 76, 18, 'Σp', 'pt', ['Σp = ' + fmt(pt, 3) + ' N·s', 'Constante : aucune force extérieure horizontale. Les forces internes se compensent (action-réaction).'], true);
+  const ey = 142, eh = 20, ex = 8, ew = w - 16, Et = pb.Etot;
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('énergie : K₁ + K₂ + E_el + E_th = ' + fmt(Et, 2) + ' J', 4, 106);
+  const K1 = 0.5 * m1 * s.v1 ** 2, K2 = 0.5 * m2 * s.v2 ** 2, segs = [['K₁', K1, 'K'], ['K₂', K2, 'K'], ['E_el', Math.max(0, s.Eel), 'U'], ['E_th', Math.max(0, s.Eth), 'T']];
+  const names = { K: ['Énergie cinétique', 'Plein : l’énergie du mouvement du chariot.'], U: ['Énergie élastique du pare-chocs', 'Hachuré : énergie stockée dans le ressort comprimé.'], T: ['Énergie dissipée E_th', 'Pâle : chaleur et déformation, perdues pour le mouvement.'] };
+  let xx = ex;
+  c.strokeStyle = C.trait; c.strokeRect(ex + 0.5, ey - eh / 2 + 0.5, ew - 1, eh - 1);
+  segs.forEach((sg, i) => {
+    const wd = sg[1] / Et * ew; if (wd < 0.3) return;
+    drawBar(c, sg[2], xx, ey + eh / 2, wd, eh);
+    if (i === 1 && K1 > 0 && K2 > 0) { c.fillStyle = C.fond; c.fillRect(xx - 0.75, ey - eh / 2, 1.5, eh); }
+    if (wd > 26) { c.fillStyle = sg[2] === 'K' ? C.fond : C.texte; c.textAlign = 'center'; c.fillText(sg[0], xx + wd / 2, ey); }
+    zone(zonesBars, xx, ey - eh / 2, xx + wd, ey + eh / 2, 'e' + sg[0], sg[0] === 'K₁' ? 'Énergie cinétique K₁ = ' + fmt(K1, 2) + ' J' : sg[0] === 'K₂' ? 'Énergie cinétique K₂ = ' + fmt(K2, 2) + ' J' : names[sg[2]][0] + ' = ' + fmt(sg[1], 2) + ' J', names[sg[2]][1]);
+    xx += wd;
+  });
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('le total reste fixe : l’énergie change de forme, ne disparaît pas', 4, 166);
+}
+
+/* ---------------- Légendes et mesures ---------------- */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const LEG = {
+  A: lg('<line x1="0" y1="4" x2="20" y2="4" stroke="#d6c4ff" stroke-width="2.6"/>', 'ΣF') + lg('<line x1="0" y1="4" x2="20" y2="4" stroke="#8a93a0" stroke-width="1.6"/>', 'v'),
+  B: lg('<rect x="0" y="0" width="20" height="8" fill="#ffd166"/>', 'K') + lg('<rect x="0.5" y="0.5" width="19" height="7" fill="none" stroke="#ffd166"/><path d="M4 8L8 0M10 8L14 0M16 8L20 0" stroke="#ffd166" stroke-opacity=".7"/>', 'U') + lg('<rect x="0" y="0" width="20" height="8" fill="#ffd166" fill-opacity=".35"/>', 'E_th') + lg('<line x1="0" y1="4" x2="20" y2="4" stroke="#e8e4dc" stroke-width="1.4" stroke-dasharray="4 3"/>', 'E₀ + W'),
+  F: lg('<line x1="0" y1="4" x2="20" y2="4" stroke="#d6c4ff" stroke-width="2.2"/>', 'F(t)') + lg('<rect x="0" y="0" width="20" height="8" fill="#d6c4ff" fill-opacity=".26"/>', 'aire = J'),
+  P: lg('<rect x="0" y="0" width="20" height="8" fill="#ff8a5b"/>', 'p > 0') + lg('<rect x="0" y="0" width="20" height="8" fill="#5bb8ff"/>', 'p < 0') + lg('<rect x="0" y="0" width="20" height="8" fill="#ffd166"/>', 'K') + lg('<rect x="0.5" y="0.5" width="19" height="7" fill="none" stroke="#ffd166"/><path d="M4 8L8 0M10 8L14 0M16 8L20 0" stroke="#ffd166" stroke-opacity=".7"/>', 'E_el') + lg('<rect x="0" y="0" width="20" height="8" fill="#ffd166" fill-opacity=".35"/>', 'E_th')
+};
+const MEAS = [
+  [['sf', 'ΣF', 'N'], ['m', 'm', 'kg'], ['am', 'a mesurée', 'm/s²'], ['ac', 'ΣF / m', 'm/s²'], ['v', 'v', 'm/s']],
+  [['sf', 'ΣF', 'N'], ['m', 'm', 'kg'], ['am', 'a mesurée', 'm/s²'], ['ac', 'ΣF / m', 'm/s²'], ['v', 'v', 'm/s']],
+  [['t', 't', 's'], ['F', 'F₁→₂ = F₂→₁', 'N'], ['a1', 'a₁', 'm/s²'], ['a2', 'a₂', 'm/s²'], ['J', 'J = ∫F dt', 'N·s'], ['p1', 'p₁', 'N·s'], ['p2', 'p₂', 'N·s'], ['pt', 'Σp', 'N·s'], ['K', 'K₁ + K₂', 'J'], ['Eel', 'E ressort', 'J']],
+  [['v', 'v', 'm/s'], ['h', 'h', 'm'], ['K', 'K', 'J'], ['U', 'U', 'J'], ['Eth', 'E_th', 'J'], ['W', 'W (poussée)', 'J'], ['bal', 'K+U+E_th−W−E₀', 'J'], ['P', 'P poussée', 'W'], ['Pg', 'P poids', 'W']],
+  [['t', 't', 's'], ['F', 'F de contact', 'N'], ['J', 'J = ∫F dt', 'N·s'], ['p1', 'p₁', 'N·s'], ['p2', 'p₂', 'N·s'], ['pt', 'Σp', 'N·s'], ['K', 'K₁ + K₂', 'J'], ['Eel', 'E_el', 'J'], ['Eth', 'E_th', 'J'], ['Et', 'total', 'J'], ['e', 'e mesuré', '']],
+  [['t', 't', 's'], ['F', 'F de contact', 'N'], ['J', 'J = ∫F dt', 'N·s'], ['p1', 'p₁', 'N·s'], ['p2', 'p₂', 'N·s'], ['pt', 'Σp', 'N·s'], ['K', 'K₁ + K₂', 'J'], ['Eel', 'E_el', 'J'], ['Eth', 'E_th', 'J'], ['Et', 'total', 'J'], ['e', 'e mesuré', '']]
+];
+const MNOTE = [
+  'Échelles des flèches fixes dans l’acte : 1 N = 12 px, 1 m/s = 14 px, 1 m/s² = 14 px. Les flèches représentent des grandeurs : ce ne sont pas des objets.',
+  'Échelles fixes : 1 N = 12 px, 1 m/s = 12 px, 1 m/s² = 4 px. a mesurée : pente de v sur les 0,3 dernières secondes.',
+  'Ralenti ×10 pendant la poussée du ressort ; le temps affiché reste le temps physique. Échelles : 1 N = 1,5 px, 1 m/s² = 1 px.',
+  'Poussée tenue : ±6 N le long de la piste. Frottement µ = 0,05 (le terme centripète de la normale est négligé). Les barres sont des comptes d’énergie, pas une substance.',
+  'Ralenti ×10 pendant le contact et 0,15 s autour ; le temps affiché reste physique. Échelles : 1 N = 1,6 px, 1 m/s = 26 px. Le repère CM est calculé.',
+  'Ralenti ×10 pendant le contact. Échelles : 1 N = 0,6 px, 1 m/s = 26 px. Les chariots sont sur un coussin d’air : pas de frottement.'
+];
+const MEYE = ['Enregistreur · ΣF et v', 'Enregistreur · ΣF et v', 'Enregistreur · force du ressort', 'Enregistreur · énergie empilée', 'Enregistreur · force de contact', 'Enregistreur · force de contact'];
+const mEls = {};
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  for (const [k, lab, u] of MEAS[n]) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}</span><span class="val"><b>—</b><i>${u}</i></span>`;
+    m.appendChild(r); mEls[k] = r.querySelector('b');
+  }
+  $('#mNote').textContent = MNOTE[n];
+  $('#rEye').textContent = MEYE[n];
+  $('#leg').innerHTML = n < 2 ? LEG.A : n === 3 ? LEG.B : LEG.F;
+  $('#leg2').innerHTML = n === 2 || n >= 4 ? LEG.P : '';
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function readouts() {
+  if (act < 2) {
+    setM('sf', fmt(a.Fnet, 2)); setM('m', fmt(a.m, 1)); setM('am', fmt(aMeasured(), 2)); setM('ac', fmt(a.Fnet / a.m, 2)); setM('v', fmt(a.v, 3));
+  } else if (act === 3) {
+    const e = bEnergy(), P = Phys.T;
+    setM('v', fmt(b.v, 2)); setM('h', fmt(P.h(b.s), 2)); setM('K', fmt(e.K, 2)); setM('U', fmt(e.U, 2)); setM('Eth', fmt(e.Eth, 2)); setM('W', fmt(e.W, 2));
+    setM('bal', fmt(e.bal, 4)); setM('P', fmt(b.Fp * b.v, 1)); setM('Pg', fmt(-b.m * g * b.sn * b.v, 1));
+  } else {
+    const s = pbS(), p1 = pb.m1 * s.v1, p2 = pb.m2 * s.v2, K = 0.5 * pb.m1 * s.v1 ** 2 + 0.5 * pb.m2 * s.v2 ** 2;
+    setM('t', fmt(pb.tp, 3)); setM('F', fmt(s.F, 1)); setM('J', fmt(s.J, 3)); setM('p1', fmt(p1, 3)); setM('p2', fmt(p2, 3)); setM('pt', fmt(p1 + p2, 3));
+    setM('K', fmt(K, 3)); setM('Eel', fmt(s.Eel, 3)); setM('Eth', fmt(s.Eth, 3)); setM('Et', fmt(K + s.Eel + s.Eth, 3));
+    if (pb.kind === 'spring') { setM('a1', fmt(s.F / pb.m1, 1)); setM('a2', fmt(s.F / pb.m2, 1)); }
+    else {
+      const vr = pb.v2 - pb.v1;
+      setM('e', pbAfter() && Math.abs(vr) > 1e-9 ? fmt(-(s.v2 - s.v1) / vr, 3) : '—');
+    }
+  }
+  status();
+}
+function status() {
+  let t = '';
+  const eps = 0.01;
+  if (act === 0) {
+    if (pushNow()) t = 'Tu pousses : ΣF ≠ 0, la vitesse grandit.';
+    else if (Math.abs(a.v) > 0.05) t = 'ΣF = 0 et pourtant v ≠ 0 : le bloc continue, les graduations défilent.';
+    else t = 'Au repos : ΣF = 0 et v = 0. Pousse pour voir.';
+  } else if (act === 1) {
+    const F = a.Fnet;
+    if (Math.abs(F) < eps && Math.abs(a.v) > 0.05) t = 'ΣF = 0 avec v ≠ 0 : mouvement uniforme. Rien n’accélère.';
+    else if (prm.fricA && Math.abs(a.Fapp) > 0.01 && Math.abs(F) < eps) t = 'On pousse, et pourtant ça n’accélère pas : le frottement compense la poussée.';
+    else if (Math.abs(F) >= eps) t = 'ΣF ≠ 0 : la vitesse change au rythme a = ΣF/m = ' + fmt(F / a.m, 2) + ' m/s².';
+    else t = 'ΣF = 0 et v = 0 : équilibre.';
+  } else if (act === 3) {
+    const e = bEnergy();
+    if (b.held) t = 'Retenu : toute l’énergie est potentielle (U), K = 0.';
+    else if (Math.abs(b.Fp) > 0.01) t = 'La poussée apporte de l’énergie de l’extérieur : W = ' + fmt(e.W, 1) + ' J.';
+    else if (prm.fricB && e.Eth > 0.05) t = 'Le frottement transforme de l’énergie en chaleur : E_th = ' + fmt(e.Eth, 1) + ' J.';
+    else t = 'Sans frottement ni poussée : K + U reste constant, l’énergie passe de K à U et retour.';
+  } else {
+    const spring = pb.kind === 'spring';
+    if (!pb.contact) t = spring ? '' : 'Les chariots ne se rencontrent jamais : v₁ ≤ v₂, rien ne les approche.';
+    else if (!pb.launched && pb.tp === 0) t = spring ? 'Prêt : le ressort est verrouillé. Appuie sur « Relâcher ».' : 'Prêt : appuie sur « Lancer ».';
+    else if (pb.tp < pb.c0) t = 'Approche : aucune force, Σp et K constants.';
+    else if (pb.tp <= pb.c1) t = spring ? 'Le ressort pousse chaque chariot avec la même force, en sens contraires.' : 'Contact : F égale et opposée, p₁ passe dans p₂, Σp ne bouge pas.';
+    else { const s = pbS(); t = spring ? 'Fini. m₁v₁ = −m₂v₂, donc Σp = 0 ; l’énergie du ressort est devenue K₁ + K₂.' : 'Terminé. Σp = ' + fmt(pb.m1 * s.v1 + pb.m2 * s.v2, 3) + ' N·s, comme avant. Remonte le curseur « Temps ».'; }
+  }
+  const el = $('#status'); if (el.textContent !== t) el.textContent = t;
+}
+
+/* ---------------- Actes ---------------- */
+const ROM = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const ACTS = [
+  { t: 'Inertie', x: 'Un bloc au repos sur un rail sans frottement. Pousse-le : tant que tu pousses, la résultante ΣF n’est pas nulle et la vitesse grandit. Lâche : ΣF = 0, et pourtant il continue, à vitesse constante. Regarde les graduations : elles défilent toujours.' },
+  { t: 'Force résultante et masse', x: 'Ce n’est pas une force qui fait bouger : c’est la résultante qui change la vitesse, selon a = ΣF/m. Essaie F₁ = F₂ avec le bloc lancé, puis la même ΣF avec une masse double. Avec le frottement, pousse juste assez pour l’égaler.' },
+  { t: 'Action-réaction', x: 'Deux chariots au repos, un ressort comprimé entre eux. À chaque instant, le ressort pousse chacun avec la même force, en sens contraires. Les accélérations diffèrent (a = F/m), mais à la fin m₁v₁ = −m₂v₂ : la quantité de mouvement totale reste nulle.' },
+  { t: 'Travail et énergie', x: 'Le poids fait un travail égal à −ΔU : K et U s’échangent. Le frottement transforme de l’énergie en chaleur (E_th) ; la poussée en apporte de l’extérieur (W). Le bilan K + U + E_th − W reste égal à E₀, tout le temps.' },
+  { t: 'Collision', x: 'Un chariot en rencontre un autre. Au contact, le temps ralentit : les pare-chocs se compriment, les forces égales et opposées grandissent puis décroissent, p₁ se vide dans p₂ pendant que Σp ne bouge pas, et K passe dans le ressort puis revient. Remonte ensuite le temps.' },
+  { t: 'À toi', x: 'Règle les masses, les vitesses et e. Quelle combinaison laisse un chariot immobile ? Que vaut la perte d’énergie à e = 0 ? Σp change-t-il jamais ? Compare ce que tu mesures à (1 − e²)·½µ·v_rel².' }
+];
+const SYNC = [
+  ['rF1', 'vF1', () => prm.F1, v => fmt(v, 1) + ' N'], ['rF2', 'vF2', () => prm.F2, v => fmt(v, 1) + ' N'], ['rMA', 'vMA', () => prm.mA, v => fmt(v, 1) + ' kg'],
+  ['rMB', 'vMB', () => prm.mB, v => fmt(v, 1) + ' kg'], ['rM1r', 'vM1r', () => prm.m1r, v => fmt(v, 1) + ' kg'], ['rM2r', 'vM2r', () => prm.m2r, v => fmt(v, 1) + ' kg'],
+  ['rM1', 'vM1', () => prm.ps.m1, v => fmt(v, 1) + ' kg'], ['rM2', 'vM2', () => prm.ps.m2, v => fmt(v, 1) + ' kg'],
+  ['rV1', 'vV1', () => prm.ps.v1, v => fmt(v, 1) + ' m/s'], ['rV2', 'vV2', () => prm.ps.v2, v => fmt(v, 1) + ' m/s'], ['rE', 'vE', () => prm.ps.e, v => fmt(v, 2)]
+];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = v; $('#' + vid).textContent = f(v); }
+  $('#bFric').setAttribute('aria-pressed', act === 1 ? prm.fricA : prm.fricB);
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  pushBtn = 0; pushKey = 0; a.ptr = 0;
+  if (n < 2) resetA();
+  else if (n === 3) bInit(prm.x0B);
+  else pbReady();
+  hideTip(); syncTools(); buildMeas(n);
+  if (n === 2 || n >= 4) { if (restart) setPlay(true); }
+  sizePanelCanvases();
+}
+function updateUI(n) {
+  uiAct = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VI`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  document.querySelectorAll('#tools .grp').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === 5;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, 5);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; }
+  else fade = -1;
+}
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+
+function holdBtn(id, dir) {
+  const el = $(id);
+  const on = e => { pushBtn = dir; el.classList.add('on'); try { el.setPointerCapture(e.pointerId); } catch (_) {} };
+  const off = () => { if (pushBtn === dir) pushBtn = 0; el.classList.remove('on'); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); on(e); });
+  el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') { pushBtn = dir; } }); el.addEventListener('keyup', e => { if (e.key === 'Enter') off(); });
+}
+holdBtn('#bPushL', -1); holdBtn('#bPushR', 1);
+
+function bindRange(id, vid, set, f) {
+  const el = $('#' + id);
+  el.addEventListener('input', () => { const v = +el.value; set(v); $('#' + vid).textContent = f(v); });
+}
+bindRange('rF1', 'vF1', v => { prm.F1 = v; }, v => fmt(v, 1) + ' N');
+bindRange('rF2', 'vF2', v => { prm.F2 = v; }, v => fmt(v, 1) + ' N');
+bindRange('rMA', 'vMA', v => { prm.mA = v; a.m = v; }, v => fmt(v, 1) + ' kg');
+bindRange('rMB', 'vMB', v => { prm.mB = v; bInit(prm.x0B); }, v => fmt(v, 1) + ' kg');
+bindRange('rM1r', 'vM1r', v => { prm.m1r = v; pbReady(); }, v => fmt(v, 1) + ' kg');
+bindRange('rM2r', 'vM2r', v => { prm.m2r = v; pbReady(); }, v => fmt(v, 1) + ' kg');
+bindRange('rM1', 'vM1', v => { prm.ps.m1 = v; pbReady(); }, v => fmt(v, 1) + ' kg');
+bindRange('rM2', 'vM2', v => { prm.ps.m2 = v; pbReady(); }, v => fmt(v, 1) + ' kg');
+bindRange('rV1', 'vV1', v => { prm.ps.v1 = v; pbReady(); }, v => fmt(v, 1) + ' m/s');
+bindRange('rV2', 'vV2', v => { prm.ps.v2 = v; pbReady(); }, v => fmt(v, 1) + ' m/s');
+bindRange('rE', 'vE', v => { prm.ps.e = v; pbReady(); }, v => fmt(v, 2));
+$('#bV3').addEventListener('click', () => { a.v = 3; a.rec.push({ t: a.t, F: a.Fnet, v: 3 }); });
+$('#bV0').addEventListener('click', () => { a.v = 0; });
+$('#bFric').addEventListener('click', () => { if (act === 1) prm.fricA = !prm.fricA; else prm.fricB = !prm.fricB; syncTools(); });
+$('#bDrop').addEventListener('click', e => { b.held = false; e.currentTarget.blur(); });
+$('#bRel').addEventListener('click', e => { pbLaunch(); e.currentTarget.blur(); });
+$('#bLaunch').addEventListener('click', e => { pbLaunch(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-pre]').forEach(el => el.addEventListener('click', () => { prm.pv = Object.assign({}, PRE[+el.dataset.pre]); pbReady(); pbLaunch(); el.blur(); }));
+$('#rT').addEventListener('input', e => { pb.tp = +e.target.value; pb.launched = true; setPlay(false); $('#vT').textContent = fmt(pb.tp, 3) + ' s'; });
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-6]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
+  if (!isRange && (e.key === 'a' || e.key === 'A')) pushKey = -1;
+  if (!isRange && (e.key === 'd' || e.key === 'D')) pushKey = 1;
+});
+addEventListener('keyup', e => { if ((e.key === 'a' || e.key === 'A') && pushKey < 0) pushKey = 0; if ((e.key === 'd' || e.key === 'D') && pushKey > 0) pushKey = 0; });
+addEventListener('blur', () => { pushKey = 0; pushBtn = 0; a.ptr = 0; });
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol, poussée tactile, glisser le chariot ---------------- */
+let dragB = false;
+function cartScreen() { const { pxm, ox, y0 } = bGeo(), T = Phys.T; return { x: ox + T.x(b.s) * pxm, y: y0 - T.h(b.s) * pxm - 7 }; }
+function setBFromPointer(x) {
+  const { pxm, ox } = bGeo(), T = Phys.T;
+  b.s = T.sOfX(clamp((x - ox) / pxm, T.X0 + 0.02, T.X1 - 0.02)); b.v = 0; b.Eth = 0; b.W = 0; b.held = true; b.Fp = 0; b.Fnet = 0; b.hist = []; b.t = 0; b.acc = 0;
+  const e = Phys.energyB(b, b.m); b.E0 = e.K + e.U; b.sn = T.sin(b.s); b.cs = T.cos(b.s); prm.x0B = T.x(b.s); b.scE = Math.max(5, b.E0 * 1.2);
+}
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (act === 3) {
+    const c = cartScreen();
+    if (Math.hypot(x - c.x, y - c.y) < (e.pointerType === 'touch' ? 36 : 26)) { dragB = true; setBFromPointer(x); cv.setPointerCapture(e.pointerId); cv.className = 'grabbing'; hideTip(); e.preventDefault(); }
+  } else if (act === 0) {
+    a.ptr = x < W / 2 ? -1 : 1; try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+});
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (dragB) { setBFromPointer(x); return; }
+  if (act === 0 && a.ptr) a.ptr = x < W / 2 ? -1 : 1;
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(zones, x, y);
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.className = z.key === 'cart' ? 'grab' : ''; } else { hideTip(); cv.className = ''; }
+});
+const endPtr = e => { dragB = false; a.ptr = 0; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!dragB) { hideTip(); cv.className = ''; } });
+barsC.addEventListener('pointermove', e => {
+  const r = barsC.getBoundingClientRect(), z = hitZone(zonesBars, e.clientX - r.left, e.clientY - r.top);
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+});
+barsC.addEventListener('pointerleave', hideTip);
+
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) {
+    if (act < 2) advanceA(dt); else if (act === 3) advanceB(dt); else pbAdvance(dt);
+  }
+  // dessin
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic';
+  if (act < 2) drawA(); else if (act === 3) drawB(); else drawPair();
+  ctx.restore();
+  if (act < 2) drawScopeA(); else if (act === 3) drawScopeB(); else { drawScopePair(); drawBarsPair(); }
+  if (act >= 4 || act === 2) { const rt = $('#rT'); if (document.activeElement !== rt) { rt.value = pb.tp; } const vt = fmt(pb.tp, 3) + ' s'; if ($('#vT').textContent !== vt) $('#vT').textContent = vt; }
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+window.__labo = {
+  Phys,
+  get act() { return act; },
+  goAct,
+  get state() {
+    if (act < 2) return { act, bench: 'A', x: a.x, v: a.v, m: a.m, Fnet: a.Fnet, aMeasured: aMeasured(), aTheory: a.Fnet / a.m, p: a.m * a.v, K: 0.5 * a.m * a.v * a.v, t: a.t };
+    if (act === 3) { const e = bEnergy(); return { act, bench: 'B', s: b.s, x: Phys.T.x(b.s), v: b.v, m: b.m, K: e.K, U: e.U, Eth: e.Eth, W: e.W, E0: b.E0, balance: e.bal, p: b.m * b.v, t: b.t }; }
+    const s = pbS(), p1 = pb.m1 * s.v1, p2 = pb.m2 * s.v2, K1 = 0.5 * pb.m1 * s.v1 ** 2, K2 = 0.5 * pb.m2 * s.v2 ** 2;
+    return { act, bench: 'C', t: pb.tp, tEnd: pb.tEnd, launched: pb.launched, x1: s.x1, x2: s.x2, v1: s.v1, v2: s.v2, F: s.F, p1, p2, pTot: p1 + p2, J: s.J, K1, K2, Eel: s.Eel, Eth: s.Eth, Etot: K1 + K2 + s.Eel + s.Eth, contact: pb.contact, c0: pb.c0, c1: pb.c1 };
+  },
+  tick: n => { last = n - 16; tick(n); }, launch: pbLaunch, setPlay, prm, pb, a, b,
+  setTime(t) { pb.tp = clamp(t, 0, pb.tEnd); pb.launched = false; },
+  stepTo(t) { if (act < 2) { const n = Math.round(t / 0.016); for (let i = 0; i < n; i++) advanceA(0.016); } }
+};
+
+resize();
+resetPrm(1); resetPrm(2); resetPrm(3); resetPrm(4); resetPrm(5);
+enterAct(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

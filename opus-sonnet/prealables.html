@@ -61,6 +61,7 @@ th{font-weight:500;color:var(--texte-2);font-size:13px}
   <a href="#neurone">03 · Le neurone</a>
   <a href="#champ">04 · Le champ électrique</a>
   <a href="#ondes">05 · Les ondes</a>
+  <a href="#circuits">06 · Courant et circuits</a>
 </nav>
 <main>
   <p class="serie">L’invisible en mouvement — préalables</p>
@@ -235,6 +236,8 @@ th{font-weight:500;color:var(--texte-2);font-size:13px}
     <p>Le <strong>potentiel</strong> <span class="m">V</span> (volts) est l'énergie potentielle par unité de charge. C'est un nombre, pas un vecteur, donc il s'additionne simplement :</p>
     <div class="eq">V = k · q / r   (en 1/r, pas en 1/r²)</div>
     <p>Une <strong>équipotentielle</strong> relie les points de même potentiel, comme une courbe de niveau sur une carte topographique. Le champ pointe toujours dans le sens de la pente descendante du potentiel, <strong>perpendiculairement</strong> aux équipotentielles. Déplacer une charge le long d'une équipotentielle ne demande aucun travail.</p>
+    <h3>Tension : toujours entre deux points</h3>
+    <p>La <strong>tension</strong> <span class="m">U = V<sub>B</sub> − V<sub>A</sub></span> est une <strong>différence</strong> de potentiel, comme une dénivellation entre deux points d'une carte. Amener une charge q de A à B demande un travail <span class="m">W = qU</span>, quel que soit le chemin. Le champ, lui, est la pente locale : <span class="m">E ≈ ΔV / Δd</span>, d'où son unité, le V/m. Retiens les trois distinctions : champ ≠ force (F = qE n'existe que s'il y a une charge q) ; potentiel ≠ champ (une altitude n'est pas une pente) ; tension = différence de potentiel.</p>
     <div class="analogie"><b>Analogie</b>Le potentiel est l'altitude d'un relief ; les équipotentielles sont les courbes de niveau ; le champ est la direction dans laquelle une bille roulerait. Une charge positive « roule » vers les potentiels bas, une charge négative vers les potentiels hauts.</div>
 
     <h3>Pourquoi la simulation intègre pas à pas</h3>
@@ -276,6 +279,43 @@ th{font-weight:500;color:var(--texte-2);font-size:13px}
       <li>Deux oscillations de même amplitude sont en opposition de phase : que vaut leur somme ?</li>
     </ul></div>
     <a class="aller" href="05-ondes-interferences/index.html">Ouvrir la planche 05 &rarr;</a>
+  </section>
+
+  <!-- ================= 06 CIRCUITS ================= -->
+  <section id="circuits" style="--c:#8fe9d9">
+    <h2><span class="n">06 · PRÉALABLES</span>Courant et circuits</h2>
+    <p class="pourquoi">La planche 04 montre des charges immobiles. Ici, on relie deux points de potentiels différents par un fil : les charges se mettent en mouvement. Quelques grandeurs suffisent ; la tension et le condensateur plan viennent directement de la planche 04.</p>
+
+    <h3>Le courant : un débit de charges</h3>
+    <div class="eq">I = ΔQ / Δt      (1 A = 1 C/s ≈ 6,2 × 10¹⁸ électrons par seconde)</div>
+    <p>Le courant compte combien de charge traverse une section du fil par seconde, comme un débit d'eau en litres par seconde. Dans un métal, ce sont des <strong>électrons</strong> qui bougent ; par convention historique, on oriente pourtant le courant du + vers le − à l'extérieur de la pile, soit à l'inverse des électrons. Dans une boucle sans embranchement, la charge ne s'accumule nulle part dans les fils : le courant est <strong>le même partout</strong>.</p>
+
+    <h3>La tension pousse, la résistance freine</h3>
+    <p>Une <strong>pile</strong> maintient une tension V entre ses bornes : elle remonte les charges « en altitude » électrique. Dans un fil, cette tension crée un champ E qui pousse les électrons ; ils se cognent sans cesse aux atomes du métal et avancent à une vitesse moyenne faible, proportionnelle au champ. Résultat : le courant est proportionnel à la tension. Le rapport est la <strong>résistance</strong> R, en ohms (Ω).</p>
+    <div class="eq">V = R · I      (loi d'Ohm)</div>
+    <div class="analogie"><b>Analogie</b>Une conduite d'eau entre deux réservoirs : la différence de hauteur est la tension, le débit est le courant, l'étroitesse de la conduite est la résistance. Double la hauteur, le débit double ; double l'étroitesse, il est divisé par deux.</div>
+
+    <h3>La puissance : de l'énergie par seconde</h3>
+    <div class="eq">P = V · I = R · I² = V² / R      (1 W = 1 J/s)</div>
+    <p>Chaque coulomb qui descend une tension V cède une énergie V joules (c'est la définition du volt). Avec I coulombs par seconde, l'énergie cédée par seconde est V·I. Dans une résistance, cette énergie devient de la chaleur : c'est l'<strong>effet Joule</strong> (grille-pain, filament).</p>
+
+    <h3>Le condensateur : stocker de la charge séparée</h3>
+    <div class="eq">Q = C · V      U = ½ · C · V²      (C en farads, F)</div>
+    <p>Deux plaques conductrices séparées par un isolant : le <strong>condensateur plan</strong> de la planche 04. Une pile y pousse des électrons sur une plaque et en retire autant de l'autre : <span class="m">+Q</span> d'un côté, <span class="m">−Q</span> de l'autre, charge totale nulle (la charge ne se crée pas, elle se déplace). La <strong>capacité</strong> C dit combien de charge on sépare par volt. Le condensateur stocke de l'énergie dans le champ entre ses plaques. Le facteur ½ vient de ce que les premières charges montent une tension presque nulle et les dernières, la tension complète : en moyenne, V/2.</p>
+
+    <h3>Rappel : la décroissance exponentielle</h3>
+    <div class="eq">x(t) = x₀ · e^(−t/τ)      après τ : 37 %   après 3τ : 5 %   après 5τ : &lt; 1 %</div>
+    <p>Quand une quantité diminue à une vitesse <strong>proportionnelle à elle-même</strong>, elle perd toujours la même fraction par unité de temps : c'est une exponentielle. La <strong>constante de temps</strong> τ est le temps pour que l'écart soit divisé par e ≈ 2,718 (il reste 37 %). La demi-vie vaut τ·ln 2 ≈ 0,69 τ. La planche 06 montre qu'un condensateur qui se charge à travers une résistance suit exactement cette loi, avec <span class="m">τ = R·C</span> : l'écart entre sa tension et celle de la pile fond comme une exponentielle.</p>
+
+    <h3>L'inductance, en une phrase</h3>
+    <p>Une <strong>bobine</strong> (un fil enroulé) s'oppose aux <strong>variations</strong> du courant qui la traverse : <span class="m">V<sub>L</sub> = L · dI/dt</span>, L en henrys (H). Elle stocke de l'énergie <span class="m">½ · L · I²</span> dans le champ magnétique créé par le courant. C'est l'équivalent électrique de l'inertie d'une masse. Le mécanisme (l'induction) fera l'objet d'une planche à part.</p>
+
+    <div class="verif"><h4>Vérifie que tu sais</h4><ul>
+      <li>Une résistance de 60 Ω est branchée sur 6 V. Courant et puissance ? (réponse : 0,1 A et 0,6 W)</li>
+      <li>Un condensateur de 100 µF est chargé sous 6 V. Charge et énergie ? (réponse : 0,6 mC et 1,8 mJ)</li>
+      <li>Après combien de constantes de temps une exponentielle décroissante est-elle sous 5 % ?</li>
+    </ul></div>
+    <a class="aller" href="06-courant-circuits/index.html">Ouvrir la planche 06 &rarr;</a>
   </section>
 </main>
 </div>
