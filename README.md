@@ -8,6 +8,7 @@ Cinq planches scientifiques interactives : mitose, respiration cellulaire, neuro
 
 - `prompts/` : la charte commune (`00-direction-artistique.md`), un brief par projet, `PROMPT-SESSION.md` (prompt à coller dans une autre session) et `astra-neurone.md` (tout-en-un pour Astra).
 - `opus-sonnet/` : Opus 5.5 écrit la direction, des sous-agents Sonnet 5.5 construisent (quatre en parallèle pour 01 à 04 ; un constructeur et un relecteur QA pour 05, ajoutée le 2026-10-01). Ouvrir `opus-sonnet/index.html`.
+- `opus-sonnet/09-supernova/` : supernova par effondrement du cœur (2026-10-01), planche narrative en huit actes. Opus 5.5 a écrit le brief (`prompts/09-supernova.md`) ; des sous-agents Sonnet 5.5 ont construit la page, rédigé l'explication et fait la QA.
 - `astra/03-neurone/` : GPT-6 Astra, même brief, en solo, projet 03 seulement.
 
 ## Grille de comparaison
