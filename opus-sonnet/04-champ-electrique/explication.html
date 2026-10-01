@@ -55,6 +55,12 @@ details[open] summary::before{content:"\2713"}
 details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 .cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
 .cta:hover{background:var(--accent);color:var(--fond)}
+table.mots{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:15px}
+table.mots th,table.mots td{text-align:left;vertical-align:top;padding:9px 10px 9px 0;border-bottom:1px solid var(--trait)}
+table.mots th{font:400 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2)}
+table.mots td:first-child{font-weight:500;white-space:nowrap}
+table.mots td.m{font-family:var(--mono);font-size:14px;white-space:nowrap}
+.tablewrap{overflow-x:auto}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
 </style>
 </head>
@@ -77,6 +83,10 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <dd>Le potentiel V : orange où il est positif, bleu où il est négatif, noir près de 0 V.</dd>
     <dt><span class="acc">Point vert</span></dt>
     <dd>La charge test (1 nC, 10 mg). Sa flèche verte est la force F = qE ; sa traînée s'estompe en trois secondes.</dd>
+    <dt><span class="ener">Flèches jaunes</span> (vue « Forces »)</dt>
+    <dd>La force de Coulomb totale subie par chaque charge, due à toutes les autres, en µN. Dans une paire isolée, les deux flèches sont égales et opposées.</dd>
+    <dt>Point A et pointillé blanc</dt>
+    <dd>Le point de référence d'un voltmètre (bouton « Point A ») ; la sonde joue le rôle de la deuxième pointe, B. Le pointillé qui passe par A est son équipotentielle : partout dessus, la tension avec A est nulle.</dd>
   </dl>
 
   <h2><span>2</span>Ce qui se passe vraiment</h2>
@@ -88,6 +98,20 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
   <p>Les équipotentielles sont toujours <strong>perpendiculaires</strong> aux lignes de champ. Raison : déplacer une charge le long d'une équipotentielle ne change pas son énergie, donc E ne fait aucun travail (E·dl = 0) et E est perpendiculaire à ce déplacement. C'est aussi pourquoi, sur un conducteur à l'équilibre, le champ est perpendiculaire à la surface.</p>
   <p>La charge test suit la deuxième loi de Newton : F = qE, donc a = qE/m. Elle accélère, gagne de l'énergie cinétique et perd autant d'énergie potentielle : E<sub>c</sub> + qV reste constante (le panneau l'affiche) tant que les charges sources ne bougent pas. Attention : sa trajectoire n'est pas une ligne de champ. La ligne indique la direction de la force, pas celle de la vitesse, et la charge a de l'inertie.</p>
   <p><strong>Le condensateur plan.</strong> Entre deux plaques de charges opposées, chaque charge pousse ou tire à la fois vers le bas et sur le côté ; par symétrie, les composantes latérales s'annulent en s'éloignant des bords, et il reste la composante qui traverse. On obtient un champ presque uniforme, d'où des lignes parallèles et des équipotentielles également espacées. Aux bords, les lignes s'incurvent : c'est l'effet de bord.</p>
+
+  <h3 style="font:500 17px var(--sans);margin:34px 0 10px">Six mots pour une même situation</h3>
+  <p>La planche montre une seule réalité (des charges immobiles) sous plusieurs lectures. Chaque mot répond à une question différente ; les confondre est l'erreur la plus fréquente en électricité.</p>
+  <div class="tablewrap"><table class="mots">
+    <tr><th>Grandeur</th><th>Question</th><th>Nature, unité</th><th>Dans la planche</th></tr>
+    <tr><td>Charge q</td><td>Qui crée, qui subit ?</td><td class="m">scalaire signé, C</td><td>Les disques. La charge nette (panneau) ne change que si tu ajoutes ou retires une charge : elle se conserve.</td></tr>
+    <tr><td>Champ E</td><td>Ici, quelle poussée par coulomb ?</td><td class="m">vecteur, N/C = V/m</td><td>Lignes, vecteurs, valeur |E| de la sonde. Existe même là où il n'y a aucune charge.</td></tr>
+    <tr><td>Force F</td><td>Sur cette charge-là, quelle poussée ?</td><td class="m">vecteur, N</td><td>F = qE : flèche verte de la charge test, flèches jaunes. Pas de charge, pas de force.</td></tr>
+    <tr><td>Potentiel V</td><td>Ici, quelle énergie par coulomb ?</td><td class="m">scalaire, V = J/C</td><td>Carte de couleur, équipotentielles, valeur V de la sonde. Défini à une constante près (ici, 0 V à l'infini).</td></tr>
+    <tr><td>Tension U</td><td>Entre deux points, quel écart ?</td><td class="m">scalaire, V</td><td>U = V<sub>B</sub> − V<sub>A</sub> : la section « Tension » avec le point A. Ne dépend pas du choix du zéro.</td></tr>
+    <tr><td>Énergie U<sub>e</sub></td><td>Combien pour cette charge-là ?</td><td class="m">scalaire, J</td><td>qV pour la charge test ; qU pour aller de A à B.</td></tr>
+  </table></div>
+  <p><strong>Potentiel ≠ champ.</strong> Le potentiel est une altitude, le champ est la pente. Entre deux charges identiques, le champ est nul au milieu (terrain plat, un col) alors que V y est élevé. Inversement, là où V vaut 0 sur la médiatrice d'un dipôle, le champ est intense. Ce qui compte pour la force, ce n'est pas la valeur de V, c'est la vitesse à laquelle elle change d'un point à l'autre : E ≈ ΔV / Δd, ce qui explique l'unité V/m.</p>
+  <p><strong>Tension = différence de potentiel.</strong> Un voltmètre a toujours deux pointes : il ne mesure jamais « le potentiel d'un point », seulement l'écart entre deux. Amener une charge q de A à B demande un travail W = qU, quel que soit le chemin. C'est ce qu'une pile fait en permanence dans un circuit : elle maintient une tension entre ses bornes, et cette tension met les charges en mouvement dans les fils. Suite dans la <a href="../06-courant-circuits/index.html">planche 06, courant et circuits</a>.</p>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
   <ul>
@@ -114,6 +138,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <p>En un point de l'espace, le champ total a une seule direction et un seul sens. Une intersection en donnerait deux. (Aux points où E = 0, comme au milieu de deux charges identiques, il n'y a tout simplement pas de ligne qui passe.)</p></details>
   <details><summary>Une charge test positive est lâchée au repos dans un champ non uniforme. Suit-elle exactement la ligne de champ qui passe par son point de départ ?</summary>
     <p>Non. Elle démarre dans la direction de la ligne, mais elle acquiert une vitesse. Quand la ligne se courbe, la charge continue en partie sur son élan : sa trajectoire s'écarte de la ligne. Elles coïncident seulement si la ligne est droite.</p></details>
+
+  <details><summary>Au milieu de deux charges positives identiques, |E| = 0. Le potentiel y est-il nul aussi ?</summary>
+    <p>Non, il est même élevé : les deux potentiels positifs s'additionnent. Le champ est nul parce que le potentiel y est à un col : il ne varie pas quand on fait un tout petit pas, comme le sommet d'une selle. Champ et potentiel décrivent la même situation, mais E est la pente de V, pas sa valeur.</p></details>
+  <details><summary>Tu places A et B sur la même équipotentielle, dans une région où le champ est intense. Que vaut la tension U entre eux ? Combien coûte le déplacement d'une charge de A à B ?</summary>
+    <p>U = 0 et le travail W = qU = 0. Le champ y est fort, mais il est perpendiculaire à l'équipotentielle : il pousse de côté, jamais le long du chemin qui relie A et B en restant dessus. Et comme le travail ne dépend pas du chemin, il est nul aussi par n'importe quel autre trajet.</p></details>
+  <details><summary>À un même point, on place successivement une charge de +1 nC puis de −3 nC. Qu'est-ce qui change : le champ, la force, ou les deux ?</summary>
+    <p>Seulement la force. Le champ en ce point est créé par les autres charges ; il ne dépend pas de la charge qu'on y pose. La force F = qE est trois fois plus grande et de sens opposé pour −3 nC.</p></details>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
 </div>

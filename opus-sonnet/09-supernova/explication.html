@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la supernova par effondrement du cœur — L’invisible en mouvement 09</title>
+<meta name="description" content="Ce que montre la planche sur la supernova par effondrement du cœur, le mécanisme réel, ses simplifications et les ordres de grandeur à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#ff5e62;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:400 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:26px 0 8px}
+p{margin:0 0 16px}
+ul,ol{padding-left:22px;margin:0 0 16px}
+li{margin-bottom:10px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — 09</p>
+  <h1>Comprendre la supernova par effondrement du <em>cœur</em></h1>
+  <p class="lede">Le cœur de fer d'une étoile massive ne peut plus rien tirer de la fusion : il s'effondre en une fraction de seconde. L'énergie libérée, presque toute emportée par des neutrinos, finit par chasser l'enveloppe.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>La supergéante</dt>
+    <dd>L'étoile de référence (15 à 20 M☉ à la naissance), devenue supergéante rouge d'environ 800 rayons solaires. Les grandes cellules de surface (convection) sont stylisées.</dd>
+    <dt>La coupe en couches</dt>
+    <dd>Un secteur ouvert montre la structure « en oignon » : H, He, C et O, O-Ne-Mg, Si-S, puis le cœur de fer. Les couleurs vont du <span class="acc">rouge sombre</span> (extérieur, plus froid) au blanc acier (centre, plus chaud) : rampe de température illustrative, pas la vraie couleur.</dd>
+    <dt>L'horloge et la frise logarithmiques</dt>
+    <dd>Chaque acte dure à peu près le même temps à l'écran, alors qu'une étape réelle peut durer 10 millions d'années (la combustion de l'hydrogène) ou quelques millisecondes (le rebond), et que le film se termine 10 000 ans après l'effondrement. L'horloge affiche le temps réel, mesuré par rapport à l'effondrement, et la frise (« échelle logarithmique ») montre où tu es : avant à gauche, après à droite.</dd>
+    <dt>Le régime d'échelle</dt>
+    <dd>Dans la coupe, les épaisseurs ne sont pas à l'échelle : le cœur de fer est environ 10⁵ fois plus petit que l'étoile. Aux actes III à VI, la caméra plonge « à l'échelle » ; le champ de vue (« champ ≈ … km ») est affiché.</dd>
+    <dt><span class="neg">Les points bleus</span></dt>
+    <dd>Les électrons (charge négative, comme dans la série). Quand ils s'éteignent, le soutien du cœur disparaît.</dd>
+    <dt>Les traits pâles</dt>
+    <dd>Les neutrinos. Invisibles en réalité ; le trait est un symbole.</dd>
+    <dt><span class="ener">Le jaune</span></dt>
+    <dd>Ce qui porte l'énergie : l'onde de choc, la région chauffée sous le choc (région de gain) et le sursaut lumineux de sortie.</dd>
+    <dt>La proto-étoile, puis l'étoile à neutrons</dt>
+    <dd>La sphère blanc bleuté au centre : d'abord chaude (~30 à 50 km de rayon), puis refroidie (~12 km).</dd>
+    <dt>Les éjectas</dt>
+    <dd>La matière projetée, en filaments aux couleurs des couches mélangées.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <ol>
+    <li><strong>Combustions successives.</strong> Au centre, l'étoile fusionne H, puis He, C, Ne, O, Si, chacun allumé quand le précédent s'épuise, et laisse sa cendre en couche. Chaque étape est plus courte : elle libère moins d'énergie par unité de masse, et l'étoile perd de plus en plus d'énergie en neutrinos.</li>
+    <li><strong>Le cœur de fer.</strong> Sur la courbe de l'énergie de liaison par nucléon, le groupe du fer est au sommet : fusionner ou fissionner du fer ne libère plus d'énergie. Le cœur est inerte et grossit des cendres de la couche de silicium, jusqu'à ~1,5 M☉.</li>
+    <li><strong>Un cœur soutenu par ses électrons.</strong> Il tient surtout par la <em>pression de dégénérescence</em> des électrons : le principe d'exclusion de Pauli interdit de les tasser dans le même état. Ce soutien a une limite de masse.</li>
+    <li><strong>Le déclencheur.</strong> Deux processus retirent la pression. D'abord les <em>captures électroniques</em>, qui font disparaître les électrons porteurs du soutien et laissent s'échapper des neutrinos :
+      <div class="eq">p + e⁻ → n + νₑ</div>
+      Ensuite la <em>photodésintégration</em> : des photons très énergétiques brisent les noyaux de fer, une réaction endothermique qui consomme de l'énergie thermique.</li>
+    <li><strong>L'effondrement.</strong> En quelques dixièmes de seconde, le cœur interne s'effondre de façon <em>homologue</em> (vitesse proportionnelle au rayon), le cœur externe tombe plus vite que le son, jusqu'à ~70 000 km/s (environ le quart de c). Le rayon passe de ~3 000 km à quelques dizaines de km. Vers ~10¹² g/cm³, les neutrinos sont <em>piégés</em> un moment.</li>
+    <li><strong>Le rebond.</strong> Le cœur interne atteint la densité nucléaire (~3 × 10¹⁴ g/cm³) : la force nucléaire devient fortement répulsive, il se raidit et rebondit un peu. La matière qui tombe dessus est stoppée, et une <em>onde de choc</em> naît au bord du cœur interne (~0,5 M☉). Le cœur chaud est une <em>proto-étoile à neutrons</em>.</li>
+    <li><strong>Le choc cale.</strong> Le choc dépense son énergie à dissocier les noyaux du fer qui tombe et en neutrinos. En quelques dizaines de millisecondes il s'arrête, vers 100 à 200 km : le rebond seul ne suffit pas.</li>
+    <li><strong>La relance.</strong> Scénario dominant, encore étudié : la proto-étoile à neutrons émet un flot énorme de neutrinos, dont une petite fraction est absorbée sous le choc, dans la <em>région de gain</em>, qui se réchauffe. La convection et les instabilités du choc (SASI) aident. Le choc repart, asymétrique, en ~0,1 à 1 s. Les simulations 3D récentes font exploser beaucoup d'étoiles, pas toutes ; le mécanisme exact reste étudié.</li>
+    <li><strong>Traversée et lumière.</strong> Le choc met ~1 jour à atteindre la surface d'une supergéante rouge, en mélangeant les couches. Le <em>sursaut de sortie</em> est le premier signal lumineux. L'enveloppe chaude brille ensuite des mois (plateau d'environ 100 jours), puis la désintégration ⁵⁶Ni → ⁵⁶Co → ⁵⁶Fe prend le relais.</li>
+    <li><strong>Le résidu.</strong> Le plus souvent une étoile à neutrons, parfois un trou noir. Les éjectas (~10 000 km/s au départ, puis freinés à mesure qu'ils balaient le gaz interstellaire) forment un reste de supernova, large de quelques dizaines d'années-lumière après 10 000 ans, qui enrichit le milieu interstellaire en O, Si, Ca, Fe…</li>
+  </ol>
+
+  <h2><span>3</span>Ce que la planche simplifie</h2>
+  <h3>Représenté</h3>
+  <p>Une étoile de ~15 à 20 M☉, supergéante rouge (type II-P, le cas le plus courant) ; les couches ; le déclencheur ; l'effondrement, le rebond, le choc ; le bilan d'énergie, en ordres de grandeur.</p>
+  <h3>Simplifié</h3>
+  <ul>
+    <li>Une seule étoile. Masse, rotation, champ magnétique, métallicité et compagnon binaire changent tout (types Ib/Ic, IIb, IIn…). SN 1987A venait d'une supergéante bleue.</li>
+    <li>Couches sphériques et nettes ; en réalité elles se mélangent et brûlent par intermittence.</li>
+    <li>Temps compressé sur une échelle logarithmique ; durées d'acte arbitraires.</li>
+    <li>Effondrement en mouvement d'ensemble lisse ; la relance est une déformation stylisée du choc, pas une simulation hydrodynamique.</li>
+    <li>Neutrinos dessinés comme des traits, alors qu'ils sont invisibles, astronomiquement nombreux et interagissent rarissimement.</li>
+    <li>Ni rotation, ni jets, ni champ magnétique, ni nucléosynthèse détaillée.</li>
+  </ul>
+  <h3>Illustratif</h3>
+  <ul>
+    <li>Les couleurs des couches (rampe de température, désaturée) et la granulation de surface.</li>
+    <li>Le flash du rebond et celui du sursaut de sortie : dosés, pas mesurés.</li>
+    <li>Les filaments du reste de supernova.</li>
+  </ul>
+
+  <h2><span>4</span>Prudences d'interprétation</h2>
+  <dl>
+    <dt>« Le fer absorbe l'énergie en fusionnant. »</dt>
+    <dd>En fait, la fusion du fer ne libère plus d'énergie. Ce qui en consomme, c'est la photodésintégration ; ce qui retire le soutien, ce sont les captures électroniques.</dd>
+    <dt>« L'explosion vient du rebond. »</dt>
+    <dd>En fait, le rebond crée le choc, mais celui-ci cale en quelques dizaines de ms. La relance, par les neutrinos et la convection, est le scénario dominant, encore étudié.</dd>
+    <dt>« Toute étoile massive finit en supernova brillante. »</dt>
+    <dd>En fait, certaines s'effondrent en trou noir sans explosion brillante, d'autres perdent leur enveloppe avant (types Ib/Ic).</dd>
+    <dt>« Une supernova crée tout l'or de l'Univers. »</dt>
+    <dd>En fait, les éléments lourds du processus r (dont l'or) viennent surtout d'autres sites, comme les fusions d'étoiles à neutrons. L'apport des supernovas à ces éléments est débattu. Elles produisent surtout O, Si, Ca, Fe et leurs voisins.</dd>
+    <dt>« L'explosion est sphérique. »</dt>
+    <dd>En fait, les explosions sont asymétriques, avec des doigts de matière mélangée.</dd>
+    <dt>« Une supernova, c'est surtout de la lumière. »</dt>
+    <dd>En fait, environ 99 % de l'énergie part en neutrinos, ~1 % en mouvement de la matière et ~0,01 % en lumière.</dd>
+  </dl>
+
+  <h2><span>5</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>10 Myr → ~1 jour</b><span>combustions : H ~10 Myr, He ~1 Myr, C ~1 000 ans, Ne et O ~1 an chacun, Si ~1 jour.</span></div>
+    <div><b>~1,5 M☉</b><span>masse du cœur de fer (de ~1,4 à 1,8), pour un rayon de quelques milliers de km, de l'ordre de la Terre.</span></div>
+    <div><b>&lt; 1 s</b><span>durée de l'effondrement, à des vitesses jusqu'à ~70 000 km/s (~¼ c).</span></div>
+    <div><b>~3 × 10¹⁴ g/cm³</b><span>densité nucléaire : un dé à coudre de cette matière pèserait des centaines de millions de tonnes (ordre de grandeur).</span></div>
+    <div><b>~3 × 10⁴⁶ J</b><span>énergie libérée : ≈ 99 % en neutrinos, ≈ 1 % en mouvement, ≈ 0,01 % en lumière.</span></div>
+    <div><b>~1,4 M☉ / ~12 km</b><span>l'étoile à neutrons : plus d'une masse solaire dans une ville.</span></div>
+  </div>
+
+  <h2><span>6</span>Teste-toi</h2>
+  <details><summary>Pourquoi le cœur de fer ne peut-il plus se soutenir ?</summary>
+    <p>Il ne produit plus d'énergie et ne tient que par la pression des électrons dégénérés. Près de sa masse limite, les captures électroniques retirent ces électrons et la photodésintégration consomme de l'énergie thermique.</p></details>
+  <details><summary>Pourquoi le choc ne suffit-il pas à lui seul à faire exploser l'étoile ?</summary>
+    <p>Il dissocie les noyaux du fer qui tombe et perd de l'énergie en neutrinos : il cale vers 100 à 200 km. Il faut le relancer, surtout par le chauffage des neutrinos dans la région de gain, aidé par la convection.</p></details>
+  <details><summary>Pourquoi les neutrinos de SN 1987A sont-ils arrivés avant la lumière ?</summary>
+    <p>Pas parce qu'ils iraient plus vite que la lumière. Ils s'échappent du cœur dès l'effondrement, alors que la lumière n'apparaît qu'à la sortie du choc à la surface de l'étoile, plusieurs heures plus tard.</p></details>
+  <details><summary>Que reste-t-il au centre ?</summary>
+    <p>Le plus souvent une étoile à neutrons (~1,4 M☉, ~12 km de rayon), parfois un trou noir.</p></details>
+
+  <a class="cta" href="index.html"><span>Revoir la supernova</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
