@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LABO</title>
+<meta name="description" content="Prototype de direction UI pour labo-modeles : accueil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23f3f0e9%27/%3E%3Cpath d=%27M9 6v20h14%27 fill=%27none%27 stroke=%27%2317191b%27 stroke-width=%274%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="labo.css">
+<style>
+/* ---------- En-tête ---------- */
+.tete{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(24px,5vw,80px);
+  padding:clamp(24px,6vw,88px) var(--gouttiere) clamp(40px,6vw,72px);align-items:end}
+.tete h1{font-weight:600;font-size:clamp(88px,17vw,260px);line-height:.8;letter-spacing:-.055em;margin-left:-.04em}
+.tete .devise{font-size:clamp(22px,2.6vw,36px);line-height:1.15;letter-spacing:-.015em;margin-top:clamp(18px,2.4vw,32px);max-width:15em}
+.tete .chapeau{color:var(--encre-2);font-size:16px;max-width:30em;margin-top:18px}
+.tete .regle{display:flex;gap:28px;margin-top:clamp(28px,4vw,48px);padding-top:14px;border-top:1px solid var(--trait);flex-wrap:wrap}
+.tete .regle a{text-decoration:none}
+.tete .regle b{font-weight:500;font-family:var(--mono);font-size:12px;color:var(--encre);margin-left:6px}
+
+/* Planche d'ouverture : un seul phénomène vivant, dans un cadre d'instrument */
+.fig{position:relative;aspect-ratio:1/1;max-height:62vh;width:100%;justify-self:end;background:var(--papier-2)}
+.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.fig .coin{position:absolute;width:10px;height:10px;border-color:var(--encre-3);border-style:solid;border-width:0}
+.fig .c1{left:-1px;top:-1px;border-left-width:1px;border-top-width:1px}
+.fig .c2{right:-1px;top:-1px;border-right-width:1px;border-top-width:1px}
+.fig .c3{left:-1px;bottom:-1px;border-left-width:1px;border-bottom-width:1px}
+.fig .c4{right:-1px;bottom:-1px;border-right-width:1px;border-bottom-width:1px}
+.fig figcaption{position:absolute;left:0;right:0;top:100%;display:flex;justify-content:space-between;gap:12px;padding-top:10px;color:var(--encre-3)}
+.fig figcaption span:first-child{color:var(--encre-2)}
+
+/* ---------- Sections ---------- */
+section{padding:0 var(--gouttiere)}
+.sect{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:clamp(16px,4vw,64px);
+  padding:clamp(56px,8vw,112px) 0 18px;border-bottom:1px solid var(--encre)}
+.sect h2{font-weight:500;font-size:13px;letter-spacing:.2em;text-transform:uppercase}
+.sect p{font-size:clamp(20px,2vw,26px);line-height:1.25;letter-spacing:-.01em;max-width:24em}
+.sect p span{color:var(--encre-3)}
+.sect .compte{display:block;margin-top:6px;color:var(--encre-3)}
+
+/* ---------- Index des fondations : entrée de catalogue ---------- */
+.index{list-style:none}
+.dom{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:clamp(16px,4vw,64px);padding:34px 0 10px;border-bottom:1px solid var(--trait)}
+.dom .label{color:var(--encre-2)}
+.dom .label + .label{color:var(--encre-3);text-transform:none;letter-spacing:.02em}
+.e{border-bottom:1px solid var(--trait)}
+.e > a,.e > div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:clamp(16px,4vw,64px);align-items:center;
+  min-height:56px;padding:10px 0;text-decoration:none;position:relative}
+.e .n{font-family:var(--mono);font-size:13px;color:var(--encre-3);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:12px}
+.e .n i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--c);opacity:0;transition:opacity .4s var(--ease)}
+.e .ligne{display:grid;grid-template-columns:minmax(0,1fr) 128px 180px 74px;gap:20px;align-items:center}
+.e .t{font-size:clamp(17px,1.6vw,21px);letter-spacing:-.01em;line-height:1.25;transition:transform .5s var(--ease)}
+.e .viz{height:36px;display:block}
+.e .viz svg{width:128px;height:36px;display:block;overflow:visible}
+.e .meta{font-family:var(--mono);font-size:12px;color:var(--encre-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.e .etat{font-family:var(--mono);font-size:11px;color:var(--encre-3);text-align:right;letter-spacing:.04em}
+
+.e.dispo .n i{opacity:1}
+.e.dispo > a:hover .t,.e.dispo > a:focus-visible .t{transform:translateX(10px)}
+.e.dispo > a:hover .n,.e.dispo > a:focus-visible .n{color:var(--encre)}
+.e.dispo > a::after{content:"→";position:absolute;right:0;top:50%;transform:translate(-8px,-50%);opacity:0;font-size:14px;transition:.4s var(--ease)}
+.e.dispo > a:hover::after,.e.dispo > a:focus-visible::after{opacity:1;transform:translate(0,-50%)}
+.e.dispo > a:hover .etat,.e.dispo > a:focus-visible .etat{opacity:0}
+.e.venir .t{color:var(--encre-3)}
+.e.venir .viz{opacity:.55}
+.e.maquette .etat{color:var(--encre)}
+
+/* ---------- Phénomènes : entrées plus amples ---------- */
+.phen{list-style:none}
+.coll{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:clamp(16px,4vw,64px);padding:40px 0 0}
+.coll .label{color:var(--encre-2);line-height:1.6}
+.coll .label small{display:block;text-transform:none;letter-spacing:.02em;color:var(--encre-3);font-size:12px;margin-top:8px;max-width:22em;font-family:var(--sans)}
+.coll ol{list-style:none;border-left:1px solid var(--encre);padding-left:clamp(16px,2.4vw,32px)}
+.p{border-bottom:1px solid var(--trait)}
+.p:last-child{border-bottom:0}
+.p > a,.p > div{display:grid;grid-template-columns:minmax(0,1fr) 220px;gap:24px;padding:22px 0 20px;text-decoration:none;align-items:baseline}
+.p .t{font-size:clamp(26px,3.2vw,44px);line-height:1.02;letter-spacing:-.03em;font-weight:500;transition:transform .5s var(--ease)}
+.p .t::before{content:"";display:inline-block;width:.32em;height:.32em;border-radius:50%;background:var(--c);vertical-align:.18em;margin-right:.32em}
+.p .d{display:block;font-size:15px;line-height:1.45;font-weight:400;letter-spacing:0;color:var(--encre-2);margin-top:8px;max-width:34em}
+.p .meta{font-family:var(--mono);font-size:12px;color:var(--encre-3);text-align:right;line-height:1.7}
+.p > a:hover .t,.p > a:focus-visible .t{transform:translateX(10px)}
+.p.venir .t{color:var(--encre-3)}
+.p.venir .t::before{background:none;box-shadow:inset 0 0 0 1px var(--c)}
+
+/* ---------- Pied ---------- */
+footer{padding:clamp(72px,10vw,140px) var(--gouttiere) 72px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:clamp(16px,4vw,64px);color:var(--encre-3)}
+footer .marque{color:var(--encre)}
+footer p{font-size:14px;max-width:36em}
+footer p + p{margin-top:8px}
+
+@media (max-width:1100px){
+  .e .ligne{grid-template-columns:minmax(0,1fr) 128px 74px}
+  .e .meta{display:none}
+}
+@media (max-width:860px){
+  .tete{grid-template-columns:1fr}
+  .fig{max-height:none;aspect-ratio:3/2;margin-bottom:28px}
+  .sect,.dom,.coll,.e > a,.e > div,footer{grid-template-columns:1fr;gap:6px}
+  .sect{gap:14px}
+  .e > a,.e > div{gap:2px;padding:12px 0}
+  .e .ligne{grid-template-columns:minmax(0,1fr) auto}
+  .e .viz{display:none}
+  .e.dispo > a::after{display:none}
+  .p > a,.p > div{grid-template-columns:1fr;gap:10px}
+  .p .meta{text-align:left}
+  .coll ol{padding-left:16px}
+}
+</style>
+</head>
+<body>
+
+<header class="barre">
+  <a class="marque" href="index.html">LABO</a>
+  <nav aria-label="Principale">
+    <a href="#fondations">Fondations</a>
+    <a href="#phenomenes">Phénomènes</a>
+    <a href="../opus-sonnet/prealables.html">Préalables</a>
+  </nav>
+</header>
+
+<main>
+  <div class="tete">
+    <div>
+      <h1>LABO</h1>
+      <p class="devise">Modèles pour voir ce qui se passe.</p>
+      <p class="chapeau">Des expériences à manipuler, de l’échelle de la molécule à celle des étoiles. On observe le phénomène, on touche aux causes, puis on lit la théorie.</p>
+      <div class="regle mono">
+        <a href="#fondations">Fondations<b>50</b></a>
+        <a href="#phenomenes">Phénomènes<b>8</b></a>
+        <span style="color:var(--encre-3)">Mis à jour 2026-10-01</span>
+      </div>
+    </div>
+    <figure class="fig" aria-label="Figure animée : interférence de deux sources">
+      <canvas id="moire"></canvas>
+      <span class="coin c1"></span><span class="coin c2"></span><span class="coin c3"></span><span class="coin c4"></span>
+      <figcaption class="mono"><span>Fig. 0 · deux sources en phase</span><span id="fig-lambda">λ = 1,0 cm</span></figcaption>
+    </figure>
+  </div>
+
+  <section id="fondations">
+    <div class="sect">
+      <h2>Fondations</h2>
+      <p>Les briques conceptuelles. <span>Mesurer, représenter, faire évoluer : les outils qu’on réutilise partout ailleurs.</span>
+        <span class="compte mono">50 entrées · 18 ouvertes · 1 maquette</span></p>
+    </div>
+    <ol class="index" id="index"></ol>
+  </section>
+
+  <section id="phenomenes">
+    <div class="sect">
+      <h2>Phénomènes</h2>
+      <p>Des expériences plus longues, construites autour d’un seul phénomène. <span>On suit ce qui arrive, du début à la fin.</span></p>
+    </div>
+    <div class="coll">
+      <p class="label">Collection<br>L’invisible en mouvement
+        <small>Ce qui se passe à des échelles qu’on ne voit jamais : trop petit, trop rapide ou trop loin.</small></p>
+      <ol class="phen" id="invisible"></ol>
+    </div>
+    <div class="coll">
+      <p class="label">Hors collection</p>
+      <ol class="phen" id="autres"></ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span class="marque">LABO</span>
+  <div>
+    <p>Un laboratoire personnel de modèles scientifiques. Chaque expérience assume ses simplifications et les nomme.</p>
+    <p class="mono">labo-modeles · prototype de direction · <a href="../opus-sonnet/index.html">interface actuelle</a></p>
+  </div>
+</footer>
+
+<p class="proto">Prototype · <a href="../opus-sonnet/index.html">comparer avec l’actuel</a></p>
+
+<script>
+// ---------- Données (prototype : la numérotation 08, 09, 12, 13, 24 → 50 est provisoire) ----------
+const OS = '../opus-sonnet/';
+const FOND = [
+  ['Langage scientifique', 'Mesurer, représenter, compter'],
+  [1,'Mesure, échelles et représentation scientifique','10⁻¹⁰ → 10¹³ m',OS+'fondations-langage/index.html','#3a8f86'],
+  [2,'Vecteurs et géométrie des quantités','a + b · |a|',OS+'fondations-langage/index.html','#3a8f86'],
+  [3,'Changement et accumulation','v = dx/dt',OS+'fondations-langage/index.html','#3a8f86'],
+  [4,'Systèmes dynamiques et rétroaction','dx/dt = f(x)',OS+'fondations-systemes-hasard/index.html','#8b8f2e'],
+  [5,'Croissance, exponentielles et logarithmes','t½ = ln2 / λ',OS+'fondations-systemes-hasard/index.html','#8b8f2e'],
+  [6,'Cercle, phase et périodicité','T = 1/f',OS+'fondations-oscillations-ondes/index.html','#3f6fa8','phase'],
+  [7,'Hasard, probabilités et distributions','σ = √n',OS+'fondations-systemes-hasard/index.html','#8b8f2e','hasard'],
+  [8,'Incertitude et ajustement','± 1σ',null,'#8b8f2e'],
+  ['Mécanique', 'Ce qui bouge et pourquoi'],
+  [9,'Mouvement dans le plan','~1 m · ~1 s',null,'#7a64b0'],
+  [10,'Forces et lois de Newton','ΣF = ma',OS+'fondations-forces-energie/index.html','#7a64b0'],
+  [11,'Énergie, travail et conservation','Σp = cte',OS+'fondations-forces-energie/index.html','#7a64b0'],
+  [12,'Rotation et moment cinétique','L = Iω',null,'#7a64b0'],
+  [13,'Gravitation et orbites','~1 UA · ~1 an',null,'#b0453c','orbite'],
+  [14,'Oscillateurs et résonance','ω₀ = √(k/m)',OS+'fondations-oscillations-ondes/index.html','#3f6fa8'],
+  [15,'Ondes mécaniques','λ = v/f',OS+'fondations-oscillations-ondes/index.html','#3f6fa8','onde'],
+  ['Champs et matière', 'Du continu au moléculaire'],
+  [16,'Champs, gradients et flux','∇·F · ∇×F',OS+'fondations-flux-fluides/index.html','#b0598a'],
+  [17,'Le monde microscopique des gaz','PV = NkT',OS+'07-matiere-chaleur/index.html','#a5793f','gaz'],
+  [18,'Chaleur, phases et entropie','ΔS ≥ 0',OS+'07-matiere-chaleur/index.html','#a5793f'],
+  [19,'Transport et diffusion','J = −D ∇c',OS+'07-matiere-chaleur/index.html','#a5793f','diffusion'],
+  [20,'Fluides, pression et débit','Q = A·v',OS+'fondations-flux-fluides/index.html','#b0598a'],
+  ['Électromagnétisme et lumière', 'Charges, courants, champs, ondes'],
+  [21,'Électrostatique','F = qE',OS+'04-champ-electrique/index.html','#d4532a'],
+  [22,'Courant et circuits dynamiques','τ = RC',OS+'06-courant-circuits/index.html','#c3920e'],
+  [23,'Magnétisme et induction','ε = −N dΦ/dt','magnetisme.html','#3b4fb8','fil','maquette'],
+  [24,'Onde électromagnétique','c = 1/√(μ₀ε₀)',null,'#3b4fb8','em'],
+  [25,'Optique géométrique','n₁ sin θ₁ = n₂ sin θ₂',null,'#3f6fa8'],
+  [26,'Diffraction et interférences lumineuses','~500 nm',null,'#3f6fa8'],
+  ['Chimie', 'Atomes, liaisons, réactions'],
+  [27,'Atomes et tableau périodique','~0,1 nm',null,'#a5793f'],
+  [28,'Liaisons et géométrie moléculaire','~0,1 nm · ~10⁻¹³ s',null,'#a5793f'],
+  [29,'Réactions et stœchiométrie','n = m/M',null,'#a5793f'],
+  [30,'Équilibres chimiques','K = [C][D]/[A][B]',null,'#a5793f'],
+  [31,'Acides, bases et pH','pH = −log[H⁺]',null,'#a5793f'],
+  [32,'Cinétique et catalyse','k = A e^(−Ea/RT)',null,'#a5793f'],
+  [33,'Oxydoréduction et électrochimie','ΔG = −nFE',null,'#a5793f'],
+  ['Vivant', 'De la molécule à la population'],
+  [34,'La cellule et ses membranes','~10 µm',null,'#3e9a6a'],
+  [35,'Métabolisme et énergie du vivant','ATP · ~1 µm',null,'#3e9a6a'],
+  [36,'Information génétique','~2 nm',null,'#3e9a6a'],
+  [37,'Physiologie : circulation et échanges','~1 m · ~1 s',null,'#3e9a6a'],
+  [38,'Signaux nerveux et hormonaux','~100 mV · ms',null,'#3e9a6a'],
+  [39,'Évolution et sélection','~10⁴ générations',null,'#3e9a6a'],
+  [40,'Populations et écosystèmes','dN/dt = rN(1 − N/K)',null,'#3e9a6a'],
+  ['Univers', 'Étoiles, galaxies, cosmos'],
+  [41,'Lumière des étoiles et spectres','λ_max T = b',null,'#b0453c'],
+  [42,'Vie et mort des étoiles','~10¹⁰ ans',null,'#b0453c'],
+  [43,'Galaxies et expansion','v = H₀ d',null,'#b0453c'],
+  [44,'Cosmologie','~10²⁶ m',null,'#b0453c'],
+  ['Physique moderne', 'Quand le modèle classique cède'],
+  [45,'Relativité restreinte','γ = 1/√(1 − v²/c²)',null,'#55585a'],
+  [46,'Relativité générale','~10⁻⁹ Δt/t',null,'#55585a'],
+  [47,'Quanta et dualité onde-corpuscule','E = hf',null,'#55585a'],
+  [48,'Atome quantique','ΔxΔp ≥ ħ/2',null,'#55585a'],
+  [49,'Noyau et radioactivité','~10⁻¹⁵ m',null,'#55585a'],
+  [50,'Particules et interactions','~10⁻¹⁸ m',null,'#55585a'],
+];
+
+const INVISIBLE = [
+  ['La mitose','Des chromosomes tirés par des câbles, puis une cellule qui se pince en deux.','~20 µm','~1 h',OS+'01-mitose/index.html','#3e9a6a'],
+  ['La respiration cellulaire','Du glucose à l’ATP : une turbine moléculaire mue par des protons.','~1 µm','ms',OS+'02-respiration/index.html','#8a5bc4'],
+  ['Le neurone qui apprend','Une impulsion électrique, puis une synapse qui se renforce à force de répétition.','~100 µm','~2 ms',OS+'03-neurone/index.html','#c2477f'],
+  ['La réplication de l’ADN','Suivre une fourche : un brin se copie d’un trait, l’autre à reculons, par fragments.','~2 nm','30–50 nt/s',OS+'08-replication-adn/index.html','#1f9a8e'],
+  ['Supernova par effondrement du cœur','Un cœur de fer s’écroule en une fraction de seconde, puis une onde de choc traverse l’étoile.','~10⁹ km','~0,3 s → 10⁴ ans',OS+'09-supernova/index.html','#b0453c'],
+];
+const AUTRES = [
+  ['Ondes et interférences','Deux ondes se croisent : ici elles se renforcent, là elles s’annulent.','~1 cm','~0,1 s',OS+'05-ondes-interferences/index.html','#3f6fa8'],
+  ['Le double pendule','Deux tiges, aucune règle cachée, et pourtant aucune prévision possible au-delà de quelques secondes.','~1 m','~10 s',null,'#7a64b0'],
+  ['L’effet tunnel','Une particule franchit une barrière qu’elle ne pourrait jamais escalader.','~1 nm','~10⁻¹⁵ s',null,'#55585a'],
+];
+
+const pad = n => String(n).padStart(2,'0');
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+const idx = document.getElementById('index');
+idx.innerHTML = FOND.map(r => {
+  if (typeof r[0] === 'string') return `<li class="dom"><span class="label">${r[0]}</span><span class="label">${r[1]}</span></li>`;
+  const [n,t,meta,href,c,viz,etat] = r;
+  const cls = ['e', href ? 'dispo' : 'venir', etat || ''].join(' ');
+  const inner = `<span class="n"><span>${pad(n)}</span><i></i></span>
+    <span class="ligne"><span class="t">${esc(t)}</span>
+    <span class="viz">${viz ? `<svg viewBox="0 0 128 36" data-viz="${viz}" aria-hidden="true"></svg>` : ''}</span>
+    <span class="meta">${meta}</span><span class="etat">${etat || (href ? '' : 'à venir')}</span></span>`;
+  return `<li class="${cls}" style="--c:${c}">${href ? `<a href="${href}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
+}).join('');
+
+const phen = list => list.map(([t,d,ech,tps,href,c]) => {
+  const inner = `<span class="t">${esc(t)}<span class="d">${esc(d)}</span></span>
+    <span class="meta">échelle ${ech}<br>temps ${tps}${href ? '' : '<br>à venir'}</span>`;
+  return `<li class="p ${href ? '' : 'venir'}" style="--c:${c}">${href ? `<a href="${href}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
+}).join('');
+document.getElementById('invisible').innerHTML = phen(INVISIBLE);
+document.getElementById('autres').innerHTML = phen(AUTRES);
+
+// ---------- Microvisualisations : statiques, elles s'animent seulement au survol ----------
+const NS = 'http://www.w3.org/2000/svg';
+const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const el = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); return e; };
+let alea = 7; const rnd = () => (alea = (alea * 16807) % 2147483647) / 2147483647;
+
+const VIZ = {
+  onde(svg){
+    const p = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.3});
+    svg.append(el('line',{x1:0,x2:128,y1:18,y2:18,stroke:'var(--trait)','stroke-width':1}), p);
+    return t => { let d=''; for (let x=0;x<=128;x+=2){ const y = 18 - 11*Math.sin(x/128*Math.PI*4 - t*3)*Math.exp(-x/260); d += (x?'L':'M')+x+' '+y.toFixed(2); } p.setAttribute('d',d); };
+  },
+  phase(svg){
+    const cx=18, R=13;
+    svg.append(el('circle',{cx,cy:18,r:R,fill:'none',stroke:'var(--trait)'}));
+    const ray = el('line',{x1:cx,y1:18,stroke:'var(--encre-3)','stroke-width':1});
+    const dot = el('circle',{r:2.4,fill:'var(--c)'});
+    const tr = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.2});
+    const h = el('line',{stroke:'var(--c)','stroke-width':.8,'stroke-dasharray':'2 2',opacity:.6});
+    svg.append(ray,tr,h,dot);
+    return t => {
+      const a = t*1.6, x = cx+R*Math.cos(a), y = 18-R*Math.sin(a);
+      ray.setAttribute('x2',x); ray.setAttribute('y2',y); dot.setAttribute('cx',x); dot.setAttribute('cy',y);
+      h.setAttribute('x1',x); h.setAttribute('y1',y); h.setAttribute('x2',40); h.setAttribute('y2',y);
+      let d=''; for (let i=0;i<=88;i+=2){ d += (i?'L':'M')+(40+i)+' '+(18-R*Math.sin(a - i/14)).toFixed(2); } tr.setAttribute('d',d);
+    };
+  },
+  orbite(svg){
+    svg.append(el('ellipse',{cx:64,cy:18,rx:46,ry:13,fill:'none',stroke:'var(--trait)'}),
+               el('circle',{cx:64+46*0.55,cy:18,r:3.2,fill:'var(--encre)'}));
+    const p = el('circle',{r:2.2,fill:'var(--c)'}); svg.append(p);
+    const f = 46*0.55; // foyer
+    return t => { // anomalie : approximation suffisante pour un pictogramme
+      const M = t*1.2; let E = M; for (let i=0;i<5;i++) E = M + .55*Math.sin(E);
+      p.setAttribute('cx', 64 + 46*Math.cos(E)); p.setAttribute('cy', 18 + 13*Math.sin(E)); };
+  },
+  gaz(svg){
+    svg.append(el('rect',{x:.5,y:.5,width:127,height:35,fill:'none',stroke:'var(--trait)'}));
+    const P = Array.from({length:18},()=>({x:4+rnd()*120,y:4+rnd()*28,vx:rnd()-.5,vy:rnd()-.5,e:el('circle',{r:1.7,fill:'var(--c)'})}));
+    P.forEach(p => svg.append(p.e));
+    let last = 0;
+    return t => { const dt = Math.min(.05, t-last || 0); last = t;
+      for (const p of P){ p.x += p.vx*dt*90; p.y += p.vy*dt*90;
+        if (p.x<3||p.x>125){p.vx*=-1;p.x=Math.max(3,Math.min(125,p.x));} if (p.y<3||p.y>33){p.vy*=-1;p.y=Math.max(3,Math.min(33,p.y));}
+        p.e.setAttribute('cx',p.x.toFixed(1)); p.e.setAttribute('cy',p.y.toFixed(1)); } };
+  },
+  diffusion(svg){
+    svg.append(el('line',{x1:64,x2:64,y1:0,y2:36,stroke:'var(--trait)','stroke-dasharray':'2 3'}));
+    const P = Array.from({length:22},()=>({x:4+rnd()*30,y:4+rnd()*28,e:el('circle',{r:1.6,fill:'var(--c)'})}));
+    P.forEach(p => svg.append(p.e));
+    const base = P.map(p => ({x:p.x,y:p.y})); let last=0, t0=null;
+    return (t, actif) => { if (!actif){ P.forEach((p,i)=>{p.x=base[i].x;p.y=base[i].y;}); t0=null; }
+      else { const dt = Math.min(.05,t-last||0); for (const p of P){ p.x += (rnd()-.5)*dt*160; p.y += (rnd()-.5)*dt*160;
+        p.x=Math.max(3,Math.min(125,p.x)); p.y=Math.max(3,Math.min(33,p.y)); } }
+      last=t; P.forEach(p=>{p.e.setAttribute('cx',p.x.toFixed(1));p.e.setAttribute('cy',p.y.toFixed(1));}); };
+  },
+  hasard(svg){
+    const bars = []; const N = 15;
+    for (let i=0;i<N;i++){ const b = el('rect',{x:6+i*8,width:5,fill:'var(--c)'}); bars.push(b); svg.append(b); }
+    svg.append(el('line',{x1:0,x2:128,y1:35.5,y2:35.5,stroke:'var(--trait)'}));
+    const g = i => Math.exp(-((i-7)**2)/(2*2.6**2));
+    let n = 0, cts = new Array(N).fill(0);
+    return (t, actif) => {
+      if (!actif){ cts = cts.map((_,i)=>g(i)*30); n = 0; }
+      else { for (let k=0;k<3;k++){ let s=0; for (let j=0;j<14;j++) s += rnd()<.5?1:0; cts[s]=(cts[s]||0)+1; } n++; }
+      const m = Math.max(...cts) || 1; bars.forEach((b,i)=>{ const h = 32*cts[i]/m; b.setAttribute('y',35-h); b.setAttribute('height',h); });
+      if (actif && n>220){ cts.fill(0); n=0; } };
+  },
+  fil(svg){ // fil vu en bout : courant sortant, lignes de champ concentriques
+    const C = [];
+    svg.append(el('line',{x1:0,x2:128,y1:18,y2:18,stroke:'var(--trait)','stroke-dasharray':'1 3'}));
+    for (let i=0;i<4;i++){ const c = el('circle',{cx:64,cy:18,fill:'none',stroke:'var(--c)','stroke-width':1}); C.push(c); svg.append(c); }
+    svg.append(el('circle',{cx:64,cy:18,r:3.4,fill:'var(--papier)',stroke:'var(--encre)','stroke-width':1}), el('circle',{cx:64,cy:18,r:1,fill:'var(--encre)'}));
+    return t => C.forEach((c,i)=>{ const r = 7 + i*8 + 1.2*Math.sin(t*2 - i*.8); c.setAttribute('r',r); c.setAttribute('opacity',(1 - i*.22).toFixed(2)); });
+  },
+  em(svg){
+    const e = el('path',{fill:'none',stroke:'var(--positif)','stroke-width':1.1});
+    const b = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.1});
+    svg.append(el('line',{x1:0,x2:128,y1:20,y2:20,stroke:'var(--trait)'}), b, e);
+    return t => { let de='',db=''; for (let x=0;x<=128;x+=2){ const s = Math.sin(x/128*Math.PI*4 - t*3);
+      de += (x?'L':'M')+x+' '+(20-13*s).toFixed(2); db += (x?'L':'M')+(x+4*s).toFixed(2)+' '+(20+5*s).toFixed(2); }
+      e.setAttribute('d',de); b.setAttribute('d',db); };
+  },
+};
+
+const vivants = [];
+document.querySelectorAll('svg[data-viz]').forEach(svg => {
+  const f = VIZ[svg.dataset.viz](svg); const ligne = svg.closest('li');
+  const v = { f, actif:false }; vivants.push(v); f(0.35, false);
+  if (calme) return;
+  ligne.addEventListener('pointerenter', () => { v.actif = true; boucle(); });
+  ligne.addEventListener('pointerleave', () => { v.actif = false; });
+  ligne.addEventListener('focusin', () => { v.actif = true; boucle(); });
+  ligne.addEventListener('focusout', () => { v.actif = false; });
+});
+let tourne = false;
+function boucle(){ if (tourne) return; tourne = true;
+  const pas = now => { const t = now/1000; let un = false;
+    for (const v of vivants) if (v.actif){ v.f(t, true); un = true; }
+    if (un) requestAnimationFrame(pas); else tourne = false; };
+  requestAnimationFrame(pas); }
+
+// ---------- Fig. 0 : moiré de deux familles de cercles (interférence) ----------
+(() => {
+  const cv = document.getElementById('moire'), x = cv.getContext('2d');
+  let w, h, vis = true;
+  const taille = () => { const d = devicePixelRatio || 1, r = cv.getBoundingClientRect(); w = r.width; h = r.height;
+    cv.width = w*d; cv.height = h*d; x.setTransform(d,0,0,d,0,0); dessine(performance.now()); };
+  function dessine(now){
+    const t = now/1000, lam = Math.min(w,h)/15, ph = calme ? 0 : (t*0.35 % 1)*lam;
+    x.clearRect(0,0,w,h);
+    const s = [[w*.5 - lam*2.2, h*.62],[w*.5 + lam*2.2, h*.62]];
+    x.lineWidth = .9;
+    s.forEach(([sx,sy], k) => {
+      x.strokeStyle = k ? 'rgba(63,111,168,.38)' : 'rgba(23,25,27,.24)';
+      for (let r = ph; r < Math.hypot(w,h); r += lam){ if (r < 1) continue; x.beginPath(); x.arc(sx,sy,r,0,Math.PI*2); x.stroke(); }
+    });
+    s.forEach(([sx,sy]) => { x.fillStyle = '#3f6fa8'; x.beginPath(); x.arc(sx,sy,3.2,0,7); x.fill(); });
+    // repère discret
+    x.fillStyle = 'rgba(23,25,27,.5)'; x.font = '11px "IBM Plex Mono", monospace';
+    x.fillText('S₁', s[0][0]-18, s[0][1]+18); x.fillText('S₂', s[1][0]+8, s[1][1]+18);
+    x.strokeStyle = 'rgba(23,25,27,.5)'; x.beginPath(); x.moveTo(14, h-16); x.lineTo(14+lam, h-16);
+    x.moveTo(14,h-19); x.lineTo(14,h-13); x.moveTo(14+lam,h-19); x.lineTo(14+lam,h-13); x.stroke();
+  }
+  new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(cv);
+  const boucle = now => { if (vis) dessine(now); requestAnimationFrame(boucle); };
+  addEventListener('resize', taille); taille();
+  if (!calme) requestAnimationFrame(boucle);
+})();
+</script>
+</body>
+</html>

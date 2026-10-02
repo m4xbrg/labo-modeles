@@ -1,0 +1,75 @@
+/* LABO — prototype de direction UI (exploration, 2026-10-01).
+   Instrument scientifique éditorial : UI silencieuse, phénomène expressif.
+   Trois voix typographiques : Plex Sans (interface, titres), Plex Mono (mesures),
+   Instrument Serif italique (symboles mathématiques seulement). */
+
+:root{
+  /* Structure : neutre, papier minéral chaud */
+  --papier:#f3f0e9;
+  --papier-2:#ece8df;      /* surface d'instrument (scène) */
+  --papier-3:#e3ded2;
+  --encre:#17191b;
+  --encre-2:#55585a;
+  --encre-3:#8e8d86;
+  --trait:#d5cfc1;
+  --trait-fin:rgba(23,25,27,.10);
+
+  /* Couleur portée par les phénomènes (mêmes sens que la série, assombris pour le papier) */
+  --positif:#d4532a;       /* charge +, courant conventionnel */
+  --negatif:#2b6fc0;       /* charge − */
+  --energie:#c3920e;
+  --champ-b:#3b4fb8;       /* champ magnétique */
+  --induit:#178a6c;        /* f.é.m. induite */
+  --onde:#3f6fa8;
+  --matiere:#a5793f;
+  --vivant:#3e9a6a;
+  --astre:#b0453c;
+
+  --sans:"IBM Plex Sans", system-ui, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --math:"Instrument Serif", "STIX Two Math", Georgia, serif;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --gouttiere:clamp(16px,4vw,56px);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--papier);color:var(--encre);-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);font-size:16px;line-height:1.5;background:var(--papier);overflow-x:hidden;
+  font-feature-settings:"ss02" 1}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:1.5px solid var(--encre);outline-offset:3px}
+::selection{background:var(--encre);color:var(--papier)}
+
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.02em}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--encre-3)}
+
+/* Symboles mathématiques : serif italique, vecteurs avec flèche fine dessinée */
+.m{font-family:var(--math);font-style:italic;font-weight:400;letter-spacing:0}
+.m.up{font-style:normal}
+.vec{position:relative;display:inline-block;font-family:var(--math);font-style:italic}
+.vec::before{content:"";position:absolute;left:12%;right:2%;top:.02em;height:1px;background:currentColor}
+.vec::after{content:"";position:absolute;right:0;top:-.11em;width:.22em;height:.22em;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}
+
+/* Lecture d'instrument : symbole > valeur > unité */
+.lecture{display:inline-flex;align-items:baseline;gap:.35em;white-space:nowrap;line-height:1}
+.lecture .s{font-family:var(--math);font-style:italic;font-size:1.45em;color:var(--c,var(--encre))}
+.lecture .eq{font-family:var(--math);color:var(--encre-3);font-size:1.1em}
+.lecture .v{font-family:var(--mono);font-size:1em;font-variant-numeric:tabular-nums;color:var(--encre)}
+.lecture .u{font-family:var(--sans);font-size:.78em;color:var(--encre-3);letter-spacing:.02em}
+
+/* Barre supérieure */
+.barre{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:22px var(--gouttiere);position:relative;z-index:5}
+.marque{font-family:var(--sans);font-weight:600;font-size:15px;letter-spacing:.18em;text-decoration:none}
+.barre nav{display:flex;gap:clamp(16px,3vw,32px);font-size:14px;color:var(--encre-2)}
+.barre nav a{text-decoration:none;position:relative}
+.barre nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease)}
+.barre nav a:hover::after,.barre nav a[aria-current]::after{transform:scaleX(1)}
+.barre nav a:hover,.barre nav a[aria-current]{color:var(--encre)}
+
+/* Pastille « prototype » : discrète, pour comparer avec l'actuel */
+.proto{position:fixed;right:12px;bottom:12px;z-index:50;font-family:var(--mono);font-size:11px;color:var(--encre-2);
+  background:var(--papier);border:1px solid var(--trait);padding:6px 10px;border-radius:2px}
+.proto a{color:var(--encre)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
