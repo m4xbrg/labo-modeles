@@ -1,0 +1,1681 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Rotation et gravitation parlent la même langue que 10·11 : couple τ, α et g en chartreuse (ce qui change le mouvement), L signé en orange/bleu comme p, énergie en jaune dont la texture dit la forme ; la potentielle gravitationnelle est hachurée et passe sous la ligne zéro.
+  2. Le mouvement ne sert qu'à signifier : un rectangle I×ω d'aire constante pour L, une droite tiretée, un point fantôme et une balle lâchée pour montrer qu'une orbite est une chute qui rate le sol ; le temps est accéléré, jamais l'espace (distances à l'échelle).
+  3. Le moteur est une pile de fonctions pures (objet Phys) à pas fixes, séparé du dessin ; flèches et barres sont des représentations à échelle fixe par acte, et la page le dit.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotation, gravitation et orbites — L’invisible en mouvement, Fondations 12·13</title>
+<meta name="description" content="Deux paillasses : la rotation (couple, inertie, moment cinétique, gyroscope) et la gravitation (canon de Newton, ellipse et énergie, barycentre). Une orbite est une chute libre qui rate le sol.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#d4ee8a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:36px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden]{display:none}
+#scope,#bars{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0}
+.sg[data-g=R]{flex:4 1 0}.sg[data-g=G]{flex:3 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+.tools .grp[data-mode]{display:flex}.tools .grp[data-mode][hidden]{display:none}
+.btn.sm{padding:7px 9px}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Paillasse de rotation et de gravitation : disque, rotors, patineur, gyroscope, astre et orbites, avec leurs vecteurs et leurs énergies dessinés en flèches et en barres."></canvas>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — Fondations 12·13</p>
+      <h1>Rotation, gravitation et <em>orbites</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VII</p>
+      <h2 id="stepTitle">Tourner</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps, ou puits de potentiel."></canvas></div>
+      <p class="leg" id="leg"></p>
+      <div class="scopeBox" id="barsBox" hidden style="margin-top:12px"><canvas id="bars" role="img" aria-label="Barres de moment cinétique et d'énergie."></canvas></div>
+      <p class="leg" id="leg2"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>7</kbd> aller à l'acte</li>
+        <li><kbd>R</kbd> réinitialiser l'acte · <kbd>D</kbd> maintenir le couple (acte II) · <kbd>T</kbd> tirer / lancer (actes V et VI)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les sept actes">
+      <div class="sg" data-g="R"><span class="sgl"><span class="long">Paillasse R · rotation</span><span class="short">R</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Acte I — Tourner"><b>I</b><span>Tourner</span></button>
+        <button class="seg" data-a="1" title="Acte II — Couple et inertie"><b>II</b><span>Couple</span></button>
+        <button class="seg" data-a="2" title="Acte III — Moment cinétique conservé"><b>III</b><span>Moment cinétique</span></button>
+        <button class="seg" data-a="3" title="Acte IV — Gyroscope et précession"><b>IV</b><span>Gyroscope</span></button>
+      </div></div>
+      <div class="sg" data-g="G"><span class="sgl"><span class="long">Paillasse G · gravitation</span><span class="short">G</span></span><div class="sgs">
+        <button class="seg" data-a="4" title="Acte V — Le canon de Newton"><b>V</b><span>Canon</span></button>
+        <button class="seg" data-a="5" title="Acte VI — Ellipse et énergie"><b>VI</b><span>Ellipse</span></button>
+        <button class="seg" data-a="6" title="Acte VII — Barycentre"><b>VII</b><span>Barycentre</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <!-- I -->
+      <div class="grp" data-acts="0"><span class="gl">ω visée</span><input type="range" id="rWt" min="-6" max="6" step="0.1" value="1.5" aria-label="Vitesse angulaire visée en radians par seconde"><span class="rv" id="vWt"></span></div>
+      <div class="grp" data-acts="0"><span class="gl">r_P</span><input type="range" id="rRp" min="0.02" max="0.4" step="0.01" value="0.25" aria-label="Position du point P sur la bande, en mètres"><span class="rv" id="vRp"></span></div>
+      <div class="grp" data-acts="0"><button class="btn" id="bStop1">Arrêter</button><button class="btn" id="bCmp" aria-pressed="false"><span class="dot"></span>Comparer à une translation</button></div>
+      <!-- II -->
+      <div class="grp" data-acts="1"><span class="gl">F</span><input type="range" id="rF" min="0" max="10" step="0.5" value="4" aria-label="Force de traction en newtons"><span class="rv" id="vF"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">d</span><input type="range" id="rD" min="0.02" max="0.1" step="0.01" value="0.05" aria-label="Rayon du tambour, bras de levier, en mètres"><span class="rv" id="vD"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">m</span><input type="range" id="rM" min="0.1" max="1" step="0.05" value="0.5" aria-label="Masse de chacune des deux masses en kilogrammes"><span class="rv" id="vM"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">r_A</span><input type="range" id="rRA" min="0.05" max="0.45" step="0.01" value="0.1" aria-label="Distance des masses à l'axe, rotor A"><span class="rv" id="vRA"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">r_B</span><input type="range" id="rRB" min="0.05" max="0.45" step="0.01" value="0.4" aria-label="Distance des masses à l'axe, rotor B"><span class="rv" id="vRB"></span></div>
+      <div class="grp" data-acts="1"><button class="btn go" id="bT1s">Couple pendant 1 s</button><button class="btn go" id="bTurn">Couple sur 1 tour</button><button class="btn" id="bHold" title="Maintenir le couple (touche D)">Maintenir</button></div>
+      <div class="grp" data-acts="1"><button class="btn" id="bBrake" aria-pressed="false"><span class="dot"></span>Frein</button><button class="btn" id="bStop2">Arrêter</button></div>
+      <!-- III -->
+      <div class="grp" data-acts="2"><span class="gl">Expérience</span><button class="btn" id="bSk" aria-pressed="true">Patineur</button><button class="btn" id="bRg" aria-pressed="false">Anneau</button></div>
+      <div class="grp" data-acts="2" data-mode="sk"><span class="gl">Bras</span><input type="range" id="rArm" min="0.2" max="0.9" step="0.01" value="0.9" aria-label="Distance visée des haltères à l'axe, en mètres"><span class="rv" id="vArm"></span></div>
+      <div class="grp" data-acts="2" data-mode="sk"><button class="btn" id="bIn">Ramener</button><button class="btn" id="bOut">Écarter</button><button class="btn go" id="bSpin" title="Seul instant où un couple extérieur agit">Lancer la rotation</button><button class="btn" id="bIce" aria-pressed="false"><span class="dot"></span>Frottement de la glace</button></div>
+      <div class="grp" data-acts="2" data-mode="ring"><button class="btn go" id="bDrop">Lâcher l’anneau</button></div>
+      <!-- IV -->
+      <div class="grp" data-acts="3"><span class="gl">rotation propre ω</span><input type="range" id="rW3" min="0" max="300" step="5" value="200" aria-label="Rotation propre de la roue en radians par seconde"><span class="rv" id="vW3"></span></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bGy">Lâcher</button><button class="btn go" id="bGyS">Lâcher en douceur</button><button class="btn" id="bGyH">Tenir</button></div>
+      <!-- V -->
+      <div class="grp" data-acts="4"><span class="gl">v₀</span><input type="range" id="rV0" min="0" max="12" step="0.05" value="6" aria-label="Vitesse de tir en kilomètres par seconde"><span class="rv" id="vV0"></span></div>
+      <div class="grp" data-acts="4"><button class="btn sm" data-v0="4000">4 km/s</button><button class="btn sm" data-v0="vc">v_c (7,67)</button><button class="btn sm" data-v0="9000">9 km/s</button><button class="btn sm" data-v0="vl">v_lib (10,85)</button><button class="btn sm" data-v0="11500">11,5 km/s</button></div>
+      <div class="grp" data-acts="4"><button class="btn go" id="bFire" title="Tirer (touche T)">Tirer</button><button class="btn" id="bClr">Effacer les traces</button></div>
+      <div class="grp" data-acts="4"><button class="btn" id="bField" aria-pressed="false"><span class="dot"></span>Champ g</button><button class="btn" id="bCmp5" aria-pressed="true"><span class="dot"></span>Comparaison</button></div>
+      <div class="grp" data-acts="4"><span class="gl">vitesse d’affichage</span><input type="range" id="rSpd" min="-2" max="2" step="0.1" value="0" aria-label="Vitesse d'affichage, de ×0,25 à ×4"><span class="rv" id="vSpd"></span></div>
+      <!-- VI -->
+      <div class="grp" data-acts="5"><span class="gl">v₀</span><input type="range" id="rV6" min="7" max="11.5" step="0.05" value="9" aria-label="Vitesse de lancer horizontale en kilomètres par seconde"><span class="rv" id="vV6"></span></div>
+      <div class="grp" data-acts="5"><button class="btn" id="bAir" aria-pressed="false"><span class="dot"></span>Aires (Kepler 2)</button><button class="btn" id="bUeff" aria-pressed="false"><span class="dot"></span>Potentiel effectif</button><button class="btn go" id="bRe6" title="Relancer (touche T)">Relancer</button></div>
+      <!-- VII -->
+      <div class="grp" data-acts="6"><span class="gl">q = m₂/m₁</span><input type="range" id="rQ" min="-3" max="0" step="0.01" value="-1.91" aria-label="Rapport des masses, échelle logarithmique"><span class="rv" id="vQ"></span></div>
+      <div class="grp" data-acts="6"><span class="gl">excentricité</span><input type="range" id="rE7" min="0" max="0.7" step="0.01" value="0.055" aria-label="Excentricité de l'orbite relative"><span class="rv" id="vE7"></span></div>
+      <div class="grp" data-acts="6"><button class="btn sm" data-pre="Terre–Lune">Terre–Lune</button><button class="btn sm" data-pre="Soleil–Jupiter">Soleil–Jupiter</button><button class="btn sm" data-pre="Binaire 2 : 1">Binaire 2 : 1</button><button class="btn sm" data-pre="Jumelles">Jumelles</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* PHYS-BEGIN */
+/* ================= Moteur physique : fonctions pures, sans DOM ================= */
+const Phys = (() => {
+  const g = 9.81;
+  const TAU = 2 * Math.PI;
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+
+  /* ---------------- Paillasse R : rotation autour d'un axe fixe ---------------- */
+
+  // Acte I : disque dont la vitesse angulaire rejoint une consigne avec |α| ≤ aMax.
+  // s = {th, w}. Mise à jour exacte à α constant sur le pas.
+  function stepKin(s, wTarget, aMax, dt) {
+    const dw = wTarget - s.w;
+    const a = Math.abs(dw) <= aMax * dt ? dw / dt : Math.sign(dw) * aMax;
+    return { th: s.th + s.w * dt + 0.5 * a * dt * dt, w: s.w + a * dt, a };
+  }
+
+  // Rotor : moyeu (disque plein M_h, R_h) + deux masses ponctuelles m sur des rayons sans masse, à la distance r de l'axe.
+  const ROT = { Mh: 1.0, Rh: 0.10, dt: 1 / 1000, brake: 0.4 };
+  const Ihub = 0.5 * ROT.Mh * ROT.Rh * ROT.Rh;                 // 0,005 kg·m²
+  const inertiaRotor = (m, r) => Ihub + 2 * m * r * r;
+  // s = {th, w, W}; tau = couple moteur (N·m, constant sur le pas) ; brake = true : couple de frein |τ_b| = ROT.brake opposé à ω.
+  // Mise à jour exacte ; si le frein seul ferait changer ω de signe, ω = 0 exactement. W = travail du couple moteur.
+  function stepRot(s, I, tau, brake, dt) {
+    let tb = 0;
+    if (brake && Math.abs(s.w) > 1e-9) tb = -Math.sign(s.w) * ROT.brake;
+    else if (brake && Math.abs(tau) <= ROT.brake) return { th: s.th, w: 0, W: s.W, a: 0, tauNet: 0 };
+    else if (brake) tb = -Math.sign(tau) * ROT.brake;
+    const a = (tau + tb) / I;
+    let h = dt;
+    if (brake && s.w !== 0 && (s.w + a * dt) * s.w < 0) h = -s.w / a;        // arrêt exact au cours du pas
+    const dth = s.w * h + 0.5 * a * h * h;
+    return { th: s.th + dth, w: h < dt ? 0 : s.w + a * dt, W: s.W + tau * dth, a, tauNet: tau + tb };
+  }
+  // Temps t > 0 tel que w·t + ½·a·t² = dth (dth > 0, w ≥ 0, a > 0) : pour arrêter un couple pile après un tour.
+  function timeToAngle(w, a, dth) {
+    if (Math.abs(a) < 1e-12) return dth / w;
+    return (-w + Math.sqrt(w * w + 2 * a * dth)) / a;
+  }
+
+  // Acte III-a : patineur. Corps I0 + deux masses m au bout des bras, à r de l'axe (rayon variable).
+  const SK = { I0: 1.0, m: 2.0, rMin: 0.2, rMax: 0.9, vr: 0.6, dt: 1 / 1000, iceTau: 0.15 };
+  const inertiaSkater = r => SK.I0 + 2 * SK.m * r * r;
+  // s = {th, r, L, Wb}; rT = rayon visé ; ice = frottement de la glace (couple extérieur constant opposé à la rotation).
+  // Sans couple extérieur, L est constant exactement et ω = L / I(r). Wb = travail fourni par les bras (tension × déplacement radial).
+  function stepSkater(s, rT, ice, dt) {
+    const r0 = s.r, r1 = r0 + clamp(rT - r0, -SK.vr * dt, SK.vr * dt);
+    let L = s.L;
+    if (ice && L !== 0) { const dL = SK.iceTau * dt; L = Math.abs(L) <= dL ? 0 : L - Math.sign(L) * dL; }
+    const I0 = inertiaSkater(r0), I1 = inertiaSkater(r1), w0 = s.L / I0, w1 = L / I1;
+    const rm = 0.5 * (r0 + r1), wm = L / inertiaSkater(rm);
+    const T = SK.m * wm * wm * rm;                            // tension dans un bras (force centripète fournie)
+    return { th: s.th + 0.5 * (w0 + w1) * dt, r: r1, L, w: w1, I: I1, T, Wb: s.Wb + 2 * T * (r0 - r1), E: L * L / (2 * I1) };
+  }
+
+  // Acte III-b : anneau lâché sur un plateau qui tourne. Frottement de glissement entre les deux : couple ±RING.tauF.
+  const RING = { I1: 0.0169, I2: 0.0144, tauF: 0.04, dt: 1 / 1000 };   // plateau : disque 1,5 kg, R 15 cm ; anneau : 1,0 kg, R 12 cm
+  // s = {th1, th2, w1, w2}; coupled = l'anneau touche le plateau.
+  function stepRing(s, coupled, dt) {
+    let w1 = s.w1, w2 = s.w2;
+    if (coupled && w1 !== w2) {
+      const d = Math.sign(w1 - w2), dw1 = -d * RING.tauF / RING.I1 * dt, dw2 = d * RING.tauF / RING.I2 * dt;
+      if (Math.sign((w1 + dw1) - (w2 + dw2)) !== d) { const wf = (RING.I1 * w1 + RING.I2 * w2) / (RING.I1 + RING.I2); w1 = wf; w2 = wf; }
+      else { w1 += dw1; w2 += dw2; }
+    }
+    return { th1: s.th1 + 0.5 * (s.w1 + w1) * dt, th2: s.th2 + 0.5 * (s.w2 + w2) * dt, w1, w2 };
+  }
+  const ringBudget = s => {
+    const L1 = RING.I1 * s.w1, L2 = RING.I2 * s.w2;
+    return { L1, L2, L: L1 + L2, E1: 0.5 * RING.I1 * s.w1 * s.w1, E2: 0.5 * RING.I2 * s.w2 * s.w2 };
+  };
+
+  // Acte IV : gyroscope (toupie pesante à point fixe). Roue = anneau m, R ; centre à d du pivot ; axe de masse négligée.
+  // θ = angle de l'axe depuis la verticale montante (π/2 = horizontal), φ = azimut (précession), ψ = rotation propre.
+  // ω3 = rotation propre autour de l'axe (constante) ; p_φ = I1·φ̇·sin²θ + I3·ω3·cosθ (constante sans frottement).
+  const GY = { m: 0.5, R: 0.08, d: 0.12, damp: 0.8, thMin: 10 * Math.PI / 180, thMax: 150 * Math.PI / 180, dt: 1 / 2000 };
+  GY.I3 = GY.m * GY.R * GY.R;                                   // 0,0032 kg·m²
+  GY.I1 = 0.5 * GY.m * GY.R * GY.R + GY.m * GY.d * GY.d;         // 0,0088 kg·m² (autour du pivot)
+  GY.tau = GY.m * g * GY.d;                                      // couple du poids à l'horizontale, 0,589 N·m
+  const precessionRate = w3 => (w3 > 0 ? GY.tau / (GY.I3 * w3) : Infinity);   // Ω = m g d / (I3 ω3)
+  function gyroDeriv(y, w3, pphi) {
+    const [th, thd] = y, s = Math.sin(th), c = Math.cos(th);
+    const phd = Math.abs(s) < 1e-6 ? 0 : (pphi - GY.I3 * w3 * c) / (GY.I1 * s * s);
+    const thdd = phd * phd * s * c - (GY.I3 / GY.I1) * w3 * phd * s + (GY.m * g * GY.d / GY.I1) * s - GY.damp * thd;
+    return [thd, thdd, phd, w3 - phd * c];
+  }
+  // s = {th, thd, ph, ps, w3, pphi, down}. RK4. Butées : θ ∈ [thMin, thMax] (l'axe touche le socle : il est tombé).
+  function stepGyro(s, dt) {
+    if (s.down) return s;
+    const y = [s.th, s.thd, s.ph, s.ps], f = v => gyroDeriv(v, s.w3, s.pphi);
+    const add = (a, b, k) => a.map((x, i) => x + k * b[i]);
+    const k1 = f(y), k2 = f(add(y, k1, dt / 2)), k3 = f(add(y, k2, dt / 2)), k4 = f(add(y, k3, dt));
+    const n = y.map((x, i) => x + dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+    const out = { th: n[0], thd: n[1], ph: n[2], ps: n[3], w3: s.w3, pphi: s.pphi, down: false };
+    if (out.th >= GY.thMax || out.th <= GY.thMin) {
+      out.th = clamp(out.th, GY.thMin, GY.thMax); out.thd = 0; out.down = true;
+      out.pphi = GY.I3 * s.w3 * Math.cos(out.th);             // posé : plus de précession
+    }
+    out.phd = gyroDeriv([out.th, out.thd], s.w3, out.pphi)[2];
+    return out;
+  }
+  // Lâcher l'axe à l'horizontale (θ = π/2), au repos en azimut (φ̇ = 0) : réaliste, provoque une petite nutation.
+  // smooth = true : lâcher avec φ̇ = Ω déjà installé (la nutation disparaît presque).
+  function gyroInit(w3, smooth) {
+    const th = Math.PI / 2, phd = smooth && w3 > 0 ? precessionRate(w3) : 0;
+    return { th, thd: 0, ph: 0, ps: 0, w3, pphi: GY.I1 * phd, down: false, phd };
+  }
+
+  /* ---------------- Paillasse G : gravitation newtonienne ---------------- */
+  // Astre central sphérique de la masse et du rayon de la Terre, sans atmosphère, sans rotation propre prise en compte.
+  const ORB = { GM: 3.986004418e14, R: 6.371e6, dt: 1, rEscape: 60 * 6.371e6 };
+  const gAt = r => ORB.GM / (r * r);                            // champ gravitationnel, m/s²
+  const vCirc = r => Math.sqrt(ORB.GM / r);
+  const vEsc = r => Math.sqrt(2 * ORB.GM / r);
+  // Énergies par kilogramme (J/kg) : K = v²/2, U = −GM/r, E = K + U.
+  const energy = s => { const r = Math.hypot(s.x, s.y), K = 0.5 * (s.vx * s.vx + s.vy * s.vy), U = -ORB.GM / r; return { r, K, U, E: K + U }; };
+  // Saute-mouton (kick-drift-kick), symplectique : l'énergie oscille sans dériver.
+  function stepOrbit(s, dt) {
+    let r = Math.hypot(s.x, s.y), k = -ORB.GM / (r * r * r);
+    let vx = s.vx + 0.5 * dt * k * s.x, vy = s.vy + 0.5 * dt * k * s.y;
+    const x = s.x + dt * vx, y = s.y + dt * vy;
+    r = Math.hypot(x, y); k = -ORB.GM / (r * r * r);
+    vx += 0.5 * dt * k * x; vy += 0.5 * dt * k * y;
+    return { x, y, vx, vy, t: s.t + dt };
+  }
+  // Avance de T secondes en pas ≤ ORB.dt·f(r) ; s'arrête à l'impact (r < R) ou à la fuite (r > rEscape).
+  // Le pas grandit avec r (proportionnel au temps dynamique local) : sûr près de la surface, rapide au loin.
+  function advanceOrbit(s, T) {
+    let left = T, st = s;
+    while (left > 0) {
+      const r = Math.hypot(st.x, st.y);
+      const h = Math.min(left, ORB.dt * Math.pow(r / ORB.R, 1.5));
+      const n = stepOrbit(st, h);
+      const rn = Math.hypot(n.x, n.y);
+      if (rn < ORB.R) {                                        // impact : interpolation sur le pas pour poser l'objet sur la surface
+        const f = (r - ORB.R) / (r - rn);
+        return { x: st.x + f * (n.x - st.x), y: st.y + f * (n.y - st.y), vx: 0, vy: 0, t: st.t + f * h, ended: 'impact',
+                 vImpact: Math.hypot(st.vx + f * (n.vx - st.vx), st.vy + f * (n.vy - st.vy)) };
+      }
+      if (rn > ORB.rEscape) return { ...n, ended: 'fuite' };
+      st = n; left -= h;
+    }
+    return st;
+  }
+  // Éléments d'orbite à partir de la position et de la vitesse (problème à deux corps, M ≫ m).
+  function elements(s) {
+    const r = Math.hypot(s.x, s.y), v2 = s.vx * s.vx + s.vy * s.vy, GM = ORB.GM;
+    const E = 0.5 * v2 - GM / r, h = s.x * s.vy - s.y * s.vx;            // énergie et moment cinétique par kg
+    const rv = s.x * s.vx + s.y * s.vy;
+    const ex = ((v2 - GM / r) * s.x - rv * s.vx) / GM, ey = ((v2 - GM / r) * s.y - rv * s.vy) / GM;
+    const e = Math.hypot(ex, ey), p = h * h / GM;
+    const rp = p / (1 + e), ra = e < 1 ? p / (1 - e) : Infinity;
+    const a = E < 0 ? -GM / (2 * E) : Infinity, b = E < 0 ? a * Math.sqrt(Math.max(0, 1 - e * e)) : NaN;
+    const T = E < 0 ? TAU * Math.sqrt(a * a * a / GM) : Infinity;
+    let type;
+    if (rp < ORB.R) type = 'impact';
+    else if (E >= 0) type = Math.abs(e - 1) < 0.01 ? 'parabole' : 'hyperbole';
+    else type = e < 0.01 ? 'cercle' : 'ellipse';
+    return { E, h, e, ex, ey, wp: Math.atan2(ey, ex), p, rp, ra, a, b, T, type };
+  }
+  // Lancer horizontal depuis l'altitude alt, au-dessus du « pôle » (x = 0, y = R + alt), vers la droite, avec un angle au-dessus de l'horizontale.
+  function launch(alt, v0, angleDeg) {
+    const r = ORB.R + alt, a = (angleDeg || 0) * Math.PI / 180;
+    return { x: 0, y: r, vx: v0 * Math.cos(a), vy: v0 * Math.sin(a), t: 0 };
+  }
+  // Énergie potentielle effective (par kg) pour un moment cinétique h : U_eff = −GM/r + h²/(2r²).
+  const uEff = (r, h) => -ORB.GM / r + h * h / (2 * r * r);
+  // Chute libre radiale lâchée au repos depuis r0 : même intégrateur, utile pour comparer « chute » et « orbite ».
+  // Aire balayée (par rapport au centre) entre deux positions successives : ½ |r × dr|.
+  const sweptArea = (a, b) => 0.5 * Math.abs(a.x * b.y - a.y * b.x);
+
+  /* ---------------- Acte VII : deux corps autour du barycentre ---------------- */
+  // Unités réduites : a = 1, G(m1+m2) = 4π², période = 1. Orbite relative r = r2 − r1 intégrée au saute-mouton.
+  const BI = { mu: 4 * Math.PI * Math.PI, dt: 1 / 4000 };
+  function binaryInit(e) {                       // départ au péricentre de l'orbite relative
+    const rp = 1 - e, vp = Math.sqrt(BI.mu * (1 + e) / (1 - e));
+    return { x: rp, y: 0, vx: 0, vy: vp, t: 0 };
+  }
+  function stepBinary(s, dt) {
+    let r = Math.hypot(s.x, s.y), k = -BI.mu / (r * r * r);
+    let vx = s.vx + 0.5 * dt * k * s.x, vy = s.vy + 0.5 * dt * k * s.y;
+    const x = s.x + dt * vx, y = s.y + dt * vy;
+    r = Math.hypot(x, y); k = -BI.mu / (r * r * r);
+    vx += 0.5 * dt * k * x; vy += 0.5 * dt * k * y;
+    return { x, y, vx, vy, t: s.t + dt };
+  }
+  // Positions des deux corps par rapport au barycentre (immobile à l'origine).
+  function bodies(s, m1, m2) {
+    const M = m1 + m2;
+    return { x1: -m2 / M * s.x, y1: -m2 / M * s.y, x2: m1 / M * s.x, y2: m1 / M * s.y };
+  }
+
+  return {
+    g, TAU, clamp,
+    stepKin,
+    ROT, Ihub, inertiaRotor, stepRot, timeToAngle,
+    SK, inertiaSkater, stepSkater,
+    RING, stepRing, ringBudget,
+    GY, precessionRate, gyroInit, stepGyro,
+    ORB, gAt, vCirc, vEsc, energy, stepOrbit, advanceOrbit, elements, launch, uEff, sweptArea,
+    BI, binaryInit, stepBinary, bodies
+  };
+})();
+/* PHYS-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const barsC = $('#bars'), bctx = barsC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RE = rgb(C.ener), RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RP = rgb(C.pos), RN = rgb(C.neg), RF2 = rgb(C.fond2);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, PI = Math.PI;
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const trim = (r, t0) => { let i = 0; while (i < r.length && r[i].t < t0) i++; if (i) r.splice(0, i); };
+const { ORB } = Phys, RE_ = ORB.R, ALT = 400e3, R0 = RE_ + ALT, VC = Phys.vCirc(R0), VL = Phys.vEsc(R0);
+const fmtKm = km => fmt(km, km < 10 ? 3 : km < 100 ? 2 : km < 1000 ? 1 : 0);
+const fmtT = s => s < 5400 ? fmt(s / 60, 1) + ' min' : fmt(s / 3600, 2) + ' h';
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function arrow(c, x0, y0, x1, y1, col, lw, dash, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 7, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill();
+  c.restore();
+}
+// Arc en angles mathématiques (antihoraire positif), centré en (cx,cy) à l'écran
+function arcPath(c, cx, cy, r, a0, sw) {
+  const n = Math.max(4, Math.ceil(Math.abs(sw) / 0.1)); c.beginPath();
+  for (let i = 0; i <= n; i++) { const a = a0 + sw * i / n, x = cx + r * Math.cos(a), y = cy - r * Math.sin(a); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+}
+function arcArrow(c, cx, cy, r, a0, sw, col, lw, head) {
+  if (Math.abs(sw) < 0.05) return;
+  c.save(); c.strokeStyle = col; c.lineWidth = lw; arcPath(c, cx, cy, r, a0, sw); c.stroke(); c.restore();
+  const a1 = a0 + sw, sg = Math.sign(sw), x1 = cx + r * Math.cos(a1), y1 = cy - r * Math.sin(a1), tx = -Math.sin(a1) * sg, ty = -Math.cos(a1) * sg;
+  arrow(c, x1 - tx * 5, y1 - ty * 5, x1, y1, col, lw, null, head || 7);
+}
+function hatch(c, x, y, w, h, col, gap) {
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.strokeStyle = col; c.lineWidth = 1; c.beginPath();
+  for (let k = -h; k < w; k += gap || 5) { c.moveTo(x + k, y + h); c.lineTo(x + k + h, y); }
+  c.stroke(); c.restore();
+}
+// Barre d'énergie : K plein, U hachuré, T pâle (35 %), signe : h > 0 vers le haut, h < 0 vers le bas depuis yb
+function drawBar(c, kind, x, yb, w, h) {
+  const y = h >= 0 ? yb - h : yb, hh = Math.abs(h); if (hh < 0.3) return;
+  c.save();
+  if (kind === 'K') { c.fillStyle = rgba(RE, 0.92); c.fillRect(x, y, w, hh); }
+  else if (kind === 'U') { c.fillStyle = rgba(RE, 0.07); c.fillRect(x, y, w, hh); hatch(c, x, y, w, hh, rgba(RE, 0.65), 5); c.strokeStyle = C.ener; c.lineWidth = 1.3; c.strokeRect(x + 0.5, y + 0.5, w - 1, Math.max(0, hh - 1)); }
+  else if (kind === 'T') { c.fillStyle = rgba(RE, 0.35); c.fillRect(x, y, w, hh); }
+  c.restore();
+}
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0;
+const NA = 7, ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const prm = {};
+function resetPrm(n) {
+  if (n === 0) Object.assign(prm, { wt: 1.5, rP: 0.25, cmp: false });
+  if (n === 1) Object.assign(prm, { F: 4, d: 0.05, m: 0.5, rA: 0.10, rB: 0.40, brake: false });
+  if (n === 2) Object.assign(prm, { mode3: 'sk', rT: 0.9, ice: false });
+  if (n === 3) Object.assign(prm, { w3: 200 });
+  if (n === 4) Object.assign(prm, { v0: 6000, field: false, cmp5: true, spd: 0 });
+  if (n === 5) Object.assign(prm, { v6: 9000, areas: false, ueff: false });
+  if (n === 6) Object.assign(prm, { q: 0.0123, e7: 0.055, pre: 'Terre–Lune' });
+}
+for (let i = 0; i < NA; i++) resetPrm(i);
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [], zonesBars = [];
+function zone(x0, y0, x1, y1, key, name, role, list) { (list || zones).push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function azone(x0, y0, x1, y1, key, name, role) { const p = 7; zone(Math.min(x0, x1) - p, Math.min(y0, y1) - p, Math.max(x0, x1) + p, Math.max(y0, y1) + p, key, name, role); }
+function zcirc(cx, cy, r, key, name, role) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- Enregistreur générique ---------------- */
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+// cfg : {t0, t1, xl0, xl1, bands:[[ta,tb]], series:[{rec, f, col, dash, lw, lo, hi, d, name}]}
+function scopePlot(cfg) {
+  const { w, h } = scopeSetup(), c = sctx, two = cfg.series.length > 1, padL = 40, padR = two ? 40 : 10, padT = 14, padB = 16, pw = w - padL - padR, ph = h - padT - padB;
+  const xT = t => padL + (t - cfg.t0) / (cfg.t1 - cfg.t0) * pw;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+  for (const b of cfg.bands || []) { c.fillStyle = rgba(RA, 0.14); const x0 = Math.max(padL, xT(b[0])), x1 = Math.min(padL + pw, xT(b[1])); if (x1 > x0) c.fillRect(x0, padT, x1 - x0, ph); }
+  c.restore();
+  c.font = mono(10); c.textBaseline = 'middle';
+  cfg.series.forEach((s, k) => {
+    const yO = v => padT + ph * (1 - (v - s.lo) / (s.hi - s.lo));
+    if (s.lo < 0 && s.hi > 0 && k === 0) { c.strokeStyle = C.trait; c.setLineDash([2, 4]); c.beginPath(); c.moveTo(padL, yO(0)); c.lineTo(padL + pw, yO(0)); c.stroke(); c.setLineDash([]); }
+    c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+    c.beginPath(); let first = true;
+    for (const r of s.rec) { if (r.t < cfg.t0 - 1) continue; const x = xT(r.t), y = yO(s.f(r)); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; }
+    c.strokeStyle = s.col; c.lineWidth = s.lw || 1.6; c.setLineDash(s.dash || []); c.stroke(); c.setLineDash([]); c.restore();
+    c.fillStyle = s.col === C.accent ? C.accent : s.col; c.textAlign = k ? 'left' : 'right'; const lx = k ? padL + pw + 4 : padL - 4;
+    c.fillText(fmt(s.hi, s.d), lx, padT + 3); c.fillText(fmt(s.lo, s.d), lx, padT + ph - 3);
+    c.textAlign = k ? 'right' : 'left'; c.fillText(s.name, k ? w - 2 : 2, 6);
+  });
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText(cfg.xl0, padL, h - 5); c.textAlign = 'right'; c.fillText(cfg.xl1, padL + pw, h - 5);
+  return { padL, padT, pw, ph, xT };
+}
+function rng(rec, f, minSpan, sym) {
+  let lo = Infinity, hi = -Infinity; for (const r of rec) { const v = f(r); if (v < lo) lo = v; if (v > hi) hi = v; }
+  if (!isFinite(lo)) { lo = 0; hi = 0; }
+  if (sym) { const m = Math.max(minSpan, Math.abs(lo), Math.abs(hi)) * 1.1; return [-m, m]; }
+  lo = Math.min(lo, 0); hi = Math.max(hi, 0); if (hi - lo < minSpan) hi = lo + minSpan;
+  return [lo, hi * 1.08];
+}
+function niceMax(v) { const e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }
+
+/* ================= Acte I : tourner ================= */
+const k1 = { s: { th: 0, w: 0, a: 0 }, acc: 0, t: 0, rec: [], rc: 0, xT: 0, geo: { cx: 0, cy: 0, pxm: 100 }, drag: false };
+function reset1() { k1.s = { th: 0, w: 0, a: 0 }; k1.acc = 0; k1.t = 0; k1.rec = []; k1.rc = 0; k1.xT = 0; }
+function adv1(dt) {
+  k1.acc += dt; const h = 1 / 240; let n = 0;
+  while (k1.acc >= h && n++ < 40) {
+    k1.s = Phys.stepKin(k1.s, prm.wt, 2, h); k1.acc -= h; k1.t += h; k1.xT += k1.s.w * prm.rP * h;
+    if (++k1.rc % 4 === 0) k1.rec.push({ t: k1.t, w: k1.s.w, a: k1.s.a, th: k1.s.th });
+  }
+  if (k1.acc > 0.2) k1.acc = 0; trim(k1.rec, k1.t - 10.5);
+}
+function thAgo(sec) { for (let i = k1.rec.length - 1; i >= 0; i--) if (k1.rec[i].t <= k1.t - sec) return k1.rec[i].th; return 0; }
+function draw1() {
+  const c = ctx, s = k1.s, top = 108, bot = 30, strip = prm.cmp ? 100 : 0, aH = H - top - bot - strip;
+  const pxm = Math.max(60, Math.min((W - 28) / 2, aH / 2) / 0.44), cx = W / 2, cy = top + aH / 2, Rd = 0.4 * pxm;
+  k1.geo = { cx, cy, pxm };
+  const kv = 34, ka = 24;
+  c.save(); c.fillStyle = rgba(RT, 0.035); c.strokeStyle = rgba(RT2, 0.9); c.lineWidth = 1.3; c.beginPath(); c.arc(cx, cy, Rd, 0, TAU); c.fill(); c.stroke(); c.restore();
+  zcirc(cx, cy, Rd, 'disque', 'Disque tournant · R = 0,40 m', 'Tous ses points tournent du même angle θ dans le même temps : même θ, même ω, même α. Seule la vitesse v = ωr dépend du point.');
+  c.save(); c.strokeStyle = rgba(RT2, 0.9); c.setLineDash([5, 4]); c.lineWidth = 1; c.beginPath(); c.moveTo(cx, cy + 0.5); c.lineTo(cx + Rd + 10, cy + 0.5); c.stroke(); c.restore();
+  c.font = mono(10.5); tagText(c, 'θ = 0', cx + Rd - 6, cy - 4, 'right', 'bottom', C.texte2);
+  zone(cx, cy - 4, cx + Rd + 10, cy + 4, 'ref', 'Ligne de référence θ = 0', 'Fixe dans la pièce. L’angle θ se mesure depuis elle, positif dans le sens antihoraire.');
+  // bande radiale peinte
+  const bw = 0.05 * pxm;
+  c.save(); c.translate(cx, cy); c.rotate(-s.th); c.fillStyle = rgba(RT, 0.13); c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.fillRect(0, -bw / 2, Rd, bw); c.strokeRect(0.5, -bw / 2 + 0.5, Rd - 1, bw - 1); c.restore();
+  zoneF((x, y) => { const dx = x - cx, dy = cy - y, u = dx * Math.cos(s.th) + dy * Math.sin(s.th), v = -dx * Math.sin(s.th) + dy * Math.cos(s.th); return u >= 0 && u <= Rd && Math.abs(v) <= bw / 2 + 4; }, 'bande', 'Bande peinte', 'Un rayon marqué sur le disque : elle montre l’angle θ dont le disque a tourné depuis la référence.');
+  // arc θ
+  const thm = s.th % TAU, ra = 0.36 * pxm;
+  if (Math.abs(thm) > 0.03) {
+    c.save(); c.strokeStyle = C.texte; c.lineWidth = 1.3; arcPath(c, cx, cy, ra, 0, thm); c.stroke(); c.restore();
+    const am = thm / 2; c.font = mono(10.5);
+    tagText(c, 'θ = ' + fmt(s.th, 2) + ' rad', cx + (ra + 4) * Math.cos(am) * 0.55 + 22 * Math.cos(am), cy - (ra + 4) * Math.sin(am) * 0.55 - 22 * Math.sin(am), 'center', 'middle', C.texte);
+    zoneF((x, y) => Math.abs(Math.hypot(x - cx, y - cy) - ra) < 6 && (() => { let a = Math.atan2(cy - y, x - cx); if (thm >= 0) return a >= -0.05 && a <= thm + 0.05; return a <= 0.05 && a >= thm - 0.05; })(), 'arcth', 'Angle θ', 'Entre la référence fixe et la bande : θ en radians (1 tour = 2π rad ≈ 6,28 rad).');
+  }
+  // arc de ω autour de l'axe
+  arcArrow(c, cx, cy, 13, PI * 0.9, Math.sign(s.w) * Math.min(1.6 * PI, Math.abs(s.w) * 0.55), C.texte, 1.3, 6);
+  zcirc(cx, cy, 15, 'axe', 'Axe de rotation', 'Fixe, perpendiculaire à l’écran. L’arc fléché donne le sens de ω (antihoraire si ω > 0).');
+  // points
+  const th0 = thAgo(1), dth = s.th - th0, pts = [{ r: 0.1 }, { r: 0.2 }, { r: 0.3 }, { r: prm.rP, P: true }];
+  const px = r => cx + r * pxm * Math.cos(s.th), py = r => cy - r * pxm * Math.sin(s.th);
+  const tx = -Math.sin(s.th), ty = -Math.cos(s.th);
+  for (const p of pts) {
+    const x = px(p.r), y = py(p.r), col = p.P ? C.accent : C.texte;
+    if (Math.abs(dth) > 0.005) { c.save(); c.strokeStyle = p.P ? rgba(RA, 0.8) : rgba(RT, 0.45); c.lineWidth = p.P ? 2.6 : 2; arcPath(c, cx, cy, p.r * pxm, th0, dth); c.stroke(); c.restore(); }
+    const v = s.w * p.r, L = clamp(v * kv, -120, 120);
+    arrow(c, x, y, x + tx * L, y + ty * L, C.texte2, 1.4, null, 6);
+    c.beginPath(); c.fillStyle = col; c.arc(x, y, p.P ? 5.5 : 3.5, 0, TAU); c.fill();
+    if (p.P && Math.abs(v) > 0.02) { c.font = mono(10.5); tagText(c, 'v = ' + fmt(v, 2) + ' m/s', x + tx * L * 0.5 - ty * 12, y + ty * L * 0.5 + tx * 12, 'center', 'middle', C.texte2); }
+    if (Math.abs(L) > 4) azone(x, y, x + tx * L, y + ty * L, 'v' + p.r, 'Vitesse tangentielle v = ωr', 'Tangente au cercle, proportionnelle à r. Les points extérieurs vont plus vite : ils parcourent plus de chemin pour le même angle.');
+    if (p.P) {
+      const ac = s.w * s.w * p.r, at = s.a * p.r, ux = (cx - x), uy = (cy - y), un = Math.hypot(ux, uy) || 1;
+      const La = Math.min(ac * ka, 120);
+      if (La > 2) { arrow(c, x, y, x + ux / un * La, y + uy / un * La, C.accent, 1.8, [5, 4], 7); azone(x, y, x + ux / un * La, y + uy / un * La, 'ac', 'Accélération centripète a_c = ω²r', 'Vers le centre : elle courbe la trajectoire, même quand ω est constante (flèche plafonnée à 120 px).'); c.font = mono(10.5); tagText(c, 'a_c = ' + fmt(ac, 2), x + ux / un * La * 0.5 - uy / un * 14, y + uy / un * La * 0.5 + ux / un * 14, 'center', 'middle', C.accent); }
+      if (Math.abs(at) * ka > 2) { const Lt = clamp(at * ka, -120, 120); arrow(c, x, y, x + tx * Lt, y + ty * Lt, C.accent, 1.8, [2, 3], 7); azone(x, y, x + tx * Lt, y + ty * Lt, 'at', 'Accélération tangentielle a_t = αr', 'Le long de la tangente : elle change la vitesse v. Nulle quand α = 0.'); }
+    }
+    if (p.P) zcirc(x, y, 13, 'P', 'Point P · r_P = ' + fmt(p.r, 2) + ' m', 'Glisse-le le long de la bande (ou curseur r_P). Il décrit un arc s = r·Δθ ; v = ωr, a_c = ω²r, a_t = αr.');
+    else zcirc(x, y, 9, 'pt' + p.r, 'Point à r = ' + fmt(p.r, 1) + ' m', 'Même θ et même ω que P, mais v = ωr plus petite ou plus grande : un chemin d’arc plus court ou plus long pour le même angle.');
+  }
+  // comparaison avec une translation
+  if (prm.cmp) {
+    const gy = H - bot - 14, y1 = H - bot - strip + 4, vP = s.w * prm.rP, L = clamp(vP * kv, -120, 120), bx = W / 2, bwd = Math.min(170, W - 40);
+    c.save(); c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(0, gy + 0.5); c.lineTo(W, gy + 0.5); c.stroke();
+    c.strokeStyle = rgba(RT2, 0.5); c.beginPath(); const sp = 40, off = ((k1.xT * 60) % sp + sp) % sp;
+    for (let x = -off; x < W + sp; x += sp) { c.moveTo(x, gy); c.lineTo(x, gy + 7); } c.stroke();
+    c.fillStyle = rgba(RT, 0.07); c.strokeStyle = C.texte; c.lineWidth = 1.4; c.beginPath(); c.roundRect(bx - bwd / 2, gy - 34, bwd, 32, 3); c.fill(); c.stroke(); c.restore();
+    for (const dx of [-bwd / 3, 0, bwd / 3]) {
+      c.beginPath(); c.fillStyle = C.texte; c.arc(bx + dx, gy - 18, 3.5, 0, TAU); c.fill();
+      arrow(c, bx + dx, gy - 18, bx + dx + L, gy - 18, C.texte2, 1.4, null, 6);
+    }
+    zone(bx - bwd / 2, gy - 34, bx + bwd / 2, gy, 'transl', 'Bloc en translation', 'Trois points identiques : tous ont la même vitesse v = v_P. Les graduations défilent (la caméra suit le bloc). Comparer : en rotation, v change d’un point à l’autre.');
+    c.font = mono(10.5);
+    const ph1 = 'translation : même v pour tous les points', ph2 = 'rotation : même ω, v = ωr';
+    if (W >= 600) tagText(c, ph1 + ' · ' + ph2, W / 2, y1 + 6, 'center', 'top', C.accent);
+    else { tagText(c, ph1, W / 2, y1 + 2, 'center', 'top', C.accent); tagText(c, ph2, W / 2, y1 + 18, 'center', 'top', C.accent); }
+    if (Math.abs(vP) > 0.02) tagText(c, 'v = ' + fmt(vP, 2) + ' m/s', bx, gy - 42, 'center', 'bottom', C.texte2);
+  }
+  c.font = mono(10.5);
+  tagText(c, (W < 620 ? '' : 'échelles : ') + '1 m/s = ' + kv + ' px · 1 m/s² = ' + ka + ' px', 14, H - 8, 'left', 'bottom', C.texte2);
+  if (Math.abs(s.w) < 1e-3 && prm.wt !== 0 && k1.t < 0.05) tagText(c, 'ω part de 0 : α ≤ 2 rad/s² le temps de rejoindre la consigne', cx, top - 4, 'center', 'bottom', C.texte2);
+}
+function scope1() {
+  const r = k1.rec, t1 = k1.t;
+  const wr = rng(r, q => q.w, 2, true);
+  scopePlot({ t0: t1 - 10, t1, xl0: '−10 s', xl1: 'maintenant', series: [{ rec: r, f: q => q.w, col: C.texte, lo: -Math.max(2, Math.ceil(wr[1])), hi: Math.max(2, Math.ceil(wr[1])), d: 0, name: 'ω (rad/s)' }, { rec: r, f: q => q.a, col: C.accent, lw: 2.2, lo: -2.5, hi: 2.5, d: 1, name: 'α (rad/s²)' }] });
+}
+
+/* ================= Acte II : couple et inertie ================= */
+const k2 = { A: { th: 0, w: 0, W: 0, a: 0, on: false, done: true, th0: 0 }, B: { th: 0, w: 0, W: 0, a: 0, on: false, done: true, th0: 0 }, mode: 'idle', n: 0, acc: 0, t: 0, rec: [], rc: 0, hold: false, last: '', btnHold: false };
+const rotI = r => Phys.inertiaRotor(prm.m, r);
+function resetRot() { for (const R of [k2.A, k2.B]) { R.th = 0; R.w = 0; R.W = 0; R.a = 0; R.th0 = 0; R.done = true; R.on = false; } }
+function reset2() { resetRot(); k2.rec = []; k2.t = 0; k2.rc = 0; k2.mode = 'idle'; k2.n = 0; k2.acc = 0; k2.last = ''; k2.hold = false; }
+function startExp(kind) {
+  if (act !== 1) return; resetRot(); k2.rec = []; k2.t = 0; k2.rc = 0; k2.mode = kind; k2.n = 0; k2.acc = 0; k2.last = '';
+  if (kind === 'turn') { k2.A.done = false; k2.B.done = false; }
+  setPlay(true);
+}
+function adv2(dt) {
+  k2.acc += dt; const h = Phys.ROT.dt, tau = prm.F * prm.d; let n = 0;
+  while (k2.acc >= h && n++ < 60) {
+    k2.acc -= h; k2.t += h;
+    const holdOn = k2.hold || k2.btnHold, pulse = k2.mode === 'pulse' && k2.n < 1000;
+    for (const [R, I] of [[k2.A, rotI(prm.rA)], [k2.B, rotI(prm.rB)]]) {
+      let on = pulse ? true : k2.mode === 'turn' ? !R.done : (k2.mode === 'idle' ? holdOn : false);
+      R.on = on;
+      if (on && k2.mode === 'turn') {
+        const aN = (tau - (prm.brake ? Phys.ROT.brake : 0)) / I, rem = Math.max(0, TAU - (R.th - R.th0));
+        if (aN <= 1e-12 && R.w <= 1e-12) { R.done = true; R.on = false; continue; }
+        const tn = Phys.timeToAngle(Math.max(0, R.w), aN, rem);
+        if (tn <= h) {
+          let r = Phys.stepRot(R, I, tau, prm.brake, tn); R.th = r.th; R.w = r.w; R.W = r.W; R.a = r.a;
+          r = Phys.stepRot(R, I, 0, prm.brake, h - tn); R.th = r.th; R.w = r.w; R.W = r.W; R.done = true; R.on = false; continue;
+        }
+      }
+      const r = Phys.stepRot(R, I, on ? tau : 0, prm.brake, h); R.th = r.th; R.w = r.w; R.W = r.W; R.a = r.a;
+    }
+    if (k2.mode === 'pulse') { k2.n++; if (k2.n >= 1000) { k2.mode = 'idle'; k2.last = 'pulse'; k2.A.on = k2.B.on = false; } }
+    else if (k2.mode === 'turn' && k2.A.done && k2.B.done) { k2.mode = 'idle'; k2.last = 'turn'; }
+    if (++k2.rc % 8 === 0) k2.rec.push({ t: k2.t, wA: k2.A.w, wB: k2.B.w, on: k2.A.on || k2.B.on });
+  }
+  if (k2.acc > 0.2) k2.acc = 0; trim(k2.rec, k2.t - 10.5);
+}
+function rotQ(R, r) { const I = rotI(r); return { I, L: I * R.w, E: 0.5 * I * R.w * R.w }; }
+function drawRotor(c, cx, cy, pxm, R, r, lab, tau) {
+  const m = prm.m, rd = 5 + 8 * Math.pow(m, 1 / 3), hubR = 0.1 * pxm, dR = prm.d * pxm, spoke = 0.5 * pxm;
+  // anneau de référence pour la longueur des rayons
+  c.save(); c.strokeStyle = rgba(RT2, 0.35); c.setLineDash([2, 5]); c.lineWidth = 1; c.beginPath(); c.arc(cx, cy, r * pxm, 0, TAU); c.stroke(); c.restore();
+  c.save(); c.translate(cx, cy); c.rotate(-R.th);
+  c.strokeStyle = rgba(RT, 0.6); c.lineWidth = 1.5; c.beginPath(); c.moveTo(-spoke, 0); c.lineTo(spoke, 0); c.stroke();
+  c.fillStyle = C.fond2; c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.beginPath(); c.arc(0, 0, hubR, 0, TAU); c.fill(); c.stroke();
+  c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, 0); c.lineTo(hubR, 0); c.stroke();
+  c.strokeStyle = C.texte; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, dR, 0, TAU); c.stroke();
+  for (const sg of [-1, 1]) { c.beginPath(); c.fillStyle = rgba(RT, 0.18); c.strokeStyle = C.texte; c.lineWidth = 1.5; c.arc(sg * r * pxm, 0, rd, 0, TAU); c.fill(); c.stroke(); }
+  c.restore();
+  zcirc(cx, cy, hubR + 2, 'moyeu' + lab, 'Moyeu · 1 kg, R = 0,10 m', 'Disque plein au centre : I_moyeu = ½MR² = 0,005 kg·m². Il porte le tambour et les deux rayons sans masse.');
+  for (const sg of [-1, 1]) zcirc(cx + sg * r * pxm * Math.cos(R.th), cy - sg * r * pxm * Math.sin(R.th), rd + 3, 'mass' + lab, 'Masse m = ' + fmt(m, 2) + ' kg à r = ' + fmt(r, 2) + ' m', 'Leur contribution à I est 2mr² : elle croît comme le carré de la distance à l’axe. Plus elles sont loin, plus I est grand, à masse égale.');
+  // corde et force F : tangente, perpendiculaire au rayon
+  const on = R.on, a = on ? 1 : 0.38, fx = cx + dR, F = prm.F, Lf = F * 6;
+  c.save(); c.globalAlpha = a; c.strokeStyle = rgba(RT2, 0.9); c.lineWidth = 1; c.beginPath(); c.moveTo(fx, cy); c.lineTo(fx, cy - Math.max(Lf, 8) - 12); c.stroke(); c.restore();
+  c.save(); c.globalAlpha = a; arrow(c, fx, cy, fx, cy - Lf, C.texte, 1.6, null, 7); c.restore();
+  if (Lf > 3) azone(fx, cy, fx, cy - Lf, 'F' + lab, 'Force F = ' + fmt(F, 1) + ' N', 'Tirée sur la corde, tangente au tambour : toujours perpendiculaire au rayon. 1 N = 6 px.');
+  c.save(); c.strokeStyle = rgba(RT2, 0.9); c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath(); c.moveTo(cx, cy); c.lineTo(fx, cy); c.stroke(); c.restore();
+  c.font = mono(10.5); tagText(c, 'd', cx + dR / 2, cy + 3, 'center', 'top', C.texte2);
+  zone(cx - 2, cy - 6, fx + 4, cy + 14, 'd' + lab, 'Bras de levier d = ' + fmt(prm.d * 100, 0) + ' cm', 'Distance de l’axe au point d’application : le rayon du tambour. Le couple vaut τ = F·d.');
+  if (on && F > 0) arcArrow(c, cx, cy, 0.16 * pxm, PI * 0.25, clamp(0.5 + tau * 4.5, 0.5, 5.2), C.accent, 2.6, 8);
+  if (F > 0) zcirc(cx, cy, 0.16 * pxm + 6, 'tau' + lab, 'Couple τ = F·d = ' + fmt(tau, 2) + ' N·m', 'L’analogue rotationnel de la force : il produit une accélération angulaire α = τ/I. Même valeur pour les deux rotors.');
+  c.font = mono(11); tagText(c, lab + ' · r = ' + fmt(r, 2) + ' m', cx, cy + spoke + 20, 'center', 'middle', C.texte);
+}
+function draw2() {
+  const c = ctx, top = 108, bot = 34, aH = H - top - bot, tau = prm.F * prm.d;
+  const Rpx = Math.min(W / 4 - 10, aH / 2 - 14), pxm = Rpx / 0.5, cy = top + aH / 2 - 6;
+  drawRotor(c, W / 4, cy, pxm, k2.A, prm.rA, 'A', tau);
+  drawRotor(c, 3 * W / 4, cy, pxm, k2.B, prm.rB, 'B', tau);
+  c.font = mono(10.5);
+  tagText(c, 'même masse totale : 1 kg + 2 × ' + fmt(prm.m, 2) + ' kg', W / 2, top - 2, 'center', 'bottom', C.texte2);
+  tagText(c, 'τ = F·d = ' + fmt(tau, 3) + ' N·m (même pour A et B)', W / 2, H - 8, 'center', 'bottom', C.accent);
+}
+function scope2() {
+  const r = k2.rec, t1 = k2.t, wm = Math.max(1, ...r.map(q => Math.max(q.wA, q.wB))) * 1.1;
+  const bands = []; let s0 = null;
+  for (const q of r) { if (q.on && s0 === null) s0 = q.t; if (!q.on && s0 !== null) { bands.push([s0, q.t]); s0 = null; } }
+  if (s0 !== null) bands.push([s0, t1]);
+  scopePlot({ t0: t1 - 10, t1, xl0: '−10 s', xl1: 'maintenant', bands, series: [{ rec: r, f: q => q.wA, col: C.texte, lo: 0, hi: wm, d: 0, name: 'ω_A plein · ω_B tireté (rad/s)', lw: 2 }, { rec: r, f: q => q.wB, col: C.texte, dash: [5, 4], lo: 0, hi: wm, d: 0, name: '' }] });
+}
+function bars2() {
+  const w = barsC.width / dpr, h = barsC.height / dpr, c = bctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h); zonesBars = [];
+  const tau = prm.F * prm.d, qa = rotQ(k2.A, prm.rA), qb = rotQ(k2.B, prm.rB);
+  const Ls = Math.max(tau * 1.0, Math.abs(qa.L), Math.abs(qb.L), 0.02) * 1.12, Es = Math.max(tau * TAU, qa.E, qb.E, k2.A.W, k2.B.W, 0.02) * 1.12;
+  const base = h - 24, hMax = h - 52, bw = Math.min(34, (w - 60) / 5), gap = 12, x0 = Math.max(8, (w - (4 * bw + 3 * gap + 28)) / 2);
+  c.font = mono(10); c.textBaseline = 'middle'; c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('L = Iω (positif)', x0, 10); c.fillText('E = ½Iω²', x0 + 2 * (bw + gap) + 28, 10);
+  c.strokeStyle = C.trait; c.beginPath(); c.moveTo(x0 - 4, base + 0.5); c.lineTo(x0 + 4 * bw + 3 * gap + 32, base + 0.5); c.stroke();
+  const items = [['L_A', qa.L / Ls, 'L', x0], ['L_B', qb.L / Ls, 'L', x0 + bw + gap], ['E_A', qa.E / Es, 'E', x0 + 2 * (bw + gap) + 28], ['E_B', qb.E / Es, 'E', x0 + 3 * (bw + gap) + 28]];
+  items.forEach((it, i) => {
+    const hh = clamp(it[1], 0, 1) * hMax, x = it[3];
+    if (it[2] === 'L') { c.fillStyle = rgba(RP, 0.9); c.fillRect(x, base - hh, bw, hh); }
+    else { c.fillStyle = rgba(RE, 0.92); c.fillRect(x, base - hh, bw, hh); const Wk = i === 2 ? k2.A.W : k2.B.W, hw = clamp(Wk / Es, 0, 1) * hMax; c.save(); c.strokeStyle = C.texte; c.setLineDash([4, 3]); c.lineWidth = 1.4; c.strokeRect(x + 0.5, base - hw + 0.5, bw - 1, Math.max(0, hw - 1)); c.restore(); }
+    c.fillStyle = C.texte2; c.textAlign = 'center'; c.fillText(it[0], x + bw / 2, base + 11);
+    const val = it[2] === 'L' ? (i === 0 ? qa.L : qb.L) : (i === 2 ? qa.E : qb.E); c.fillStyle = C.texte; c.fillText(fmt(val, 2), x + bw / 2, base - hh - 7);
+    zone(x - 3, base - hMax, x + bw + 3, base + 16, 'b2' + i, it[2] === 'L' ? 'Moment cinétique ' + it[0] + ' = ' + fmt(val, 3) + ' kg·m²/s' : 'Énergie ' + it[0] + ' = ' + fmt(val, 3) + ' J', it[2] === 'L' ? 'L = Iω. Après un même couple pendant un même temps, L est le même (τΔt) pour les deux rotors.' : 'E = ½Iω² = L²/2I. Le contour tireté est le travail reçu W = τΔθ : l’énergie vient de lui. Après un même angle, E est la même.', zonesBars);
+  });
+}
+function status2() {
+  const A = k2.A, B = k2.B, tau = prm.F * prm.d;
+  if (k2.mode === 'pulse') return 'Couple appliqué, 1,000 s : τ = ' + fmt(tau, 3) + ' N·m, de la même durée pour A et B.';
+  if (k2.mode === 'turn') return 'Chaque rotor reçoit le couple jusqu’à ce que son propre θ ait avancé de 2π. ' + (A.done && !B.done ? 'A a fini ; B continue.' : '');
+  if (k2.last === 'pulse') return 'Même couple, même durée : même L (τΔt). Mais ω et E diffèrent : E = L²/2I.';
+  if (k2.last === 'turn') return 'Même couple sur le même angle : même travail τ·2π, donc même énergie. Mais L diffère.';
+  if (k2.hold || k2.btnHold) return 'Couple maintenu : α = τ/I, plus grande pour A (I plus petit). ω croît linéairement.';
+  if (A.w === 0 && B.w === 0) return 'Même couple sur deux rotors de même masse : leurs I diffèrent. Essaie « Couple pendant 1 s », puis « Couple sur 1 tour ».';
+  return 'Les rotors tournent librement : sans couple, ω est constante (inertie de rotation).';
+}
+
+/* ================= Acte III : moment cinétique conservé ================= */
+const SKI = r => Phys.inertiaSkater(r);
+const k3 = { sk: null, ring: null, acc: 0, t: 0, rec: [], rc: 0, E0r: 0, rrec: [] };
+function mkSkater() { const r = 0.9, I = SKI(r), L = I * 3; return { th: 0, r, L, Wb: 0, w: 3, I, T: Phys.SK.m * 9 * r, E: L * L / (2 * I) }; }
+function mkRing() { return { th1: 0, th2: 0, w1: 20, w2: 0, phase: 'idle', tD: 0 }; }
+function reset3() { k3.sk = mkSkater(); k3.ring = mkRing(); k3.E0r = 0.5 * Phys.RING.I1 * 400; k3.acc = 0; k3.t = 0; k3.rec = []; k3.rrec = []; k3.rc = 0; }
+function dropRing() { if (act !== 2) return; prm.mode3 = 'ring'; k3.ring = mkRing(); k3.ring.phase = 'down'; k3.rrec = []; k3.t = 0; k3.rc = 0; syncTools(); buildMeas(2); sizePanelCanvases(); setPlay(true); }
+function launchSkater() { const s = k3.sk; s.L = SKI(s.r) * 3; s.w = 3; s.Wb = 0; s.E = s.L * s.L / (2 * SKI(s.r)); }
+function setArm(r) { prm.rT = clamp(r, 0.2, 0.9); syncTools(); }
+function adv3(dt) {
+  k3.acc += dt; const h = 1 / 1000; let n = 0;
+  while (k3.acc >= h && n++ < 60) {
+    k3.acc -= h; k3.t += h;
+    if (prm.mode3 === 'sk') { k3.sk = Phys.stepSkater(k3.sk, prm.rT, prm.ice, h); if (++k3.rc % 8 === 0) k3.rec.push({ t: k3.t, w: k3.sk.w, L: k3.sk.L }); }
+    else {
+      const g = k3.ring;
+      if (g.phase === 'down') { g.tD += h; if (g.tD >= 0.4) g.phase = 'coupled'; }
+      const r = Phys.stepRing(g, g.phase === 'coupled', h); g.th1 = r.th1; g.th2 = r.th2; g.w1 = r.w1; g.w2 = r.w2;
+      if (g.phase !== 'idle' && ++k3.rc % 8 === 0) k3.rrec.push({ t: k3.t, w1: g.w1, w2: g.w2 });
+    }
+  }
+  if (k3.acc > 0.2) k3.acc = 0; trim(k3.rec, k3.t - 10.5); trim(k3.rrec, k3.t - 10.5);
+}
+const rg = () => { const b = Phys.ringBudget(k3.ring), E = b.E1 + b.E2; return Object.assign(b, { E, Eth: Math.max(0, k3.E0r - E) }); };
+function drawSkater(c, cx, cy, pxm) {
+  const s = k3.sk, ang = -s.th, ex = Math.cos(ang), ey = Math.sin(ang), nx = -ey, ny = ex;
+  const arm = s.r * pxm;
+  c.save(); c.strokeStyle = rgba(RT2, 0.35); c.setLineDash([2, 5]); c.lineWidth = 1; c.beginPath(); c.arc(cx, cy, arm, 0, TAU); c.stroke(); c.restore();
+  // bras
+  c.strokeStyle = C.texte; c.lineWidth = 2.2;
+  for (const sg of [-1, 1]) { c.beginPath(); c.moveTo(cx + sg * ex * 0.1 * pxm, cy + sg * ey * 0.1 * pxm); c.lineTo(cx + sg * ex * arm, cy + sg * ey * arm); c.stroke(); }
+  // corps ovale et tête
+  c.save(); c.fillStyle = rgba(RT, 0.12); c.strokeStyle = C.texte; c.lineWidth = 1.6; c.beginPath(); c.ellipse(cx, cy, 0.17 * pxm, 0.1 * pxm, ang, 0, TAU); c.fill(); c.stroke(); c.restore();
+  c.beginPath(); c.fillStyle = C.fond2; c.strokeStyle = C.texte; c.arc(cx, cy, 0.055 * pxm, 0, TAU); c.fill(); c.stroke();
+  c.beginPath(); c.fillStyle = C.texte; c.moveTo(cx + nx * 0.09 * pxm, cy + ny * 0.09 * pxm); c.lineTo(cx + nx * 0.055 * pxm + ex * 0.025 * pxm, cy + ny * 0.055 * pxm + ey * 0.025 * pxm); c.lineTo(cx + nx * 0.055 * pxm - ex * 0.025 * pxm, cy + ny * 0.055 * pxm - ey * 0.025 * pxm); c.closePath(); c.fill();
+  zcirc(cx, cy, 0.18 * pxm, 'corps', 'Corps · I₀ = 1,0 kg·m²', 'Épaules et tête, vus de dessus (abstrait). Le petit triangle marque l’avant : il montre la rotation.');
+  const kT = 1.4;
+  for (const sg of [-1, 1]) {
+    const hx = cx + sg * ex * arm, hy = cy + sg * ey * arm, T = s.T;
+    const Lt = Math.min(T * kT, Math.max(0, arm - 16));
+    if (Lt > 3) arrow(c, hx, hy, hx - sg * ex * Lt, hy - sg * ey * Lt, C.texte, 1.5, null, 6);
+    c.beginPath(); c.fillStyle = rgba(RT, 0.25); c.strokeStyle = C.texte; c.lineWidth = 1.6; c.arc(hx, hy, 9, 0, TAU); c.fill(); c.stroke();
+    zcirc(hx, hy, 12, 'halt', 'Haltère · m = 2 kg à r = ' + fmt(s.r, 2) + ' m', 'Contribue 2·m·r² à I. Le bras tire dessus avec la force centripète T = mω²r (flèche, 1 N = 1,4 px).');
+  }
+  arcArrow(c, cx, cy, 1.04 * pxm, PI * 0.78, Math.sign(s.w || 1) * Math.min(1.7 * PI, Math.abs(s.w) * 0.2 + 0.3), C.texte, 1.3, 6);
+  zoneF((x, y) => Math.abs(Math.hypot(x - cx, y - cy) - 1.04 * pxm) < 6, 'omk', 'Rotation ω', 'Sens et rapidité de la rotation du patineur (arc fléché). Sans couple extérieur, ω = L/I.');
+}
+function drawRect3(c, x0, y0, w, h) {
+  const s = k3.sk, Imax = 4.4, Wmax = 12.5, L = s.L, I = s.I, w_ = s.w;
+  const px = I2 => x0 + I2 / Imax * w, py = w2 => y0 + h - w2 / Wmax * h;
+  c.save(); c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x0 + 0.5, y0 + 0.5, w, h); c.restore();
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  c.fillText('ω (rad/s)', x0 + 3, y0 - 4); c.textAlign = 'right'; c.fillText('I (kg·m²)', x0 + w, y0 + h + 12);
+  c.textAlign = 'center'; for (const v of [1, 2, 3, 4]) { c.fillText(v, px(v), y0 + h + 12); c.beginPath(); c.strokeStyle = C.trait; c.moveTo(px(v), y0 + h); c.lineTo(px(v), y0 + h - 3); c.stroke(); }
+  c.textAlign = 'right'; for (const v of [0, 5, 10]) c.fillText(v, x0 - 4, py(v) + 3);
+  // hyperbole ω = L/I
+  c.save(); c.beginPath(); c.rect(x0, y0, w, h); c.clip(); c.strokeStyle = C.texte2; c.setLineDash([5, 4]); c.lineWidth = 1.2; c.beginPath();
+  for (let i = 0; i <= 60; i++) { const Iv = 1.1 + (Imax - 1.1) * i / 60, x = px(Iv), y = py(L / Iv); i ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); c.setLineDash([]);
+  // rectangle I × ω, d'aire L
+  const col = L >= 0 ? RP : RN; c.fillStyle = rgba(col, 0.22); c.strokeStyle = rgba(col, 0.95); c.lineWidth = 1.4;
+  c.beginPath(); c.rect(px(0), py(w_), px(I) - px(0), py(0) - py(w_)); c.fill(); c.stroke();
+  c.beginPath(); c.fillStyle = C.texte; c.arc(px(I), py(w_), 4, 0, TAU); c.fill(); c.restore();
+  c.font = mono(11); tagText(c, 'aire = L = ' + fmt(L, 1), (px(0) + px(I)) / 2, (py(w_) + py(0)) / 2, 'center', 'middle', C.texte);
+  tagText(c, 'ω = L/I', px(1.5), py(L / 1.5) - 8, 'left', 'bottom', C.texte2);
+  zoneF((x, y) => x >= px(0) && x <= px(I) && y >= py(w_) && y <= py(0), 'rect', 'Rectangle I × ω', 'Sa largeur est I, sa hauteur ω : son aire est L = Iω. Ramène les bras : il s’amincit et s’allonge, mais son aire ne change pas (sauf avec la glace).');
+  zoneF((x, y) => { const Iv = (x - x0) / w * Imax; if (Iv < 1.1 || Iv > Imax) return false; return Math.abs(py(L / Iv) - y) < 6; }, 'hyp', 'Hyperbole ω = L/I', 'Tous les couples (I, ω) possibles pour le L courant. Le point glisse dessus. Avec la glace, elle descend lentement.');
+}
+function draw3() {
+  const c = ctx, top = 108, bot = 30;
+  if (prm.mode3 === 'sk') {
+    const wide = W >= 620, aH = H - top - bot;
+    let sx, sy, pxm, gx, gy, gw, gh;
+    if (wide) { const aw = W * 0.56; pxm = Math.min(aw / 2 - 12, aH / 2 - 4) / 1.12; sx = aw / 2; sy = top + aH / 2; gx = aw + 54; gw = W - gx - 16; gy = top + 18; gh = Math.min(aH - 70, 240); }
+    else { const sh = (aH) * 0.56; pxm = Math.min(W / 2 - 14, sh / 2 - 2) / 1.12; sx = W / 2; sy = top + sh / 2; gx = 46; gw = W - gx - 16; gy = top + sh + 16; gh = H - bot - gy - 20; }
+    drawSkater(c, sx, sy, pxm);
+    if (gw > 60 && gh > 50) drawRect3(c, gx, gy, gw, gh);
+    c.font = mono(10.5);
+    tagText(c, (W < 620 ? 'T : ' : 'tension T des bras : ') + '1 N = 1,4 px', 14, H - 8, 'left', 'bottom', C.texte2);
+    if (prm.ice) tagText(c, 'glace : couple extérieur 0,15 N·m', W - 14, H - 8, 'right', 'bottom', C.accent);
+  } else {
+    const g = k3.ring, aH = H - top - bot, pxm = Math.min(W / 2 - 16, aH / 2 - 8) / 0.15 / 1.38 * 1.0, cx = W / 2, cy = top + aH / 2;
+    const sc = g.phase === 'idle' ? 1.38 : g.phase === 'down' ? 1 + 0.38 * (1 - sstep(g.tD / 0.4)) : 1;
+    c.save(); c.fillStyle = rgba(RT, 0.06); c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.beginPath(); c.arc(cx, cy, 0.15 * pxm, 0, TAU); c.fill(); c.stroke();
+    c.translate(cx, cy); c.rotate(-g.th1); c.strokeStyle = C.texte; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(0.15 * pxm, 0); c.stroke(); c.restore();
+    zcirc(cx, cy, 0.15 * pxm, 'plateau', 'Plateau · 1,5 kg, R = 15 cm', 'Disque plein, I₁ = ½MR² = 0,0169 kg·m². Il tourne à 20 rad/s au départ. Le repère peint (trait) montre sa rotation propre.');
+    // anneau
+    const Rr = 0.12 * pxm * sc, alpha = g.phase === 'coupled' ? 1 : 0.75;
+    if (g.phase !== 'coupled') { c.save(); c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); c.arc(cx + 5, cy + 5, Rr, 0, TAU); c.fill(); c.restore(); }
+    c.save(); c.globalAlpha = alpha; c.translate(cx, cy); c.rotate(-g.th2); c.strokeStyle = C.accent; c.lineWidth = 5 * Math.min(1.2, sc); c.beginPath(); c.arc(0, 0, Rr, 0, TAU); c.stroke();
+    c.fillStyle = C.fond; c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.arc(Rr, 0, 5, 0, TAU); c.fill(); c.stroke(); c.restore();
+    zcirc(cx + 0.12 * pxm * sc * Math.cos(g.th2), cy - 0.12 * pxm * sc * Math.sin(g.th2), 8, 'repAn', 'Repère de l’anneau', 'Point peint sur l’anneau : il montre sa rotation propre, indépendante de celle du plateau jusqu’à ce que les vitesses se rejoignent.');
+    zoneF((x, y) => Math.abs(Math.hypot(x - cx, y - cy) - Rr) < 7, 'anneau', 'Anneau · 1,0 kg, R = 12 cm', 'I₂ = mR² = 0,0144 kg·m². Immobile au départ ; posé sur le plateau, il glisse jusqu’à tourner avec lui. Le frottement agit sur les deux avec des couples égaux et opposés.');
+    c.font = mono(10.5);
+    if (g.phase !== 'coupled') tagText(c, g.phase === 'idle' ? 'anneau immobile au-dessus (agrandi : perspective)' : 'il descend : agrandi → ramené à sa taille (perspective seulement)', cx, cy + 0.15 * pxm * 1.42 + 16, 'center', 'top', C.texte2);
+    else if (g.w1 !== g.w2) tagText(c, 'ça glisse : les vitesses se rejoignent', cx, cy + 0.15 * pxm + 16, 'center', 'top', C.accent);
+    else tagText(c, 'ω commun : plus de glissement', cx, cy + 0.15 * pxm + 16, 'center', 'top', C.accent);
+    tagText(c, 'vue de dessus · ω₁ = ' + fmt(g.w1, 2) + ' · ω₂ = ' + fmt(g.w2, 2) + ' rad/s', W / 2, H - 8, 'center', 'bottom', C.texte2);
+  }
+}
+function scope3() {
+  if (prm.mode3 === 'sk') {
+    const r = k3.rec, t1 = k3.t, wm = Math.max(4, ...r.map(q => q.w), k3.sk.w) * 1.1, Lm = Math.max(4, ...r.map(q => Math.abs(q.L)), Math.abs(k3.sk.L)) * 1.1;
+    scopePlot({ t0: t1 - 10, t1, xl0: '−10 s', xl1: 'maintenant', series: [{ rec: r, f: q => q.w, col: C.texte, lo: 0, hi: wm, d: 0, name: 'ω (rad/s)' }, { rec: r, f: q => q.L, col: C.pos, lo: 0, hi: Lm, d: 0, name: 'L (kg·m²/s)', lw: 2.2 }] });
+  } else {
+    const r = k3.rrec, t1 = k3.t;
+    scopePlot({ t0: t1 - 10, t1, xl0: '−10 s', xl1: 'maintenant', series: [{ rec: r, f: q => q.w1, col: C.texte, lo: 0, hi: 22, d: 0, name: 'ω₁ plateau plein · ω₂ anneau tireté (rad/s)', lw: 2 }, { rec: r, f: q => q.w2, col: C.texte, dash: [5, 4], lo: 0, hi: 22, d: 0, name: '' }] });
+  }
+}
+function bars3() {
+  const w = barsC.width / dpr, h = barsC.height / dpr, c = bctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h); zonesBars = [];
+  const b = rg(), L0 = Phys.RING.I1 * 20, E0 = k3.E0r, base = h - 26, hMax = h - 54, bw = Math.min(46, (w - 60) / 4), x1 = w / 2 - bw - 24, x2 = w / 2 + 24;
+  c.font = mono(10); c.textBaseline = 'middle'; c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('L₁ + L₂ (constant)', x1 - 20, 10); c.fillText('K₁ + K₂ + E_th', x2 - 20, 24);
+  c.strokeStyle = C.trait; c.beginPath(); c.moveTo(8, base + 0.5); c.lineTo(w - 8, base + 0.5); c.stroke();
+  const h1 = b.L1 / L0 * hMax, h2 = Math.max(0, b.L2) / L0 * hMax;
+  c.fillStyle = rgba(RP, 0.95); c.fillRect(x1, base - h1, bw, h1); c.fillStyle = rgba(RP, 0.45); c.fillRect(x1, base - h1 - h2, bw, h2);
+  c.strokeStyle = C.texte; c.lineWidth = 1.2; c.strokeRect(x1 + 0.5, base - hMax + 0.5, bw - 1, hMax - 1);
+  const k1h = b.E1 / E0 * hMax, k2h = b.E2 / E0 * hMax, th = b.Eth / E0 * hMax;
+  c.fillStyle = rgba(RE, 0.95); c.fillRect(x2, base - k1h, bw, k1h); c.fillStyle = rgba(RE, 0.6); c.fillRect(x2, base - k1h - k2h, bw, k2h); c.fillStyle = rgba(RE, 0.35); c.fillRect(x2, base - k1h - k2h - th, bw, th);
+  c.strokeRect(x2 + 0.5, base - hMax + 0.5, bw - 1, hMax - 1);
+  c.fillStyle = C.texte2; c.textAlign = 'center'; c.fillText('L₁', x1 + bw / 2, base + 10); c.fillText('L₂', x1 + bw / 2, base + 21);
+  c.fillText('K₁', x2 + bw / 2, base + 10); c.fillText('K₂ · E_th', x2 + bw / 2, base + 21);
+  c.textAlign = 'left'; c.fillStyle = C.texte; c.fillText('L₁ ' + fmt(b.L1, 3), x1 + bw + 6, base - h1 / 2); if (h2 > 4) c.fillText('L₂ ' + fmt(b.L2, 3), x1 + bw + 6, base - h1 - h2 / 2);
+  c.fillText('K₁ ' + fmt(b.E1, 2), x2 + bw + 6, base - k1h / 2); if (k2h > 4) c.fillText('K₂ ' + fmt(b.E2, 2), x2 + bw + 6, base - k1h - k2h / 2); if (th > 4) c.fillText('chaleur ' + fmt(b.Eth, 2), x2 + bw + 6, base - k1h - k2h - th / 2);
+  zone(x1, base - hMax, x1 + bw, base, 'bL', 'Moment cinétique L₁ + L₂ = ' + fmt(b.L, 3) + ' kg·m²/s', 'Hauteur totale constante : le frottement déplace L d’un objet à l’autre, il n’en crée pas et n’en détruit pas.', zonesBars);
+  zone(x2, base - hMax, x2 + bw, base, 'bE', 'Énergie : K₁ + K₂ = ' + fmt(b.E, 2) + ' J, chaleur ' + fmt(b.Eth, 2) + ' J', 'Plein : énergie cinétique de rotation de chaque objet. Pâle : chaleur du frottement. Le total est constant, mais l’énergie utile baisse de I₂/(I₁+I₂) ≈ 46 %.', zonesBars);
+}
+function status3() {
+  if (prm.mode3 === 'sk') {
+    let t = 'En ramenant les haltères, les bras tirent (T) sur une distance : ce travail devient énergie de rotation. L, lui, ne change pas.';
+    if (prm.ice) t += ' La glace freine un peu : L baisse lentement.';
+    return t;
+  }
+  const g = k3.ring; if (g.phase === 'idle') return 'Appuie sur « Lâcher l’anneau » : le plateau tourne à 20 rad/s, l’anneau est immobile.';
+  return 'Le frottement entre les deux transfère du moment cinétique du plateau à l’anneau. Le total ne change pas. L’énergie, elle, en perd (I₂/(I₁+I₂) ≈ 46 %) : chaleur.';
+}
+
+/* ================= Acte IV : gyroscope ================= */
+const k4 = { mode: 'held', smooth: false, s: Phys.gyroInit(200, false), acc: 0, t: 0, rec: [], rc: 0, phH: [], trail: [], disp: 0, Om: 0 };
+function gyroReinit() { k4.s = Phys.gyroInit(prm.w3, k4.mode === 'held' ? false : k4.smooth); k4.acc = 0; k4.t = 0; k4.rec = []; k4.phH = []; k4.trail = []; k4.Om = 0; k4.rc = 0; }
+function releaseGyro(w, smooth) { if (w != null) prm.w3 = w; k4.smooth = !!smooth; k4.mode = 'free'; gyroReinit(); syncTools(); setPlay(true); }
+function holdGyro() { k4.mode = 'held'; gyroReinit(); }
+function adv4(dt) {
+  k4.disp += Math.min(prm.w3, 10) * dt;
+  if (k4.mode === 'held' || k4.s.down) return;
+  k4.acc += dt; const h = Phys.GY.dt; let n = 0;
+  while (k4.acc >= h && n++ < 70) {
+    k4.s = Phys.stepGyro(k4.s, h); k4.acc -= h; k4.t += h;
+    if (++k4.rc % 20 === 0 || k4.s.down) {
+      k4.phH.push({ t: k4.t, ph: k4.s.ph }); trim(k4.phH, k4.t - 0.5);
+      const a0 = k4.phH[0], dtm = k4.t - a0.t; k4.Om = dtm > 0.08 ? (k4.s.ph - a0.ph) / dtm : 0;
+      k4.rec.push({ t: k4.t, inc: 90 - k4.s.th * 180 / PI, Om: k4.Om });
+      const u = [Math.sin(k4.s.th) * Math.cos(k4.s.ph), Math.sin(k4.s.th) * Math.sin(k4.s.ph), Math.cos(k4.s.th)];
+      if (k4.rc % 100 === 0) { k4.trail.push(u); if (k4.trail.length > 420) k4.trail.shift(); }
+    }
+    if (k4.s.down) break;
+  }
+  if (k4.acc > 0.2) k4.acc = 0; trim(k4.rec, k4.t - 12);
+}
+const gyQ = () => { const G = Phys.GY, s = k4.s, L = G.I3 * s.w3, tau = G.m * Phys.g * G.d * Math.sin(s.th), Omp = L > 0 ? tau / L : Infinity; return { L, tau, Omp, inc: 90 - s.th * 180 / PI }; };
+function draw4() {
+  const c = ctx, G = Phys.GY, s = k4.s, q = gyQ(), top = 108, bot = 34, aH = H - top - bot;
+  const pxm = Math.min((W - 24) / 0.62, aH / 0.6), ox = W / 2 - 0.03 * pxm, oy = top + aH * 0.42;
+  const az = 28 * PI / 180, el = 20 * PI / 180, ca = Math.cos(az), sa = Math.sin(az), ce = Math.cos(el), se = Math.sin(el);
+  const P3 = (X, Y, Z) => { const xr = X * ca - Y * sa, dep = X * sa + Y * ca; return [ox + xr * pxm, oy - (Z * ce + dep * se) * pxm]; };
+  const Pv = (p, v, k) => P3(p[0] + v[0] * k, p[1] + v[1] * k, p[2] + v[2] * k);
+  // sol, poteau, pivot
+  c.save(); c.strokeStyle = rgba(RT2, 0.45); c.lineWidth = 1; c.beginPath();
+  for (let i = 0; i <= 48; i++) { const a = i / 48 * TAU, p = P3(0.24 * Math.cos(a), 0.24 * Math.sin(a), -0.3); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); } c.stroke();
+  const p0 = P3(0, 0, 0), pg = P3(0, 0, -0.3); c.strokeStyle = C.texte2; c.lineWidth = 3; c.beginPath(); c.moveTo(pg[0], pg[1]); c.lineTo(p0[0], p0[1]); c.stroke(); c.restore();
+  zoneF((x, y) => Math.abs(x - p0[0]) < 6 && y > p0[1] && y < pg[1], 'poteau', 'Poteau', 'Il tient le pivot. Le pivot est le seul point fixe : tous les couples se calculent autour de lui.');
+  zoneF((x, y) => Math.abs(y - pg[1]) < pxm * 0.05 && Math.abs(x - pg[0]) < pxm * 0.25, 'sol', 'Sol', 'Repère : l’ellipse est un cercle horizontal vu sous 20° d’élévation.');
+  // vecteurs unitaires
+  const th = s.th, ph = s.ph, u = [Math.sin(th) * Math.cos(ph), Math.sin(th) * Math.sin(ph), Math.cos(th)], e1 = [-Math.sin(ph), Math.cos(ph), 0], e2 = [Math.cos(th) * Math.cos(ph), Math.cos(th) * Math.sin(ph), -Math.sin(th)];
+  const cen = [u[0] * G.d, u[1] * G.d, u[2] * G.d];
+  // trace de l'axe
+  if (k4.trail.length > 2) { c.save(); c.strokeStyle = rgba(RT, 0.28); c.lineWidth = 1.2; c.beginPath(); k4.trail.forEach((v, i) => { const p = P3(v[0] * G.d, v[1] * G.d, v[2] * G.d); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); }); c.stroke(); c.restore(); }
+  // axe
+  const pc = P3(cen[0], cen[1], cen[2]);
+  c.strokeStyle = C.texte; c.lineWidth = 2.4; c.beginPath(); c.moveTo(p0[0], p0[1]); c.lineTo(pc[0], pc[1]); c.stroke();
+  zone(Math.min(p0[0], pc[0]) - 4, Math.min(p0[1], pc[1]) - 4, Math.max(p0[0], pc[0]) + 4, Math.max(p0[1], pc[1]) + 4, 'axe4', 'Axe · d = 12 cm', 'Part du pivot, porte la roue à son extrémité. Sa direction est celle de L.');
+  c.beginPath(); c.fillStyle = C.texte; c.arc(p0[0], p0[1], 3.5, 0, TAU); c.fill();
+  // roue
+  const wheel = a => [cen[0] + G.R * (Math.cos(a) * e1[0] + Math.sin(a) * e2[0]), cen[1] + G.R * (Math.cos(a) * e1[1] + Math.sin(a) * e2[1]), cen[2] + G.R * (Math.cos(a) * e1[2] + Math.sin(a) * e2[2])];
+  c.save(); c.beginPath(); for (let i = 0; i < 24; i++) { const p = wheel(i / 24 * TAU), sp = P3(p[0], p[1], p[2]); i ? c.lineTo(sp[0], sp[1]) : c.moveTo(sp[0], sp[1]); } c.closePath();
+  c.fillStyle = rgba(RT, 0.07); c.fill(); c.strokeStyle = C.texte; c.lineWidth = 2; c.stroke();
+  c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1.2; c.beginPath(); for (let k = 0; k < 4; k++) { const p = wheel(-k4.disp + k * PI / 2), sp = P3(p[0], p[1], p[2]); c.moveTo(pc[0], pc[1]); c.lineTo(sp[0], sp[1]); } c.stroke(); c.restore();
+  zcirc(pc[0], pc[1], Math.max(14, G.R * pxm * 0.8), 'roue', 'Roue · 0,5 kg, R = 8 cm', 'Anneau qui tourne très vite autour de son axe : I₃ = mR² = 0,0032 kg·m². C’est sa rotation propre qui donne L.');
+  // vecteurs
+  const kg = 5, kL = 90, kt = 50;
+  const wL = Math.min(G.m * Phys.g * kg, 40), pW = [pc[0], pc[1] + wL];
+  arrow(c, pc[0], pc[1], pW[0], pW[1], C.texte, 1.6, null, 7); tagText(c, 'mg', pW[0] + 6, pW[1] - 2, 'left', 'middle', C.texte);
+  azone(pc[0], pc[1], pW[0], pW[1], 'poids4', 'Poids mg = ' + fmt(G.m * Phys.g, 1) + ' N', 'S’applique au centre de la roue, à d du pivot : il crée un couple autour du pivot.');
+  const Lpx = Math.min(q.L * kL, 120);
+  if (Lpx > 2) {
+    const pL = Pv(cen, u, Lpx / pxm); arrow(c, pc[0], pc[1], pL[0], pL[1], C.pos, 2.6, null, 9); tagText(c, 'L', pL[0] + (pL[0] > pc[0] ? 8 : -8), pL[1] - 4, pL[0] > pc[0] ? 'left' : 'right', 'bottom', C.pos);
+    azone(pc[0], pc[1], pL[0], pL[1], 'L4', 'Moment cinétique L = I₃ω = ' + fmt(q.L, 2) + ' kg·m²/s', 'Le long de l’axe, dans le sens de la rotation (règle de la main droite). Longueur ∝ L, plafonnée à 120 px.');
+    if (q.tau > 1e-3) {
+      const dl = q.tau * kt, pD = Pv([cen[0] + u[0] * Lpx / pxm, cen[1] + u[1] * Lpx / pxm, cen[2] + u[2] * Lpx / pxm], e1, dl / pxm), pT = P3(cen[0] + u[0] * Lpx / pxm, cen[1] + u[1] * Lpx / pxm, cen[2] + u[2] * Lpx / pxm);
+      arrow(c, pT[0], pT[1], pD[0], pD[1], C.accent, 2, [4, 3], 7); tagText(c, 'ΔL = τΔt', pD[0] + 8, pD[1], 'left', 'middle', C.accent);
+      azone(pT[0], pT[1], pD[0], pD[1], 'dL', 'ΔL = τΔt', 'Le petit ajout de moment cinétique pendant Δt : horizontal, perpendiculaire à L. Il fait tourner L (précession) au lieu de l’incliner.');
+    }
+  }
+  if (q.tau > 1e-3) {
+    const pt = Pv([0, 0, 0], e1, q.tau * kt / pxm); arrow(c, p0[0], p0[1], pt[0], pt[1], C.accent, 3, null, 9); tagText(c, 'τ', pt[0] + (pt[0] > p0[0] ? 8 : -8), pt[1] - 5, pt[0] > p0[0] ? 'left' : 'right', 'bottom', C.accent);
+    azone(p0[0], p0[1], pt[0], pt[1], 'tau4', 'Couple τ = mgd·sinθ = ' + fmt(q.tau, 2) + ' N·m', 'Dû au poids : horizontal, perpendiculaire à l’axe (τ = d × mg). 1 N·m = 50 px.');
+  }
+  c.font = mono(10.5);
+  tagText(c, 'rotation propre ralentie à l’affichage', 14, H - 8, 'left', 'bottom', C.texte2);
+  tagText(c, '1 kg·m²/s = ' + kL + ' px · 1 N·m = ' + kt + ' px', W - 14, H - 8, 'right', 'bottom', C.texte2);
+  if (k4.mode === 'held') tagText(c, 'axe tenu à l’horizontale · « Lâcher »', W / 2, top - 2, 'center', 'bottom', C.texte2);
+}
+function scope4() {
+  const r = k4.rec, t1 = Math.max(8, k4.t), im = rng(r, q => q.inc, 2, true), Om = Math.max(0.5, ...r.map(q => q.Om), q4().Omp === Infinity ? 0 : q4().Omp) * 1.2;
+  scopePlot({ t0: t1 - 8, t1, xl0: '−8 s', xl1: 'maintenant', series: [{ rec: r, f: q => q.inc, col: C.texte, lo: -Math.ceil(im[1]), hi: Math.ceil(im[1]), d: 0, name: 'inclinaison (°)' }, { rec: r, f: q => q.Om, col: C.accent, lw: 2.2, lo: 0, hi: Om, d: 1, name: 'Ω mesurée (rad/s)' }] });
+}
+function q4() { return gyQ(); }
+function status4() {
+  const s = k4.s;
+  if (k4.mode === 'held') return 'Axe tenu horizontal : L = I₃ω. Lâche-le : le poids crée un couple horizontal, perpendiculaire à L.';
+  if (s.down) return prm.w3 < 1 ? 'Sans rotation, le couple du poids la fait simplement tomber.' : 'Trop lente : L est trop petit, le couple l’emporte, la roue tombe sur la butée (θ = 150°).';
+  return 'Le couple du poids ne fait pas tomber la roue : il ajoute à L un petit ΔL horizontal, perpendiculaire à L. L tourne au lieu de pencher. Plus L est grand, plus il tourne lentement : Ω = τ/L.';
+}
+
+/* ================= Actes V et VI : astre central ================= */
+// Vue commune : l'astre est au centre, rv = rayon visible (en R)
+const view = { rv: 4.6, rvT: 4.6 };
+function geoG() {
+  const top = 100, bot = 30, aH = H - top - bot, ext = Math.min(W / 2, aH / 2), cx = W / 2, cy = top + aH / 2, pxR = ext * 0.94 / view.rv;
+  return { cx, cy, pxR, k: pxR / RE_, ext };
+}
+function viewFor(el) {
+  if (el.type === 'parabole' || el.type === 'hyperbole') return 6;
+  if (!isFinite(el.ra) || isNaN(el.ra)) return 1.6;
+  return clamp(el.ra * 1.15 / RE_, 1.6, 14);
+}
+function drawPlanet(c, g) {
+  const Rp = g.pxR;
+  c.save();
+  const grd = c.createRadialGradient(g.cx - Rp * 0.3, g.cy - Rp * 0.3, Rp * 0.1, g.cx, g.cy, Rp);
+  grd.addColorStop(0, '#171e29'); grd.addColorStop(1, C.fond2);
+  c.fillStyle = grd; c.beginPath(); c.arc(g.cx, g.cy, Rp, 0, TAU); c.fill();
+  c.shadowColor = rgba(RT, 0.35); c.shadowBlur = 10; c.strokeStyle = rgba(RT, 0.3); c.lineWidth = 1.2; c.beginPath(); c.arc(g.cx, g.cy, Rp, 0, TAU); c.stroke();
+  c.restore();
+  zcirc(g.cx, g.cy, Rp, 'astre', 'Astre · masse et rayon de la Terre', 'Sphère immobile, sans atmosphère ni rotation prise en compte. GM = 3,986 × 10¹⁴ m³/s², R = 6 371 km. Distances à l’échelle.');
+}
+function gTip(x, y, g) {
+  const r = Math.hypot(x - g.cx, y - g.cy) / g.k;
+  if (r < RE_) return null;
+  return { key: 'g' + Math.round(r / 1e5) + '_' + Math.round(Phys.gAt(r) * 100), name: 'g = GM/r² = ' + fmt(Phys.gAt(r), 2) + ' m/s²', role: 'à r = ' + fmt(r / RE_, 2) + ' R (altitude ' + fmtI((r - RE_) / 1000) + ' km). Vers le centre ; divisée par 4 chaque fois que r double.' };
+}
+// Avance d'un vol : sous-pas ≈ 4 px d'écran, trace et enregistrement
+function flyAdvance(F, dtPhys, k) {
+  let left = dtPhys, n = 0;
+  while (left > 1e-9 && !F.ended && n++ < 400) {
+    const sp = Math.hypot(F.s.vx, F.s.vy) || 1, ch = Math.min(left, Math.max(0.5, 4 / (k * sp)));
+    const s1 = Phys.advanceOrbit(F.s, ch); left -= ch; F.s = s1;
+    if (F.ball && !F.ballEnded) { const b1 = Phys.advanceOrbit(F.ball, ch); F.ball = b1; if (b1.ended) F.ballEnded = true; }
+    const p = F.trace[F.trace.length - 1]; if (!p || Math.hypot(s1.x - p.x, s1.y - p.y) * k > 1.5 || s1.ended) F.trace.push({ x: s1.x, y: s1.y });
+    if (F.trace.length > 5000) F.trace.splice(0, 500);
+    F.t = s1.t;
+    if (F.rec) { F.rec.push({ t: s1.t, alt: Math.hypot(s1.x, s1.y) - RE_, v: s1.ended === 'impact' ? 0 : Math.hypot(s1.vx, s1.vy) }); if (F.rec.length > 1600) F.rec = F.rec.filter((_, i) => i % 2 === 0); }
+    if (s1.ended) F.ended = s1.ended;
+  }
+  if (left > 1e-9 && !F.ended) { F.s = Phys.advanceOrbit(F.s, left); F.t = F.s.t; if (F.s.ended) F.ended = F.s.ended; }
+}
+function flightTime(s0, el) {
+  if (el.type === 'impact') { const r = Phys.advanceOrbit(s0, 1e6); return r.ended ? r.t : 1000; }
+  if (isFinite(el.T)) return el.T;
+  let s = s0, i = 0; while (i++ < 600) { s = Phys.advanceOrbit(s, 300); if (s.ended || Math.hypot(s.x, s.y) > 6 * RE_) break; } return s.t || 3000;
+}
+
+/* ---- Acte V : le canon de Newton ---- */
+const k5 = { cur: null, traces: [], geo: null };
+function reset5() { k5.cur = null; k5.traces = []; view.rv = view.rvT = 4.6; }
+function fire(v0) {
+  if (act !== 4) return;
+  if (v0 != null) { prm.v0 = v0; syncTools(); }
+  const cur = k5.cur; if (cur && cur.trace.length > 2) { k5.traces.push({ pts: cur.trace, v0: cur.v0 }); if (k5.traces.length > 6) k5.traces.shift(); }
+  const s0 = Phys.launch(ALT, prm.v0, 0), el = Phys.elements(s0), tF = flightTime(s0, el);
+  k5.cur = { s: s0, ball: Phys.launch(ALT, 0, 0), ballEnded: false, v0: prm.v0, el, trace: [{ x: s0.x, y: s0.y }], rec: [{ t: 0, alt: ALT, v: prm.v0 }], t: 0, ended: null, accel: clamp(tF / 8, 1, 3e5), tF };
+  view.rvT = viewFor(el); setPlay(true);
+}
+function adv5(dt) {
+  view.rv += (view.rvT - view.rv) * (1 - Math.exp(-dt * 2.6)); const F = k5.cur;
+  if (!F || F.ended) return;
+  const g = geoG(); flyAdvance(F, dt * F.accel * Math.pow(2, prm.spd), g.k);
+}
+const chuteLine = F => { const gx = F.v0 * F.t, gy = R0; return Math.hypot(F.s.x - gx, F.s.y - gy); };
+const chuteBall = F => R0 - Math.hypot(F.ball.x, F.ball.y);
+function drawTrace(c, pts, g, col, lw) {
+  if (pts.length < 2) return; c.save(); c.strokeStyle = col; c.lineWidth = lw; c.beginPath();
+  pts.forEach((p, i) => { const x = g.cx + p.x * g.k, y = g.cy - p.y * g.k; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); c.restore();
+}
+function draw5() {
+  const c = ctx, g = geoG(), F = k5.cur, k = g.k; k5.geo = g;
+  // champ g
+  if (prm.field) {
+    const step = Math.max(34, Math.min(W, H) / 9);
+    c.save(); c.globalAlpha = 0.85;
+    for (let x = g.cx % step - step; x < W + step; x += step) for (let y = g.cy % step - step; y < H + step; y += step) {
+      const dx = x - g.cx, dy = y - g.cy, r = Math.hypot(dx, dy) / k; if (r < RE_ * 1.06 || y < 96) continue;
+      const L = Math.min(Phys.gAt(r) * 3, 28), ux = -dx / Math.hypot(dx, dy), uy = -dy / Math.hypot(dx, dy);
+      arrow(c, x - ux * L / 2, y - uy * L / 2, x + ux * L / 2, y + uy * L / 2, rgba(RA, 0.8), 1.2, null, 4);
+    }
+    c.restore();
+  }
+  // anneaux g
+  for (let n = 2; n <= 4; n++) {
+    const rr = n * g.pxR; if (rr > g.ext * 2.4) continue;
+    c.save(); c.strokeStyle = rgba(RT2, 0.5); c.setLineDash([3, 5]); c.lineWidth = 1; c.beginPath(); c.arc(g.cx, g.cy, rr, 0, TAU); c.stroke(); c.restore();
+    zoneF((x, y) => Math.abs(Math.hypot(x - g.cx, y - g.cy) - rr) < 5, 'ring' + n, 'Anneau r = ' + n + 'R · g = ' + fmt(Phys.gAt(n * RE_), 2) + ' m/s²', 'g = GM/r² : à r = ' + n + 'R, le champ vaut 1/' + n * n + ' de sa valeur à la surface. C’est la loi en 1/r².');
+  }
+  drawPlanet(c, g);
+  c.font = mono(10); const labs = ['9,8', '2,5', '1,1', '0,6'];
+  for (let n = 1; n <= 4; n++) { const rr = n * g.pxR, lx = g.cx - rr * Math.cos(0.25), ly = g.cy + rr * Math.sin(0.25); if (rr <= g.ext * 2.4 && lx > 8 && lx < W - 70) tagText(c, (n === 1 ? 'R' : n + 'R') + ' · g = ' + labs[n - 1], lx + 5, ly, 'left', 'middle', C.texte2); }
+  // tour et canon
+  const topY = g.cy - R0 * k, baseY = g.cy - RE_ * k, tw = Math.max(1.5, Math.min(4, g.pxR * 0.012));
+  c.save(); c.strokeStyle = C.texte; c.lineWidth = tw; c.beginPath(); c.moveTo(g.cx, baseY); c.lineTo(g.cx, topY); c.stroke();
+  c.fillStyle = C.texte; c.fillRect(g.cx - 1.5, topY - 3, 15, 3.5); c.restore();
+  zone(g.cx - 6, topY - 8, g.cx + 16, baseY, 'tour', 'Tour fictive de 400 km · canon horizontal', 'Dessinée à l’échelle : fine, comparée à l’astre. Elle n’existe pas : c’est une montagne imaginaire qui dépasse l’atmosphère (il n’y en a pas ici).');
+  // traces des tirs précédents
+  k5.traces.forEach(t => { drawTrace(c, t.pts, g, rgba(RT, 0.25), 1.2); const p = t.pts[t.pts.length - 1], x = g.cx + p.x * k, y = g.cy - p.y * k; if (x > 20 && x < W - 40 && y > 100 && y < H - 40) { c.font = mono(9.5); c.fillStyle = rgba(RT2, 0.8); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText((t.v0 / 1000).toFixed(2).replace('.', ','), x + 6, y); } });
+  // ligne sans gravité, fantôme, balle lâchée
+  if (F) {
+    const sx = F => g.cx + F.x * k, sy = F => g.cy - F.y * k, pr = { x: F.s.x, y: F.s.y };
+    if (prm.cmp5) {
+      c.save(); c.strokeStyle = rgba(RT2, 0.9); c.setLineDash([6, 5]); c.lineWidth = 1; c.beginPath(); c.moveTo(g.cx, topY); c.lineTo(W + 20, topY); c.stroke(); c.restore();
+      zoneF((x, y) => Math.abs(y - topY) < 4 && x > g.cx, 'droite', 'Trajectoire sans gravité', 'Ce que ferait le projectile sans attraction : une droite, à vitesse constante v₀ (première loi de Newton).');
+      const gp = { x: F.v0 * F.t, y: R0 }, gx = sx(gp), gy = topY;
+      if (!F.ended && gx < W - 8) {
+        c.save(); c.strokeStyle = rgba(RT2, 0.95); c.setLineDash([2, 3]); c.beginPath(); c.moveTo(gx, gy); c.lineTo(sx(pr), sy(pr)); c.stroke(); c.restore();
+        c.beginPath(); c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.fillStyle = C.fond; c.arc(gx, gy, 4.5, 0, TAU); c.fill(); c.stroke();
+        zcirc(gx, gy, 10, 'fant', 'Point fantôme', 'Le projectile qu’on aurait sans gravité : il parcourt la droite à v₀. L’écart entre lui et le vrai projectile est la « chute ».');
+        const L = Math.hypot(sx(pr) - gx, sy(pr) - gy);
+        if (L > 18) { c.font = mono(10.5); tagText(c, 'chute', (gx + sx(pr)) / 2 + 12, (gy + sy(pr)) / 2, 'left', 'middle', C.texte2); }
+        if (L > 3) zoneF((x, y) => { const ax = sx(pr) - gx, ay = sy(pr) - gy, t = clamp(((x - gx) * ax + (y - gy) * ay) / (ax * ax + ay * ay || 1), 0, 1); return Math.hypot(x - gx - t * ax, y - gy - t * ay) < 6; }, 'chute', 'Chute depuis la droite', 'Distance entre le fantôme et le projectile : ' + fmtKm(chuteLine(F) / 1000) + ' km. Au début, elle est égale à celle de la balle lâchée.');
+      }
+      // balle lâchée
+      const b = F.ball, bx = sx(b), by = sy(b);
+      c.beginPath(); c.fillStyle = C.fond; c.strokeStyle = C.texte; c.lineWidth = 1.5; c.arc(bx, by, 4, 0, TAU); c.fill(); c.stroke();
+      c.save(); c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.beginPath(); c.moveTo(g.cx, topY); c.lineTo(bx, by); c.stroke(); c.restore();
+      zcirc(bx, by, 10, 'balle', 'Balle lâchée', 'Lâchée sans vitesse de la bouche du canon au même instant : elle tombe tout droit vers le centre. ' + (F.ballEnded ? 'Elle a touché le sol.' : 'Sa chute : ' + fmtKm(chuteBall(F) / 1000) + ' km.'));
+      if (Math.hypot(bx - g.cx, by - topY) > 20) tagText(c, 'lâchée', bx + 8, by, 'left', 'middle', C.texte);
+    }
+    drawTrace(c, F.trace, g, C.texte, 1.4);
+    const px = sx(pr), py = sy(pr);
+    c.save(); c.shadowColor = C.texte; c.shadowBlur = 10; c.beginPath(); c.fillStyle = C.texte; c.arc(px, py, 4.5, 0, TAU); c.fill(); c.restore();
+    zcirc(px, py, 11, 'proj', 'Projectile', 'Masse négligeable. Il ne subit que la gravité : il est en chute libre depuis la bouche du canon.');
+    if (!F.ended) {
+      const r = Math.hypot(F.s.x, F.s.y), gl = Phys.gAt(r), L = clamp(gl * 3, 6, 40), ux = -F.s.x / r, uy = F.s.y / r;
+      arrow(c, px, py, px + (-F.s.x / r) * L, py + (F.s.y / r) * L, C.accent, 2, null, 7);
+      azone(px, py, px + (-F.s.x / r) * L, py + (F.s.y / r) * L, 'gp', 'Accélération g = ' + fmt(gl, 2) + ' m/s²', 'Toujours dirigée vers le centre de l’astre : la direction change à mesure que le projectile tourne autour (1 m/s² = 3 px).');
+      const sv = Math.hypot(F.s.vx, F.s.vy), Lv = clamp(sv / 1000 * 8, 6, 90);
+      arrow(c, px, py, px + F.s.vx / sv * Lv, py - F.s.vy / sv * Lv, C.texte2, 1.5, null, 7);
+      azone(px, py, px + F.s.vx / sv * Lv, py - F.s.vy / sv * Lv, 'vp', 'Vitesse v = ' + fmt(sv / 1000, 2) + ' km/s', 'Tangente à la trajectoire (1 km/s = 8 px). Changée en direction par g, jamais « ralentie » par un frottement : il n’y en a pas.');
+    } else if (F.ended === 'impact') {
+      c.font = mono(11); tagText(c, 'impact', px, py - 12, 'center', 'bottom', C.accent);
+    }
+  }
+  c.font = mono(10.5);
+  const tx = F ? 'temps ×' + fmtI(F.accel * Math.pow(2, prm.spd)) + ' · t = ' + fmtT(F.t) : 'temps accéléré au tir';
+  tagText(c, tx, 14, H - 8, 'left', 'bottom', C.texte2);
+  tagText(c, (W < 620 ? '' : 'échelle : ') + 'r visible = ' + fmt(view.rv, 1) + ' R' + (prm.field ? ' · flèches g ∝ g (≤ 28 px)' : ''), W - 14, H - 8, 'right', 'bottom', C.texte2);
+  if (!F) { c.font = mono(12); tagText(c, 'choisis v₀, puis « Tirer » (T)', W / 2, g.cy - (R0 * k) - 24 > 120 ? g.cy - R0 * k - 22 : 126, 'center', 'bottom', C.texte2); }
+}
+function scope5() {
+  const F = k5.cur; if (!F) { scopeSetup(); sctx.fillStyle = C.texte2; sctx.font = mono(11); sctx.textAlign = 'center'; sctx.fillText('tire pour lancer l’enregistrement', scopeC.width / dpr / 2, scopeC.height / dpr / 2); return; }
+  const tm = Math.max(F.t, 60), am = rng(F.rec, q => q.alt, 1, false), vm = rng(F.rec, q => q.v, 1000, false);
+  scopePlot({ t0: 0, t1: tm, xl0: '0', xl1: fmtT(tm), series: [{ rec: F.rec, f: q => q.alt / 1000, col: C.texte, lo: 0, hi: Math.max(500, am[1] / 1000), d: 0, name: 'altitude (km)', lw: 1.8 }, { rec: F.rec, f: q => q.v / 1000, col: C.texte2, lo: 0, hi: Math.max(1, vm[1] / 1000), d: 1, name: 'v (km/s)', dash: [5, 4] }] });
+}
+const KEY5 = 'Le projectile tombe exactement comme la balle lâchée. Mais il file si vite de côté que le sol se dérobe sous lui à mesure qu’il tombe. Une orbite, c’est une chute qui rate le sol.';
+function status5() {
+  const F = k5.cur, el = Phys.elements(Phys.launch(ALT, prm.v0, 0));
+  const typ = { impact: 'impact : le projectile retombe', cercle: 'orbite circulaire', ellipse: 'ellipse (orbite liée)', parabole: 'parabole : juste assez pour s’échapper', hyperbole: 'fuite (hyperbole)' }[el.type];
+  if (!F) return 'Prévu : ' + typ + ' · v₀/v_c = ' + fmt(prm.v0 / VC, 2) + ' · v₀/v_lib = ' + fmt(prm.v0 / VL, 2) + '.';
+  if (F.ended === 'impact') return 'impact à ' + fmt(F.s.vImpact / 1000, 2) + ' km/s après ' + fmtT(F.s.t) + '.';
+  if (F.ended === 'fuite' && F.el.E < 0) return 'sorti du calcul (r > 60 R) mais lié : E < 0, apogée ' + fmtI((F.el.ra - RE_) / 1000) + ' km, il reviendrait après ' + fmtT(F.el.T) + ' (sans Lune ni Soleil).';
+  if (F.ended === 'fuite' || (F.el.E >= 0 && Math.hypot(F.s.x, F.s.y) > view.rv * RE_ * 1.05)) return 'fuite : l’objet ne reviendra pas.';
+  if (F.el.type === 'cercle') return F.t >= F.el.T ? 'orbite circulaire, une révolution en ' + fmt(F.el.T / 60, 0) + ' min.' : KEY5;
+  if (F.el.type === 'ellipse') return F.t >= F.el.T ? 'ellipse : une révolution en ' + fmtT(F.el.T) + ', périgée ' + fmtI((F.el.rp - RE_) / 1000) + ' km, apogée ' + fmtI((F.el.ra - RE_) / 1000) + ' km.' : KEY5;
+  return KEY5;
+}
+
+/* ---- Acte VI : ellipse et énergie ---- */
+const k6 = { s: null, el: null, ended: null, t: 0, tail: [], accel: 1, samp: null, cumA: null, geo: null };
+function init6() {
+  const s0 = Phys.launch(ALT, prm.v6, 0), el = Phys.elements(s0);
+  k6.s = s0; k6.el = el; k6.ended = null; k6.t = 0; k6.tail = [{ x: s0.x, y: s0.y }]; k6.samp = null;
+  k6.accel = clamp(flightTime(s0, el) / 10, 1, 3e5); view.rvT = el.type === 'hyperbole' || el.type === 'parabole' ? 8 : isFinite(el.ra) ? clamp(el.ra * 1.15 / RE_, 1.6, 14) : 1.6;
+  if ((el.type === 'ellipse' || el.type === 'cercle') && isFinite(el.T)) {
+    const N = 720, h = el.T / N, pts = [{ x: s0.x, y: s0.y }]; let s = s0; const cum = [0];
+    for (let i = 0; i < N; i++) { const n = Phys.advanceOrbit(s, h); cum.push(cum[i] + Phys.sweptArea(s, n)); pts.push({ x: n.x, y: n.y }); s = n; }
+    k6.samp = pts; k6.cumA = cum;
+  }
+}
+function adv6(dt) {
+  view.rv += (view.rvT - view.rv) * (1 - Math.exp(-dt * 2.6));
+  if (k6.ended || !k6.s) return;
+  const F = { s: k6.s, trace: k6.tail, t: k6.t, ended: null }, g = geoG(); flyAdvance(F, dt * k6.accel, g.k);
+  k6.s = F.s; k6.t = F.t; k6.ended = F.ended; k6.tail = F.trace; if (k6.tail.length > 260) k6.tail.splice(0, k6.tail.length - 260);
+}
+function sectorArea(tAbs) { // aire cumulée au temps tAbs (modulo la période), en m²
+  const el = k6.el, N = 720, cyc = Math.floor(tAbs / el.T), f = (tAbs / el.T - cyc) * N, i = Math.min(N - 1, Math.floor(f)), fr = f - i;
+  return cyc * k6.cumA[N] + k6.cumA[i] + (k6.cumA[i + 1] - k6.cumA[i]) * fr;
+}
+function lastSectorPct() { const el = k6.el; if (!k6.cumA || !isFinite(el.T) || k6.t < el.T / 12) return NaN; const a = sectorArea(k6.t) - sectorArea(k6.t - el.T / 12); return a / (PI * el.a * el.b / 12) * 100; }
+const q6 = () => { const s = k6.s, e = Phys.energy(s), r = e.r, el = k6.el; return Object.assign(e, { alt: r - RE_, v: Math.hypot(s.vx, s.vy), h: Math.abs(s.x * s.vy - s.y * s.vx) }); };
+function drawSectors(c, g) {
+  const k = g.k, S = (x, y) => [g.cx + x * k, g.cy - y * k];
+  if (prm.areas && k6.samp) {
+    const per = 60; for (let j = 0; j < 12; j++) {
+      c.beginPath(); c.moveTo(g.cx, g.cy); for (let i = 0; i <= per; i++) { const p = k6.samp[j * per + i], s = S(p.x, p.y); c.lineTo(s[0], s[1]); } c.closePath();
+      c.fillStyle = rgba(RA, j % 2 ? 0.22 : 0.12); c.fill();
+    }
+    zoneF((x, y) => { const dx = x - g.cx, dy = y - g.cy; return k6.samp && Math.hypot(dx, dy) < (g.ext * 2) && prm.areas && Math.hypot(dx, dy) > g.pxR; }, 'sect', 'Secteurs de Kepler 2', 'Le rayon astre–satellite balaie des aires égales pendant des durées égales (T/12) : étroits et longs près du périastre, larges et courts à l’apoastre.');
+  }
+}
+function drawPlanetOrbit(c, g, el) {
+  const k = g.k, S = (x, y) => [g.cx + x * k, g.cy - y * k], ux = Math.cos(el.wp), uy = Math.sin(el.wp);
+  // conique
+  const e = el.e, p = el.p, rcap = Math.max(view.rv * RE_ * 2.2, 3 * RE_);
+  let nuL = PI; if (e > 1e-6) { nuL = Math.acos(clamp((p / rcap - 1) / e, -1, 1)); if (e < 1 && p / (1 - e) < rcap) nuL = PI; }
+  c.save(); c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.1; c.beginPath();
+  const n = 480; for (let i = 0; i <= n; i++) { const nu = -nuL + 2 * nuL * i / n, r = p / (1 + e * Math.cos(nu)), s = S(r * Math.cos(el.wp + nu), r * Math.sin(el.wp + nu)); i ? c.lineTo(s[0], s[1]) : c.moveTo(s[0], s[1]); }
+  if (e < 1 && nuL >= PI - 1e-9) c.closePath(); c.stroke(); c.restore();
+  zoneF((x, y) => { const dx = (x - g.cx) / k, dy = -(y - g.cy) / k, r = Math.hypot(dx, dy); if (r < 1) return false; let nu = Math.atan2(dy, dx) - el.wp; const rr = p / (1 + e * Math.cos(nu)); return rr > 0 && Math.abs(rr - r) * k < 6; }, 'conique', 'Trajectoire prévue (' + ({ impact: 'impact', cercle: 'cercle', ellipse: 'ellipse', parabole: 'parabole', hyperbole: 'hyperbole' }[el.type]) + ', e = ' + fmt(el.e, 3) + ')', 'Tracée à partir de la position et de la vitesse de départ : une conique dont l’astre occupe un foyer (première loi de Kepler).');
+  const rp = S(el.rp * ux, el.rp * uy);
+  if (el.type === 'ellipse' || el.type === 'impact') {
+    const a = el.a, ra = isFinite(el.ra) ? el.ra : 0, f2 = S(-2 * a * e * ux, -2 * a * e * uy), pa = S(-ra * ux, -ra * uy);
+    if (isFinite(a)) {
+      c.save(); c.setLineDash([5, 4]); c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(rp[0], rp[1]); c.lineTo(pa[0], pa[1]); c.stroke(); c.restore();
+      if (e > 0.01) { c.strokeStyle = C.texte; c.lineWidth = 1.4; const x = f2[0], y = f2[1]; c.beginPath(); c.moveTo(x - 4, y - 4); c.lineTo(x + 4, y + 4); c.moveTo(x + 4, y - 4); c.lineTo(x - 4, y + 4); c.stroke(); c.font = mono(10.5); tagText(c, 'foyer vide', x + 7, y - 10, 'left', 'bottom', C.texte2); zcirc(x, y, 10, 'foyer', 'Foyer vide', 'Le deuxième foyer de l’ellipse : il ne contient rien. Somme des distances à ses deux foyers = 2a pour tout point.'); }
+      c.font = mono(10.5);
+    }
+    if (el.rp >= RE_) {
+      c.beginPath(); c.fillStyle = C.texte; c.arc(rp[0], rp[1], 3.5, 0, TAU); c.fill();
+      const lp = 'périastre (périgée) ' + fmtI((el.rp - RE_) / 1000) + ' km', barsL = W - 16 - (3 * (W < 620 ? 18 : 24) + 20) - 10;   // ne pas empiéter sur les barres d'énergie du coin
+      const lpLeft = rp[0] + 8 + c.measureText(lp).width > barsL;
+      tagText(c, lp, rp[0] + (lpLeft ? -8 : 8), rp[1] + (uy > 0.5 ? -10 : 10), lpLeft ? 'right' : 'left', 'middle', C.texte);
+      zcirc(rp[0], rp[1], 10, 'peri', 'Périastre (périgée) · altitude ' + fmtI((el.rp - RE_) / 1000) + ' km', 'Point le plus proche de l’astre : la vitesse y est maximale (flèche longue).');
+      const vp = Math.abs(el.h) / el.rp, Lp = clamp(vp / 1000 * 9, 6, 100), sgn = Math.sign(el.h) || 1;
+      arrow(c, rp[0], rp[1], rp[0] + sgn * -uy * Lp, rp[1] - sgn * ux * Lp, C.texte2, 1.6, null, 7);
+    }
+    if (isFinite(ra) && ra > 0 && el.type === 'ellipse') {
+      const inView = Math.hypot(pa[0] - g.cx, pa[1] - g.cy) < g.ext * 1.0;
+      if (inView) {
+        c.beginPath(); c.fillStyle = C.texte; c.arc(pa[0], pa[1], 3.5, 0, TAU); c.fill();
+        tagText(c, 'apoastre (apogée) ' + fmtI((el.ra - RE_) / 1000) + ' km', pa[0] - 8, pa[1] + (uy > 0.5 ? 10 : -10), 'right', 'middle', C.texte);
+        zcirc(pa[0], pa[1], 10, 'apo', 'Apoastre (apogée) · altitude ' + fmtI((el.ra - RE_) / 1000) + ' km', 'Point le plus éloigné : la vitesse y est minimale (flèche courte).');
+        const va = Math.abs(el.h) / el.ra, La = clamp(va / 1000 * 9, 3, 100), sgn = Math.sign(el.h) || 1;
+        arrow(c, pa[0], pa[1], pa[0] + sgn * uy * La, pa[1] + sgn * ux * La, C.texte2, 1.6, null, 6);
+      }
+    }
+  } else if (el.type === 'cercle') { /* rien de plus */ }
+  else if (el.rp >= RE_) {
+    c.beginPath(); c.fillStyle = C.texte; c.arc(rp[0], rp[1], 3.5, 0, TAU); c.fill(); c.font = mono(10.5); tagText(c, 'périastre ' + fmtI((el.rp - RE_) / 1000) + ' km', rp[0] + 8, rp[1] - 10, 'left', 'middle', C.texte);
+    zcirc(rp[0], rp[1], 10, 'peri', 'Périastre', 'Point de plus grande proximité de la trajectoire ouverte.');
+  }
+}
+function draw6() {
+  const c = ctx, g = geoG(), el = k6.el, s = k6.s, k = g.k; k6.geo = g;
+  drawSectors(c, g); drawPlanet(c, g); drawPlanetOrbit(c, g, el);
+  if (k6.tail.length > 1) drawTrace(c, k6.tail, g, rgba(RT, 0.55), 1.6);
+  const sx = g.cx + s.x * k, sy = g.cy - s.y * k;
+  c.save(); c.shadowColor = C.texte; c.shadowBlur = 10; c.beginPath(); c.fillStyle = C.texte; c.arc(sx, sy, 4.5, 0, TAU); c.fill(); c.restore();
+  zcirc(sx, sy, 11, 'sat', 'Satellite', 'Masse négligeable, en chute libre. Sa vitesse et son altitude changent le long de l’orbite : K et U s’échangent.');
+  if (k6.ended === 'impact') { c.font = mono(11); tagText(c, 'impact', sx, sy - 12, 'center', 'bottom', C.accent); }
+  // barres d'énergie par kg, coin
+  const q = q6(), bw = W < 620 ? 18 : 24, gap = 10, hH = clamp(H * 0.16, 44, 72), zeroY = Math.round(110 + hH + 14), x0 = W - 16 - (3 * bw + 2 * gap), sc = hH / 70e6;
+  c.save(); c.strokeStyle = C.trait; c.beginPath(); c.moveTo(x0 - 6, zeroY + 0.5); c.lineTo(W - 10, zeroY + 0.5); c.stroke(); c.restore();
+  const cols = [['K', q.K, 'K', 'Énergie cinétique K = ½v² par kg', 'Énergie du mouvement : maximale au périastre, minimale à l’apoastre.'], ['U', q.U, 'U', 'Énergie potentielle U = −GM/r par kg', 'Hachurée et négative : zéro à l’infini, de plus en plus négative près de l’astre.'], ['E', q.E, 'E', 'Énergie totale E = K + U par kg', 'Constante le long de l’orbite : elle décide de la forme (négative : liée ; nulle : seuil ; positive : fuite).']];
+  c.font = mono(10); cols.forEach((col, i) => {
+    const bx = x0 + i * (bw + gap), hh = clamp(col[1] * sc, -hH - 10, hH + 10);
+    if (col[2] === 'E') { c.save(); c.strokeStyle = C.texte; c.lineWidth = 1.4; const y = hh >= 0 ? zeroY - hh : zeroY; c.strokeRect(bx + 0.5, y + 0.5, bw - 1, Math.max(0, Math.abs(hh) - 1)); c.restore(); } else drawBar(c, col[2], bx, zeroY, bw, hh);
+    tagText(c, col[2], bx + bw / 2, zeroY + (col[1] < 0 && col[2] !== 'K' ? -hh * 0 : 0) + (i === 1 ? -hH - 14 : -hH - 14), 'center', 'bottom', C.texte2);
+    tagText(c, fmt(col[1] / 1e6, 1), bx + bw / 2, hh >= 0 ? zeroY - hh - 3 : zeroY - hh + 4, 'center', hh >= 0 ? 'bottom' : 'top', C.texte);
+    zone(bx - 3, zeroY - hH - 12, bx + bw + 3, zeroY + hH + 12, 'b6' + i, col[3], col[4]);
+  });
+  c.font = mono(10); tagText(c, 'MJ/kg', W - 14, zeroY + hH + 22, 'right', 'top', C.texte2);
+  c.font = mono(10.5); tagText(c, 'temps ×' + fmtI(k6.accel) + ' · t = ' + fmtT(k6.t), 14, H - 8, 'left', 'bottom', C.texte2);
+  tagText(c, (W < 620 ? '' : 'à l’échelle · ') + 'r visible = ' + fmt(view.rv, 1) + ' R', W - 14, H - 8, 'right', 'bottom', C.texte2);
+  if (prm.areas) { const pc = lastSectorPct(); tagText(c, isFinite(pc) ? 'dernier secteur T/12 : ' + fmt(pc, 1) + ' % de πab/12' : (k6.samp ? 'secteurs de T/12 · attends T/12…' : 'orbite ouverte : pas de période'), W / 2, H - 8, 'center', 'bottom', C.accent); }
+}
+function scope6() {
+  const { w, h } = scopeSetup(), c = sctx, el = k6.el, s = k6.s, q = q6();
+  const padL = 46, padR = 10, padT = 12, padB = 24, pw = w - padL - padR, ph = h - padT - padB;
+  const rmaxR = el.E >= 0 || !isFinite(el.ra) ? 12 : clamp(el.ra * 1.08 / RE_, 2, 14), Umin = -66e6, Umax = 12e6;
+  const xR = r => padL + (r / RE_ - 1) / (rmaxR - 1) * pw, yE = e => padT + ph * (1 - (e - Umin) / (Umax - Umin));
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.textBaseline = 'middle'; c.fillStyle = C.texte2; c.textAlign = 'right';
+  for (const v of [-60, -30, 0]) c.fillText(v, padL - 4, yE(v * 1e6));
+  c.textAlign = 'left'; c.fillText('MJ/kg', 2, 7); c.textAlign = 'center'; for (let n = 1; n <= rmaxR; n += rmaxR > 6 ? 2 : 1) c.fillText(n + 'R', xR(n * RE_), h - 8);
+  // E = 0
+  c.setLineDash([3, 4]); c.strokeStyle = C.texte2; c.beginPath(); c.moveTo(padL, yE(0)); c.lineTo(padL + pw, yE(0)); c.stroke(); c.setLineDash([]);
+  c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText('E = 0 : seuil de libération', padL + pw - 3, yE(0) - 8);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  // U(r) plein, hachuré dessous
+  c.beginPath(); for (let i = 0; i <= 140; i++) { const r = RE_ * (1 + (rmaxR - 1) * i / 140), x = xR(r), y = yE(-ORB.GM / r); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+  c.strokeStyle = C.ener; c.lineWidth = 2; c.stroke();
+  if (prm.ueff) { c.setLineDash([5, 4]); c.beginPath(); for (let i = 0; i <= 200; i++) { const r = RE_ * (1 + (rmaxR - 1) * i / 200), x = xR(r), y = yE(Phys.uEff(r, el.h)); i ? c.lineTo(x, y) : c.moveTo(x, y); } c.strokeStyle = rgba(RE, 0.9); c.lineWidth = 1.5; c.stroke(); c.setLineDash([]); }
+  // ligne E
+  c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.moveTo(padL, yE(el.E)); c.lineTo(padL + pw, yE(el.E)); c.stroke();
+  // segment K et point
+  const xr = xR(q.r), yU = yE(q.U), yEE = yE(q.E);
+  c.strokeStyle = C.ener; c.lineWidth = 3; c.beginPath(); c.moveTo(xr, yU); c.lineTo(xr, yEE); c.stroke();
+  c.beginPath(); c.fillStyle = C.texte; c.arc(xr, yU, 4, 0, TAU); c.fill();
+  if (prm.ueff && isFinite(el.ra) && el.type !== 'impact') for (const [rr, nm] of [[el.rp, 'péri'], [el.ra, 'apo']]) { const x = xR(rr); if (x >= padL && x <= padL + pw) { c.beginPath(); c.fillStyle = C.texte; c.arc(x, yE(el.E), 3.5, 0, TAU); c.fill(); c.fillStyle = C.texte; c.textAlign = 'center'; c.fillText(nm, x, yE(el.E) + 11); } }
+  c.restore();
+  c.textAlign = 'left'; c.fillStyle = C.ener; c.fillText('U(r) = −GM/r', padL + 6, yE(-ORB.GM / (RE_ * (1 + (rmaxR - 1) * 0.35))) + 14);
+  c.fillStyle = C.texte; const ky = (yU + yEE) / 2; c.textAlign = xr > padL + pw - 60 ? 'right' : 'left'; c.fillText('K = ' + fmt(q.K / 1e6, 1), xr + (xr > padL + pw - 60 ? -6 : 6), clamp(ky, padT + 8, padT + ph - 8));
+  c.textAlign = 'right'; c.fillStyle = C.texte; c.fillText('E = ' + fmt(el.E / 1e6, 1), padL + pw - 3, yE(el.E) + (el.E > -8e6 ? 9 : -8));
+}
+function status6() {
+  const el = k6.el, t = { impact: 'E < 0 mais le périastre est sous la surface : le satellite retombe.', cercle: 'E < 0 : orbite circulaire.', ellipse: 'E < 0 : ellipse, K et U s’échangent.', parabole: 'E = 0 : juste assez pour s’échapper.', hyperbole: 'E > 0 : fuite.' }[el.type];
+  return 'Tout se joue sur E. E < 0 : lié (cercle ou ellipse). E = 0 : juste assez pour s’échapper. E > 0 : fuite. Le long d’une orbite, K et U s’échangent ; leur somme ne bouge pas. Ici : ' + t;
+}
+
+/* ================= Acte VII : barycentre ================= */
+const k7 = { s: null, acc: 0, t: 0, tr: [], rc: 0, rec: [], geo: null };
+function init7() { k7.s = Phys.binaryInit(prm.e7); k7.acc = 0; k7.t = 0; k7.tr = []; k7.rec = []; k7.rc = 0; }
+function setBinary(q, e) { if (q != null) prm.q = clamp(q, 0.001, 1); if (e != null) prm.e7 = clamp(e, 0, 0.7); prm.pre = null; init7(); syncTools(); }
+function adv7(dt) {
+  k7.acc += dt / 6; const h = Phys.BI.dt; let n = 0;
+  while (k7.acc >= h && n++ < 500) {
+    k7.s = Phys.stepBinary(k7.s, h); k7.acc -= h; k7.t += h;
+    if (++k7.rc % 20 === 0) { k7.tr.push({ x: k7.s.x, y: k7.s.y }); if (k7.tr.length > 230) k7.tr.shift(); const b = Phys.bodies(k7.s, 1, prm.q); k7.rec.push({ t: k7.t, r1: Math.hypot(b.x1, b.y1), r2: Math.hypot(b.x2, b.y2) }); }
+  }
+  if (k7.acc > 0.2) k7.acc = 0; trim(k7.rec, k7.t - 3);
+}
+const niceZ = z => { const e = Math.pow(10, Math.floor(Math.log10(z))), m = z / e; return (m < 2 ? 1 : m < 5 ? 2 : m < 10 ? 5 : 10) * e; };
+function draw7() {
+  const c = ctx, top = 108, bot = 30, aH = H - top - bot, cx = W / 2, cy = top + aH / 2, pxu = 0.9 * Math.min(W / 2 - 10, aH / 2) / 1.7, q = prm.q, e = prm.e7;
+  k7.geo = { cx, cy, pxu };
+  const b = Phys.bodies(k7.s, 1, q), s = k7.s;
+  const r1 = clamp(11 * Math.cbrt(1), 11, 11), r2 = Math.max(3, 11 * Math.cbrt(q));
+  // traces
+  c.save(); c.lineWidth = 1.3;
+  for (const w of [1, 2]) {
+    c.strokeStyle = w === 1 ? rgba(RT, 0.5) : rgba(RT2, 0.7); c.beginPath();
+    k7.tr.forEach((p, i) => { const bb = Phys.bodies(p, 1, q), x = cx + (w === 1 ? bb.x1 : bb.x2) * pxu, y = cy - (w === 1 ? bb.y1 : bb.y2) * pxu; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+  }
+  c.restore();
+  // barycentre
+  c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath(); c.moveTo(cx - 7, cy); c.lineTo(cx + 7, cy); c.moveTo(cx, cy - 7); c.lineTo(cx, cy + 7); c.stroke();
+  zcirc(cx, cy, 12, 'bary', 'Barycentre (centre de masse)', 'Point fixe autour duquel tournent les deux corps : m₁r₁ = m₂r₂. Il se trouve toujours plus près du corps lourd.');
+  const x1 = cx + b.x1 * pxu, y1 = cy - b.y1 * pxu, x2 = cx + b.x2 * pxu, y2 = cy - b.y2 * pxu;
+  c.save(); c.setLineDash([2, 4]); c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke(); c.restore();
+  // quantités de mouvement : égales et opposées, échelle ajustée à q
+  const vr = [s.vx, s.vy], vm = Math.hypot(s.vx, s.vy), pn = q / (1 + q) * 2 * PI, kp = 46 / pn, pl = q / (1 + q) * vm * kp;
+  const p1x = -q / (1 + q) * s.vx, p1y = -q / (1 + q) * s.vy;
+  if (pl > 2) {
+    const ux = s.vx / vm, uy = s.vy / vm;
+    arrow(c, x1, y1, x1 - ux * pl, y1 + uy * pl, C.texte, 1.6, null, 7); arrow(c, x2, y2, x2 + ux * pl, y2 - uy * pl, C.texte, 1.6, null, 7);
+    c.font = mono(10.5); tagText(c, 'p₁', x1 - ux * pl - 10, y1 + uy * pl, 'center', 'middle', C.texte); tagText(c, 'p₂', x2 + ux * pl + 10, y2 - uy * pl, 'center', 'middle', C.texte);
+    azone(x1, y1, x1 - ux * pl, y1 + uy * pl, 'p1', 'Quantité de mouvement p₁ = m₁v₁', 'Égale et opposée à p₂ : Σp = 0 dans le référentiel du barycentre (voir 10·11). Échelle ajustée à q pour rester visible.');
+    azone(x2, y2, x2 + ux * pl, y2 - uy * pl, 'p2', 'Quantité de mouvement p₂ = m₂v₂', 'Même grandeur que p₁, sens contraire : le corps léger va vite, le lourd lentement.');
+  }
+  c.beginPath(); c.fillStyle = C.texte; c.arc(x1, y1, r1, 0, TAU); c.fill();
+  c.beginPath(); c.fillStyle = C.texte2; c.strokeStyle = C.texte; c.lineWidth = 1; c.arc(x2, y2, r2, 0, TAU); c.fill(); c.stroke();
+  zcirc(x1, y1, r1 + 3, 'c1', 'Corps 1 (le plus lourd) · m₁ = 1', 'Décrit la plus petite orbite : r₁ = q/(1+q) · r. Son rayon dessiné est arbitraire.');
+  zcirc(x2, y2, Math.max(r2 + 3, 8), 'c2', 'Corps 2 · m₂ = ' + fmt(q, q < 0.01 ? 4 : 3) + ' m₁', 'Décrit la plus grande orbite : r₂ = r/(1+q). Même période que le corps 1.');
+  // loupe
+  const Rl = Math.min(64, W * 0.17), lx = W - Rl - 16, ly = H - Rl - 30, r1max = (1 + e) * q / (1 + q), Mz = niceZ(Math.max(1, 0.62 * Rl / (Math.max(r1max, 1e-9) * pxu)));
+  let lensMsg = '';
+  if (Mz >= 2) {
+    c.save(); c.beginPath(); c.arc(lx, ly, Rl, 0, TAU); c.clip(); c.fillStyle = 'rgba(17,22,30,0.95)'; c.fillRect(lx - Rl, ly - Rl, 2 * Rl, 2 * Rl);
+    c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1.2; c.beginPath(); k7.tr.forEach((p, i) => { const bb = Phys.bodies(p, 1, q), x = lx + bb.x1 * pxu * Mz, y = ly - bb.y1 * pxu * Mz; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+    c.strokeStyle = C.accent; c.beginPath(); c.moveTo(lx - 5, ly); c.lineTo(lx + 5, ly); c.moveTo(lx, ly - 5); c.lineTo(lx, ly + 5); c.stroke();
+    c.fillStyle = C.texte; c.beginPath(); c.arc(lx + b.x1 * pxu * Mz, ly - b.y1 * pxu * Mz, 4, 0, TAU); c.fill(); c.restore();
+    c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.beginPath(); c.arc(lx, ly, Rl, 0, TAU); c.stroke();
+    c.font = mono(10.5); tagText(c, 'loupe ×' + fmtI(Mz), lx, ly - Rl - 3, 'center', 'bottom', C.texte2);
+    zcirc(lx, ly, Rl, 'loupe', 'Loupe ×' + fmtI(Mz) + ' centrée sur le barycentre', 'Le corps 1 décrit un tout petit cercle : le « vacillement » de l’étoile, qui trahit la présence d’une planète invisible.');
+  }
+  c.font = mono(10.5);
+  tagText(c, 'tailles non à l’échelle : rayon ∝ m^(1/3), minimum 3 px', 14, H - 8, 'left', 'bottom', C.texte2);
+}
+function scope7() {
+  const r = k7.rec, t1 = k7.t, m1 = (1 + prm.e7) * prm.q / (1 + prm.q), m2 = (1 + prm.e7) / (1 + prm.q);
+  scopePlot({ t0: t1 - 2, t1, xl0: '−2 périodes', xl1: 'maintenant', series: [{ rec: r, f: q => q.r2 / (1 + 0), col: C.texte2, lo: 0, hi: Math.max(0.1, m2 * 1.05), d: 2, name: 'r₂ (a)' }, { rec: r, f: q => q.r1, col: C.texte, lo: 0, hi: Math.max(1e-4, m1 * 1.05), d: m1 < 0.01 ? 4 : 2, name: 'r₁ (a)', lw: 2 }] });
+}
+const FACTS = { 'Terre–Lune': 'Terre–Lune : le barycentre est à 4 670 km du centre de la Terre (rayon 6 371 km : à l’intérieur de la Terre).', 'Soleil–Jupiter': 'Soleil–Jupiter : le barycentre est à ≈ 742 000 km du centre du Soleil (rayon 696 000 km : juste à l’extérieur).' };
+const PRE7 = { 'Terre–Lune': [0.0123, 0.055], 'Soleil–Jupiter': [0.000954, 0.049], 'Binaire 2 : 1': [0.5, 0.3], 'Jumelles': [1, 0.3] };
+function status7() {
+  return (prm.pre && FACTS[prm.pre] ? FACTS[prm.pre] + ' ' : '') + 'Les deux corps tournent autour de leur centre de masse commun, chacun sur sa propre orbite, dans le même temps. Le plus lourd décrit la plus petite.';
+}
+
+/* ---------------- Mises en page ---------------- */
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+const hasBars = () => act === 1 || (act === 2 && prm.mode3 === 'ring');
+function sizePanelCanvases() {
+  $('#barsBox').hidden = !hasBars();
+  sizeCanvas(scopeC, act === 5 ? 214 : 160);
+  if (hasBars()) sizeCanvas(barsC, act === 1 ? 172 : 168);
+  $('#leg2').style.display = hasBars() ? '' : 'none';
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases();
+}
+
+/* ---------------- Légendes et mesures ---------------- */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const bx = (col, op) => `<rect x="0" y="0" width="20" height="8" fill="${col}" fill-opacity="${op || 1}"/>`;
+const LEG = [
+  [lg(ln('#e8e4dc', 1.8), 'ω') + lg(ln('#d4ee8a', 2.4), 'α'), ''],
+  [lg(ln('#e8e4dc', 1.8), 'ω_A') + lg(ln('#e8e4dc', 1.8, 1), 'ω_B') + lg(bx('#d4ee8a', .3), 'couple appliqué'), lg(bx('#ff8a5b'), 'L = Iω') + lg(bx('#ffd166'), 'E = ½Iω²') + lg('<rect x="0.5" y="0.5" width="19" height="7" fill="none" stroke="#e8e4dc" stroke-dasharray="4 3"/>', 'travail W reçu')],
+  [lg(ln('#e8e4dc', 1.8), 'ω') + lg(ln('#ff8a5b', 2.4), 'L'), lg(bx('#ff8a5b'), 'L₁') + lg(bx('#ff8a5b', .45), 'L₂') + lg(bx('#ffd166'), 'K₁') + lg(bx('#ffd166', .6), 'K₂') + lg(bx('#ffd166', .35), 'chaleur')],
+  [lg(ln('#e8e4dc', 1.8), 'inclinaison') + lg(ln('#d4ee8a', 2.4), 'Ω mesurée'), ''],
+  [lg(ln('#e8e4dc', 1.8), 'altitude') + lg(ln('#8a93a0', 1.6, 1), 'v'), ''],
+  [lg(ln('#ffd166', 2), 'U(r)') + lg(ln('#e8e4dc', 1.6), 'E') + lg(ln('#ffd166', 3), 'K = E − U') + lg(ln('#ffd166', 1.4, 1), 'U_eff'), ''],
+  [lg(ln('#8a93a0', 1.8), 'r₂') + lg(ln('#e8e4dc', 2), 'r₁'), '']
+];
+const MEAS = [
+  [['θ', [['th', 'rad'], ['thT', 'tr']]], ['ω', [['w', 'rad/s'], ['wr', 'tr/min']]], ['α', [['a', 'rad/s²']]], ['r_P', [['rp', 'm']]], ['s_P = r_P·θ', [['s', 'm']]], ['v_P = ωr_P', [['v', 'm/s']]], ['a_c = ω²r_P', [['ac', 'm/s²']]], ['a_t = αr_P', [['at', 'm/s²']]]],
+  [['', [['hA', 'A'], ['hB', 'B']]], ['τ = F·d (commun)', [['tau', 'N·m']]], ['I = I_moyeu + 2mr²', [['IA', ''], ['IB', 'kg·m²']]], ['α = τ/I', [['aA', ''], ['aB', 'rad/s²']]], ['ω', [['wA', ''], ['wB', 'rad/s']]], ['L = Iω', [['LA', ''], ['LB', 'kg·m²/s']]], ['E = ½Iω²', [['EA', ''], ['EB', 'J']]], ['W reçu = τΔθ', [['WA', ''], ['WB', 'J']]]],
+  [['r (bras)', [['r', 'm']]], ['I = I₀ + 2mr²', [['I', 'kg·m²']]], ['ω', [['w', 'rad/s'], ['wT', 'tr/s']]], ['L = Iω', [['L', 'kg·m²/s']]], ['E = L²/2I', [['E', 'J']]], ['T = mω²r (un bras)', [['T', 'N']]], ['travail des bras', [['Wb', 'J']]]],
+  [['ω₁ plateau · ω₂ anneau', [['w1', ''], ['w2', 'rad/s']]], ['L₁ · L₂', [['L1', ''], ['L2', 'kg·m²/s']]], ['L total (constant)', [['L', 'kg·m²/s']]], ['K₁ + K₂', [['E', 'J']]], ['chaleur dégagée', [['Eth', 'J']]]],
+  [['ω (rotation propre)', [['w', 'rad/s']]], ['L = I₃ω', [['L', 'kg·m²/s']]], ['τ = mgd·sinθ', [['tau', 'N·m']]], ['Ω prédite = τ/L', [['Op', 'rad/s']]], ['Ω mesurée (0,5 s)', [['Om', 'rad/s']]], ['période 2π/Ω', [['Tp', 's']]], ['inclinaison (+ au-dessus)', [['inc', '°']]]],
+  [['v₀', [['v0', 'km/s']]], ['v_c · v_lib (400 km)', [['vc', ''], ['vl', 'km/s']]], ['v₀/v_c · v₀/v_lib', [['rc', ''], ['rl', '']]], ['t', [['t', '']]], ['altitude', [['alt', 'km']]], ['v', [['v', 'km/s']]], ['g local', [['g', 'm/s²']]], ['chute depuis la droite', [['c1', 'km']]], ['chute de la balle lâchée', [['c2', 'km']]]],
+  [['r · altitude', [['r', ''], ['alt', 'km']]], ['v', [['v', 'km/s']]], ['K = ½v²', [['K', 'MJ/kg']]], ['U = −GM/r', [['U', 'MJ/kg']]], ['E = K + U', [['E', 'MJ/kg']]], ['h = r·v⊥ (constant)', [['h', '10⁹ m²/s']]], ['e · a', [['e', ''], ['a', '10³ km']]], ['alt. périastre · apoastre', [['hp', ''], ['ha', 'km']]], ['v périastre · apoastre', [['vp', ''], ['va', 'km/s']]], ['T', [['T', '']]], ['T²/a³', [['k3', 's²/m³']]]],
+  [['q = m₂/m₁', [['q', '']]], ['r₁/r₂ = m₂/m₁', [['rr', '']]], ['v₁/v₂ = m₂/m₁', [['vv', '']]], ['période commune', [['T', 'u.r.']]], ['r₁/a (moyen · instant)', [['r1m', ''], ['r1', '']]], ['r₂/a (moyen · instant)', [['r2m', ''], ['r2', '']]]]
+];
+const MNOTE = [
+  'Disque rigide autour d’un axe fixe. Échelles fixes : 1 m/s = 34 px, 1 m/s² = 24 px (flèche a_c plafonnée à 120 px).',
+  'Rotation autour d’un axe fixe ; masses ponctuelles sur des rayons sans masse ; I scalaire (pas de tenseur). 1 N = 6 px. Le frein exerce un couple constant de 0,4 N·m.',
+  'Axe fixe, I scalaire ; patineur abstrait. Anneau : « agrandi puis ramené » en 0,4 s par perspective seulement ; frottement à couple constant (0,04 N·m). 1 N = 1,4 px.',
+  'Vraie intégration de la toupie pesante, avec un amortissement de la nutation (frottement au pivot) et une rotation propre maintenue constante ; approximation gyroscopique : Ω ≪ ω. La théorie complète (nutation, toupie) est hors de ce module.',
+  'Newton : astre sphérique immobile, sans atmosphère ni autres corps, tour de 400 km fictive, temps accéléré, point de l’objet grossi. Distances à l’échelle ; v_c et v_lib à 400 km.',
+  'Même modèle. Kepler 3 : T²/a³ = 4π²/GM = 9,90 × 10⁻¹⁴ s²/m³, la même valeur pour toute ellipse. Si le périastre est sous la surface, le satellite retombe.',
+  'Tailles non à l’échelle (rayon ∝ m^(1/3), minimum 3 px). Newtonien, deux corps, unités réduites (a = 1, période = 1). Flèches p à échelle ajustée à q.'
+];
+const MEYE = ['Enregistreur · ω et α', 'Enregistreur · ω des deux rotors', 'Enregistreur', 'Enregistreur · inclinaison et Ω', 'Enregistreur · altitude et vitesse', 'Puits de potentiel · U(r) et E', 'Enregistreur · distances au barycentre'];
+const mEls = {};
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  const spec = n === 2 && prm.mode3 === 'ring' ? MEAS[3] : n >= 3 ? MEAS[n + (n >= 3 ? 1 : 0)] : MEAS[n];
+  for (const [lab, vals] of spec) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; });
+  }
+  if (n === 1) { mEls.hA.textContent = ''; mEls.hB.textContent = ''; }
+  $('#mNote').textContent = MNOTE[n];
+  $('#rEye').textContent = n === 2 ? (prm.mode3 === 'ring' ? 'Enregistreur · ω du plateau et de l’anneau' : 'Enregistreur · ω et L') : MEYE[n];
+  const lgI = n === 2 && prm.mode3 === 'ring' ? [lg(ln('#e8e4dc', 1.8), 'ω₁ plateau') + lg(ln('#e8e4dc', 1.8, 1), 'ω₂ anneau'), LEG[2][1]] : LEG[n];
+  $('#leg').innerHTML = lgI[0]; $('#leg2').innerHTML = lgI[1];
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function readouts() {
+  if (act === 0) {
+    const s = k1.s, p = prm.rP;
+    setM('th', fmt(s.th, 2)); setM('thT', fmt(s.th / TAU, 3)); setM('w', fmt(s.w, 2)); setM('wr', fmt(s.w * 60 / TAU, 1)); setM('a', fmt(s.a, 2)); setM('rp', fmt(p, 2)); setM('s', fmt(p * s.th, 2)); setM('v', fmt(s.w * p, 2)); setM('ac', fmt(s.w * s.w * p, 2)); setM('at', fmt(s.a * p, 2));
+  } else if (act === 1) {
+    const A = k2.A, B = k2.B, qa = rotQ(A, prm.rA), qb = rotQ(B, prm.rB), tau = prm.F * prm.d;
+    setM('tau', fmt(tau, 3)); setM('IA', fmt(qa.I, 4)); setM('IB', fmt(qb.I, 4)); setM('aA', fmt(tau / qa.I, 2)); setM('aB', fmt(tau / qb.I, 2));
+    setM('wA', fmt(A.w, 3)); setM('wB', fmt(B.w, 3)); setM('LA', fmt(qa.L, 4)); setM('LB', fmt(qb.L, 4)); setM('EA', fmt(qa.E, 3)); setM('EB', fmt(qb.E, 3)); setM('WA', fmt(A.W, 3)); setM('WB', fmt(B.W, 3));
+  } else if (act === 2) {
+    if (prm.mode3 === 'sk') { const s = k3.sk; setM('r', fmt(s.r, 2)); setM('I', fmt(s.I || SKI(s.r), 3)); setM('w', fmt(s.w, 2)); setM('wT', fmt(s.w / TAU, 2)); setM('L', fmt(s.L, 3)); setM('E', fmt(s.E, 2)); setM('T', fmt(Phys.SK.m * s.w * s.w * s.r, 1)); setM('Wb', fmt(s.Wb, 2)); }
+    else { const b = rg(), g = k3.ring; setM('w1', fmt(g.w1, 2)); setM('w2', fmt(g.w2, 2)); setM('L1', fmt(b.L1, 4)); setM('L2', fmt(b.L2, 4)); setM('L', fmt(b.L, 4)); setM('E', fmt(b.E, 3)); setM('Eth', fmt(b.Eth, 3)); }
+  } else if (act === 3) {
+    const q = gyQ(), s = k4.s; setM('w', fmt(s.w3, 0)); setM('L', fmt(q.L, 3)); setM('tau', fmt(q.tau, 3)); setM('Op', isFinite(q.Omp) ? fmt(q.Omp, 3) : '∞'); setM('Om', k4.mode === 'held' ? '—' : fmt(k4.Om, 3)); setM('Tp', isFinite(q.Omp) && q.Omp > 0 ? fmt(TAU / q.Omp, 1) : '—'); setM('inc', fmt(q.inc, 1));
+  } else if (act === 4) {
+    const F = k5.cur; setM('v0', fmt(prm.v0 / 1000, 2)); setM('vc', fmt(VC / 1000, 2)); setM('vl', fmt(VL / 1000, 2)); setM('rc', fmt(prm.v0 / VC, 3)); setM('rl', fmt(prm.v0 / VL, 3));
+    if (!F) { for (const k of ['t', 'alt', 'v', 'g', 'c1', 'c2']) setM(k, '—'); setM('alt', '400'); }
+    else { const r = Math.hypot(F.s.x, F.s.y), v = Math.hypot(F.s.vx, F.s.vy); setM('t', fmtT(F.t)); setM('alt', fmt((r - RE_) / 1000, 0)); setM('v', fmt(F.s.ended === 'impact' ? 0 : v / 1000, 2)); setM('g', fmt(Phys.gAt(r), 2)); setM('c1', F.ended ? '—' : fmtKm(chuteLine(F) / 1000)); setM('c2', fmtKm(chuteBall(F) / 1000)); }
+  } else if (act === 5) {
+    const q = q6(), el = k6.el, K = q.K / 1e6;
+    setM('r', fmtI(q.r / 1000)); setM('alt', fmtI(q.alt / 1000)); setM('v', fmt(q.v / 1000, 2)); setM('K', fmt(K, 1)); setM('U', fmt(q.U / 1e6, 1)); setM('E', fmt(q.E / 1e6, 1)); setM('h', fmt(q.h / 1e9, 1));
+    setM('e', fmt(el.e, 3)); setM('a', isFinite(el.a) ? fmt(el.a / 1e6, 2) : '∞');
+    setM('hp', el.rp >= RE_ ? fmtI((el.rp - RE_) / 1000) : 'sous sol'); setM('ha', isFinite(el.ra) && el.E < 0 ? fmtI((el.ra - RE_) / 1000) : '∞');
+    setM('vp', fmt(Math.abs(el.h) / el.rp / 1000, 2)); setM('va', isFinite(el.ra) && el.E < 0 ? fmt(Math.abs(el.h) / el.ra / 1000, 2) : '—');
+    setM('T', isFinite(el.T) ? fmtT(el.T) : '—'); setM('k3', isFinite(el.T) ? (Math.pow(el.T, 2) / Math.pow(el.a, 3)).toExponential(3).replace('.', ',').replace('e-', ' × 10⁻').replace(/(10⁻)(\d+)/, (m, a, b) => a + String(+b).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join('')) : '—');
+  } else {
+    const q = prm.q, s = k7.s, b = Phys.bodies(s, 1, q), e = prm.e7;
+    setM('q', fmt(q, q < 0.01 ? 4 : 3)); setM('rr', fmt(q, q < 0.01 ? 4 : 3)); setM('vv', fmt(q, q < 0.01 ? 4 : 3)); setM('T', '1');
+    setM('r1m', fmt(q / (1 + q), q < 0.01 ? 4 : 3)); setM('r1', fmt(Math.hypot(b.x1, b.y1), q < 0.01 ? 4 : 3)); setM('r2m', fmt(1 / (1 + q), 3)); setM('r2', fmt(Math.hypot(b.x2, b.y2), 3));
+  }
+  status();
+}
+function statusText() {
+  if (act === 0) { const s = k1.s; if (Math.abs(s.a) > 0.01) return 'ω change, donc α ≠ 0 : α ≤ 2 rad/s² jusqu’à la consigne.'; if (Math.abs(s.w) < 1e-3) return 'Au repos : ω = 0. Change la consigne pour faire tourner le disque.'; return 'α = 0 : ω est constante, mais chaque point garde son accélération centripète a_c = ω²r vers le centre.'; }
+  if (act === 1) return status2(); if (act === 2) return status3(); if (act === 3) return status4(); if (act === 4) return status5(); if (act === 5) return status6(); return status7();
+}
+function status() { const t = statusText(), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
+
+/* ---------------- Actes ---------------- */
+const ACTS = [
+  { t: 'Tourner', x: 'Un disque tourne autour d’un axe fixe : chaque point décrit un arc s = r·Δθ, avec la même ω mais une vitesse v = ωr. Fais varier la consigne : α n’existe que pendant le changement de ω. Compare avec une translation, où tous les points vont à la même vitesse.' },
+  { t: 'Couple et inertie', x: 'Deux rotors de même masse totale reçoivent le même couple τ = F·d. Celui dont les masses sont loin de l’axe a un plus grand moment d’inertie I : il accélère moins. Sur la même durée, L est le même ; sur le même angle, E est la même.' },
+  { t: 'Moment cinétique conservé', x: 'Sans couple extérieur, L = Iω reste constant. Ramène les haltères : I diminue, donc ω augmente, et l’aire du rectangle I × ω ne change pas. L’anneau montre le même principe avec un frottement : L passe d’un objet à l’autre.' },
+  { t: 'Gyroscope et précession', x: 'Une roue qui tourne vite est suspendue à un pivot. Son poids crée un couple τ horizontal : il ajoute à L un petit ΔL perpendiculaire, et l’axe tourne lentement (précession) au lieu de tomber. Essaie ω = 0, puis 200 rad/s.' },
+  { t: 'Le canon de Newton', x: 'Un projectile est tiré horizontalement du haut d’une tour de 400 km. Sans gravité, il filerait en ligne droite ; avec elle, il tombe exactement comme une balle lâchée. Augmente v₀ : le sol se dérobe sous lui. Une orbite est une chute libre qui rate le sol.' },
+  { t: 'Ellipse et énergie', x: 'Lancé horizontalement à 400 km, le satellite décrit une conique dont l’astre est un foyer. Son énergie totale E = K + U décide de la forme : liée (cercle, ellipse) si E < 0, fuite si E ≥ 0. Regarde K et U s’échanger le long du puits de potentiel.' },
+  { t: 'Barycentre', x: 'Deux corps ne tournent pas l’un autour de l’autre mais autour de leur centre de masse commun. Le plus lourd décrit la plus petite orbite. Pour q = m₂/m₁ petit, la loupe montre le vacillement du corps 1 : c’est ainsi qu’on détecte des planètes.' }
+];
+const SYNC = [
+  ['rWt', 'vWt', () => prm.wt, v => fmt(v, 1) + ' rad/s'], ['rRp', 'vRp', () => prm.rP, v => fmt(v, 2) + ' m'],
+  ['rF', 'vF', () => prm.F, v => fmt(v, 1) + ' N'], ['rD', 'vD', () => prm.d, v => fmt(v * 100, 0) + ' cm'], ['rM', 'vM', () => prm.m, v => fmt(v, 2) + ' kg'], ['rRA', 'vRA', () => prm.rA, v => fmt(v, 2) + ' m'], ['rRB', 'vRB', () => prm.rB, v => fmt(v, 2) + ' m'],
+  ['rArm', 'vArm', () => prm.rT, v => fmt(v, 2) + ' m'], ['rW3', 'vW3', () => prm.w3, v => fmt(v, 0) + ' rad/s'],
+  ['rV0', 'vV0', () => prm.v0 / 1000, v => fmt(v, 2) + ' km/s'], ['rSpd', 'vSpd', () => prm.spd, v => '×' + fmt(Math.pow(2, v), 2)],
+  ['rV6', 'vV6', () => prm.v6 / 1000, v => fmt(v, 2) + ' km/s'], ['rQ', 'vQ', () => Math.log10(prm.q), v => fmt(Math.pow(10, v), v < -2 ? 4 : 3)], ['rE7', 'vE7', () => prm.e7, v => fmt(v, 2)]
+];
+const PRESS = [['bCmp', () => prm.cmp], ['bBrake', () => prm.brake], ['bIce', () => prm.ice], ['bField', () => prm.field], ['bCmp5', () => prm.cmp5], ['bAir', () => prm.areas], ['bUeff', () => prm.ueff], ['bSk', () => prm.mode3 === 'sk'], ['bRg', () => prm.mode3 === 'ring']];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = id === 'rQ' ? v : v; $('#' + vid).textContent = f(v); }
+  for (const [id, get] of PRESS) $('#' + id).setAttribute('aria-pressed', get() ? 'true' : 'false');
+  document.querySelectorAll('#tools .grp[data-mode]').forEach(gp => { gp.hidden = act !== 2 || gp.dataset.mode !== prm.mode3; });
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  k2.hold = false; k2.btnHold = false;
+  if (n === 0) reset1(); else if (n === 1) reset2(); else if (n === 2) reset3(); else if (n === 3) { k4.mode = 'held'; gyroReinit(); } else if (n === 4) reset5(); else if (n === 5) { view.rv = 4.6; init6(); view.rv = view.rvT; } else init7();
+  hideTip(); syncTools(); buildMeas(n); sizePanelCanvases();
+  if (restart) setPlay(true);
+}
+function updateUI(n) {
+  uiAct = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VII`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)) || (gp.dataset.mode && (n !== 2 || gp.dataset.mode !== prm.mode3)); });
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, NA - 1);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; }
+  else fade = -1;
+}
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+
+function bindRange(id, vid, set, f) { const el = $('#' + id); el.addEventListener('input', () => { const v = +el.value; set(v); $('#' + vid).textContent = f(v); }); }
+const sy = id => { const e = SYNC.find(s => s[0] === id); $('#' + e[1]).textContent = e[3](e[2]()); };
+bindRange('rWt', 'vWt', v => { prm.wt = v; }, v => fmt(v, 1) + ' rad/s');
+bindRange('rRp', 'vRp', v => { prm.rP = v; }, v => fmt(v, 2) + ' m');
+bindRange('rF', 'vF', v => { prm.F = v; }, v => fmt(v, 1) + ' N');
+bindRange('rD', 'vD', v => { prm.d = v; }, v => fmt(v * 100, 0) + ' cm');
+bindRange('rM', 'vM', v => { prm.m = v; }, v => fmt(v, 2) + ' kg');
+bindRange('rRA', 'vRA', v => { prm.rA = v; }, v => fmt(v, 2) + ' m');
+bindRange('rRB', 'vRB', v => { prm.rB = v; }, v => fmt(v, 2) + ' m');
+bindRange('rArm', 'vArm', v => { prm.rT = v; }, v => fmt(v, 2) + ' m');
+bindRange('rW3', 'vW3', v => { prm.w3 = v; gyroReinit(); }, v => fmt(v, 0) + ' rad/s');
+bindRange('rV0', 'vV0', v => { prm.v0 = v * 1000; }, v => fmt(v, 2) + ' km/s');
+bindRange('rSpd', 'vSpd', v => { prm.spd = v; }, v => '×' + fmt(Math.pow(2, v), 2));
+bindRange('rV6', 'vV6', v => { prm.v6 = v * 1000; init6(); }, v => fmt(v, 2) + ' km/s');
+bindRange('rQ', 'vQ', v => { prm.q = Math.pow(10, v); prm.pre = null; init7(); }, v => fmt(Math.pow(10, v), v < -2 ? 4 : 3));
+bindRange('rE7', 'vE7', v => { prm.e7 = v; prm.pre = null; init7(); }, v => fmt(v, 2));
+const tog = (id, key) => $('#' + id).addEventListener('click', e => { prm[key] = !prm[key]; syncTools(); e.currentTarget.blur(); });
+tog('bCmp', 'cmp'); tog('bBrake', 'brake'); tog('bIce', 'ice'); tog('bField', 'field'); tog('bCmp5', 'cmp5'); tog('bAir', 'areas'); tog('bUeff', 'ueff');
+$('#bStop1').addEventListener('click', e => { prm.wt = 0; syncTools(); e.currentTarget.blur(); });
+$('#bT1s').addEventListener('click', e => { startExp('pulse'); e.currentTarget.blur(); });
+$('#bTurn').addEventListener('click', e => { startExp('turn'); e.currentTarget.blur(); });
+$('#bStop2').addEventListener('click', e => { k2.A.w = 0; k2.B.w = 0; k2.mode = 'idle'; k2.last = ''; k2.A.on = k2.B.on = false; e.currentTarget.blur(); });
+{ const el = $('#bHold'), on = e => { k2.btnHold = true; el.classList.add('on'); try { el.setPointerCapture(e.pointerId); } catch (_) {} }, off = () => { k2.btnHold = false; el.classList.remove('on'); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); on(e); }); el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') k2.btnHold = true; }); el.addEventListener('keyup', e => { if (e.key === 'Enter') off(); }); }
+$('#bSk').addEventListener('click', e => { prm.mode3 = 'sk'; syncTools(); buildMeas(2); sizePanelCanvases(); e.currentTarget.blur(); });
+$('#bRg').addEventListener('click', e => { prm.mode3 = 'ring'; syncTools(); buildMeas(2); sizePanelCanvases(); e.currentTarget.blur(); });
+$('#bIn').addEventListener('click', () => setArm(0.2)); $('#bOut').addEventListener('click', () => setArm(0.9));
+$('#bSpin').addEventListener('click', () => launchSkater());
+$('#bDrop').addEventListener('click', e => { dropRing(); e.currentTarget.blur(); });
+$('#bGy').addEventListener('click', () => releaseGyro(null, false)); $('#bGyS').addEventListener('click', () => releaseGyro(null, true)); $('#bGyH').addEventListener('click', () => { holdGyro(); });
+$('#bFire').addEventListener('click', e => { fire(); e.currentTarget.blur(); });
+$('#bClr').addEventListener('click', e => { k5.traces = []; if (k5.cur) k5.cur.trace = k5.cur.ended ? [] : k5.cur.trace; e.currentTarget.blur(); });
+$('#bRe6').addEventListener('click', e => { init6(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-v0]').forEach(el => el.addEventListener('click', () => { const v = el.dataset.v0; prm.v0 = v === 'vc' ? VC : v === 'vl' ? VL : +v; syncTools(); fire(); el.blur(); }));
+function preset7(name) { const [q, e] = PRE7[name]; prm.q = q; prm.e7 = e; prm.pre = name; init7(); syncTools(); }
+document.querySelectorAll('[data-pre]').forEach(el => el.addEventListener('click', () => { preset7(el.dataset.pre); el.blur(); }));
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-7]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
+  if (!isRange && (e.key === 'd' || e.key === 'D') && act === 1) k2.hold = true;
+  if (!isRange && (e.key === 't' || e.key === 'T') && !e.repeat) { if (act === 4) fire(); else if (act === 5) init6(); }
+});
+addEventListener('keyup', e => { if (e.key === 'd' || e.key === 'D') k2.hold = false; });
+addEventListener('blur', () => { k2.hold = false; k2.btnHold = false; k1.drag = false; });
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol, point P glissé ---------------- */
+function pPos() { const { cx, cy, pxm } = k1.geo, th = k1.s.th; return { x: cx + prm.rP * pxm * Math.cos(th), y: cy - prm.rP * pxm * Math.sin(th) }; }
+function setRP(x, y) { const { cx, cy, pxm } = k1.geo, th = k1.s.th, r = ((x - cx) * Math.cos(th) - (y - cy) * Math.sin(th)) / pxm; prm.rP = clamp(Math.round(r * 100) / 100, 0.02, 0.4); sy('rRp'); $('#rRp').value = prm.rP; }
+cv.addEventListener('pointerdown', e => {
+  if (act !== 0) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, p = pPos();
+  if (Math.hypot(x - p.x, y - p.y) < (e.pointerType === 'touch' ? 32 : 18)) { k1.drag = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); setRP(x, y); }
+});
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (k1.drag) { setRP(x, y); return; }
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(zones, x, y);
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.className = z.key === 'P' ? 'grab' : ''; }
+  else if (act === 4 || act === 5) { const t = gTip(x, y, geoG()); if (t) showTip(t.key, t.name, t.role, e.clientX, e.clientY); else hideTip(); cv.className = ''; }
+  else { hideTip(); cv.className = ''; }
+});
+const endPtr = e => { k1.drag = false; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!k1.drag) { hideTip(); cv.className = ''; } });
+barsC.addEventListener('pointermove', e => {
+  const r = barsC.getBoundingClientRect(), z = hitZone(zonesBars, e.clientX - r.left, e.clientY - r.top);
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+});
+barsC.addEventListener('pointerleave', hideTip);
+
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+function advance(dt) {
+  if (act === 0) adv1(dt); else if (act === 1) adv2(dt); else if (act === 2) adv3(dt); else if (act === 3) adv4(dt); else if (act === 4) adv5(dt); else if (act === 5) adv6(dt); else adv7(dt);
+}
+const SCENES = [draw1, draw2, draw3, draw4, draw5, draw6, draw7], SCOPES = [scope1, scope2, scope3, scope4, scope5, scope6, scope7];
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) advance(dt);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  SCENES[act](); ctx.restore();
+  SCOPES[act]();
+  if (act === 1) bars2(); else if (act === 2 && prm.mode3 === 'ring') bars3();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function stateNow() {
+  if (act === 0) { const s = k1.s; return { act, th: s.th, w: s.w, a: s.a, rP: prm.rP, wt: prm.wt, sP: prm.rP * s.th, vP: s.w * prm.rP, ac: s.w * s.w * prm.rP, at: s.a * prm.rP, t: k1.t, cmp: prm.cmp }; }
+  if (act === 1) { const A = k2.A, B = k2.B, qa = rotQ(A, prm.rA), qb = rotQ(B, prm.rB), tau = prm.F * prm.d; return { act, tau, mode: k2.mode, last: k2.last, t: k2.t, A: { I: qa.I, th: A.th, w: A.w, L: qa.L, E: qa.E, W: A.W, done: A.done }, B: { I: qb.I, th: B.th, w: B.w, L: qb.L, E: qb.E, W: B.W, done: B.done } }; }
+  if (act === 2) {
+    if (prm.mode3 === 'sk') { const s = k3.sk; return { act, mode: 'sk', r: s.r, I: SKI(s.r), w: s.w, L: s.L, E: s.E, T: Phys.SK.m * s.w * s.w * s.r, Wb: s.Wb, rectArea: SKI(s.r) * s.w, ice: prm.ice, t: k3.t }; }
+    const b = rg(), g = k3.ring; return { act, mode: 'ring', phase: g.phase, w1: g.w1, w2: g.w2, L1: b.L1, L2: b.L2, L: b.L, E: b.E, Eth: b.Eth, E0: k3.E0r, t: k3.t };
+  }
+  if (act === 3) { const q = gyQ(), s = k4.s; return { act, mode: k4.mode, down: s.down, w3: s.w3, L: q.L, tau: q.tau, OmPred: q.Omp, OmMeas: k4.Om, inc: q.inc, th: s.th, ph: s.ph, nut: k4.rec.length ? Math.max(...k4.rec.slice(-80).map(r => r.inc)) - Math.min(...k4.rec.slice(-80).map(r => r.inc)) : 0, t: k4.t }; }
+  if (act === 4) { const F = k5.cur, el = Phys.elements(Phys.launch(ALT, prm.v0, 0)); if (!F) return { act, v0: prm.v0, fired: false, predicted: el.type, vc: VC, vl: VL }; const r = Math.hypot(F.s.x, F.s.y); return { act, v0: F.v0, fired: true, type: F.el.type, ended: F.ended, t: F.t, alt: r - RE_, v: Math.hypot(F.s.vx, F.s.vy), vImpact: F.s.vImpact, chuteLine: chuteLine(F), chuteBall: chuteBall(F), accel: F.accel, view: view.rv, T: F.el.T, E: Phys.energy(F.s).E, nTraces: k5.traces.length }; }
+  if (act === 5) { const q = q6(), el = k6.el; return { act, v0: prm.v6, type: el.type, ended: k6.ended, t: k6.t, r: q.r, alt: q.alt, v: q.v, K: q.K, U: q.U, E: q.E, h: q.h, e: el.e, a: el.a, T: el.T, rp: el.rp, ra: el.ra, k3: isFinite(el.T) ? el.T * el.T / Math.pow(el.a, 3) : NaN, sector: lastSectorPct() }; }
+  const b = Phys.bodies(k7.s, 1, prm.q); return { act, q: prm.q, e: prm.e7, r1: Math.hypot(b.x1, b.y1), r2: Math.hypot(b.x2, b.y2), x1: b.x1, y1: b.y1, x2: b.x2, y2: b.y2, bary: [b.x1 * 1 + prm.q * b.x2, b.y1 * 1 + prm.q * b.y2], t: k7.t, pre: prm.pre };
+}
+window.__labo = {
+  Phys,
+  get act() { return act; },
+  goAct, get state() { return stateNow(); },
+  tick: n => { last = n - 16; tick(n); }, setPlay, prm,
+  run(sec) { const n = Math.ceil(sec * 60); for (let i = 0; i < n; i++) advance(1 / 60); },
+  setKin(wt, rP) { if (wt != null) prm.wt = wt; if (rP != null) prm.rP = rP; syncTools(); },
+  setCompare(b) { prm.cmp = !!b; syncTools(); },
+  setRotor(o) { Object.assign(prm, o); syncTools(); },
+  torque1s: () => startExp('pulse'), torqueTurn: () => startExp('turn'), holdTorque(b) { k2.hold = !!b; }, setBrake(b) { prm.brake = !!b; syncTools(); },
+  skaterTo: setArm, launchSkater, setIce(b) { prm.ice = !!b; syncTools(); }, setMode3(m) { prm.mode3 = m; syncTools(); buildMeas(2); sizePanelCanvases(); }, dropRing,
+  releaseGyro, holdGyro,
+  fire, setV6(v) { prm.v6 = v; syncTools(); init6(); }, relaunch6: init6, setAreas(b) { prm.areas = !!b; syncTools(); }, setUeff(b) { prm.ueff = !!b; syncTools(); },
+  setBinary, preset7
+};
+
+resize();
+for (let i = 0; i < NA; i++) resetPrm(i);
+enterAct(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
