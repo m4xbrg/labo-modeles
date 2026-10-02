@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre rotation, gravitation et orbites — L’invisible en mouvement, Fondations 12·13</title>
+<meta name="description" content="Ce que montre le laboratoire de rotation et de gravitation : couple, moment d'inertie, moment cinétique, précession, champ en 1/r², orbite comme chute libre, ellipses, énergie orbitale et vitesse de libération, avec les simplifications du modèle.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#d4ee8a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:400 23px/1.2 var(--serif);margin:36px 0 10px;color:var(--texte)}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.tab{overflow-x:auto;margin:18px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--trait);vertical-align:baseline}
+th{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2)}
+td.m{font:400 14px var(--mono);white-space:nowrap}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+.aside{border:1px solid var(--trait);padding:14px 16px;margin:18px 0;font-size:15px;color:var(--texte);opacity:.92}
+.aside b{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}}
+@media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour au laboratoire</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — Fondations 12·13</p>
+  <h1>Comprendre rotation, gravitation et <em>orbites</em></h1>
+  <p class="lede">Faire tourner un objet obéit aux mêmes lois que le pousser, à condition de traduire chaque grandeur : la force devient un couple, la masse devient un moment d'inertie, la quantité de mouvement devient un moment cinétique. Et une orbite n'est rien d'autre qu'une chute libre qui rate le sol, parce que l'objet file de côté assez vite.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>Paillasse R : disque, rotors, patineur, plateau, gyroscope</dt>
+    <dd>Des objets qui tournent autour d'un axe. Aux actes I à III, l'axe est fixe et perpendiculaire à l'écran : on regarde de face (ou de dessus). À l'acte IV, l'axe du gyroscope est libre de changer de direction, et la scène passe en perspective.</dd>
+    <dt>Paillasse G : un astre et un projectile, puis deux corps</dt>
+    <dd>Un astre de la masse et du rayon de la Terre, sans atmosphère. Aux actes V et VI, les distances sont à l'échelle (rayon, altitude, trajectoire) ; seul le point du projectile est grossi pour être visible. À l'acte VII, deux corps tournent autour de leur barycentre.</dd>
+    <dt><span class="acc">Le chartreuse</span></dt>
+    <dd>Ce qui change le mouvement : le couple τ et l'accélération angulaire α qu'il produit, et l'accélération de la pesanteur g, toujours dirigée vers le centre de l'astre. C'est le même rôle que la force résultante dans la planche Forces, énergie et conservation.</dd>
+    <dt><span class="pos">Orange</span> et <span class="neg">bleu</span></dt>
+    <dd>Le moment cinétique L, orange quand la rotation est dans le sens antihoraire, bleu dans l'autre, exactement comme la quantité de mouvement p l'était vers la droite ou vers la gauche.</dd>
+    <dt><span class="ener">Le jaune</span></dt>
+    <dd>L'énergie : plein pour l'énergie cinétique (de rotation ou de translation), hachuré pour l'énergie potentielle gravitationnelle, qui est <strong>négative</strong> et descend sous la ligne zéro, pâle pour la chaleur dégagée, contour pour l'énergie totale.</dd>
+    <dt>La droite tiretée et le point fantôme (acte V)</dt>
+    <dd>Où serait le projectile s'il n'y avait pas de gravité : sur une droite, à vitesse constante (première loi de Newton). L'écart entre le fantôme et le projectile, c'est la chute.</dd>
+    <dt>Le puits de potentiel (acte VI)</dt>
+    <dd>La courbe U(r) = −GM/r, en énergie par kilogramme. La ligne horizontale est l'énergie totale E ; la distance verticale entre la courbe et cette ligne est, à chaque instant, l'énergie cinétique.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment : la rotation</h2>
+
+  <h3>Angle, vitesse angulaire, vitesse tangentielle</h3>
+  <p>Pour décrire un objet qui tourne autour d'un axe fixe, une seule grandeur suffit : l'<strong>angle</strong> θ dont il a tourné. On le mesure en <strong>radians</strong> : un angle de 1 rad découpe, sur un cercle de rayon r, un arc de longueur égale à r. D'où la relation la plus utile de la rotation : un point situé à la distance r de l'axe parcourt un chemin s = r·θ. Un tour complet vaut 2π rad, environ 6,28.</p>
+  <p>La <strong>vitesse angulaire</strong> ω = dθ/dt (en rad/s) dit à quelle vitesse l'angle change ; l'<strong>accélération angulaire</strong> α = dω/dt (en rad/s²) dit à quelle vitesse ω change. Ce sont les cousins exacts de la position, de la vitesse et de l'accélération.</p>
+  <div class="eq">s = r·θ     v = ω·r     a_t = α·r     a_c = ω²·r = v²/r</div>
+  <p>C'est ce qui distingue une <strong>rotation</strong> d'une <strong>translation</strong>. En translation, tous les points d'un objet ont la même vitesse. En rotation, tous ont le même ω, mais leur vitesse v = ωr grandit avec la distance à l'axe : le bord d'un disque file, le centre ne bouge pas. Tout point en rotation subit aussi une <strong>accélération centripète</strong> a_c = ω²r dirigée vers l'axe, même à ω constant, parce que la direction de sa vitesse change sans cesse. Il faut une force pour la produire : la cohésion du disque, la tension d'un bras, ou, pour un satellite, la gravité.</p>
+
+  <h3>Le couple : ce qui fait tourner</h3>
+  <p>Une force ne fait pas tourner un objet de la même façon selon l'endroit où on l'applique : pousser une porte près des charnières ne donne presque rien. Ce qui compte est le <strong>couple</strong> (ou moment de force) :</p>
+  <div class="eq">τ = r·F·sin φ = F·d     (en N·m)</div>
+  <p>où r est la distance entre l'axe et le point d'application, φ l'angle entre la force et le rayon, et d = r·sin φ le <strong>bras de levier</strong>, la distance perpendiculaire entre l'axe et la ligne d'action de la force. Une force dirigée vers l'axe (φ = 0) ne fait pas tourner du tout. Au laboratoire, la corde est tangente au tambour : la force est perpendiculaire au rayon et le bras de levier est simplement le rayon d du tambour.</p>
+  <p>Le couple est l'analogue rotationnel de la force résultante. La deuxième loi de Newton devient :</p>
+  <div class="eq">Στ = I·α</div>
+
+  <h3>Le moment d'inertie : la masse ne suffit pas</h3>
+  <p>Le <strong>moment d'inertie</strong> I joue le rôle de la masse : il mesure la résistance d'un objet à un changement de rotation. Mais il dépend de <em>où</em> se trouve la masse, et fortement :</p>
+  <div class="eq">I = Σ m·r²     (en kg·m²)</div>
+  <p>Chaque morceau de masse compte avec le carré de sa distance à l'axe. Doubler la distance quadruple sa contribution. C'est l'acte II : deux rotors de même masse totale, l'un avec ses masses près de l'axe, l'autre au bout des rayons. Le même couple fait démarrer le premier bien plus vite. Quelques valeurs classiques, pour une masse M et un rayon R : anneau ou cerceau, M·R² (toute la masse au bord) ; disque plein, ½·M·R² ; sphère pleine, ⅖·M·R². Le moment d'inertie dépend aussi de l'axe choisi : la même tige est bien plus facile à faire tourner autour de son milieu qu'autour d'un bout.</p>
+
+  <h3>Énergie de rotation et travail d'un couple</h3>
+  <p>Un objet qui tourne possède de l'énergie cinétique, même si son centre ne bouge pas : chaque morceau a sa vitesse v = ωr. En sommant ½mv² :</p>
+  <div class="eq">E_rot = ½·I·ω²     W = τ·Δθ     P = τ·ω</div>
+  <p>Un couple qui fait tourner l'objet d'un angle Δθ lui fournit le travail τ·Δθ. C'est le sens de « couple sur un tour » à l'acte II : même couple, même angle, donc même énergie reçue (τ·2π), quel que soit le rotor. La puissance P = τω est celle qu'on lit sur la fiche d'un moteur : un couple de 300 N·m à 3000 tr/min (314 rad/s) fournit environ 94 kW. Couple et régime sont les deux moitiés de la puissance.</p>
+
+  <h3>Le moment cinétique, et sa conservation</h3>
+  <p>Le <strong>moment cinétique</strong> L est l'analogue de la quantité de mouvement p = mv :</p>
+  <div class="eq">L = I·ω     (en kg·m²/s, ou J·s)     Στ = dL/dt</div>
+  <p>Un couple appliqué pendant un temps Δt change L de τ·Δt (l'« impulsion angulaire »), exactement comme une force change p de F·Δt. D'où « couple pendant 1 s » à l'acte II : même couple, même durée, donc même L pour les deux rotors, même si leurs ω et leurs énergies diffèrent (E = L²/2I : le rotor de petit I a reçu plus d'énergie, parce qu'il a tourné d'un plus grand angle pendant la même seconde).</p>
+  <p>Conséquence centrale : <strong>sans couple extérieur, L ne change pas</strong>. Si I diminue, ω doit augmenter dans la même proportion. C'est le patineur de l'acte III : en ramenant les bras, il divise son moment d'inertie et tourne plus vite. Le rectangle de la scène le montre : sa largeur est I, sa hauteur ω, et son aire L reste la même.</p>
+  <p>Mais l'énergie, elle, augmente : E = L²/2I grandit quand I diminue. D'où vient-elle ? Des bras. Pour garder une haltère en rotation, il faut tirer dessus vers l'axe (la tension T = mω²r fournit l'accélération centripète). En la ramenant, on tire sur une distance : on fait un travail, qui devient de l'énergie de rotation. En écartant les bras, on la récupère. La « force centrifuge » qu'on croit sentir n'est que l'inertie de l'haltère, qui tend à continuer tout droit.</p>
+  <p>Le moment cinétique peut aussi se <strong>transférer</strong>. Quand un anneau immobile tombe sur un plateau qui tourne, le frottement entre eux exerce des couples égaux et opposés (troisième loi) : le plateau perd exactement le L que l'anneau gagne, jusqu'à ce qu'ils tournent ensemble. Le total est conservé ; l'énergie ne l'est pas (près de la moitié devient chaleur), comme dans une collision où les chariots restent collés. Le moment cinétique est une grandeur conservée bien plus robuste que l'énergie mécanique.</p>
+  <p>Pour un point de masse m qui se déplace à la vitesse v, le moment cinétique par rapport à un point O est L = m·r·v⊥, où v⊥ est la composante de la vitesse perpendiculaire au rayon. Ce détail servira pour les orbites.</p>
+
+  <div class="tab"><table>
+    <thead><tr><th>Translation</th><th></th><th>Rotation autour d'un axe fixe</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>position</td><td class="m">x</td><td>angle</td><td class="m">θ</td></tr>
+      <tr><td>vitesse</td><td class="m">v = dx/dt</td><td>vitesse angulaire</td><td class="m">ω = dθ/dt</td></tr>
+      <tr><td>accélération</td><td class="m">a = dv/dt</td><td>accélération angulaire</td><td class="m">α = dω/dt</td></tr>
+      <tr><td>masse</td><td class="m">m</td><td>moment d'inertie</td><td class="m">I = Σ m r²</td></tr>
+      <tr><td>force</td><td class="m">F</td><td>couple</td><td class="m">τ = F·d</td></tr>
+      <tr><td>2ᵉ loi</td><td class="m">ΣF = m·a</td><td>2ᵉ loi</td><td class="m">Στ = I·α</td></tr>
+      <tr><td>quantité de mouvement</td><td class="m">p = m·v</td><td>moment cinétique</td><td class="m">L = I·ω</td></tr>
+      <tr><td>énergie cinétique</td><td class="m">½·m·v²</td><td>énergie de rotation</td><td class="m">½·I·ω²</td></tr>
+      <tr><td>travail, puissance</td><td class="m">F·Δx, F·v</td><td>travail, puissance</td><td class="m">τ·Δθ, τ·ω</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Gyroscope et précession : une première idée</h3>
+  <p>Jusqu'ici, l'axe était fixe et L se résumait à un nombre signé. En réalité, L est un <strong>vecteur</strong> dirigé le long de l'axe de rotation (règle de la main droite), et la loi Στ = dL/dt est vectorielle : le couple change L dans <em>sa</em> direction à lui.</p>
+  <p>Pour une roue qui ne tourne pas, tenue par un seul bout de son axe, le poids crée un couple qui la fait tomber, comme n'importe quel objet mal soutenu. Pour une roue qui tourne vite, le même couple est horizontal et perpendiculaire à L : il ajoute à chaque instant un petit ΔL de côté. L ne s'allonge pas et ne penche pas : il <strong>pivote</strong> à l'horizontale. C'est la <strong>précession</strong>, à la vitesse angulaire</p>
+  <div class="eq">Ω = τ / L = m·g·d / (I·ω)</div>
+  <p>Plus la roue tourne vite, plus L est grand, plus la précession est lente. C'est ce qui stabilise une toupie, un vélo en marche, un gyroscope de navigation, et c'est la même physique qui fait lentement tourner l'axe de la Terre (précession des équinoxes, un tour en 26 000 ans environ, sous le couple exercé par la Lune et le Soleil sur son renflement équatorial). Cette formule n'est valable que si la précession est lente devant la rotation propre ; la théorie complète de la toupie (nutation, stabilité) dépasse ce module.</p>
+
+  <h2><span>3</span>Ce qui se passe vraiment : la gravitation</h2>
+
+  <h3>Une attraction en 1/r²</h3>
+  <p>Deux masses s'attirent toujours, selon la loi de la gravitation universelle de Newton :</p>
+  <div class="eq">F = G·M·m / r²     G = 6,674 × 10⁻¹¹ N·m²/kg²</div>
+  <p>La force est dirigée le long de la droite qui joint les deux corps, égale sur chacun (troisième loi) et proportionnelle à l'inverse du carré de la distance : à deux fois plus loin, quatre fois plus faible ; à dix fois plus loin, cent fois. G est minuscule : la gravité n'est sensible que lorsqu'une des masses est énorme. Une propriété remarquable (le théorème de Gauss, ou des coquilles) : à l'extérieur d'un astre sphérique, tout se passe comme si toute sa masse était concentrée en son centre. C'est ce qui autorise à traiter la Terre comme un point.</p>
+
+  <h3>Le champ gravitationnel</h3>
+  <p>Plutôt que de parler de la force sur un objet particulier, on décrit ce que l'astre fait à l'espace autour de lui : le <strong>champ gravitationnel</strong> g, la force par kilogramme, en N/kg (ou m/s², c'est la même unité).</p>
+  <div class="eq">g(r) = G·M / r²     g(R_Terre) ≈ 9,8 m/s²</div>
+  <p>Les anneaux de l'acte V le rendent visible : 9,8 m/s² à la surface, 2,5 à deux rayons du centre, 1,1 à trois. À l'altitude de la Station spatiale (400 km), g vaut encore 8,7 m/s², près de 90 % de sa valeur au sol. Les astronautes ne flottent pas parce qu'il n'y a « plus de gravité » : ils flottent parce qu'ils sont en chute libre, avec leur station.</p>
+
+  <h3>La chute libre, et l'orbite comme chute permanente</h3>
+  <p>Un objet n'est soumis qu'à la gravité : il est en <strong>chute libre</strong>, et son accélération vaut g, quelle que soit sa vitesse et quelle que soit sa masse. Lancé horizontalement, il garde sa vitesse de côté (rien ne la freine) pendant qu'il tombe. C'est l'expérience de pensée de Newton, reprise à l'acte V : un canon au sommet d'une montagne très haute tire de plus en plus fort.</p>
+  <p>Écart par rapport à la droite « sans gravité » : le projectile tombe exactement comme une balle lâchée au même instant, environ ½·g·t² au début. Mais la Terre est ronde. Plus le tir est rapide, plus le sol se courbe et s'éloigne sous le projectile avant qu'il ne l'atteigne. À une vitesse précise, le sol s'éloigne exactement aussi vite que le projectile tombe : il ne l'atteint jamais. Il est en orbite, <strong>toujours en train de tomber</strong>. La condition : la gravité doit fournir exactement l'accélération centripète d'un mouvement circulaire, g = v²/r, d'où la <strong>vitesse orbitale circulaire</strong></p>
+  <div class="eq">v_c = √(G·M / r)     ≈ 7,7 km/s à 400 km d'altitude, une révolution en 92 min</div>
+  <p>Remarque : la masse du satellite ne figure pas dans la formule. Une plume et une station spatiale au même endroit, à la même vitesse, suivent la même orbite.</p>
+
+  <h3>Ellipses, périastre et apoastre</h3>
+  <p>Un tir un peu plus rapide que v_c ne donne pas un cercle plus grand : il donne une <strong>ellipse</strong>, dont l'astre occupe l'un des deux foyers (et non le centre). Le point le plus proche est le <strong>périastre</strong> (périgée autour de la Terre, périhélie autour du Soleil), le plus lointain l'<strong>apoastre</strong> (apogée, aphélie). L'ellipse est décrite par son demi-grand axe a (la moyenne des distances au périastre et à l'apoastre) et son excentricité e (0 pour un cercle, proche de 1 pour une ellipse très allongée). Un tir plus lent que v_c donne aussi une ellipse, mais qui coupe la surface : c'est un impact.</p>
+
+  <h3>Les lois de Kepler, et ce qui les explique</h3>
+  <p>Kepler les a tirées des observations de Mars, avant Newton ; la gravitation en 1/r² les explique toutes les trois.</p>
+  <ul>
+    <li><strong>Première loi</strong> : les orbites liées sont des ellipses dont l'astre central occupe un foyer. C'est une signature de la force en 1/r² ; une autre loi de force ne donnerait pas d’ellipses fermées ayant l’astre pour foyer.</li>
+    <li><strong>Deuxième loi</strong> : le rayon qui joint l'astre au satellite balaie des <strong>aires égales en des temps égaux</strong>. Le satellite file au périastre et traîne à l'apoastre. C'est la conservation du moment cinétique : la gravité est dirigée vers le centre, elle n'exerce donc aucun couple autour de lui, et L = m·r·v⊥ reste constant. Près de l'astre, r est petit, donc v⊥ est grand. Les deux paillasses se rejoignent ici : le patineur qui ramène les bras et la comète qui plonge vers le Soleil accélèrent pour la même raison.</li>
+    <li><strong>Troisième loi</strong> : le carré de la période est proportionnel au cube du demi-grand axe, avec la même constante pour tout ce qui tourne autour du même astre : T² / a³ = 4π² / (G·M). C'est ainsi qu'on pèse les étoiles et les planètes : mesurer la période et la taille d'une orbite donne la masse de l'astre central.</li>
+  </ul>
+
+  <h3>L'énergie potentielle gravitationnelle</h3>
+  <p>Près du sol, l'énergie potentielle vaut m·g·h. Loin du sol, g diminue et cette formule ne tient plus. La forme générale, en prenant le zéro à l'infini, est</p>
+  <div class="eq">U(r) = −G·M·m / r</div>
+  <p>Elle est <strong>négative</strong> partout : il faut fournir de l'énergie pour arracher un objet à l'astre et l'amener à l'infini, où U = 0. C'est pour cela que la courbe de l'acte VI est un puits. Pour de petites variations d'altitude, la différence U(R + h) − U(R) redonne bien m·g·h.</p>
+
+  <h3>Énergie orbitale : la forme de l'orbite est décidée par E</h3>
+  <p>Le long d'une orbite, seule la gravité travaille : l'énergie mécanique E = K + U est conservée. Le satellite qui s'approche de l'astre descend dans le puits, U baisse, K augmente du même montant. Pour une ellipse, l'énergie ne dépend que du demi-grand axe :</p>
+  <div class="eq">E = ½·m·v² − G·M·m / r = −G·M·m / (2a)</div>
+  <p>Ce qui donne la vitesse en tout point (« équation de vis-viva ») : v² = G·M·(2/r − 1/a). Et la classification complète :</p>
+  <ul>
+    <li><strong>E &lt; 0</strong> : orbite liée, cercle ou ellipse. L'objet ne peut pas remonter plus haut que le point où toute son énergie cinétique serait épuisée.</li>
+    <li><strong>E = 0</strong> : tout juste assez pour s'éloigner indéfiniment (trajectoire parabolique), avec une vitesse qui tend vers zéro.</li>
+    <li><strong>E &gt; 0</strong> : fuite, trajectoire hyperbolique ; l'objet garde une vitesse résiduelle à l'infini.</li>
+  </ul>
+  <p>Dans le puits de l'acte VI, l'énergie cinétique n'est jamais nulle sur une ellipse, même à l'apoastre : le satellite y garde sa vitesse de côté. La courbe en tirets, le <strong>potentiel effectif</strong> U + L²/(2mr²), ajoute l'énergie de ce mouvement de côté, imposée par la conservation de L ; ses intersections avec E sont exactement le périastre et l'apoastre. C'est la « barrière centrifuge » qui empêche une planète, ou la matière d'un disque d'accrétion, de tomber droit sur son étoile.</p>
+
+  <h3>La vitesse de libération</h3>
+  <p>E = 0 donne la vitesse minimale pour échapper à l'astre à partir de la distance r, sans propulsion ensuite :</p>
+  <div class="eq">v_lib = √(2·G·M / r) = √2 · v_c</div>
+  <p>11,2 km/s depuis la surface de la Terre, 10,85 km/s depuis 400 km. Elle ne dépend pas de la direction du tir (tant qu'il ne rencontre pas le sol) : c'est une condition d'énergie, pas de trajectoire. Une fusée réelle n'atteint jamais cette vitesse d'un coup : elle accélère longtemps, et la frontière entre lié et libre reste la même, E = 0.</p>
+
+  <h3>Le barycentre</h3>
+  <p>L'astre central n'est pas parfaitement immobile : le satellite l'attire aussi, avec une force égale et opposée. Les deux corps tournent autour de leur <strong>centre de masse</strong> commun, le barycentre, chacun sur sa propre ellipse, dans le même temps, avec des distances au barycentre inversement proportionnelles à leurs masses : m₁·r₁ = m₂·r₂. Leurs quantités de mouvement restent égales et opposées : le barycentre ne bouge pas. Le barycentre Terre-Lune est à 4 670 km du centre de la Terre, sous la surface ; celui du Soleil et de Jupiter est juste à l'extérieur du Soleil. Pour deux étoiles de masses voisines (une binaire), le barycentre est entre les deux. Le petit cercle décrit par une étoile autour du barycentre, à cause d'une planète invisible, est l'une des méthodes de détection des exoplanètes. Dans les formules de Kepler, M devient alors la masse totale M + m.</p>
+
+  <div class="aside"><b>Ce que cela ouvre</b>
+  <strong>Moteurs</strong> : couple et régime, P = τω. <strong>Gyroscopes</strong> : Ω = τ/L, centrales de navigation, stabilisation des satellites. <strong>Étoiles binaires</strong> et <strong>exoplanètes</strong> : barycentre et troisième loi de Kepler, qui pèsent les étoiles. <strong>Marées</strong> : la gravité de la Lune n'est pas la même des deux côtés de la Terre (le champ varie en 1/r²) ; le frottement des marées freine la rotation de la Terre (le jour s'allonge d'environ 2 ms par siècle) et transfère ce moment cinétique à la Lune, qui s'éloigne d'environ 3,8 cm par an. <strong>Assistance gravitationnelle</strong> : dans le repère d'une planète, une sonde repart avec la même vitesse qu'à l'arrivée (énergie conservée) mais déviée ; dans le repère du Soleil, cette déviation peut ajouter ou retirer de la vitesse. <strong>Disques d'accrétion</strong> : la matière qui tombe vers un astre ne peut pas tomber droit, son moment cinétique l'en empêche ; elle tourne en disque et ne descend qu'à mesure que le frottement interne transporte L vers l'extérieur, en rayonnant l'énergie perdue. <strong>Pulsars</strong> : un cœur d'étoile qui s'effondre (planche 09) jusqu'à quelques dizaines de kilomètres conserve son L et finit par tourner des centaines de fois par seconde, le patineur poussé à l'extrême.</div>
+
+  <h2><span>4</span>Ce que la simulation simplifie</h2>
+  <p><strong>Réellement calculé.</strong> Toutes les trajectoires et rotations sont intégrées pas à pas à partir des lois du mouvement, puis comparées aux formules : couple et moment d'inertie (Στ = Iα, mise à jour exacte à couple constant), moment cinétique du patineur et du plateau (conservé exactement), toupie pesante pour le gyroscope (méthode de Runge-Kutta), gravitation newtonienne par un intégrateur « saute-mouton » qui conserve l'énergie à mieux qu'un millionième sur plusieurs révolutions. Les aires de Kepler, les énergies et la précession affichées sont mesurées sur la simulation, pas recopiées d'une formule.</p>
+  <p><strong>Simplifications physiques.</strong></p>
+  <ul>
+    <li>Rotation autour d'un axe fixe seulement (actes I à III) ; le moment d'inertie est un nombre, pas le tenseur d'inertie qu'exige une rotation libre en trois dimensions. Masses ponctuelles sur des rayons sans masse ; corps du patineur réduit à un cylindre de moment d'inertie fixe.</li>
+    <li>Frottements simplifiés : un frein à couple constant, un couple de frottement constant entre plateau et anneau, un frottement de la glace constant.</li>
+    <li>Gyroscope : la nutation (petite oscillation de l'axe au lâcher) est amortie artificiellement, comme le ferait le frottement au pivot, et la rotation propre est maintenue constante. La rotation réelle de la roue (jusqu'à 50 tours par seconde) est ralentie à l'affichage pour rester visible.</li>
+    <li>Gravitation de Newton, sans relativité. Astre parfaitement sphérique, sans atmosphère, sans rotation propre, immobile (sauf à l'acte VII) ; projectile de masse négligeable. Aucun autre corps : ni Lune, ni Soleil, ni perturbation. Ce n'est pas un simulateur astrophysique : c'est le problème à deux corps, idéal.</li>
+    <li>La « montagne » de 400 km est fictive, et l'absence d'air est essentielle : au niveau du sol, la traînée rendrait le tir de Newton impossible.</li>
+    <li>Temps accéléré (le facteur est affiché). À l'acte VII, les tailles des corps ne sont pas à l'échelle, et la loupe agrandit le mouvement de l'astre principal.</li>
+  </ul>
+  <p><strong>Éléments illustratifs.</strong> Les flèches (couples, vitesses, moments cinétiques, champ) et les barres d'énergie représentent des grandeurs, avec des échelles fixes dans chaque acte. Le rectangle I × ω et le puits de potentiel sont des graphes, pas des objets. L'effet de descente de l'anneau est une perspective dessinée.</p>
+
+  <h2><span>5</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>9,8 → 2,5 m/s²</b><span>le champ g à la surface de la Terre, puis à deux rayons du centre : la loi en 1/r². À la distance de la Lune (60 rayons), il ne reste que 0,003 m/s².</span></div>
+    <div><b>7,7 km/s · 92 min</b><span>la vitesse et la période d'une orbite basse à 400 km (Station spatiale internationale) : environ 28 000 km/h, seize levers de soleil par jour.</span></div>
+    <div><b>11,2 km/s</b><span>la vitesse de libération depuis la surface de la Terre (2,4 km/s pour la Lune, 618 km/s pour le Soleil).</span></div>
+    <div><b>35 786 km</b><span>l'altitude de l'orbite géostationnaire : une période de 23 h 56 min, celle de la rotation de la Terre, donc un satellite immobile dans le ciel.</span></div>
+    <div><b>× 4 à 5</b><span>l'augmentation de la vitesse de rotation d'une patineuse qui ramène bras et jambe, jusqu'à environ 5 tours par seconde.</span></div>
+  </div>
+
+  <h2><span>6</span>Teste-toi</h2>
+  <details><summary>Deux cylindres de même masse et même rayon, l'un plein, l'autre creux (toute la masse au bord), reçoivent le même couple. Lequel accélère le plus ?</summary>
+    <p>Le plein. Son moment d'inertie (½MR²) est deux fois plus petit que celui du creux (MR²), donc son accélération angulaire α = τ/I est deux fois plus grande. La masse est la même ; c'est sa distribution qui change tout.</p></details>
+  <details><summary>Une patineuse ramène ses bras et passe de 1 à 3 tours par seconde. Que sont devenus I, L et son énergie de rotation ?</summary>
+    <p>L est conservé (pas de couple extérieur notable). ω a triplé, donc I a été divisé par 3. L'énergie E = ½Iω² = ½Lω a triplé : ce supplément vient du travail de ses bras, qui ont tiré les masses vers l'axe.</p></details>
+  <details><summary>Pourquoi les astronautes de la Station spatiale flottent-ils, alors que g vaut encore 8,7 m/s² à leur altitude ?</summary>
+    <p>Parce qu'ils sont en chute libre, avec la station : tout tombe ensemble, à la même accélération, donc rien ne presse contre le plancher. Ils ne s'écrasent pas parce qu'ils filent de côté à 7,7 km/s : le sol se dérobe sous eux à mesure qu'ils tombent. Une orbite est une chute permanente.</p></details>
+  <details><summary>Un satellite en orbite circulaire est freiné par les traces d'atmosphère. Descend-il ? Ralentit-il ?</summary>
+    <p>Il perd de l'énergie, donc E = −GMm/2r diminue : il descend sur une orbite plus basse. Mais sur une orbite plus basse, la vitesse circulaire √(GM/r) est plus grande : il <em>accélère</em>. Sa chute dans le puits libère deux fois plus d'énergie potentielle que ce que le frottement lui retire ; la moitié devient de l'énergie cinétique. C'est le « paradoxe du satellite ».</p></details>
+  <details><summary>Une comète passe dix fois plus près du Soleil à son périhélie qu'à son aphélie. Combien de fois plus vite va-t-elle ?</summary>
+    <p>Dix fois. Aux deux extrémités, la vitesse est perpendiculaire au rayon, et la conservation du moment cinétique impose r·v = constante (deuxième loi de Kepler).</p></details>
+
+  <a class="cta" href="index.html"><span>Retour au laboratoire</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
