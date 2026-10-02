@@ -1,0 +1,1173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Fondations : même paillasse sombre que la série, un seul vocabulaire visuel du début à la fin (graphe x(t) avec le temps en bas, flèche de taux colorée par son signe, ligne de phase). Orange = ça croît, bleu = ça décroît, citron pâle = équilibre stable et histogrammes, jaune = repère clé.
+  2. Le mouvement est toujours un calcul : Euler visible pas à pas en A1, RK4 à pas fixe en A2 et B2, exponentielle exacte en C, générateur semé (mulberry32) en D. Les changements d'étape se fondent sans saut.
+  3. Les moments forts passent par la forme : en A1 la tangente se pose puis le point la suit, en B1 la même règle au signe près fait une cuvette ou un dôme, en D2 le nuage se met en cloche, et en D3 des atomes au hasard retracent l'exponentielle du chapitre C.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systèmes, croissance et hasard — Fondations 4 · 5 · 7</title>
+<meta name="description" content="Un état, une règle de changement, la rétroaction, l'exponentielle et le logarithme, puis le hasard qui devient loi : le langage commun des systèmes, de la croissance et des probabilités.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#d9e58c;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:default}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:82%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 17px/1.35 var(--serif);color:var(--texte)}
+.eq{margin:10px 0 0;font:500 13.5px/1.4 var(--mono);color:var(--energie);word-break:break-word}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:26px}
+.row.small .val{font-size:14px}
+.row.small .lab{font-size:11px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px}
+#sec{display:block;width:100%;height:150px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:6px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding:10px 0 0}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+.lien2{display:flex;justify-content:space-between;align-items:center;text-decoration:none;font:400 13px var(--sans);padding:9px 14px;border:1px solid var(--trait);color:var(--texte-2);transition:color .35s var(--ease),border-color .35s var(--ease)}
+.lien2:hover{color:var(--texte);border-color:var(--texte-2)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+
+.stepper{display:flex;gap:3px;flex:1 1 420px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+.seg.ch0{margin-left:12px}
+.seg.ch0:first-child{margin-left:0}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:48px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:420px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;padding:0}
+  .stepper{flex:1 0 100%;order:5;gap:2px}
+  .seg.ch0{margin-left:8px}
+  .tools{gap:8px 18px}
+  input[type=range]{width:110px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:12px}
+  .seg.ch0{margin-left:6px}
+  .head{max-width:90%}
+  .btn{padding:7px 9px}
+  input[type=range]{width:96px}
+  .rv{min-width:44px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg,.lien2{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène en cours : graphes de l'état en fonction du temps, flèches de taux, lignes de phase, paysages, histogrammes ou grille d'atomes, selon l'étape."></canvas>
+    <header class="head">
+      <p class="serie">Fondations — modules 4 · 5 · 7</p>
+      <h1>Systèmes, croissance et <em>hasard</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 9</p>
+      <h2 id="stepTitle"></h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="cle" id="stepKey"></p>
+      <p class="eq" id="eq"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section id="secBox" hidden>
+      <p class="eyebrow" id="secEye"></p>
+      <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe du taux en fonction de l'état."></canvas></div>
+      <p class="leg" id="secLeg"></p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd> aller à l'étape</li>
+        <li><kbd>R</kbd> réinitialiser l'étape</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="lien2" id="lien07" href="../07-matiere-chaleur/index.html" hidden><span>La même chose avec des molécules</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les neuf étapes, en quatre chapitres">
+      <button class="seg ch0" data-a="0" title="A1 — L'état et son taux"><b>A1</b><span>Taux</span></button>
+      <button class="seg" data-a="1" title="A2 — Même règle, autres départs"><b>A2</b><span>Départs</span></button>
+      <button class="seg ch0" data-a="2" title="B1 — Négatif ou positif ?"><b>B1</b><span>Boucle</span></button>
+      <button class="seg" data-a="3" title="B2 — La croissance logistique"><b>B2</b><span>Logistique</span></button>
+      <button class="seg ch0" data-a="4" title="C1 — Pourquoi ça explose"><b>C1</b><span>Explose</span></button>
+      <button class="seg" data-a="5" title="C2 — L'échelle logarithmique"><b>C2</b><span>Log</span></button>
+      <button class="seg ch0" data-a="6" title="D1 — Un lancer, beaucoup de lancers"><b>D1</b><span>Dé</span></button>
+      <button class="seg" data-a="7" title="D2 — Marche aléatoire et distribution"><b>D2</b><span>Marche</span></button>
+      <button class="seg" data-a="8" title="D3 — La désintégration"><b>D3</b><span>Atomes</span></button>
+    </div>
+
+    <div class="tools" id="tools">
+      <div class="grp" data-s="0 1">
+        <span class="gl">Règle</span>
+        <button class="btn" data-set="rule" data-v="const">Taux constant</button>
+        <button class="btn" data-set="rule" data-v="prop">Taux ∝ état</button>
+        <button class="btn" data-set="rule" data-v="goal">Retour vers une cible</button>
+      </div>
+      <div class="grp" data-s="0">
+        <span class="gl">Δt</span>
+        <button class="btn" data-set="dt" data-v="2">2 s</button>
+        <button class="btn" data-set="dt" data-v="1">1 s</button>
+        <button class="btn" data-set="dt" data-v="0.5">0,5 s</button>
+        <button class="btn" data-set="dt" data-v="0.1">0,1 s</button>
+      </div>
+      <div class="grp" data-s="0">
+        <span class="gl">x₀</span>
+        <input type="range" id="rX0A" min="0.5" max="9" step="0.1" value="1" aria-label="Valeur de départ x zéro, en unités">
+        <span class="rv" id="vX0A">1,0 u</span>
+      </div>
+      <div class="grp" data-s="1">
+        <button class="btn" id="b5">5 départs</button>
+        <button class="btn" id="bClrA">Effacer</button>
+      </div>
+      <div class="grp" data-s="2">
+        <span class="gl">τ</span>
+        <input type="range" id="rTau" min="1" max="5" step="0.1" value="2" aria-label="Temps caractéristique tau en secondes">
+        <span class="rv" id="vTau">2,0 s</span>
+      </div>
+      <div class="grp" data-s="2">
+        <button class="btn" id="bPert">Perturber</button>
+        <button class="btn" id="bNoise" aria-pressed="false">Bruit</button>
+        <button class="btn" id="bRec">Recentrer</button>
+      </div>
+      <div class="grp" data-s="3">
+        <span class="gl">r</span>
+        <input type="range" id="rR" min="0.2" max="1.5" step="0.05" value="0.8" aria-label="Taux de croissance r en s moins un">
+        <span class="rv" id="vR">0,80 s⁻¹</span>
+        <button class="btn" id="bTyp">Départs types</button>
+      </div>
+      <div class="grp" data-s="4 5">
+        <span class="gl">x₀</span>
+        <input type="range" id="rX0C" min="1" max="10" step="0.5" value="1" aria-label="Valeur de départ x zéro, en unités">
+        <span class="rv" id="vX0C">1,0 u</span>
+      </div>
+      <div class="grp" data-s="4 5">
+        <span class="gl">k</span>
+        <input type="range" id="rK" min="-1" max="1" step="0.05" value="0.35" aria-label="Taux k en s moins un">
+        <span class="rv" id="vK">0,35 s⁻¹</span>
+      </div>
+      <div class="grp" data-s="4 5"><button class="btn" id="bReplay">Rejouer</button></div>
+      <div class="grp" data-s="4">
+        <button class="btn" id="bZoom">Zoom arrière ×10</button>
+        <button class="btn" id="bZoom0">Cadre initial</button>
+      </div>
+      <div class="grp" data-s="5">
+        <span class="gl">Échelle</span>
+        <button class="btn" data-set="log" data-v="0">Linéaire</button>
+        <button class="btn" data-set="log" data-v="1">Logarithmique</button>
+      </div>
+      <div class="grp" data-s="6">
+        <button class="btn" data-roll="1">1 lancer</button>
+        <button class="btn" data-roll="10">×10</button>
+        <button class="btn" data-roll="100">×100</button>
+        <button class="btn" data-roll="1000">×1000</button>
+        <button class="btn" id="bCont" aria-pressed="false">Lancer en continu</button>
+        <button class="btn" id="bClrD">Effacer</button>
+      </div>
+      <div class="grp" data-s="7">
+        <span class="gl">Marcheurs</span>
+        <button class="btn" data-set="M" data-v="200">200</button>
+        <button class="btn" data-set="M" data-v="1000">1000</button>
+        <button class="btn" data-set="M" data-v="5000">5000</button>
+        <button class="btn" id="bNew">Nouvel échantillon</button>
+      </div>
+      <div class="grp" data-s="8">
+        <span class="gl">Atomes</span>
+        <button class="btn" data-set="N0" data-v="25">25</button>
+        <button class="btn" data-set="N0" data-v="400">400</button>
+        <button class="btn" data-set="N0" data-v="2500">2500</button>
+        <button class="btn" id="bRelance">Relancer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Modèle ----------------
+   A  : dx/dt = f(x). A1 : Euler à pas fixe Δt (visible). A2 : RK4, pas 0,02 s. Solutions exactes en tireté.
+   B1 : de/dt = ∓e/τ, schéma exact (facteur e^(∓dt/τ)) + bruit σ√dt N(0,1) ; B2 : logistique, RK4 pas 0,02 s.
+   C  : modèle exact x = x0 e^(kt). D  : générateur mulberry32 semé, Box-Muller pour les normales.
+   D3 : p = 1 − 2^(−dt/T½) par pas de 0,05 s, sans mémoire. */
+const TAU2 = Math.PI * 2, LN2 = Math.LN2;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TS = reduce ? 0.25 : 1;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const secC = $('#sec'), sx = secC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const hx = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RGB = { tx: hx(C.texte), t2: hx(C.texte2), ac: hx(C.accent), pos: hx(C.pos), neg: hx(C.neg), en: hx(C.ener), tr: hx(C.trait) };
+const rgba = (c, a) => `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const fmt = (n, d) => (isFinite(n) ? n.toFixed(d) : '—').replace('.', ',').replace('-', '−');
+const fmtG = v => String(v).replace('.', ',');
+const NB = ' ';
+const grp = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB);
+const SUP = { 0:'⁰',1:'¹',2:'²',3:'³',4:'⁴',5:'⁵',6:'⁶',7:'⁷',8:'⁸',9:'⁹','-':'⁻' };
+const sup = n => String(n).replace(/[-0-9]/g, m => SUP[m]);
+function fmtBig(x) {
+  if (!isFinite(x)) return '—';
+  const ax = Math.abs(x), sg = x < 0 ? '−' : ''; if (ax === 0) return '0';
+  if (ax >= 1e6 || ax < 1e-3) { let e = Math.floor(Math.log10(ax)), s = (ax / Math.pow(10, e)).toFixed(2);
+    if (parseFloat(s) >= 10) { s = '1,00'; e++; } else s = s.replace('.', ','); return sg + s + '·10' + sup(e); }
+  if (ax >= 1000) return sg + grp(ax);
+  return fmt(x, ax >= 100 ? 0 : ax >= 10 ? 1 : 2);
+}
+const decLab = n => n === 0 ? '1' : n === 1 ? '10' : n === 2 ? '100' : n === 3 ? '1000' : n === -1 ? '0,1' : n === -2 ? '0,01' : '10' + sup(n);
+const mono = px => `${px}px ${C.mono}`;
+function txt(c, s, x, y, col, size, align, base) {
+  c.font = mono(size || 11); c.fillStyle = col; c.textAlign = align || 'left'; c.textBaseline = base || 'alphabetic'; c.fillText(s, x, y);
+}
+function tag(c, s, x, y, col, size, align) {
+  size = size || 11; c.font = mono(size); c.textAlign = align || 'left'; c.textBaseline = 'middle';
+  const w = c.measureText(s).width, hh = size + 4, rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  c.fillStyle = 'rgba(10,13,18,0.78)'; c.fillRect(rx - 3, y - hh / 2, w + 6, hh); c.fillStyle = col; c.fillText(s, x, y + 0.5);
+}
+
+/* ---------------- Générateur semé ---------------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+let rng = mulberry32(20240607), spare = null;
+const randn = () => { if (spare !== null) { const s = spare; spare = null; return s; }
+  let u = 0; while (u < 1e-12) u = rng(); const v = rng(), r = Math.sqrt(-2 * Math.log(u)); spare = r * Math.sin(TAU2 * v); return r * Math.cos(TAU2 * v); };
+
+/* ---------------- Anneau (historique) ---------------- */
+class Ring {
+  constructor(n) { this.n = n; this.d = new Float32Array(n); this.i = 0; this.len = 0; }
+  push(v) { this.d[this.i] = v; this.i = (this.i + 1) % this.n; if (this.len < this.n) this.len++; }
+  get(j) { return this.d[((this.i - 1 - j) % this.n + this.n) % this.n]; }
+  clear() { this.i = 0; this.len = 0; }
+}
+
+/* ---------------- État ---------------- */
+let W = 800, H = 600, dpr = 1, idx = 0, playing = true;
+const spots = [];
+const spotC = (x, y, r, name, role) => spots.push({ k: 0, x, y, r, name, role });
+const spotR = (x, y, w, h, name, role) => spots.push({ k: 1, x, y, w, h, name, role });
+function spotP(pts, tol, name, role) { for (let i = 1; i < pts.length; i++) spots.push({ k: 2, x: pts[i-1][0], y: pts[i-1][1], x2: pts[i][0], y2: pts[i][1], r: tol, name, role }); }
+let G = {};
+
+const P = { rule: 'prop', dtE: 1, x0A: 1, kA: 0.2, tauA: 2, tauB: 2, noise: false, r: 0.8, x0C: 1, kC: 0.35, log: true, zoom: 0, cont: false, M: 1000, N0: 400 };
+const A_A = 0.5, A_XS = 5, KCAP = 100, TMAX_C = 30;
+
+/* A */
+const fRule = x => P.rule === 'const' ? A_A : P.rule === 'prop' ? P.kA * x : -(x - A_XS) / P.tauA;
+const exactA = (t, x0) => P.rule === 'const' ? x0 + A_A * t : P.rule === 'prop' ? x0 * Math.exp(P.kA * t) : A_XS + (x0 - A_XS) * Math.exp(-t / P.tauA);
+const E = { n: 0, acc: 0, xs: new Float64Array(102), hold: 0 };
+const nmaxE = () => Math.round(10 / P.dtE);
+function resetE() { E.n = 0; E.acc = 0; E.xs[0] = P.x0A; E.hold = 0; }
+function stepE(sec) {
+  const dt = P.dtE, nmax = nmaxE(); if (E.n >= nmax) return;
+  E.acc += sec;
+  while (E.acc >= dt - 1e-9 && E.n < nmax) { const x = E.xs[E.n]; E.xs[E.n + 1] = x + fRule(x) * dt; E.n++; E.acc -= dt; }
+  if (E.n >= nmax) E.acc = 0;
+}
+const rk4 = (f, x, h) => { const k1 = f(x), k2 = f(x + h / 2 * k1), k3 = f(x + h / 2 * k2), k4 = f(x + h * k3); return x + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4); };
+const TR = [];
+function fillTraj(tr) { let x = tr.x0; tr.pts[0] = x; for (let i = 1; i < tr.pts.length; i++) { x = clamp(rk4(fRule, x, 0.02), -1e6, 1e6); tr.pts[i] = x; } }
+function addTraj(t0, x0) {
+  t0 = clamp(t0, 0, 9.98); const m = Math.floor((10 - t0) / 0.02 + 1e-9) + 1, tr = { t0, x0, pts: new Float32Array(m), prog: 1 };
+  fillTraj(tr); TR.push(tr); if (TR.length > 8) TR.shift(); return tr;
+}
+const headOf = (tr, step) => { const m = tr.pts.length, i = clamp(tr.prog - 1, 0, m - 1), i0 = Math.floor(i), a = tr.pts[i0], b = tr.pts[Math.min(i0 + 1, m - 1)]; return [tr.t0 + i * step, a + (b - a) * (i - i0)]; };
+
+/* B1 */
+const F = { eN: 0.5, eP: 0.5, t: 0, acc: 0, n: 0, hN: new Ring(301), hP: new Ring(301) };
+const SAT = 4;
+function resetF() { F.eN = 0.5; F.eP = 0.5; F.t = 0; F.acc = 0; F.n = 0; F.hN.clear(); F.hP.clear(); F.hN.push(F.eN); F.hP.push(F.eP); }
+function stepF(sec) {
+  const dt = 1 / 120; F.acc += sec;
+  while (F.acc >= dt - 1e-9) {
+    F.acc -= dt; F.eN *= Math.exp(-dt / P.tauB); F.eP *= Math.exp(dt / P.tauB);
+    if (P.noise) { const s = 0.15 * Math.sqrt(dt); F.eN += s * randn(); F.eP += s * randn(); }
+    F.eP = clamp(F.eP, -SAT, SAT); F.eN = clamp(F.eN, -SAT, SAT); F.t += dt;
+    if (++F.n % 4 === 0) { F.hN.push(F.eN); F.hP.push(F.eP); }
+  }
+}
+
+/* B2 */
+const LG = [], lgF = N => P.r * N * (1 - N / KCAP);
+let lgCur = null, lgHold = 0;
+function fillLG(tr) { let x = tr.N0; tr.pts[0] = x; for (let i = 1; i < tr.pts.length; i++) { x = Math.max(0, rk4(lgF, x, 0.02)); tr.pts[i] = x; } }
+function addLG(N0) { N0 = clamp(N0, 0.5, 140); const tr = { N0, pts: new Float32Array(1001), prog: 1 }; fillLG(tr); LG.push(tr); if (LG.length > 6) LG.shift(); lgCur = tr; return tr; }
+function typLG() { LG.length = 0; for (const n of [130, 60, 20, 2]) addLG(n); lgHold = 0; }
+
+/* C */
+const CC = { t: 0, hold: 0, L: 0, zD: 1, lo: 0, hi: 5, yl: 10, probe: 20 };
+const cx = t => P.x0C * Math.exp(P.kC * t);
+function cTargets() { const xe = cx(TMAX_C), mx = Math.max(P.x0C, xe), mn = Math.min(P.x0C, xe);
+  let lo = Math.floor(Math.log10(mn) + 1e-9), hi = Math.ceil(Math.log10(mx) - 1e-9); if (hi - lo < 2) hi = lo + 2; return { lo, hi, yl: Math.max(10, mx * 1.05) }; }
+function cDefaultProbe() { return P.kC < 0 ? P.x0C * 0.05 : P.x0C * 20; }
+
+/* D1 : dé */
+const D1 = { counts: new Int32Array(6), n: 0, sum: 0, sumsq: 0, last: 0, rib: new Uint8Array(30), rn: 0, hn: new Float32Array(2000), hf: new Float32Array(2000), hc: 0, next: 1, acc: 0, t0: -1e9, disp: 1 };
+function resetD1() { D1.counts.fill(0); D1.n = D1.sum = D1.sumsq = D1.last = D1.rn = D1.hc = 0; D1.next = 1; D1.acc = 0; D1.t0 = -1e9; D1.rib.fill(0); }
+function rollOne() {
+  const f = 1 + Math.floor(rng() * 6); D1.counts[f - 1]++; D1.n++; D1.sum += f; D1.sumsq += f * f; D1.last = f; D1.rib[D1.rn % 30] = f; D1.rn++;
+  if (D1.n >= D1.next && D1.hc < 2000 && D1.n <= 100000) { D1.hn[D1.hc] = D1.n; D1.hf[D1.hc] = D1.counts[5] / D1.n; D1.hc++; D1.next = Math.max(D1.n + 1, Math.ceil(D1.n * 1.03)); }
+}
+function rollN(k) { k = Math.max(0, Math.floor(k)); for (let i = 0; i < k; i++) rollOne(); if (k > 0) D1.t0 = performance.now(); }
+
+/* D2 : marche */
+const WK = { M: 1000, n: 0, pos: new Int16Array(5000), y: new Float32Array(5000), path: new Int16Array(401), s: 0, ss: 0, acc: 0, hold: 0, hist: new Int32Array(402), yD: 10 };
+const WN = 400;
+function resetWK() { WK.M = P.M; WK.n = 0; WK.pos.fill(0); for (let i = 0; i < WK.M; i++) WK.y[i] = rng(); WK.path[0] = 0; WK.s = WK.ss = 0; WK.acc = 0; WK.hist.fill(0); WK.hist[0] = WK.M; }
+function stepWK(sec) {
+  WK.acc += sec * 15;
+  while (WK.acc >= 1 && WK.n < WN) {
+    WK.acc -= 1; const M = WK.M, pos = WK.pos; let s = 0, ss = 0;
+    for (let i = 0; i < M; i++) { const p = pos[i] + (rng() < 0.5 ? -1 : 1); pos[i] = p; s += p; ss += p * p; }
+    WK.n++; WK.s = s; WK.ss = ss; WK.hist.fill(0, 0, WK.n + 1); const h = WK.hist, n = WK.n;
+    for (let i = 0; i < M; i++) h[(pos[i] + n) >> 1]++;
+    WK.path[n] = pos[0];
+  }
+  if (WK.n >= WN) WK.acc = 0;
+}
+
+/* D3 : désintégration */
+const T_HALF = 2, LAM = LN2 / T_HALF, DT3 = 0.05, T3 = 12, NS3 = Math.round(T3 / DT3), P_DEC = 1 - Math.pow(2, -DT3 / T_HALF);
+const DC = { N0: 400, alive: new Uint8Array(2500), dT: new Float32Array(2500), n: 0, cnt: 400, acc: 0, hist: new Int32Array(NS3 + 1), th: null, thPrev: null, hold: 0 };
+function resetDC(full) { if (!full && DC.th !== null) DC.thPrev = DC.th; if (full) DC.thPrev = null; DC.th = null;
+  DC.N0 = P.N0; DC.alive.fill(1, 0, DC.N0); DC.dT.fill(-9); DC.n = 0; DC.cnt = DC.N0; DC.acc = 0; DC.hold = 0; DC.hist[0] = DC.N0; }
+function stepDC(sec) {
+  DC.acc += sec / DT3;
+  while (DC.acc >= 1 - 1e-9 && DC.n < NS3) {
+    DC.acc -= 1; DC.n++; const t = DC.n * DT3, N0 = DC.N0, al = DC.alive; let c = DC.cnt;
+    for (let i = 0; i < N0; i++) if (al[i] && rng() < P_DEC) { al[i] = 0; DC.dT[i] = t; c--; }
+    DC.cnt = c; DC.hist[DC.n] = c; if (DC.th === null && c < N0 / 2) DC.th = t;
+  }
+  if (DC.n >= NS3) DC.acc = 0;
+}
+
+/* ---------------- Étapes ---------------- */
+const STEPS = [
+  { c: 'A', t: 'L’état et son taux', x: 'Un état x, et une règle qui donne sa vitesse de changement selon ce qu’il vaut maintenant. Ici le système avance pas à pas : on pose la tangente, on avance de Δt, on recalcule.',
+    k: 'La règle ne dit pas où sera x : elle dit à quelle vitesse x change, compte tenu de ce qu’il vaut maintenant.' },
+  { c: 'A', t: 'Même règle, autres départs', x: 'Chaque petit trait du champ de pentes montre la direction que prendrait le système en passant par là. Touche le graphe pour lancer une trajectoire depuis n’importe quel point ; à gauche, la ligne de phase résume où va l’état.',
+    k: 'Les trajectoires ne se croisent jamais : un état donné n’a qu’un seul avenir. La condition initiale choisit laquelle on suit.' },
+  { c: 'B', t: 'Négatif ou positif ?', x: 'Deux systèmes, la même règle au signe près. À gauche, l’écart e = x − x* appelle une réponse qui le réduit : la bille retombe au fond de la cuvette. À droite, elle l’augmente : la bille quitte le sommet du dôme.',
+    k: 'Rétroaction négative : l’écart crée une réponse qui le réduit. Positive : l’écart crée une réponse qui l’augmente.' },
+  { c: 'B', t: 'Les deux à la fois : la croissance logistique', x: 'Une population croît d’abord en proportion d’elle-même (rétroaction positive), puis le manque de ressources la freine (rétroaction négative, facteur 1 − N/K). Le graphe du taux donne la direction ; N(t) donne l’issue.',
+    k: 'Près d’un équilibre, regarde la pente du graphe du taux : si elle descend, l’équilibre est stable ; si elle monte, il est instable.' },
+  { c: 'C', t: 'Pourquoi ça explose', x: 'Chaque seconde, l’exponentielle multiplie par le même facteur e^k. La droite en tireté, de même pente au départ, ajoute toujours la même quantité : les deux se confondent un moment, puis plus du tout.',
+    k: 'Croissance linéaire : on ajoute la même quantité à chaque seconde. Exponentielle : on multiplie par le même facteur.' },
+  { c: 'C', t: 'L’échelle logarithmique et l’opération inverse', x: 'Sur une échelle logarithmique, chaque graduation vaut dix fois la précédente : l’exponentielle devient une droite. Glisse la sonde jaune : elle lit le temps qu’il faut pour atteindre un niveau donné.',
+    k: 'Le logarithme répond à la question inverse : combien de temps (combien de multiplications) pour arriver là ? Sur une échelle log, multiplier devient avancer d’un pas constant.' },
+  { c: 'D', t: 'Un lancer, beaucoup de lancers', x: 'Un dé équilibré : chaque face a la probabilité 1/6. Lance-le une fois, puis des milliers de fois, et regarde les fréquences observées entrer dans l’entonnoir de la théorie.',
+    k: 'Le prochain lancer est imprévisible. La proportion sur mille lancers, elle, l’est presque.' },
+  { c: 'D', t: 'Marche aléatoire et distribution', x: 'À chaque pas, chaque marcheur fait +1 ou −1 au hasard. Un marcheur est imprévisible ; le nuage, lui, dessine une cloche dont la largeur croît comme √n.',
+    k: 'Chaque marcheur fait n’importe quoi ; le nuage s’étale toujours comme √n. C’est la diffusion.' },
+  { c: 'D', t: 'Hasard individuel, loi collective', x: 'Chaque atome intact a la même chance de se désintégrer à chaque instant, quel que soit son âge. Aucun n’est prévisible, mais le total retrace l’exponentielle du chapitre C, avec k = −λ.',
+    k: 'Personne ne peut dire quel atome partira. Tout le monde peut dire combien. Et plus ils sont nombreux, plus la prévision est précise (fluctuations relatives ∝ 1/√N).' }
+];
+const NOTES = [
+  'Pas d’Euler : x(t+Δt) = x + (dx/dt)·Δt. Unités génériques « u » pour x ; temps en secondes de simulation.',
+  'Trajectoires par RK4, pas de 0,02 s ; les 8 dernières sont gardées. Unités génériques « u ».',
+  'Mouvement sur-amorti, « comme dans du miel » : la bille glisse, sans rouler ni rebondir. À gauche e est divisé par e ≈ 2,72 toutes les τ secondes, à droite il est multiplié par e : le même exponentiel, dans les deux sens (chapitre C). Butée à |e| = 4.',
+  'K = 100 u. Tireté : N₀·e^(rt), la croissance sans freinage. Touche l’axe N ou le graphe N(t) pour lancer une trajectoire (6 gardées).',
+  'Modèle exact x(t) = x₀·e^(kt), sans intégration. Au-delà de 10⁶, le compteur passe en notation scientifique.',
+  'Axe en puissances de 10. Pente de la droite : k/ln 10 décades par seconde.',
+  'Bande pâle : ±2·√(p(1−p)/n), p = 1/6. Moyenne théorique 3,5 ; écart-type théorique √(35/12) ≈ 1,71.',
+  'Cases de largeur 2 (les positions ont la parité de n). Courbe : M·2·φ(x ; 0, √n). Variance de la position = n.',
+  'T½ = 2 s, λ = ln 2/T½ ≈ 0,35 s⁻¹, p = 1 − 2^(−Δt/T½) ≈ 1,72 % par pas de 0,05 s. Bande : ±√(N₀·q(1−q)), q = e^(−λt).'
+];
+const RN = ['A', 'B', 'C', 'D'];
+const headH = () => W <= 860 ? 104 : 134;
+const padX = () => W < 600 ? 14 : 26;
+const stackMode = () => innerWidth <= 860;
+
+/* ---------------- Physique ---------------- */
+function physics(sec) {
+  if (!(sec > 0)) return;
+  if (idx === 0) stepE(sec);
+  else if (idx === 1) { for (const tr of TR) tr.prog = Math.min(tr.pts.length, tr.prog + sec / 0.02); }
+  else if (idx === 2) stepF(sec);
+  else if (idx === 3) { for (const tr of LG) tr.prog = Math.min(tr.pts.length, tr.prog + sec / 0.02); }
+  else if (idx === 4 || idx === 5) CC.t = Math.min(TMAX_C, CC.t + sec);
+  else if (idx === 6) { if (P.cont) { D1.acc += sec * 20; const k = Math.floor(D1.acc); D1.acc -= k; rollN(k); } }
+  else if (idx === 7) stepWK(sec);
+  else stepDC(sec);
+}
+const speed = () => idx === 0 ? (P.dtE >= 0.5 ? P.dtE / 0.6 : 1) : idx === 1 ? 3 : idx === 3 ? 2.5 : (idx === 4 || idx === 5) ? 2 : 1;
+
+/* ---------------- Gabarits de dessin ---------------- */
+const mk = (x, y, w, h, x0, x1, y0, y1) => ({ x, y, w, h, x0, x1, y0, y1, X: v => x + (v - x0) / (x1 - x0) * w, Y: v => y + h - (v - y0) / (y1 - y0) * h });
+function axes(c, p, o) {
+  c.save(); c.lineWidth = 1;
+  for (const v of (o.xt || [])) { const X = Math.round(p.X(v)) + .5; c.strokeStyle = rgba(RGB.t2, .15); c.beginPath(); c.moveTo(X, p.y); c.lineTo(X, p.y + p.h); c.stroke();
+    txt(c, o.xf ? o.xf(v) : fmt(v, 0), X, p.y + p.h + 14, C.texte2, 10, 'center'); }
+  for (const v of (o.yt || [])) { const Y = Math.round(p.Y(v)) + .5; c.strokeStyle = rgba(RGB.t2, .15); c.beginPath(); c.moveTo(p.x, Y); c.lineTo(p.x + p.w, Y); c.stroke();
+    txt(c, o.yf ? o.yf(v) : fmt(v, 0), p.x - 6, Y + 3.5, C.texte2, 10, 'right'); }
+  c.strokeStyle = rgba(RGB.t2, .7); c.beginPath(); c.moveTo(p.x + .5, p.y); c.lineTo(p.x + .5, p.y + p.h + .5); c.lineTo(p.x + p.w, p.y + p.h + .5); c.stroke();
+  if (o.xl) txt(c, o.xl, p.x + p.w, p.y + p.h + 27, C.texte2, 10, 'right');
+  if (o.yl) txt(c, o.yl, p.x + 5, p.y + 11, C.texte2, 10);
+  c.restore();
+}
+const clipP = (c, p) => { c.save(); c.beginPath(); c.rect(p.x, p.y, p.w, p.h + 1); c.clip(); };
+function arrow(c, x0, y0, x1, y1, col, lw, hs) {
+  hs = hs || 6; const a = Math.atan2(y1 - y0, x1 - x0); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw || 2;
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - Math.cos(a) * hs * .6, y1 - Math.sin(a) * hs * .6); c.stroke();
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - Math.cos(a - .45) * hs, y1 - Math.sin(a - .45) * hs); c.lineTo(x1 - Math.cos(a + .45) * hs, y1 - Math.sin(a + .45) * hs); c.closePath(); c.fill();
+}
+const rateCol = r => Math.abs(r) < 1e-3 ? C.texte2 : r > 0 ? C.pos : C.neg;
+function dot(c, x, y, r, col, ring) { c.beginPath(); c.arc(x, y, r, 0, TAU2); if (ring) { c.strokeStyle = col; c.lineWidth = 1.6; c.fillStyle = C.fond; c.fill(); c.stroke(); } else { c.fillStyle = col; c.fill(); } }
+function line(c, x0, y0, x1, y1, col, lw, dash) { c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.setLineDash([]); }
+function polyline(c, p, fn, a, b, n, col, lw, dash) {
+  c.strokeStyle = col; c.lineWidth = lw; c.setLineDash(dash || []); c.beginPath();
+  for (let i = 0; i <= n; i++) { const t = a + (b - a) * i / n, X = p.X(t), Y = p.Y(fn(t)); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); } c.stroke(); c.setLineDash([]);
+}
+const sampleP = (p, fn, a, b, n) => { const o = []; for (let i = 0; i <= n; i++) { const t = a + (b - a) * i / n; o.push([p.X(t), p.Y(fn(t))]); } return o; };
+/* ligne de phase verticale : flèches de la valeur de f, longueur ∝ |f| */
+function phaseV(c, p, ax, f, vmin, vmax, vals, fmaxPx, eq) {
+  line(c, ax, p.Y(vmin), ax, p.Y(vmax), rgba(RGB.t2, .7), 1.2);
+  let fm = 0; for (let v = vmin; v <= vmax; v += (vmax - vmin) / 40) fm = Math.max(fm, Math.abs(f(v))); fm = Math.max(fm, 1e-6);
+  for (const v of vals) { const r = f(v), L = Math.abs(r) / fm * fmaxPx, Y = p.Y(v); if (L < 3) continue; const d = r > 0 ? -1 : 1;
+    arrow(c, ax, Y - d * L / 2, ax, Y + d * L / 2, rateCol(r), 2, 5); }
+  for (const q of eq) dot(c, ax, p.Y(q.v), 5, q.st ? C.accent : C.texte, !q.st);
+}
+
+/* ---------------- A ---------------- */
+const ruleLabel = () => P.rule === 'const' ? 'dx/dt = ' + fmtG(A_A) : P.rule === 'prop' ? 'dx/dt = ' + fmtG(P.kA) + '·x' : 'dx/dt = −(x − ' + A_XS + ')/' + fmtG(P.tauA);
+function drawA(c) {
+  const nar = W < 560, top = headH() + 8, bot = H - 40, left = padX(), right = padX(), ph = bot - top; let p;
+  const eqPts = P.rule === 'goal' ? [{ v: A_XS, st: true }] : P.rule === 'prop' ? [{ v: 0, st: P.kA < 0 }] : [];
+  if (idx === 0) {
+    const gw = nar ? 24 : 34, gx = left + (nar ? 24 : 34), axx = gx + gw + (nar ? 20 : 34), px = gx + gw + (nar ? 54 : 94);
+    p = mk(px, top, W - right - px, ph, 0, 10, 0, 10);
+    const xcur = E.xs[E.n], rate = fRule(xcur);
+    c.strokeStyle = rgba(RGB.t2, .8); c.lineWidth = 1.2; c.strokeRect(gx + .5, p.y + .5, gw, p.h);
+    const fy = p.Y(clamp(xcur, 0, 10)); c.fillStyle = rgba(RGB.tx, .78); c.fillRect(gx + 1, fy, gw - 1, p.Y(0) - fy);
+    for (const v of [0, 5, 10]) { line(c, gx + gw, p.Y(v), gx + gw + 4, p.Y(v), C.texte2, 1); txt(c, String(v), gx - 4, p.Y(v) + 3.5, C.texte2, 10, 'right'); }
+    txt(c, 'x (u)', gx + gw / 2, p.y - 4, C.texte2, 10, 'center'); txt(c, 'dx/dt', axx, p.y - 4, C.texte2, 10, 'center');
+    spotR(gx, p.y, gw, p.h, 'Jauge d’état x', 'Le réservoir est rempli jusqu’à la valeur courante de x (0 à 10 u).');
+    const Yb = p.Y(xcur), L = clamp(rate * 38, -p.h * .7, p.h * .7);
+    line(c, gx + gw, Yb, axx + 12, Yb, rgba(RGB.t2, .45), 1, [2, 3]);
+    if (Math.abs(L) > 2) arrow(c, axx, Yb, axx, Yb - L, rateCol(rate), 3, 8); else dot(c, axx, Yb, 3, C.texte2);
+    spotR(axx - 14, Math.min(Yb, Yb - L) - 4, 28, Math.abs(L) + 8, 'Flèche de taux', 'dx/dt : à quelle vitesse x change maintenant. Orange = croît, bleu = décroît.');
+    axes(c, p, { xt: [0, 2, 4, 6, 8, 10], yt: [0, 2, 4, 6, 8, 10], xl: 't (s)', yl: 'x (u)' });
+    clipP(c, p); polyline(c, p, t => exactA(t, P.x0A), 0, 10, 120, rgba(RGB.t2, .95), 1.1, [5, 4]);
+    const nm = E.n, dt = P.dtE;
+    for (let i = 0; i < nm; i++) line(c, p.X(i * dt), p.Y(E.xs[i]), p.X((i + 1) * dt), p.Y(E.xs[i + 1]), rateCol(fRule(E.xs[i])), 2.4);
+    for (let i = 0; i <= nm; i++) dot(c, p.X(i * dt), p.Y(E.xs[i]), i === nm ? 4.5 : 2.6, C.texte);
+    const tc = nm * dt;
+    if (nm < nmaxE()) { const fr = E.acc / dt, xp = xcur + rate * dt, col = rateCol(rate);
+      line(c, p.X(tc), p.Y(xcur), p.X(tc + dt), p.Y(xp), col, 1, [2, 3]);
+      c.globalAlpha = .35; line(c, p.X(tc), p.Y(xcur), p.X(tc + dt), p.Y(xp), col, 2.4); c.globalAlpha = 1;
+      line(c, p.X(tc), p.Y(xcur), p.X(tc + fr * dt), p.Y(xcur + rate * fr * dt), col, 2.8); dot(c, p.X(tc + dt), p.Y(xp), 3.5, col, true);
+      G.tan = [p.X(tc), p.Y(xcur), p.X(tc + dt), p.Y(xp)]; spotP([[p.X(tc), p.Y(xcur)], [p.X(tc + dt), p.Y(xp)]], 8, 'Tangente', 'La pente donnée par la règle au point courant, prolongée sur un pas Δt.'); }
+    c.restore();
+    spotP(sampleP(p, t => E.xs[0] * 0 + exactA(t, P.x0A), 0, 10, 20), 6, 'Solution exacte', 'Ce que donnerait un pas infiniment petit (tireté).');
+    spotP(Array.from({ length: nm + 1 }, (_, i) => [p.X(i * dt), p.Y(E.xs[i])]), 6, 'Trajectoire pas à pas', 'Chaque segment suit la tangente du début du pas.');
+    G.hx0 = { x: p.X(0), y: p.Y(P.x0A) }; G.pA = p;
+    c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.setLineDash([2, 3]); c.beginPath(); c.arc(p.X(0), p.Y(P.x0A), 9, 0, TAU2); c.stroke(); c.setLineDash([]);
+    spotC(p.X(0), p.Y(P.x0A), 11, 'Point de départ x₀', 'Glisse-le verticalement pour changer la valeur de départ.');
+    if (P.rule === 'goal') { const ys = p.Y(A_XS); line(c, p.x, ys, p.x + p.w, ys, rgba(RGB.ac, .5), 1, [1, 4]); txt(c, 'x* = 5', p.x + p.w - 4, ys - 5, C.accent, 10, 'right'); }
+  } else {
+    const px = left + (nar ? 66 : 88); p = mk(px, top, W - right - px, ph, 0, 10, 0, 10); G.pA = p;
+    const nx = 14, ny = 10, cw = p.w / nx, ch = p.h / ny, len = Math.min(cw, ch) * 0.78;
+    spotR(p.x, p.y, p.w, p.h, 'Champ de pentes', 'Chaque trait : la pente dx/dt = f(x) en ce point. Touche pour lancer une trajectoire.');
+    axes(c, p, { xt: [0, 2, 4, 6, 8, 10], yt: [0, 2, 4, 6, 8, 10], xl: 't (s)', yl: 'x (u)' });
+    c.lineWidth = 1.5; c.lineCap = 'round';
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) {
+      const t = (i + .5) * 10 / nx, x = (j + .5), r = fRule(x), sl = r * (p.h / 10) / (p.w / 10), nn = Math.hypot(1, sl), dx = len / 2 / nn, dy = len / 2 * sl / nn, X = p.X(t), Y = p.Y(x);
+      c.strokeStyle = rgba(Math.abs(r) < 1e-3 ? RGB.t2 : r > 0 ? RGB.pos : RGB.neg, .72); c.beginPath(); c.moveTo(X - dx, Y + dy); c.lineTo(X + dx, Y - dy); c.stroke(); }
+    c.lineCap = 'butt';
+    clipP(c, p);
+    TR.forEach((tr, k) => { const last = k === TR.length - 1, a = last ? 1 : .35 + .5 * k / Math.max(1, TR.length - 1), m = Math.floor(tr.prog);
+      c.strokeStyle = rgba(RGB.tx, a); c.lineWidth = last ? 2.4 : 1.8; c.beginPath();
+      for (let i = 0; i < m; i++) { const X = p.X(tr.t0 + i * .02), Y = p.Y(tr.pts[i]); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); } c.stroke();
+      const h = headOf(tr, .02); dot(c, p.X(h[0]), p.Y(h[1]), last ? 4.5 : 3, C.texte); dot(c, p.X(tr.t0), p.Y(tr.x0), 2.5, C.texte2); });
+    c.restore();
+    if (TR.length) { const tr = TR[TR.length - 1]; spotP(Array.from({ length: Math.min(24, Math.floor(tr.prog)) }, (_, i) => { const q = Math.floor(i * (Math.floor(tr.prog) - 1) / 23); return [p.X(tr.t0 + q * .02), p.Y(tr.pts[q])]; }), 6, 'Trajectoire', 'Un seul avenir par état de départ : elle ne croise jamais une autre.'); }
+    const pa = left + (nar ? 24 : 34);
+    phaseV(c, p, pa, fRule, 0, 10, [.8, 1.8, 2.8, 3.8, 4.8, 5.8, 6.8, 7.8, 8.8, 9.6], nar ? 24 : 32, eqPts.map(q => ({ v: q.v, st: q.st })));
+    txt(c, 'phase', pa, p.y - 4, C.texte2, 10, 'center');
+    spotR(pa - 12, p.y, 24, p.h, 'Ligne de phase', 'L’axe de l’état seul : une flèche montre où va x ; sa longueur est proportionnelle à |dx/dt|.');
+    for (const q of eqPts) spotC(pa, p.Y(q.v), 9, q.st ? 'Équilibre stable' : 'Équilibre instable', q.st ? 'Les flèches pointent vers lui : x y revient.' : 'Les flèches s’en éloignent : x n’y reste pas.');
+  }
+}
+
+/* ---------------- B1 ---------------- */
+function sysDraw(c, bx, by, bw, bh, neg, e, ring, side, ballsOut) {
+  const col = neg ? C.neg : C.pos, tau = P.tauB;
+  tag(c, neg ? 'Rétroaction négative' : 'Rétroaction positive', bx + 2, by + 8, col, 11);
+  txt(c, neg ? 'de/dt = −e/τ' : 'de/dt = +e/τ', bx + bw - 2, by + 12, col, 11, 'right');
+  const y0 = by + 24, lh = side ? bh - 24 : (bh - 24) * 0.46, lw = side ? bw * 0.5 - 8 : bw;
+  const pL = mk(bx + 6, y0 + 12, lw - 10, lh - 14, -4.6, 4.6, neg ? -1.8 : -10.8, neg ? 10.8 : 1.8), V = z => (neg ? 1 : -1) * z * z / 2;
+  spotR(pL.x, y0, pL.w, lh, neg ? 'Paysage en cuvette' : 'Paysage en dôme', neg ? 'V(e) = e²/2 : toute pente ramène au fond (équilibre stable).' : 'V(e) = −e²/2 : toute pente éloigne du sommet (équilibre instable).');
+  c.strokeStyle = rgba(RGB.t2, .15); c.lineWidth = 1;
+  for (const v of [-SAT, SAT]) { line(c, pL.X(v), y0 + 4, pL.X(v), pL.y + pL.h, rgba(RGB.t2, .35), 1, [3, 4]); }
+  c.beginPath(); for (let i = 0; i <= 80; i++) { const z = -4.6 + 9.2 * i / 80, X = pL.X(z), Y = pL.Y(V(z)); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); }
+  c.lineTo(pL.X(4.6), pL.y + pL.h); c.lineTo(pL.X(-4.6), pL.y + pL.h); c.closePath(); c.fillStyle = rgba(neg ? RGB.neg : RGB.pos, .09); c.fill();
+  c.beginPath(); for (let i = 0; i <= 80; i++) { const z = -4.6 + 9.2 * i / 80, X = pL.X(z), Y = pL.Y(V(z)); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); }
+  c.strokeStyle = col; c.lineWidth = 2; c.stroke();
+  dot(c, pL.X(0), pL.Y(V(0)), 4.5, neg ? C.accent : C.texte, !neg);
+  spotC(pL.X(0), pL.Y(V(0)), 9, neg ? 'Équilibre stable' : 'Équilibre instable', neg ? 'e = 0 : la bille y revient.' : 'e = 0 : la moindre poussée l’en écarte.');
+  const bxp = pL.X(e), byp = pL.Y(V(e)) - 8; dot(c, bxp, byp, 7.5, C.texte); c.strokeStyle = C.fond; c.lineWidth = 1; c.beginPath(); c.arc(bxp, byp, 7.5, 0, TAU2); c.stroke();
+  ballsOut.push({ x: bxp, y: byp });
+  spotC(bxp, byp, 11, 'Bille', 'Sa position e est l’écart à l’équilibre. Touche-la pour la pousser vers le côté touché.');
+  txt(c, 'e', pL.x + pL.w - 2, pL.y + pL.h - 3, C.texte2, 10, 'right');
+  if (!neg && Math.abs(e) >= SAT - 1e-6) { if (pL.w < 330) { tag(c, 'saturation :', pL.x + pL.w / 2, pL.y + pL.h * .5, C.pos, 10, 'center'); tag(c, 'le modèle linéaire', pL.x + pL.w / 2, pL.y + pL.h * .5 + 16, C.pos, 10, 'center'); tag(c, 'ne vaut plus', pL.x + pL.w / 2, pL.y + pL.h * .5 + 32, C.pos, 10, 'center'); }
+    else tag(c, 'saturation : le modèle linéaire ne vaut plus', pL.x + pL.w / 2, pL.y + 10, C.pos, 10, 'center'); }
+  /* e(t) */
+  const gx = side ? bx + bw * 0.5 + 34 : bx + 34, gy = side ? y0 + 12 : y0 + lh + 18, gw = side ? bw * 0.5 - 40 : bw - 40, gh = side ? bh - 24 - 34 : bh - 24 - lh - 18 - 30;
+  const ws = Math.max(0, F.t - 10), pT = mk(gx, gy, gw, Math.max(30, gh), ws, ws + 10, -4.4, 4.4);
+  const tk = []; for (let v = Math.ceil(ws / 2) * 2; v <= ws + 10.001; v += 2) tk.push(v);
+  axes(c, pT, { xt: tk, yt: [-4, 0, 4], xl: 't (s)', yl: 'e' });
+  line(c, pT.x, pT.Y(0), pT.x + pT.w, pT.Y(0), rgba(RGB.t2, .6), 1, [4, 4]);
+  clipP(c, pT); c.strokeStyle = C.texte; c.lineWidth = 1.7; c.beginPath(); const nn = Math.min(ring.len, 301);
+  for (let j = nn - 1; j >= 0; j--) { const t = F.t - j / 30, X = pT.X(t), Y = pT.Y(ring.get(j)); if (j === nn - 1) c.moveTo(X, Y); else c.lineTo(X, Y); } c.stroke(); c.restore();
+  spotR(pT.x, pT.y, pT.w, pT.h, 'Graphe e(t)', 'L’écart en fonction du temps : les 10 dernières secondes.');
+  dot(c, pT.X(F.t), pT.Y(ring.get(0)), 3.5, C.texte);
+  const jt = Math.round(tau * 30);
+  if (ring.len > jt + 1) { const en = ring.get(0), eb = ring.get(jt), X1 = pT.X(F.t), X0 = pT.X(F.t - tau);
+    line(c, X0, pT.y, X0, pT.y + pT.h, rgba(RGB.en, .75), 1, [2, 3]); line(c, X1, pT.y, X1, pT.y + pT.h, rgba(RGB.en, .75), 1, [2, 3]);
+    dot(c, X0, pT.Y(eb), 3, C.ener); dot(c, X1, pT.Y(en), 3, C.ener);
+    if (Math.abs(eb) > 0.04 && Math.abs(en) < SAT - 1e-3 && Math.abs(eb) < SAT - 1e-3) tag(c, 'sur τ : ×' + fmt(en / eb, 2), (X0 + X1) / 2, pT.y + 9, C.ener, 10, 'center');
+    spotR(X0 - 4, pT.y, X1 - X0 + 8, 14, 'Repère de τ', 'En τ secondes, l’écart est multiplié par e^−1 ≈ 0,37 (à gauche) ou par e ≈ 2,72 (à droite).'); }
+}
+function drawB1(c) {
+  const top = headH() + 2, left = padX(), right = padX(), aw = W - left - right, ah = H - top - 6, st = stackMode(), balls = [];
+  if (st) { const hh = (ah - 12) / 2; sysDraw(c, left, top, aw, hh, true, F.eN, F.hN, true, balls); sysDraw(c, left, top + hh + 12, aw, hh, false, F.eP, F.hP, true, balls); }
+  else { const cw = (aw - 28) / 2; sysDraw(c, left, top, cw, ah, true, F.eN, F.hN, false, balls); sysDraw(c, left + cw + 28, top, cw, ah, false, F.eP, F.hP, false, balls); }
+  G.balls = balls;
+}
+
+/* ---------------- B2 ---------------- */
+function drawB2(c) {
+  const top = headH() + 6, left = padX(), right = padX(), aw = W - left - right, st = stackMode(), r = P.r;
+  let pR, pN; const ah = H - top - 40;
+  if (st) { const hh = (ah - 44) / 2; pR = mk(left + 36, top, aw - 40, hh, 0, 140, -62 * r, 30 * r); pN = mk(left + 36, top + hh + 52, aw - 40, hh, 0, 20, 0, 140); }
+  else { const w1 = Math.round(aw * 0.42); pR = mk(left + 40, top + 10, w1 - 44, ah - 10, 0, 140, -62 * r, 30 * r); pN = mk(left + w1 + 50, top + 10, aw - w1 - 54, ah - 10, 0, 20, 0, 140); }
+  G.pR = pR; G.pN = pN;
+  const f = lgF;
+  axes(c, pR, { xt: [0, 50, 100], yt: [0], xl: 'N (u)', yl: 'dN/dt' }); txt(c, fmt(25 * r, 1), pR.x - 6, pR.Y(25 * r) + 3.5, C.texte2, 10, 'right'); line(c, pR.x, pR.Y(25 * r), pR.x + 4, pR.Y(25 * r), C.texte2, 1);
+  line(c, pR.x, pR.Y(0), pR.x + pR.w, pR.Y(0), rgba(RGB.t2, .8), 1.2);
+  clipP(c, pR); c.lineWidth = 2.4;
+  for (let i = 0; i < 140; i++) { const a = f(i), b = f(i + 1); c.strokeStyle = rateCol((a + b) / 2); c.beginPath(); c.moveTo(pR.X(i), pR.Y(a)); c.lineTo(pR.X(i + 1), pR.Y(b)); c.stroke(); }
+  c.restore();
+  spotP(sampleP(pR, f, 0, 140, 24), 7, 'Graphe du taux f(N)', 'dN/dt en fonction de N : positif entre 0 et K (orange), négatif au-delà (bleu).');
+  const fm = 62 * r, ay = pR.Y(0);
+  for (let N = 6; N <= 136; N += 10) { const q = f(N), L = Math.abs(q) / fm * 26; if (L < 3.5) continue; const d = q > 0 ? 1 : -1; arrow(c, pR.X(N) - d * L / 2, ay, pR.X(N) + d * L / 2, ay, rateCol(q), 2.4, 5); }
+  spotR(pR.x, ay - 8, pR.w, 16, 'Ligne de phase', 'L’axe N seul : les flèches montrent où va la population ; sa longueur ∝ |dN/dt|.');
+  dot(c, pR.X(0), ay, 5, C.texte, true); dot(c, pR.X(KCAP), ay, 5, C.accent);
+  spotC(pR.X(0), ay, 9, 'Équilibre instable (N = 0)', 'Pente du taux positive : la moindre population s’éloigne de 0.');
+  spotC(pR.X(KCAP), ay, 9, 'Équilibre stable (N = K)', 'Pente du taux négative : on revient toujours à K.');
+  txt(c, 'K', pR.X(KCAP), ay + 15, C.accent, 10, 'center');
+  if (lgCur) { const h = headOf2(lgCur); dot(c, pR.X(h[1]), pR.Y(f(h[1])), 4.5, C.texte); dot(c, pR.X(h[1]), ay, 3, C.texte); }
+  /* N(t) */
+  axes(c, pN, { xt: [0, 5, 10, 15, 20], yt: [0, 50, 100], xl: 't (s)', yl: 'N (u)' });
+  line(c, pN.x, pN.Y(KCAP), pN.x + pN.w, pN.Y(KCAP), rgba(RGB.t2, .85), 1, [5, 4]); txt(c, 'K = 100', pN.x + pN.w - 3, pN.Y(KCAP) - 5, C.texte2, 10, 'right');
+  spotR(pN.x, pN.Y(KCAP) - 5, pN.w, 10, 'Capacité K', 'Valeur d’équilibre stable de la population.');
+  clipP(c, pN);
+  if (lgCur) polyline(c, pN, t => lgCur.N0 * Math.exp(r * t), 0, 20, 160, rgba(RGB.t2, .95), 1.1, [5, 4]);
+  for (const tr of LG) { const cur = tr === lgCur, m = Math.floor(tr.prog); c.strokeStyle = rgba(RGB.tx, cur ? 1 : .45); c.lineWidth = cur ? 2.4 : 1.6; c.beginPath();
+    for (let i = 0; i < m; i += 2) { const X = pN.X(i * .02), Y = pN.Y(tr.pts[i]); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); } const h = headOf2(tr); c.lineTo(pN.X(h[0]), pN.Y(h[1])); c.stroke(); dot(c, pN.X(h[0]), pN.Y(h[1]), cur ? 4.5 : 3, C.texte); }
+  c.restore();
+  if (lgCur) spotP(Array.from({ length: 25 }, (_, i) => [pN.X(i * .8), pN.Y(lgCur.pts[Math.min(1000, Math.round(i * 40))])]), 6, 'Trajectoire courante', 'N(t) depuis N₀ : d’abord exponentielle, puis freinée.');
+  if (lgCur) tag(c, 'tireté : N₀·e^(rt)', pN.x + 8, pN.y + 10, C.texte2, 10);
+}
+function headOf2(tr) { const m = tr.pts.length, i = clamp(tr.prog - 1, 0, m - 1), i0 = Math.floor(i), a = tr.pts[i0], b = tr.pts[Math.min(i0 + 1, m - 1)]; return [i * .02, a + (b - a) * (i - i0)]; }
+
+/* ---------------- C ---------------- */
+const smooth = t => t * t * (3 - 2 * t);
+function drawC(c) {
+  const c2 = idx === 5, nar = W < 560, top = headH() + 8, bot = H - 40, left = padX(), right = padX(), ph = bot - top, k = P.kC, x0 = P.x0C, tn = CC.t;
+  const gw = nar ? 22 : 30, gx = left + (nar ? 20 : 30), px = c2 ? left + (nar ? 48 : 60) : gx + gw + (nar ? 46 : 62);
+  const p = mk(px, top, W - right - px, ph, 0, TMAX_C, 0, 1); G.pC = p;
+  const L = smooth(CC.L), X = p.X;
+  let yf;
+  if (c2) { const span = CC.hi - CC.lo; yf = x => { const ul = x / CC.yl, ug = (Math.log10(Math.max(x, 1e-300)) - CC.lo) / span; return p.y + p.h - ((1 - L) * ul + L * ug) * p.h; }; }
+  else { const ym = Math.pow(10, CC.zD); yf = x => p.y + p.h - x / ym * p.h; }
+  G.yf = yf;
+  axes(c, p, { xt: [0, 5, 10, 15, 20, 25, 30], xl: 't (s)', yl: 'x (u)' });
+  if (c2) {
+    const span = CC.hi - CC.lo;
+    if (L < 0.995) for (let q = 0; q <= 4; q++) { const v = q / 4 * CC.yl, Y = Math.round(yf(v)) + .5; c.globalAlpha = (1 - L) * .9; line(c, p.x, Y, p.x + p.w, Y, rgba(RGB.t2, .15), 1); txt(c, fmtBig(v), p.x - 6, Y + 3.5, C.texte2, 10, 'right'); }
+    if (L > 0.005) { for (let n = Math.ceil(CC.lo - 1e-9); n <= Math.floor(CC.hi + 1e-9); n++) { const Y = Math.round(yf(Math.pow(10, n))) + .5; c.globalAlpha = L; line(c, p.x, Y, p.x + p.w, Y, rgba(RGB.t2, .22), 1); txt(c, decLab(n), p.x - 6, Y + 3.5, C.texte2, 10, 'right');
+        if (span <= 8 && n < Math.floor(CC.hi)) for (let m = 2; m <= 9; m++) { const Ym = yf(m * Math.pow(10, n)); c.globalAlpha = L * .6; line(c, p.x, Ym, p.x + 5, Ym, C.texte2, 1); } } }
+    c.globalAlpha = 1;
+  } else {
+    const ym = Math.pow(10, 1 + P.zoom);
+    for (let q = 0; q <= 4; q++) { const v = q / 4 * ym, Y = Math.round(p.y + p.h - q / 4 * p.h) + .5; line(c, p.x, Y, p.x + p.w, Y, rgba(RGB.t2, .15), 1); txt(c, fmtBig(v), p.x - 6, Y + 3.5, C.texte2, 10, 'right'); }
+  }
+  /* jauge (C1) */
+  const xcur = cx(tn);
+  if (!c2) {
+    const ym = Math.pow(10, CC.zD); c.strokeStyle = rgba(RGB.t2, .8); c.lineWidth = 1.2; c.strokeRect(gx + .5, p.y + .5, gw, p.h);
+    const fy = yf(Math.min(xcur, ym)); c.fillStyle = rgba(RGB.tx, .78); c.fillRect(gx + 1, fy, gw - 1, p.y + p.h - fy);
+    txt(c, 'quantité', gx + gw / 2, p.y - 4, C.texte2, 10, 'center');
+    spotR(gx, p.y, gw, p.h, 'Jauge linéaire', 'La quantité x, à l’échelle du cadre : elle déborde quand x sort du cadre.');
+    if (xcur > ym) { arrow(c, gx + gw / 2, p.y + 26, gx + gw / 2, p.y + 6, C.ener, 2.4, 7); txt(c, 'hors', gx + gw / 2, p.y + 38, C.energie || C.ener, 9, 'center'); txt(c, 'cadre', gx + gw / 2, p.y + 48, C.ener, 9, 'center'); }
+  }
+  clipP(c, p);
+  if (!c2) polyline(c, { X, Y: yf }, t => x0 * (1 + k * t), 0, k < 0 ? Math.min(tn, 1 / -k) : tn, 80, rgba(RGB.t2, .95), 1.1, [5, 4]);
+  polyline(c, { X, Y: yf }, cx, 0, Math.max(tn, 1e-3), 220, C.texte, 2.4);
+  const Tc = k === 0 ? 0 : LN2 / Math.abs(k);
+  if (Tc > 0) {
+    const f = k > 0 ? 2 : .5, pxs = Math.max(1, X(Tc) - X(0)), skip = Math.max(1, Math.ceil(40 / pxs)); let m = 1; c.lineWidth = 1.2; c.strokeStyle = rgba(RGB.en, .9);
+    for (; m * Tc <= tn + 1e-9 && m <= 60; m++) { const t0 = (m - 1) * Tc, t1 = m * Tc, xa = x0 * Math.pow(f, m - 1), xb = x0 * Math.pow(f, m);
+      c.beginPath(); c.moveTo(X(t0), yf(xa)); c.lineTo(X(t1), yf(xa)); c.lineTo(X(t1), yf(xb)); c.stroke(); dot(c, X(t1), yf(xb), 3, C.ener);
+      if (m % skip === 0 && yf(xb) > p.y + 8 && yf(xb) < p.y + p.h - 4) tag(c, k > 0 ? '×2' : '÷2', X(t1) + 4, yf(xb) - 9, C.ener, 10); }
+  }
+  dot(c, X(tn), yf(xcur), 4.5, C.texte);
+  c.restore();
+  const yv = yf(xcur);
+  if (!c2 && yv < p.y) { arrow(c, clamp(X(tn), p.x + 14, p.x + p.w - 14), p.y + 22, clamp(X(tn), p.x + 14, p.x + p.w - 14), p.y + 4, C.ener, 2.2, 6); tag(c, 'hors cadre', clamp(X(tn), p.x + 40, p.x + p.w - 40), p.y + 32, C.ener, 10, 'center'); }
+  tag(c, 'x = ' + fmtBig(xcur), p.x + p.w - 4, p.y + 12 + (!c2 && yv < p.y ? 28 : 0), C.texte, 13, 'right');
+  spotP(sampleP({ X, Y: yf }, cx, 0, Math.max(tn, 0.01), 22), 7, 'Courbe x(t)', 'x(t) = x₀·e^(kt) : chaque seconde, x est multiplié par e^k.');
+  if (!c2 && Tc > 0) { for (let m = 1; m * Tc <= tn && m <= 60; m++) spotC(X(m * Tc), yf(x0 * Math.pow(k > 0 ? 2 : .5, m)), 6, k > 0 ? 'Repère ×2' : 'Repère ÷2', k > 0 ? 'Un temps de doublement T₂ = ln 2 / k vient de s’écouler.' : 'Une demi-vie T½ = ln 2 / |k| vient de s’écouler.'); }
+  if (c2) {
+    const py = clamp(yf(CC.probe), p.y, p.y + p.h); G.probeY = py;
+    line(c, p.x, py, p.x + p.w, py, C.ener, 1.4); dot(c, p.x + 6, py, 4, C.ener); tag(c, 'y = ' + fmtBig(CC.probe), p.x + p.w - 4, py - 9, C.ener, 11, 'right');
+    spotR(p.x, py - 6, p.w, 12, 'Sonde', 'Glisse cette ligne : elle lit le temps où x atteint ce niveau, t = ln(y/x₀)/k.');
+    const ts = tStar(); if (isFinite(ts) && ts >= 0 && ts <= TMAX_C) { const Xs = X(ts);
+      line(c, Xs, py, Xs, p.y + p.h, C.ener, 1, [2, 3]); dot(c, Xs, py, 4, C.ener, true); txt(c, 't = ' + fmt(ts, 2) + ' s', clamp(Xs, p.x + 40, p.x + p.w - 40), p.y + p.h - 6, C.ener, 10, 'center'); }
+    else tag(c, !isFinite(ts) ? 'jamais atteint' : ts < 0 ? 'niveau sous x₀ : avant t = 0' : 'au-delà de 30 s', p.x + p.w / 2, clamp(py + 14, p.y + 10, p.y + p.h - 10), C.ener, 10, 'center');
+    if (k !== 0) tag(c, 'pente k/ln 10 = ' + fmt(k / Math.LN10, 3) + ' décade/s', p.x + 8, p.y + 12, C.texte2, 10);
+  }
+}
+function tStar() { const k = P.kC; if (k === 0) return NaN; const r = CC.probe / P.x0C; return r > 0 ? Math.log(r) / k : NaN; }
+
+/* ---------------- D1 ---------------- */
+const PIP = { 1: [[1, 1]], 2: [[0, 0], [2, 2]], 3: [[0, 0], [1, 1], [2, 2]], 4: [[0, 0], [2, 0], [0, 2], [2, 2]], 5: [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]], 6: [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2]] };
+function drawDie(c, cx_, cy, s, face, rot, sc) {
+  c.save(); c.translate(cx_, cy); c.rotate(rot); c.scale(sc, sc); const h = s / 2, r = s * .16;
+  c.beginPath(); c.moveTo(-h + r, -h); c.arcTo(h, -h, h, h, r); c.arcTo(h, h, -h, h, r); c.arcTo(-h, h, -h, -h, r); c.arcTo(-h, -h, h, -h, r); c.closePath();
+  c.fillStyle = C.fond2; c.fill(); c.strokeStyle = C.ener; c.lineWidth = 1.6; c.stroke();
+  if (face) for (const [i, j] of PIP[face]) dot(c, (i - 1) * s * .26, (j - 1) * s * .26, s * .072, C.texte);
+  c.restore();
+}
+function drawD1(c) {
+  const top = headH() + 4, left = padX(), right = padX(), aw = W - left - right, ah = H - top - 8, st = stackMode(), now = performance.now();
+  let A1, A2, A3; // die zone, hist zone, curve zone : {x,y,w,h}
+  if (st) { const h1 = Math.min(150, ah * 0.34), h2 = (ah - h1) * 0.46; A1 = { x: left, y: top, w: aw, h: h1 }; A2 = { x: left, y: top + h1, w: aw, h: h2 }; A3 = { x: left, y: top + h1 + h2, w: aw, h: ah - h1 - h2 }; }
+  else { const cw = Math.round(aw * 0.5), h1 = Math.min(190, ah * 0.4); A1 = { x: left, y: top, w: cw, h: h1 }; A3 = { x: left, y: top + h1, w: cw, h: ah - h1 }; A2 = { x: left + cw + 28, y: top, w: aw - cw - 28, h: ah }; }
+  /* dé et ruban */
+  const anim = reduce ? 1 : clamp((now - D1.t0) / 300, 0, 1), rolling = anim < 1;
+  const s = Math.min(A1.h - 44, 104, A1.w * 0.3), dcx = A1.x + A1.w / 2, dcy = A1.y + 8 + s / 2 + 6;
+  let face = D1.last; if (rolling) face = 1 + Math.floor(now / 55 % 6);
+  const e = 1 - anim, rot = rolling ? Math.sin(anim * 18) * e * 0.5 : 0, sc = rolling ? 1 + .06 * Math.sin(anim * Math.PI) : 1;
+  drawDie(c, dcx, dcy, s, D1.n ? face : 0, rot, sc);
+  if (!D1.n) txt(c, 'Lance le dé', dcx, dcy + 4, C.texte2, 12, 'center');
+  spotR(dcx - s / 2, dcy - s / 2, s, s, 'Dé à six faces', D1.n ? 'Dernier lancer : ' + D1.last + '. Chaque face a la probabilité 1/6.' : 'Chaque face a la probabilité 1/6.');
+  const rw = Math.min(A1.w, 30 * 14), cwid = rw / 30, ry = A1.y + A1.h - 26, rx = A1.x + (A1.w - rw) / 2;
+  for (let i = 0; i < 30; i++) { const have = i >= 30 - Math.min(30, D1.rn); const v = have ? D1.rib[((D1.rn - 30 + i) % 30 + 30) % 30] : 0; c.strokeStyle = rgba(RGB.t2, .35); c.lineWidth = 1; c.strokeRect(rx + i * cwid + .5, ry + .5, cwid - 1, 20);
+    if (v) txt(c, String(v), rx + i * cwid + cwid / 2, ry + 14.5, v === 6 ? C.accent : C.texte, 10, 'center'); }
+  if (D1.rn) { c.strokeStyle = C.ener; c.lineWidth = 1.4; c.strokeRect(rx + 29 * cwid + .5, ry + .5, cwid - 1, 20); }
+  spotR(rx, ry, rw, 20, 'Ruban des lancers', 'Les 30 derniers résultats, le plus récent à droite (encadré jaune). Les 6 sont en citron.');
+  /* histogramme */
+  const hp = mk(A2.x + 40, A2.y + 22, A2.w - 48, A2.h - 22 - 30 - (st ? 0 : 0), 0, 6, 0, D1.disp); G.d1h = hp;
+  const fr = i => D1.n ? D1.counts[i] / D1.n : 0; let mx = 1 / 6; for (let i = 0; i < 6; i++) mx = Math.max(mx, fr(i));
+  txt(c, 'fréquence observée par face', A2.x + 2, A2.y + 10, C.texte2, 10);
+  axes(c, hp, { yt: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1].filter(v => v < D1.disp * 0.98), yf: v => fmt(v * 100, 0) + ' %' });
+  const bw = hp.w / 6;
+  for (let i = 0; i < 6; i++) { const f = fr(i), Y = hp.Y(f); c.fillStyle = rgba(RGB.ac, .85); c.fillRect(hp.x + i * bw + bw * .12, Y, bw * .76, hp.y + hp.h - Y); txt(c, String(i + 1), hp.x + i * bw + bw / 2, hp.y + hp.h + 15, C.texte2, 11, 'center');
+    spotR(hp.x + i * bw, hp.y, bw, hp.h, 'Face ' + (i + 1), D1.counts[i] + ' fois sur ' + grp(D1.n) + (D1.n ? ' (' + fmt(f * 100, 1) + ' %)' : '') + '. Théorie : 16,7 %.'); }
+  line(c, hp.x, hp.Y(1 / 6), hp.x + hp.w, hp.Y(1 / 6), C.texte2, 1.2, [5, 4]); txt(c, '1/6', hp.x + hp.w - 2, hp.Y(1 / 6) - 4, C.texte2, 10, 'right');
+  D1.target = Math.max(0.3, mx * 1.15);
+  /* fréquence de 6 en fonction de n */
+  const gp = mk(A3.x + 40, A3.y + 22, A3.w - 48, A3.h - 22 - 30, 0, 5, 0, 0.5); G.d1g = gp;
+  txt(c, 'fréquence de 6 en fonction du nombre de lancers n', A3.x + 2, A3.y + 10, C.texte2, 10);
+  axes(c, gp, { xt: [0, 1, 2, 3, 4, 5], xf: v => v === 0 ? '1' : v === 1 ? '10' : v === 2 ? '100' : v === 3 ? '1000' : '10' + sup(v), yt: [0, 0.1, 0.2, 0.3, 0.4, 0.5], yf: v => fmt(v * 100, 0) + ' %', xl: 'n' });
+  const pp = 1 / 6; clipP(c, gp);
+  c.beginPath(); const NB_ = 100; for (let i = 0; i <= NB_; i++) { const n = Math.pow(10, 5 * i / NB_), b = 2 * Math.sqrt(pp * (1 - pp) / n), X = gp.X(Math.log10(n)), Y = gp.Y(Math.min(0.5, pp + b)); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); }
+  for (let i = NB_; i >= 0; i--) { const n = Math.pow(10, 5 * i / NB_), b = 2 * Math.sqrt(pp * (1 - pp) / n); c.lineTo(gp.X(Math.log10(n)), gp.Y(Math.max(0, pp - b))); } c.closePath(); c.fillStyle = rgba(RGB.t2, .13); c.fill();
+  line(c, gp.x, gp.Y(pp), gp.x + gp.w, gp.Y(pp), C.texte2, 1.2, [5, 4]);
+  if (D1.hc > 0) { c.strokeStyle = C.accent; c.lineWidth = 1.7; c.beginPath(); for (let i = 0; i < D1.hc; i++) { const X = gp.X(Math.log10(D1.hn[i])), Y = gp.Y(D1.hf[i]); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); } c.stroke();
+    dot(c, gp.X(Math.log10(Math.max(1, Math.min(1e5, D1.n)))), gp.Y(D1.counts[5] / D1.n), 3.5, C.ener); }
+  c.restore();
+  txt(c, 'p = 1/6', gp.x + 6, gp.Y(pp) - 5, C.texte2, 10);
+  spotR(gp.x, gp.y, gp.w, gp.h, 'Entonnoir', 'La bande pâle est ±2·√(p(1−p)/n) : la fréquence observée y entre et y reste. La ligne tiretée est p = 1/6.');
+}
+
+/* ---------------- D2 ---------------- */
+const XR = 70;
+function drawD2(c) {
+  const top = headH() + 4, left = padX(), right = padX(), aw = W - left - right, ah = H - top - 48;
+  const h1 = Math.max(46, ah * 0.17), h2 = Math.max(70, ah * 0.27), h3 = ah - h1 - h2 - 30, px = left + 38, pw = aw - 44, n = WK.n, M = WK.M;
+  const pc = mk(px, top + 14, pw, h1, -XR, XR, 0, 1), pw_ = mk(px, top + 14 + h1 + 22, pw, h2, 0, WN, -XR, XR), ph_ = mk(px, top + 14 + h1 + 22 + h2 + 36, pw, Math.max(60, h3 - 24), -XR, XR, 0, WK.yD);
+  G.d2 = { pc, ph: ph_, pw: pw_ };
+  /* nuage */
+  txt(c, 'les marcheurs (un point chacun)', left, top + 8, C.texte2, 10);
+  line(c, pc.x, pc.y + pc.h + .5, pc.x + pc.w, pc.y + pc.h + .5, rgba(RGB.t2, .7), 1); line(c, pc.X(0), pc.y, pc.X(0), pc.y + pc.h, rgba(RGB.t2, .3), 1, [2, 4]);
+  c.beginPath(); const pos = WK.pos, yy = WK.y, sx_ = pc.w / (2 * XR); for (let i = 1; i < M; i++) { const X = pc.x + (pos[i] + XR) * sx_; if (X < pc.x || X > pc.x + pc.w) continue; c.rect(X - .9, pc.y + 3 + yy[i] * (pc.h - 8), 1.8, 1.8); }
+  c.fillStyle = rgba(RGB.tx, M > 2000 ? .5 : .72); c.fill();
+  const w0x = pc.x + (pos[0] + XR) * sx_, w0y = pc.y + 3 + yy[0] * (pc.h - 8); dot(c, w0x, w0y, 4, C.ener);
+  spotR(pc.x, pc.y, pc.w, pc.h, 'Nuage de marcheurs', 'Un point par marcheur : sa position est la somme de n pas de +1 ou −1.');
+  spotC(w0x, w0y, 9, 'Marcheur suivi', 'Son trajet est tracé dessous : un zigzag imprévisible.');
+  /* un marcheur */
+  txt(c, 'un marcheur : position en fonction du pas', left, pw_.y - 6, C.texte2, 10);
+  axes(c, pw_, { xt: [0, 100, 200, 300, 400], yt: [-60, -30, 0, 30, 60], xl: 'pas n' });
+  clipP(c, pw_); polyline(c, pw_, t => Math.sqrt(t), 0, WN, 60, rgba(RGB.t2, .9), 1, [4, 4]); polyline(c, pw_, t => -Math.sqrt(t), 0, WN, 60, rgba(RGB.t2, .9), 1, [4, 4]);
+  c.strokeStyle = C.ener; c.lineWidth = 1.5; c.beginPath(); for (let i = 0; i <= n; i++) { const X = pw_.X(i), Y = pw_.Y(WK.path[i]); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); } c.stroke(); c.restore();
+  tag(c, '±√n', pw_.x + pw_.w - 4, pw_.Y(Math.sqrt(WN)) - 8, C.texte2, 10, 'right');
+  spotR(pw_.x, pw_.y, pw_.w, pw_.h, 'Trajet du marcheur suivi', 'Position en fonction du pas. Tireté : ±√n, la largeur typique du nuage.');
+  /* histogramme */
+  txt(c, 'histogramme des positions', left, ph_.y - 8, C.texte2, 10);
+  const th = n > 0 ? M * 2 / (Math.sqrt(n) * Math.sqrt(TAU2)) : M; let hm = 0; for (let j = 0; j <= n; j++) hm = Math.max(hm, WK.hist[j]);
+  WK.yT = Math.max(5, Math.max(hm, th * (n > 3 ? 1 : 0)) * 1.22);
+  const ytk = []; const stp = WK.yD > 400 ? 200 : WK.yD > 120 ? 50 : WK.yD > 40 ? 20 : WK.yD > 15 ? 10 : 5; for (let v = 0; v < WK.yD * .97; v += stp) ytk.push(v);
+  axes(c, ph_, { xt: [-60, -40, -20, 0, 20, 40, 60], yt: ytk, xl: 'position' });
+  clipP(c, ph_); c.fillStyle = rgba(RGB.ac, .85);
+  for (let j = 0; j <= n; j++) { const v = WK.hist[j]; if (!v) continue; const ps = -n + 2 * j, X0 = ph_.X(ps - 1), X1 = ph_.X(ps + 1), Y = ph_.Y(v); c.fillRect(X0 + .4, Y, Math.max(.8, X1 - X0 - .8), ph_.y + ph_.h - Y); }
+  if (n > 0) { const sd = Math.sqrt(WK.ss / M - (WK.s / M) ** 2), mu = WK.s / M, XM = ph_.X(mu);
+    c.fillStyle = rgba(RGB.t2, .13); c.fillRect(ph_.X(mu - sd), ph_.y, ph_.X(mu + sd) - ph_.X(mu - sd), ph_.h);
+    line(c, ph_.X(mu - sd), ph_.y, ph_.X(mu - sd), ph_.y + ph_.h, rgba(RGB.t2, .7), 1, [2, 3]); line(c, ph_.X(mu + sd), ph_.y, ph_.X(mu + sd), ph_.y + ph_.h, rgba(RGB.t2, .7), 1, [2, 3]);
+    line(c, XM, ph_.y, XM, ph_.y + ph_.h, C.ener, 1.6);
+    polyline(c, ph_, x => M * 2 * Math.exp(-x * x / (2 * n)) / (Math.sqrt(n) * Math.sqrt(TAU2)), -XR, XR, 200, C.texte, 1.3);
+    G.d2m = XM; }
+  c.restore();
+  if (n > 0) { spotP(sampleP(ph_, x => M * 2 * Math.exp(-x * x / (2 * n)) / (Math.sqrt(n) * Math.sqrt(TAU2)), -XR, XR, 28), 6, 'Courbe théorique', 'M·2·φ(x ; 0, √n) : la cloche prévue pour des cases de largeur 2.');
+    spotR(G.d2m - 4, ph_.y, 8, ph_.h, 'Moyenne observée', 'Le centre du nuage (trait jaune). Théorie : 0.'); }
+  tag(c, 'n = ' + n, px + pw - 4, top + 8, C.texte, 12, 'right');
+}
+
+/* ---------------- D3 ---------------- */
+function drawD3(c) {
+  const top = headH() + 4, left = padX(), right = padX(), aw = W - left - right, ah = H - top - 34, st = stackMode(), N0 = DC.N0;
+  const side = Math.round(Math.sqrt(N0)); let gs, gx, gy, pg;
+  if (st) { gs = Math.min(aw * 0.62, ah * 0.46); gx = left + (aw - gs) / 2; gy = top; pg = mk(left + 40, top + gs + 28, aw - 50, ah - gs - 28 - 6, 0, T3, 0, N0); }
+  else { gs = Math.min(ah - 10, aw * 0.42); gx = left; gy = top + 4; pg = mk(left + gs + 70, top + 18, aw - gs - 80, ah - 18, 0, T3, 0, N0); }
+  G.d3 = { gx, gy, gs, side, pg };
+  const cs = gs / side, gap = cs >= 5 ? 1 : 0, now = DC.n * DT3;
+  c.beginPath(); for (let i = 0; i < N0; i++) if (DC.alive[i]) { const q = i % side, r = (i / side) | 0; c.rect(gx + q * cs + gap / 2, gy + r * cs + gap / 2, cs - gap, cs - gap); }
+  c.fillStyle = C.texte; c.fill();
+  c.beginPath(); for (let i = 0; i < N0; i++) if (!DC.alive[i]) { const q = i % side, r = (i / side) | 0; c.rect(gx + q * cs + gap / 2, gy + r * cs + gap / 2, cs - gap, cs - gap); }
+  c.fillStyle = rgba(RGB.tr, .55); c.fill();
+  if (!reduce) for (let i = 0; i < N0; i++) { if (DC.alive[i]) continue; const a = 1 - (now - DC.dT[i]) / 0.3; if (a > 0 && a <= 1) { const q = i % side, r = (i / side) | 0; c.fillStyle = rgba(RGB.en, a); c.fillRect(gx + q * cs - cs * .3, gy + r * cs - cs * .3, cs * 1.6, cs * 1.6); } }
+  c.strokeStyle = rgba(RGB.t2, .5); c.lineWidth = 1; c.strokeRect(gx - 3.5, gy - 3.5, gs + 7, gs + 7);
+  txt(c, 'intact : ' + DC.cnt + ' / ' + N0, gx, gy + gs + 17, C.texte2, 11);
+  /* graphe N(t) */
+  axes(c, pg, { xt: [0, 2, 4, 6, 8, 10, 12], yt: N0 === 25 ? [0, 5, 10, 15, 20, 25] : N0 === 400 ? [0, 100, 200, 300, 400] : [0, 500, 1000, 1500, 2000, 2500], xl: 't (s)', yl: 'N' });
+  const q = t => Math.exp(-LAM * t), band = t => Math.sqrt(N0 * q(t) * (1 - q(t)));
+  clipP(c, pg); c.beginPath();
+  for (let i = 0; i <= 120; i++) { const t = T3 * i / 120, X = pg.X(t), Y = pg.Y(N0 * q(t) + band(t)); if (i === 0) c.moveTo(X, Y); else c.lineTo(X, Y); }
+  for (let i = 120; i >= 0; i--) { const t = T3 * i / 120; c.lineTo(pg.X(t), pg.Y(Math.max(0, N0 * q(t) - band(t)))); } c.closePath(); c.fillStyle = rgba(RGB.t2, .14); c.fill();
+  polyline(c, pg, t => N0 * q(t), 0, T3, 120, rgba(RGB.t2, .95), 1.2, [5, 4]);
+  c.strokeStyle = C.accent; c.lineWidth = 1.9; c.beginPath(); for (let i = 0; i <= DC.n; i++) { const X = pg.X(i * DT3), Y = pg.Y(DC.hist[i]); if (i === 0) c.moveTo(X, Y); else { c.lineTo(X, pg.Y(DC.hist[i - 1])); c.lineTo(X, Y); } } c.stroke();
+  for (let k = 1; k <= 6; k++) { const t = k * T_HALF, v = N0 / Math.pow(2, k); line(c, pg.X(t), pg.Y(v), pg.X(t), pg.y + pg.h, rgba(RGB.en, .6), 1, [2, 3]); line(c, pg.x, pg.Y(v), pg.X(t), pg.Y(v), rgba(RGB.en, .6), 1, [2, 3]); dot(c, pg.X(t), pg.Y(v), 3, C.ener); }
+  c.restore();
+  for (let k = 1; k <= 3; k++) tag(c, k === 1 ? 'N₀/2' : 'N₀/' + Math.pow(2, k), pg.X(k * T_HALF) + 5, pg.Y(N0 / Math.pow(2, k)) - 9, C.ener, 10);
+  spotP(sampleP(pg, t => N0 * q(t), 0, T3, 24), 6, 'Courbe attendue', 'N₀·e^(−λt) : la même exponentielle qu’au chapitre C, avec k = −λ.');
+  spotR(pg.x, pg.y, pg.w, pg.h, 'Comptage observé et attendu', 'Escalier citron : atomes intacts. Tireté : attendu. Bande : ±√(N₀·q(1−q)). Jaune : demi-vies.');
+}
+
+/* ---------------- Scène ---------------- */
+let fadeA = 1, fadeDir = 0, pending = -1;
+function drawScene() {
+  const c = ctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H); spots.length = 0; G = {};
+  c.save(); c.globalAlpha = fadeA;
+  if (idx < 2) drawA(c); else if (idx === 2) drawB1(c); else if (idx === 3) drawB2(c); else if (idx < 6) drawC(c); else if (idx === 6) drawD1(c); else if (idx === 7) drawD2(c); else drawD3(c);
+  c.restore();
+}
+function legend(items) {
+  return items.map(([k, col, s]) => { let g;
+    if (k === 'pt') g = `<circle cx="10" cy="3" r="3" fill="${col}"/>`; else if (k === 'ring') g = `<circle cx="10" cy="3" r="3" fill="none" stroke="${col}"/>`;
+    else g = `<line x1="0" y1="3" x2="20" y2="3" stroke="${col}" stroke-width="${k === 'fort' ? 2.4 : 1.4}"${k === 'tiret' ? ' stroke-dasharray="4 3"' : ''}/>`;
+    return `<span><svg viewBox="0 0 20 6">${g}</svg>${s}</span>`; }).join('');
+}
+function drawSec() {
+  const c = sx, w = secC.width / dpr, h = secC.height / dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  const p = mk(40, 10, w - 50, h - 10 - 38, 0, 10, -2.7, 2.7);
+  axes(c, p, { xt: [0, 5, 10], yt: [-2, 0, 2], xl: 'x (u)', yl: 'dx/dt (u/s)' });
+  line(c, p.x, p.Y(0), p.x + p.w, p.Y(0), rgba(RGB.t2, .7), 1, [3, 3]);
+  c.lineWidth = 2.4; for (let i = 0; i < 100; i++) { const x1 = i / 10, x2 = (i + 1) / 10, a = fRule(x1), b = fRule(x2); c.strokeStyle = rateCol((a + b) / 2); c.beginPath(); c.moveTo(p.X(x1), p.Y(a)); c.lineTo(p.X(x2), p.Y(b)); c.stroke(); }
+  if (P.rule === 'goal') dot(c, p.X(A_XS), p.Y(0), 4.5, C.accent); else if (P.rule === 'prop') dot(c, p.X(0), p.Y(0), 4.5, C.texte, true);
+  if (TR.length) { const h_ = headOf(TR[TR.length - 1], .02), x = clamp(h_[1], 0, 10); dot(c, p.X(x), p.Y(fRule(x)), 4.5, C.texte); }
+  $('#secLeg').innerHTML = legend([['fort', C.pos, 'x croît'], ['fort', C.neg, 'x décroît'], ['pt', C.accent, 'équilibre stable'], ['ring', C.texte, 'équilibre instable']]);
+}
+
+/* ---------------- Mesures ---------------- */
+const mEl = $('#meas'); let rowEls = [], noteLast = '', eqLast = '';
+const pctS = (v, d) => (v >= 0 ? '+' : '') + fmt(v, d);
+function rowsFor() {
+  if (idx === 0) { const x = E.xs[E.n], r = fRule(x), t = E.n * P.dtE;
+    return [['t', fmt(t, 1), 's'], ['x', fmt(x, 2), 'u'], ['dx/dt', fmt(r, 2), 'u/s'], ['Δt', fmt(P.dtE, 1), 's'], ['x + (dx/dt)·Δt', fmt(x + r * P.dtE, 2), 'u'], ['x exact à ce t', fmt(exactA(t, P.x0A), 2), 'u']]; }
+  if (idx === 1) { const tr = TR[TR.length - 1], hd = tr ? headOf(tr, .02) : [0, NaN];
+    return [['trajectoires', String(TR.length), ''], ['t (dernière)', fmt(hd[0], 1), 's'], ['x (dernière)', fmt(hd[1], 2), 'u'], ['dx/dt', fmt(fRule(hd[1]), 2), 'u/s'],
+      ['équilibre', P.rule === 'goal' ? 'x* = 5 (stable)' : P.rule === 'prop' ? 'x = 0 (instable)' : 'aucun', '']]; }
+  if (idx === 2) { const tau = P.tauB; return [['e (négatif)', fmt(F.eN, 2), 'u'], ['de/dt (négatif)', fmt(-F.eN / tau, 2), 'u/s'], ['e (positif)', fmt(F.eP, 2), 'u'], ['de/dt (positif)', fmt(F.eP / tau, 2), 'u/s'],
+    ['temps caractéristique τ', fmt(tau, 1), 's'], ['facteur sur τ (nég. / pos.)', '×0,37 · ×2,72', '']]; }
+  if (idx === 3) { const h = lgCur ? headOf2(lgCur) : [0, 0], N = h[1], r = P.r, q = lgF(N);
+    return [['t', fmt(h[0], 1), 's'], ['N', fmt(N, 1), 'u'], ['dN/dt', fmt(q, 1), 'u/s'], ['N/K', fmt(N / KCAP, 2), ''], ['pente du taux f′(N)', pctS(r * (1 - 2 * N / KCAP), 2), 's⁻¹']]; }
+  if (idx === 4) { const k = P.kC, t = CC.t, x = cx(t), T = Math.abs(k) > 1e-9 ? LN2 / Math.abs(k) : NaN;
+    return [['t', fmt(t, 1), 's'], ['x', fmtBig(x), 'u'], ['chaque seconde', '×' + fmt(Math.exp(k), 2), ''], [k > 0 ? 'doublement T₂ = ln 2/k' : k < 0 ? 'demi-vie T½ = ln 2/|k|' : 'T₂, T½', k === 0 ? '—' : fmt(T, 2), k === 0 ? '' : 's'],
+      ['τ = 1/|k|', k === 0 ? '—' : fmt(1 / Math.abs(k), 2), k === 0 ? '' : 's'], [k < 0 ? 'demi-vies écoulées' : 'doublements écoulés t/T₂', k === 0 ? '—' : fmt(t / T, 2), '']]; }
+  if (idx === 5) { const k = P.kC, t = CC.t, ts = tStar(), y = CC.probe, x0 = P.x0C;
+    return [['t', fmt(t, 1), 's'], ['x', fmtBig(cx(t)), 'u'], ['niveau de la sonde y', fmtBig(y), 'u'], ['t = ln(y/x₀)/k', isFinite(ts) && ts >= 0 ? fmt(ts, 2) : '—', isFinite(ts) && ts >= 0 ? 's' : ''],
+      ['log₂(y/x₀) doublements', isFinite(Math.log2(y / x0)) ? fmt(Math.log2(y / x0), 2) : '—', ''], ['temps pour ×10 = ln 10/k', k > 0 ? fmt(Math.LN10 / k, 2) : '—', k > 0 ? 's' : ''], ['pente k/ln 10', fmt(k / Math.LN10, 3), 'décade/s']]; }
+  if (idx === 6) { const d = dice(); return [['n', grp(d.n), ''], ['fréquence de 6', d.n ? fmt(d.freq6 * 100, 1) : '—', d.n ? '%' : ''], ['écart à 1/6', d.n ? pctS((d.freq6 - 1 / 6) * 100, 1) : '—', d.n ? 'pt' : ''],
+    ['moyenne (théorie 3,5)', d.n ? fmt(d.mean, 2) : '—', ''], ['écart-type (théorie 1,71)', d.n ? fmt(d.sd, 2) : '—', '']]; }
+  if (idx === 7) { const w = walk(), n = w.n; return [['n', String(n), 'pas'], ['moyenne (théorie 0)', fmt(w.mean, 2), ''], ['écart-type observé', fmt(w.sd, 2), ''], ['√n', fmt(Math.sqrt(n), 2), ''], ['σ observé / √n', n ? fmt(w.sd / Math.sqrt(n), 3) : '—', '']]; }
+  const d = decay(), q = d.expected;
+  return [['t', fmt(d.t, 2), 's'], ['N', grp(d.N), ''], ['N attendu', fmt(q, 1), ''], ['écart relatif', q > 0.5 ? pctS((d.N - q) / q * 100, 1) : '—', q > 0.5 ? '%' : ''], ['demi-vie mesurée (théorie 2,00)', d.thalfMeasured === null ? '—' : fmt(d.thalfMeasured, 2), d.thalfMeasured === null ? '' : 's']];
+}
+function eqFor() {
+  if (idx < 2) return ruleLabel();
+  if (idx === 2) return 'de/dt = ∓e/τ   (τ = ' + fmt(P.tauB, 1) + ' s)';
+  if (idx === 3) return 'dN/dt = r·N·(1 − N/K)';
+  if (idx === 4) return 'x(t) = x₀·e^(kt) = ' + fmtG(P.x0C) + '·e^(' + fmtG(P.kC) + '·t)';
+  if (idx === 5) { const k = P.kC, ts = tStar(); return 'ln(y/x₀) = k·t' + (k !== 0 ? '\nln(' + fmtBig(CC.probe) + '/' + fmtG(P.x0C) + ') = ' + fmtG(k) + '·' + (isFinite(ts) ? fmt(ts, 2) : 't') : ''); }
+  if (idx === 6) return 'p(chaque face) = 1/6';
+  if (idx === 7) return 'x ← x ± 1,  p = ½  ⇒  σ = √n';
+  return 'p = 1 − 2^(−Δt/T½) = ' + fmt(P_DEC * 100, 2) + ' %  par pas de 0,05 s';
+}
+function noteFor() {
+  let s = NOTES[idx];
+  if (idx === 0 && P.rule === 'goal' && Math.abs(1 - P.dtE / P.tauA) < 1e-9) s += ' Ici Δt = τ : Euler arrive exactement sur x* en un pas. Ce n’est pas un bug, c’est un pas trop grand.';
+  return s;
+}
+function buildRows() {
+  const rows = rowsFor(); mEl.innerHTML = ''; rowEls = [];
+  rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 'row' + (i >= 4 ? ' small' : ''); d.innerHTML = '<span class="lab"></span><span class="val"><b></b><i></i></span>'; mEl.appendChild(d);
+    rowEls.push([d.children[0], d.querySelector('b'), d.querySelector('i')]); });
+}
+const setText = (e, s) => { if (e.textContent !== s) e.textContent = s; };
+function readouts() {
+  const rows = rowsFor(); if (rows.length !== rowEls.length) buildRows();
+  rows.forEach((r, i) => { setText(rowEls[i][0], r[0]); setText(rowEls[i][1], r[1]); setText(rowEls[i][2], r[2]); });
+  const eq = eqFor(); if (eq !== eqLast) { eqLast = eq; $('#eq').style.whiteSpace = 'pre-line'; $('#eq').textContent = eq; }
+  const nt = noteFor(); if (nt !== noteLast) { noteLast = nt; $('#mNote').textContent = nt; }
+}
+
+/* ---------------- Entrée dans une étape ---------------- */
+function syncUI() {
+  const setR = (id, vid, val, f) => { $(id).value = val; $(vid).textContent = f(val); };
+  setR('#rX0A', '#vX0A', P.x0A, v => fmt(v, 1) + ' u'); setR('#rTau', '#vTau', P.tauB, v => fmt(v, 1) + ' s'); setR('#rR', '#vR', P.r, v => fmt(v, 2) + ' s⁻¹');
+  setR('#rX0C', '#vX0C', P.x0C, v => fmt(v, 1) + ' u'); setR('#rK', '#vK', P.kC, v => fmt(v, 2) + ' s⁻¹');
+  $('#bNoise').setAttribute('aria-pressed', P.noise); $('#bCont').setAttribute('aria-pressed', P.cont);
+  document.querySelectorAll('[data-set]').forEach(b => { const n = b.dataset.set, cur = n === 'rule' ? P.rule : n === 'dt' ? P.dtE : n === 'log' ? (P.log ? 1 : 0) : n === 'M' ? P.M : P.N0; b.setAttribute('aria-pressed', String(cur) === b.dataset.v); });
+  document.querySelectorAll('#tools .grp').forEach(g => { g.hidden = !g.dataset.s.split(' ').includes(String(idx)); });
+  $('#bZoom').disabled = P.zoom >= 12; $('#bZoom0').disabled = P.zoom === 0;
+}
+function applyC(imm) { const g = cTargets(); if (imm) { CC.lo = g.lo; CC.hi = g.hi; CC.yl = g.yl; } return g; }
+function initStep(i) {
+  idx = i; spots.length = 0; hideTip();
+  if (i === 0) resetE();
+  else if (i === 1) { TR.length = 0; addTraj(0, 2); addTraj(0, 7); for (const t of TR) t.prog = 1; }
+  else if (i === 2) resetF();
+  else if (i === 3) typLG();
+  else if (i === 4) { CC.t = 0; CC.hold = 0; P.zoom = 0; CC.zD = 1; applyC(true); }
+  else if (i === 5) { CC.t = 0; CC.hold = 0; P.log = true; CC.L = reduce ? 1 : 0; applyC(true); CC.probe = cDefaultProbe(); }
+  else if (i === 6) { P.cont = false; resetD1(); D1.disp = 0.3; }
+  else if (i === 7) { resetWK(); WK.yD = 10; }
+  else if (i === 8) resetDC(true);
+  syncUI(); updateUI(i); buildRows(); readouts();
+}
+const secCfg = { 1: ['Graphe du taux : dx/dt en fonction de x', 150] };
+function sizeSec() {
+  const cfg = secCfg[idx]; $('#secBox').hidden = !cfg; if (!cfg) return;
+  $('#secEye').textContent = cfg[0]; secC.style.height = cfg[1] + 'px';
+  const r = secC.getBoundingClientRect(); secC.width = Math.max(10, Math.round(r.width * dpr)); secC.height = Math.max(10, Math.round(r.height * dpr)); sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function updateUI(n) {
+  const ae = document.activeElement; if (ae && ae.closest && ae.closest('#tools .grp[hidden]')) ae.blur();
+  const s = STEPS[n];
+  document.querySelectorAll('.seg').forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Chapitre <b>${s.c}</b> · étape ${n + 1} sur 9`;
+  $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#stepKey').textContent = '« ' + s.k + ' »';
+  for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === 8; $('#lien07').hidden = n !== 7; eqLast = ''; noteLast = '';
+  sizeSec();
+}
+function goStep(n, immediate) {
+  n = clamp(Math.round(n), 0, 8);
+  if (immediate || reduce) { initStep(n); fadeA = 1; fadeDir = 0; pending = -1; return; }
+  pending = n; fadeDir = -1;
+}
+function resetStep() {
+  const i = idx;
+  if (i === 0) { P.dtE = 1; P.x0A = 1; } else if (i === 2) { P.tauB = 2; P.noise = false; } else if (i === 3) P.r = 0.8;
+  else if (i === 4 || i === 5) { P.x0C = 1; P.kC = 0.35; } else if (i === 7) P.M = 1000; else if (i === 8) P.N0 = 400;
+  goStep(i, false);
+}
+
+/* ---------------- Paramètres (UI et crochet) ---------------- */
+function recomputeTraj() { for (const t of TR) { const m = t.pts.length; fillTraj(t); void m; } }
+function setParam(name, v) {
+  const bv = typeof v === 'string' ? (v === '1' || v === 'true') : !!v, nv = +v;
+  switch (name) {
+    case 'rule': if (v === 'const' || v === 'prop' || v === 'goal') { P.rule = v; resetE(); recomputeTraj(); } break;
+    case 'dt': P.dtE = nv; resetE(); break;
+    case 'x0': if (idx <= 1) { P.x0A = clamp(nv, 0.5, 9); resetE(); } else { P.x0C = clamp(nv, 1, 10); applyC(false); if (idx === 5) CC.probe = clamp(CC.probe, 1e-9, 1e300); } break;
+    case 'tau': if (idx <= 1) { P.tauA = nv; resetE(); recomputeTraj(); } else P.tauB = clamp(nv, 1, 5); break;
+    case 'r': P.r = clamp(nv, 0.2, 1.5); for (const t of LG) fillLG(t); break;
+    case 'k': if (idx <= 1) { P.kA = nv; resetE(); recomputeTraj(); } else P.kC = clamp(nv, -1, 1); break;
+    case 'log': P.log = bv; break;
+    case 'M': P.M = Math.min(5000, Math.max(1, Math.round(nv))); if (idx === 7) { resetWK(); WK.yD = 10; } break;
+    case 'N0': P.N0 = Math.min(2500, Math.max(1, Math.round(nv))); if (idx === 8) resetDC(true); break;
+    case 'noise': P.noise = bv; break;
+  }
+  syncUI();
+}
+const dice = () => ({ n: D1.n, counts: Array.from(D1.counts), freq6: D1.n ? D1.counts[5] / D1.n : 0, mean: D1.n ? D1.sum / D1.n : 0, sd: D1.n ? Math.sqrt(Math.max(0, D1.sumsq / D1.n - (D1.sum / D1.n) ** 2)) : 0 });
+const walk = () => { const n = WK.n, M = WK.M, mean = WK.s / M; return { n, M, mean, sd: n ? Math.sqrt(Math.max(0, WK.ss / M - mean * mean)) : 0, hist: Array.from(WK.hist.subarray(0, n + 1)) }; };
+const decay = () => { const t = DC.n * DT3; return { t, N0: DC.N0, N: DC.cnt, expected: DC.N0 * Math.exp(-LAM * t), thalfMeasured: DC.th !== null ? DC.th : DC.thPrev }; };
+function restartCurrent() { if (idx === 6) resetD1(); else if (idx === 7) resetWK(); else if (idx === 8) resetDC(true); }
+
+/* ---------------- Tailles ---------------- */
+function resize() {
+  const r = sceneEl.getBoundingClientRect(), nw = Math.max(280, Math.round(r.width)), nh = Math.max(300, Math.round(r.height)), dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); sizeSec();
+}
+
+/* ---------------- Survol, clics, glisser ---------------- */
+let tipKey = '', drag = null, tipTimer = 0;
+function showTip(key, name, role, x, y) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight; let tx = x + 14, ty = y + 16; if (tx + tw > W - 6) tx = x - tw - 12; if (ty + th > H - 6) ty = y - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function findSpot(x, y) {
+  for (let i = spots.length - 1; i >= 0; i--) { const s = spots[i]; let hit;
+    if (s.k === 0) hit = Math.hypot(x - s.x, y - s.y) <= s.r;
+    else if (s.k === 1) hit = x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h;
+    else { const dx = s.x2 - s.x, dy = s.y2 - s.y, l2 = dx * dx + dy * dy, t = l2 ? clamp(((x - s.x) * dx + (y - s.y) * dy) / l2, 0, 1) : 0; hit = Math.hypot(x - s.x - t * dx, y - s.y - t * dy) <= s.r; }
+    if (hit) return s; }
+  return null;
+}
+const inP = (p, x, y) => p && x >= p.x && x <= p.x + p.w && y >= p.y && y <= p.y + p.h;
+function hoverInfo(x, y) {
+  if (idx === 7 && G.d2 && inP(G.d2.ph, x, y)) { const p = G.d2.ph, n = WK.n; if (n > 0) { const pos = Math.round(((x - p.x) / p.w * 2 * XR - XR + n) / 2) * 2 - n + 0; const j = (pos + n) / 2;
+      if (j >= 0 && j <= n && Math.abs(x - p.X(pos)) < 40) { const s = findSpot(x, y); if (s && s.k === 2) return { key: s.name, name: s.name, role: s.role };
+        return { key: 'bar' + pos, name: 'Case de position ' + pos, role: WK.hist[j] + ' marcheurs sur ' + WK.M + ' (' + fmt(WK.hist[j] / WK.M * 100, 1) + ' %)' }; } } }
+  if (idx === 8 && G.d3) { const g = G.d3, q = Math.floor((x - g.gx) / (g.gs / g.side)), r = Math.floor((y - g.gy) / (g.gs / g.side));
+    if (q >= 0 && r >= 0 && q < g.side && r < g.side) { const i = r * g.side + q; if (i < DC.N0) return DC.alive[i] ? { key: 'at' + i + 'v', name: 'Atome intact n° ' + (i + 1), role: 'Probabilité de se désintégrer dans la prochaine seconde : 29 %, quel que soit son âge.' }
+      : { key: 'at' + i + 'x', name: 'Atome désintégré n° ' + (i + 1), role: 'Parti à t = ' + fmt(DC.dT[i], 2) + ' s. Aucun moyen de l’avoir prévu individuellement.' }; } }
+  const s = findSpot(x, y); return s ? { key: s.name, name: s.name, role: s.role } : null;
+}
+const pos2 = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+const clickable = (x, y) => (idx === 1 && inP(G.pA, x, y)) || (idx === 3 && (inP(G.pR, x, y) || inP(G.pN, x, y))) || (idx === 5 && inP(G.pC, x, y));
+function setProbeFromY(y) {
+  const p = G.pC; if (!p) return; const u = clamp((p.y + p.h - y) / p.h, 0.003, 1);
+  CC.probe = P.log ? Math.pow(10, CC.lo + u * (CC.hi - CC.lo)) : u * CC.yl;
+}
+cv.addEventListener('pointermove', e => {
+  const [x, y] = pos2(e);
+  if (drag) { if (drag.k === 'x0' && G.pA) { setParam('x0', Math.round(clamp(G.pA.y0 + (G.pA.y + G.pA.h - y) / G.pA.h * (G.pA.y1 - G.pA.y0), 0.5, 9) * 10) / 10); }
+    else if (drag.k === 'probe') setProbeFromY(y); hideTip(); return; }
+  const near = idx === 0 && G.hx0 && Math.hypot(x - G.hx0.x, y - G.hx0.y) < 14;
+  cv.style.cursor = near ? 'grab' : (clickable(x, y) ? 'crosshair' : (idx === 2 && G.balls && G.balls.some(b => Math.hypot(x - b.x, y - b.y) < 14) ? 'pointer' : 'default'));
+  const s = hoverInfo(x, y); if (s) showTip(s.key, s.name, s.role, x, y); else hideTip();
+});
+cv.addEventListener('pointerleave', () => { if (!drag) hideTip(); });
+cv.addEventListener('pointerdown', e => {
+  const [x, y] = pos2(e), touch = e.pointerType !== 'mouse';
+  if (idx === 0 && G.hx0 && Math.hypot(x - G.hx0.x, y - G.hx0.y) < (touch ? 28 : 16)) { drag = { k: 'x0' }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; e.preventDefault(); return; }
+  if (idx === 1 && inP(G.pA, x, y)) { const p = G.pA; addTraj(p.x0 + (x - p.x) / p.w * (p.x1 - p.x0), p.y1 - (y - p.y) / p.h * (p.y1 - p.y0)); e.preventDefault(); return; }
+  if (idx === 2 && G.balls) { for (let i = 0; i < G.balls.length; i++) { const b = G.balls[i]; if (Math.hypot(x - b.x, y - b.y) < (touch ? 26 : 16)) { const d = x >= b.x ? 1 : -1; if (i === 0) F.eN = clamp(F.eN + .5 * d, -SAT, SAT); else F.eP = clamp(F.eP + .5 * d, -SAT, SAT); e.preventDefault(); return; } } }
+  if (idx === 3) { if (inP(G.pR, x, y)) { addLG(G.pR.x0 + (x - G.pR.x) / G.pR.w * (G.pR.x1 - G.pR.x0)); e.preventDefault(); return; }
+    if (inP(G.pN, x, y)) { addLG(G.pN.y1 - (y - G.pN.y) / G.pN.h * (G.pN.y1 - G.pN.y0)); e.preventDefault(); return; } }
+  if (idx === 5 && inP(G.pC, x, y)) { drag = { k: 'probe' }; setProbeFromY(y); cv.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+  if (touch) { const s = hoverInfo(x, y); if (s) { showTip(s.key, s.name, s.role, x, y); clearTimeout(tipTimer); tipTimer = setTimeout(hideTip, 3500); } else hideTip(); }
+});
+const endDrag = e => { if (!drag) return; drag = null; cv.style.cursor = 'default'; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) { playing = p; $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : ''; $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture'); }
+const blur = e => e.currentTarget.blur();
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goStep(idx - 1); blur(e); });
+$('#bNext').addEventListener('click', e => { goStep(idx + 1); blur(e); });
+$('#bReset').addEventListener('click', e => { resetStep(); blur(e); });
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goStep(+b.dataset.a); blur(e); }));
+document.querySelectorAll('[data-set]').forEach(b => b.addEventListener('click', e => { setParam(b.dataset.set, b.dataset.set === 'rule' ? b.dataset.v : +b.dataset.v); blur(e); }));
+document.querySelectorAll('[data-roll]').forEach(b => b.addEventListener('click', e => { rollN(+b.dataset.roll); blur(e); }));
+$('#rX0A').addEventListener('input', e => setParam('x0', e.target.value));
+$('#rTau').addEventListener('input', e => setParam('tau', e.target.value));
+$('#rR').addEventListener('input', e => setParam('r', e.target.value));
+$('#rX0C').addEventListener('input', e => setParam('x0', e.target.value));
+$('#rK').addEventListener('input', e => setParam('k', e.target.value));
+$('#b5').addEventListener('click', e => { TR.length = 0; for (const x of [1, 3, 5, 7, 9]) addTraj(0, x); blur(e); });
+$('#bClrA').addEventListener('click', e => { TR.length = 0; blur(e); });
+$('#bPert').addEventListener('click', e => { F.eN = clamp(F.eN + .5, -SAT, SAT); F.eP = clamp(F.eP + .5, -SAT, SAT); blur(e); });
+$('#bNoise').addEventListener('click', e => { P.noise = !P.noise; syncUI(); blur(e); });
+$('#bRec').addEventListener('click', e => { F.eN = 0; F.eP = 0; blur(e); });
+$('#bTyp').addEventListener('click', e => { typLG(); blur(e); });
+$('#bReplay').addEventListener('click', e => { CC.t = 0; CC.hold = 0; blur(e); });
+$('#bZoom').addEventListener('click', e => { P.zoom = Math.min(12, P.zoom + 1); syncUI(); blur(e); });
+$('#bZoom0').addEventListener('click', e => { P.zoom = 0; syncUI(); blur(e); });
+$('#bCont').addEventListener('click', e => { P.cont = !P.cont; syncUI(); blur(e); });
+$('#bClrD').addEventListener('click', e => { resetD1(); blur(e); });
+$('#bNew').addEventListener('click', e => { resetWK(); blur(e); });
+$('#bRelance').addEventListener('click', e => { resetDC(false); blur(e); });
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target && e.target.tagName, isRange = tg === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tg === 'BUTTON' || isRange || tg === 'A' || tg === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goStep(idx + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if (e.key === 'r' || e.key === 'R') { resetStep(); return; }
+  if (/^[1-9]$/.test(e.key)) goStep(+e.key - 1);
+});
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Boucle ---------------- */
+let last = 0, lastRead = 0;
+function loops(dr) {
+  if (idx === 0) { if (E.n >= nmaxE()) { E.hold += dr; if (E.hold > 1.4) resetE(); } }
+  else if (idx === 3) { if (LG.length && LG.every(t => t.prog >= t.pts.length)) { lgHold += dr; if (lgHold > 2.5) { lgHold = 0; for (const t of LG) t.prog = 1; } } else lgHold = 0; }
+  else if (idx === 4 || idx === 5) { if (CC.t >= TMAX_C) { CC.hold += dr; if (CC.hold > 2) { CC.hold = 0; CC.t = 0; } } }
+  else if (idx === 8) { if (DC.n >= NS3) { DC.hold += dr; if (DC.hold > 2.5) resetDC(false); } }
+}
+function easeVars(dr) {
+  const a = reduce ? 1 : 1 - Math.exp(-dr * 7);
+  if (idx === 4) CC.zD += (1 + P.zoom - CC.zD) * a;
+  if (idx === 5) { const g = cTargets(); CC.lo += (g.lo - CC.lo) * a; CC.hi += (g.hi - CC.hi) * a; CC.yl += (g.yl - CC.yl) * a;
+    const tg = P.log ? 1 : 0; CC.L = reduce ? tg : CC.L + clamp(tg - CC.L, -dr / 0.9, dr / 0.9); }
+  if (idx === 6 && D1.target) D1.disp += (D1.target - D1.disp) * a;
+  if (idx === 7 && WK.yT) WK.yD += (WK.yT - WK.yD) * a;
+}
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (document.hidden) { last = 0; return; }
+  const dr = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+  if (fadeDir !== 0) {
+    if (fadeDir < 0) { fadeA -= dr / 0.16; if (fadeA <= 0.05) { fadeA = 0.05; initStep(pending); pending = -1; fadeDir = 1; } }
+    else { fadeA += dr / 0.4; if (fadeA >= 1) { fadeA = 1; fadeDir = 0; } }
+  }
+  if (playing) { physics(dr * TS * speed()); loops(dr * TS); }
+  easeVars(dr);
+  drawScene(); if (secCfg[idx]) drawSec();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochet de vérification ---------------- */
+window.__fondations = {
+  step: () => idx,
+  go: i => goStep(i, true),
+  setParam: (n, v) => setParam(n, v),
+  advance: s => { physics(s); readouts(); },
+  seed: n => { rng = mulberry32(n >>> 0); spare = null; restartCurrent(); },
+  roll: k => { if (idx !== 6) return; rollN(k); },
+  evo: () => { const x = E.xs[E.n], t = E.n * P.dtE; return { rule: P.rule, t, x, rate: fRule(x), dt: P.dtE, x0: P.x0A, exact: exactA(t, P.x0A) }; },
+  fb: () => ({ t: F.t, tau: P.tauB, eNeg: F.eN, ePos: F.eP, saturated: Math.abs(F.eP) >= SAT - 1e-6 }),
+  logi: () => { const N = lgCur ? headOf2(lgCur)[1] : NaN; return { r: P.r, K: KCAP, N, rate: lgF(N) }; },
+  expo: () => { const k = P.kC; return { x0: P.x0C, k, t: CC.t, x: cx(CC.t), T2: k > 0 ? LN2 / k : null, Thalf: k < 0 ? LN2 / -k : null, tau: k !== 0 ? 1 / Math.abs(k) : null, log: P.log }; },
+  dice, walk, decay
+};
+
+resize();
+initStep(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
