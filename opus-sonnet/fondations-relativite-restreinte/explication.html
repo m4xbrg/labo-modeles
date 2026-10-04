@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la relativité restreinte — L’invisible en mouvement, Fondations 46</title>
+<meta name="description" content="Ce que montre le laboratoire de relativité restreinte : référentiels inertiels, invariance de c, simultanéité relative, diagramme d’espace-temps et cône de lumière, dilatation et contraction comme une seule géométrie, temps propre, addition des vitesses et énergie relativiste.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#b6f2ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+h3{font:400 23px/1.2 var(--serif);margin:36px 0 10px;color:var(--texte)}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.tab{overflow-x:auto;margin:18px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--trait);vertical-align:baseline}
+th{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2)}
+td.m{font:400 14px var(--mono);white-space:nowrap}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+.aside{border:1px solid var(--trait);padding:14px 16px;margin:18px 0;font-size:15px;color:var(--texte);opacity:.92}
+.aside b{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}}
+@media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour au laboratoire</a><a href="../index.html">Accueil de la série</a></nav>
+  <p class="serie">L’invisible en mouvement — Fondations 46</p>
+  <h1>Comprendre la relativité <em>restreinte</em></h1>
+  <p class="lede">La relativité restreinte n'est pas une collection d'effets bizarres. C'est une seule idée géométrique : le temps et l'espace forment ensemble un espace-temps, et des observateurs en mouvement les uns par rapport aux autres le découpent différemment. La dilatation du temps, la contraction des longueurs, la relativité de la simultanéité et la vitesse limite en sont des conséquences, pas des phénomènes séparés.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <p>Huit actes en trois paillasses. La lumière est toujours en <span class="acc">cyan glacé</span>. Le quai (référentiel S) est dessiné en blanc cassé, le train ou la fusée (référentiel S') en <span style="color:#c9a7ff">lilas</span>. Un petit signe « invariant » marque les grandeurs que tous les observateurs mesurent identiques : apprends à le chercher, c'est le fil de toute la planche.</p>
+  <dl>
+    <dt>R · Référentiels et lumière</dt>
+    <dd><b>I. Deux référentiels.</b> Un quai, un train, une balle : Galilée suffit, et personne n'est « vraiment » au repos. Puis une lampe : Galilée prédit c + v sur le quai, l'expérience donne c. <b>II. Horloge lumineuse.</b> Un photon entre deux miroirs ; vu du quai, il suit une diagonale plus longue, toujours à c : il lui faut plus de temps. <b>III. Train et éclairs.</b> Deux éclairs simultanés pour le quai ne le sont pas pour le train, même après avoir corrigé le temps de trajet de la lumière.</dd>
+    <dt>E · Géométrie de l'espace-temps</dt>
+    <dd><b>IV. Diagramme d'espace-temps.</b> Les événements, les lignes d'univers, le cône de lumière, les axes inclinés d'un observateur mobile, et la transformation de Lorentz qui fait glisser les événements le long d'hyperboles. <b>V. Dilatation et contraction.</b> Les deux effets lus sur le même dessin. <b>VI. Temps propre.</b> Les jumeaux : deux chemins entre les mêmes événements, deux durées différentes, que tout le monde calcule pareil.</dd>
+    <dt>D · Vitesse limite et énergie</dt>
+    <dd><b>VII. Addition des vitesses.</b> Une fusée tire un projectile ; les vitesses ne s'additionnent plus, et la lumière reste à c. <b>VIII. Énergie.</b> Pousser un objet de plus en plus fort le rapproche de c sans jamais l'y amener ; E = γmc², dont E₀ = mc² n'est que le cas au repos.</dd>
+  </dl>
+
+  <h2><span>2</span>Ce qui se passe vraiment : référentiels et lumière</h2>
+  <h3>Référentiel inertiel, et pas de repos absolu</h3>
+  <p>Un <b>référentiel</b> est une manière de repérer les événements : une règle pour dire <em>où</em>, des horloges pour dire <em>quand</em>. Il est <b>inertiel</b> si un objet libre de toute force y garde une vitesse constante (première loi de Newton). Le quai et un train qui roule en ligne droite à vitesse constante sont deux référentiels inertiels.</p>
+  <p>Le <b>principe de relativité</b> (déjà chez Galilée) : les lois de la physique sont les mêmes dans tous les référentiels inertiels. Dans un wagon fermé qui roule sans à-coups, aucune expérience (balle lancée, pendule, réaction chimique) ne révèle le mouvement. « Le train bouge » et « le quai bouge » sont deux descriptions également valables ; il n'existe aucun référentiel privilégié qui serait « le » repos.</p>
+  <p>Chez Galilée, passer d'un référentiel à l'autre est simple : les positions se décalent (x' = x − vt), le temps est le même pour tous (t' = t), et les vitesses s'additionnent : une balle lancée à u' dans un train qui roule à v va à u = u' + v sur le quai.</p>
+  <h3>Le problème de la lumière</h3>
+  <p>Les équations de Maxwell (1865) prédisent des ondes électromagnétiques qui avancent à c = 299 792 458 m/s, sans dire par rapport à quoi. Les expériences (Michelson et Morley en 1887, puis des mesures modernes bien plus précises) ne trouvent aucune différence selon le mouvement de l'appareil : <b>la lumière dans le vide va à c pour tout observateur inertiel</b>, quelle que soit la vitesse de la source ou de l'observateur.</p>
+  <p>C'est incompatible avec Galilée : un passager qui allume une lampe vers l'avant mesure c ; Galilée dit que le quai devrait mesurer c + v, et le quai mesure c. Einstein (1905) garde les deux faits, le principe de relativité et l'invariance de c, et abandonne ce qui semblait le plus évident : un temps commun à tous.</p>
+  <h3>Pourquoi le temps mesuré dépend du référentiel</h3>
+  <p>L'horloge lumineuse est un photon qui fait l'aller-retour entre deux miroirs distants de L. Dans son propre référentiel, un tic dure Δτ = 2L/c. Vu du quai, l'horloge avance pendant que le photon voyage : le photon suit deux diagonales. Chaque demi-tic, il parcourt l'hypoténuse d'un triangle rectangle de côtés L et vΔt/2, à la vitesse c :</p>
+  <div class="eq">(cΔt/2)² = L² + (vΔt/2)²  ⟹  Δt = γ Δτ,  γ = 1 / √(1 − v²/c²)</div>
+  <p>Le facteur de Lorentz γ vaut 1 au repos, 1,005 à 0,1 c, 1,25 à 0,6 c, 2 à 0,866 c, 7,1 à 0,99 c, et croît sans borne quand v approche c.</p>
+  <p>L'horloge n'a aucun défaut et rien ne la « ralentit » : son fonctionnement interne est intact. Toute horloge idéale embarquée (à balancier, atomique, biologique) bat au même rythme qu'elle ; sinon, en comparant les deux dans le wagon, le passager détecterait son mouvement, contre le principe de relativité. C'est la <b>durée entre deux événements</b> (deux tics) qui n'est pas la même dans deux référentiels. La durée mesurée par une horloge qui est présente aux deux événements s'appelle le <b>temps propre</b> Δτ : c'est la plus courte. Tout autre référentiel inertiel mesure Δt = γΔτ.</p>
+  <p>Et c'est réciproque : le passager mesure les horloges du quai plus lentes, du même facteur γ. Ce n'est pas une contradiction, parce que comparer deux horloges éloignées oblige à décider ce qui est « en même temps » ici et là-bas. C'est le cœur de l'affaire.</p>
+  <h3>La simultanéité est relative</h3>
+  <p>Deux éclairs frappent l'avant et l'arrière d'un train, laissant des marques sur le train et sur le quai. M, sur le quai, est au milieu des marques ; M', dans le train, au milieu du train. M reçoit les deux éclairs en même temps. M' file vers l'éclair avant : il le reçoit d'abord.</p>
+  <div class="aside"><b>Pas un délai de lumière</b>Que M' reçoive l'éclair avant en premier ne suffit pas, à soi seul, à conclure quoi que ce soit : on pourrait croire qu'il s'agit d'un simple retard de propagation. Mais M' corrige ce retard. Dans <em>son</em> référentiel, il est immobile au milieu du train ; chaque éclair a frappé à L₀/2 de lui ; la lumière va à c dans son référentiel aussi (invariance de c). Les deux signaux ont donc mis exactement le même temps à lui parvenir. Puisqu'ils arrivent à des instants différents, ils sont <b>partis</b> à des instants différents : pour M', l'éclair avant a eu lieu avant l'éclair arrière, avec un écart de vL₀/c². C'est ce que montre le tableau « Reconstruction » de l'acte III, et c'est exactement ce que donne la transformation de Lorentz.</div>
+  <p>M et M' ont tous deux raison : chacun applique correctement la même physique dans son propre référentiel. « Simultané » n'est pas une propriété de deux événements séparés dans l'espace ; c'est une propriété de deux événements <em>et</em> d'un référentiel. Synchroniser des horloges éloignées (par exemple avec des signaux lumineux, à la manière d'Einstein), c'est choisir une simultanéité ; chaque référentiel en a une, différente, et cohérente.</p>
+  <p>Dès que v ≪ c, l'écart vL₀/c² devient minuscule (10⁻¹³ s pour un train de 300 m à 300 km/h) : c'est pourquoi le temps nous paraît universel.</p>
+
+  <h2><span>3</span>Ce qui se passe vraiment : la géométrie</h2>
+  <h3>Événements et lignes d'univers</h3>
+  <p>Un <b>événement</b> est un ici-et-maintenant : un point de l'espace-temps, repéré par (ct, x). Multiplier le temps par c permet de mesurer les deux axes dans la même unité : en années et en années-lumière, la lumière fait toujours un angle de 45°. L'histoire d'un objet est une courbe dans ce diagramme, sa <b>ligne d'univers</b> : verticale pour un objet immobile dans S, inclinée pour un objet en mouvement, à 45° pour la lumière.</p>
+  <h3>Le cône de lumière et la causalité</h3>
+  <p>Les deux rayons lumineux qui partent d'un événement O dessinent son <b>cône de lumière</b>. Il découpe l'espace-temps en trois régions : le <b>futur</b> de O (ce que O peut influencer), le <b>passé</b> de O (ce qui a pu influencer O), et l'<b>ailleurs</b> (ce qui est hors de portée de tout signal). Un objet matériel va moins vite que la lumière : sa ligne d'univers reste à l'intérieur de son cône en chaque point.</p>
+  <h3>L'intervalle, ce qui ne change pas</h3>
+  <p>Entre deux événements, deux observateurs mesurent des Δt et des Δx différents. Mais une combinaison est la même pour tous, l'<b>intervalle</b> :</p>
+  <div class="eq">s² = c²Δt² − Δx²   (invariant)</div>
+  <p>Son signe classe les paires d'événements, pour tous les observateurs à la fois. <b>Genre temps</b> (s² &gt; 0) : un signal plus lent que la lumière peut aller de l'un à l'autre ; leur ordre temporel est le même pour tous, la cause précède toujours l'effet. <b>Genre lumière</b> (s² = 0) : seul un rayon lumineux les relie. <b>Genre espace</b> (s² &lt; 0) : rien ne peut les relier ; selon le référentiel, ils sont simultanés, ou l'un précède l'autre, ou l'inverse. Les éclairs de l'acte III sont de ce type : la relativité de la simultanéité ne menace jamais la causalité.</p>
+  <h3>Transformation de Lorentz</h3>
+  <p>Le passage de S à S' (qui se déplace à v selon x) remplace la transformation de Galilée :</p>
+  <div class="eq">ct' = γ(ct − (v/c)x)    x' = γ(x − vt)</div>
+  <p>Le terme −vx/c² dans t' est la relativité de la simultanéité : deux événements simultanés dans S (même t) mais à des x différents n'ont pas le même t'. Quand v ≪ c, γ ≈ 1 et ce terme s'efface : on retrouve Galilée. Sur le diagramme, les axes de S' sont inclinés vers la diagonale, comme des ciseaux qui se referment ; l'axe ct' est la ligne d'univers de l'observateur S', et l'axe x' (ainsi que toutes ses parallèles) est sa ligne de simultanéité. Quand on passe dans S', chaque événement glisse le long d'une <b>hyperbole</b> c²t² − x² = constante : c'est la forme que prend « garder s² fixe ».</p>
+  <h3>Dilatation et contraction : une seule géométrie</h3>
+  <p><b>Dilatation.</b> Les tics d'une horloge de S' sont espacés d'un an de temps propre le long de sa ligne d'univers ; les hyperboles d'étalonnage le montrent. Projetés sur les lignes de simultanéité de S (horizontales), ils tombent à γ ans d'intervalle. Δt = γΔτ.</p>
+  <p><b>Contraction.</b> Une règle au repos dans S' n'a pas une ligne d'univers mais un <b>ruban</b>. Mesurer sa longueur, c'est repérer ses deux bouts <em>au même instant</em>, donc couper ce ruban par une ligne de simultanéité. S coupe à l'horizontale, S' le long de son axe x' : ce ne sont pas les mêmes paires d'événements. S obtient</p>
+  <div class="eq">L = L₀ / γ</div>
+  <p>où L₀, la <b>longueur propre</b>, est celle mesurée dans le référentiel où la règle est au repos. Pour S', les deux lectures faites par S ne sont pas simultanées (l'avant est lu « plus tôt » que l'arrière, d'un écart vL₀/c²). La contraction des longueurs <em>est</em> la relativité de la simultanéité, vue sous un autre angle. La règle ne subit aucune contrainte et ne se comprime pas. Ce n'est pas non plus ce qu'une photo montrerait : une photo capte la lumière qui arrive en même temps à l'objectif, partie de points différents à des instants différents ; l'apparence visuelle d'un objet rapide est un autre sujet (rotation de Terrell). Seule la longueur parallèle au mouvement est concernée.</p>
+  <h3>Le temps propre est une longueur</h3>
+  <p>Le long d'une ligne d'univers, le temps qu'affiche une horloge embarquée est</p>
+  <div class="eq">c²dτ² = c²dt² − dx²   (en trois dimensions : c²dτ² = c²dt² − dx² − dy² − dz²)</div>
+  <p>Tous les observateurs calculent le même τ : c'est la « longueur » de la ligne d'univers dans la géométrie de Minkowski. À cause du signe moins, cette géométrie a une propriété surprenante : entre deux événements, la ligne <b>droite</b> (le mouvement inertiel) est celle qui accumule le <b>plus</b> de temps propre ; tout détour en accumule moins. C'est la solution du paradoxe des jumeaux : la voyageuse qui part à 0,8 c et revient au bout de 10 ans (pour sa sœur) n'a vieilli que de 6 ans, puisque chaque branche vaut √(5² − 4²) = 3 ans. La situation n'est pas symétrique : sa ligne d'univers a un coude, elle a changé de référentiel inertiel ; sa sœur, non. Nul besoin de gravitation pour le comprendre ; c'est de la géométrie.</p>
+  <div class="tab"><table>
+    <thead><tr><th>Grandeur</th><th>Change avec le référentiel ?</th></tr></thead>
+    <tbody>
+      <tr><td>Δt, Δx entre deux événements</td><td>oui</td></tr>
+      <tr><td>Simultanéité d'événements éloignés</td><td>oui</td></tr>
+      <tr><td>Vitesse de la lumière c</td><td class="acc">non</td></tr>
+      <tr><td>Intervalle s² = c²Δt² − Δx²</td><td class="acc">non</td></tr>
+      <tr><td>Temps propre τ le long d'une ligne d'univers</td><td class="acc">non</td></tr>
+      <tr><td>Longueur propre L₀, masse m</td><td class="acc">non</td></tr>
+      <tr><td>Ordre de deux événements genre temps (cause → effet)</td><td class="acc">non</td></tr>
+      <tr><td>E² − (pc)² = (mc²)²</td><td class="acc">non</td></tr>
+    </tbody></table></div>
+
+  <h2><span>4</span>Ce qui se passe vraiment : vitesse limite et énergie</h2>
+  <h3>Les vitesses ne s'additionnent plus</h3>
+  <p>Un projectile va à u' dans une fusée qui va à v par rapport au quai. Sa vitesse sur le quai u, et inversement sa vitesse u' dans la fusée si on connaît u :</p>
+  <div class="eq">u = (u' + v) / (1 + u'v/c²)      u' = (u − v) / (1 − uv/c²)</div>
+  <p>Aux petites vitesses, le dénominateur vaut presque 1 : Galilée. Si u' = c, alors u = (c + v)/(1 + v/c) = c : la lumière reste à c, et l'invariance de c est contenue dans la formule. Deux vitesses inférieures à c donnent toujours une vitesse inférieure à c : des fusées lancées chacune à 0,5 c par la précédente atteignent 0,8 c, 0,929 c, 0,976 c… jamais c. Ce qui s'additionne simplement, c'est la <b>rapidité</b> artanh(v/c).</p>
+  <h3>Énergie et quantité de mouvement</h3>
+  <p>Avec des temps et des longueurs nouvelles, les définitions de la quantité de mouvement et de l'énergie doivent changer pour que leurs lois de conservation restent vraies dans tous les référentiels. Pour une particule de masse m à la vitesse v :</p>
+  <div class="eq">p = γmv      E = γmc²      E² = (pc)² + (mc²)²</div>
+  <p>Au repos (γ = 1), il reste <b>E₀ = mc²</b> : l'énergie de masse, celle qu'un objet possède du seul fait d'exister. C'est elle que libèrent la fission, la fusion ou l'annihilation. En mouvement, l'énergie totale est γmc², et l'énergie cinétique est K = (γ − 1)mc², qui redevient ½mv² aux petites vitesses. <b>E = mc² n'est donc pas la formule générale</b> : c'est le cas particulier au repos. Pour une particule sans masse (le photon), E = pc et sa vitesse est c, toujours.</p>
+  <p>Quand on pousse un objet avec une force constante, sa quantité de mouvement croît sans limite (p = Ft), son énergie aussi, mais sa vitesse v = pc²/E tend vers c sans l'atteindre : chaque joule ajouté rapporte moins de vitesse que le précédent, et atteindre c demanderait une énergie infinie. Ce n'est pas un objet qui deviendrait « plus lourd » : la masse m est la même pour tous les observateurs. Le vieux terme de « masse relativiste » (γm) n'est qu'un autre nom pour E/c² ; il prête à confusion et la physique moderne l'évite.</p>
+
+  <h2><span>5</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li>Une seule dimension d'espace : tous les mouvements se font selon x. Les longueurs perpendiculaires au mouvement ne changent pas (c'est pourquoi la hauteur L de l'horloge lumineuse est la même pour tous).</li>
+    <li>Train, fusée et vitesses sont fictifs : aucun train n'approche c. Les durées et distances sont choisies pour que les effets soient visibles (un train d'une microseconde-lumière, des voyages de quelques années).</li>
+    <li>Les scènes montrent les <b>coordonnées mesurées</b> dans un référentiel (avec des règles et des horloges synchronisées réparties partout), pas l'image qu'une caméra enregistrerait. L'apparence visuelle (aberration, Doppler, rotation de Terrell) est hors champ.</li>
+    <li>Le demi-tour du jumeau voyageur est instantané ; l'accélération propre et les référentiels accélérés ne sont pas étudiés.</li>
+    <li>À l'acte I, la balle suit Galilée pour montrer d'abord le monde classique ; aux vitesses fictives du train, c'est faux de quelques pour cent, ce que l'acte VII corrige.</li>
+    <li>À l'acte VIII, la force est constante dans le référentiel de départ ; aucun rayonnement, aucune perte.</li>
+    <li>Aucune gravitation : espace-temps plat. Tout ce qui est montré reste vrai dans un petit laboratoire en chute libre, mais pas à grande échelle autour d'un astre.</li>
+  </ul>
+
+  <h2><span>6</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>c = 299 792 458 m/s</b><span>exacte par définition depuis 1983 (le mètre est défini à partir d'elle) : 30 cm par nanoseconde, 300 000 km par seconde.</span></div>
+    <div><b>γ = 2 à 0,866 c</b><span>1,005 à 0,1 c ; 1,25 à 0,6 c ; 7,1 à 0,99 c ; environ 7 250 pour un proton de 6,8 TeV au LHC, qui file à 3 m/s sous la vitesse de la lumière.</span></div>
+    <div><b>2,2 µs</b><span>la durée de vie propre du muon. Créés à 15 km d'altitude par les rayons cosmiques, ils ne devraient parcourir que 660 m en moyenne ; avec γ ≈ 20 ou plus, ils atteignent le sol en grand nombre.</span></div>
+    <div><b>38 µs par jour</b><span>la correction nette appliquée aux horloges des satellites GPS (−7 µs/jour de relativité restreinte, +45 µs/jour de relativité générale). Sans elle, la position dériverait d'une dizaine de kilomètres par jour.</span></div>
+    <div><b>9 × 10¹⁶ J/kg</b><span>l'énergie de masse mc² d'un kilogramme : environ 21 mégatonnes de TNT. Une fusion d'hydrogène en hélium n'en libère que 0,7 %.</span></div>
+  </div>
+
+  <h2><span>7</span>Teste-toi</h2>
+  <details><summary>Un vaisseau passe devant la Terre à 0,6 c. Chacun mesure l'horloge de l'autre plus lente d'un facteur 1,25. Lequel a raison ?</summary>
+    <p>Les deux. Chacun compare une horloge de l'autre à deux de ses propres horloges, synchronisées dans son référentiel ; comme les deux ne s'accordent pas sur ce qui est simultané, ils ne comparent pas les mêmes paires d'événements. Aucun des deux référentiels n'est privilégié. Le désaccord ne devient une différence tranchée que si les deux horloges se retrouvent au même endroit, ce qui exige qu'au moins l'une change de référentiel (les jumeaux).</p></details>
+  <details><summary>Le passager du train reçoit l'éclair avant en premier. Pourquoi ne peut-on pas dire « c'est juste que la lumière de l'éclair arrière a eu plus de chemin à faire » ?</summary>
+    <p>Parce que, dans le référentiel du train, il n'y a pas plus de chemin : le passager est immobile au milieu du train, les deux éclairs ont frappé ses deux bouts, à L₀/2 de lui chacun, et la lumière va à c pour lui aussi. Après avoir tenu compte du temps de trajet, identique des deux côtés, il conclut que les éclairs ne sont pas partis en même temps. L'argument du « plus de chemin » est celui du quai, dans le référentiel du quai.</p></details>
+  <details><summary>Deux événements sont séparés de 3 années-lumière et de 5 ans dans un référentiel. Un observateur peut-il les voir dans l'ordre inverse ? Quel temps propre minimal faut-il pour aller de l'un à l'autre ?</summary>
+    <p>s² = 5² − 3² = 16 (en années²) : l'intervalle est genre temps, l'ordre est le même pour tous les observateurs. Une horloge qui va de l'un à l'autre en ligne droite, à 0,6 c, affiche √16 = 4 ans : c'est le maximum de temps propre possible. Un trajet avec détours affiche moins, et peut s'approcher de zéro autant qu'on veut en frôlant la vitesse de la lumière, sans jamais l'atteindre.</p></details>
+  <details><summary>Une fusée à 0,9 c allume ses phares vers l'avant. À quelle vitesse la lumière s'éloigne-t-elle de la Terre ? Et de la fusée ?</summary>
+    <p>À c dans les deux cas. u = (c + 0,9c)/(1 + 0,9) = c. Pour la Terre, la lumière ne gagne que 0,1 c par rapport à la fusée (en coordonnées terrestres) ; pour la fusée, elle s'en éloigne à c. Les deux mesures sont compatibles parce que leurs horloges et leurs règles ne s'accordent pas.</p></details>
+  <details><summary>On double l'énergie cinétique d'un électron qui va déjà à 0,99 c. Sa vitesse double-t-elle ?</summary>
+    <p>Non. À 0,99 c, γ ≈ 7,09 et K ≈ 6,09 mc². Doubler K donne γ ≈ 13,2, soit v ≈ 0,997 c. L'énergie (et la quantité de mouvement) ont presque doublé ; la vitesse, à peine bougé. Près de c, ajouter de l'énergie augmente surtout p et E.</p></details>
+
+  <h2><span>8</span>Et après</h2>
+  <p>Tout ce qui précède suppose des référentiels <b>inertiels</b> et un espace-temps <b>plat</b>, le même partout : une grille de Minkowski que rien ne déforme. Trois questions restent ouvertes. Que mesure un observateur qui accélère ? Pourquoi la gravitation, qui agit de la même façon sur tous les corps quelle que soit leur masse, ressemble-t-elle tant à une accélération ? Et si c'était l'espace-temps lui-même qui se courbait ?</p>
+  <p>Ce sera le sujet des <b>Fondations 47 · Relativité générale</b>. Elles prolongeront ce diagramme d'espace-temps, ses cônes de lumière et son temps propre, qui seront le langage des trous noirs, des lentilles gravitationnelles et des ondes gravitationnelles.</p>
+
+  <a class="cta" href="index.html"><span>Retour au laboratoire</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,1736 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Une seule géométrie, huit angles : la lumière est cyan glacé partout (photons, fronts, cône à 45°), le quai S est blanc cassé, le train S′ est lilas (seul jeton ajouté) ; ce qui ne change pas d’un référentiel à l’autre (s², τ, c) porte une marque « invariant » que l’étudiant apprend à chercher.
+  2. Le mouvement ne sert qu’à signifier : une ligne de simultanéité qui s’incline, un événement qui glisse sur son hyperbole pendant que le cône reste en place, une courbe qui s’écrase contre le mur c ; les diagrammes ont la même échelle sur les deux axes, donc la lumière y fait toujours 45°.
+  3. Le moteur est une pile de fonctions pures (objet Phys, c = 1) séparée du dessin ; les scènes montrent des coordonnées mesurées dans un référentiel, jamais ce qu’une caméra enregistrerait, et la page le dit.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relativité restreinte — L’invisible en mouvement, Fondations 46</title>
+<meta name="description" content="Trois paillasses : référentiels et lumière, géométrie de l’espace-temps, vitesse limite et énergie. Dilatation, contraction et simultanéité comme conséquences d’une seule géométrie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#b6f2ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --mobile:#c9a7ff;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}#cv.cross{cursor:crosshair}#cv.ns{cursor:ns-resize}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:270px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 14px var(--mono);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.val i{font:400 11.5px var(--mono);color:var(--texte-2);font-style:normal;min-width:26px}
+.inv{font:400 9.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:2px 4px;margin-left:6px;opacity:.9;white-space:nowrap}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden],.extra[hidden],.bridge[hidden]{display:none}
+#scope{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.extra{font:400 11.5px/1.55 var(--mono);color:var(--texte)}
+.extra table{width:100%;border-collapse:collapse;margin:0}
+.extra th{font:400 10.5px var(--mono);color:var(--texte-2);text-align:right;padding:3px 2px;border-bottom:1px solid var(--trait)}
+.extra td{padding:3px 2px;text-align:right;border-bottom:1px solid var(--trait);white-space:nowrap}
+.extra th:first-child,.extra td:first-child{text-align:left;color:var(--texte-2);white-space:normal}
+.extra .m{color:var(--mobile)}.extra .q{color:var(--texte)}.extra .l{color:var(--accent)}.extra .g{color:var(--texte-2);text-decoration:line-through}
+.extra .eq{border-left:2px solid var(--accent);padding:2px 0 2px 10px;margin:10px 0 0;color:var(--texte)}
+.extra .ln{margin:3px 0}
+.extra .sub{color:var(--texte-2)}
+.bridge{border:1px solid var(--trait);padding:10px 12px;font:400 11.5px/1.55 var(--mono);color:var(--texte-2)}
+.bridge b{color:var(--texte);font-weight:500}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.sm{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0}
+.sg[data-g=R]{flex:3 1 0}.sg[data-g=E]{flex:3 1 0}.sg[data-g=D]{flex:2 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 34px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:70vh;height:70svh;min-height:420px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Planche de relativité restreinte : quai et train, horloge lumineuse, éclairs et simultanéité, diagrammes d’espace-temps, addition des vitesses et énergie, dessinés en coordonnées mesurées."></canvas>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — Fondations 46</p>
+      <h1>Relativité <em>restreinte</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VIII</p>
+      <h2 id="stepTitle">Deux référentiels</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <section class="extra" id="extra" hidden></section>
+
+    <section id="scopeSec">
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : courbe de l’acte en cours."></canvas></div>
+      <p class="leg" id="leg"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section class="bridge" id="bridge" hidden>
+      <b>Jusqu’ici : des référentiels inertiels, un espace-temps plat.</b><br>
+      Que se passe-t-il si l’observateur accélère ? Si la gravitation s’en mêle ? Si l’espace-temps lui-même se courbe ?<br>
+      &rarr; Fondations 47 · Relativité générale (à venir).
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>8</kbd> aller à l’acte</li>
+        <li><kbd>R</kbd> réinitialiser · <kbd>L</kbd> lampe / lancer (actes I, VII) · <kbd>F</kbd> changer de référentiel (I, II, III, IV, VI)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l’acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les huit actes">
+      <div class="sg" data-g="R"><span class="sgl"><span class="long">Paillasse R · référentiels et lumière</span><span class="short">R</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Acte I — Deux référentiels"><b>I</b><span>Référentiels</span></button>
+        <button class="seg" data-a="1" title="Acte II — Horloge lumineuse"><b>II</b><span>Horloge</span></button>
+        <button class="seg" data-a="2" title="Acte III — Train et éclairs"><b>III</b><span>Éclairs</span></button>
+      </div></div>
+      <div class="sg" data-g="E"><span class="sgl"><span class="long">Paillasse E · espace-temps</span><span class="short">E</span></span><div class="sgs">
+        <button class="seg" data-a="3" title="Acte IV — Diagramme d’espace-temps"><b>IV</b><span>Diagramme</span></button>
+        <button class="seg" data-a="4" title="Acte V — Dilatation et contraction"><b>V</b><span>Dilat. et contr.</span></button>
+        <button class="seg" data-a="5" title="Acte VI — Temps propre"><b>VI</b><span>Temps propre</span></button>
+      </div></div>
+      <div class="sg" data-g="D"><span class="sgl"><span class="long">Paillasse D · limite et énergie</span><span class="short">D</span></span><div class="sgs">
+        <button class="seg" data-a="6" title="Acte VII — Addition des vitesses"><b>VII</b><span>Vitesses</span></button>
+        <button class="seg" data-a="7" title="Acte VIII — Énergie et quantité de mouvement"><b>VIII</b><span>Énergie</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <!-- I -->
+      <div class="grp" data-acts="0"><span class="gl">Référentiel</span><button class="btn" id="bFrQ" aria-pressed="true">quai</button><button class="btn" id="bFrT" aria-pressed="false">train</button></div>
+      <div class="grp" data-acts="0"><span class="gl">b = v/c</span><input type="range" id="rB1" min="0" max="0.5" step="0.01" value="0.3" aria-label="Vitesse du train en fraction de c"><span class="rv" id="vB1"></span></div>
+      <div class="grp" data-acts="0"><span class="gl">u′ (balle)</span><input type="range" id="rU1" min="-0.4" max="0.4" step="0.05" value="0.2" aria-label="Vitesse de la balle dans le train en fraction de c"><span class="rv" id="vU1"></span></div>
+      <div class="grp" data-acts="0"><button class="btn go" id="bBall">Lancer la balle</button><button class="btn go" id="bLamp" title="Allumer la lampe (L)">Allumer la lampe</button><button class="btn" id="bClosed" aria-pressed="false"><span class="dot"></span>Wagon fermé</button></div>
+      <!-- II -->
+      <div class="grp" data-acts="1"><span class="gl">b = v/c</span><input type="range" id="rB2" min="0" max="0.99" step="0.01" value="0.6" aria-label="Vitesse de l’horloge en fraction de c"><span class="rv" id="vB2"></span></div>
+      <div class="grp" data-acts="1"><button class="btn sm" data-b2="0">0</button><button class="btn sm" data-b2="0.5">0,5</button><button class="btn sm" data-b2="0.8">0,8</button><button class="btn sm" data-b2="0.99">0,99</button></div>
+      <div class="grp" data-acts="1"><button class="btn" id="bTri" aria-pressed="true"><span class="dot"></span>Triangle</button><button class="btn" id="bOth" aria-pressed="false"><span class="dot"></span>Une autre horloge</button><button class="btn" id="bRec" aria-pressed="false" title="Inverser les rôles (F)"><span class="dot"></span>Réciproque</button></div>
+      <!-- III -->
+      <div class="grp" data-acts="2"><span class="gl">b = v/c</span><input type="range" id="rB3" min="0" max="0.9" step="0.01" value="0.5" aria-label="Vitesse du train en fraction de c"><span class="rv" id="vB3"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">Vu depuis</span><button class="btn" id="bFr3Q" aria-pressed="true">quai</button><button class="btn" id="bFr3T" aria-pressed="false">train</button></div>
+      <div class="grp" data-acts="2"><span class="gl">temps</span><input type="range" id="rT3" min="0" max="1000" step="1" value="0" aria-label="Temps dans le référentiel affiché"><span class="rv" id="vT3"></span></div>
+      <div class="grp" data-acts="2"><button class="btn" id="bSync" aria-pressed="false"><span class="dot"></span>Horloges synchronisées</button></div>
+      <!-- IV -->
+      <div class="grp" data-acts="3"><span class="gl">Couches</span><button class="btn sm" data-ly="1">Événements</button><button class="btn sm" data-ly="2">Lignes d’univers</button><button class="btn sm" data-ly="3">Cône de lumière</button><button class="btn sm" data-ly="4">Axes de S′</button><button class="btn sm" data-ly="5">Invariance</button></div>
+      <div class="grp" data-acts="3"><span class="gl">b</span><input type="range" id="rB4" min="-0.9" max="0.9" step="0.05" value="0.6" aria-label="Vitesse de S′ en fraction de c"><span class="rv" id="vB4"></span></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bBoost">Passer dans S′</button><button class="btn" id="bUnboost">Revenir dans S</button></div>
+      <div class="grp" data-acts="3"><button class="btn sm" id="bPreA">Éclairs de l’acte III</button><button class="btn sm" id="bPreC">Cause et effet</button><button class="btn sm" id="bClr4">Effacer</button></div>
+      <!-- V -->
+      <div class="grp" data-acts="4"><button class="btn" id="bMh" aria-pressed="true">Horloge</button><button class="btn" id="bMr" aria-pressed="false">Règle</button></div>
+      <div class="grp" data-acts="4"><span class="gl">b</span><input type="range" id="rB5" min="0" max="0.95" step="0.01" value="0.6" aria-label="Vitesse de S′ en fraction de c"><span class="rv" id="vB5"></span></div>
+      <div class="grp" data-acts="4"><span class="gl">Mesuré par</span><button class="btn" id="bBySq" aria-pressed="true">S</button><button class="btn" id="bByS2" aria-pressed="false">S′</button></div>
+      <div class="grp" data-acts="4" id="gHyp"><button class="btn" id="bHyp" aria-pressed="false"><span class="dot"></span>Hyperboles d’étalonnage</button></div>
+      <!-- VI -->
+      <div class="grp" data-acts="5"><button class="btn sm" id="bPre6">0,8 c, aller-retour</button><button class="btn" id="bTwo" aria-pressed="false">Deux virages</button></div>
+      <div class="grp" data-acts="5"><button class="btn go" id="bRun6">Lecture</button><button class="btn" id="bView6" aria-pressed="false" title="Changer de référentiel (F)"><span class="dot"></span>Voir depuis l’aller du voyageur</button></div>
+      <!-- VII -->
+      <div class="grp" data-acts="6"><span class="gl">b = v/c</span><input type="range" id="rB7" min="0" max="0.99" step="0.01" value="0.5" aria-label="Vitesse de la fusée en fraction de c"><span class="rv" id="vB7"></span></div>
+      <div class="grp" data-acts="6"><span class="gl">u′</span><input type="range" id="rU7" min="-1" max="1" step="0.01" value="0.5" aria-label="Vitesse du projectile dans la fusée en fraction de c"><span class="rv" id="vU7"></span></div>
+      <div class="grp" data-acts="6"><button class="btn go" id="bLaunch7" title="Lancer (L)">Lancer</button><button class="btn" id="bPh7">u′ = c (lumière)</button></div>
+      <div class="grp" data-acts="6"><button class="btn" id="bStage">Étage suivant</button><button class="btn" id="bStage0">Remettre à zéro</button></div>
+      <!-- VIII -->
+      <div class="grp" data-acts="7"><button class="btn go" id="bPush" aria-pressed="true">Pousser</button><button class="btn" id="bAdd">+ 1 mc² d’énergie</button><button class="btn" id="bStopE">Arrêter</button><button class="btn" id="bRest">Repartir du repos</button></div>
+      <div class="grp" data-acts="7"><button class="btn" id="bPh8" aria-pressed="false"><span class="dot"></span>Photon (m = 0)</button><button class="btn sm" id="bProton">Proton du LHC</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* PHYS-BEGIN */
+/* Moteur de relativité restreinte, 1 dimension d'espace (x) + temps.
+   Unités naturelles : c = 1. Un événement est {t, x} avec t déjà multiplié par c
+   (« ct »). Une vitesse est b = v/c, |b| < 1 pour tout objet matériel.
+   Fonctions pures, aucun état caché. La page convertit en unités humaines. */
+const Phys = (() => {
+  const C_SI = 299792458;            // m/s, exact
+  const BMAX = 0.999;                // plafond des curseurs pour un objet matériel
+
+  const clampB = b => Math.max(-BMAX, Math.min(BMAX, b));
+  const gamma = b => 1 / Math.sqrt(1 - b * b);
+  const rapidity = b => Math.atanh(b);
+  const fromRapidity = w => Math.tanh(w);
+
+  /* Transformation de Lorentz : coordonnées d'un événement dans le référentiel S'
+     qui se déplace à b (selon +x) par rapport à S. Origines confondues. */
+  function boost(ev, b) {
+    const g = gamma(b);
+    return { t: g * (ev.t - b * ev.x), x: g * (ev.x - b * ev.t) };
+  }
+  const unboost = (ev, b) => boost(ev, -b);
+
+  /* Transformation de Galilée (pour l'acte I) : même temps partout. */
+  const galilee = (ev, b) => ({ t: ev.t, x: ev.x - b * ev.t });
+
+  /* Intervalle s² = Δt² − Δx² (signature + −). Invariant de Lorentz. */
+  function interval(e1, e2) {
+    const dt = e2.t - e1.t, dx = e2.x - e1.x;
+    const s2 = dt * dt - dx * dx;
+    const tol = 1e-9 * (dt * dt + dx * dx + 1e-12);
+    let kind = Math.abs(s2) <= tol ? 'lumiere' : (s2 > 0 ? 'temps' : 'espace');
+    return { dt, dx, s2, kind,
+      tau: s2 > 0 ? Math.sqrt(s2) : 0,           // temps propre si genre temps
+      dist: s2 < 0 ? Math.sqrt(-s2) : 0 };       // distance propre si genre espace
+  }
+
+  /* Ordre causal : vrai si l'ordre temporel de e1, e2 est le même pour tout b. */
+  const orderInvariant = (e1, e2) => interval(e1, e2).kind !== 'espace';
+
+  /* Vitesse b à partir de laquelle deux événements genre espace deviennent simultanés. */
+  function simultaneityBoost(e1, e2) {
+    const { dt, dx, kind } = interval(e1, e2);
+    if (kind !== 'espace') return null;
+    return dt / dx;                               // |dt/dx| < 1
+  }
+
+  /* Vitesses. velTransform : vitesse u (mesurée dans S) vue depuis S' (vitesse b).
+     velCompose : vitesse u' (mesurée dans S') vue depuis S. */
+  const velTransform = (u, b) => (u - b) / (1 - u * b);
+  const velCompose = (up, b) => (up + b) / (1 + up * b);
+  const velGalilee = (up, b) => up + b;
+
+  /* Horloge lumineuse : deux miroirs séparés de L (dans le référentiel de l'horloge),
+     horloge en mouvement à b selon x. Renvoie, au temps t du laboratoire,
+     la position du photon et le nombre de tics. tau0 = 2L (aller-retour). */
+  function lightClock(b, L, t) {
+    const g = gamma(b);
+    const T = 2 * L * g;                          // période mesurée dans le labo
+    const n = Math.floor(t / T);
+    const ph = (t - n * T) / T;                   // phase 0..1
+    const y = ph < 0.5 ? 2 * ph * L : (2 - 2 * ph) * L;
+    const xc = b * t;                             // centre de l'horloge
+    return { T, tau0: 2 * L, ticks: n, phase: ph, y, x: xc,
+      tauOwn: t / g,                              // temps propre de l'horloge
+      diag: Math.hypot(b * T / 2, L),             // longueur d'une demi-diagonale
+      check: Math.hypot(b * T / 2, L) - T / 2 };  // = 0 : la lumière va à c
+  }
+
+  /* Train et éclairs. Train de longueur propre L0, roulant à b dans S (quai).
+     Les éclairs frappent l'arrière (A) et l'avant (B) du train à t = 0 dans S,
+     au moment où ils coïncident avec deux repères du quai séparés de L0/γ.
+     Observateur M (quai) au milieu des repères, x = 0 ; M' (train) au milieu du train. */
+  function lightning(b, L0) {
+    const g = gamma(b), Lq = L0 / g;              // longueur du train mesurée sur le quai
+    const A = { t: 0, x: -Lq / 2 }, B = { t: 0, x: Lq / 2 };
+    // Réceptions en S. M fixe en x = 0.
+    const rM_A = { t: Lq / 2, x: 0 }, rM_B = { t: Lq / 2, x: 0 };
+    // M' : x = b t. Front de B (vers −x) : Lq/2 − t = b t. Front de A (vers +x) : −Lq/2 + t = b t.
+    const tB = (Lq / 2) / (1 + b), tA = (Lq / 2) / (1 - b);
+    const rMp_B = { t: tB, x: b * tB }, rMp_A = { t: tA, x: b * tA };
+    // Reconstruction par M' dans son propre référentiel : il est au milieu (distance L0/2
+    // de chaque bout), la lumière va à c dans S', donc t'_émission = t'_réception − L0/2.
+    const tpRA = boost(rMp_A, b).t, tpRB = boost(rMp_B, b).t;
+    const recA = tpRA - L0 / 2, recB = tpRB - L0 / 2;
+    // Vérité donnée par Lorentz :
+    const Ap = boost(A, b), Bp = boost(B, b);
+    return { g, Lq, A, B, Ap, Bp, rM_A, rM_B, rMp_A, rMp_B,
+      tpReceptA: tpRA, tpReceptB: tpRB,
+      reconA: recA, reconB: recB,
+      dtPrime: Ap.t - Bp.t,                       // t'_A − t'_B = b·L0 (> 0 : B d'abord)
+      dtPrimeFormula: b * L0,
+      // Ce que M (quai) reconstruit : distance Lq/2 de chaque côté, réception à Lq/2 : émission 0.
+      reconM: [rM_A.t - Lq / 2, rM_B.t - Lq / 2] };
+  }
+
+  /* Horloges du train (synchronisées dans S') lues depuis S au temps t de S.
+     Horloge fixée à la position x' (repère du train). Lecture : t' = t/γ − b x'. */
+  const trainClockReading = (b, xp, t) => t / gamma(b) - b * xp;
+  /* Position dans S d'un point du train de coordonnée x' au temps t de S. */
+  const trainPointX = (b, xp, t) => b * t + xp / gamma(b);
+
+  /* Mesure de longueur d'une règle de longueur propre L0 au repos dans S' (vitesse b).
+     Dans S : positions des deux bouts au même t de S → L0/γ.
+     Retourne aussi les deux événements « bouts lus en même temps » dans S, et
+     leur écart temporel dans S' (non simultanés pour S'). */
+  function rodMeasure(b, L0, t = 0) {
+    const x1 = trainPointX(b, 0, t), x2 = trainPointX(b, L0, t);
+    const e1 = { t, x: x1 }, e2 = { t, x: x2 };
+    return { L: x2 - x1, L0, e1, e2, dtPrime: boost(e2, b).t - boost(e1, b).t };
+  }
+
+  /* Temps propre le long d'une ligne d'univers polygonale [{t,x}, ...].
+     Chaque segment doit être genre temps (|Δx| < Δt). */
+  function properTime(path) {
+    let tau = 0, ok = true, segs = [];
+    for (let i = 1; i < path.length; i++) {
+      const iv = interval(path[i - 1], path[i]);
+      if (iv.kind !== 'temps' || iv.dt <= 0) ok = false;
+      segs.push({ dt: iv.dt, dx: iv.dx, tau: iv.tau, b: iv.dx / iv.dt });
+      tau += iv.tau;
+    }
+    return { tau, ok, segs, coord: path[path.length - 1].t - path[0].t };
+  }
+
+  /* Contraint un point de passage P entre A et B pour que A→P et P→B restent genre temps
+     avec |b| ≤ bmax. Renvoie le point corrigé (projection simple). */
+  function clampWaypoint(A, P, B, bmax = BMAX) {
+    let t = Math.min(Math.max(P.t, A.t + 1e-6), B.t - 1e-6);
+    const lo = Math.max(A.x - bmax * (t - A.t), B.x - bmax * (B.t - t));
+    const hi = Math.min(A.x + bmax * (t - A.t), B.x + bmax * (B.t - t));
+    if (lo > hi) return { t, x: (lo + hi) / 2 };
+    return { t, x: Math.min(hi, Math.max(lo, P.x)) };
+  }
+
+  /* Énergie et impulsion d'une particule de masse m à la vitesse b (c = 1).
+     E = γ m, p = γ m b, K = (γ − 1) m, E² = p² + m². Photon : m = 0, E = |p|. */
+  function energy(m, b) {
+    const g = gamma(b);
+    const E = g * m, p = g * m * b;
+    return { g, E, E0: m, p, K: E - m, Kclass: 0.5 * m * b * b,
+      pclass: m * b, check: E * E - p * p - m * m };
+  }
+
+  /* Poussée à force constante F (dans le référentiel de départ) à partir du repos.
+     Impulsion p = F t (exacte en relativité, dp/dt = F). b = p / √(m² + p²) < 1.
+     Version newtonienne : b = F t / m (dépasse 1). Travail reçu = K. */
+  function push(m, F, t) {
+    const p = F * t;
+    const b = p / Math.sqrt(m * m + p * p);
+    const x = (Math.sqrt(m * m + p * p) - m) / F; // position (mouvement hyperbolique)
+    const g = gamma(b);
+    return { t, p, b, x, g, E: g * m, K: (g - 1) * m,
+      bNewton: F * t / m, xNewton: 0.5 * F * t * t / m,
+      tau: (m / F) * Math.asinh(F * t / m) };     // temps propre écoulé à bord
+  }
+
+  /* Vitesse atteinte avec une énergie cinétique K donnée (en unités de m c²). */
+  const bFromK = (m, K) => { const g = 1 + K / m; return Math.sqrt(1 - 1 / (g * g)); };
+
+  /* Hyperbole d'invariance t² − x² = s2 (s2 > 0 : branche future, genre temps ;
+     s2 < 0 : branche droite, genre espace). Points paramétrés par la rapidité. */
+  function hyperbola(s2, wMin = -2.5, wMax = 2.5, n = 80) {
+    const pts = [], s = Math.sqrt(Math.abs(s2));
+    for (let i = 0; i <= n; i++) {
+      const w = wMin + (wMax - wMin) * i / n;
+      pts.push(s2 >= 0 ? { t: s * Math.cosh(w), x: s * Math.sinh(w) }
+                       : { t: s * Math.sinh(w), x: s * Math.cosh(w) });
+    }
+    return pts;
+  }
+
+  /* Axes de l'observateur S' (vitesse b) dessinés dans S :
+     axe ct' : direction (1, b) en (t, x) ; axe x' : direction (b, 1).
+     Graduations : l'événement (t' = k, x' = 0) est en S à (γk, γbk). */
+  function primedAxes(b) {
+    const g = gamma(b);
+    return { tAxis: { t: 1, x: b }, xAxis: { t: b, x: 1 },
+      tick: k => ({ t: g * k, x: g * b * k }),
+      xtick: k => ({ t: g * b * k, x: g * k }) };
+  }
+
+  /* Conversion en unités humaines (pour l'affichage). */
+  const units = {
+    c: C_SI,
+    toKmS: b => b * C_SI / 1000,
+    lightTime: (Lm) => Lm / C_SI                  // s
+  };
+
+  return { C_SI, BMAX, clampB, gamma, rapidity, fromRapidity, boost, unboost, galilee,
+    interval, orderInvariant, simultaneityBoost, velTransform, velCompose, velGalilee,
+    lightClock, lightning, trainClockReading, trainPointX, rodMeasure, properTime,
+    clampWaypoint, energy, push, bFromK, hyperbola, primedAxes, units };
+})();
+/* PHYS-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = (n, d) => rootCS.getPropertyValue(n).trim() || d;
+const C = { fond: tok('--fond', '#0a0d12'), fond2: tok('--fond-2', '#11161e'), trait: tok('--trait', '#1f2833'), texte: tok('--texte', '#e8e4dc'), texte2: tok('--texte-2', '#8a93a0'),
+            accent: tok('--accent', '#b6f2ff'), ener: tok('--energie', '#ffd166'), mob: tok('--mobile', '#c9a7ff'), mono: tok('--mono', 'monospace') };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RM = rgb(C.mob), RE = rgb(C.ener);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, PI = Math.PI, UL = 299.792458;        // 1 µs-lumière en mètres
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const fmtB = b => { const d = b < 0.999 ? 3 : Math.min(11, Math.ceil(-Math.log10(1 - b))); const [i, f] = Math.abs(b).toFixed(d).split('.'); return (b < 0 ? '−' : '') + i + ',' + f.replace(/(\d{3})(?=\d)/g, '$1 '); };
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const sg = x => x < 0 ? '−' : '+';
+
+/* ---------------- Primitives de dessin ---------------- */
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function wrapTag(c, text, x, y, maxW, color, align) {
+  const words = text.split(' '); let line = '', yy = y;
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (c.measureText(t).width > maxW && line) { tagText(c, line, x, yy, align || 'left', 'top', color); yy += 15; line = w; } else line = t; }
+  if (line) { tagText(c, line, x, yy, align || 'left', 'top', color); yy += 15; }
+  return yy;
+}
+function seg(c, x0, y0, x1, y1, col, lw, dash) { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.restore(); }
+function disc(c, x, y, r, col, glow) { c.save(); if (glow) { c.shadowColor = col; c.shadowBlur = glow; } c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.restore(); }
+function circ(c, x, y, r, col, lw, dash) { c.save(); c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke(); c.restore(); }
+function arrow(c, x0, y0, x1, y1, col, lw, dash, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 7, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill();
+  c.restore();
+}
+function hatch(c, x, y, w, h, col, gap) {
+  if (w < 0.5 || h < 0.5) return;
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.strokeStyle = col; c.lineWidth = 1; c.beginPath();
+  for (let k = -h; k < w; k += gap || 5) { c.moveTo(x + k, y + h); c.lineTo(x + k + h, y); }
+  c.stroke(); c.restore();
+}
+function cross(c, x, y, r, col, lw) { seg(c, x - r, y - r, x + r, y + r, col, lw || 1.4); seg(c, x - r, y + r, x + r, y - r, col, lw || 1.4); }
+function polyline(c, pts, col, lw, dash) {
+  if (pts.length < 2) return;
+  c.save(); c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath();
+  pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke(); c.restore();
+}
+function clockFace(c, x, y, r, val, col) {                      // val en µs, un tour = 1 µs
+  circ(c, x, y, r, col, 1.2);
+  const a = val * TAU - PI / 2; seg(c, x, y, x + Math.cos(a) * r * 0.82, y + Math.sin(a) * r * 0.82, col, 1.4);
+  disc(c, x, y, 1.4, col);
+}
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0;
+const NA = 8, ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+const prm = {};
+function resetPrm(n) {
+  if (n === 0) Object.assign(prm, { b1: 0.3, u1: 0.2, fr1: 'S', closed: false });
+  if (n === 1) Object.assign(prm, { b2: 0.6, tri: true, oth: false, rec: false });
+  if (n === 2) Object.assign(prm, { b3: 0.5, fr3: 'S', sync: false });
+  if (n === 3) Object.assign(prm, { b4: 0.6, ly: 2 });
+  if (n === 4) Object.assign(prm, { b5: 0.6, mode: 'horloge', by: 'S', hyp: false });
+  if (n === 5) Object.assign(prm, { two: false, view6: false });
+  if (n === 6) Object.assign(prm, { b7: 0.5, u7: 0.5 });
+  if (n === 7) Object.assign(prm, { push: true, ph8: false, proton: false });
+}
+for (let i = 0; i < NA; i++) resetPrm(i);
+
+/* ---------------- Survol ---------------- */
+let zones = [];
+function zone(x0, y0, x1, y1, key, name, role) { zones.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role); }
+const dSeg = (x, y, x0, y0, x1, y1) => { const dx = x1 - x0, dy = y1 - y0, L2 = dx * dx + dy * dy || 1, t = clamp(((x - x0) * dx + (y - y0) * dy) / L2, 0, 1); return Math.hypot(x - x0 - t * dx, y - y0 - t * dy); };
+function szone(x0, y0, x1, y1, tol, key, name, role) { zoneF((x, y) => dSeg(x, y, x0, y0, x1, y1) <= tol, key, name, role); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- Enregistreur générique x–y ---------------- */
+// cfg : {x0,x1,y0,y1, xt:[[v,txt]], yt:[[v,txt]], series:[{pts,col,dash,lw}], hl:[{y,col,dash}], vl:[{x,col,dash}], dots:[{x,y,col}], xl, yl, strike}
+function plotXY(cfg) {
+  const w = scopeC.width / dpr, h = scopeC.height / dpr, c = sctx;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  const padL = 40, padR = 10, padT = 14, padB = 24, pw = w - padL - padR, ph = h - padT - padB;
+  const X = v => padL + (v - cfg.x0) / (cfg.x1 - cfg.x0) * pw, Y = v => padT + ph * (1 - (v - cfg.y0) / (cfg.y1 - cfg.y0));
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (const [v, t] of cfg.yt || []) { c.fillText(t, padL - 4, Y(v)); seg(c, padL, Y(v), padL + pw, Y(v), C.trait, 1); }
+  c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (const [v, t] of cfg.xt || []) c.fillText(t, X(v), h - 10);
+  c.textAlign = 'left'; c.fillText(cfg.yl || '', 2, 8); c.textAlign = 'right'; c.fillText(cfg.xl || '', w - 2, h - 1);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  for (const l of cfg.hl || []) seg(c, padL, Y(l.y), padL + pw, Y(l.y), l.col, 1, l.dash);
+  for (const l of cfg.vl || []) seg(c, X(l.x), padT, X(l.x), padT + ph, l.col, 1, l.dash);
+  for (const s of cfg.series) polyline(c, s.pts.map(p => [X(p[0]), Y(p[1])]), s.col, s.lw || 1.8, s.dash);
+  for (const d of cfg.dots || []) disc(c, X(d.x), Y(d.y), 4, d.col);
+  c.restore();
+  return { X, Y };
+}
+
+/* ---------------- Diagramme de Minkowski (actes IV à VI) ---------------- */
+// Même échelle sur les deux axes : la lumière fait toujours 45°.
+const dg = { ox: 0, oy: 0, s: 40 };
+const DX = x => dg.ox + x * dg.s, DY = t => dg.oy - t * dg.s;
+const dgT = y => (dg.oy - y) / dg.s, dgXinv = x => (x - dg.ox) / dg.s;
+const px2 = ev => [DX(ev.x), DY(ev.t)];
+function dgGrid(c, step, cols) {                                     // grille orthonormale du référentiel affiché
+  const tMin = dgT(H), tMax = dgT(0), xMin = dgXinv(0), xMax = dgXinv(W);
+  c.save(); c.lineWidth = 1; c.strokeStyle = cols || C.trait; c.beginPath();
+  for (let k = Math.ceil(tMin / step) * step; k <= tMax; k += step) { const y = Math.round(DY(k)) + 0.5; c.moveTo(0, y); c.lineTo(W, y); }
+  for (let k = Math.ceil(xMin / step) * step; k <= xMax; k += step) { const x = Math.round(DX(k)) + 0.5; c.moveTo(x, 0); c.lineTo(x, H); }
+  c.stroke(); c.restore();
+}
+function lineThrough(c, P, dir, col, lw, dash) {                      // droite en coordonnées du monde (t,x), P point, dir direction {t,x}
+  const R = 60; seg(c, ...px2({ t: P.t - dir.t * R, x: P.x - dir.x * R }), ...px2({ t: P.t + dir.t * R, x: P.x + dir.x * R }), col, lw, dash);
+}
+function evDot(c, p, sel, lab, col) {
+  c.save(); c.shadowColor = col || C.texte; c.shadowBlur = 9; c.fillStyle = col || C.texte; c.beginPath(); c.arc(p[0], p[1], 4.5, 0, TAU); c.fill(); c.restore();
+  if (sel) circ(c, p[0], p[1], 9, C.accent, 1.6);
+  if (lab) { c.font = mono(11); tagText(c, lab, p[0] + 9, p[1] - 8, 'left', 'bottom', col || C.texte); }
+}
+function bdStep(cur, tgt, dt) {                                       // approche en rapidité (transformation continue)
+  if (reduce) return tgt;
+  const w = Phys.rapidity(cur), wt = Phys.rapidity(tgt), nw = w + (wt - w) * (1 - Math.exp(-dt * 4.2));
+  return Math.abs(nw - wt) < 1e-3 ? tgt : Phys.fromRapidity(nw);
+}
+const colOf = r => r === 'S' ? C.texte : C.mob;
+
+
+/* ================= Acte I : deux référentiels ================= */
+const TS1 = 0.8;                                                   // µs par seconde d’écran
+const k1 = { t: 0, xc: -1.7, vb: 0, cl: 0, ball: null, lamp: null, marks: [], X0: -1.7 };
+const STEP50 = 50 / UL;                                            // 50 m en µs-lumière
+function reset1() { k1.t = 0; k1.xc = k1.X0; k1.ball = null; k1.lamp = null; k1.marks = []; k1.vb = prm.fr1 === 'Sp' ? 1 : 0; k1.cl = prm.closed ? 1 : 0; }
+function throwBall() { if (act !== 0) return; k1.ball = { t0: k1.t, u: prm.u1, n: 0, done: false, off: 0 }; k1.marks = []; setPlay(true); }
+function lamp() { if (act !== 0) return; k1.lamp = { t0: k1.t, xq0: k1.xc, tau: 0, meas: false, gone: false }; setPlay(true); }
+function adv1(dt) {
+  const h = dt * TS1, b = prm.b1, r = dt / 0.6;
+  k1.vb += clamp((prm.fr1 === 'Sp' ? 1 : 0) - k1.vb, -r, r); k1.cl += clamp((prm.closed ? 1 : 0) - k1.cl, -r, r);
+  k1.t += h; k1.xc += b * h;
+  const B = k1.ball;
+  if (B && !B.done) {
+    const tau = k1.t - B.t0; B.off = clamp(B.u * tau, -0.5, 0.5);
+    while (B.n * 0.2 <= tau && B.n < 80) { const off = B.u * B.n * 0.2; if (Math.abs(off) > 0.5) break; k1.marks.push({ xq: k1.xc - b * (tau - B.n * 0.2) + off, xp: off }); B.n++; }
+    if (Math.abs(B.u * tau) >= 0.5 || (B.u === 0 && tau > 3)) B.done = true;
+  }
+  const Lp = k1.lamp;
+  if (Lp && !Lp.gone) { Lp.tau = k1.t - Lp.t0; if (Lp.tau >= 1.0) Lp.meas = true; if (Lp.tau > 3.2) Lp.gone = true; }
+  if (k1.xc - 0.5 > 2.7) { const keep = Lp && Lp.meas; k1.t = 0; k1.xc = k1.X0; k1.ball = null; k1.marks = []; k1.lamp = keep ? { t0: 0, xq0: 0, tau: 9, meas: true, gone: true } : null; }
+}
+function draw1() {
+  const c = ctx, b = prm.b1, vb = sstep(k1.vb), cl = sstep(k1.cl), ve = Math.max(vb, cl), qa = 1 - cl;
+  const pxU = (W - 40) / 5.4, cam = ve * k1.xc, narrow = W < 700;
+  const SX = x => W / 2 + (x - cam) * pxU, ST = o => W / 2 + (k1.xc + o - cam) * pxU, FX = (xq, o) => lerp(SX(xq), ST(o), ve);
+  const yQ = Math.min(H - 92, Math.max(310, H * 0.66)), yWb = yQ - 36, yWt = yQ - 92, yBall = yWb - 34;
+  c.save(); c.textBaseline = 'alphabetic';
+  // quai : règle, repères, horloges
+  c.save(); c.globalAlpha = qa;
+  seg(c, 0, yQ, W, yQ, C.texte, 1.2);
+  const xa = cam - W / 2 / pxU - 0.2, xb = cam + W / 2 / pxU + 0.2, sp = STEP50 * pxU, lab = sp >= 22 ? 2 : 6;
+  c.font = mono(10); c.textAlign = 'center'; c.fillStyle = C.texte2;
+  for (let k = Math.ceil(xa / STEP50); k * STEP50 <= xb; k++) { const x = SX(k * STEP50); seg(c, x, yQ, x, yQ - (k % 2 ? 5 : 8), C.texte, 1); if (((k % lab) + lab) % lab === 0) { c.textBaseline = 'top'; c.fillText(fmtI(k * 50), x, yQ + 5); } }
+  tagText(c, 'quai · mètres', 14, yQ - 10, 'left', 'bottom', C.texte);
+  zone(0, yQ - 10, W, yQ + 16, 'qr', 'Règle du quai', 'Graduée tous les 50 m dans le référentiel du quai. Les marques de la balle y sont lues quand on regarde depuis le quai.');
+  c.font = mono(11);
+  for (let k = Math.floor(xa / 2.5); k * 2.5 <= xb; k++) {
+    const x = SX(k * 2.5), y = yQ + 38; clockFace(c, x, y, 11, k1.t, C.texte);
+    c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillStyle = C.texte; if (!narrow) c.fillText(fmt(k1.t, 2) + ' µs', x + 16, y);
+    zcirc(x, y, 13, 'hq' + k, 'Horloge du quai', 'Réglée sur le temps du quai. Galilée : toutes les horloges, du quai comme du train, marquent le même temps.');
+  }
+  c.restore();
+  // rail et train
+  seg(c, 0, yWb + 3.5, W, yWb + 3.5, rgba(RT2, 0.5 * qa), 1, [3, 4]);
+  const x0 = ST(-0.5), x1 = ST(0.5);
+  c.save(); c.fillStyle = cl > 0.5 ? C.fond2 : rgba(RM, 0.08); c.strokeStyle = C.mob; c.lineWidth = 1.6; c.fillRect(x0, yWt, x1 - x0, yWb - yWt); c.strokeRect(x0 + 0.5, yWt + 0.5, x1 - x0 - 1, yWb - yWt - 1);
+  if (cl < 0.5) { c.fillStyle = rgba(RM, 0.12); for (let i = 0; i < 5; i++) c.fillRect(x0 + (x1 - x0) * (0.08 + i * 0.19), yWt + 8, (x1 - x0) * 0.1, 14); }
+  c.restore();
+  disc(c, x0 + 0.12 * (x1 - x0), yWb + 3, 3.5, C.mob); disc(c, x1 - 0.12 * (x1 - x0), yWb + 3, 3.5, C.mob);
+  zone(x0, yWt, x1, yWb, 'train', 'Train (wagon)', 'Longueur propre L₀ = 1 µs-lumière ≈ 299,8 m. Chacun de ses occupants est immobile dans le référentiel du train (S′, en lilas).');
+  c.font = mono(10); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let k = 0; k * STEP50 <= 1.0001; k++) { const x = x0 + k * sp, y = yWt; seg(c, x, y, x, y - (k % 2 ? 5 : 8), C.mob, 1); if (k % 2 === 0 && sp * 2 > 18) { c.fillStyle = C.mob; c.fillText(String(k * 50), x, y - 12); } }
+  tagText(c, 'train · mètres', x0, yWt - 26, 'left', 'bottom', C.mob);
+  zone(x0, yWt - 28, x1, yWt, 'tr', 'Règle du train', 'Sa propre règle, graduée tous les 50 m. Elle défile sous le quai quand on est sur le quai.');
+  clockFace(c, x0 + 16, yWt + 17, 9, k1.t, C.mob);
+  if (x1 - x0 > 140) { c.font = mono(10.5); c.fillStyle = C.mob; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(fmt(k1.t, 2) + ' µs', x0 + 30, yWt + 17); }
+  zcirc(x0 + 16, yWt + 17, 12, 'ht', 'Horloge du train', 'Même temps que l’horloge du quai : un seul temps pour tous (Galilée).');
+  if (cl > 0.5) { c.font = mono(10.5); tagText(c, 'wagon fermé : pas de fenêtre', (x0 + x1) / 2, yWt + 36, 'center', 'middle', C.texte2); }
+  const px = (x0 + x1) / 2;
+  seg(c, px, yWb - 6, px, yWb - 26, C.mob, 2); disc(c, px, yWb - 31, 5, C.mob); seg(c, px - 5, yWb - 19, px + 5, yWb - 19, C.mob, 1.6);
+  zcirc(px, yWb - 18, 16, 'pass', 'Passager', 'Au milieu du wagon. Il lance la balle ou allume la lampe vers l’avant. Pour lui, le wagon est immobile.');
+  // balle et marques
+  const B = k1.ball;
+  if (B) {
+    const ycm = lerp(yQ, yWt, ve);
+    for (const m of k1.marks) { const x = lerp(SX(m.xq), ST(m.xp), ve); seg(c, x, ycm - 5, x, ycm + 5, C.ener, 1.5); disc(c, x, ycm, 1.8, C.ener); }
+    if (k1.marks.length) zoneF((x, y) => Math.abs(y - ycm) < 10 && k1.marks.some(m => Math.abs(x - lerp(SX(m.xq), ST(m.xp), ve)) < 6), 'mk', 'Marques de la balle', 'Une marque tous les 0,2 µs sur la règle du référentiel affiché. Leur écart donne la vitesse de la balle dans ce référentiel.');
+    const bx = ST(B.off); disc(c, bx, yBall, 4.5, C.ener, 6); zcirc(bx, yBall, 10, 'balle', 'Balle', 'Lancée par le passager à u′ dans le train. Sur le quai, Galilée donne u = u′ + v.');
+  }
+  // lampe
+  const Lp = k1.lamp;
+  if (Lp && !Lp.gone) {
+    const tau = Lp.tau, yP = yBall - 16, xr = lerp(SX(Lp.xq0 + tau), ST(tau), ve);
+    seg(c, xr - 26, yP, xr, yP, rgba(RA, 0.5), 2); disc(c, xr, yP, 4.5, C.accent, 12);
+    zcirc(xr, yP, 11, 'ph', 'Impulsion lumineuse', 'Lampe du passager. Mesurée à c dans le train comme sur le quai : c’est ce que donnent toutes les expériences.');
+    if (ve < 0.97) {
+      const xg = SX(Lp.xq0 + (1 + b) * tau), yg = yP - 24, ga = (1 - ve) * 0.9;
+      c.save(); c.globalAlpha = ga; seg(c, xg - 26, yg, xg, yg, C.texte2, 1.5, [4, 3]); disc(c, xg, yg, 4, C.texte2); if (Lp.meas) cross(c, xg, yg, 9, C.texte2, 1.6);
+      c.font = mono(10.5); tagText(c, 'Galilée : c + v', xg, yg - 8, 'center', 'bottom', C.texte2); c.restore();
+      if (ga > 0.3) zcirc(xg, yg, 12, 'gh', 'Photon fantôme (Galilée)', 'Là où l’addition des vitesses le placerait vu du quai : à c + v. Il est barré dès que la mesure donne c.');
+    }
+  }
+  c.restore();
+  // légende de scène
+  c.font = mono(11);
+  const ref = cl > 0.5 ? 'wagon fermé' : (vb > 0.5 ? 'train' : 'quai');
+  const txt = 'Référentiel : ' + ref + ' (immobile) · ' + (cl > 0.5 ? '' : (vb > 0.5 ? 'le quai défile' : 'le train roule à ' + fmt(b, 2) + ' c'));
+  const note = 'Aucun des deux n’est « vraiment » au repos. Chacun est immobile dans son propre référentiel.';
+  if (narrow) { tagText(c, txt, 16, 122, 'left', 'top', C.texte); c.font = mono(10.5); wrapTag(c, note, 16, 140, W - 32, C.texte2, 'left'); }
+  else { tagText(c, txt, W - 16, 24, 'right', 'top', C.texte); c.font = mono(10.5); wrapTag(c, note, W - 16, 44, Math.min(330, W * 0.42), C.texte2, 'right'); }
+}
+function extra1() {
+  const L = k1.lamp, m = L && L.meas, b = prm.b1;
+  return `<table><tr><th></th><th>Galilée prédit</th><th>On mesure</th></tr>
+<tr><td class="m">Train</td><td>${m ? 'c' : '—'}</td><td class="l">${m ? 'c' : '—'}</td></tr>
+<tr><td class="q">Quai</td><td class="${m ? 'g' : ''}">${m ? 'c + v = ' + fmt(1 + b, 2) + ' c' : '—'}</td><td class="l">${m ? 'c' : '—'}</td></tr></table>`;
+}
+function status1() {
+  const L = k1.lamp;
+  if (L && L.meas) return 'Contradiction. Les mesures donnent c pour les deux observateurs. Il faut abandonner quelque chose : l’addition des vitesses, et avec elle le temps absolu.';
+  if (prm.closed) return 'Aucune expérience faite à l’intérieur ne dit si le wagon bouge : c’est le principe de relativité.';
+  if (k1.ball) return 'Galilée : u = u′ + v, et un seul temps pour tous. Ici, la balle suit la règle de Galilée.';
+  if (L) return 'La lampe est allumée : mesure la vitesse de l’impulsion dans chaque référentiel.';
+  return 'Change de référentiel, lance la balle, puis allume la lampe.';
+}
+
+/* ================= Acte II : horloge lumineuse ================= */
+const TS2 = 0.8, LC = 0.5;                                          // L = 150 m = 0,5 µs-lumière : τ₀ = 2L/c = 1 µs
+const k2 = { T: 0, tau: 0, xd: 0, trail: [], xa: 0, half: 0, pxL: 60, span: 3, pxU: 120, fresh: true };
+const phY = ph => { const f = ph - Math.floor(ph); return f < 0.5 ? 2 * f * LC : (2 - 2 * f) * LC; };
+function reset2() { k2.T = 0; k2.tau = 0; k2.xd = 0; k2.xa = 0; k2.half = 0; k2.trail = [{ xd: 0, y: 0 }]; k2.fresh = true; }
+function adv2(dt) {
+  const b = prm.b2, g = Phys.gamma(b), Tp = 2 * LC * g, h = dt * TS2, ph0 = k2.tau, xd0 = k2.xd;
+  k2.T += h; k2.tau += h / g; k2.xd += b * h;
+  const n0 = Math.floor(2 * ph0 + 1e-9), n1 = Math.floor(2 * k2.tau + 1e-9);
+  if (n1 > n0) {
+    const f = (n1 / 2 - ph0) / (k2.tau - ph0), xv = xd0 + (k2.xd - xd0) * f, yv = n1 % 2 ? LC : 0;
+    k2.trail.push({ xd: xv, y: yv, ph: n1 / 2 }); k2.xa = xv; k2.half = n1;
+    if (xv + b * Tp / 2 > k2.span) { k2.xd = k2.xd - xv; k2.xa = 0; k2.trail = [{ xd: 0, y: yv, ph: n1 / 2 }]; }
+    while (k2.trail.length > 8) k2.trail.shift();
+  }
+}
+function draw2() {
+  const c = ctx, b = prm.b2, g = Phys.gamma(b), rec = prm.rec, dir = rec ? -1 : 1, stacked = innerWidth <= 860, top = stacked ? 112 : 108;
+  const pa = stacked ? { x: 0, y: top, w: W, h: (H - top - 8) / 2 } : { x: 0, y: top, w: W / 2, h: H - top - 10 };
+  const pb = stacked ? { x: 0, y: top + (H - top - 8) / 2, w: W, h: (H - top - 8) / 2 } : { x: W / 2, y: top, w: W / 2, h: H - top - 10 };
+  const regH = pa.h - 88, tgt = Math.max(24, Math.min(regH * 0.55, 150, 0.8 * (pb.w - 70) / Math.max(b * g, 0.35)));
+  k2.pxL = k2.fresh ? tgt : k2.pxL + (tgt - k2.pxL) * 0.12; k2.fresh = false;
+  const pxL = k2.pxL, pxU = pxL / LC; k2.pxU = pxU; k2.span = (pb.w - 70) / pxU;
+  const cc = rec ? C.texte : C.mob, oc = rec ? C.mob : C.texte;
+  const yB = pa.y + 30 + regH * 0.5 + pxL / 2, yT = yB - pxL, yB2 = pb.y + 30 + regH * 0.5 + pxL / 2, yT2 = yB2 - pxL;
+  const ph = k2.tau, yNow = phY(ph), n = Math.floor(ph + 1e-9);
+  c.save(); c.textBaseline = 'alphabetic';
+  if (stacked) seg(c, 12, pb.y, W - 12, pb.y, C.trait, 1); else seg(c, pb.x, pb.y, pb.x, pb.y + pb.h, C.trait, 1);
+  c.font = mono(11);
+  tagText(c, rec ? 'Dans le référentiel de l’horloge (quai)' : 'Dans le référentiel de l’horloge', pa.x + 16, pa.y + 4, 'left', 'top', cc);
+  tagText(c, rec ? 'Depuis le train' : 'Depuis le quai', pb.x + 16, pb.y + 4, 'left', 'top', oc);
+  // mirroirs : fonction de dessin
+  const mir = (x, yb, yt) => {
+    for (const y of [yb, yt]) { c.save(); c.fillStyle = rgba(rec ? RT : RM, 0.35); c.fillRect(x - 24, y - 1.5, 48, 3); c.restore(); }
+  };
+  const spring = (x, yt, yb, bx) => {
+    const L = (yb - yt) * (0.56 + 0.2 * Math.sin(ph * TAU)), x0 = x, y1 = yt + L;
+    seg(c, x0 - 9, yt, x0 + 9, yt, C.texte2, 1.2);
+    c.save(); c.strokeStyle = C.texte2; c.lineWidth = 1.1; c.beginPath(); c.moveTo(x0, yt);
+    for (let i = 1; i <= 8; i++) c.lineTo(x0 + (i % 2 ? 6 : -6), yt + (y1 - yt) * i / 9); c.lineTo(x0, y1); c.stroke(); c.restore();
+    c.save(); c.fillStyle = cc; c.fillRect(x0 - 6, y1, 12, 10); c.restore();
+  };
+  // volet gauche
+  const cx = pa.x + pa.w * (prm.oth ? 0.4 : 0.5);
+  mir(cx, yB, yT); seg(c, cx, yT, cx, yB, rgba(RA, 0.18), 1, [3, 4]);
+  const py = yB - yNow / LC * pxL; disc(c, cx, py, 5, C.accent, 12);
+  zone(cx - 26, yT - 6, cx + 26, yT + 6, 'mir1', 'Miroirs', 'Deux miroirs distants de L = 150 m dans le référentiel de l’horloge. Le photon les relie : un aller-retour = un tic de 1 µs.');
+  zone(cx - 26, yB - 6, cx + 26, yB + 6, 'mir1b', 'Miroirs', 'Deux miroirs distants de L = 150 m dans le référentiel de l’horloge. Le photon les relie : un aller-retour = un tic de 1 µs.');
+  zcirc(cx, py, 10, 'phot1', 'Photon', 'Il monte et descend à c. Dans le référentiel de l’horloge, le trajet est vertical : 2L par tic.');
+  if (prm.oth) { spring(cx + 66, yT, yB); zone(cx + 56, yT, cx + 76, yB, 'spr1', 'Ressort (une autre horloge)', 'Un type d’horloge tout différent, réglé pour battre 1 µs dans son propre référentiel. Il reste synchrone avec l’horloge lumineuse.'); }
+  c.font = mono(11); tagText(c, 'tics : ' + n, pa.x + 16, pa.y + pa.h - 36, 'left', 'bottom', C.texte);
+  tagText(c, 'temps propre τ : ' + fmt(k2.tau, 2) + ' µs', pa.x + 16, pa.y + pa.h - 18, 'left', 'bottom', cc);
+  // volet droit
+  const X = xd => dir > 0 ? pb.x + 35 + xd * pxU : pb.x + pb.w - 35 - xd * pxU;
+  const xcl = X(k2.xd);
+  seg(c, pb.x + 20, yB2 + 6, pb.x + pb.w - 20, yB2 + 6, rgba(RT2, 0.35), 1, [2, 5]);
+  for (let k = 0; k <= Math.floor(k2.span); k++) { const x = X(k); seg(c, x, yB2 + 6, x, yB2 + 11, rgba(RT2, 0.5), 1); }
+  mir(xcl, yB2, yT2);
+  const pts = k2.trail.map(t => [X(t.xd), yB2 - t.y / LC * pxL]); pts.push([xcl, yB2 - yNow / LC * pxL]);
+  polyline(c, pts, rgba(RA, 0.75), 1.6);
+  if (prm.tri) {
+    const hv = k2.half % 2 === 0, xa = X(k2.xa), xb = X(k2.xa + b * g * LC), ys = hv ? yB2 : yT2, ye = hv ? yT2 : yB2;
+    c.save(); c.fillStyle = rgba(RA, 0.06); c.beginPath(); c.moveTo(xa, ys); c.lineTo(xb, ys); c.lineTo(xb, ye); c.closePath(); c.fill(); c.restore();
+    seg(c, xb, ys, xb, ye, cc, 2); seg(c, xa, ys, xb, ys, oc, 2); seg(c, xa, ys, xb, ye, C.accent, 2);
+    c.font = mono(10.5);
+    tagText(c, 'L', xb + dir * 8, (ys + ye) / 2, dir > 0 ? 'left' : 'right', 'middle', cc);
+    if (Math.abs(xb - xa) > 40) tagText(c, 'vΔt/2', (xa + xb) / 2, ys + (hv ? 4 : -4), 'center', hv ? 'top' : 'bottom', oc);
+    if (Math.abs(xb - xa) > 40) tagText(c, 'cΔt/2', (xa + xb) / 2 - dir * 12, (ys + ye) / 2 - (hv ? 12 : -12), 'center', 'middle', C.accent);
+    zone(Math.min(xa, xb) - 4, Math.min(ys, ye), Math.max(xa, xb) + 4, Math.max(ys, ye), 'tri', 'Triangle de la demi-période', 'Côté vertical L (le même pour tous : la hauteur ne se contracte pas), côté horizontal vΔt/2, hypoténuse cΔt/2. Pythagore donne Δt = γΔτ.');
+  }
+  disc(c, xcl, yB2 - yNow / LC * pxL, 5, C.accent, 12);
+  zcirc(xcl, yB2 - yNow / LC * pxL, 10, 'phot2', 'Le même photon', 'Mesuré dans l’autre référentiel : il trace une diagonale plus longue, mais toujours à la vitesse c.');
+  zone(xcl - 26, yT2 - 6, xcl + 26, yT2 + 6, 'mir2', 'Miroirs en mouvement', 'Les mêmes miroirs, entraînés avec l’horloge. L’écart L entre eux est le même pour tous.');
+  if (prm.oth) { spring(xcl + dir * Math.max(12, 66 / g), yT2, yB2); zone(xcl + dir * Math.max(12, 66 / g) - 10, yT2, xcl + dir * Math.max(12, 66 / g) + 10, yB2, 'spr2', 'Le même ressort', 'Toujours synchrone avec le photon. Si elle prenait du retard, le passager saurait qu’il bouge.'); }
+  c.font = mono(11); tagText(c, 'tics : ' + n, pb.x + 16, pb.y + pb.h - 36, 'left', 'bottom', C.texte);
+  tagText(c, (rec ? 'temps du train : ' : 'temps du quai : ') + fmt(k2.T, 2) + ' µs', pb.x + 16, pb.y + pb.h - 18, 'left', 'bottom', oc);
+  c.font = mono(10.5); if (!stacked) tagText(c, 'échelle ajustée à b · même échelle des deux volets', pb.x + pb.w - 16, pb.y + 4, 'right', 'top', C.texte2);
+  c.restore();
+}
+function extra2() {
+  const g = Phys.gamma(prm.b2), b = prm.b2, Lm = LC * UL, hp = g * LC * UL;
+  if (!prm.tri) return '';
+  return `<div class="ln"><span class="sub">(cΔt/2)² = L² + (vΔt/2)²</span><br>(${fmt(hp, 1)} m)² = (${fmt(Lm, 1)} m)² + (${fmt(b * hp, 1)} m)²</div>
+<div class="ln"><span class="sub">Δt = (2L/c) / √(1 − v²/c²)</span><br>Δt = 1,00 µs / √(1 − ${fmt(b, 2)}²) = ${fmt(2 * g * LC, 2)} µs</div>
+<div class="ln"><span class="sub">Δt = γ Δτ</span><br><span class="l">Δt = ${fmt(g, 2)} × 1,00 µs = ${fmt(2 * g * LC, 2)} µs</span></div>`;
+}
+function status2() {
+  if (prm.oth) return 'Si elle prenait du retard sur l’horloge lumineuse, le passager saurait qu’il bouge : contraire au principe de relativité. Ce n’est pas l’horloge qui est ralentie : c’est le temps entre deux événements qui dépend du référentiel.';
+  if (prm.rec) return 'Chacun mesure l’horloge de l’autre plus lente. Pas de contradiction : comparer deux horloges éloignées demande de décider ce qui est simultané. Voir l’acte III.';
+  if (prm.b2 < 0.005) return 'À b = 0, les deux volets sont identiques : le photon fait 2L par tic partout.';
+  return 'Même vitesse c, trajet plus long : le tic dure γ fois plus longtemps. Δt = γΔτ.';
+}
+function scope2() {
+  const pts = []; for (let i = 0; i <= 99; i++) pts.push([i / 100, Phys.gamma(i / 100)]);
+  const b = prm.b2;
+  plotXY({ x0: 0, x1: 1, y0: 0, y1: 7.6, xt: [[0, '0'], [0.5, '0,5'], [0.87, '0,87'], [0.99, '0,99']], yt: [[1, '1'], [2, '2'], [4, '4'], [7, '7']], xl: 'b = v/c', yl: 'γ',
+    series: [{ pts, col: C.texte, lw: 1.8 }], vl: [{ x: 0.5, col: C.trait }, { x: 0.87, col: C.trait }, { x: 0.99, col: C.trait }],
+    dots: [{ x: 0.5, y: Phys.gamma(0.5), col: C.texte2 }, { x: 0.87, y: Phys.gamma(0.87), col: C.texte2 }, { x: 0.99, y: Phys.gamma(0.99), col: C.texte2 }, { x: b, y: Phys.gamma(b), col: C.accent }] });
+}
+
+/* ================= Acte III : train et éclairs ================= */
+const k3 = { p: 0, wait: 0 };
+const ltNow = () => Phys.lightning(prm.b3, 1);
+function rng3(lt, fr) { return fr === 'S' ? [-0.5, lt.rMp_A.t + 0.35] : [lt.Bp.t - 0.5, lt.tpReceptA + 0.35]; }
+function time3() { const lt = ltNow(), r = rng3(lt, prm.fr3); return r[0] + k3.p * (r[1] - r[0]); }
+function scrub(t) { const r = rng3(ltNow(), prm.fr3); k3.p = clamp((t - r[0]) / (r[1] - r[0]), 0, 1); k3.wait = 0; }
+function setFrame3(fr) {                                          // le temps est converti par le temps propre de M′ (t′ = t/γ)
+  if (fr === prm.fr3) return; const lt = ltNow(), t = time3(), tn = fr === 'Sp' ? t / lt.g : t * lt.g;
+  prm.fr3 = fr; scrub(tn); if (!reduce && fade === 0) { sceneA = 0.3; fade = 1; }
+}
+function reset3() { k3.p = 0; k3.wait = 0; }
+function adv3(dt) { if (k3.wait > 0) { k3.wait -= dt; if (k3.wait <= 0) k3.p = 0; return; } k3.p += dt / 10; if (k3.p >= 1) { k3.p = 1; k3.wait = 1.4; } }
+function draw3() {
+  const c = ctx, b = prm.b3, fr = prm.fr3, lt = ltNow(), g = lt.g, t = time3(), narrow = W < 700;
+  const pxU = (W - 40) / 4.4, SX = x => W / 2 + x * pxU, yQ = Math.min(H - 84, Math.max(320, H * 0.68)), yWb = yQ - 30, yWt = yWb - 36, yMid = (yWt + yWb) / 2;
+  const qX = xq => fr === 'S' ? xq : xq / g - b * t, tX = xp => fr === 'S' ? b * t + xp / g : xp;
+  const EA = fr === 'S' ? lt.A : lt.Ap, EB = fr === 'S' ? lt.B : lt.Bp;
+  const f = e => fr === 'S' ? e : Phys.boost(e, b);
+  const recM = [f(lt.rM_A), f(lt.rM_B)], recP = [f(lt.rMp_A), f(lt.rMp_B)];
+  c.save(); c.textBaseline = 'alphabetic';
+  // quai
+  seg(c, 0, yQ, W, yQ, C.texte, 1.2);
+  const aq = qX(-lt.Lq / 2), bq = qX(lt.Lq / 2), mq = qX(0);
+  for (const [x, nm] of [[aq, 'A_q'], [bq, 'B_q']]) { seg(c, SX(x), yQ - 9, SX(x), yQ + 9, C.texte, 2); c.font = mono(11); tagText(c, nm, SX(x), yQ + 12, 'center', 'top', C.texte); }
+  disc(c, SX(mq), yQ, 3.5, C.texte); c.font = mono(11); tagText(c, 'M', SX(mq), yQ - 12, 'center', 'bottom', C.texte);
+  zone(SX(aq) - 8, yQ - 10, SX(aq) + 8, yQ + 10, 'Aq', 'Repère A_q du quai', 'Les deux repères sont séparés exactement de la longueur du train mesurée sur le quai, L₀/γ. M, l’observateur du quai, est au milieu.');
+  zone(SX(bq) - 8, yQ - 10, SX(bq) + 8, yQ + 10, 'Bq', 'Repère B_q du quai', 'Les deux repères sont séparés exactement de la longueur du train mesurée sur le quai, L₀/γ. M, l’observateur du quai, est au milieu.');
+  zcirc(SX(mq), yQ, 10, 'M', 'M, observateur du quai', 'Au milieu des repères : il est à L/2 de chaque éclair, dans sa propre mesure.');
+  seg(c, 0, yWb + 3.5, W, yWb + 3.5, rgba(RT2, 0.4), 1, [3, 4]);
+  // train
+  const xl = SX(tX(-0.5)), xr = SX(tX(0.5));
+  c.save(); c.fillStyle = rgba(RM, 0.08); c.strokeStyle = C.mob; c.lineWidth = 1.6; c.fillRect(xl, yWt, xr - xl, yWb - yWt); c.strokeRect(xl + 0.5, yWt + 0.5, xr - xl - 1, yWb - yWt - 1); c.restore();
+  zone(xl, yWt, xr, yWb, 'train3', 'Train', 'Longueur propre L₀ = 1 µs-lumière ≈ 299,8 m. Sur le quai, sa longueur mesurée est L₀/γ.');
+  const mp = SX(tX(0)); disc(c, mp, yWb - 9, 3.5, C.mob); c.font = mono(11); tagText(c, 'M′', mp, yWb - 12, 'center', 'bottom', C.mob);
+  zcirc(mp, yWb - 9, 10, 'Mp', 'M′, observateur du train', 'Au milieu du train : à L₀/2 de chaque bout, dans sa propre mesure. Il corrige le temps de trajet de la lumière.');
+  // horloges synchronisées
+  if (prm.sync) {
+    const gp = Math.abs(xr - xl) / 4;
+    for (let k = 0; k < 5; k++) {
+      const xq = -lt.Lq / 2 + k * lt.Lq / 4, xp = -0.5 + k * 0.25, vq = fr === 'S' ? t : t / g + b * xq, vt = fr === 'S' ? Phys.trainClockReading(b, xp, t) : t;
+      const sxq = SX(qX(xq)), sxt = SX(tX(xp)), yq = yQ + 36;
+      clockFace(c, sxq, yq, 8.5, vq, C.texte); clockFace(c, sxt, yWt + 13, 8.5, vt, C.mob);
+      c.font = mono(9.5);
+      if (pxU * lt.Lq / 4 > 44) { c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = C.texte; c.fillText(fmt(vq, 2), sxq, yq + 11); c.fillStyle = C.mob; c.fillText(fmt(vt, 2), sxt, yWt + 24); }
+      zcirc(sxq, yq, 10, 'cq' + k, 'Horloge du quai', 'Synchronisée dans le référentiel du quai. Lecture en µs ; un tour de cadran = 1 µs.');
+      zcirc(sxt, yWt + 13, 10, 'ct' + k, 'Horloge du train', 'Synchronisée dans le référentiel du train. Vue du quai, l’horloge arrière est en avance de vL₀/c² sur l’avant ; vue du train, c’est l’inverse pour les horloges du quai.');
+    }
+  }
+  // fronts lumineux
+  const y0 = yWt - 34, y1 = yQ + 10;
+  for (const e of [EA, EB]) {
+    const dts = t - e.t; if (dts < 0) continue;
+    for (const s of [-1, 1]) { const x = SX(e.x + s * dts); if (x < -4 || x > W + 4) continue; c.save(); c.shadowColor = C.accent; c.shadowBlur = 8; seg(c, x, y0, x, y1, C.accent, 2); c.restore(); zone(x - 5, y0, x + 5, y1, 'fr' + s + e.x, 'Front lumineux', 'Il part de l’éclair à la vitesse c dans les deux sens, dans les deux référentiels.'); }
+  }
+  // marques de brûlure : sur le quai et sur le train
+  for (const [e, xqm, xpm, nm] of [[EA, -lt.Lq / 2, -0.5, 'A'], [EB, lt.Lq / 2, 0.5, 'B']]) {
+    if (t < e.t) continue;
+    cross(c, SX(qX(xqm)), yQ, 6, C.texte, 1.8); cross(c, SX(tX(xpm)), yMid, 6, C.mob, 1.8);
+    c.font = mono(11); tagText(c, nm, SX(tX(xpm)), yWt - 4, 'center', 'bottom', C.accent);
+    zcirc(SX(qX(xqm)), yQ, 9, 'bq' + nm, 'Marque de brûlure sur le quai', 'Un fait que les deux observateurs constatent : l’éclair a frappé le repère du quai ET le bout du train au même endroit, au même moment.');
+    zcirc(SX(tX(xpm)), yMid, 9, 'bt' + nm, 'Marque de brûlure sur le train', 'Même événement, deux traces. Les deux observateurs s’accordent sur le fait, pas sur l’ordre des deux éclairs.');
+  }
+  // réceptions
+  for (const [list, yy, nm] of [[recM, yQ, 'M'], [recP, yMid, 'M′']]) for (const e of list) {
+    if (t < e.t) continue; const age = t - e.t, x = SX(e.x);
+    if (age < 0.18) circ(c, x, yy, 6 + age * 150, rgba(RA, 1 - age / 0.18), 1.6);
+    disc(c, x, yy, 2.2, C.accent);
+  }
+  const labM = t >= recM[0].t ? 'M : A et B reçus ensemble' : '', tBp = Math.min(recP[0].t, recP[1].t), nmFirst = recP[0].t < recP[1].t ? 'A' : 'B';
+  c.font = mono(10.5);
+  if (labM) tagText(c, labM, SX(qX(0)), yQ + (prm.sync ? 62 : 28), 'center', 'top', C.accent);
+  const same = Math.abs(recP[0].t - recP[1].t) < 1e-9;
+  if (t >= tBp) tagText(c, 'M′ : ' + (same ? 'A et B reçus ensemble' : t >= Math.max(recP[0].t, recP[1].t) ? 'B reçu avant A' : nmFirst + ' reçu'), SX(tX(0)), yWb + 10, 'center', 'top', C.accent);
+  // légende de la vue
+  c.font = mono(11);
+  const lbl = fr === 'S' ? 'Vu depuis le quai · temps du quai t = ' + fmt(t, 2) + ' µs' : 'Vu depuis le train · temps du train t′ = ' + fmt(t, 2) + ' µs';
+  tagText(c, lbl + (fr === 'S' ? '' : ' · le quai défile'), 16, 122, 'left', 'top', fr === 'S' ? C.texte : C.mob);
+  // encart diagramme (aperçu de l'acte IV)
+  const bw = narrow ? 108 : 156, bh = narrow ? 96 : 128, bx = W - bw - 14, by = narrow ? 146 : 14, sc = (bw - 12) / 1.7, ox = bx + bw / 2, oy = by + (bh - 24) * 0.6;
+  c.save(); c.fillStyle = rgba([17, 22, 30], 0.92); c.fillRect(bx, by, bw, bh); c.strokeStyle = C.trait; c.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+  seg(c, bx + 4, oy, bx + bw - 4, oy, rgba(RT2, 0.5), 1); seg(c, ox, by + 4, ox, by + bh - 24, rgba(RT2, 0.5), 1);
+  c.font = mono(9); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillText('x', bx + bw - 5, oy + 2); c.textAlign = 'left'; c.fillText('ct', ox + 3, by + 3);
+  const hx = (bw - 14) / 2;                                            // pente b : t = b x
+  seg(c, ox - hx, oy + b * hx, ox + hx, oy - b * hx, C.mob, 1.5, [4, 3]);
+  seg(c, ox - hx * 0.62, oy, ox + hx * 0.62, oy, C.texte, 1.6);
+  disc(c, ox - lt.Lq / 2 * sc, oy, 3.5, C.texte); disc(c, ox + lt.Lq / 2 * sc, oy, 3.5, C.texte);
+  c.font = mono(9.5); c.fillStyle = C.texte; c.textAlign = 'center'; c.textBaseline = 'bottom'; c.fillText('A', ox - lt.Lq / 2 * sc, oy - 5); c.fillText('B', ox + lt.Lq / 2 * sc, oy - 5);
+  c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = C.texte; c.fillText('horizontale : quai', bx + 6, by + bh - 13); c.fillStyle = C.mob; c.fillText('inclinée : train', bx + 6, by + bh - 3);
+  c.restore();
+  zone(bx, by, bx + bw, by + bh, 'ins', 'Aperçu : diagramme d’espace-temps', 'Axes x et ct. A et B sont sur la ligne de simultanéité du quai (horizontale). La ligne de simultanéité du train est inclinée de pente b : elle rencontre B avant A. Acte IV : la carte complète.');
+  c.restore();
+}
+function recon3() {
+  const b = prm.b3, lt = ltNow(), ns = v => (v >= 0 ? '' : '−') + fmtI(Math.abs(v) * 1000) , nss = v => (Math.abs(v) < 5e-7 ? '0' : (v > 0 ? '+' : '−') + fmtI(Math.abs(v) * 1000));
+  return { lt, b, ns, nss };
+}
+function extra3() {
+  const { lt, b, ns, nss } = recon3(), dm = lt.Lq / 2 * UL, dp = 0.5 * UL;
+  const simult = b < 0.005;
+  return `<table><tr><th></th><th colspan="2" class="q">M (quai)</th><th colspan="2" class="m">M′ (train)</th></tr>
+<tr><th>éclair</th><th>A</th><th>B</th><th>A</th><th>B</th></tr>
+<tr><td>reçu à (horloge, ns)</td><td>${ns(lt.rM_A.t)}</td><td>${ns(lt.rM_B.t)}</td><td>${ns(lt.tpReceptA)}</td><td>${ns(lt.tpReceptB)}</td></tr>
+<tr><td>distance à la source (règle, m)</td><td>${fmt(dm, 1)}</td><td>${fmt(dm, 1)}</td><td>${fmt(dp, 1)}</td><td>${fmt(dp, 1)}</td></tr>
+<tr><td>donc émis à = reçu − d/c (ns)</td><td class="l">${nss(lt.reconM[0])}</td><td class="l">${nss(lt.reconM[1])}</td><td class="l">${nss(lt.reconA)}</td><td class="l">${nss(lt.reconB)}</td></tr></table>
+<div class="ln"><span class="q">M : ${simult ? 'simultanés' : 'A et B simultanés (0 et 0)'}</span> · <span class="m">M′ : ${simult ? 'simultanés' : 'B d’abord, écart vL₀/c² = ' + fmtI(b * 1000) + ' ns'}</span></div>
+<div class="ln sub">Les valeurs de M′ sont celles de la transformation de Lorentz (t′ = ∓vL₀/2c²).</div>
+<div class="eq">M′ a déjà corrigé le temps de trajet de la lumière. Après correction, les deux éclairs ne sont toujours pas simultanés pour lui. La simultanéité n’est pas une affaire de délai : elle dépend du référentiel.</div>`;
+}
+function status3() {
+  const b = prm.b3;
+  if (prm.sync) return 'Synchroniser des horloges éloignées, c’est choisir ce qui est simultané. Chaque référentiel a son propre choix, cohérent.';
+  if (b < 0.005) return 'À b = 0, les deux éclairs sont simultanés pour tous les observateurs.';
+  return prm.fr3 === 'S' ? 'Pour le quai, A et B sont simultanés. Pour le train, B a lieu avant A : change de référentiel pour le vérifier. La lumière va à c dans les deux vues.' : 'Dans le référentiel du train, B a lieu avant A. Le quai défile, et la lumière va toujours à c.';
+}
+
+/* ================= Acte IV : diagramme d’espace-temps ================= */
+const O0 = { t: 0, x: 0 };
+const k4 = { ev: [{ t: 2.5, x: 1 }, { t: 1, x: 3 }], sel: 1, prev: 0, bd: 0, inv: false, drag: null, msg: '', msgT: 0, hx: 4 };
+function reset4() { k4.ev = [{ t: 2.5, x: 1 }, { t: 1, x: 3 }]; k4.sel = 1; k4.prev = 0; k4.bd = 0; k4.inv = false; k4.drag = null; k4.msg = ''; k4.msgT = 0; }
+const D4 = ev => Phys.boost(ev, k4.bd);
+function adv4(dt) { k4.bd = bdStep(k4.bd, k4.inv ? prm.b4 : 0, dt); if (k4.msgT > 0) k4.msgT -= dt; }
+const nm4 = i => i < 0 ? 'O' : 'E' + (i + 1);
+function pair4() {
+  const e = k4.ev, bI = k4.sel, aI = (k4.prev >= 0 && k4.prev !== k4.sel && k4.prev < e.length) ? k4.prev : -1;
+  if (bI < 0 || bI >= e.length) return null;
+  const a = aI < 0 ? O0 : e[aI], b = e[bI], iv = Phys.interval(a, b), ap = Phys.boost(a, prm.b4), bp = Phys.boost(b, prm.b4), ivp = Phys.interval(ap, bp);
+  const ord = (d, x, y) => Math.abs(d) < 1e-9 ? x + ' et ' + y + ' simultanés' : d > 0 ? x + ' avant ' + y : y + ' avant ' + x;
+  return { aI, bI, a, b, iv, ivp, orderS: ord(iv.dt, nm4(aI), nm4(bI)), orderSp: ord(ivp.dt, nm4(aI), nm4(bI)), flip: Phys.simultaneityBoost(a, b) };
+}
+function setLy(n) { prm.ly = clamp(n, 1, 5); if (prm.ly < 5) k4.inv = false; syncTools(); }
+function placeEvent(t, x) {
+  const e = { t, x }; if (k4.ev.length >= 4) k4.ev[3] = e; else k4.ev.push(e);
+  k4.prev = k4.sel; k4.sel = k4.ev.indexOf(e); if (act === 3) syncTools();
+}
+function boostTo(b) { prm.b4 = clamp(b, -0.9, 0.9); setLy(5); k4.inv = true; k4.bd = prm.b4; syncTools(); }
+function draw4() {
+  const c = ctx, b = prm.b4, ly = prm.ly, bd = k4.bd, g = Phys.gamma(b);
+  dg.s = clamp(Math.min(W / 17, H / 10.5), 22, 70); dg.ox = W / 2; dg.oy = H * 0.66;
+  const st = dg.s >= 28 ? 1 : 2, D = ev => Phys.boost(ev, bd), P = ev => px2(D(ev)), gb = Phys.gamma(bd);
+  c.save(); c.textBaseline = 'alphabetic';
+  // grille de S (se referme en ciseaux quand on passe dans S′)
+  c.save(); c.lineWidth = 1; c.strokeStyle = C.trait; c.beginPath();
+  for (let k = -14; k <= 14; k += st) { if (!k) continue; const a = P({ t: k, x: -40 }), z = P({ t: k, x: 40 }); c.moveTo(a[0], a[1]); c.lineTo(z[0], z[1]); const a2 = P({ t: -40, x: k }), z2 = P({ t: 40, x: k }); c.moveTo(a2[0], a2[1]); c.lineTo(z2[0], z2[1]); }
+  c.stroke(); c.restore();
+  const O = px2(D(O0));
+  // cône de lumière
+  if (ly >= 3) {
+    c.save(); c.fillStyle = rgba(RA, 0.07);
+    c.beginPath(); c.moveTo(O[0], O[1]); c.lineTo(...px2({ t: 40, x: -40 })); c.lineTo(...px2({ t: 40, x: 40 })); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(O[0], O[1]); c.lineTo(...px2({ t: -40, x: -40 })); c.lineTo(...px2({ t: -40, x: 40 })); c.closePath(); c.fill(); c.restore();
+    for (const sgn of [1, -1]) seg(c, ...px2({ t: -40, x: -40 * sgn }), ...px2({ t: 40, x: 40 * sgn }), C.accent, 1.2);
+    c.font = mono(11);
+    tagText(c, 'futur de O', DX(0) - 30, DY(3.6), 'right', 'middle', C.accent); tagText(c, 'passé de O', DX(0) - 30, DY(-3.6), 'right', 'middle', C.accent);
+    tagText(c, 'ailleurs', DX(Math.max(5, Math.min(dgXinv(W) - 2, 7))), DY(0.7), 'center', 'bottom', C.texte2); tagText(c, 'ailleurs', DX(-Math.max(5, Math.min(dgXinv(W) - 2, 7))), DY(0.7), 'center', 'bottom', C.texte2);
+    zoneF((x, y) => { const t = dgT(y), xx = dgXinv(x); return t > Math.abs(xx) + 0.15; }, 'fut', 'Futur de O', 'Tout ce que O peut influencer : événements atteignables par un signal au plus aussi rapide que la lumière. Tous les référentiels s’accordent sur cette région.');
+    zoneF((x, y) => { const t = dgT(y), xx = dgXinv(x); return -t > Math.abs(xx) + 0.15; }, 'pas', 'Passé de O', 'Tout ce qui peut avoir influencé O. Tous les référentiels s’accordent aussi sur cette région.');
+    zoneF((x, y) => { const t = dgT(y), xx = dgXinv(x); return Math.abs(t) < Math.abs(xx) - 0.15; }, 'ail', '« Ailleurs » de O', 'Genre espace : aucun signal ne relie ces événements à O. Leur ordre temporel avec O dépend du référentiel.');
+    szone(...px2({ t: -40, x: -40 }), ...px2({ t: 40, x: 40 }), 5, 'edge1', 'Bord du cône : la lumière', 'Droite à 45° : la lumière, dans les deux sens. Elle reste exactement en place, quel que soit l’observateur.');
+    szone(...px2({ t: -40, x: 40 }), ...px2({ t: 40, x: -40 }), 5, 'edge2', 'Bord du cône : la lumière', 'Droite à 45° : la lumière, dans les deux sens. Elle reste exactement en place, quel que soit l’observateur.');
+  }
+  // axes de S (ct et x) et graduations
+  const ax = [{ t: -40, x: 0 }, { t: 40, x: 0 }], ax2 = [{ t: 0, x: -40 }, { t: 0, x: 40 }];
+  seg(c, ...P(ax[0]), ...P(ax[1]), ly >= 2 ? C.texte : rgba(RT, 0.6), ly >= 2 ? 2 : 1.3); seg(c, ...P(ax2[0]), ...P(ax2[1]), rgba(RT, 0.6), 1.3);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+  for (let k = -14; k <= 14; k += st) { if (!k) continue; const a = P({ t: 0, x: k }), z = P({ t: k, x: 0 }); c.fillText(k, a[0], a[1] + 4); c.textAlign = 'right'; c.fillText(k, z[0] - 5, z[1] - 5); c.textAlign = 'center'; }
+  c.font = mono(11); tagText(c, 'x (al)', ...P({ t: 0, x: Math.max(8.2, Math.min(dgXinv(W) * 0.93, 12)) / gb }).map((v, i) => v + (i ? 18 : 0)), 'center', 'top', C.texte);
+  tagText(c, 'ct (années)', ...P({ t: dgT(0) * 0.9 / gb, x: 0 }).map((v, i) => v + (i ? 0 : 56)), 'center', 'top', C.texte);
+  zone(DX(0) - 8, 0, DX(0) + 8, H, 'axS', 'Axes de S', 'Observateur du quai : x horizontal en années-lumière, ct vertical en années. Même échelle sur les deux axes : la lumière fait 45°.');
+  // ligne d'univers de S′, photon
+  if (ly >= 2) {
+    const dirp = { t: 1, x: b };
+    seg(c, ...P({ t: -40, x: -40 * b }), ...P({ t: 40, x: 40 * b }), C.mob, 2);
+    szone(...P({ t: -40, x: -40 * b }), ...P({ t: 40, x: 40 * b }), 5, 'wlp', 'Ligne d’univers de S′', 'La trajectoire de S′ dans l’espace-temps : une droite de pente b (en ct). Les événements où il se trouve à chaque instant.');
+    szone(...P({ t: -40, x: 0 }), ...P({ t: 40, x: 0 }), 5, 'wls', 'Ligne d’univers de S', 'L’observateur du quai est immobile dans S : sa ligne d’univers est l’axe ct.');
+    c.save(); c.shadowColor = C.accent; c.shadowBlur = 8; seg(c, ...P(O0), ...P({ t: 40, x: 40 }), C.accent, 2); c.restore();
+    c.font = mono(10.5); tagText(c, 'photon', ...P({ t: 6.2, x: 6.2 }).map((v, i) => v + (i ? 0 : 6)), 'left', 'middle', C.accent);
+    szone(...P(O0), ...P({ t: 40, x: 40 }), 5, 'phg', 'Photon émis de O', 'Une droite à 45° : la lumière parcourt 1 al en 1 an. C’est la même droite pour tous les observateurs.');
+    const hp = P({ t: k4.hx, x: b * k4.hx }); disc(c, hp[0], hp[1], 6, C.fond); circ(c, hp[0], hp[1], 6, C.mob, 2);
+    c.font = mono(10.5); tagText(c, 'S′ à b = ' + fmt(b, 2), hp[0] + 10, hp[1], 'left', 'middle', C.mob);
+    zcirc(hp[0], hp[1], 12, 'hdl', 'Poignée sur la ligne de S′', 'Glisse-la pour changer b. Elle est bornée à |b| ≤ 0,999 : une particule matérielle reste à l’intérieur de son cône de lumière.');
+  }
+  // axes de S′ et graduations (ciseaux)
+  if (ly >= 4) {
+    const pa = Phys.primedAxes(b), Pp = (tt, xx) => P(Phys.unboost({ t: tt, x: xx }, b));
+    seg(c, ...P({ t: -40 * b, x: -40 }), ...P({ t: 40 * b, x: 40 }), C.mob, 1.5);
+    szone(...P({ t: -40 * b, x: -40 }), ...P({ t: 40 * b, x: 40 }), 5, 'xp', 'Axe x′ de S′', 'L’ensemble des événements simultanés à O pour S′ : une droite inclinée de pente b. Les axes ct′ et x′ sont symétriques par rapport à la lumière.');
+    c.save(); c.setLineDash([4, 4]); c.strokeStyle = rgba(RM, 0.4); c.lineWidth = 1; c.beginPath();
+    for (let k = -14; k <= 14; k += st) { if (!k) continue; const a = Pp(k, -40), z = Pp(k, 40); c.moveTo(a[0], a[1]); c.lineTo(z[0], z[1]); }
+    c.stroke(); c.restore();
+    c.font = mono(10); c.fillStyle = C.mob; c.textBaseline = 'middle';
+    for (let k = -14; k <= 14; k += st) { if (!k) continue; const a = P(pa.xtick(k)), z = P(pa.tick(k)); c.textAlign = 'center'; c.fillText(k, a[0], a[1] + 12); c.textAlign = 'left'; c.fillText(k, z[0] + 6, z[1]); }
+    c.font = mono(11); const pe = P({ t: 7.5 * pa.tAxis.t, x: 7.5 * pa.tAxis.x }); tagText(c, 'ct′', pe[0] + 4, pe[1] - 12, 'center', 'bottom', C.mob);
+    const pf = P({ t: 8 * pa.xAxis.t, x: 8 * pa.xAxis.x }); tagText(c, 'x′', pf[0] + 4, pf[1] - 12, 'center', 'bottom', C.mob);
+    zoneF((x, y) => { for (let k = -14; k <= 14; k += st) { if (!k) continue; const a = Pp(k, -40), z = Pp(k, 40); if (dSeg(x, y, a[0], a[1], z[0], z[1]) < 4) return true; } return false; }, 'sim', 'Ligne de simultanéité de S′', 'Tous les événements d’une même ligne tiretée ont le même t′ : ils sont simultanés pour S′. Pour S, ils ne le sont pas (lignes inclinées).');
+  }
+  // hyperboles d'invariance et événements
+  if (ly >= 5) {
+    k4.ev.forEach((e, i) => {
+      const s2 = e.t * e.t - e.x * e.x; if (Math.abs(s2) < 1e-6) return;
+      const pts = Phys.hyperbola(s2, -3.6, 3.6, 90).map(p => s2 > 0 ? [DX(p.x), DY(p.t * (e.t >= 0 ? 1 : -1))] : [DX(p.x * (e.x >= 0 ? 1 : -1)), DY(p.t)]);
+      polyline(c, pts, rgba(RT2, 0.8), 1);
+      zoneF((x, y) => { for (let j = 1; j < pts.length; j++) if (dSeg(x, y, pts[j - 1][0], pts[j - 1][1], pts[j][0], pts[j][1]) < 4) return true; return false; }, 'hy' + i, 'Hyperbole d’invariance de ' + nm4(i), 'Tous les points où s² = c²t² − x² a la même valeur. Passer dans S′ fait glisser l’événement le long de cette courbe sans la quitter.');
+    });
+  }
+  // lien de la paire sélectionnée
+  const pr = pair4();
+  if (ly >= 1 && pr) {
+    const pa_ = P(pr.a), pb_ = P(pr.b); seg(c, pa_[0], pa_[1], pb_[0], pb_[1], rgba(RT2, 0.9), 1, [3, 4]);
+    c.font = mono(10.5); tagText(c, { temps: 'genre temps', lumiere: 'genre lumière', espace: 'genre espace' }[pr.iv.kind], (pa_[0] + pb_[0]) / 2, (pa_[1] + pb_[1]) / 2 - 6, 'center', 'bottom', C.texte2);
+  }
+  if (ly >= 1) {
+    evDot(c, O, false, 'O'); zcirc(O[0], O[1], 10, 'O', 'Événement O', 'L’origine : le point de départ de toutes les coordonnées. Un événement = un lieu et un instant.');
+    k4.ev.forEach((e, i) => { const p = P(e); evDot(c, p, i === k4.sel, nm4(i)); zcirc(p[0], p[1], 12, 'e' + i, 'Événement ' + nm4(i), 'Un lieu et un instant. Glisse-le. Le dernier touché est sélectionné : le panneau donne Δt, Δx et s² pour la paire.'); });
+  }
+  if (k4.msgT > 0) { c.font = mono(11.5); tagText(c, k4.msg, W / 2, H - 14, 'center', 'bottom', C.accent); }
+  c.font = mono(10.5); tagText(c, 'même échelle sur les deux axes : la lumière fait 45°' + (bd !== 0 ? ' · vue dans S′ (b = ' + fmt(bd, 2) + ')' : ''), W - 14, H - 12, 'right', 'bottom', C.texte2);
+  c.restore();
+}
+function extra4() {
+  const e = k4.ev; if (prm.ly < 1) return '';
+  let h = '<table><tr><th></th><th class="q">S : t ; x</th><th class="m">S′ : t′ ; x′</th></tr>';
+  e.forEach((v, i) => { const p = Phys.boost(v, prm.b4); h += `<tr><td>${nm4(i)}${i === k4.sel ? ' ◂' : ''}</td><td>${fmt(v.t, 2)} ; ${fmt(v.x, 2)}</td><td class="m">${fmt(p.t, 2)} ; ${fmt(p.x, 2)}</td></tr>`; });
+  return h + '</table>';
+}
+function status4() {
+  if (k4.msgT > 0) return k4.msg;
+  const pr = pair4(); if (!pr) return 'Clique dans le diagramme pour placer un événement.';
+  const A = nm4(pr.aI), B = nm4(pr.bI);
+  if (pr.iv.kind === 'temps') return A + ' et ' + B + ' sont de genre temps : un signal plus lent que la lumière peut les relier. Leur ordre est le même dans tous les référentiels : aucun b ne l’inverse (impossible : il faudrait dépasser c).';
+  if (pr.iv.kind === 'lumiere') return A + ' et ' + B + ' sont de genre lumière : seul un signal lumineux peut les relier (s² = 0, pour tous).';
+  const fb = pr.flip; return A + ' et ' + B + ' sont de genre espace : aucun signal ne peut les relier. Leur ordre dépend du référentiel : simultanés pour b = ' + fmt(fb, 2) + ', inversés au-delà.';
+}
+
+/* ================= Acte V : dilatation et contraction ================= */
+const k5 = { t0: 2.5, drag: false };
+const L05 = 4;
+function reset5() { k5.t0 = 2.5; k5.drag = false; }
+function geo5() {
+  const b = prm.b5, g = Phys.gamma(b), by = prm.by, ub = by === 'S' ? b : -b;
+  return { b, g, by, ub, cm: by === 'S' ? C.texte : C.mob, co: by === 'S' ? C.mob : C.texte, mN: by === 'S' ? 'S' : 'S′', oN: by === 'S' ? 'S′' : 'S', rm: Phys.rodMeasure(ub, L05, k5.t0) };
+}
+function draw5() {
+  const c = ctx, G = geo5(), { b, g, ub, cm, co, mN, oN } = G, rod = prm.mode === 'regle';
+  dg.s = clamp(Math.min(W / 21, H / 10.5), 20, 64); dg.ox = W / 2; dg.oy = H * 0.6;
+  const st = dg.s >= 28 ? 1 : 2;
+  c.save(); c.textBaseline = 'alphabetic';
+  dgGrid(c, st);
+  seg(c, DX(0), 0, DX(0), H, rgba(by5(cm), 0.7), 1.4); seg(c, 0, DY(0), W, DY(0), rgba(by5(cm), 0.7), 1.4);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+  for (let k = -12; k <= 12; k += st) { if (!k) continue; c.fillText(k, DX(k), DY(0) + 4); c.textAlign = 'right'; c.fillText(k, DX(0) - 5, DY(k) - 5); c.textAlign = 'center'; }
+  c.font = mono(11); tagText(c, 'x (al)', W - 14, DY(0) - 6, 'right', 'bottom', cm); tagText(c, 'ct (années)', DX(0) + 8, 104, 'left', 'top', cm);
+  tagText(c, 'mesuré par ' + mN + ' (horizontales : simultanéité de ' + mN + ')', 16, H - 12, 'left', 'bottom', cm);
+  zone(0, DY(0) - 6, W, DY(0) + 6, 'ax5', 'Axes du mesureur ' + mN, 'Le mesureur est immobile dans ses propres axes : ses lignes de simultanéité sont horizontales. Même échelle sur les deux axes : la lumière fait 45°.');
+  if (!rod) {
+    seg(c, ...px2({ t: -40, x: -40 * ub }), ...px2({ t: 40, x: 40 * ub }), co, 2);
+    szone(...px2({ t: -40, x: -40 * ub }), ...px2({ t: 40, x: 40 * ub }), 5, 'wl5', 'Ligne d’univers de l’horloge de ' + oN, 'Droite de pente b. Chaque tic est un an de temps propre, mesuré par l’horloge elle-même.');
+    const tMaxV = dgT(0);
+    for (let k = 1; k * g <= tMaxV + 1; k++) {
+      const e = { t: g * k, x: g * ub * k }, p = px2(e), q = px2({ t: g * k, x: 0 });
+      if (prm.hyp) { const pts = Phys.hyperbola(k * k, -3.4, 3.4, 80).map(h => [DX(h.x), DY(h.t)]); polyline(c, pts, rgba(RT2, 0.7), 1); }
+      seg(c, p[0], p[1], q[0], q[1], rgba(by5(cm), 0.85), 1, [3, 4]);
+      const nn = Math.hypot(1, ub); seg(c, p[0] - 7 / nn, p[1] + 7 * ub / nn, p[0] + 7 / nn, p[1] - 7 * ub / nn, co, 1.4);
+      disc(c, p[0], p[1], 3.5, co); disc(c, q[0], q[1], 3.5, cm);
+      c.font = mono(10); if (k <= 6) tagText(c, 't = ' + fmt(g * k, 2), q[0] - 8, q[1], 'right', 'middle', cm);
+      zcirc(p[0], p[1], 8, 'tick' + k, 'Tic n° ' + k + ' : 1 an de temps propre', 'Chaque tic de l’horloge de ' + oN + ' est sur l’hyperbole t² − x² = k². La ligne de simultanéité de ' + mN + ' le projette sur son axe ct à γk : Δt = γΔτ.');
+    }
+  } else {
+    const t0 = k5.t0, w = L05 / g;
+    c.save(); c.fillStyle = rgba(rgb(co), 0.14); c.beginPath();
+    c.moveTo(...px2({ t: -40, x: -40 * ub })); c.lineTo(...px2({ t: 40, x: 40 * ub })); c.lineTo(...px2({ t: 40, x: 40 * ub + w })); c.lineTo(...px2({ t: -40, x: -40 * ub + w })); c.closePath(); c.fill(); c.restore();
+    seg(c, ...px2({ t: -40, x: -40 * ub }), ...px2({ t: 40, x: 40 * ub }), co, 1.6); seg(c, ...px2({ t: -40, x: -40 * ub + w }), ...px2({ t: 40, x: 40 * ub + w }), co, 1.6);
+    zoneF((x, y) => { const t = dgT(y), xx = dgXinv(x); return xx > ub * t && xx < ub * t + w; }, 'rub', 'Ruban d’univers de la règle', 'Les deux bouts de la règle au cours du temps : une bande entre deux droites parallèles. Mesurer sa longueur, c’est le couper selon une ligne de simultanéité.');
+    const e1 = G.rm.e1, e2 = G.rm.e2, p1 = px2(e1), p2 = px2(e2);
+    seg(c, 0, p1[1], W, p1[1], rgba(by5(cm), 0.35), 1, [5, 5]);
+    seg(c, p1[0], p1[1], p2[0], p2[1], cm, 3.5);
+    zone(0, p1[1] - 7, W, p1[1] + 7, 'ln5', 'Ligne de simultanéité de ' + mN + ' (glisse)', 'À cet instant de ' + mN + ', on repère les deux bouts : c’est la mesure de la longueur. Glisse-la verticalement : le résultat ne change pas.');
+    c.font = mono(11); tagText(c, 'L = L₀/γ = ' + fmt(G.rm.L, 2) + ' al', (p1[0] + p2[0]) / 2, p1[1] - 8, 'center', 'bottom', cm);
+    const pe = px2({ t: e1.t + L05 * g * ub, x: e1.x + L05 * g });
+    seg(c, p1[0], p1[1], pe[0], pe[1], co, 3.5);
+    for (let k = 0; k <= L05; k++) { const q = px2({ t: e1.t + k * g * ub, x: e1.x + k * g }); seg(c, q[0] - 3, q[1] - 6, q[0] + 3, q[1] + 6, C.fond, 1.5); disc(c, q[0], q[1], 2.5, co); c.font = mono(10); tagText(c, k, q[0], q[1] + 12 + 0, 'center', 'top', co); }
+    tagText(c, 'L₀ = ' + L05 + ' al (graduations de x′)', (p1[0] + pe[0]) / 2 + 16, (p1[1] + pe[1]) / 2 - 14, 'left', 'bottom', co);
+    szone(p1[0], p1[1], pe[0], pe[1], 6, 'ln5p', 'Ligne de simultanéité de ' + oN, 'Inclinée : pour ' + oN + ', les deux bouts coupés sont d’autres événements. Elle mesure L₀ = 4 al avec ses propres graduations.');
+    disc(c, p1[0], p1[1], 4.5, cm); disc(c, p2[0], p2[1], 4.5, cm);
+    zcirc(p1[0], p1[1], 9, 'e1', 'Première lecture', 'Le mesureur ' + mN + ' lit le bout gauche. Pour ' + oN + ', cet événement n’a pas lieu au même instant que la lecture du bout droit.');
+    zcirc(p2[0], p2[1], 9, 'e2', 'Seconde lecture', 'Le mesureur ' + mN + ' lit le bout droit au même instant de ' + mN + '. Pour ' + oN + ', c’est un autre instant : l’écart vaut bL₀.');
+  }
+  c.restore();
+}
+const by5 = col => col === C.texte ? RT : RM;
+function pointer5(type, x, y) {
+  if (act !== 4 || prm.mode !== 'regle') return false;
+  if (type === 'down' && Math.abs(y - DY(k5.t0)) < 10) { k5.drag = true; return true; }
+  if (type === 'move' && k5.drag) { k5.t0 = clamp(Math.round(dgT(y) * 20) / 20, -3, 4); return true; }
+  if (type === 'up' && k5.drag) { k5.drag = false; return true; }
+  return false;
+}
+function status5() {
+  const G = geo5();
+  if (prm.mode === 'regle') return 'Mesurer une longueur, c’est décider quels événements sont simultanés. S et S′ coupent le même ruban d’espace-temps selon des lignes différentes : c’est la même chose que l’acte III.';
+  return G.mN + ' mesure l’horloge de ' + G.oN + ' : chaque année de temps propre dure γ = ' + fmt(G.g, 2) + ' ans pour ' + G.mN + '. Inverse les rôles : ' + G.oN + ' mesure l’horloge de ' + G.mN + ' plus lente, avec le même γ.';
+}
+
+/* ================= Acte VI : temps propre (les jumeaux) ================= */
+const B6 = { t: 10, x: 0 };
+const k6 = { P: { t: 5, x: 4 }, P2: null, T: 10, run: false, bd: 0, drag: 0, msg: '', msgT: 0 };
+function reset6() { k6.P = { t: 5, x: 4 }; k6.P2 = null; k6.T = 10; k6.run = false; k6.bd = 0; k6.drag = 0; k6.msg = ''; k6.msgT = 0; }
+const path6 = () => k6.P2 ? [O0, k6.P, k6.P2, B6] : [O0, k6.P, B6];
+const b1of = () => clamp(k6.P.x / k6.P.t, -0.99, 0.99);
+function setWaypoint(t, x) { const p = k6.P2 ? Phys.clampWaypoint(O0, { t, x }, k6.P2, 0.99) : Phys.clampWaypoint(O0, { t, x }, B6, 0.99); k6.P = p; }
+function twoTurns(on) {
+  prm.two = !!on;
+  if (on) { k6.P = { t: 3, x: 2.4 }; k6.P2 = { t: 7, x: 2.4 }; } else { k6.P2 = null; k6.P = Phys.clampWaypoint(O0, k6.P, B6, 0.99); }
+  syncTools();
+}
+function tauAt(path, T) {
+  let tau = 0;
+  for (let i = 1; i < path.length; i++) { const a = path[i - 1], b = path[i], s = Phys.interval(a, b).tau; if (T >= b.t) tau += s; else if (T > a.t) { tau += s * (T - a.t) / (b.t - a.t); break; } else break; }
+  return tau;
+}
+function posAt(path, T) {
+  for (let i = 1; i < path.length; i++) { const a = path[i - 1], b = path[i]; if (T <= b.t || i === path.length - 1) { const f = clamp((T - a.t) / (b.t - a.t), 0, 1); return { t: a.t + f * (b.t - a.t), x: a.x + f * (b.x - a.x) }; } }
+  return path[0];
+}
+function beads(path) {
+  const out = []; let cum = 0;
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i], s = Phys.interval(a, b).tau;
+    for (let n = Math.floor(cum + 1e-9) + 1; n <= cum + s + 1e-9; n++) { const f = (n - cum) / s; out.push({ t: a.t + f * (b.t - a.t), x: a.x + f * (b.x - a.x) }); }
+    cum += s;
+  }
+  return out;
+}
+function adv6(dt) {
+  k6.bd = bdStep(k6.bd, prm.view6 ? b1of() : 0, dt);
+  if (k6.run) { k6.T += dt * 1.0; if (k6.T >= 10) { k6.T = 10; k6.run = false; } }
+  if (k6.msgT > 0) k6.msgT -= dt;
+}
+function run6() { k6.T = 0; k6.run = true; setPlay(true); }
+function draw6() {
+  const c = ctx, bd = k6.bd, D = ev => Phys.boost(ev, bd), pr = path6();
+  // cadre adapté au losange atteignable (|b| ≤ 1 depuis A et vers B), vu dans le référentiel affiché
+  let tl = 1e9, th = -1e9, xl = 1e9, xh = -1e9;
+  for (const e of [{ t: 0, x: 0 }, { t: 10, x: 0 }, { t: 5, x: 5 }, { t: 5, x: -5 }]) { const p = D(e); tl = Math.min(tl, p.t); th = Math.max(th, p.t); xl = Math.min(xl, p.x); xh = Math.max(xh, p.x); }
+  const top = 112, bot = H - 40, s = Math.min((W - 120) / (xh - xl), (bot - top) / (th - tl)); dg.s = s;
+  dg.ox = W / 2 - (xl + xh) / 2 * s; dg.oy = (top + bot) / 2 + (tl + th) / 2 * s;
+  const st = s >= 26 ? 1 : 2, P = ev => px2(D(ev)), prim = Math.abs(bd) > 0.002;
+  c.save(); c.textBaseline = 'alphabetic';
+  dgGrid(c, st);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+  for (let k = 0; k <= 11; k += st) c.fillText(k, DX(0) - 14, DY(k) - 5);
+  c.font = mono(11); tagText(c, prim ? 'x′ (al)' : 'x (al)', W - 14, DY(0) + 4, 'right', 'top', prim ? C.mob : C.texte); tagText(c, prim ? 'ct′ (années)' : 'ct (années)', DX(0) + 8, 104, 'left', 'top', prim ? C.mob : C.texte);
+  seg(c, DX(0), 0, DX(0), H, rgba(prim ? RM : RT, 0.5), 1.2); seg(c, 0, DY(0), W, DY(0), rgba(prim ? RM : RT, 0.5), 1.2);
+  // sédentaire
+  const pA = P(O0), pB = P(B6), pP = P(k6.P);
+  seg(c, pA[0], pA[1], pB[0], pB[1], C.texte, 2.2);
+  szone(pA[0], pA[1], pB[0], pB[1], 6, 'sed', 'Ligne d’univers de la sédentaire', 'Immobile en x = 0 dans S : la ligne droite de A à B. Elle accumule le plus de temps propre : 10 ans.');
+  const vpts = pr.map(e => P(e)); polyline(c, vpts, C.mob, 2.4);
+  for (let i = 1; i < vpts.length; i++) szone(vpts[i - 1][0], vpts[i - 1][1], vpts[i][0], vpts[i][1], 6, 'voy' + i, 'Ligne d’univers du voyageur', 'Une ligne brisée de A à B : un coude, donc un changement de référentiel. Moins de temps propre accumulé que la ligne droite.');
+  for (const e of beads([O0, B6])) { const p = P(e); disc(c, p[0], p[1], 2.8, C.texte); }
+  for (const e of beads(pr)) { const p = P(e); disc(c, p[0], p[1], 2.8, C.mob); }
+  evDot(c, pA, false, 'A (départ)'); evDot(c, pB, false, 'B (retrouvailles)');
+  zcirc(pA[0], pA[1], 9, 'A', 'Événement A', 'Le départ : les deux jumeaux sont ensemble.'); zcirc(pB[0], pB[1], 9, 'B', 'Événement B', 'Les retrouvailles : les deux sont de nouveau au même endroit. Les deux mesurent leur propre temps propre entre A et B.');
+  const wp = [k6.P].concat(k6.P2 ? [k6.P2] : []);
+  wp.forEach((w, i) => { const p = P(w); disc(c, p[0], p[1], 7, C.fond); circ(c, p[0], p[1], 7, C.mob, 2); c.font = mono(10.5); tagText(c, 'P' + (wp.length > 1 ? i + 1 : ''), p[0] + 10, p[1], 'left', 'middle', C.mob); zcirc(p[0], p[1], 13, 'wp' + i, 'Point de demi-tour', 'Glisse-le : le voyageur change de direction ici, instantanément (idéalisation). Chaque segment reste à |b| ≤ 0,99, donc dans le cône de lumière.'); });
+  // points lumineux et compteurs
+  const T = k6.T, ps = P({ t: T, x: 0 }), pv = P(posAt(pr, T));
+  disc(c, ps[0], ps[1], 5, C.texte, 12); disc(c, pv[0], pv[1], 5, C.mob, 12);
+  const tauS = T, tauV = tauAt(pr, T);
+  c.font = mono(11.5); tagText(c, 'sédentaire : τ = ' + fmt(tauS, 2) + ' ans', 16, 122, 'left', 'top', C.texte); tagText(c, 'voyageur : τ = ' + fmt(tauV, 2) + ' ans', 16, 142, 'left', 'top', C.mob);
+  zone(14, 118, 240, 160, 'cnt', 'Compteurs de temps propre', 'Chaque jumeau compte le temps propre qu’il accumule : la longueur de sa ligne d’univers. À l’arrivée, ils ne marquent pas la même chose.');
+  if (k6.msgT > 0) { c.font = mono(11.5); tagText(c, k6.msg, W / 2, H - 14, 'center', 'bottom', C.accent); }
+  c.font = mono(10.5); tagText(c, (prim ? 'vue depuis l’aller du voyageur (b = ' + fmt(bd, 2) + ') · ' : '') + 'une perle = 1 an de temps propre', W - 14, H - 12, 'right', 'bottom', C.texte2);
+  c.restore();
+}
+function pointer6(type, x, y) {
+  if (act !== 5) return false;
+  const wp = [k6.P].concat(k6.P2 ? [k6.P2] : []), toW = () => Phys.unboost({ t: dgT(y), x: dgXinv(x) }, k6.bd);
+  if (type === 'down') { for (let i = 0; i < wp.length; i++) { const p = px2(Phys.boost(wp[i], k6.bd)); if (Math.hypot(x - p[0], y - p[1]) < 16) { k6.drag = i + 1; return true; } } return false; }
+  if (type === 'move' && k6.drag) {
+    const w = toW(), snap = v => Math.round(v * 20) / 20, i = k6.drag - 1, pt = { t: snap(w.t), x: snap(w.x) };
+    const res = i === 0 ? Phys.clampWaypoint(O0, pt, k6.P2 || B6, 0.99) : Phys.clampWaypoint(k6.P, pt, B6, 0.99);
+    if (Math.hypot(res.t - pt.t, res.x - pt.x) > 0.08) { k6.msg = 'Une particule matérielle reste à l’intérieur de son cône de lumière.'; k6.msgT = 2.5; }
+    if (i === 0) k6.P = res; else k6.P2 = res;
+    return true;
+  }
+  if (type === 'up' && k6.drag) { k6.drag = 0; return true; }
+  return false;
+}
+function segs6() { return Phys.properTime(path6()); }
+function extra6() {
+  const pt = segs6(), pr = path6(), n1 = v => Math.abs(v - Math.round(v)) < 0.005 ? String(Math.round(v)) : fmt(v, 2);
+  let h = '<div class="ln sub">c dτ = √(c²dt² − dx²), segment par segment :</div>';
+  pt.segs.forEach((s, i) => { h += `<div class="ln">segment ${i + 1} : √(${n1(s.dt)}² − ${n1(Math.abs(s.dx))}²) = <span class="m">${n1(s.tau)} an${s.tau >= 1.995 ? 's' : ''}</span> <span class="sub">(b = ${fmt(s.b, 2)})</span></div>`; });
+  h += `<div class="ln">sédentaire : √(10² − 0²) = <span class="q">10 ans</span></div>`;
+  return h;
+}
+function status6() {
+  if (k6.msgT > 0) return k6.msg;
+  if (prm.view6) return 'Les deux ne sont pas symétriques : la ligne du voyageur a un coude, il a changé de référentiel. La sédentaire, non. Les deux temps propres affichés n’ont pas bougé.';
+  return 'Sur ce diagramme, la ligne droite entre deux événements est celle qui accumule le plus de temps propre. C’est l’inverse de la géométrie ordinaire, à cause du signe moins dans c²dτ² = c²dt² − dx².';
+}
+
+/* ================= Acte VII : addition relativiste des vitesses ================= */
+const TC7 = 3.6;
+const k7 = { t: 0, wait: 0, stages: [] };
+const uNow = () => Phys.velCompose(prm.u7, prm.b7);
+function reset7() { k7.t = 0; k7.wait = 0; k7.stages = []; }
+function launch7() { if (act !== 6) return; k7.t = 0; k7.wait = 0; setPlay(true); }
+function nextStage() { if (k7.stages.length >= 8) return; const prev = k7.stages.length ? k7.stages[k7.stages.length - 1] : 0; k7.stages.push(Phys.velCompose(0.5, prev)); }
+function adv7(dt) {
+  if (k7.wait > 0) { k7.wait -= dt; if (k7.wait <= 0) k7.t = 0; return; }
+  k7.t += dt * 0.85; if (k7.t >= TC7) { k7.t = TC7; k7.wait = 1.0; }
+}
+function draw7() {
+  const c = ctx, b = prm.b7, up = prm.u7, u = uNow(), ug = Phys.velGalilee(up, b), photon = up >= 0.999999, t = k7.t;
+  const y1 = Math.max(190, H * 0.34), yR = Math.max(y1 + 110, H * 0.7), x0 = 54, pxX = (W - 110) / 4.3, X = x => x0 + x * pxX;
+  c.save(); c.textBaseline = 'alphabetic';
+  // quai
+  seg(c, 0, y1, W, y1, C.texte, 1.2);
+  for (let k = 0; k <= 4; k++) seg(c, X(k + 0.3 - 0.3), y1, X(k), y1 + 6, C.texte, 1);
+  c.font = mono(10.5); tagText(c, 'quai : 1 graduation = 1 unité de distance (c = 1 par unité de temps)', 14, y1 + 10, 'left', 'top', C.texte2);
+  zone(0, y1 - 4, W, y1 + 8, 'qu7', 'Quai', 'Référentiel S : les vitesses u y sont mesurées. La fusée, le projectile et son fantôme partent du même point à t = 0.');
+  const xr = 0.3 + b * t, xt = 0.3 + u * t, xg = 0.3 + ug * t;
+  // fusée
+  const fx = X(xr);
+  c.save(); c.fillStyle = rgba(RM, 0.12); c.strokeStyle = C.mob; c.lineWidth = 1.6; c.beginPath(); c.moveTo(fx - 28, y1 - 18); c.lineTo(fx - 4, y1 - 18); c.lineTo(fx + 8, y1 - 10); c.lineTo(fx - 4, y1 - 2); c.lineTo(fx - 28, y1 - 2); c.closePath(); c.fill(); c.stroke(); c.restore();
+  zcirc(fx - 10, y1 - 10, 18, 'fusee', 'Fusée', 'Se déplace à la vitesse v = b·c par rapport au quai. Elle lance le projectile vers l’avant à u′ dans son propre référentiel.');
+  // projectile vrai
+  const tx = X(xt), ty = y1 - 32;
+  if (photon) { seg(c, tx - 22, ty, tx, ty, rgba(RA, 0.5), 2); disc(c, tx, ty, 4.5, C.accent, 12); } else disc(c, tx, ty, 4.5, C.texte);
+  zcirc(tx, ty, 11, 'vrai', photon ? 'Photon (vrai)' : 'Projectile (vrai)', 'Vitesse u mesurée sur le quai : u = (u′ + v)/(1 + u′v/c²). Toujours sous c, et égale à c pour la lumière.');
+  c.font = mono(10.5); tagText(c, (photon ? 'lumière : ' : 'vrai : ') + 'u = ' + fmt(u, 3) + ' c', clamp(tx, 60, W - 70), ty - 8, 'center', 'bottom', photon ? C.accent : C.texte);
+  // fantôme galiléen
+  const gy = y1 - 62, gx = X(xg), clipped = gx > W - 14 || gx < 14, gdx = clamp(gx, 14, W - 14);
+  c.save(); c.globalAlpha = 0.9; circ(c, gdx, gy, 4.5, C.texte2, 1.4, [3, 3]);
+  if (Math.abs(ug) >= 1) cross(c, gdx, gy, 9, C.texte2, 1.6);
+  if (clipped) tagText(c, ug > 0 ? '›' : '‹', gdx + (ug > 0 ? -8 : 8), gy, 'center', 'middle', C.texte2);
+  c.restore();
+  tagText(c, 'Galilée : u′ + v = ' + fmt(ug, 3) + ' c' + (Math.abs(ug) >= 1 ? ' (impossible)' : ''), clamp(gdx, 90, W - 100), gy - 8, 'center', 'bottom', C.texte2);
+  zcirc(gdx, gy, 12, 'gh7', 'Fantôme galiléen', 'Où l’addition des vitesses de Galilée placerait le projectile. Barré quand il dépasse c : aucune expérience ne l’a jamais observé.');
+  // règle des vitesses
+  const vx = v => W / 2 + v * (W - 90) / 4;
+  seg(c, vx(-2), yR, vx(2), yR, C.texte, 1.2);
+  for (let k = -4; k <= 4; k++) seg(c, vx(k / 2), yR - 4, vx(k / 2), yR + 4, C.texte2, 1);
+  c.save(); c.fillStyle = rgba(RT2, 0.05); c.fillRect(vx(-2), yR - 24, vx(-1) - vx(-2), 48); c.fillRect(vx(1), yR - 24, vx(2) - vx(1), 48); c.restore();
+  for (const s of [-1, 1]) { c.save(); c.shadowColor = C.accent; c.shadowBlur = 6; seg(c, vx(s), yR - 36, vx(s), yR + 36, C.accent, 1.4); c.restore(); }
+  c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+  for (const [v, l] of [[-2, '−2c'], [-1, '−c'], [0, '0'], [1, '+c'], [2, '+2c']]) c.fillText(l, vx(v), yR + 26 + (Math.abs(v) === 1 ? 8 : 0) - (Math.abs(v) === 1 ? 8 : 0));
+  tagText(c, 'mur c', vx(1) + 6, yR - 36, 'left', 'bottom', C.accent);
+  zone(vx(1) - 6, yR - 38, vx(1) + 6, yR + 38, 'mur', 'Mur c', 'Aucun objet matériel ne le franchit, dans aucun référentiel. Les vitesses se composent de façon à ne jamais le dépasser.'); zone(vx(-1) - 6, yR - 38, vx(-1) + 6, yR + 38, 'mur2', 'Mur −c', 'Même limite dans l’autre sens.');
+  arrow(c, vx(b), yR - 20, vx(clamp(b + up, -2, 2)), yR - 20, C.mob, 1.4, null, 6);
+  c.font = mono(10); tagText(c, 'u′ (dans la fusée)', (vx(b) + vx(clamp(b + up, -2, 2))) / 2, yR - 24, 'center', 'bottom', C.mob);
+  c.save(); c.fillStyle = C.mob; c.beginPath(); c.moveTo(vx(b), yR - 2); c.lineTo(vx(b) - 5, yR - 11); c.lineTo(vx(b) + 5, yR - 11); c.closePath(); c.fill(); c.restore();
+  zone(vx(b) - 8, yR - 12, vx(b) + 8, yR, 'mb', 'Vitesse v de la fusée', 'Sa vitesse sur le quai : b = v/c.');
+  circ(c, vx(clamp(ug, -2, 2)), yR, 5, C.texte2, 1.4, [3, 3]); if (Math.abs(ug) >= 1) cross(c, vx(clamp(ug, -2, 2)), yR, 8, C.texte2, 1.6);
+  zcirc(vx(clamp(ug, -2, 2)), yR, 9, 'mg', 'Galilée : u′ + v', 'La prédiction galiléenne. Elle sort du mur dès que u′ + v ≥ c.');
+  disc(c, vx(u), yR, 5, photon ? C.accent : C.texte, photon ? 10 : 0); zcirc(vx(u), yR, 9, 'mu', 'Vitesse relativiste u', 'La vraie vitesse du projectile sur le quai. Elle reste dans le mur.');
+  // étages
+  k7.stages.forEach((s, i) => {
+    const gv = 0.5 * (i + 1);
+    c.save(); c.fillStyle = C.mob; c.beginPath(); c.moveTo(vx(s), yR + 14); c.lineTo(vx(s) - 3.5, yR + 21); c.lineTo(vx(s) + 3.5, yR + 21); c.closePath(); c.fill(); c.restore();
+    zcirc(vx(s), yR + 18, 7, 'st' + i, 'Étage ' + (i + 1), 'Une fusée lancée à 0,5 c par la précédente. Vitesse sur le quai : ' + fmt(s, 4) + ' c, de plus en plus serrée contre le mur.');
+    if (gv < 2.1) { circ(c, vx(gv), yR + 44, 3, C.texte2, 1, [2, 2]); if (gv >= 1) cross(c, vx(gv), yR + 44, 5, C.texte2, 1.2); }
+  });
+  if (k7.stages.length) { c.font = mono(10); tagText(c, 'étages (0,5 c chacun)', vx(-2) + 4, yR + 18, 'left', 'middle', C.mob); tagText(c, 'Galilée (barré)', vx(-2) + 4, yR + 44, 'left', 'middle', C.texte2); }
+  c.restore();
+}
+function extra7() {
+  const b = prm.b7, up = prm.u7, u = uNow(), gu = up >= 0.999999 ? 1 : u, upBack = Phys.velTransform(u, b), f = v => fmt(v, 3);
+  let h = `<div class="ln sub">u : vitesse sur le quai (S) · u′ : dans la fusée (S′) · v : vitesse de la fusée</div>
+<div class="ln">u′ = (u − v)/(1 − uv/c²)</div>
+<div class="ln">u = (u′ + v)/(1 + u′v/c²)</div>
+<div class="ln l">u = (${fmt(up, 2)} + ${fmt(b, 2)})/(1 + ${fmt(up, 2)} × ${fmt(b, 2)}) = ${f(u)} c</div>
+<div class="ln sub">retour : u′ = (${f(u)} − ${fmt(b, 2)})/(1 − ${f(u)} × ${fmt(b, 2)}) = ${f(upBack)} c</div>`;
+  if (k7.stages.length) {
+    const s = k7.stages;
+    h += `<div class="ln">étages : ${s.map(v => fmt(v, 3)).join(' · ')}</div><div class="ln"><span class="g">Galilée : ${s.map((v, i) => fmt(0.5 * (i + 1), 1)).join(' · ')}</span></div>
+<div class="ln sub">Ce qui s’additionne vraiment, c’est la rapidité artanh(v/c) : chaque étage ajoute la même, ${fmt(Phys.rapidity(0.5), 3)}.</div>`;
+  }
+  return h;
+}
+function status7() {
+  const b = prm.b7, up = prm.u7, ug = b + up;
+  if (up >= 0.999999) return 'Lumière dans la fusée → lumière sur le quai, à la même vitesse : c’est l’invariance de c, retrouvée.';
+  if (b < 0.1 && Math.abs(up) < 0.1) return 'Vitesses petites : Galilée est retrouvé. Écart relatif : ' + fmt(Math.abs((ug - uNow()) / (uNow() || 1)) * 100, 2) + ' %.';
+  if (Math.abs(ug) >= 1) return 'Galilée prédit ' + fmt(ug, 2) + ' c : impossible. La relativité compose les vitesses et donne ' + fmt(uNow(), 3) + ' c, sous le mur.';
+  return 'La vitesse sur le quai n’est pas u′ + v : elle vaut ' + fmt(uNow(), 3) + ' c, un peu moins que Galilée (' + fmt(ug, 3) + ' c). Pousse b et u′ vers c.';
+}
+function scope7() {
+  const b = prm.b7, up = prm.u7, g = [], r = [];
+  for (let i = -100; i <= 100; i += 2) { const v = i / 100; g.push([v, v + b]); r.push([v, Phys.velCompose(v, b)]); }
+  plotXY({ x0: -1, x1: 1, y0: -1.7, y1: 1.7, xt: [[-1, '−1'], [0, '0'], [1, '1']], yt: [[-1, '−c'], [0, '0'], [1, '+c']], xl: 'u′ (c)', yl: 'u (c)',
+    hl: [{ y: 1, col: rgba(RA, 0.8), dash: [4, 3] }, { y: -1, col: rgba(RA, 0.8), dash: [4, 3] }],
+    series: [{ pts: g, col: C.texte2, dash: [5, 4], lw: 1.4 }, { pts: r, col: C.texte, lw: 2 }],
+    dots: [{ x: up, y: up + b, col: C.texte2 }, { x: up, y: uNow(), col: C.accent }] });
+}
+
+/* ================= Acte VIII : énergie et quantité de mouvement ================= */
+const MGEV = 0.938, F8 = 1, TS8 = 0.9;
+const k8 = { p: 0, x: 0, xN: 0, t: 0, rec: [], rc: 0, gains: [], wait: 1.0 };
+function reset8() { k8.p = 0; k8.x = 0; k8.xN = 0; k8.t = 0; k8.rec = [{ t: 0, b: 0, bN: 0 }]; k8.rc = 0; k8.gains = []; k8.wait = 1.0; prm.push = true; prm.proton = false; }
+const q8 = () => { const s = Phys.push(1, F8, k8.p / F8), e = Phys.energy(1, s.b); return Object.assign(e, { b: s.b, bN: k8.p, pc: e.p }); };
+function stopE() { prm.push = false; syncTools(); }
+function restE() { reset8(); syncTools(); }
+function setP8(p) { k8.p = p; }
+function addMc2() {
+  const q = q8(); if (!k8.gains.length) k8.gains.push(q.b);
+  const E = q.E + 1; k8.p = Math.sqrt(E * E - 1); k8.gains.push(Phys.bFromK(1, q.K + 1)); k8.wait = 0; prm.proton = false;
+  k8.rec.push({ t: k8.t, b: q8().b, bN: k8.p });
+}
+function preset8(name) {
+  if (name === 'repos') { restE(); return; }
+  if (name === 'proton') { const E = 6800 / MGEV; k8.p = Math.sqrt(E * E - 1); prm.proton = true; prm.push = false; prm.ph8 = false; k8.gains = []; k8.rec.push({ t: k8.t, b: q8().b, bN: Math.min(k8.p, 50) }); k8.wait = 0; syncTools(); }
+}
+function adv8(dt) {
+  const h = dt * TS8; k8.t += h;
+  if (k8.wait > 0) k8.wait -= dt; else if (prm.push) k8.p += F8 * h;
+  const q = q8(); k8.x += q.b * h; k8.xN += Math.min(k8.p, 1e6) * h;
+  if (++k8.rc % 3 === 0) { k8.rec.push({ t: k8.t, b: q.b, bN: Math.min(k8.p, 50) }); if (k8.rec.length > 700) k8.rec.splice(0, 100); }
+}
+const niceE = v => { for (const m of [2, 3, 5, 8, 12, 20, 30, 50, 80, 120, 200, 300, 500, 800, 1200, 2000, 3000, 5000, 8000, 12000]) if (v <= m) return m; return Math.pow(10, Math.ceil(Math.log10(v))); };
+function draw8() {
+  const c = ctx, q = q8(), ph = prm.ph8, narrow = W < 700;
+  const yT = Math.max(158, H * 0.27), yR = yT + 62, ax = W * 0.3, area0 = yR + 44, areaH = H - area0 - 14;
+  c.save(); c.textBaseline = 'alphabetic';
+  // piste qui défile
+  seg(c, 0, yT + 16, W, yT + 16, C.texte, 1.2);
+  const sp = 48, off = ((k8.x * 70) % sp + sp) % sp;
+  c.save(); c.strokeStyle = rgba(RT2, 0.7); c.beginPath(); for (let x = -off; x < W + sp; x += sp) { c.moveTo(x, yT + 16); c.lineTo(x, yT + 23); } c.stroke(); c.restore();
+  zone(0, yT + 12, W, yT + 26, 'piste', 'Piste', 'Droite et sans frottement. Les graduations défilent : la caméra suit l’objet.');
+  c.save(); c.fillStyle = rgba(RT, 0.08); c.strokeStyle = C.texte; c.lineWidth = 1.6; c.fillRect(ax - 22, yT - 12, 44, 28); c.strokeRect(ax - 21.5, yT - 11.5, 43, 27); c.restore();
+  c.font = mono(12); tagText(c, 'm', ax, yT + 2, 'center', 'middle', C.texte);
+  zone(ax - 22, yT - 12, ax + 22, yT + 16, 'obj', 'Objet de masse m', 'Poussé par une force constante F depuis le repos. Sa masse m ne change pas : ce sont son énergie et son impulsion qui croissent.');
+  if (prm.push && k8.wait <= 0) { arrow(c, ax - 62, yT + 2, ax - 26, yT + 2, C.texte, 1.4, null, 7); c.font = mono(10.5); tagText(c, 'F', ax - 62, yT - 8, 'left', 'bottom', C.texte2); zone(ax - 64, yT - 4, ax - 26, yT + 8, 'F', 'Force constante F', 'Dans le référentiel de départ : l’impulsion croît de F à chaque unité de temps, sans limite.'); }
+  // fantôme newtonien
+  const gx = ax + (k8.xN - k8.x) * 70, bN = q.bN, gc = clamp(gx, 20, W - 28);
+  if (k8.p > 1e-6) {
+    c.save(); c.globalAlpha = 0.85; c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.setLineDash([4, 3]); c.strokeRect(gc - 16, yT - 46, 32, 22); c.setLineDash([]);
+    if (bN >= 1) { seg(c, gc - 18, yT - 24, gc + 18, yT - 46, C.texte2, 1.5); }
+    c.restore();
+    c.font = mono(10.5); tagText(c, 'Newton : v = p/m = ' + (bN < 100 ? fmt(bN, 2) : fmtI(bN)) + ' c' + (bN >= 1 ? ' (impossible)' : ''), clamp(gc, 100, W - 120), yT - 50, 'center', 'bottom', C.texte2);
+    if (gx > W - 28) tagText(c, '›', W - 12, yT - 35, 'center', 'middle', C.texte2);
+    zone(gc - 18, yT - 48, gc + 18, yT - 22, 'ghN', 'Fantôme newtonien', 'Accélère uniformément, v = Ft/m, et traverse le mur c sans effort. Barré dès qu’il dépasse c : la nature ne fait pas ça.');
+  }
+  // règle des vitesses
+  const vx = v => 40 + v / 1.3 * (W - 80);
+  seg(c, vx(0), yR, vx(1.3), yR, C.texte, 1.2);
+  for (let k = 0; k <= 13; k++) seg(c, vx(k / 10), yR - 3, vx(k / 10), yR + 3, C.texte2, 1);
+  c.save(); c.shadowColor = C.accent; c.shadowBlur = 6; seg(c, vx(1), yR - 22, vx(1), yR + 22, C.accent, 1.4); c.restore();
+  c.save(); c.fillStyle = rgba(RT2, 0.05); c.fillRect(vx(1), yR - 14, vx(1.3) - vx(1), 28); c.restore();
+  c.font = mono(10.5); tagText(c, 'mur c', vx(1) + 6, yR - 22, 'left', 'bottom', C.accent); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText('0', vx(0), yR + 6); c.fillText('0,5 c', vx(0.5), yR + 6);
+  zone(vx(1) - 6, yR - 24, vx(1) + 6, yR + 24, 'mur8', 'Mur c', 'La vitesse d’un objet massif tend vers c sans l’atteindre : il faudrait une énergie infinie.');
+  const bv = vx(Math.min(q.b, 1)); c.save(); c.fillStyle = C.texte; c.beginPath(); c.moveTo(bv, yR - 1); c.lineTo(bv - 5, yR - 11); c.lineTo(bv + 5, yR - 11); c.closePath(); c.fill(); c.restore();
+  zone(bv - 8, yR - 12, bv + 8, yR, 'vb', 'Vitesse v', 'Relativiste : tend vers c, ne l’atteint jamais.');
+  if (k8.p > 1e-6) { const nv = vx(Math.min(bN, 1.3)); circ(c, nv, yR, 4.5, C.texte2, 1.3, [3, 3]); if (bN >= 1) cross(c, nv, yR, 8, C.texte2, 1.4); }
+  c.font = mono(11); tagText(c, 'v = ' + fmtB(q.b) + ' c', 40, yR - 14, 'left', 'bottom', C.texte);
+  // zone du bas : barres d'énergie et triangle
+  if (areaH > 70) {
+    const barH = Math.min(areaH - 30, 190), Em = niceE(Math.max(q.E * 1.04, 2)), sc = barH / Em, yb = area0 + barH + 8, bw = narrow ? 30 : 38, bx = 20;
+    seg(c, bx - 8, yb + 0.5, bx + 2 * bw + 40, yb + 0.5, C.trait, 1);
+    const hm = Math.max(2, sc), hk = Math.max(0, q.K * sc);
+    c.save(); c.fillStyle = rgba(RE, 0.92); c.fillRect(bx, yb - hm - hk, bw, hk); c.restore();
+    c.save(); c.fillStyle = rgba(RE, 0.07); c.fillRect(bx, yb - hm, bw, hm); c.restore(); hatch(c, bx, yb - hm, bw, hm, rgba(RE, 0.75), 4);
+    c.save(); c.strokeStyle = C.texte; c.lineWidth = 1.4; c.strokeRect(bx + 0.5, yb - hm - hk + 0.5, bw - 1, hm + hk - 1); c.restore();
+    zone(bx, yb - hm - hk, bx + bw, yb, 'bE', 'Barre E = mc² + K', 'Énergie totale : mc² hachuré (stockée dans l’objet au repos) + K plein (énergie cinétique). Contour : E.');
+    const kn = Math.min(q.Kclass, 5e4) * sc; c.save(); c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.setLineDash([4, 3]); c.strokeRect(bx + bw + 14.5, yb - Math.min(kn, barH + 8) + 0.5, bw - 1, Math.min(kn, barH + 8)); c.restore();
+    zone(bx + bw + 14, yb - barH, bx + 2 * bw + 14, yb, 'bK', 'K newtonienne ½mv²', 'Pour la même vitesse : égale à K à basse vitesse, beaucoup plus petite près de c. La formule de Newton est la limite de basse vitesse.');
+    c.font = mono(10); tagText(c, 'E', bx + bw / 2, yb + 3, 'center', 'top', C.texte); tagText(c, '½mv²', bx + bw + 14 + bw / 2, yb + 3, 'center', 'top', C.texte2);
+    tagText(c, 'échelle : haut = ' + fmtI(Em) + ' mc²', bx, area0 - 2, 'left', 'bottom', C.texte2);
+    // triangle énergie-impulsion
+    const tx0 = bx + 2 * bw + 56, tw = W - tx0 - 20, th = areaH - 40;
+    if (tw > 80) {
+      const E = q.E, pcv = ph ? E : q.pc, mcv = ph ? 0 : 1, k = Math.min(tw / Math.max(pcv, 1e-9), th / Math.max(E, 1)) * (ph ? 0.98 : 0.95), yb2 = area0 + th, xa = tx0, hh = Math.max(mcv * k, mcv ? 1.5 : 0);
+      const xb = xa + pcv * k, hyp = ph ? 0 : 1;
+      c.save(); c.fillStyle = rgba(RE, 0.06); c.beginPath(); c.moveTo(xa, yb2); c.lineTo(xb, yb2); c.lineTo(xb, yb2 - hh); c.closePath(); c.fill(); c.restore();
+      seg(c, xa, yb2, xb, yb2, C.ener, 2.4);
+      if (hh > 0.5) { c.save(); c.fillStyle = rgba(RE, 0.1); c.fillRect(xb - 8, yb2 - hh, 8, hh); c.restore(); hatch(c, xb - 8, yb2 - hh, 8, hh, rgba(RE, 0.85), 3); seg(c, xb, yb2, xb, yb2 - hh, C.ener, 1.4); }
+      seg(c, xa, yb2, xb, yb2 - hh, C.texte, 1.6);
+      c.font = mono(10.5); tagText(c, 'pc = ' + (pcv < 100 ? fmt(pcv, 2) : fmtI(pcv)) + ' mc²', (xa + xb) / 2, yb2 + 4, 'center', 'top', C.ener);
+      if (hh > 8) tagText(c, 'mc²', xb + 6 > W - 40 ? xb - 12 : xb + 6, yb2 - hh / 2, xb + 6 > W - 40 ? 'right' : 'left', 'middle', C.ener);
+      tagText(c, 'E = ' + (E < 100 ? fmt(E, 2) : fmtI(E)) + ' mc²', (xa + xb) / 2, yb2 - hh / 2 - 10, 'center', 'bottom', C.texte);
+      tagText(c, ph ? 'photon : E = pc' : 'E² = (pc)² + (mc²)²', tx0, area0 - 2, 'left', 'bottom', C.texte2);
+      zone(xa, yb2 - Math.max(hh, 12), xb, yb2 + 4, 'tri8', 'Triangle énergie–impulsion', 'Côté vertical mc² (constant), côté horizontal pc, hypoténuse E : E² = (pc)² + (mc²)². À grande vitesse le triangle s’aplatit : E ≈ pc. Photon : mc² = 0, E = pc.');
+    }
+  }
+  c.restore();
+}
+function extra8() {
+  const q = q8(); let h = '';
+  if (k8.gains.length > 1) h += `<div class="ln">gain de vitesse par mc² ajouté : ${k8.gains.map(v => fmt(v, 3)).join(' → ')}</div><div class="ln sub">Chaque mc² de plus rapproche de c un peu moins.</div>`;
+  if (prm.proton) h += `<div class="ln">Proton du LHC : m = 0,938 GeV/c², E = 6,8 TeV, γ ≈ ${fmtI(q.g)}, 1 − v/c = ${(1 - q.b).toExponential(2).replace('.', ',').replace('e-', ' × 10⁻').replace(/(10⁻)(\d+)/, (m, a, n) => a + String(+n).split('').map(d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).join(''))} : encore ≈ ${fmtI(Phys.C_SI * (1 - q.b))} m/s sous c.</div>`;
+  return h;
+}
+function status8() {
+  const q = q8();
+  if (prm.ph8) return 'Photon : m = 0, donc E = pc et v = c, quelle que soit l’énergie. Le côté vertical du triangle disparaît : il s’aplatit.';
+  if (k8.p < 1e-6) return 'E₀ = mc² : l’énergie qu’un objet possède du seul fait de sa masse.';
+  if (q.b < 0.99) return 'E = γmc². E = mc² n’est que le cas au repos.';
+  return 'Chaque mc² ajouté rapproche de c sans jamais l’atteindre : il faudrait une énergie infinie.' + (prm.proton ? ' Ici : encore ' + fmtI(Phys.C_SI * (1 - q.b)) + ' m/s sous c.' : '');
+}
+function scope8() {
+  const tmax = Math.max(6, k8.t), r = k8.rec;
+  plotXY({ x0: 0, x1: tmax, y0: 0, y1: 1.4, xt: [[0, '0'], [tmax, fmt(tmax, 0) + ' u.t.']], yt: [[0.5, '0,5'], [1, 'c']], xl: 't', yl: 'v/c',
+    hl: [{ y: 1, col: rgba(RA, 0.8), dash: [4, 3] }],
+    series: [{ pts: r.map(p => [p.t, Math.min(p.bN, 1.6)]), col: C.texte2, dash: [5, 4], lw: 1.4 }, { pts: r.map(p => [p.t, p.b]), col: C.texte, lw: 2 }],
+    dots: [{ x: k8.t, y: q8().b, col: C.accent }] });
+}
+
+/* ================= Panneau : mesures, textes, légendes ================= */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const lnL = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const LEG = ['', lg(lnL('#e8e4dc', 1.8), 'γ(b)') + lg('<circle cx="10" cy="4" r="3" fill="#b6f2ff"/>', 'valeur courante'), '', '', '', '',
+  lg(lnL('#e8e4dc', 2), 'u relativiste') + lg(lnL('#8a93a0', 1.4, 1), 'Galilée') + lg(lnL('#b6f2ff', 1.2, 1), 'mur ±c'),
+  lg(lnL('#e8e4dc', 2), 'v/c relativiste') + lg(lnL('#8a93a0', 1.4, 1), 'v/c newtonien') + lg(lnL('#b6f2ff', 1.2, 1), 'mur c')];
+const bg = ['b · γ', [['b', ''], ['g', '']]];
+const MEAS = [
+  [['b · v', [['b', ''], ['v', 'km/s']]], ['u′ (balle, dans le train)', [['up', 'c']]], ['u = u′ + v (Galilée, quai)', [['ug', 'c']]], ['c mesurée : train · quai', [['ct', 'c'], ['cq', 'c']]], ['horloge du quai', [['tq', 'µs']]], ['horloge du train', [['tt', 'µs']]]],
+  [bg, ['τ₀ (temps propre par tic)', [['tau0', 'µs']], 1], ['période mesurée γτ₀', [['Tm', 'µs']]], ['temps propre écoulé τ', [['tau', 'µs']], 1], ['temps du quai t', [['t', 'µs']]], ['trajet du photon par tic : 2L · 2γL', [['p0', ''], ['p1', 'm']]]],
+  [bg, ['L₀ (longueur propre du train)', [['L0', 'm']], 1], ['L₀/γ (mesurée sur le quai)', [['Lq', 'm']]], ['Δt′ = vL₀/c²', [['dtn', 'ns'], ['dtu', 'µs']]], ['ordre dans le quai', [['oq', '']]], ['ordre dans le train', [['ot', '']]]],
+  [bg, ['paire sélectionnée', [['pair', '']]], ['Δt · Δx (S)', [['dt', 'an'], ['dx', 'al']]], ['Δt′ · Δx′ (S′)', [['dtp', 'an'], ['dxp', 'al']]], ['s² = Δt² − Δx² (S · S′)', [['s2', ''], ['s2p', 'an²']], 1], ['type', [['kind', '']]], ['ordre dans S', [['oS', '']]], ['ordre dans S′', [['oSp', '']]]],
+  [bg, ['Δτ (temps propre, S′)', [['dtau', 'an']], 1], ['Δt = γΔτ (mesuré)', [['dt', 'ans']]], ['mesuré par', [['by', '']]]],
+  [bg, ['L₀ (longueur propre)', [['L0', 'al']], 1], ['L = L₀/γ (mesurée)', [['L', 'al']]], ['écart Δt′ des deux lectures = bL₀', [['dtp', 'ans']]], ['mesuré par', [['by', '']]]],
+  [['τ sédentaire', [['ts', 'ans']], 1], ['τ voyageur', [['tv', 'ans']], 1], ['différence', [['df', 'ans']]], ['b par segment', [['bs', '']]]],
+  [['b · u′', [['b', ''], ['up', 'c']]], ['u relativiste', [['u', 'c']]], ['u′ + b (Galilée)', [['ug', 'c']]], ['écart relatif', [['ec', '%']]], ['γ(b) · γ(u′) · γ(u)', [['g1', ''], ['g2', ''], ['g3', '']]]],
+  [['v/c', [['b', '']]], ['γ', [['g', '']]], ['m', [['m', '']]], ['E₀ = mc²', [['E0', 'mc²']]], ['K = (γ − 1)mc²', [['K', 'mc²']]], ['K newtonienne ½mv²', [['Kn', 'mc²']]], ['E = γmc²', [['E', 'mc²']]], ['p', [['p', 'mc']]], ['pc', [['pc', 'mc²']]], ['E² − (pc)²', [['chk', '(mc²)²']], 1], ['E en GeV (proton)', [['Eg', 'GeV']]]]
+];
+const MNOTE = [
+  'Train fictif : aucun train réel n’approche c ; à 300 km/h l’effet serait de l’ordre de 10⁻¹³. On fait semblant que Galilée a raison pour la balle ; on verra à l’acte VII. Réalité : Michelson-Morley (1887), mesures modernes à 10⁻¹⁷ près ; les équations de Maxwell ne contiennent aucune vitesse de référence.',
+  'Une seule dimension d’espace : la hauteur L de l’horloge est la même pour tous (les directions perpendiculaires ne sont pas contractées). Horloge fictive ; échelle de temps choisie pour être visible : 1 s d’écran = 0,8 µs.',
+  'Train fictif jusqu’à 0,9 c. Les scènes montrent les coordonnées mesurées dans un référentiel, pas ce qu’une caméra enregistrerait. Les éclairs sont séparés par plus de distance que la lumière ne peut en couvrir dans leur écart de temps : aucun ne peut causer l’autre. C’est pourquoi leur ordre peut dépendre du référentiel (acte IV).',
+  'Une dimension d’espace ; unités : années et années-lumière. Les événements sont des points idéaux ; les axes ct′ et x′ sont tracés dans le dessin de S.',
+  'La contraction n’est pas un écrasement de la matière ni ce qu’une photo montrerait (une photo enregistre la lumière arrivée en même temps à l’objectif, partie à des instants différents : rotation de Terrell, hors champ). La règle n’a subi aucune contrainte : sa longueur propre reste L₀. Une seule dimension d’espace.',
+  'Demi-tour instantané idéalisé ; l’accélération propre n’est pas étudiée ici ; aucune gravitation n’est nécessaire pour résoudre le paradoxe. Réalité : muons cosmiques (durée de vie propre 2,2 µs, γ ≈ 20 typique : ils atteignent le sol) et horloges atomiques en avion (Hafele-Keating, 1971).',
+  'Vitesses fictives ; distances et durées du quai en unités arbitraires (c = 1). Une seule dimension d’espace. Les vitesses s’ajoutent par la rapidité, pas par u′ + v.',
+  'Force constante dans le référentiel de départ ; objet ponctuel, sans frottement. Unité d’énergie : mc². La masse m ne change pas avec la vitesse : c’est l’énergie et la quantité de mouvement qui croissent (on évite le vieux terme « masse relativiste »).'
+];
+const MEYE = ['', 'Enregistreur · γ en fonction de b', '', '', '', '', 'Graphe · u en fonction de u′', 'Enregistreur · v/c en fonction du temps'];
+const mEls = {};
+const hasScope = () => act === 1 || act === 6 || act === 7;
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  const spec = n === 4 && prm.mode === 'regle' ? MEAS[5] : n >= 5 ? MEAS[n + 1] : n === 4 ? MEAS[4] : MEAS[n];
+  for (const [lab, vals, inv] of spec) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}${inv ? '<i class="inv">invariant</i>' : ''}</span><span style="display:flex;gap:10px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; });
+  }
+  $('#mNote').textContent = MNOTE[n];
+  $('#rEye').textContent = MEYE[n]; $('#leg').innerHTML = LEG[n];
+  $('#bridge').hidden = n !== 7;
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+const KIND = { temps: 'temps', lumiere: 'lumière', espace: 'espace' };
+function readouts() {
+  const g1 = n => fmt(Phys.gamma(n), 3);
+  if (act === 0) {
+    const b = prm.b1, m = k1.lamp && k1.lamp.meas;
+    setM('b', fmt(b, 2)); setM('v', fmtI(b * Phys.C_SI / 1000)); setM('up', fmt(prm.u1, 2)); setM('ug', fmt(prm.u1 + b, 2)); setM('ct', m ? '1' : '—'); setM('cq', m ? '1' : '—'); setM('tq', fmt(k1.t, 3)); setM('tt', fmt(k1.t, 3));
+  } else if (act === 1) {
+    const b = prm.b2, g = Phys.gamma(b);
+    setM('b', fmt(b, 2)); setM('g', fmt(g, 3)); setM('tau0', '1,000'); setM('Tm', fmt(g, 3)); setM('tau', fmt(k2.tau, 2)); setM('t', fmt(k2.T, 2)); setM('p0', fmt(2 * LC * UL, 1)); setM('p1', fmt(2 * g * LC * UL, 1));
+  } else if (act === 2) {
+    const b = prm.b3, lt = ltNow(), ord = fr => b < 0.005 ? 'simultanés' : fr === 'S' ? 'simultanés' : 'B avant A';
+    setM('b', fmt(b, 2)); setM('g', fmt(lt.g, 3)); setM('L0', fmt(UL, 1)); setM('Lq', fmt(UL / lt.g, 1)); setM('dtn', fmtI(b * 1000)); setM('dtu', fmt(b, 3)); setM('oq', 'simultanés'); setM('ot', ord('Sp'));
+  } else if (act === 3) {
+    const b = prm.b4, pr = pair4(); setM('b', fmt(b, 2)); setM('g', fmt(Phys.gamma(b), 3));
+    if (pr) { setM('pair', nm4(pr.aI) + ' → ' + nm4(pr.bI)); setM('dt', fmt(pr.iv.dt, 2)); setM('dx', fmt(pr.iv.dx, 2)); setM('dtp', fmt(pr.ivp.dt, 2)); setM('dxp', fmt(pr.ivp.dx, 2)); setM('s2', fmt(pr.iv.s2, 2)); setM('s2p', fmt(pr.ivp.s2, 2)); setM('kind', KIND[pr.iv.kind]); setM('oS', pr.orderS); setM('oSp', pr.orderSp); }
+    else for (const k of ['pair', 'dt', 'dx', 'dtp', 'dxp', 's2', 's2p', 'kind', 'oS', 'oSp']) setM(k, '—');
+  } else if (act === 4) {
+    const G = geo5(), rod = prm.mode === 'regle';
+    setM('b', fmt(G.b, 2)); setM('g', fmt(G.g, 3)); setM('by', G.mN);
+    if (!rod) { setM('dtau', '1,00'); setM('dt', fmt(G.g, 2)); } else { setM('L0', fmt(L05, 2)); setM('L', fmt(L05 / G.g, 2)); setM('dtp', fmt(Math.abs(G.rm.dtPrime), 2)); }
+  } else if (act === 5) {
+    const pt = segs6(), T = k6.T, tv = tauAt(path6(), T);
+    setM('ts', fmt(T, 2)); setM('tv', fmt(tv, 2)); setM('df', fmt(T - tv, 2)); setM('bs', pt.segs.map(s => fmt(s.b, 2)).join(' · '));
+  } else if (act === 6) {
+    const b = prm.b7, up = prm.u7, u = uNow(), ug = b + up;
+    setM('b', fmt(b, 2)); setM('up', fmt(up, 2)); setM('u', fmt(u, 3)); setM('ug', fmt(ug, 3)); setM('ec', fmt(Math.abs((ug - u) / (u || 1)) * 100, 2));
+    setM('g1', g1(b)); setM('g2', up >= 0.999999 ? '∞' : g1(up)); setM('g3', u >= 0.999999 ? '∞' : g1(u));
+    if (mEls.ug) mEls.ug.style.textDecoration = Math.abs(ug) >= 1 ? 'line-through' : '';
+  } else {
+    const q = q8(), P = prm.proton;
+    setM('b', fmtB(q.b)); setM('g', q.g < 1000 ? fmt(q.g, 3) : fmtI(q.g)); setM('m', P ? '0,938 GeV/c²' : '1'); setM('E0', '1'); setM('K', q.K < 1000 ? fmt(q.K, 3) : fmtI(q.K)); setM('Kn', q.Kclass < 1000 ? fmt(q.Kclass, 3) : fmtI(q.Kclass));
+    setM('E', q.E < 1000 ? fmt(q.E, 3) : fmtI(q.E)); setM('p', q.p < 1000 ? fmt(q.p, 3) : fmtI(q.p)); setM('pc', q.p < 1000 ? fmt(q.p, 3) : fmtI(q.p)); setM('chk', '1,000'); setM('Eg', P ? fmt(q.E * MGEV, 0) : '—');
+  }
+  const ex = EXTRA[act] ? EXTRA[act]() : '', exEl = $('#extra');
+  if (exEl.dataset.h !== ex) { exEl.dataset.h = ex; exEl.innerHTML = ex; exEl.hidden = !ex; }
+  const sl = $('#rT3'); if (act === 2) { sl.value = Math.round(k3.p * 1000); $('#vT3').textContent = fmt(time3(), 2) + ' µs'; }
+  status();
+}
+const EXTRA = [extra1, extra2, extra3, extra4, null, extra6, extra7, extra8];
+const STATUS = [status1, status2, status3, status4, status5, status6, status7, status8];
+function status() { const t = STATUS[act](), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
+
+/* ---------------- Actes ---------------- */
+const ACTS = [
+  { t: 'Deux référentiels', x: 'Un quai et un train décrivent le même mouvement avec des coordonnées différentes. Galilée additionne les vitesses et donne le même temps à tous. Lance la balle, puis allume la lampe : la lumière met cette règle en défaut.' },
+  { t: 'Horloge lumineuse', x: 'Un photon rebondit entre deux miroirs : un aller-retour est un tic. Dans le référentiel de l’horloge, le photon monte et descend ; depuis le quai, il trace des diagonales plus longues, et il va toujours à c. Même vitesse, trajet plus long : le tic dure plus longtemps.' },
+  { t: 'Train et éclairs', x: 'Deux éclairs frappent l’arrière et l’avant du train au moment où il coïncide avec deux repères du quai. Pour le quai, ils sont simultanés. Pour le train, même après correction du temps de trajet de la lumière, ils ne le sont pas.' },
+  { t: 'Diagramme d’espace-temps', x: 'Un diagramme place chaque événement par son lieu et son instant. La lumière y fait 45° ; son cône sépare ce que O peut influencer de ce qu’il ne peut pas. Un autre observateur a d’autres axes, mais le même cône. Ajoute les couches une à une.' },
+  { t: 'Dilatation et contraction', x: 'Deux lectures de la même géométrie. Mesurer une durée ou une longueur, c’est choisir des lignes de simultanéité : S et S′ en choisissent d’inclinées différemment sur le même dessin. Bascule entre horloge et règle, puis entre les deux mesureurs.' },
+  { t: 'Temps propre', x: 'Le temps propre est la longueur d’une ligne d’univers, mesurée par c²dτ² = c²dt² − dx². Deux trajets entre les mêmes événements n’accumulent pas le même temps propre : la ligne droite est celle qui en accumule le plus. Déplace le point de demi-tour.' },
+  { t: 'Addition des vitesses', x: 'Une fusée lance un projectile. Galilée additionne les vitesses et dépasse c sans effort ; la relativité les compose autrement et reste sous c. Pour la lumière, le résultat est c pour tous les observateurs.' },
+  { t: 'Énergie et quantité de mouvement', x: 'Avec une force constante, l’impulsion croît sans limite, mais la vitesse tend vers c. L’énergie E = γmc² diverge, et E² = (pc)² + (mc²)² relie énergie, impulsion et masse. Pousse, ou ajoute des mc² d’un coup.' }
+];
+const SYNC = [
+  ['rB1', 'vB1', () => prm.b1, v => fmt(v, 2) + ' · ' + fmtI(v * Phys.C_SI / 1000) + ' km/s'], ['rU1', 'vU1', () => prm.u1, v => fmt(v, 2) + ' c'],
+  ['rB2', 'vB2', () => prm.b2, v => fmt(v, 2)], ['rB3', 'vB3', () => prm.b3, v => fmt(v, 2)], ['rB4', 'vB4', () => clamp(prm.b4, -0.9, 0.9), v => fmt(prm.b4, 2)],
+  ['rB5', 'vB5', () => prm.b5, v => fmt(v, 2)], ['rB7', 'vB7', () => prm.b7, v => fmt(v, 2)], ['rU7', 'vU7', () => prm.u7, v => fmt(v, 2)]
+];
+const PRESS = [['bFrQ', () => prm.fr1 === 'S'], ['bFrT', () => prm.fr1 === 'Sp'], ['bClosed', () => prm.closed], ['bTri', () => prm.tri], ['bOth', () => prm.oth], ['bRec', () => prm.rec],
+  ['bFr3Q', () => prm.fr3 === 'S'], ['bFr3T', () => prm.fr3 === 'Sp'], ['bSync', () => prm.sync], ['bMh', () => prm.mode === 'horloge'], ['bMr', () => prm.mode === 'regle'], ['bBySq', () => prm.by === 'S'], ['bByS2', () => prm.by === 'Sp'],
+  ['bHyp', () => prm.hyp], ['bTwo', () => prm.two], ['bView6', () => prm.view6], ['bPush', () => prm.push], ['bPh8', () => prm.ph8]];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = v; $('#' + vid).textContent = f(v); }
+  for (const [id, get] of PRESS) $('#' + id).setAttribute('aria-pressed', get() ? 'true' : 'false');
+  document.querySelectorAll('[data-ly]').forEach(el => el.setAttribute('aria-pressed', +el.dataset.ly <= prm.ly ? 'true' : 'false'));
+  $('#bBoost').disabled = prm.ly < 5; $('#bUnboost').disabled = !k4.inv;
+  const gh = $('#gHyp'); gh.hidden = act !== 4 || prm.mode !== 'horloge';
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  [reset1, reset2, reset3, reset4, reset5, reset6, reset7, reset8][n]();
+  hideTip(); buildMeas(n); sizePanelCanvases(); syncTools(); $('#extra').dataset.h = '\u0000';
+  if (restart) setPlay(true);
+}
+function updateUI(n) {
+  uiAct = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VIII`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, NA - 1);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); updateUI(pendingAct); pendingAct = -1; fade = 0; sceneA = 1; }
+  else fade = -1;
+}
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+const onB = (id, fn) => $('#' + id).addEventListener('click', e => { fn(e); e.currentTarget.blur(); });
+const bindRange = (id, fn) => $('#' + id).addEventListener('input', e => { fn(+e.target.value); syncTools(); });
+bindRange('rB1', v => { prm.b1 = v; k1.ball = null; k1.marks = []; }); bindRange('rU1', v => { prm.u1 = v; });
+bindRange('rB2', v => { prm.b2 = v; k2.trail = k2.trail.slice(-1); }); bindRange('rB3', v => { prm.b3 = v; });
+bindRange('rB4', v => { prm.b4 = v; }); bindRange('rB5', v => { prm.b5 = v; }); bindRange('rB7', v => { prm.b7 = v; k7.t = 0; k7.wait = 0; }); bindRange('rU7', v => { prm.u7 = v; k7.t = 0; k7.wait = 0; });
+$('#rT3').addEventListener('input', e => { k3.p = +e.target.value / 1000; k3.wait = 0; });
+const setFr1 = f => { prm.fr1 = f; syncTools(); };
+onB('bFrQ', () => setFr1('S')); onB('bFrT', () => setFr1('Sp')); onB('bClosed', () => { prm.closed = !prm.closed; syncTools(); });
+onB('bBall', () => throwBall()); onB('bLamp', () => lamp());
+document.querySelectorAll('[data-b2]').forEach(el => el.addEventListener('click', () => { prm.b2 = +el.dataset.b2; k2.trail = k2.trail.slice(-1); syncTools(); el.blur(); }));
+onB('bTri', () => { prm.tri = !prm.tri; syncTools(); }); onB('bOth', () => { prm.oth = !prm.oth; syncTools(); }); onB('bRec', () => { prm.rec = !prm.rec; k2.trail = k2.trail.slice(-1); syncTools(); });
+onB('bFr3Q', () => { setFrame3('S'); syncTools(); }); onB('bFr3T', () => { setFrame3('Sp'); syncTools(); }); onB('bSync', () => { prm.sync = !prm.sync; syncTools(); });
+document.querySelectorAll('[data-ly]').forEach(el => el.addEventListener('click', () => { setLy(+el.dataset.ly); el.blur(); }));
+onB('bBoost', () => { if (prm.ly >= 5) { k4.inv = true; if (reduce) k4.bd = prm.b4; syncTools(); } }); onB('bUnboost', () => { k4.inv = false; if (reduce) k4.bd = 0; syncTools(); });
+onB('bPreA', () => { k4.ev = [{ t: 0, x: -2 }, { t: 0, x: 2 }]; k4.prev = 0; k4.sel = 1; prm.b4 = 0.5; setLy(Math.max(prm.ly, 4)); });
+onB('bPreC', () => { k4.ev = [{ t: 1, x: 0.5 }, { t: 3.5, x: 2 }]; k4.prev = 0; k4.sel = 1; setLy(Math.max(prm.ly, 2)); });
+onB('bClr4', () => { k4.ev = []; k4.sel = -1; k4.prev = -1; syncTools(); });
+const setMode = m => { prm.mode = m; buildMeas(4); syncTools(); };
+onB('bMh', () => setMode('horloge')); onB('bMr', () => setMode('regle'));
+onB('bBySq', () => { prm.by = 'S'; syncTools(); }); onB('bByS2', () => { prm.by = 'Sp'; syncTools(); }); onB('bHyp', () => { prm.hyp = !prm.hyp; syncTools(); });
+onB('bPre6', () => { k6.P = { t: 5, x: 4 }; k6.P2 = null; prm.two = false; syncTools(); }); onB('bTwo', () => twoTurns(!prm.two)); onB('bRun6', () => run6()); onB('bView6', () => { prm.view6 = !prm.view6; if (reduce) k6.bd = prm.view6 ? b1of() : 0; syncTools(); });
+onB('bLaunch7', () => launch7()); onB('bPh7', () => { prm.u7 = 1; k7.t = 0; syncTools(); }); onB('bStage', () => nextStage()); onB('bStage0', () => { k7.stages = []; });
+onB('bPush', () => { prm.push = !prm.push; k8.wait = 0; syncTools(); }); onB('bAdd', () => addMc2()); onB('bStopE', () => stopE()); onB('bRest', () => restE());
+onB('bPh8', () => { prm.ph8 = !prm.ph8; syncTools(); }); onB('bProton', () => preset8('proton'));
+
+function swapFrame() {                                              // touche F
+  if (act === 0) setFr1(prm.fr1 === 'S' ? 'Sp' : 'S'); else if (act === 1) { prm.rec = !prm.rec; k2.trail = k2.trail.slice(-1); syncTools(); }
+  else if (act === 2) { setFrame3(prm.fr3 === 'S' ? 'Sp' : 'S'); syncTools(); }
+  else if (act === 3) { setLy(5); k4.inv = !k4.inv; syncTools(); } else if (act === 5) { prm.view6 = !prm.view6; syncTools(); }
+}
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-8]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
+  if (!isRange && !e.repeat && (e.key === 'l' || e.key === 'L')) { if (act === 0) lamp(); else if (act === 6) launch7(); }
+  if (!isRange && !e.repeat && (e.key === 'f' || e.key === 'F')) swapFrame();
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur ---------------- */
+function pointer4(type, x, y, e) {
+  if (act !== 3) return false;
+  const toW = () => Phys.unboost({ t: dgT(y), x: dgXinv(x) }, k4.bd), snap = v => clamp(Math.round(v * 4) / 4, -11, 11);
+  if (type === 'down') {
+    const R = e && e.pointerType === 'touch' ? 26 : 15;
+    if (prm.ly >= 2) { const hp = px2(D4({ t: k4.hx, x: prm.b4 * k4.hx })); if (Math.hypot(x - hp[0], y - hp[1]) < R) { k4.drag = { k: 'h' }; return true; } }
+    if (prm.ly >= 1) {
+      for (let i = k4.ev.length - 1; i >= 0; i--) { const p = px2(D4(k4.ev[i])); if (Math.hypot(x - p[0], y - p[1]) < R) { if (i !== k4.sel) { k4.prev = k4.sel; k4.sel = i; } k4.drag = { k: 'e', i }; return true; } }
+      const o = px2(D4(O0)); if (Math.hypot(x - o[0], y - o[1]) < R) return false;
+      if (k4.ev.length < 4) { const w = toW(); placeEvent(snap(w.t), snap(w.x)); k4.drag = { k: 'e', i: k4.ev.length - 1 }; return true; }
+      k4.msg = '4 événements au maximum : déplace-en un.'; k4.msgT = 2.2; return true;
+    }
+    return false;
+  }
+  if (type === 'move' && k4.drag) {
+    const w = toW();
+    if (k4.drag.k === 'e') { const ev = k4.ev[k4.drag.i]; if (ev) { ev.t = snap(w.t); ev.x = snap(w.x); } }
+    else { const raw = w.x / Math.max(w.t, 0.4); if (Math.abs(raw) > Phys.BMAX) { k4.msg = 'Une particule matérielle reste à l’intérieur de son cône de lumière.'; k4.msgT = 2.5; } prm.b4 = Math.round(clamp(raw, -Phys.BMAX, Phys.BMAX) * 100) / 100; syncTools(); }
+    return true;
+  }
+  if (type === 'up' && k4.drag) { k4.drag = null; return true; }
+  return false;
+}
+const dragging = () => (act === 3 && k4.drag) || (act === 4 && k5.drag) || (act === 5 && k6.drag);
+const ptrXY = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+const dispatch = (type, x, y, e) => act === 3 ? pointer4(type, x, y, e) : act === 4 ? pointer5(type, x, y) : act === 5 ? pointer6(type, x, y) : false;
+cv.addEventListener('pointerdown', e => {
+  const [x, y] = ptrXY(e);
+  if (dispatch('down', x, y, e)) { try { cv.setPointerCapture(e.pointerId); } catch (_) {} hideTip(); e.preventDefault(); cv.className = act === 4 ? 'ns' : 'grabbing'; }
+});
+cv.addEventListener('pointermove', e => {
+  const [x, y] = ptrXY(e);
+  if (dragging()) { dispatch('move', x, y, e); return; }
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(zones, x, y);
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.className = /^(e\d|hdl|wp\d)$/.test(z.key) ? 'grab' : z.key === 'ln5' ? 'ns' : ''; }
+  else { hideTip(); cv.className = act === 3 && prm.ly >= 1 ? 'cross' : ''; }
+});
+const endPtr = e => { const [x, y] = ptrXY(e); dispatch('up', x, y, e); cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!dragging()) { hideTip(); cv.className = ''; } });
+
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+function sizePanelCanvases() { $('#scopeSec').hidden = !hasScope(); if (hasScope()) sizeCanvas(scopeC, 168); }
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases();
+}
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+const ADV = [adv1, adv2, adv3, adv4, () => {}, adv6, adv7, adv8], advance = dt => ADV[act](dt);
+const SCENES = [draw1, draw2, draw3, draw4, draw5, draw6, draw7, draw8], SCOPES = [null, scope2, null, null, null, null, scope7, scope8];
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) advance(dt);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  SCENES[act](); ctx.restore();
+  if (SCOPES[act]) SCOPES[act]();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function stateNow() {
+  const base = { act };
+  if (act === 0) return Object.assign(base, { frame: prm.fr1, b: prm.b1, v_kms: prm.b1 * Phys.C_SI / 1000, up: prm.u1, u: prm.u1 + prm.b1, ball: !!k1.ball, lamp: !!k1.lamp, cTrain: k1.lamp && k1.lamp.meas ? 1 : null, cQuai: k1.lamp && k1.lamp.meas ? 1 : null, galileoLight: 1 + prm.b1, tq: k1.t, tt: k1.t, closed: prm.closed });
+  if (act === 1) { const g = Phys.gamma(prm.b2); return Object.assign(base, { b: prm.b2, gamma: g, tau0: 1, period: g, tau: k2.tau, T: k2.T, ticks: Math.floor(k2.tau + 1e-9), path0: 2 * LC * UL, path1: 2 * g * LC * UL, rec: prm.rec, oth: prm.oth, tri: prm.tri }); }
+  if (act === 2) { const lt = ltNow(); return Object.assign(base, { b: prm.b3, gamma: lt.g, frame: prm.fr3, t: time3(), L0: UL, Lq: UL / lt.g, dtPrimeNs: lt.dtPrime * 1000, reconM: lt.reconM.slice(), reconA: lt.reconA, reconB: lt.reconB, ApT: lt.Ap.t, BpT: lt.Bp.t, tpReceptA: lt.tpReceptA, tpReceptB: lt.tpReceptB, sync: prm.sync }); }
+  if (act === 3) { const pr = pair4(); return Object.assign(base, { b: prm.b4, gamma: Phys.gamma(prm.b4), layer: prm.ly, bd: k4.bd, events: k4.ev.map(e => { const p = Phys.boost(e, prm.b4); return { t: e.t, x: e.x, tp: p.t, xp: p.x }; }), pair: pr && { dt: pr.iv.dt, dx: pr.iv.dx, dtp: pr.ivp.dt, dxp: pr.ivp.dx, s2: pr.iv.s2, s2p: pr.ivp.s2, kind: pr.iv.kind, orderS: pr.orderS, orderSp: pr.orderSp } }); }
+  if (act === 4) { const G = geo5(); return Object.assign(base, { mode: prm.mode, by: prm.by, b: G.b, gamma: G.g, dtau: 1, dt: G.g, L0: L05, L: G.rm.L, dtPrime: G.rm.dtPrime, t0: k5.t0 }); }
+  if (act === 5) { const pt = segs6(), pr = path6(); return Object.assign(base, { P: k6.P, P2: k6.P2, tauSed: 10, tauVoy: pt.tau, ok: pt.ok, segs: pt.segs, view: prm.view6, bd: k6.bd, T: k6.T, tauNow: tauAt(pr, k6.T) }); }
+  if (act === 6) { const b = prm.b7, up = prm.u7, u = uNow(); return Object.assign(base, { b, up, u, galilee: up + b, gammaB: Phys.gamma(b), stages: k7.stages.slice(), photon: up >= 0.999999 }); }
+  const q = q8(); return Object.assign(base, { v: q.b, gamma: q.g, E0: 1, K: q.K, Kn: q.Kclass, E: q.E, p: q.p, pc: q.p, check: q.E * q.E - q.p * q.p, gains: k8.gains.slice(), pushing: prm.push, photon: prm.ph8, proton: prm.proton });
+}
+window.__labo = {
+  Phys, get act() { return act; }, goAct, get state() { return stateNow(); }, tick: n => { last = n - 16; tick(n); }, setPlay, prm,
+  run(sec) { const n = Math.ceil(sec * 60); for (let i = 0; i < n; i++) advance(1 / 60); },
+  setB(b) { if (act === 0) prm.b1 = b; else if (act === 1) prm.b2 = b; else if (act === 2) prm.b3 = b; else if (act === 3) prm.b4 = clamp(b, -0.9, 0.9); else if (act === 4) prm.b5 = b; else if (act === 6) prm.b7 = b; syncTools(); },
+  setFrame(f) { if (act === 0) setFr1(f); else if (act === 2) { setFrame3(f); syncTools(); } else if (act === 4) { prm.by = f; syncTools(); } },
+  lamp, throwBall, scrub, placeEvent, boostTo, setMode, setWaypoint, setUp(u) { prm.u7 = u; syncTools(); }, nextStage, addMc2, preset: preset8,
+  setLayer: setLy, twoTurns, setView6(v) { prm.view6 = !!v; syncTools(); }, setP: setP8, setT0(t) { k5.t0 = t; }, setRec(v) { prm.rec = !!v; syncTools(); }, setOth(v) { prm.oth = !!v; syncTools(); }, setSync(v) { prm.sync = !!v; syncTools(); }, setClosed(v) { prm.closed = !!v; syncTools(); }
+};
+
+resize();
+for (let i = 0; i < NA; i++) resetPrm(i);
+enterAct(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
