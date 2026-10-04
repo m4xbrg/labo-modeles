@@ -1,0 +1,1574 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Fondations : même paillasse sombre que la série, un seul vocabulaire visuel du début à la fin. Un individu est un petit corps ondulant, une copie du gène est une perle, une fréquence est une barre empilée ou une courbe p(t), une distribution est un histogramme sauge, une attente théorique est un tireté fin.
+  2. Le hasard est réel et contrôlé : tout vient d'un générateur semé (mulberry32). « Nouveau tirage » change l'histoire, « Rejouer le même tirage » la refait à l'identique. Les générations sont discrètes et non chevauchantes ; l'étape A1 les décompose en quatre phases (vivre, sélection, reproduction, relève).
+  3. Les moments forts passent par la forme : en A1 aucun individu ne change de couleur mais la population, si ; en D1 chaque perle est reliée à la copie dont elle descend, sans aucun avantage, et les fréquences bougent quand même.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Évolution et génétique des populations — Fondations 40</title>
+<meta name="description" content="Variation, hérédité, succès reproductif, fréquences d'allèles, dérive, fondateur, goulot, mutation et migration : l'évolution comme changement statistique de la composition d'une population.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#a8dcb4;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --A:#c49bff; --a:#6ad1e3;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:default}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:82%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,4vw,46px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 17px/1.35 var(--serif);color:var(--texte)}
+.eq{margin:10px 0 0;font:500 13.5px/1.4 var(--mono);color:var(--energie);word-break:break-word;white-space:pre-line}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:20px}
+.row.small .val{font-size:14px}
+.row.small .lab{font-size:11px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px}
+#sec{display:block;width:100%;height:150px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:6px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+#extra p{margin:0 0 10px;font-size:14px;color:var(--texte);opacity:.9}
+#extra p.suite{font:400 12px/1.5 var(--mono);color:var(--texte-2);opacity:1}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding:10px 0 0}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.seed{font:400 11px var(--mono);color:var(--texte-2);letter-spacing:.04em}
+
+.stepper{display:flex;gap:3px;flex:1 0 100%;min-width:0;order:5}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+.seg.ch0{margin-left:12px}
+.seg.ch0:first-child{margin-left:0}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait);min-height:46px;order:6}
+input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:52px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:74vh;height:74svh;min-height:540px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;padding:0}
+  .seg.ch0{margin-left:8px}
+  .tools{gap:8px 18px}
+  input[type=range]{width:110px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:11px}
+  .seg.ch0{margin-left:5px}
+  .head{max-width:92%}
+  .btn{padding:7px 9px}
+  input[type=range]{width:96px}
+  .rv{min-width:44px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène en cours : arène d'individus, histogrammes, courbes de fréquences, nuages de copies du gène, généalogies ou grilles, selon l'étape."></canvas>
+    <header class="head">
+      <p class="serie">Fondations — module 40</p>
+      <h1>Évolution et génétique des <em>populations</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 11</p>
+      <h2 id="stepTitle"></h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="cle" id="stepKey"></p>
+      <p class="eq" id="eq"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+      <p class="note" id="mNote2"></p>
+    </section>
+
+    <section id="extra" hidden></section>
+
+    <section id="secBox" hidden>
+      <p class="eyebrow" id="secEye"></p>
+      <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe secondaire de l'étape."></canvas></div>
+      <p class="leg" id="secLeg"></p>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd> aller à l'étape</li>
+        <li><kbd>G</kbd> une génération · <kbd>R</kbd> réinitialiser l'étape</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+    </div>
+    <div class="grp">
+      <button class="btn" id="bOnce" title="Une génération (G)">Une génération</button>
+      <button class="btn" id="bTen" title="Dix générations sans animation intermédiaire">×10</button>
+      <button class="btn" id="bNew" title="Nouveau tirage : une nouvelle graine, une autre histoire">Nouveau tirage</button>
+      <button class="btn" id="bReplay" title="Même graine, même histoire">Rejouer le même tirage</button>
+      <span class="seed" id="seedLbl">graine 48213</span>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les onze étapes, en sept chapitres"></div>
+
+    <div class="tools" id="tools"></div>
+  </div>
+</div>
+
+<script>
+/* POPGEN-BEGIN */
+// Moteur stochastique de « Évolution et génétique des populations » (module 40).
+// Tout le hasard passe par un générateur semé : même graine = même histoire.
+// Conventions : générations discrètes et non chevauchantes ; « copie » = une copie du gène
+// (un individu diploïde en porte deux) ; fréquences dans [0, 1].
+
+const PG = (() => {
+
+  // ---------- Hasard ----------
+  function makeRng(seed) {                       // mulberry32
+    let a = (seed >>> 0) || 1;
+    const r = () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    r.seed = seed;
+    return r;
+  }
+  function normal(rng) {                         // Box-Muller
+    let u = 0; while (u === 0) u = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+  }
+  function binomial(n, p, rng) {                 // exact (somme de Bernoulli) : n ≤ quelques milliers ici
+    if (p <= 0) return 0; if (p >= 1) return n;
+    let k = 0; for (let i = 0; i < n; i++) if (rng() < p) k++;
+    return k;
+  }
+  function randInt(n, rng) { return Math.floor(rng() * n); }
+  function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1, rng); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  const clamp01 = x => x < 0 ? 0 : x > 1 ? 1 : x;
+  function reflect01(x) { while (x < 0 || x > 1) { if (x < 0) x = -x; if (x > 1) x = 2 - x; } return x; }
+
+  // ---------- 1. Trait continu (A1, A2, B1) ----------
+  // Chaque individu : un génotype g (héritable) et un phénotype z = g + bruit d'environnement.
+  // z ∈ [0, 1] : la coloration, de sombre (0) à clair (1).
+  // Variance totale fixe V = σ² ; h2 = part génétique de la variance au départ.
+  const TRAIT = { N: 240, sigma: 0.15, mean0: 0.5, sigmaMut: 0.006, wMin: 0.04, width: 0.12 };
+
+  function traitInit(o, rng) {
+    const N = o.N || TRAIT.N, h2 = o.h2 == null ? 0.8 : o.h2, m = o.mean == null ? TRAIT.mean0 : o.mean;
+    const sg = TRAIT.sigma * Math.sqrt(h2), se = TRAIT.sigma * Math.sqrt(1 - h2);
+    const g = new Float64Array(N), z = new Float64Array(N), id = new Int32Array(N), parent = new Int32Array(N).fill(-1);
+    for (let i = 0; i < N; i++) { g[i] = reflect01(m + sg * normal(rng)); z[i] = reflect01(g[i] + se * normal(rng)); id[i] = i; }
+    return { N, g, z, id, parent, gen: 0, h2, se, nextId: N };
+  }
+
+  // Probabilité de survie (jusqu'à la reproduction) selon la coloration et l'environnement.
+  // env : 'none' (pas de prédateur), 'dark' (fond sombre : les clairs se voient), 'light' (fond clair),
+  // 'mid' (fond moyen : sélection stabilisante), 'patchy' (fond tacheté sombre/clair : disruptive).
+  // s ∈ [0, 1] : intensité. Seul le rapport entre survies compte (fitness relative).
+  function survival(z, env, s, harsh) {
+    let w = 1;
+    const W = TRAIT.width, d = z - 0.5, gauss = Math.exp(-d * d / (2 * W * W));
+    if (env === 'dark') w = 1 - s * z;
+    else if (env === 'light') w = 1 - s * (1 - z);
+    else if (env === 'mid') w = 1 - s * (1 - gauss);
+    else if (env === 'patchy') w = 1 - s * gauss;
+    w = Math.max(TRAIT.wMin, w);
+    return harsh ? w * 0.5 : w;                  // « environnement rude » : toutes les survies × 0,5
+  }
+
+  // Une génération en deux temps, pour pouvoir l'animer : 1) qui survit ; 2) qui naît de qui.
+  function traitSurvive(pop, env, s, rng, harsh) {
+    const alive = new Uint8Array(pop.N);
+    for (let i = 0; i < pop.N; i++) alive[i] = rng() < survival(pop.z[i], env, s, harsh) ? 1 : 0;
+    return alive;
+  }
+  function traitReproduce(pop, alive, rng, o) {
+    o = o || {};
+    const sm = o.sigmaMut == null ? TRAIT.sigmaMut : o.sigmaMut, N = o.N || pop.N;
+    const surv = []; for (let i = 0; i < pop.N; i++) if (alive[i]) surv.push(i);
+    if (surv.length === 0) return null;          // extinction
+    const g = new Float64Array(N), z = new Float64Array(N), id = new Int32Array(N), parent = new Int32Array(N);
+    for (let j = 0; j < N; j++) {
+      const p = surv[randInt(surv.length, rng)]; // reproduction : parent tiré au hasard parmi les survivants
+      parent[j] = p;
+      g[j] = reflect01(pop.g[p] + sm * normal(rng));
+      z[j] = reflect01(g[j] + pop.se * normal(rng));
+      id[j] = pop.id[p];                         // lignée : l'identifiant de l'ancêtre fondateur
+    }
+    // Ordonner les enfants par parent : seulement pour l'affichage (l'ordre n'a pas de sens biologique).
+    const ord = Array.from({ length: N }, (_, k) => k).sort((a, b) => parent[a] - parent[b]);
+    const pick = (arr, T) => { const out = new T(N); for (let k = 0; k < N; k++) out[k] = arr[ord[k]]; return out; };
+    return { N, g: pick(g, Float64Array), z: pick(z, Float64Array), id: pick(id, Int32Array), parent: pick(parent, Int32Array),
+             gen: pop.gen + 1, h2: pop.h2, se: pop.se, nextId: pop.nextId };
+  }
+  function traitGeneration(pop, env, s, rng, o) {
+    const alive = traitSurvive(pop, env, s, rng, o && o.harsh);
+    const next = traitReproduce(pop, alive, rng, o);
+    return { alive, next };
+  }
+  function meanVar(a, mask) {
+    let n = 0, m = 0, q = 0;
+    for (let i = 0; i < a.length; i++) if (!mask || mask[i]) { n++; const d = a[i] - m; m += d / n; q += d * (a[i] - m); }
+    return { n, mean: n ? m : NaN, var: n > 1 ? q / (n - 1) : 0, sd: n > 1 ? Math.sqrt(q / (n - 1)) : 0 };
+  }
+  function traitStats(pop, alive) {
+    const z = meanVar(pop.z), g = meanVar(pop.g);
+    const r = { N: pop.N, gen: pop.gen, meanZ: z.mean, sdZ: z.sd, meanG: g.mean, varG: g.var, varZ: z.var,
+                h2now: z.var > 0 ? Math.min(1, g.var / z.var) : 0 };
+    if (alive) { const zs = meanVar(pop.z, alive); r.survivors = zs.n; r.S = zs.mean - z.mean; } // différentielle de sélection
+    return r;
+  }
+  function histogram(a, bins, lo, hi, mask) {
+    lo = lo == null ? 0 : lo; hi = hi == null ? 1 : hi;
+    const h = new Float64Array(bins);
+    for (let i = 0; i < a.length; i++) if (!mask || mask[i]) { let k = Math.floor((a[i] - lo) / (hi - lo) * bins); if (k < 0) k = 0; if (k >= bins) k = bins - 1; h[k]++; }
+    return h;
+  }
+  const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)); const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+  const Phi = x => 0.5 * (1 + erf(x / Math.SQRT2));
+  // Génération suivante ATTENDUE (sans hasard) : chaque individu pèse sa survie ;
+  // ses descendants ont le phénotype g ± bruit d'environnement. Rend un histogramme de N individus.
+  function traitPredictNext(pop, env, s, bins, harsh) {
+    const h = new Float64Array(bins); let W = 0;
+    const sd = Math.sqrt(pop.se * pop.se + TRAIT.sigmaMut * TRAIT.sigmaMut) || 1e-6;
+    for (let i = 0; i < pop.N; i++) {
+      const w = survival(pop.z[i], env, s, harsh); W += w;
+      let prev = Phi((0 - pop.g[i]) / sd);
+      for (let k = 0; k < bins; k++) { const c = Phi(((k + 1) / bins - pop.g[i]) / sd); h[k] += w * (c - prev); prev = c; }
+    }
+    const tot = h.reduce((a, b) => a + b, 0) || 1;
+    for (let k = 0; k < bins; k++) h[k] *= pop.N / tot;
+    return { hist: h, meanW: W / pop.N };
+  }
+
+  // ---------- 2. Deux allèles A / a, individus diploïdes (C1, C2, D2) ----------
+  // État : N individus, nA copies de A parmi 2N. Fitness relatives : AA 1+s, Aa 1+s/2, aa 1 (effets additifs).
+  function pOf(st) { return st.nA / (2 * st.N); }
+  function hardyWeinberg(p) { const q = 1 - p; return { AA: p * p, Aa: 2 * p * q, aa: q * q }; }
+  // Fréquence de A après sélection, mutation et migration, AVANT le tirage au hasard (déterministe).
+  function wfExpected(p, o) {
+    o = o || {};
+    const s = o.s || 0, h = o.h == null ? 0.5 : o.h, u = o.u || 0, v = o.v || 0, m = o.m || 0;
+    const q = 1 - p, wAA = 1 + s, wAa = 1 + h * s, waa = 1;
+    const wbar = p * p * wAA + 2 * p * q * wAa + q * q * waa;
+    let ps = (p * p * wAA + p * q * wAa) / wbar;
+    ps = ps * (1 - u) + (1 - ps) * v;            // mutation A→a (u), a→A (v)
+    if (m > 0) ps = (1 - m) * ps + m * (o.pSrc == null ? 0.5 : o.pSrc);
+    return clamp01(ps);
+  }
+  // Une génération : 2N' copies tirées au hasard, chacune vaut A avec la probabilité attendue.
+  function wfStep(st, o, rng) {
+    const N = (o && o.N) || st.N;
+    return { N, nA: binomial(2 * N, wfExpected(pOf(st), o), rng), gen: st.gen + 1 };
+  }
+  // Forme les individus en appariant au hasard les 2N copies (union aléatoire des gamètes).
+  // Rend un tableau de génotypes : 2 = AA, 1 = Aa, 0 = aa.
+  function wfIndividuals(nA, N, rng) {
+    const c = new Uint8Array(2 * N); for (let i = 0; i < nA; i++) c[i] = 1;
+    shuffle(c, rng);
+    const g = new Uint8Array(N); for (let i = 0; i < N; i++) g[i] = c[2 * i] + c[2 * i + 1];
+    return g;
+  }
+  function genotypeCounts(g) { const c = { AA: 0, Aa: 0, aa: 0 }; for (const x of g) { if (x === 2) c.AA++; else if (x === 1) c.Aa++; else c.aa++; } return c; }
+  // Probabilité de fixation (Kimura, diffusion) pour nos fitness additives : s par copie ≈ s/2.
+  function fixationProb(p, N, s) {
+    if (Math.abs(s) < 1e-9) return p;
+    const a = 2 * N * s;                         // 4·N·(s/2)
+    return (1 - Math.exp(-a * p)) / (1 - Math.exp(-a));
+  }
+  function wfReplicates(R, N, p0, o, gens, rng) {
+    const nA0 = Math.round(p0 * 2 * N), out = [];
+    for (let r = 0; r < R; r++) {
+      const tr = new Float32Array(gens + 1); let st = { N, nA: nA0, gen: 0 }; tr[0] = pOf(st);
+      for (let t = 1; t <= gens; t++) { st = wfStep(st, o, rng); tr[t] = pOf(st); }
+      out.push(tr);
+    }
+    return out;
+  }
+  // Hétérozygotie attendue sous dérive pure : H_t = H_0 · Π (1 − 1/(2N_t)).
+  function expectedH(H0, sizes) { let H = H0; for (const n of sizes) H *= 1 - 1 / (2 * n); return H; }
+
+  // ---------- 3. Copies du gène, plusieurs allèles (D1, E1, E2, F1) ----------
+  // Une population = un tableau d'allèles (entiers) de longueur 2N. Dérive neutre de Wright-Fisher :
+  // chaque copie de la génération suivante est la copie d'une copie tirée au hasard dans la précédente.
+  // Mutation : avec la probabilité mu, la nouvelle copie devient un allèle jamais vu (identifiant neuf).
+  function maInit(nCopies, K, rng, freqs) {
+    const a = new Uint16Array(nCopies);
+    if (freqs) { let i = 0; for (let k = 0; k < K; k++) { const n = k === K - 1 ? nCopies - i : Math.round(freqs[k] * nCopies); for (let j = 0; j < n && i < nCopies; j++) a[i++] = k; } }
+    else for (let i = 0; i < nCopies; i++) a[i] = i % K;
+    return shuffle(a, rng);
+  }
+  function maStep(arr, nNext, rng, o) {
+    o = o || {};
+    const mu = o.mu || 0, n = arr.length;
+    const parent = new Int32Array(nNext);
+    for (let j = 0; j < nNext; j++) parent[j] = randInt(n, rng);
+    if (o.sortByParent) parent.sort();
+    const out = new Uint16Array(nNext), mutated = new Uint8Array(nNext);
+    let newIds = 0, next = o.nextId || 0;
+    for (let j = 0; j < nNext; j++) {
+      if (mu > 0 && rng() < mu) { out[j] = next++; mutated[j] = 1; newIds++; }
+      else out[j] = arr[parent[j]];
+    }
+    return { arr: out, parent, mutated, nextId: next, newMutations: newIds };
+  }
+  // Effet fondateur : k individus (2k copies) tirés sans remise.
+  function maSample(arr, nCopies, rng) {
+    const idx = Array.from({ length: arr.length }, (_, i) => i); shuffle(idx, rng);
+    const out = new Uint16Array(nCopies); for (let i = 0; i < nCopies; i++) out[i] = arr[idx[i]];
+    return out;
+  }
+  function maStats(arr) {
+    const m = new Map(); for (const x of arr) m.set(x, (m.get(x) || 0) + 1);
+    let sum2 = 0; const n = arr.length; const freqs = [];
+    for (const [k, c] of m) { const p = c / n; sum2 += p * p; freqs.push([k, p]); }
+    freqs.sort((a, b) => b[1] - a[1]);
+    return { n, nAlleles: m.size, H: n ? 1 - sum2 : 0, freqs, counts: m };
+  }
+  // Goulot : taille avant, pendant, puis croissance logistique vers N0.
+  function bottleneckSizes(o, gens) {
+    const out = []; let N = o.N0;
+    for (let t = 0; t <= gens; t++) {
+      if (t < o.tCrash) N = o.N0;
+      else if (t < o.tCrash + o.dur) N = o.Nb;
+      else N = Math.min(o.N0, Math.max(N + 1, Math.round(N + o.r * N * (1 - N / o.N0))));
+      out.push(N);
+    }
+    return out;
+  }
+  // Mutation-dérive (allèles infinis) : H* = θ/(1+θ), θ = 4Nμ.
+  function equilibriumH(N, mu) { const th = 4 * N * mu; return th / (1 + th); }
+
+  // Deux îles : chaque nouvelle copie a un parent dans l'autre île avec la probabilité m (flux génétique).
+  function islandsStep(A, B, o, rng) {
+    const m = o.m || 0, mu = o.mu || 0; let next = o.nextId || 0;
+    const one = (own, other) => {
+      const out = new Uint16Array(own.length), mut = new Uint8Array(own.length), mig = new Uint8Array(own.length);
+      for (let j = 0; j < own.length; j++) {
+        if (mu > 0 && rng() < mu) { out[j] = next++; mut[j] = 1; continue; }
+        if (m > 0 && rng() < m) { out[j] = other[randInt(other.length, rng)]; mig[j] = 1; }
+        else out[j] = own[randInt(own.length, rng)];
+      }
+      return { arr: out, mutated: mut, migrant: mig };
+    };
+    const a = one(A, B), b = one(B, A);
+    return { A: a, B: b, nextId: next };
+  }
+  // Distance entre deux compositions : ½ Σ |p_A − p_B| (0 = identiques, 1 = rien en commun).
+  function divergence(A, B) {
+    const sa = maStats(A).counts, sb = maStats(B).counts, keys = new Set([...sa.keys(), ...sb.keys()]);
+    let d = 0; for (const k of keys) d += Math.abs((sa.get(k) || 0) / A.length - (sb.get(k) || 0) / B.length);
+    return d / 2;
+  }
+
+  // ---------- 4. Ouverture : population sur une grille (G1) ----------
+  // Même règle neutre ; seule change la façon de choisir le parent : n'importe où (mélange parfait)
+  // ou parmi les 8 voisins (voisinage). Mise à jour asynchrone : une « génération » = W·H remplacements.
+  function gridInit(W, H, K, rng) { const g = new Uint16Array(W * H); for (let i = 0; i < g.length; i++) g[i] = randInt(K, rng); return g; }
+  function gridStep(g, W, H, mode, rng, events) {
+    const n = W * H; events = events == null ? n : events;
+    for (let e = 0; e < events; e++) {
+      const i = randInt(n, rng);
+      if (mode === 'mixed') g[i] = g[randInt(n, rng)];
+      else {
+        const x = i % W, y = (i / W) | 0; let dx = 0, dy = 0;
+        while (dx === 0 && dy === 0) { dx = randInt(3, rng) - 1; dy = randInt(3, rng) - 1; }
+        g[i] = g[((y + dy + H) % H) * W + ((x + dx + W) % W)];
+      }
+    }
+    return g;
+  }
+  function gridSameNeighbor(g, W, H) {           // part des paires de voisins (droite, bas) de même allèle
+    let s = 0, t = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const v = g[y * W + x];
+      if (g[y * W + (x + 1) % W] === v) s++; if (g[((y + 1) % H) * W + x] === v) s++; t += 2;
+    }
+    return s / t;
+  }
+
+  return { makeRng, normal, binomial, randInt, shuffle, TRAIT, traitInit, survival, traitSurvive, traitReproduce,
+           traitGeneration, traitStats, traitPredictNext, histogram, meanVar, pOf, hardyWeinberg, wfExpected, wfStep,
+           wfIndividuals, genotypeCounts, fixationProb, wfReplicates, expectedH, maInit, maStep, maSample, maStats,
+           bottleneckSizes, equilibriumH, islandsStep, divergence, gridInit, gridStep, gridSameNeighbor };
+})();
+/* POPGEN-END */
+
+(() => {
+'use strict';
+
+/* ---------------- Notes de modèle ----------------
+   Générations discrètes, non chevauchantes. Tout le hasard vient de PG.makeRng(graine) :
+   « Nouveau tirage » choisit une graine, « Rejouer » la réutilise. Math.random ne sert qu'à choisir une graine.
+   A  : trait continu z = g + environnement (traitSurvive, traitReproduce).      B1 : survival, traitPredictNext.
+   C  : deux allèles A/a diploïdes (wfIndividuals, wfExpected, wfStep).           D1 : copies (maStep), D2 : wfStep.
+   E  : maSample, maStep, bottleneckSizes, expectedH.   F1 : islandsStep, divergence.   G1 : gridStep. */
+const TAU = Math.PI * 2;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TS = reduce ? 0.4 : 1;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const secC = $('#sec'), sx = secC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), A: tok('--A'), a: tok('--a'), mono: tok('--mono') };
+const hx = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RGB = { tx: hx(C.texte), t2: hx(C.texte2), ac: hx(C.accent), pos: hx(C.pos), neg: hx(C.neg), en: hx(C.ener), A: hx(C.A), a: hx(C.a), fd: hx(C.fond) };
+const rgba = (c, a) => `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const fmt = (n, d) => (isFinite(n) ? n.toFixed(d) : '—').replace('.', ',').replace('-', '−');
+const fmtG = v => String(v).replace('.', ',');
+const grp = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const mono = px => `${px}px ${C.mono}`;
+const mean = a => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i]; return a.length ? s / a.length : NaN; };
+function txt(c, s, x, y, col, size, align, base) { c.font = mono(size || 11); c.fillStyle = col; c.textAlign = align || 'left'; c.textBaseline = base || 'alphabetic'; c.fillText(s, x, y); }
+function tag(c, s, x, y, col, size, align) {
+  size = size || 11; c.font = mono(size); c.textAlign = align || 'left'; c.textBaseline = 'middle';
+  const w = c.measureText(s).width, hh = size + 4, rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  c.fillStyle = 'rgba(10,13,18,0.78)'; c.fillRect(rx - 3, y - hh / 2, w + 6, hh); c.fillStyle = col; c.fillText(s, x, y + 0.5);
+}
+
+/* palette des allèles : A, a, puis six teintes douces, puis l'angle d'or pour les allèles nés d'une mutation */
+const PAL = ['#c49bff', '#6ad1e3', '#e9b872', '#8fd19e', '#f29fb4', '#a9b4f0', '#d6d27a', '#e48f7a'];
+const alCol = k => k < 8 ? PAL[k] : `hsl(${((k * 137.508) % 360) | 0},55%,68%)`;
+const ALN = 'ABCDEFGH';
+const alName = k => k < 8 ? (k === 1 ? 'a' : ALN[k]) : 'M' + (k - 7);
+/* rampe de coloration d'un individu : de #2b2723 (z = 0) à #ece3d3 (z = 1) */
+const ZC = []; for (let i = 0; i <= 64; i++) { const t = i / 64; ZC.push(`rgb(${Math.round(43 + (236 - 43) * t)},${Math.round(39 + (227 - 39) * t)},${Math.round(35 + (211 - 35) * t)})`); }
+const zCol = z => ZC[Math.round(clamp(z, 0, 1) * 64)];
+const TERR = { none: '#5e5850', dark: '#2f2b27', light: '#bdb3a2', mid: '#8a8174' };
+const TERRN = { none: 'sans prédateur', dark: 'sombre', light: 'clair', mid: 'moyen', patchy: 'tacheté' };
+let patchCv = null;
+function patchCanvas() {
+  if (patchCv) return patchCv;
+  const w = 48, h = 32, o = document.createElement('canvas'); o.width = w; o.height = h; const g = o.getContext('2d'), im = g.createImageData(w, h), r = PG.makeRng(777), lw = 9, lh = 6, lat = [];
+  for (let i = 0; i < lw * lh; i++) lat.push(r());
+  const sm = t => t * t * (3 - 2 * t);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const fx = x / w * (lw - 1), fy = y / h * (lh - 1), x0 = Math.floor(fx), y0 = Math.floor(fy), tx = sm(fx - x0), ty = sm(fy - y0), x1 = Math.min(lw - 1, x0 + 1), y1 = Math.min(lh - 1, y0 + 1);
+    const v = (lat[y0 * lw + x0] * (1 - tx) + lat[y0 * lw + x1] * tx) * (1 - ty) + (lat[y1 * lw + x0] * (1 - tx) + lat[y1 * lw + x1] * tx) * ty;
+    const m = clamp((v - 0.4) / 0.2, 0, 1), k = (y * w + x) * 4;
+    im.data[k] = 47 + (189 - 47) * m; im.data[k + 1] = 43 + (179 - 43) * m; im.data[k + 2] = 39 + (162 - 39) * m; im.data[k + 3] = 255;
+  }
+  g.putImageData(im, 0, 0); return (patchCv = o);
+}
+function rrect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function terrain(c, R, env) {
+  c.save(); rrect(c, R.x, R.y, R.w, R.h, 4); c.clip();
+  if (env === 'patchy') { c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(patchCanvas(), R.x, R.y, R.w, R.h); } else { c.fillStyle = TERR[env] || TERR.none; c.fillRect(R.x, R.y, R.w, R.h); }
+  c.restore();
+}
+
+/* ---------------- État global ---------------- */
+let W = 800, H = 600, dpr = 1, idx = 0, playing = true, seed = 48213, rng = PG.makeRng(seed);
+const layRng = () => PG.makeRng((((seed >>> 0) * 2654435761) >>> 0) ^ 0x9e3779b9);
+const DEF = { 0: { env: 'dark', s: 0.6 }, 1: { h2: 0.8 }, 2: { env: 'dark', s: 0.6, harsh: false }, 3: { p: 0.3, N: 50 }, 4: { s: 0.05, p0: 0.1 }, 5: { N: 10 },
+              6: { s: 0.05, p0: 0.1, N: 10 }, 7: { k: 5 }, 8: { Nb: 5 }, 9: { mu: 0.002, m: 0 }, 10: {} };
+const PS = JSON.parse(JSON.stringify(DEF));
+const spots = [];
+const spotC = (x, y, r, name, role) => spots.push({ k: 0, x, y, r, name, role });
+const spotR = (x, y, w, h, name, role) => spots.push({ k: 1, x, y, w, h, name, role });
+function spotP(pts, tol, name, role) { for (let i = 1; i < pts.length; i++) spots.push({ k: 2, x: pts[i-1][0], y: pts[i-1][1], x2: pts[i][0], y2: pts[i][1], r: tol, name, role }); }
+let G = {};
+const stackMode = () => W < 700;
+const headH = () => W <= 520 ? 132 : W <= 860 ? 112 : 134;
+const padX = () => W < 600 ? 14 : 26;
+const area = () => { const x = padX(); return { x, y: headH(), w: W - 2 * x, h: H - headH() - 8 }; };
+
+/* ---------------- Gabarits de dessin ---------------- */
+const mk = (x, y, w, h, x0, x1, y0, y1) => ({ x, y, w, h, x0, x1, y0, y1, X: v => x + (v - x0) / (x1 - x0) * w, Y: v => y + h - (v - y0) / (y1 - y0) * h });
+function axes(c, p, o) {
+  c.save(); c.lineWidth = 1;
+  for (const v of (o.xt || [])) { const X = Math.round(p.X(v)) + .5; c.strokeStyle = rgba(RGB.t2, .13); c.beginPath(); c.moveTo(X, p.y); c.lineTo(X, p.y + p.h); c.stroke();
+    if (!o.noxl) txt(c, o.xf ? o.xf(v) : fmt(v, 0), X, p.y + p.h + 13, C.texte2, 10, 'center'); }
+  for (const v of (o.yt || [])) { const Y = Math.round(p.Y(v)) + .5; c.strokeStyle = rgba(RGB.t2, .13); c.beginPath(); c.moveTo(p.x, Y); c.lineTo(p.x + p.w, Y); c.stroke();
+    txt(c, o.yf ? o.yf(v) : fmt(v, 0), p.x - 5, Y + 3.5, C.texte2, 10, 'right'); }
+  c.strokeStyle = rgba(RGB.t2, .7); c.beginPath(); c.moveTo(p.x + .5, p.y); c.lineTo(p.x + .5, p.y + p.h + .5); c.lineTo(p.x + p.w, p.y + p.h + .5); c.stroke();
+  if (o.xl) txt(c, o.xl, p.x + p.w, p.y + p.h + (o.noxl ? 10 : 25), C.texte2, 10, 'right');
+  if (o.yl) txt(c, o.yl, p.x + 5, o.ylAbove ? p.y - 8 : p.y + 10, C.texte2, 10);
+  c.restore();
+}
+const clipP = (c, p) => { c.save(); c.beginPath(); c.rect(p.x, p.y - 1, p.w + 1, p.h + 2); c.clip(); };
+function dot(c, x, y, r, col, ring) { c.beginPath(); c.arc(x, y, r, 0, TAU); if (ring) { c.strokeStyle = col; c.lineWidth = 1.5; c.stroke(); } else { c.fillStyle = col; c.fill(); } }
+function line(c, x0, y0, x1, y1, col, lw, dash) { c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.setLineDash([]); }
+function poly(c, pts, col, lw, dash) { c.strokeStyle = col; c.lineWidth = lw || 1; c.setLineDash(dash || []); c.beginPath(); pts.forEach((q, i) => i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1])); c.stroke(); c.setLineDash([]); }
+/* histogramme en barres ; mode 'ghost' = contour tireté en escalier */
+function bars(c, p, h, ymax, col, alpha) {
+  const n = h.length, bw = p.w / n; c.fillStyle = rgba(col, alpha);
+  for (let i = 0; i < n; i++) { const bh = h[i] / ymax * p.h; if (bh > 0.2) c.fillRect(p.x + i * bw + 0.5, p.y + p.h - bh, Math.max(1, bw - 1), bh); }
+}
+function stairs(c, p, h, ymax, col, lw, dash) {
+  const n = h.length, bw = p.w / n; c.strokeStyle = col; c.lineWidth = lw; c.setLineDash(dash || []); c.beginPath();
+  for (let i = 0; i < n; i++) { const y = p.y + p.h - Math.min(1.05, h[i] / ymax) * p.h, x0 = p.x + i * bw; if (i === 0) c.moveTo(x0, y); else c.lineTo(x0, y); c.lineTo(x0 + bw, y); } c.stroke(); c.setLineDash([]);
+}
+/* barre empilée horizontale de fréquences : parts = [[couleur, fraction], ...] */
+function stackBar(c, x, y, w, h, parts) {
+  let X = x; for (const [col, f] of parts) { const ww = f * w; if (ww > 0.2) { c.fillStyle = col; c.fillRect(X, y, ww, h); } X += ww; }
+  c.strokeStyle = rgba(RGB.t2, .6); c.lineWidth = 1; c.strokeRect(x + .5, y + .5, w, h);
+}
+const freqParts = (arr) => { const st = PG.maStats(arr), ks = [...st.counts.keys()].sort((a, b) => a - b); return ks.map(k => [alCol(k), st.counts.get(k) / arr.length]); };
+function legend(items) {
+  return items.map(([k, col, s]) => { let g;
+    if (k === 'pt') g = `<circle cx="10" cy="3" r="3" fill="${col}"/>`; else if (k === 'ring') g = `<circle cx="10" cy="3" r="3" fill="none" stroke="${col}"/>`;
+    else g = `<line x1="0" y1="3" x2="20" y2="3" stroke="${col}" stroke-width="${k === 'fort' ? 2.4 : 1.4}"${k === 'tiret' ? ' stroke-dasharray="4 3"' : ''}/>`;
+    return `<span><svg viewBox="0 0 20 6">${g}</svg>${s}</span>`; }).join('');
+}
+
+/* ---------------- Nuages de perles (copies du gène) ---------------- */
+function blobR(th) { return 0.84 + 0.07 * Math.sin(3 * th + 1.1) + 0.05 * Math.sin(5 * th + 0.4) + 0.03 * Math.sin(2 * th + 2.0); }
+function blobPts(n, r) { const a = new Float32Array(2 * n); let i = 0; while (i < n) { const u = r() * 2 - 1, v = r() * 2 - 1; if (Math.hypot(u, v) < blobR(Math.atan2(v, u)) * 0.96) { a[2 * i] = u; a[2 * i + 1] = v; i++; } } return a; }
+function blobPath(c, cx, cy, rx, ry, t) {
+  c.beginPath(); for (let i = 0; i <= 64; i++) { const th = i / 64 * TAU, r = blobR(th) * (1 + 0.012 * Math.sin(th * 4 + t)); const x = cx + Math.cos(th) * r * rx, y = cy + Math.sin(th) * r * ry; if (i) c.lineTo(x, y); else c.moveTo(x, y); } c.closePath();
+}
+/* les copies sont rangées par identifiant d'allèle ; les positions des perles sont fixes : seule la couleur change aux frontières */
+function sortedOrder(arr) { const o = Array.from({ length: arr.length }, (_, i) => i); o.sort((a, b) => arr[a] - arr[b] || a - b); return o; }
+function drawPearls(c, pts, order, arr, cx, cy, rx, ry, pr, alpha) {
+  const groups = new Map(), n = arr.length;
+  for (let q = 0; q < n; q++) { const k = arr[order[q]]; let g = groups.get(k); if (!g) groups.set(k, g = []); g.push(q); }
+  c.globalAlpha = alpha == null ? 1 : alpha;
+  for (const [k, g] of groups) { c.fillStyle = alCol(k); c.beginPath();
+    for (const q of g) { const x = cx + pts[2 * q] * rx, y = cy + pts[2 * q + 1] * ry; c.moveTo(x + pr, y); c.arc(x, y, pr, 0, TAU); } c.fill(); }
+  c.globalAlpha = 1;
+}
+function pearlRadius(rx, ry, n) { return clamp(Math.sqrt(Math.PI * rx * ry * 0.7 / Math.max(1, n)) * 0.42, 0.9, 4); }
+function cloudHit(x, y, pts, order, arr, cx, cy, rx, ry, pr) {
+  let best = -1, bd = (pr + 4) * (pr + 4); const n = arr.length;
+  for (let q = 0; q < n; q++) { const dx = cx + pts[2 * q] * rx - x, dy = cy + pts[2 * q + 1] * ry - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = q; } }
+  return best < 0 ? -1 : order[best];
+}
+const inP = (p, x, y) => p && x >= p.x && x <= p.x + p.w && y >= p.y && y <= p.y + p.h;
+const inR = (r, x, y) => r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+const countA = (arr, v) => { let n = 0; for (let i = 0; i < arr.length; i++) if (arr[i] === v) n++; return n; };
+const sdOf = a => { const m = mean(a); let s = 0; for (let i = 0; i < a.length; i++) s += (a[i] - m) * (a[i] - m); return a.length > 1 ? Math.sqrt(s / (a.length - 1)) : 0; };
+
+/* ================= Étapes ================= */
+const ST = [];
+const pctS = (v, d) => (v >= 0 ? '+' : '−') + fmt(Math.abs(v), d);
+const nf = v => (typeof v === 'number' && isFinite(v)) ? v : null;
+const wob = () => reduce ? 0 : performance.now() / 1000;
+
+/* ---------- A : arène (A1 et A2) ---------- */
+const AN = 240, PHD = [0.6, 0.55, 0.75, 0.5], PHN = ['vivre', 'sélection', 'reproduction', 'relève'];
+const AR = { mode: 0, pop: null, xy: null, nxt: null, nxy: null, alive: null, phase: -1, t: 0, gen: 0, means: [], hist0: null, runs: [], tr: null, selfIdx: -1, lineF: null, nlineF: null,
+             S: NaN, R: NaN, surv: NaN, extinct: false, lay: null, stats: null, h2: 0.8 };
+const arEnv = () => AR.mode ? 'dark' : PS[0].env, arS = () => AR.mode ? 0.6 : PS[0].s;
+function relax(xy, iters) {
+  const n = xy.length / 2, d0 = 0.05;
+  for (let it = 0; it < iters; it++) {
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+      let dx = xy[2*i] - xy[2*j], dy = xy[2*i+1] - xy[2*j+1]; const d2 = dx * dx + dy * dy;
+      if (d2 < d0 * d0) { let d = Math.sqrt(d2); if (d < 1e-5) { dx = 1e-3; dy = 0; d = 1e-3; } const f = (d0 - d) * 0.25 / d; xy[2*i] += dx * f; xy[2*i+1] += dy * f; xy[2*j] -= dx * f; xy[2*j+1] -= dy * f; }
+    }
+    for (let i = 0; i < xy.length; i++) xy[i] = clamp(xy[i], 0.03, 0.97);
+  }
+}
+function arInit(mode) {
+  AR.mode = mode; rng = PG.makeRng(seed); AR.lay = layRng(); AR.h2 = mode ? PS[1].h2 : 0.8;
+  AR.pop = PG.traitInit({ N: AN, h2: AR.h2 }, rng);
+  AR.xy = new Float32Array(2 * AN); for (let i = 0; i < AN; i++) { AR.xy[2*i] = 0.05 + AR.lay() * 0.9; AR.xy[2*i+1] = 0.05 + AR.lay() * 0.9; }
+  relax(AR.xy, 60);
+  AR.nxt = null; AR.nxy = null; AR.alive = null; AR.phase = -1; AR.t = 0; AR.gen = 0; AR.stats = PG.traitStats(AR.pop); AR.means = [AR.stats.meanZ];
+  AR.hist0 = PG.histogram(AR.pop.z, 20); AR.S = AR.R = AR.surv = NaN; AR.extinct = false; AR.tr = null; AR.selfIdx = -1; AR.lineF = null; AR.nlineF = null;
+}
+function arArchive() { if (AR.means.length > 1) { AR.runs.push({ h2: AR.h2, means: AR.means.slice() }); if (AR.runs.length > 6) AR.runs.shift(); } }
+function trackSync() { if (AR.tr && AR.selfIdx >= 0 && AR.nxt) { AR.tr.alive = !!AR.alive[AR.selfIdx]; let c = 0; for (let j = 0; j < AR.nxt.N; j++) if (AR.nxt.parent[j] === AR.selfIdx) c++; AR.tr.children = c; } }
+function arBegin() {
+  if (AR.phase >= 0 || AR.extinct) return false;
+  const alive = PG.traitSurvive(AR.pop, arEnv(), arS(), rng, false), nxt = PG.traitReproduce(AR.pop, alive, rng, {});
+  if (!nxt) { AR.extinct = true; return false; }
+  AR.alive = alive; AR.nxt = nxt;
+  const N = nxt.N, nxy = new Float32Array(2 * N);
+  for (let j = 0; j < N; j++) { const p = nxt.parent[j]; nxy[2*j] = clamp(AR.xy[2*p] + (AR.lay() - .5) * 0.07, 0.03, 0.97); nxy[2*j+1] = clamp(AR.xy[2*p+1] + (AR.lay() - .5) * 0.07, 0.03, 0.97); }
+  AR.nxy = nxy; if (reduce) relax(nxy, 25);
+  const st = PG.traitStats(AR.pop, alive); AR.S = st.S; AR.surv = st.survivors; AR.R = PG.meanVar(nxt.z).mean - st.meanZ;
+  AR.nlineF = new Uint8Array(N); if (AR.lineF) for (let j = 0; j < N; j++) AR.nlineF[j] = AR.lineF[nxt.parent[j]];
+  trackSync(); AR.phase = 0; AR.t = 0; return true;
+}
+function arCommit() {
+  if (!AR.nxt) return;
+  AR.pop = AR.nxt; AR.xy = AR.nxy; AR.lineF = AR.nlineF; AR.selfIdx = -1; AR.nxt = null; AR.nxy = null; AR.nlineF = null;
+  AR.gen = AR.pop.gen; AR.stats = PG.traitStats(AR.pop); AR.means.push(AR.stats.meanZ); AR.phase = -1; AR.t = 0;
+  if (AR.tr && AR.lineF) { let c = 0, s = 0; for (let i = 0; i < AR.pop.N; i++) if (AR.lineF[i]) { c++; s += AR.pop.z[i]; } AR.tr.lineage = c; AR.tr.lz = c ? s / c : NaN; }
+  relax(AR.xy, reduce ? 25 : 14);
+}
+function arGen(n) { for (let k = 0; k < n; k++) { if (AR.phase >= 0) arCommit(); if (AR.extinct) break; if (arBegin()) arCommit(); } }
+function arTick(dt, play) {
+  if (AR.phase < 0) { if (play && !AR.extinct) arBegin(); if (AR.phase < 0) return; }
+  AR.t += dt / PHD[AR.phase];
+  if (AR.t >= 1) { AR.t = 0; AR.phase++; if (AR.phase > 3) arCommit(); }
+  else if (AR.phase === 3 && AR.nxy && !reduce) relax(AR.nxy, 1);
+}
+function arLayout() {
+  const a = area(); let ar, hp, mp;
+  if (!stackMode()) {
+    const aw = Math.round(a.w * 0.58), rx = a.x + aw + 30, rw = a.w - aw - 34, ph = Math.max(60, (a.h - 100) / 2);
+    ar = { x: a.x, y: a.y + 2, w: aw, h: a.h - 32 };
+    hp = mk(rx, a.y + 18, rw, ph, 0, 1, 0, 1); mp = mk(rx + 14, hp.y + hp.h + 46, rw - 14, ph, 0, 20, 0, 1);
+  } else {
+    const ah = Math.min(a.h * 0.52, a.w * 0.78), py = a.y + ah + 56, ph = Math.max(60, a.y + a.h - py - 30), pw = (a.w - 60) / 2;
+    ar = { x: a.x, y: a.y, w: a.w, h: ah }; hp = mk(a.x + 4, py, pw, ph, 0, 1, 0, 1); mp = mk(a.x + pw + 56, py, pw, ph, 0, 20, 0, 1);
+  }
+  return { ar, hp, mp };
+}
+const arPos = (R, i, xy, ph) => [R.x + (xy[2*i] + (reduce ? 0 : 0.004 * Math.sin(wob() * 0.8 + ph))) * R.w, R.y + (xy[2*i+1] + (reduce ? 0 : 0.004 * Math.cos(wob() * 0.7 + ph * 1.3))) * R.h];
+function bodyDraw(c, X, Y, r, z, ph, a, fa) {
+  const w = wob(), rx = r * (1.18 + 0.08 * Math.sin(w * 1.7 + ph)), ry = r * (0.78 + 0.07 * Math.cos(w * 1.3 + ph * 1.3)), rot = ph + (reduce ? 0 : 0.35 * Math.sin(w * 0.6 + ph));
+  c.beginPath(); c.ellipse(X, Y, rx, ry, rot, 0, TAU);
+  if (fa > 0) { c.globalAlpha = a * fa; c.fillStyle = zCol(z); c.fill(); }
+  c.globalAlpha = a; c.strokeStyle = 'rgba(232,228,220,.34)'; c.lineWidth = 0.8; c.stroke(); c.globalAlpha = 1;
+}
+function arMeanPlot(c, mp) {
+  const gmax = Math.max(20, AR.means.length - 1), step = gmax <= 20 ? 5 : gmax <= 60 ? 10 : 20, xt = []; for (let v = 0; v <= gmax; v += step) xt.push(v);
+  const p = mk(mp.x, mp.y, mp.w, mp.h, 0, gmax, 0, 1); G.mp = p;
+  axes(c, p, { xt, yt: [0, 0.5, 1], yf: v => fmt(v, 1), xl: 'génération', yl: 'moyenne de z' });
+  clipP(c, p);
+  if (AR.mode === 1) for (const r of AR.runs) { poly(c, r.means.map((m, i) => [p.X(i), p.Y(m)]), rgba(RGB.ac, .25), 1.6); }
+  poly(c, AR.means.map((m, i) => [p.X(i), p.Y(m)]), C.accent, 2);
+  c.restore();
+  if (AR.mode === 1) { for (const r of AR.runs) { const e = r.means.length - 1, y = p.Y(r.means[e]); txt(c, 'h² = ' + fmt(r.h2, 1), p.X(Math.min(e, gmax)) - 4, clamp(y - 5, p.y + 8, p.y + p.h - 2), rgba(RGB.t2, .85), 9, 'right'); }
+    const e = AR.means.length - 1; txt(c, 'h² = ' + fmt(AR.h2, 1), p.X(e) - 4, clamp(p.Y(AR.means[e]) + 13, p.y + 8, p.y + p.h - 2), C.accent, 9, 'right'); }
+  const e = AR.means.length - 1; dot(c, p.X(e), p.Y(AR.means[e]), 3.5, C.accent);
+  spotP(AR.means.map((m, i) => [p.X(i), p.Y(m)]).filter((_, i, a) => i % Math.max(1, Math.ceil(a.length / 40)) === 0), 6, 'Moyenne de z selon la génération', 'La moyenne de la coloration de la population, génération après génération.');
+}
+function arDraw(c) {
+  const L = arLayout(), R = L.ar, hp = L.hp; G.ar = R; G.hp = hp;
+  terrain(c, R, arEnv());
+  const r = clamp(Math.sqrt(R.w * R.h / AN) * 0.3, 3.2, 8.5), ph = AR.phase, t = AR.t, pop = AR.pop, N = pop.N; G.ar.r = r;
+  const ringOf = (X, Y, self, lin, a) => { if (self) { c.globalAlpha = a; dot(c, X, Y, r * 1.9, C.ener, true); c.lineWidth = 2; c.globalAlpha = 1; } else if (lin) { c.globalAlpha = a * 0.6; dot(c, X, Y, r * 1.7, C.ener, true); c.globalAlpha = 1; } };
+  c.save(); rrect(c, R.x, R.y, R.w, R.h, 4); c.clip();
+  if (ph === 2 || ph === 3) {
+    if (ph === 2) for (let j = 0; j < AR.nxt.N; j++) { const b = clamp((t - 0.7 * j / AR.nxt.N) / 0.3, 0, 1); if (b <= 0 || b >= 1) continue; const p = AR.nxt.parent[j], P0 = arPos(R, p, AR.xy, p * 2.4), P1 = arPos(R, j, AR.nxy, j * 2.4);
+      c.strokeStyle = rgba(RGB.tx, Math.sin(Math.PI * b) * 0.55); c.lineWidth = 0.8; c.beginPath(); c.moveTo(P0[0], P0[1]); c.lineTo(P1[0], P1[1]); c.stroke(); }
+  }
+  for (let i = 0; i < N; i++) {
+    let a = 1, fa = 1; const dead = ph >= 1 && !AR.alive[i];
+    if (dead) { if (ph >= 2) continue; fa = Math.max(0, 1 - 2 * t); a = t < 0.5 ? 1 : Math.max(0, 2 * (1 - t)); if (a <= 0) continue; }
+    else if (ph === 3) a = 1 - t;
+    const P = arPos(R, i, AR.xy, i * 2.4); bodyDraw(c, P[0], P[1], r, pop.z[i], i * 2.4, a, fa);
+    if (AR.mode === 1 && !dead) { c.globalAlpha = a; dot(c, P[0], P[1], r * 0.36, zCol(pop.g[i])); c.strokeStyle = 'rgba(10,13,18,.7)'; c.lineWidth = .7; c.beginPath(); c.arc(P[0], P[1], r * 0.36, 0, TAU); c.stroke(); c.globalAlpha = 1; }
+    ringOf(P[0], P[1], AR.selfIdx === i, AR.lineF && AR.lineF[i], a);
+  }
+  if (ph >= 2) {
+    const nx = AR.nxt;
+    for (let j = 0; j < nx.N; j++) {
+      const b = ph === 2 ? clamp((t - 0.7 * j / nx.N) / 0.3, 0, 1) : 1; if (b <= 0) continue;
+      const P = arPos(R, j, AR.nxy, j * 2.4 + 1); bodyDraw(c, P[0], P[1], r * (reduce ? 1 : 0.4 + 0.6 * b), nx.z[j], j * 2.4 + 1, b, 1);
+      if (AR.mode === 1) { c.globalAlpha = b; dot(c, P[0], P[1], r * 0.36, zCol(nx.g[j])); c.globalAlpha = 1; }
+      if (AR.nlineF[j]) ringOf(P[0], P[1], false, true, b);
+    }
+  }
+  c.restore();
+  spotR(R.x, R.y, R.w, R.h, 'Arène', 'Le terrain où vivent les individus : ' + (AR.mode ? 'sombre' : TERRN[arEnv()]) + '. Survie selon la coloration.');
+  /* phases */
+  for (let q = 0; q < 4; q++) { const X = R.x + R.w * (q + .5) / 4; txt(c, PHN[q], X, R.y + R.h + 15, ph === q ? C.texte : C.texte2, 10.5, 'center'); if (ph === q) line(c, X - 22, R.y + R.h + 19, X - 22 + 44 * t, R.y + R.h + 19, C.accent, 1.5); }
+  if (AR.extinct) tag(c, 'population éteinte', R.x + R.w / 2, R.y + R.h / 2, C.ener, 12, 'center');
+  /* histogramme de z */
+  const hist = PG.histogram(pop.z, 20), ymax = Math.max(8, ...hist, ...AR.hist0) * 1.12;
+  axes(c, hp, { xt: [0, 0.5, 1], xf: v => fmt(v, 1), xl: 'coloration z' });
+  txt(c, 'effectif par classe', hp.x + 5, hp.y - 4, C.texte2, 10);
+  bars(c, hp, hist, ymax, RGB.ac, 0.85); stairs(c, hp, AR.hist0, ymax, C.texte2, 1.2, [3, 3]);
+  const mz = AR.stats.meanZ; line(c, hp.X(mz), hp.y, hp.X(mz), hp.y + hp.h, C.ener, 1.8); tag(c, 'moy. ' + fmt(mz, 2), clamp(hp.X(mz) + 4, hp.x + 4, hp.x + hp.w - 52), hp.y + 8, C.ener, 10);
+  spotR(hp.x, hp.y, hp.w, hp.h, 'Histogramme de la coloration', 'Sauge : la génération courante. Tireté : la génération 0. Trait jaune : la moyenne.');
+  arMeanPlot(c, L.mp);
+  G.arHit = true;
+}
+const arHit = (x, y) => {
+  const R = G.ar; if (!R || !AR.pop || AR.phase > 1 || !inR(R, x, y)) return -1; let best = -1, bd = Math.pow(R.r * 1.5, 2);
+  for (let i = 0; i < AR.pop.N; i++) { if (AR.phase === 1 && !AR.alive[i] && AR.t > 0.5) continue; const P = arPos(R, i, AR.xy, i * 2.4), d = (P[0] - x) ** 2 + (P[1] - y) ** 2; if (d < bd) { bd = d; best = i; } }
+  return best;
+};
+function arHover(x, y) {
+  const i = arHit(x, y); if (i < 0) return null; const R = G.ar, P = arPos(R, i, AR.xy, i * 2.4), z = AR.pop.z[i];
+  if (AR.mode === 1) { if (Math.hypot(P[0] - x, P[1] - y) < R.r * 0.5) return { key: 'noy', name: 'Noyau : le génotype', role: 'g = ' + fmt(AR.pop.g[i], 2) + ' · l’information transmise.' };
+    return { key: 'corps', name: 'Corps : le phénotype', role: 'z = ' + fmt(z, 2) + ' · le caractère observable, génotype + environnement.' }; }
+  return { key: 'ind' + i, name: 'Individu', role: 'coloration z = ' + fmt(z, 2) + '. Touche pour le suivre.' };
+}
+function arClick(x, y) {
+  const R = G.ar; if (!R || !inR(R, x, y) || AR.phase > 0 || !AR.pop) return false;
+  const i = arHit(x, y), N = AR.pop.N;
+  if (i < 0) { AR.tr = null; AR.selfIdx = -1; AR.lineF = null; if (AR.nxt) AR.nlineF = new Uint8Array(AR.nxt.N); return true; }
+  AR.selfIdx = i; AR.lineF = new Uint8Array(N); AR.lineF[i] = 1; AR.tr = { z: AR.pop.z[i], alive: null, children: null, lineage: null, lz: NaN };
+  if (AR.nxt) { AR.nlineF = new Uint8Array(AR.nxt.N); for (let j = 0; j < AR.nxt.N; j++) AR.nlineF[j] = AR.lineF[AR.nxt.parent[j]]; trackSync(); }
+  return true;
+}
+function arNote() {
+  const t = AR.tr; if (!t) return 'Touche un individu pour le suivre : sa coloration, sa survie, ses descendants.';
+  if (AR.selfIdx >= 0) {
+    const base = 'Individu suivi · coloration ' + fmt(t.z, 2) + ' · ';
+    if (AR.phase < 1) return base + 'sa coloration ne change pas pendant sa vie.';
+    if (t.alive === false) return base + 'n’a pas survécu jusqu’à la reproduction.';
+    if (AR.phase < 2) return base + 'a survécu jusqu’à la reproduction.';
+    return base + (t.children === 0 ? 'n’a laissé aucun descendant.' : 'a laissé ' + t.children + (t.children > 1 ? ' descendants.' : ' descendant.'));
+  }
+  if (!t.lineage) return 'Individu suivi · sa lignée s’est éteinte.';
+  return 'Lignée suivie : ' + t.lineage + (t.lineage > 1 ? ' individus' : ' individu') + ' dans cette génération, coloration moyenne ' + fmt(t.lz, 2) + '.';
+}
+const arState = () => ({ gen: AR.gen, N: AR.pop.N, meanZ: AR.stats.meanZ, sdZ: AR.stats.sdZ, h2: AR.h2, S: nf(AR.S), R: nf(AR.R), survivors: nf(AR.surv),
+  tracked: AR.tr ? { alive: AR.tr.alive, z: AR.tr.z, children: AR.tr.children } : null });
+
+ST[0] = {
+  c: 'A', n: 'Composition', t: 'La composition change, pas les individus',
+  x: 'Deux cent quarante individus vivent sur un terrain. À chaque génération, certains survivent jusqu’à la reproduction, d’autres non ; la génération suivante naît des survivants et remplace entièrement la précédente.',
+  k: 'Aucun individu n’a changé de couleur. La population, si : ceux qui ont survécu plus souvent ont laissé plus de descendants qui leur ressemblent.',
+  ctl: [{ t: 'seg', k: 'env', l: 'Terrain', o: [['none', 'Sans prédateur'], ['dark', 'Sombre'], ['light', 'Clair']] }, { t: 'range', k: 's', l: 'Sélection s', min: 0, max: 0.9, step: 0.05, f: v => fmt(v, 2) }],
+  init() { arInit(0); }, gen: arGen, once() { arBegin(); }, tick: arTick, draw: arDraw, hover: arHover, click: arClick, state: arState,
+  rows() { const s = AR.stats; return [['génération', String(AR.gen), ''], ['N', String(AR.pop.N), 'individus'], ['moyenne de z', fmt(s.meanZ, 3), ''], ['écart-type de z', fmt(s.sdZ, 3), ''],
+    ['survivants (dernière sélection)', isFinite(AR.surv) && AR.phase !== 0 ? String(AR.surv) : isFinite(AR.surv) && AR.phase === 0 ? '…' : '—', isFinite(AR.surv) && AR.phase !== 0 ? '/ ' + AR.pop.N : '']]; },
+  eq: () => 'génération t+1 = descendants des survivants de t',
+  note() { return arNote() + (AR.mode === 0 && PS[0].env === 'none' ? ' Sans prédateur, la moyenne ne bouge que par hasard (dérive).' : ''); },
+  onParam() {}, rate: 0
+};
+ST[1] = {
+  c: 'A', n: 'Hérédité', t: 'Variation sans hérédité : génotype et phénotype',
+  x: 'Chaque individu montre deux choses : son corps, de la couleur du phénotype z (ce que voit le prédateur), et un petit noyau, de la couleur du génotype g (ce qui est transmis). Règle la part héritable de la variation et compare les courses.',
+  k: 'La sélection trie des phénotypes ; seule la part génétique de leurs différences passe aux descendants. Sans hérédité, la sélection agit à chaque génération et ne laisse aucune trace.',
+  ctl: [{ t: 'range', k: 'h2', l: 'Part héritable h²', min: 0, max: 1, step: 0.05, f: v => fmt(v, 2) }],
+  init() { arInit(1); }, gen: arGen, once() { arBegin(); }, tick: arTick, draw: arDraw, hover: arHover, click: arClick, state: arState,
+  rows() { const S = AR.S, R = AR.R, ok = isFinite(S) && AR.phase < 0; return [['génération', String(AR.gen), ''], ['h² (part héritable)', fmt(AR.h2, 2), ''],
+    ['S = survivants − population', ok ? pctS(S, 3) : '—', ''], ['R = réponse à la génération suivante', ok ? pctS(R, 3) : '—', ''],
+    ['R / S', ok && Math.abs(S) > 0.004 ? fmt(R / S, 2) : '—', ''], ['h² · S', ok ? pctS(AR.h2 * S, 3) : '—', '']]; },
+  eq: () => 'R ≈ h² · S',
+  note() { return 'S : moyenne de z des survivants moins celle de la population. R : moyenne de la génération suivante moins la courante. Les courses précédentes restent en pâle, avec leur h². ' + arNote(); },
+  onParam(k) { if (k === 'h2') { if (AR.means.length > 1) arArchive(); arInit(1); } }, rate: 0
+};
+
+/* ---------- B1 : fitness ---------- */
+const B1 = { pop: null, gen: 0, key: '', pred: null, hist: null, mNext: NaN, sdNext: NaN };
+const REGIME = { none: 'aucune', dark: 'directionnelle', light: 'directionnelle', mid: 'stabilisante', patchy: 'disruptive' };
+const regimeOf = P => P.s === 0 ? 'aucune' : REGIME[P.env];
+function b1Init() { rng = PG.makeRng(seed); B1.pop = PG.traitInit({ N: AN, h2: 0.8 }, rng); B1.gen = 0; B1.key = ''; }
+function b1Gen(n) { const P = PS[2]; for (let k = 0; k < n; k++) { const r = PG.traitGeneration(B1.pop, P.env, P.s, rng, { harsh: P.harsh }); if (!r.next) break; B1.pop = r.next; B1.gen++; } }
+function b1Pred() {
+  const P = PS[2], key = B1.gen + '|' + P.env + '|' + P.s + '|' + P.harsh;
+  if (key !== B1.key) {
+    B1.key = key; B1.pred = PG.traitPredictNext(B1.pop, P.env, P.s, 24, P.harsh); B1.hist = PG.histogram(B1.pop.z, 24);
+    const h = B1.pred.hist; let S = 0, m = 0; for (let k = 0; k < 24; k++) { S += h[k]; m += h[k] * (k + .5) / 24; } m /= S; let v = 0; for (let k = 0; k < 24; k++) v += h[k] * ((k + .5) / 24 - m) ** 2; B1.mNext = m; B1.sdNext = Math.sqrt(v / S);
+  }
+  return B1.pred;
+}
+function b1Draw(c) {
+  const a = area(), P = PS[2], pr = b1Pred(), st = PG.traitStats(B1.pop), narrow = a.w < 480;
+  const gx = a.x + 36, gw = a.w - 36 - 40, band = { x: gx, y: a.y + 2, w: gw, h: 18 };
+  terrain(c, band, P.env); txt(c, 'terrain : ' + TERRN[P.env] + (P.harsh ? ' · rude' : ''), gx + gw, a.y + 33, C.texte2, 10, 'right');
+  spotR(band.x, band.y, band.w, band.h, 'Terrain', 'Le fond sur lequel vit la population : il décide quelles colorations se voient le plus.');
+  const top = a.y + 42, gap = 22, gh = Math.max(44, (a.y + a.h - top - 3 * gap - 24) / 3), ymax = Math.max(10, ...B1.hist, ...pr.hist) * 1.12;
+  const p1 = mk(gx, top + gap - 8, gw, gh, 0, 1, 0, ymax), p2 = mk(gx, p1.y + gh + gap, gw, gh, 0, 1, 0, 1), p3 = mk(gx, p2.y + gh + gap, gw, gh, 0, 1, 0, ymax);
+  axes(c, p1, { noxl: true }); axes(c, p2, { yt: [0, 0.5, 1], yf: v => fmt(v, 1), noxl: true }); axes(c, p3, { xt: [0, 0.25, 0.5, 0.75, 1], xf: v => fmt(v, 2), xl: 'coloration z' });
+  txt(c, narrow ? '1 · génération courante' : '1 · la génération courante : effectif par classe de z', p1.x + 5, p1.y - 5, C.texte2, 10);
+  txt(c, narrow ? '2 · survie w(z)' : '2 · survie w(z) jusqu’à la reproduction, et fitness relative w/w̄', p2.x + 5, p2.y - 5, C.texte2, 10);
+  txt(c, narrow ? '3 · génération suivante attendue' : '3 · génération suivante attendue (tireté), sur la courante (fantôme)', p3.x + 5, p3.y - 5, C.texte2, 10);
+  bars(c, p1, B1.hist, ymax, RGB.ac, 0.85); line(c, p1.X(st.meanZ), p1.y, p1.X(st.meanZ), p1.y + p1.h, C.ener, 1.8);
+  spotR(p1.x, p1.y, p1.w, p1.h, 'Histogramme de la génération courante', 'Combien d’individus par classe de coloration. Trait jaune : la moyenne.');
+  /* survie */
+  const wbar = pr.meanW, n = gw, pts = [];
+  for (let i = 0; i < n; i += 2) { const z = i / n, w = PG.survival(z, P.env, P.s, P.harsh), wy = p2.Y(w), by = p2.Y(wbar); c.fillStyle = w >= wbar ? rgba(RGB.pos, 0.13) : rgba(RGB.neg, 0.13); c.fillRect(p2.x + i, Math.min(wy, by), 2, Math.abs(wy - by) + 0.5); }
+  for (let i = 0; i <= 90; i++) { const z = i / 90; pts.push([p2.X(z), p2.Y(PG.survival(z, P.env, P.s, P.harsh))]); }
+  poly(c, pts, C.texte, 2); line(c, p2.x, p2.Y(wbar), p2.x + p2.w, p2.Y(wbar), C.texte2, 1.2, [5, 4]); txt(c, 'w̄ = ' + fmt(wbar, 2), p2.x + p2.w - 3, p2.Y(wbar) - 4, C.texte2, 10, 'right');
+  txt(c, 'w/w̄', p2.x + p2.w + 5, p2.y + 8, C.texte2, 10);
+  for (const k of [0.5, 1, 1.5, 2]) { const y = k * wbar; if (y <= 1.0001) { line(c, p2.x + p2.w, p2.Y(y), p2.x + p2.w + 4, p2.Y(y), C.texte2, 1); txt(c, fmt(k, 1), p2.x + p2.w + 7, p2.Y(y) + 3.5, k === 1 ? C.texte : C.texte2, 10); } }
+  spotP(pts.filter((_, i) => i % 3 === 0), 6, 'Courbe de survie w(z)', 'Probabilité de survivre jusqu’à la reproduction, pour chaque coloration, dans ce terrain.');
+  spotR(p2.x, p2.Y(wbar) - 5, p2.w, 10, 'Survie moyenne w̄', 'Moyenne des survies de la population. Au-dessus : la fitness relative est supérieure à 1 (le variant gagne en fréquence) ; en dessous : inférieure à 1.');
+  /* attendu */
+  bars(c, p3, B1.hist, ymax, RGB.tx, 0.13); stairs(c, p3, pr.hist, ymax, C.texte2, 1.8, [4, 3]);
+  line(c, p3.X(st.meanZ), p3.y, p3.X(st.meanZ), p3.y + p3.h, rgba(RGB.en, .45), 1.2, [2, 3]); line(c, p3.X(B1.mNext), p3.y, p3.X(B1.mNext), p3.y + p3.h, C.ener, 1.8);
+  spotR(p3.x, p3.y, p3.w, p3.h, 'Génération suivante attendue', 'Tireté : la composition qu’on attend sans le hasard de l’échantillonnage. Fantôme : la génération courante. Trait jaune : moyenne attendue.');
+}
+ST[2] = {
+  c: 'B', n: 'Fitness', t: 'Ce que veut dire « fitness »',
+  x: 'Le graphe du milieu donne la survie w(z) de chaque coloration dans ce terrain ; celui du bas, la génération suivante attendue si chaque individu pèse sa survie. Tire une génération pour voir le hasard autour de l’attendu.',
+  k: 'La fitness n’est ni la force, ni la santé, ni la perfection : c’est le succès reproductif d’un variant comparé aux autres, dans cet environnement. Change le terrain, et le « meilleur » change.',
+  ctl: [{ t: 'seg', k: 'env', l: 'Terrain', o: [['none', 'Aucun prédateur'], ['dark', 'Sombre'], ['mid', 'Moyen'], ['patchy', 'Tacheté'], ['light', 'Clair']] },
+        { t: 'range', k: 's', l: 'Sélection s', min: 0, max: 0.9, step: 0.05, f: v => fmt(v, 2) }, { t: 'tog', k: 'harsh', l: 'Environnement rude : survies × 0,5' }],
+  init: b1Init, gen: b1Gen, once() { b1Gen(1); }, tick() {}, draw: b1Draw, rate: 0,
+  rows() { const P = PS[2], pr = b1Pred(), st = PG.traitStats(B1.pop);
+    return [['génération', String(B1.gen), ''], ['fitness moyenne w̄', fmt(pr.meanW, 3), ''], ['régime de sélection', regimeOf(P), ''], ['moyenne de z', fmt(st.meanZ, 2) + ' → ' + fmt(B1.mNext, 2), ''], ['écart-type de z', fmt(st.sdZ, 2) + ' → ' + fmt(B1.sdNext, 2), ''],
+      ['environnement', P.harsh ? 'rude (× 0,5)' : 'ordinaire', '']]; },
+  eq: () => 'fitness relative = w(z) / w̄',
+  note() { const r = regimeOf(PS[2]); return ({ aucune: 'Aucune sélection : tous les variants survivent aussi souvent, la composition ne change que par hasard.', directionnelle: 'Directionnelle : un côté de la distribution laisse plus de descendants, la moyenne se déplace.',
+    stabilisante: 'Stabilisante : les colorations intermédiaires laissent plus de descendants, la variation se resserre.', disruptive: 'Disruptive : les deux extrêmes laissent plus de descendants, la variation s’étale.' })[r]; },
+  state() { const P = PS[2], pr = b1Pred(), st = PG.traitStats(B1.pop); return { env: P.env, s: P.s, harsh: P.harsh, wbar: pr.meanW, meanNow: st.meanZ, meanNext: B1.mNext, sdNow: st.sdZ, sdNext: B1.sdNext, regime: regimeOf(P) }; },
+  onParam() { B1.key = ''; }
+};
+
+/* ---------- C1 : deux allèles ---------- */
+const GENO = [C.A, '#9db5ee', C.a];
+const C1 = { N: 50, nA: 0, g: null, cnt: null, t: 1 };
+function c1Form() { const P = PS[3]; C1.N = P.N; C1.nA = Math.round(P.p * 2 * C1.N); C1.g = PG.wfIndividuals(C1.nA, C1.N, rng); C1.cnt = PG.genotypeCounts(C1.g); }
+function c1Init() { rng = PG.makeRng(seed); c1Form(); C1.t = 1; }
+const c1Ease = t => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
+function c1Layout() {
+  const a = area(), P = PS[3], res = { x: a.x + 4, y: a.y + 6, w: a.w - 8, h: 26 };
+  let fld, pun;
+  if (!stackMode()) { const fw = Math.round(a.w * 0.52), S = clamp(Math.min(a.w - fw - 80, a.h - 190), 90, 240);
+    fld = { x: a.x, y: a.y + 74, w: fw, h: a.h - 84 }; pun = { x: a.x + fw + 50, y: a.y + 96, S }; }
+  else { const fh = Math.min(140, a.h * 0.3), S = clamp(Math.min(a.w - 110, a.y + a.h - (a.y + 72 + fh + 34) - 64), 80, 200);
+    fld = { x: a.x, y: a.y + 72, w: a.w, h: fh }; pun = { x: a.x + 34, y: a.y + 72 + fh + 34, S }; }
+  return { res, fld, pun, P };
+}
+function c1Draw(c) {
+  const L = c1Layout(), R = L.res, F = L.fld, Pu = L.pun, N = C1.N, nA = C1.nA, p = nA / (2 * N), q = 1 - p, e = c1Ease(C1.t);
+  /* réservoir */
+  txt(c, 'réservoir : les ' + grp(2 * N) + ' copies du gène', R.x, R.y - 3, C.texte2, 10);
+  const sp = R.w / (2 * N), pr = Math.min(R.h * 0.3, sp * 0.42);
+  if (N <= 50) { for (let k = 0; k < 2 * N; k++) dot(c, R.x + (k + .5) * sp, R.y + R.h / 2 + 4, pr, k < nA ? C.A : C.a); }
+  else { c.fillStyle = rgba(RGB.A, .85); c.fillRect(R.x, R.y + 6, R.w * p, R.h - 6); c.fillStyle = rgba(RGB.a, .85); c.fillRect(R.x + R.w * p, R.y + 6, R.w * q, R.h - 6); }
+  line(c, R.x + R.w * p, R.y + 3, R.x + R.w * p, R.y + R.h + 5, C.texte, 1);
+  txt(c, 'A : ' + nA + ' copies · p = ' + fmt(p, 2), R.x, R.y + R.h + 17, C.A, 11); txt(c, 'a : ' + (2 * N - nA) + ' copies · q = ' + fmt(q, 2), R.x + R.w, R.y + R.h + 17, C.a, 11, 'right');
+  spotR(R.x, R.y + 4, R.w * p, R.h, 'Copies de A', nA + ' copies sur ' + 2 * N + ' : p = ' + fmt(p, 2) + '. Une fréquence est une proportion de copies.');
+  spotR(R.x + R.w * p, R.y + 4, R.w * q, R.h, 'Copies de a', (2 * N - nA) + ' copies sur ' + 2 * N + ' : q = ' + fmt(q, 2) + '.');
+  /* individus */
+  const cols = N === 50 ? 10 : 40, rows = Math.ceil(N / cols), cw = F.w / cols, ch = F.h / rows; G.fld = { F, cols, cw, ch };
+  txt(c, 'les ' + N + ' individus diploïdes (deux copies chacun)', F.x, F.y - 4, C.texte2, 10);
+  if (N === 50) {
+    const rr = Math.min(cw * 0.2, ch * 0.3, 8); let sA = 0, sa = nA;
+    for (let i = 0; i < N; i++) {
+      const g = C1.g[i], al = g === 2 ? [0, 0] : g === 1 ? [0, 1] : [1, 1], ix = F.x + (i % cols + .5) * cw, iy = F.y + (Math.floor(i / cols) + .5) * ch;
+      c.globalAlpha = 0.25 + 0.75 * e; c.strokeStyle = rgba(RGB.tx, 0.25); c.lineWidth = 0.9; c.beginPath(); c.ellipse(ix, iy, rr * 2.7, rr * 1.7, 0.4 * Math.sin(wob() * .6 + i), 0, TAU); c.stroke(); c.globalAlpha = 1;
+      for (let s = 0; s < 2; s++) {
+        const slot = al[s] === 0 ? sA++ : sa++, tx = ix + (s ? 1 : -1) * rr * 1.15, ty = iy, fx = R.x + (slot + .5) * sp, fy = R.y + R.h / 2 + 4;
+        dot(c, fx + (tx - fx) * e, fy + (ty - fy) * e - Math.sin(e * Math.PI) * 14, Math.max(rr, 1.5), al[s] === 0 ? C.A : C.a);
+      }
+    }
+  } else {
+    const w2 = Math.max(1, cw * 0.38), h2 = Math.max(1.4, Math.min(ch * 0.7, 6)); c.globalAlpha = 0.3 + 0.7 * e;
+    for (let i = 0; i < N; i++) { const g = C1.g[i], ix = F.x + (i % cols) * cw + cw * 0.12, iy = F.y + Math.floor(i / cols) * ch + (ch - h2) / 2;
+      c.fillStyle = g >= 1 ? C.A : C.a; c.fillRect(ix, iy, w2, h2); c.fillStyle = g === 2 ? C.A : C.a; c.fillRect(ix + w2 + 0.5, iy, w2, h2); }
+    c.globalAlpha = 1;
+  }
+  /* carré de Punnett proportionnel */
+  const S = Pu.S, x0 = Pu.x, y0 = Pu.y, pS = p * S, qS = q * S;
+  const reg = [[x0, y0, pS, pS, 'AA', 'p² = ' + fmt(p * p, 2), 0], [x0 + pS, y0, qS, pS, 'Aa', 'pq = ' + fmt(p * q, 2), 1], [x0, y0 + pS, pS, qS, 'aA', 'qp = ' + fmt(p * q, 2), 1], [x0 + pS, y0 + pS, qS, qS, 'aa', 'q² = ' + fmt(q * q, 2), 2]];
+  txt(c, 'carré de Punnett proportionnel', x0, y0 - 24, C.texte2, 10);
+  txt(c, 'A', x0 + pS / 2, y0 - 8, C.A, 11, 'center'); txt(c, 'a', x0 + pS + qS / 2, y0 - 8, C.a, 11, 'center'); txt(c, 'A', x0 - 8, y0 + pS / 2 + 4, C.A, 11, 'center'); txt(c, 'a', x0 - 8, y0 + pS + qS / 2 + 4, C.a, 11, 'center');
+  for (const [X, Y, w, h, nm, val, kind] of reg) {
+    if (w < 0.5 || h < 0.5) continue;
+    c.fillStyle = rgba(kind === 2 ? RGB.a : RGB.A, 0.5); c.fillRect(X, Y, w, h);
+    if (kind === 1) { c.fillStyle = rgba(RGB.a, 0.5); c.beginPath(); c.moveTo(X + w, Y); c.lineTo(X + w, Y + h); c.lineTo(X, Y + h); c.closePath(); c.fill(); }
+    if (w > 22 && h > 22) { txt(c, nm === 'aA' ? 'Aa' : nm, X + w / 2, Y + h / 2 + (w > 58 ? -1 : 4), C.texte, 12, 'center'); if (w > 58 && h > 30) txt(c, val, X + w / 2, Y + h / 2 + 13, C.texte, 10, 'center'); }
+    const gname = nm === 'AA' ? 'Aire AA : p²' : nm === 'aa' ? 'Aire aa : q²' : 'Aire Aa : pq';
+    spotR(X, Y, w, h, gname, nm === 'AA' ? 'A reçu des deux parents : p² = ' + fmt(p * p, 3) + '.' : nm === 'aa' ? 'a reçu des deux parents : q² = ' + fmt(q * q, 3) + '.' : 'Un A et un a : pq = ' + fmt(p * q, 3) + ', deux fois (A du premier parent ou du second) : 2pq = ' + fmt(2 * p * q, 3) + '.');
+  }
+  c.strokeStyle = C.fond; c.lineWidth = 2; c.strokeRect(x0, y0, S, S); line(c, x0 + pS, y0, x0 + pS, y0 + S, C.fond, 2); line(c, x0, y0 + pS, x0 + S, y0 + pS, C.fond, 2);
+  /* génotypes observés */
+  const o = C1.cnt, hw = PG.hardyWeinberg(p), by = y0 + S + 22, fr = [o.AA / N, o.Aa / N, o.aa / N], ex = [hw.AA, hw.Aa, hw.aa], shades = [0.95, 0.65, 0.38];
+  txt(c, 'génotypes observés (barre) et attendus (tirets)', x0, by - 7, C.texte2, 10);
+  let X = x0; fr.forEach((f, k) => { c.fillStyle = rgba(RGB.ac, shades[k]); c.fillRect(X, by, f * S, 14); if (f * S > 22) txt(c, ['AA', 'Aa', 'aa'][k], X + f * S / 2, by + 10.5, C.fond, 10, 'center'); spotR(X, by, f * S, 14, ['Observés : AA', 'Observés : Aa', 'Observés : aa'][k], [o.AA, o.Aa, o.aa][k] + ' individus sur ' + N + ' (' + fmt(f, 2) + '). Attendu : ' + fmt(ex[k], 2) + '.'); X += f * S; });
+  let XE = x0; for (let k = 0; k < 2; k++) { XE += ex[k] * S; line(c, XE, by - 3, XE, by + 17, C.texte, 1.2, [2, 2]); }
+  c.strokeStyle = rgba(RGB.t2, .6); c.lineWidth = 1; c.strokeRect(x0 + .5, by + .5, S, 14);
+  txt(c, 'AA ' + o.AA + ' · Aa ' + o.Aa + ' · aa ' + o.aa, x0, by + 30, C.accent, 10.5);
+}
+function c1Hover(x, y) {
+  const g = G.fld; if (!g || C1.N !== 50 || !inR(g.F, x, y)) return null; const i = Math.floor((y - g.F.y) / g.ch) * g.cols + Math.floor((x - g.F.x) / g.cw); if (i < 0 || i >= C1.N) return null;
+  const v = C1.g[i]; return { key: 'i' + i, name: 'Individu n° ' + (i + 1) + ' · génotype ' + ['aa', 'Aa', 'AA'][v], role: 'Deux copies du gène : ' + (v === 2 ? 'deux A' : v === 1 ? 'un A et un a' : 'deux a') + '. Le génotype n’est pas le phénotype.' };
+}
+ST[3] = {
+  c: 'C', n: 'Fréquences', t: 'Deux allèles : p + q = 1',
+  x: 'Passons du trait continu à un gène à deux variantes, A et a. Chaque individu diploïde porte deux copies ; au-dessus, le réservoir regroupe toutes les copies de la population. Règle p et forme une génération en appariant les copies au hasard.',
+  k: 'Une fréquence, c’est une proportion de copies. Si les copies se rencontrent au hasard, les génotypes suivent p², 2pq, q² : c’est le modèle nul de Hardy-Weinberg, ce qui arrive quand rien ne pousse les fréquences.',
+  ctl: [{ t: 'seg', k: 'N', l: 'N', o: [[50, '50'], [1000, '1000']] }, { t: 'range', k: 'p', l: 'p', min: 0.02, max: 0.98, step: 0.02, f: v => fmt(v, 2) }],
+  init: c1Init, gen(n) { for (let k = 0; k < n; k++) c1Form(); C1.t = 1; }, once() { c1Form(); C1.t = reduce ? 1 : 0; }, noTen: true, onceLabel: 'Former une génération',
+  tick(dt) { if (C1.t < 1) C1.t = Math.min(1, C1.t + dt / 1.1); }, draw: c1Draw, hover: c1Hover, rate: 0,
+  rows() { const N = C1.N, p = C1.nA / (2 * N), o = C1.cnt, hw = PG.hardyWeinberg(p), f = (a, b) => fmt(a / N, 2) + ' · ' + fmt(b, 2);
+    return [['copies A', String(C1.nA), ''], ['copies a', String(2 * N - C1.nA), ''], ['p', fmt(p, 2), ''], ['q', fmt(1 - p, 2), ''], ['p + q', fmt(p + (1 - p), 2), ''],
+      ['AA observé · attendu', f(o.AA, hw.AA), ''], ['Aa observé · attendu', f(o.Aa, hw.Aa), ''], ['aa observé · attendu', f(o.aa, hw.aa), '']]; },
+  eq: () => 'p + q = 1\nAA : p²   Aa : 2pq   aa : q²',
+  note: () => 'Hardy-Weinberg n’est pas une loi de l’évolution : c’est la référence de ce qui se passe sans sélection, sans dérive, sans mutation ni migration.',
+  state() { const N = C1.N, p = C1.nA / (2 * N), hw = PG.hardyWeinberg(p); return { N, p, q: 1 - p, AA: C1.cnt.AA / N, Aa: C1.cnt.Aa / N, aa: C1.cnt.aa / N, expAA: hw.AA, expAa: hw.Aa, expaa: hw.aa }; },
+  onParam() { c1Form(); C1.t = 1; }
+};
+
+/* ---------- C2 : une sélection ---------- */
+const C2 = { N: 1000, st: null, ps: [], aa: [], ab: [], ex: [], gmax: 200 };
+function c2Geno() { const g = PG.genotypeCounts(PG.wfIndividuals(C2.st.nA, C2.N, rng)); C2.aa.push(g.AA / C2.N); C2.ab.push(g.Aa / C2.N); }
+function c2Init() {
+  const P = PS[4]; rng = PG.makeRng(seed); C2.N = 1000; C2.st = { N: C2.N, nA: Math.round(P.p0 * 2 * C2.N), gen: 0 };
+  C2.ps = [PG.pOf(C2.st)]; C2.aa = []; C2.ab = []; c2Geno(); C2.ex = [C2.ps[0]];
+  for (let t = 1; t <= C2.gmax; t++) C2.ex.push(PG.wfExpected(C2.ex[t - 1], { s: P.s }));
+}
+function c2Gen(n) { const P = PS[4]; for (let k = 0; k < n && C2.st.gen < C2.gmax; k++) { C2.st = PG.wfStep(C2.st, { s: P.s, N: C2.N }, rng); C2.ps.push(PG.pOf(C2.st)); c2Geno(); } }
+function c2Draw(c) {
+  const a = area(), pl = mk(a.x + 36, a.y + 10, a.w - 48, Math.max(80, a.h - 10 - 70), 0, C2.gmax, 0, 1), g = C2.st.gen; G.c2 = pl;
+  axes(c, pl, { xt: [0, 50, 100, 150, 200], yt: [0, 0.25, 0.5, 0.75, 1], yf: v => fmt(v, 2), xl: 'génération', yl: 'p, fréquence de A' });
+  clipP(c, pl); poly(c, C2.ex.map((v, t) => [pl.X(t), pl.Y(v)]), C.texte2, 1.4, [5, 4]); poly(c, C2.ps.map((v, t) => [pl.X(t), pl.Y(v)]), C.A, 2.2); c.restore();
+  dot(c, pl.X(g), pl.Y(C2.ps[g]), 4, C.A);
+  spotP(C2.ps.map((v, t) => [pl.X(t), pl.Y(v)]).filter((_, i) => i % 3 === 0), 6, 'Trajectoire simulée p(t)', 'La fréquence de A dans la population simulée, génération après génération.');
+  spotP(C2.ex.map((v, t) => [pl.X(t), pl.Y(v)]).filter((_, i) => i % 6 === 0), 5, 'Trajectoire attendue', 'Ce que donnerait la sélection seule, sans le hasard de l’échantillonnage (tireté).');
+  const sy = pl.y + pl.h + 34, sh = 24, cwid = pl.w / C2.gmax + 0.6; txt(c, 'génotypes par génération', pl.x, sy - 5, C.texte2, 10);
+  for (let t = 0; t <= g; t++) { const X = pl.X(t), a1 = C2.aa[t], a2 = C2.ab[t]; c.fillStyle = C.a; c.fillRect(X, sy, cwid, sh); c.fillStyle = GENO[1]; c.fillRect(X, sy, cwid, sh * (a1 + a2)); c.fillStyle = C.A; c.fillRect(X, sy, cwid, sh * a1); }
+  c.strokeStyle = rgba(RGB.t2, .5); c.strokeRect(pl.x + .5, sy + .5, pl.w, sh);
+  spotR(pl.x, sy, pl.w, sh, 'Bande des génotypes', 'Pour chaque génération : AA (lilas, en haut), Aa (mélange), aa (cyan, en bas).');
+}
+ST[4] = {
+  c: 'C', n: 'Sélection', t: 'Une sélection sur un allèle',
+  x: 'Une population de mille individus : assez grande pour que le hasard y pèse peu. L’allèle A reçoit un avantage s (ou un désavantage s’il est négatif) ; observe sa fréquence p génération après génération, et compare avec la trajectoire attendue en tireté.',
+  k: 'La sélection ne fabrique pas l’allèle A : elle change sa fréquence, un peu à chaque génération, plus vite quand les deux variantes sont courantes. Avec s = 0, rien ne bouge (presque).',
+  ctl: [{ t: 'range', k: 's', l: 's', min: -0.2, max: 0.2, step: 0.01, f: v => (v > 0 ? '+' : '') + fmt(v, 2) }, { t: 'range', k: 'p0', l: 'p₀', min: 0.02, max: 0.98, step: 0.02, f: v => fmt(v, 2) }],
+  init: c2Init, gen: c2Gen, once() { c2Gen(1); }, draw: c2Draw, rate: 6,
+  rows() { const P = PS[4], g = C2.st.gen, p = C2.ps[g], d = g ? p - C2.ps[g - 1] : NaN, pp = g ? C2.ps[g - 1] : p;
+    return [['génération', String(g), '/ ' + C2.gmax], ['p', fmt(p, 3), ''], ['q', fmt(1 - p, 3), ''], ['Δp (dernière génération)', g ? pctS(d, 4) : '—', ''], ['Δp attendu ≈ (s/2)·p·q', g ? pctS(P.s / 2 * pp * (1 - pp), 4) : '—', '']]; },
+  eq: () => 'Δp ≈ (s/2) · p · q',
+  note: () => 'Fitness relatives : AA 1 + s, Aa 1 + s/2, aa 1. Le « presque » : même avec s = 0, une génération finie n’est qu’un échantillon de la précédente (étape D).',
+  state() { const P = PS[4], g = C2.st.gen; return { gen: g, s: P.s, p: C2.ps[g], pExpected: C2.ex[g] }; },
+  onParam() { c2Init(); }
+};
+
+/* ---------- D : dérive (D1 : copies, D2 : sélection et dérive) ---------- */
+const D = { mode: 1, N: 10, gen: 0, gmax: 100, ps: [], fix: [], arrs: [], nA: [], rows: [], H: [], ex: [] };
+function dReset(mode) { D.mode = mode; D.gen = 0; D.ps = []; D.fix = []; D.arrs = []; D.nA = []; D.rows = []; D.H = []; D.ex = []; }
+function dMeanH() { let s = 0; for (let i = 0; i < 20; i++) { const p = D.ps[i][D.gen]; s += 2 * p * (1 - p); } return s / 20; }
+function d1Init() {
+  const P = PS[5]; rng = PG.makeRng(seed); dReset(1); D.N = P.N; D.gmax = 100;
+  for (let i = 0; i < 20; i++) { const arr = PG.maInit(2 * D.N, 2, rng, [0.5, 0.5]); arr.sort(); D.arrs.push(arr); const ps = new Float32Array(D.gmax + 1).fill(NaN); ps[0] = countA(arr, 0) / (2 * D.N); D.ps.push(ps); D.fix.push(-1); }
+  if (D.N <= 50) D.rows = [{ arr: D.arrs[0].slice(), par: null }];
+  D.H = [dMeanH()];
+}
+function d1Gen(n) {
+  for (let k = 0; k < n && D.gen < D.gmax; k++) {
+    const t = D.gen + 1, n2 = 2 * D.N;
+    for (let i = 0; i < 20; i++) {
+      if (i > 0 && D.fix[i] >= 0) { D.ps[i][t] = D.ps[i][t - 1]; continue; }
+      const r = PG.maStep(D.arrs[i], n2, rng, { sortByParent: i === 0 }); D.arrs[i] = r.arr; const p = countA(r.arr, 0) / n2; D.ps[i][t] = p;
+      if (D.fix[i] < 0 && (p === 0 || p === 1)) D.fix[i] = t;
+      if (i === 0 && D.N <= 50) D.rows.push({ arr: r.arr, par: r.parent });
+    }
+    D.gen = t; D.H.push(dMeanH());
+  }
+}
+function d2Init() {
+  const P = PS[6]; rng = PG.makeRng(seed); dReset(2); D.N = P.N; D.gmax = 150; const nA0 = Math.round(P.p0 * 2 * D.N);
+  for (let i = 0; i < 20; i++) { const ps = new Float32Array(D.gmax + 1).fill(NaN); ps[0] = nA0 / (2 * D.N); D.ps.push(ps); D.fix.push(-1); D.nA.push(nA0); }
+  D.ex = [D.ps[0][0]]; for (let t = 1; t <= D.gmax; t++) D.ex.push(PG.wfExpected(D.ex[t - 1], { s: P.s }));
+  D.H = [dMeanH()];
+}
+function d2Gen(n) {
+  const P = PS[6];
+  for (let k = 0; k < n && D.gen < D.gmax; k++) {
+    const t = D.gen + 1;
+    for (let i = 0; i < 20; i++) {
+      if (D.fix[i] >= 0) { D.ps[i][t] = D.ps[i][t - 1]; continue; }
+      const st = PG.wfStep({ N: D.N, nA: D.nA[i], gen: t - 1 }, { s: P.s, N: D.N }, rng); D.nA[i] = st.nA; const p = st.nA / (2 * D.N); D.ps[i][t] = p;
+      if (p === 0 || p === 1) D.fix[i] = t;
+    }
+    D.gen = t; D.H.push(dMeanH());
+  }
+}
+const dCounts = () => { let fa = 0, la = 0; for (let i = 0; i < 20; i++) { const p = D.ps[i][D.gen]; if (p === 1) fa++; else if (p === 0) la++; } return { fa, la, run: 20 - fa - la }; };
+function dLayout(withGene) {
+  const a = area(); let gene = null, tr, hi;
+  if (!stackMode()) {
+    const gw = withGene ? Math.round(a.w * 0.38) : 0, mx = a.x + (gw ? gw + 26 : 0), mw = a.w - (gw ? gw + 26 : 0), th = Math.max(90, (a.h - 120) * 0.66);
+    if (gw) gene = { x: a.x, y: a.y, w: gw, h: a.h - 4 };
+    tr = mk(mx + 38, a.y + 8, mw - 48, th, 0, D.gmax, 0, 1); hi = mk(mx + 38, tr.y + th + 52, mw - 48, Math.max(40, a.h - th - 8 - 52 - 20), 0, 1, 0, 1);
+  } else {
+    const gh = withGene ? Math.min(150, a.h * 0.3) : 0, rest = a.h - gh - 8, th = Math.max(70, rest * 0.52), hh = Math.max(40, rest - th - 112);
+    if (gh) gene = { x: a.x, y: a.y, w: a.w, h: gh };
+    tr = mk(a.x + 38, a.y + gh + 22, a.w - 48, th, 0, D.gmax, 0, 1); hi = mk(a.x + 38, tr.y + th + 62, a.w - 48, hh, 0, 1, 0, 1);
+  }
+  return { gene, tr, hi };
+}
+function dTrajDraw(c, p) {
+  G.dt = p; const g = D.gen, tk = []; for (let v = 0; v <= D.gmax; v += (D.gmax > 100 ? 50 : 25)) tk.push(v);
+  axes(c, p, { xt: tk, yt: [0, 0.25, 0.5, 0.75, 1], yf: v => fmt(v, 2), xl: 'génération', yl: 'p, fréquence de A', ylAbove: true });
+  clipP(c, p);
+  if (D.mode === 2) poly(c, D.ex.map((v, t) => [p.X(t), p.Y(v)]), C.texte2, 1.5, [5, 4]);
+  for (let i = 19; i >= 0; i--) { const pts = []; for (let t = 0; t <= g; t++) pts.push([p.X(t), p.Y(D.ps[i][t])]); if (i) poly(c, pts, rgba(RGB.tx, 0.4), 1); }
+  { const pts = []; for (let t = 0; t <= g; t++) pts.push([p.X(t), p.Y(D.ps[0][t])]); poly(c, pts, C.ener, 2.2); }
+  c.restore();
+  for (let i = 0; i < 20; i++) if (D.fix[i] >= 0) dot(c, p.X(D.fix[i]), p.Y(D.ps[i][D.fix[i]]), i ? 2.6 : 3.4, i ? C.texte : C.ener);
+  dot(c, p.X(g), p.Y(D.ps[0][g]), 3.5, C.ener);
+}
+function dTrajHover(x, y) {
+  const p = G.dt; if (!p || !inP({ x: p.x - 2, y: p.y - 4, w: p.w + 4, h: p.h + 8 }, x, y)) return null;
+  const t = Math.round(p.x0 + (x - p.x) / p.w * (p.x1 - p.x0)); if (t < 0 || t > D.gen) return null; let best = -1, bd = 8;
+  for (let i = 0; i < 20; i++) { const d = Math.abs(p.Y(D.ps[i][t]) - y); if (d < bd) { bd = d; best = i; } }
+  if (best < 0) return null; const v = D.ps[best][t];
+  return { key: 'pop' + best, name: 'Population ' + (best + 1) + ' · p = ' + fmt(v, 2), role: 'génération ' + t + (v === 1 ? ' · A fixé' : v === 0 ? ' · A perdu' : '') };
+}
+function dHistDraw(c, hi) {
+  G.dh = hi; const h = new Array(10).fill(0); for (let i = 0; i < 20; i++) h[Math.min(9, Math.floor(D.ps[i][D.gen] * 10))]++;
+  axes(c, hi, { xt: [0, 0.5, 1], xf: v => fmt(v, 1), xl: 'p actuel' }); bars(c, hi, h, Math.max(5, ...h) * 1.15, RGB.ac, 0.88);
+  const k = dCounts(); const y = hi.y - 8, A = D.mode === 1 ? 'A fixé ' : 'A fixé ', L = D.mode === 1 ? 'a fixé ' : 'A perdu ';
+  txt(c, A + k.fa, hi.x, y, C.A, 10.5); txt(c, L + k.la, hi.x + hi.w * 0.36, y, C.a, 10.5); txt(c, (D.mode === 1 ? 'encore variables ' : 'en cours ') + k.run, hi.x + hi.w, y, C.texte, 10.5, 'right');
+  spotR(hi.x, hi.y, hi.w, hi.h, 'Histogramme des p actuels', 'Combien de populations (sur 20) dans chaque classe de fréquence de A, à cette génération.');
+}
+function geneDraw(c, Gr) {
+  const rows = D.rows, n2 = 2 * D.N; txt(c, 'généalogie de la population n° 1', Gr.x, Gr.y + 8, C.texte2, 10);
+  if (D.N > 50) { tag(c, '1000 copies : trop pour les dessiner une à une.', Gr.x + Gr.w / 2, Gr.y + Gr.h * 0.36, C.texte2, 10.5, 'center');
+    const p = D.ps[0][D.gen]; stackBar(c, Gr.x + 6, Gr.y + Gr.h * 0.46, Gr.w - 12, 16, [[C.A, p], [C.a, 1 - p]]); txt(c, 'population n° 1 : p = ' + fmt(p, 2), Gr.x + 6, Gr.y + Gr.h * 0.46 + 32, C.texte, 11); G.gene = null; return; }
+  const rowH = D.N <= 10 ? 17 : 11, vis = Math.max(2, Math.floor((Gr.h - 26) / rowH)), first = Math.max(0, rows.length - vis), x0 = Gr.x + 34, sp = (Gr.w - 42) / n2, y0 = Gr.y + 22, rr = clamp(sp * 0.36, 1.2, 5);
+  G.gene = { Gr, x0, sp, y0, rowH, first, n2 };
+  for (let r = first; r < rows.length; r++) {
+    const y = y0 + (r - first) * rowH; if ((r % 5 === 0) || r === rows.length - 1) txt(c, 'g ' + r, Gr.x, y + 3, C.texte2, 9);
+    if (r > first && rows[r].par) { const py = y - rowH; c.lineWidth = 0.8; for (let k = 0; k < n2; k++) { const par = rows[r].par; if (!par) break; c.strokeStyle = rgba(rows[r].arr[k] === 0 ? RGB.A : RGB.a, 0.5); c.beginPath(); c.moveTo(x0 + (k + .5) * sp, y); c.lineTo(x0 + (par[k] + .5) * sp, py); c.stroke(); } }
+  }
+  for (let r = first; r < rows.length; r++) { const y = y0 + (r - first) * rowH, arr = rows[r].arr; for (let v = 0; v < 2; v++) { c.fillStyle = v ? C.a : C.A; c.beginPath(); for (let k = 0; k < n2; k++) if (arr[k] === v) { const x = x0 + (k + .5) * sp; c.moveTo(x + rr, y); c.arc(x, y, rr, 0, TAU); } c.fill(); } }
+}
+function geneHover(x, y) {
+  const g = G.gene; if (!g || !inR(g.Gr, x, y)) return null; const r = Math.round((y - g.y0) / g.rowH) + g.first; if (r < g.first || r >= D.rows.length) return null;
+  const k = Math.round((x - g.x0) / g.sp - 0.5); if (k < 0 || k >= g.n2) return null; if (Math.abs(g.x0 + (k + .5) * g.sp - x) > Math.max(5, g.sp * 0.6) || Math.abs(g.y0 + (r - g.first) * g.rowH - y) > 6) return null;
+  const al = D.rows[r].arr[k] === 0 ? 'A' : 'a', nx = D.rows[r + 1]; let n = 0; if (nx) for (let j = 0; j < g.n2; j++) if (nx.par[j] === k) n++;
+  return { key: 'g' + r + '_' + k, name: 'copie de ' + al + (nx ? ' · ' + n + (n > 1 ? ' descendants' : ' descendant') : ''), role: nx ? 'Génération ' + r + ' : certaines copies ne laissent rien, d’autres sont recopiées plusieurs fois.' : 'Génération courante : pas encore de descendance.' };
+}
+function dDraw(c) {
+  const withG = D.mode === 1, L = dLayout(withG); if (L.gene) geneDraw(c, L.gene); else G.gene = null;
+  dTrajDraw(c, L.tr); dHistDraw(c, L.hi);
+}
+function dSec(c, w, h) {
+  const p = mk(40, 10, w - 52, h - 10 - 36, 0, D.gmax, 0, 1); axes(c, p, { xt: [0, 25, 50, 75, 100], yt: [0, 0.5, 1], yf: v => fmt(v, 1), xl: 'génération', yl: 'H / H₀' });
+  poly(c, Array.from({ length: D.gmax + 1 }, (_, t) => [p.X(t), p.Y(Math.pow(1 - 1 / (2 * D.N), t))]), C.texte2, 1.5, [4, 3]);
+  poly(c, D.H.map((v, t) => [p.X(t), p.Y(clamp(v / D.H[0], 0, 1))]), C.accent, 2);
+}
+const dSd = () => sdOf(Array.from({ length: 20 }, (_, i) => D.ps[i][D.gen]));
+ST[5] = {
+  c: 'D', n: 'Dérive', t: 'Le hasard de la reproduction',
+  x: 'Vingt populations identiques au départ (p₀ = 0,5), dans le même environnement, sans aucun avantage pour A ni pour a. À chaque génération, chaque copie est la copie d’une copie tirée au hasard dans la précédente. À gauche : la généalogie de la population n° 1.',
+  k: 'Aucun allèle n’est avantagé. Les fréquences bougent quand même, parce qu’une génération finie n’est qu’un échantillon de la précédente. Plus la population est petite, plus l’échantillon est grossier.',
+  ctl: [{ t: 'seg', k: 'N', l: 'N', o: [[10, '10'], [50, '50'], [500, '500']] }],
+  init: d1Init, gen: d1Gen, once() { d1Gen(1); }, draw: dDraw, hover(x, y) { return geneHover(x, y) || dTrajHover(x, y); }, rate: 6,
+  rows() { const k = dCounts(); return [['génération', String(D.gen), '/ ' + D.gmax], ['N', String(D.N), 'individus'], ['p (population suivie)', fmt(D.ps[0][D.gen], 2), ''], ['écart-type des p entre populations', fmt(dSd(), 3), ''],
+    ['A fixé · a fixé', k.fa + ' · ' + k.la, ''], ['encore variables', String(k.run), '/ 20']]; },
+  eq: () => 'Var(p) = p₀q₀ · [1 − (1 − 1/2N)^t]',
+  note: () => 'Diversité H = 1 − Σpᵢ² : sans mutation ni migration, elle décroît en moyenne comme (1 − 1/2N)^t (graphe ci-dessous).',
+  sec: { eye: 'Diversité moyenne H / H₀ des 20 populations', h: 150, draw: dSec, leg: () => legend([['fort', C.accent, 'observée'], ['tiret', C.texte2, '(1 − 1/2N)^t attendu']]) },
+  state() { const k = dCounts(); return { gen: D.gen, N: D.N, s: 0, ps: Array.from({ length: 20 }, (_, i) => D.ps[i][D.gen]), fixedA: k.fa, lostA: k.la, kimura: null }; },
+  onParam() { d1Init(); }
+};
+ST[6] = {
+  c: 'D', n: 'Sél.+dérive', t: 'Sélection et dérive à la fois',
+  x: 'Les mêmes vingt populations, mais l’allèle A est avantagé (s) et rare au départ (p₀). La sélection pousse sa fréquence vers le haut, le hasard de l’échantillonnage la fait osciller. Change N pour changer le poids du hasard.',
+  k: 'La sélection est un biais ; la dérive est le bruit. Dans une petite population, un allèle avantageux peut disparaître par malchance. Ce qui décide, c’est N·s.',
+  ctl: [{ t: 'seg', k: 'N', l: 'N', o: [[10, '10'], [100, '100'], [1000, '1000']] }, { t: 'range', k: 's', l: 's', min: 0, max: 0.1, step: 0.005, f: v => fmt(v, 3) }, { t: 'range', k: 'p0', l: 'p₀', min: 0.02, max: 0.5, step: 0.02, f: v => fmt(v, 2) }],
+  init: d2Init, gen: d2Gen, once() { d2Gen(1); }, draw: dDraw, hover: dTrajHover, rate: 6,
+  rows() { const P = PS[6], k = dCounts(), fin = k.fa + k.la, kim = PG.fixationProb(P.p0, D.N, P.s);
+    return [['génération', String(D.gen), '/ ' + D.gmax], ['N·s', fmt(D.N * P.s, 2), ''], ['fixation de A (Kimura)', fmt(kim, 2), ''], ['si A était neutre (p₀)', fmt(P.p0, 2), ''],
+      ['fraction observée (fixés / terminées)', fin ? fmt(k.fa / fin, 2) + ' (' + k.fa + '/' + fin + ')' : '—', ''], ['A fixé · A perdu · en cours', k.fa + ' · ' + k.la + ' · ' + k.run, '']]; },
+  eq: () => 'P(fixation) = (1 − e^(−2N·s·p₀)) / (1 − e^(−2N·s))',
+  note: () => 'Sélection ≠ dérive : une fréquence peut changer sans aucun avantage (D1), et un avantage peut ne rien changer (ici, N = 10). Tireté : la trajectoire attendue sans hasard.',
+  state() { const P = PS[6], k = dCounts(); return { gen: D.gen, N: D.N, s: P.s, ps: Array.from({ length: 20 }, (_, i) => D.ps[i][D.gen]), fixedA: k.fa, lostA: k.la, kimura: PG.fixationProb(P.p0, D.N, P.s) }; },
+  onParam() { d2Init(); }
+};
+
+/* ---------- E1 : effet fondateur ---------- */
+const E1F = [0.30, 0.20, 0.15, 0.12, 0.09, 0.07, 0.05, 0.02];
+const E1 = { src: null, srcH: 0, srcParts: null, idx: null, ident: null, pts: null, ipts: null, cols: [] };
+function e1Init() {
+  rng = PG.makeRng(seed); const lay = layRng();
+  E1.src = PG.maInit(2000, 8, rng, E1F); E1.srcH = PG.maStats(E1.src).H; E1.srcParts = freqParts(E1.src); E1.idx = Uint16Array.from({ length: 2000 }, (_, i) => i); E1.ident = Array.from({ length: 2000 }, (_, i) => i);
+  E1.pts = blobPts(2000, lay); E1.ipts = blobPts(400, lay); E1.cols = [];
+}
+function e1Found(animate) {
+  const k = PS[7].k, ids = PG.maSample(E1.idx, 2 * k, rng), founders = Uint16Array.from(ids, i => E1.src[i]);
+  let slot = [0, 1, 2].find(s => !E1.cols.some(c => c.slot === s)); if (slot === undefined) slot = E1.cols.shift().slot;
+  const fl = animate && !reduce ? { t: 0, ids } : null;
+  E1.cols.push({ arr: founders, N: k, gen: 0, slot, k, founders: founders.slice(), fH: PG.maStats(founders).H, fl, ready: !fl, ord: null, fParts: freqParts(founders) });
+}
+function e1Gen(n) {
+  for (let g = 0; g < n; g++) for (const c of E1.cols) { if (!c.ready) continue; const N2 = Math.min(200, Math.max(c.N + 1, Math.round(c.N * 1.5))); c.arr = PG.maStep(c.arr, 2 * N2, rng, { sortByParent: true }).arr; c.N = N2; c.gen++; c.ord = null; }
+}
+function e1Tick(dt) { for (const c of E1.cols) if (c.fl) { c.fl.t += dt / 1.4; if (c.fl.t >= 1) { c.fl = null; c.ready = true; } } }
+function e1Layout() {
+  const a = area(), isl = [];
+  if (!stackMode()) {
+    const cw = Math.round(a.w * 0.42), cont = { x: a.x, y: a.y + 4, w: cw, h: a.h - 54 }, x0 = a.x + Math.round(a.w * 0.53), pw = a.x + a.w - x0, ph = (a.h - 4) / 3;
+    for (let i = 0; i < 3; i++) { const P = { x: x0, y: a.y + 4 + i * ph, w: pw, h: ph - 8 }; P.cl = { cx: P.x + P.w * 0.28, cy: P.y + P.h / 2 + 2, rx: Math.min(P.w * 0.26, P.h * 0.62), ry: P.h * 0.4 }; P.bx = P.x + P.w * 0.6; P.bw = P.w * 0.4; P.by = P.y + P.h * 0.32; isl.push(P); }
+    return { cont, isl };
+  }
+  const ch = Math.round(a.h * 0.4), cont = { x: a.x, y: a.y + 2, w: a.w, h: ch - 30 }, y0 = a.y + ch + 22, iw = a.w / 3, ih = a.y + a.h - y0;
+  for (let i = 0; i < 3; i++) { const P = { x: a.x + i * iw, y: y0, w: iw - 6, h: ih }; P.cl = { cx: P.x + P.w / 2, cy: P.y + Math.min(P.w, ih - 52) * 0.4, rx: P.w * 0.44, ry: Math.min(P.w, ih - 52) * 0.36 }; P.bx = P.x + 2; P.bw = P.w - 4; P.by = P.y + ih - 40; isl.push(P); }
+  return { cont, isl };
+}
+function e1Draw(c) {
+  const L = e1Layout(), Ct = L.cont, t = wob(), ccx = Ct.x + Ct.w / 2, ccy = Ct.y + Ct.h / 2, crx = Ct.w / 2 * 0.95, cry = Ct.h / 2 * 0.95; G.e1 = { L, ccx, ccy, crx, cry };
+  /* mer */
+  c.strokeStyle = rgba(RGB.neg, 0.08); c.lineWidth = 1; for (let i = 0; i < 6; i++) { const y = ccy - 60 + i * 24; c.beginPath(); for (let x = Ct.x + Ct.w + 8; x < W - padX(); x += 6) { const yy = y + 3 * Math.sin(x * 0.04 + t * 0.8 + i); x === Ct.x + Ct.w + 8 ? c.moveTo(x, yy) : c.lineTo(x, yy); } if (!stackMode()) c.stroke(); }
+  blobPath(c, ccx, ccy, crx, cry, t); c.fillStyle = rgba(RGB.tx, 0.045); c.fill(); c.strokeStyle = rgba(RGB.tx, 0.28); c.lineWidth = 1; c.stroke();
+  const pr = pearlRadius(crx, cry, 2000); drawPearls(c, E1.pts, E1.ident, E1.src, ccx, ccy, crx, cry, pr);
+  txt(c, 'continent · 2000 copies · 8 allèles', Ct.x, Ct.y + 4, C.texte2, 10);
+  spotC(ccx, ccy, Math.min(crx, cry) * 0.9, 'Continent', '2000 copies du gène (N = 1000), 8 allèles en proportions inégales.');
+  stackBar(c, Ct.x, Ct.y + Ct.h + 10, Ct.w, 13, E1.srcParts); txt(c, 'fréquences sur le continent', Ct.x, Ct.y + Ct.h + 36, C.texte2, 9.5);
+  spotR(Ct.x, Ct.y + Ct.h + 10, Ct.w, 13, 'Fréquences du continent', 'Part de chaque allèle parmi les 2000 copies. Les allèles rares (à droite) sont fragiles à l’échantillonnage.');
+  /* îles */
+  for (let s = 0; s < 3; s++) {
+    const P = L.isl[s], cl = P.cl, col = E1.cols.find(q => q.slot === s);
+    blobPath(c, cl.cx, cl.cy, cl.rx, cl.ry, t + s); c.fillStyle = rgba(RGB.tx, col ? 0.045 : 0.02); c.fill(); c.strokeStyle = rgba(RGB.tx, col ? 0.28 : 0.12); c.lineWidth = 1; c.setLineDash(col ? [] : [3, 4]); c.stroke(); c.setLineDash([]);
+    if (!col) { txt(c, 'île vide', cl.cx, cl.cy + 3, rgba(RGB.t2, 0.7), 10, 'center'); continue; }
+    const ipr = pearlRadius(cl.rx, cl.ry, 400), a = col.fl ? clamp((col.fl.t - 0.7) / 0.3, 0, 1) : 1; if (!col.ord) col.ord = sortedOrder(col.arr);
+    if (a > 0) drawPearls(c, E1.ipts, col.ord, col.arr, cl.cx, cl.cy, cl.rx, cl.ry, ipr, a);
+    txt(c, 'île ' + (E1.cols.indexOf(col) + 1) + ' · gén. ' + col.gen + ' · N = ' + col.N, P.x, P.y + 10, C.texte2, 9.5);
+    spotC(cl.cx, cl.cy, Math.min(cl.rx, cl.ry) * 0.85, 'Île · colonie de ' + col.k + ' fondateurs', 'Génération ' + col.gen + ', N = ' + col.N + ' individus. Elle ne ressemble pas exactement au continent.');
+    if (P.bw > 60) { txt(c, 'fondateurs', P.bx, P.by - 3, C.texte2, 9); stackBar(c, P.bx, P.by, P.bw, 9, col.fParts); txt(c, 'aujourd’hui', P.bx, P.by + 24, C.texte2, 9); stackBar(c, P.bx, P.by + 27, P.bw, 9, freqParts(col.arr)); }
+    if (col.fl) {
+      const f = col.fl, u = clamp((f.t - 0.2) / 0.8, 0, 1), e = 1 - Math.pow(1 - u, 3);
+      for (let q = 0; q < f.ids.length; q++) { const i = f.ids[q], sx0 = ccx + E1.pts[2 * i] * crx, sy0 = ccy + E1.pts[2 * i + 1] * cry, tx = cl.cx + E1.ipts[2 * q] * cl.rx, ty = cl.cy + E1.ipts[2 * q + 1] * cl.ry;
+        if (f.t < 0.2) { c.globalAlpha = f.t / 0.2; dot(c, sx0, sy0, pr * 2.4, C.ener, true); c.globalAlpha = 1; }
+        const X = sx0 + (tx - sx0) * e, Y = sy0 + (ty - sy0) * e - Math.sin(e * Math.PI) * 40; dot(c, X, Y, Math.max(2.2, ipr), C.ener); }
+    }
+  }
+}
+function e1Hover(x, y) {
+  const g = G.e1; if (!g) return null;
+  let q = cloudHit(x, y, E1.pts, E1.ident, E1.src, g.ccx, g.ccy, g.crx, g.cry, pearlRadius(g.crx, g.cry, 2000));
+  if (q >= 0) { const k = E1.src[q]; return { key: 'c' + k, name: 'Copie de l’allèle ' + alName(k), role: 'Sa fréquence sur le continent : ' + fmt(E1F[k], 2) + '.' }; }
+  for (let s = 0; s < 3; s++) { const col = E1.cols.find(z => z.slot === s); if (!col || col.fl) continue; const cl = g.L.isl[s].cl; if (!col.ord) col.ord = sortedOrder(col.arr);
+    q = cloudHit(x, y, E1.ipts, col.ord, col.arr, cl.cx, cl.cy, cl.rx, cl.ry, pearlRadius(cl.rx, cl.ry, 400)); if (q >= 0) { const k = col.arr[q]; return { key: 'i' + s + k, name: 'Copie de l’allèle ' + alName(k), role: 'Fréquence dans la colonie : ' + fmt(countA(col.arr, k) / col.arr.length, 2) + ' (continent : ' + fmt(E1F[k], 2) + ').' }; } }
+  return null;
+}
+const e1Last = () => E1.cols[E1.cols.length - 1];
+ST[7] = {
+  c: 'E', n: 'Fondateur', t: 'Effet fondateur',
+  x: 'Un continent porte huit allèles en proportions inégales. Quelques individus (k) partent fonder une colonie : leurs copies forment un échantillon de ce qui est sur le continent. La colonie croît ensuite en dérivant ; fonde-en plusieurs, elles diffèrent entre elles.',
+  k: 'Les fondateurs ne sont pas choisis pour leurs gènes : ils forment un échantillon. Un petit échantillon reproduit mal les proportions, et les allèles rares restent souvent sur le continent.',
+  ctl: [{ t: 'range', k: 'k', l: 'Fondateurs k', min: 2, max: 50, step: 1, f: v => String(v) }, { t: 'btn', l: () => E1.cols.length ? 'Fonder une autre colonie' : 'Fonder une colonie', fn() { e1Found(true); } }],
+  init: e1Init, gen: e1Gen, once() { e1Gen(1); }, tick: e1Tick, draw: e1Draw, hover: e1Hover, rate: 6, found() { e1Found(false); },
+  rows() { const c = e1Last(), k = c ? c.k : PS[7].k, st = c ? PG.maStats(c.arr) : null;
+    return [['colonies fondées', String(E1.cols.length), '/ 3'], ['allèles présents (continent / colonie)', '8 / ' + (st ? st.nAlleles : '—'), ''], ['H continent', fmt(E1.srcH, 3), ''], ['H fondateurs', c ? fmt(c.fH, 3) : '—', ''], ['attendu H₀·(1 − 1/2k)', fmt(E1.srcH * (1 - 1 / (2 * k)), 3), '']]; },
+  eq: () => 'H(fondateurs) ≈ H₀ · (1 − 1/2k)',
+  note: () => 'Fondateur et goulot (étape suivante) sont le même phénomène : un échantillonnage trop petit, suivi de dérive. Chaque colonie est un échantillon différent.',
+  state() { const c = e1Last(), k = c ? c.k : PS[7].k; return { k: PS[7].k, sourceH: E1.srcH, founderH: c ? c.fH : null, expectedFounderH: E1.srcH * (1 - 1 / (2 * k)), colonies: E1.cols.map(q => { const s = PG.maStats(q.arr); return { gen: q.gen, N: q.N, nAlleles: s.nAlleles, H: s.H }; }) }; },
+  onParam() {}
+};
+
+/* ---------- E2 : goulot d'étranglement ---------- */
+const E2 = { arr: null, gen: 0, sizes: [], Hs: [], als: [], Hx: [], pts: null, ord: null, gmax: 80 };
+function e2Init() {
+  const P = PS[8]; rng = PG.makeRng(seed); const lay = layRng();
+  E2.sizes = PG.bottleneckSizes({ N0: 400, Nb: P.Nb, tCrash: 10, dur: 3, r: 0.5 }, E2.gmax); E2.arr = PG.maInit(800, 8, rng); E2.gen = 0;
+  const st = PG.maStats(E2.arr); E2.Hs = [st.H]; E2.als = [st.nAlleles]; E2.Hx = [st.H]; E2.pts = blobPts(800, lay); E2.ord = null;
+}
+function e2Gen(n) {
+  for (let k = 0; k < n && E2.gen < E2.gmax; k++) { const t = E2.gen + 1; E2.arr = PG.maStep(E2.arr, 2 * E2.sizes[t], rng, { sortByParent: true }).arr; E2.gen = t; const st = PG.maStats(E2.arr);
+    E2.Hs.push(st.H); E2.als.push(st.nAlleles); E2.Hx.push(PG.expectedH(E2.Hs[0], E2.sizes.slice(1, t + 1))); E2.ord = null; }
+}
+function e2Draw(c) {
+  const a = area(), g = E2.gen; let cl, X0, PW, top, PH;
+  if (!stackMode()) { const cw = Math.round(a.w * 0.34); cl = { cx: a.x + cw / 2, cy: a.y + a.h * 0.42, rx: cw / 2 * 0.95, ry: Math.min(a.h * 0.36, cw * 0.55) }; X0 = a.x + cw + 56; PW = a.x + a.w - X0 - 10; top = a.y + 12; PH = (a.h - 12 - 3 * 24 - 8) / 3; }
+  else { const ch = Math.round(a.h * 0.3); cl = { cx: a.x + a.w / 2, cy: a.y + ch / 2 + 6, rx: Math.min(a.w * 0.3, ch * 0.9), ry: ch * 0.42 }; X0 = a.x + 38; PW = a.w - 50; top = a.y + ch + 22; PH = (a.y + a.h - top - 3 * 22 - 12) / 3; }
+  PH = Math.max(34, PH);
+  blobPath(c, cl.cx, cl.cy, cl.rx, cl.ry, wob()); c.fillStyle = rgba(RGB.tx, 0.045); c.fill(); c.strokeStyle = rgba(RGB.tx, 0.28); c.lineWidth = 1; c.stroke();
+  if (!E2.ord) E2.ord = sortedOrder(E2.arr); const pr = pearlRadius(cl.rx, cl.ry, 800); drawPearls(c, E2.pts, E2.ord, E2.arr, cl.cx, cl.cy, cl.rx, cl.ry, pr); G.e2 = { cl, pr };
+  txt(c, grp(E2.arr.length) + ' copies · N = ' + E2.sizes[g], cl.cx, cl.cy - cl.ry - 8, C.texte2, 10, 'center');
+  spotC(cl.cx, cl.cy, Math.min(cl.rx, cl.ry) * 0.85, 'Population', 'Les copies du gène à cette génération, colorées par allèle. Une perle = une copie.');
+  const p1 = mk(X0, top, PW, PH, 0, E2.gmax, 0, 420), p2 = mk(X0, top + PH + 24, PW, PH, 0, E2.gmax, 0, 8), p3 = mk(X0, top + 2 * (PH + 24), PW, PH, 0, E2.gmax, 0, 1);
+  axes(c, p1, { yt: [0, 200, 400], noxl: true }); axes(c, p2, { yt: [0, 4, 8], noxl: true }); axes(c, p3, { xt: [0, 20, 40, 60, 80], yt: [0, 0.5, 1], yf: v => fmt(v, 1), xl: 'génération' });
+  txt(c, 'taille N(t), en individus', p1.x + 6, p1.y - 6, C.texte2, 10); txt(c, 'allèles présents', p2.x + 6, p2.y - 6, C.texte2, 10); txt(c, 'diversité H' + (stackMode() ? '' : ' (tireté : attendue)'), p3.x + 6, p3.y - 6, C.texte2, 10);
+  const sz = E2.sizes.map((v, t) => [p1.X(t), p1.Y(v)]); poly(c, sz, rgba(RGB.t2, 0.6), 1.2, [4, 3]); poly(c, sz.slice(0, g + 1), C.texte, 2);
+  spotP(sz.filter((_, i) => i % 3 === 0), 6, 'Taille de la population', 'Effondrement à la génération 10 jusqu’à N_b, pendant 3 générations, puis croissance.');
+  const st = []; for (let t = 0; t <= g; t++) { if (t) st.push([p2.X(t), p2.Y(E2.als[t - 1])]); st.push([p2.X(t), p2.Y(E2.als[t])]); } poly(c, st, C.texte, 2);
+  poly(c, E2.Hx.map((v, t) => [p3.X(t), p3.Y(v)]), C.texte2, 1.5, [4, 3]); poly(c, E2.Hs.map((v, t) => [p3.X(t), p3.Y(v)]), C.accent, 2.2);
+  spotP(E2.Hs.map((v, t) => [p3.X(t), p3.Y(v)]).filter((_, i) => i % 2 === 0), 6, 'Diversité H', 'H = 1 − Σpᵢ² : chute avec le goulot, remonte très lentement, sans mutation ni migration.');
+  for (const q of [p1, p2, p3]) line(c, q.X(g), q.y, q.X(g), q.y + q.h, rgba(RGB.en, .5), 1, [2, 3]);
+  dot(c, p1.X(g), p1.Y(E2.sizes[g]), 3.5, C.texte); dot(c, p2.X(g), p2.Y(E2.als[g]), 3.5, C.texte); dot(c, p3.X(g), p3.Y(E2.Hs[g]), 3.5, C.accent);
+}
+function e2Hover(x, y) {
+  const g = G.e2; if (!g) return null; const cl = g.cl; const q = cloudHit(x, y, E2.pts, E2.ord || sortedOrder(E2.arr), E2.arr, cl.cx, cl.cy, cl.rx, cl.ry, g.pr);
+  if (q >= 0) { const k = E2.arr[q]; return { key: 'e' + k, name: 'Copie de l’allèle ' + alName(k), role: 'Fréquence actuelle : ' + fmt(countA(E2.arr, k) / E2.arr.length, 2) + '. Il y en avait 1/8 au départ.' }; } return null;
+}
+ST[8] = {
+  c: 'E', n: 'Goulot', t: 'Goulot d’étranglement',
+  x: 'Une population de 400 individus porte huit allèles à fréquences égales. À la génération 10, sa taille s’effondre pendant trois générations, puis elle croît de nouveau. Règle la taille minimale N_b et regarde ce qui revient, et ce qui ne revient pas.',
+  k: 'La taille revient en quelques générations. La diversité perdue, non : elle ne revient que par mutation ou par migration, beaucoup plus lentement.',
+  ctl: [{ t: 'range', k: 'Nb', l: 'Taille minimale N_b', min: 2, max: 50, step: 1, f: v => String(v) }],
+  init: e2Init, gen: e2Gen, once() { e2Gen(1); }, draw: e2Draw, hover: e2Hover, rate: 6,
+  rows() { const g = E2.gen; return [['génération', String(g), '/ ' + E2.gmax], ['N', String(E2.sizes[g]), 'individus'], ['allèles présents', E2.als[g] + ' / 8', ''], ['diversité H', fmt(E2.Hs[g], 3), ''], ['H avant le goulot', fmt(E2.Hs[Math.min(g, 9)], 3), ''], ['H attendue', fmt(E2.Hx[g], 3), '']]; },
+  eq: () => 'H(t) ≈ H₀ · Π (1 − 1/2Nₜ)',
+  note: () => 'Fondateur et goulot sont le même phénomène : un échantillonnage trop petit, suivi de dérive. Une course typique ne garde que quelques allèles sur huit.',
+  state() { const g = E2.gen; return { gen: g, N: E2.sizes[g], Nb: PS[8].Nb, nAlleles: E2.als[g], H: E2.Hs[g], Hbefore: E2.Hs[Math.min(g, 9)], Hexpected: E2.Hx[g] }; },
+  onParam() { e2Init(); }
+};
+
+/* ---------- F1 : mutation et flux génétique ---------- */
+const F1 = { A: null, B: null, gen: 0, nextId: 4, hist: [[], []], fl: [null, null], ord: [null, null], inv: [null, null], pts: [null, null], tc: 0 };
+function f1Rec() {
+  [F1.A, F1.B].forEach((arr, i) => { const m = PG.maStats(arr).counts, ids = [...m.keys()].sort((a, b) => a - b); F1.hist[i].push({ ids, cnt: ids.map(k => m.get(k)) }); if (F1.hist[i].length > 150) F1.hist[i].shift();
+    F1.ord[i] = sortedOrder(arr); const inv = new Int32Array(arr.length); F1.ord[i].forEach((o, q) => { inv[o] = q; }); F1.inv[i] = inv; });
+}
+function f1Init() {
+  rng = PG.makeRng(seed); const lay = layRng(); F1.A = PG.maInit(200, 4, rng); F1.B = PG.maInit(200, 4, rng); F1.gen = 0; F1.nextId = 4; F1.hist = [[], []]; F1.fl = [null, null];
+  F1.pts = [blobPts(200, lay), blobPts(200, lay)]; F1.tc = -1e9; f1Rec();
+}
+function f1Relabel() { const keys = [...new Set([...F1.A, ...F1.B])].sort((a, b) => a - b), m = new Map(keys.map((k, i) => [k, i])); F1.A = F1.A.map(k => m.get(k)); F1.B = F1.B.map(k => m.get(k)); F1.nextId = keys.length; F1.hist = [[], []]; }
+function f1Gen(n) {
+  const P = PS[9];
+  for (let k = 0; k < n; k++) {
+    const r = PG.islandsStep(F1.A, F1.B, { m: P.m, mu: P.mu, nextId: F1.nextId }, rng); F1.A = r.A.arr; F1.B = r.B.arr; F1.nextId = r.nextId; F1.fl = [r.A, r.B]; F1.gen++; F1.tc = performance.now();
+    if (F1.nextId > 60000) f1Relabel(); f1Rec();
+  }
+}
+function f1Layout() {
+  const a = area(), out = [];
+  if (!stackMode()) { const cw = (a.w - 40) / 2; for (let i = 0; i < 2; i++) { const x = a.x + i * (cw + 40), ch = Math.round(a.h * 0.4); out.push({ x, y: a.y, w: cw, h: a.h, cl: { cx: x + cw / 2, cy: a.y + ch / 2 + 8, rx: Math.min(cw * 0.34, ch * 0.78), ry: ch * 0.4 }, mu: mk(x + 34, a.y + ch + 34, cw - 40, a.h - ch - 60, 0, 149, 0, 1) }); } }
+  else { const rh = a.h / 2; for (let i = 0; i < 2; i++) { const y = a.y + i * rh, cw = Math.round(a.w * 0.36); out.push({ x: a.x, y, w: a.w, h: rh, cl: { cx: a.x + cw / 2, cy: y + rh / 2 + 6, rx: cw / 2 * 0.95, ry: Math.min(rh * 0.36, cw * 0.5) }, mu: mk(a.x + cw + 40, y + 22, a.w - cw - 48, rh - 56, 0, 149, 0, 1) }); } }
+  return out;
+}
+function f1Draw(c) {
+  const L = f1Layout(), now = performance.now(), ring = clamp((now - F1.tc) / 450, 0, 1); G.f1 = L;
+  [F1.A, F1.B].forEach((arr, i) => {
+    const P = L[i], cl = P.cl, hist = F1.hist[i], pr = pearlRadius(cl.rx, cl.ry, 200), st = PG.maStats(arr);
+    blobPath(c, cl.cx, cl.cy, cl.rx, cl.ry, wob() + i); c.fillStyle = rgba(RGB.tx, 0.045); c.fill(); c.strokeStyle = rgba(RGB.tx, 0.28); c.lineWidth = 1; c.stroke();
+    drawPearls(c, F1.pts[i], F1.ord[i], arr, cl.cx, cl.cy, cl.rx, cl.ry, pr);
+    const fl = F1.fl[i];
+    if (fl) for (let j = 0; j < arr.length; j++) { const q = F1.inv[i][j], x = cl.cx + F1.pts[i][2 * q] * cl.rx, y = cl.cy + F1.pts[i][2 * q + 1] * cl.ry;
+      if (fl.mutated[j] && ring < 1) { c.globalAlpha = 1 - ring; dot(c, x, y, pr * (1.6 + 3.2 * ring), C.ener, true); c.globalAlpha = 1; }
+      if (fl.migrant[j]) { c.strokeStyle = C.texte; c.lineWidth = 1.1; c.beginPath(); c.arc(x, y, pr + 1.3, 0, TAU); c.stroke(); } }
+    txt(c, 'île ' + (i + 1) + ' · H = ' + fmt(st.H, 2) + ' · ' + st.nAlleles + ' allèles', P.x, P.y + 10, C.texte2, 10);
+    spotC(cl.cx, cl.cy, Math.min(cl.rx, cl.ry) * 0.85, 'Île ' + (i + 1), '200 copies (N = 100). Cercle jaune : mutation de cette génération ; contour clair : migrant arrivé de l’autre île.');
+    const m0 = P.mu, gl = F1.gen - hist.length + 1, mp = mk(m0.x, m0.y, m0.w, m0.h, gl, gl + 149, 0, 1);
+    const xt = []; for (let v = Math.ceil(gl / 50) * 50; v <= gl + 149; v += 50) xt.push(v);
+    c.fillStyle = rgba(RGB.fd, 1); c.fillRect(mp.x, mp.y, mp.w, mp.h); const cwid = mp.w / 150 + 0.7;
+    hist.forEach((h, j) => { const tot = h.cnt.reduce((s, v) => s + v, 0); let Y = mp.y + mp.h; for (let q = 0; q < h.ids.length; q++) { const hh = h.cnt[q] / tot * mp.h; Y -= hh; c.fillStyle = alCol(h.ids[q]); c.fillRect(mp.x + j * mp.w / 150, Y, cwid, hh + 0.4); } });
+    axes(c, mp, { xt, xl: 'génération', yt: [0, 0.5, 1], yf: v => fmt(v, 1) }); txt(c, 'graphe de Muller : fréquence de chaque allèle', mp.x + 4, mp.y - 6, C.texte2, 10);
+    spotR(mp.x, mp.y, mp.w, mp.h, 'Graphe de Muller · île ' + (i + 1), 'Une aire par allèle, empilées. Un filet qui naît est une mutation ; la plupart s’éteignent, de rares s’étendent.');
+  });
+  if (!stackMode()) { const mx = L[0].x + L[0].w + 20, my = L[0].cl.cy; line(c, mx - 12, my - 6, mx + 12, my - 6, C.texte2, 1.2); line(c, mx - 12, my + 6, mx + 12, my + 6, C.texte2, 1.2); txt(c, 'm = ' + fmt(PS[9].m, 3), mx, my + 24, C.texte2, 9.5, 'center'); }
+}
+function f1Hover(x, y) {
+  const L = G.f1; if (!L) return null;
+  for (let i = 0; i < 2; i++) { const cl = L[i].cl, arr = i ? F1.B : F1.A, q = cloudHit(x, y, F1.pts[i], F1.ord[i], arr, cl.cx, cl.cy, cl.rx, cl.ry, pearlRadius(cl.rx, cl.ry, 200));
+    if (q >= 0) { const fl = F1.fl[i], k = arr[q], tags = []; if (fl && fl.mutated[q]) tags.push('mutation de cette génération'); if (fl && fl.migrant[q]) tags.push('migrant'); return { key: 'f' + i + q, name: 'Copie de l’allèle ' + (k < 8 ? alName(k) : '#' + k), role: tags.length ? tags.join(' · ') : 'Fréquence dans l’île ' + (i + 1) + ' : ' + fmt(countA(arr, k) / arr.length, 2) + '.' }; } }
+  return null;
+}
+ST[9] = {
+  c: 'F', n: 'Mutation', t: 'Mutation et flux génétique',
+  x: 'Deux îles de 100 individus partent de la même composition. Chaque nouvelle copie peut changer au hasard (taux de mutation μ) ou venir de l’autre île (taux de migration m). Sur chaque graphe de Muller, les filets naissants sont des mutations.',
+  k: 'La mutation introduit des variantes au hasard, qu’elles servent ou non ; la plupart disparaissent par dérive. La migration mélange des populations qui, sinon, divergent.',
+  ctl: [{ t: 'range', k: 'mu', l: 'Mutation μ', min: 0, max: 0.01, step: 0.0005, f: v => fmt(v, 4) }, { t: 'range', k: 'm', l: 'Migration m', min: 0, max: 0.1, step: 0.005, f: v => fmt(v, 3) }],
+  init: f1Init, gen: f1Gen, once() { f1Gen(1); }, draw: f1Draw, hover: f1Hover, rate: 6,
+  rows() { const sa = PG.maStats(F1.A), sb = PG.maStats(F1.B), th = 4 * 100 * PS[9].mu;
+    return [['génération', String(F1.gen), ''], ['île 1 : H · allèles', fmt(sa.H, 2) + ' · ' + sa.nAlleles, ''], ['île 2 : H · allèles', fmt(sb.H, 2) + ' · ' + sb.nAlleles, ''], ['divergence entre îles', fmt(PG.divergence(F1.A, F1.B), 2), '0 à 1'],
+      ['θ = 4Nμ', fmt(th, 2), ''], ['H* = θ/(1 + θ)', fmt(PG.equilibriumH(100, PS[9].mu), 2), '']]; },
+  eq: () => 'H* = θ / (1 + θ),   θ = 4Nμ',
+  note: () => 'Une mutation ne survient pas parce qu’elle serait utile : son taux ne dépend pas de l’environnement. Ici toutes les variantes sont neutres ; dans un environnement donné, la plupart des mutations qui changent quelque chose sont neutres ou nuisibles, rarement avantageuses.',
+  state() { const sa = PG.maStats(F1.A), sb = PG.maStats(F1.B); return { gen: F1.gen, mu: PS[9].mu, m: PS[9].m, H1: sa.H, H2: sb.H, n1: sa.nAlleles, n2: sb.nAlleles, divergence: PG.divergence(F1.A, F1.B), Hstar: PG.equilibriumH(100, PS[9].mu) }; },
+  onParam() {}
+};
+
+/* ---------- G1 : et si la population n'était pas mélangée ? ---------- */
+const GW = 64, GH = 40, GK = 4;
+const G1 = { mixed: null, local: null, gen: 0, hm: [], hl: [], cvs: [null, null] };
+const gStats = g => { const c = new Array(GK).fill(0); for (let i = 0; i < g.length; i++) c[g[i]]++; let s = 0; for (const v of c) s += (v / g.length) ** 2; return { same: PG.gridSameNeighbor(g, GW, GH), sum2: s }; };
+function g1Rec() { const a = gStats(G1.mixed), b = gStats(G1.local); G1.hm.push(a.same); G1.hl.push(b.same); G1.sm = a.sum2; G1.sl = b.sum2; }
+function g1Init() { rng = PG.makeRng(seed); G1.mixed = PG.gridInit(GW, GH, GK, rng); G1.local = G1.mixed.slice(); G1.gen = 0; G1.hm = []; G1.hl = []; g1Rec(); }
+function g1Gen(n) { for (let k = 0; k < n; k++) { PG.gridStep(G1.mixed, GW, GH, 'mixed', rng); PG.gridStep(G1.local, GW, GH, 'local', rng); G1.gen++; g1Rec(); } }
+const GRGB = PAL.slice(0, GK).map(hx);
+function gImg(i, g) {
+  if (!G1.cvs[i]) { const o = document.createElement('canvas'); o.width = GW; o.height = GH; G1.cvs[i] = o; }
+  const o = G1.cvs[i], x = o.getContext('2d'), im = x.createImageData(GW, GH); for (let q = 0; q < g.length; q++) { const k = GRGB[g[q]]; im.data[4 * q] = k[0]; im.data[4 * q + 1] = k[1]; im.data[4 * q + 2] = k[2]; im.data[4 * q + 3] = 255; }
+  x.putImageData(im, 0, 0); return o;
+}
+function g1Draw(c) {
+  const a = area(), gs = [G1.mixed, G1.local], names = ['mélange parfait : le parent est n’importe qui', 'voisinage : le parent est l’un des 8 voisins'], same = [G1.hm, G1.hl], s2 = [G1.sm, G1.sl], rects = [];
+  let gw, gh;
+  if (!stackMode()) { gw = Math.min((a.w - 30) / 2, (a.h - 70) * 1.6); gh = gw / 1.6; const y = a.y + Math.max(24, (a.h - gh - 60) / 2), x0 = a.x + (a.w - 2 * gw - 30) / 2; rects.push({ x: x0, y, w: gw, h: gh }, { x: x0 + gw + 30, y, w: gw, h: gh }); }
+  else { gw = Math.min(a.w, (a.h - 120) / 2 * 1.6); gh = gw / 1.6; const x = a.x + (a.w - gw) / 2; rects.push({ x, y: a.y + 20, w: gw, h: gh }, { x, y: a.y + 20 + gh + 56, w: gw, h: gh }); }
+  G.g1 = rects; c.imageSmoothingEnabled = false;
+  for (let i = 0; i < 2; i++) { const R = rects[i]; c.drawImage(gImg(i, gs[i]), R.x, R.y, R.w, R.h); c.strokeStyle = rgba(RGB.t2, 0.6); c.lineWidth = 1; c.strokeRect(R.x + .5, R.y + .5, R.w, R.h);
+    txt(c, names[i], R.x, R.y - 7, C.texte2, 10); const v = same[i][same[i].length - 1]; txt(c, 'voisins semblables ' + fmt(v, 2) + ' · sans structure ' + fmt(s2[i], 2), R.x, R.y + R.h + 15, i ? C.accent : C.texte, 10.5); }
+  c.imageSmoothingEnabled = true;
+}
+function g1Hover(x, y) {
+  const rs = G.g1; if (!rs) return null;
+  for (let i = 0; i < 2; i++) { const R = rs[i]; if (inR(R, x, y)) { const cx = Math.floor((x - R.x) / R.w * GW), cy = Math.floor((y - R.y) / R.h * GH), g = i ? G1.local : G1.mixed, v = g[cy * GW + cx]; let n = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dx || dy) if (g[((cy + dy + GH) % GH) * GW + (cx + dx + GW) % GW] === v) n++;
+    return { key: 'g' + i + cx + '_' + cy, name: 'Cellule (' + (cx + 1) + ', ' + (cy + 1) + ') · allèle ' + 'ABCD'[v], role: n + ' de ses 8 voisins portent le même allèle. ' + (i ? 'Son parent est l’un des voisins.' : 'Son parent peut être n’importe quelle cellule.') }; } }
+  return null;
+}
+function g1Sec(c, w, h) {
+  const gmax = Math.max(100, G1.gen), p = mk(40, 10, w - 52, h - 10 - 36, 0, gmax, 0, 1); axes(c, p, { xt: gmax <= 100 ? [0, 25, 50, 75, 100] : [0, Math.round(gmax / 2), gmax], yt: [0, 0.5, 1], yf: v => fmt(v, 1), xl: 'génération', yl: 'voisins semblables' });
+  poly(c, G1.hm.map((v, t) => [p.X(t), p.Y(v)]), C.texte, 1.8); poly(c, G1.hl.map((v, t) => [p.X(t), p.Y(v)]), C.accent, 2.2);
+  line(c, p.x, p.Y(G1.sm), p.x + p.w, p.Y(G1.sm), C.texte2, 1.2, [4, 3]);
+}
+ST[10] = {
+  c: 'G', n: 'Espace', t: 'Et si la population n’était pas mélangée ?',
+  x: 'Deux grilles de 64 × 40 cellules, quatre allèles tirés au hasard au départ, la même règle neutre : à chaque remplacement, une cellule recopie une autre. À gauche, n’importe laquelle ; à droite, l’un de ses huit voisins.',
+  k: 'Même règle, aucun avantage : seule change la façon de choisir le parent. Avec des voisins, des taches se forment et grandissent ; sans structure, le poivre et sel dérive en bloc.',
+  ctl: [], init: g1Init, gen: g1Gen, once() { g1Gen(1); }, draw: g1Draw, hover: g1Hover, rate: 8,
+  rows() { return [['génération', String(G1.gen), ''], ['voisins semblables · mélange', fmt(G1.hm[G1.hm.length - 1], 3), ''], ['voisins semblables · voisinage', fmt(G1.hl[G1.hl.length - 1], 3), ''], ['sans structure Σpᵢ² · mélange', fmt(G1.sm, 3), ''], ['sans structure Σpᵢ² · voisinage', fmt(G1.sl, 3), '']]; },
+  eq: () => 'voisins semblables ≈ Σ pᵢ²  sans structure',
+  note: () => 'Une génération = 2560 remplacements par grille. Tireté (graphe) : Σpᵢ² du mélange.',
+  extra: '<p>Jusqu’ici, chacun pouvait se reproduire avec n’importe qui. Les vraies populations ont un espace, des contacts, des réseaux. Qui touche qui change ce qui se propage, une variante, une rumeur ou une maladie.</p><p>Personne ne copie plus loin que son voisin, et personne ne dessine les taches. Une règle individuelle simple produit une structure collective qu’aucun individu ne vise : c’est l’émergence.</p><p class="suite">À suivre : 41 · Populations et propagation sur réseaux · 42 · Émergence</p>',
+  sec: { eye: 'Voisins semblables selon la génération', h: 150, draw: g1Sec, leg: () => legend([['fort', C.texte, 'mélange'], ['fort', C.accent, 'voisinage'], ['tiret', C.texte2, 'Σpᵢ² sans structure']]) },
+  state() { return { gen: G1.gen, sameMixed: G1.hm[G1.hm.length - 1], sameLocal: G1.hl[G1.hl.length - 1] }; },
+  onParam() {}
+};
+
+/* ================= Interface ================= */
+const NSTEP = ST.length;
+const stepper = $('#stepper');
+ST.forEach((s, i) => { const b = document.createElement('button'); b.className = 'seg' + (i === 0 || s.c !== ST[i - 1].c ? ' ch0' : ''); b.dataset.a = i; b.title = s.c + (ST.slice(0, i).filter(q => q.c === s.c).length + 1) + ' — ' + s.t;
+  b.innerHTML = `<b>${s.c}${ST.slice(0, i).filter(q => q.c === s.c).length + 1}</b><span>${s.n}</span>`; stepper.appendChild(b); });
+const segs = [...stepper.children];
+
+/* mesures */
+const mEl = $('#meas'); let rowEls = [], eqLast = '', noteLast = '', legLast = '';
+const setText = (e, s) => { if (e.textContent !== s) e.textContent = s; };
+function readouts() {
+  const S = ST[idx], rows = S.rows();
+  if (rows.length !== rowEls.length) { mEl.innerHTML = ''; rowEls = []; rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 'row' + (i >= 5 ? ' small' : ''); d.innerHTML = '<span class="lab"></span><span class="val"><b></b><i></i></span>'; mEl.appendChild(d); rowEls.push([d.children[0], d.querySelector('b'), d.querySelector('i')]); }); }
+  rows.forEach((r, i) => { setText(rowEls[i][0], r[0]); setText(rowEls[i][1], r[1]); setText(rowEls[i][2], r[2]); });
+  const eq = S.eq(); if (eq !== eqLast) { eqLast = eq; $('#eq').textContent = eq; }
+  const nt = S.note(); if (nt !== noteLast) { noteLast = nt; $('#mNote').textContent = nt; }
+}
+
+/* contrôles propres à l'étape */
+let toolEls = [];
+function mkBtn(label) { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; return b; }
+function buildTools() {
+  const tools = $('#tools'); tools.innerHTML = ''; toolEls = [];
+  for (const d of ST[idx].ctl) {
+    const g = document.createElement('div'); g.className = 'grp'; const it = { d };
+    if (d.t === 'btn') { it.el = mkBtn(typeof d.l === 'function' ? d.l() : d.l); it.el.addEventListener('click', e => { d.fn(); readouts(); syncTools(); e.currentTarget.blur(); }); g.appendChild(it.el); }
+    else {
+      const l = document.createElement('span'); l.className = 'gl'; l.textContent = d.t === 'tog' ? '' : d.l; if (d.t !== 'tog') g.appendChild(l);
+      if (d.t === 'seg') { it.els = d.o.map(([v, lab]) => { const b = mkBtn(lab); b.addEventListener('click', e => { setParam(d.k, v); e.currentTarget.blur(); }); g.appendChild(b); return b; }); }
+      else if (d.t === 'tog') { it.el = mkBtn(d.l); it.el.addEventListener('click', e => { setParam(d.k, !PS[idx][d.k]); e.currentTarget.blur(); }); g.appendChild(it.el); }
+      else { const r = document.createElement('input'); r.type = 'range'; r.min = d.min; r.max = d.max; r.step = d.step; r.setAttribute('aria-label', d.l); const v = document.createElement('span'); v.className = 'rv'; it.el = r; it.rv = v;
+        r.addEventListener('input', () => setParam(d.k, r.value)); g.appendChild(r); g.appendChild(v); }
+    }
+    tools.appendChild(g); toolEls.push(it);
+  }
+  tools.hidden = !toolEls.length; syncTools();
+}
+function syncTools() {
+  const P = PS[idx];
+  for (const it of toolEls) { const d = it.d;
+    if (d.t === 'seg') it.els.forEach((b, i) => b.setAttribute('aria-pressed', String(String(P[d.k]) === String(d.o[i][0]))));
+    else if (d.t === 'tog') it.el.setAttribute('aria-pressed', String(!!P[d.k]));
+    else if (d.t === 'range') { it.el.value = P[d.k]; it.rv.textContent = d.f(+P[d.k]); }
+    else if (d.t === 'btn' && typeof d.l === 'function') setText(it.el, d.l()); }
+}
+function setParam(name, value) {
+  const P = PS[idx]; if (!(name in P)) return false; const d = ST[idx].ctl.find(q => q.k === name); let v = value;
+  if (typeof DEF[idx][name] === 'boolean') v = value === true || value === 'true' || value === 1 || value === '1';
+  else if (typeof DEF[idx][name] === 'string') { if (d && d.o && !d.o.some(o => o[0] === value)) return false; v = String(value); }
+  else { v = +value; if (!isFinite(v)) return false; if (d && d.o) { if (!d.o.some(o => +o[0] === v)) return false; } else if (d && d.min != null) v = clamp(+(Math.round(v / d.step) * d.step).toFixed(6), d.min, d.max); }
+  P[name] = v; ST[idx].onParam(name); syncTools(); readouts(); return true;
+}
+
+/* étape */
+function sizeSec() {
+  const cfg = ST[idx].sec; $('#secBox').hidden = !cfg; if (!cfg) return;
+  $('#secEye').textContent = cfg.eye; secC.style.height = cfg.h + 'px';
+  const r = secC.getBoundingClientRect(); secC.width = Math.max(10, Math.round(r.width * dpr)); secC.height = Math.max(10, Math.round(r.height * dpr)); sx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function updateUI(n) {
+  const ae = document.activeElement; if (ae && ae.closest && ae.closest('#tools')) ae.blur();
+  const s = ST[n];
+  segs.forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Chapitre <b>${s.c}</b> · étape ${n + 1} sur ${NSTEP}`;
+  $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#stepKey').textContent = '« ' + s.k + ' »';
+  for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NSTEP - 1; setText($('#bOnce'), s.onceLabel || 'Une génération'); $('#bTen').hidden = !!s.noTen;
+  const ex = $('#extra'); ex.hidden = !s.extra; ex.innerHTML = s.extra || ''; eqLast = ''; noteLast = ''; legLast = ''; sizeSec();
+}
+const syncSeed = () => { $('#seedLbl').textContent = 'graine ' + seed; };
+function initStep(i) {
+  idx = i; spots.length = 0; G = {}; hideTip(); accum = 0; rowEls = [];
+  ST[i].init(); buildTools(); updateUI(i); readouts();
+}
+function restart() { if (idx === 1) arArchive(); accum = 0; ST[idx].init(); syncTools(); readouts(); }
+function newSeed() { seed = ((Math.random() * 1e9) >>> 0) || 1; syncSeed(); restart(); }
+function resetStep() { PS[idx] = JSON.parse(JSON.stringify(DEF[idx])); if (idx === 1) AR.runs = []; accum = 0; ST[idx].init(); syncTools(); readouts(); }
+let fadeA = 1, fadeDir = 0, pending = -1, accum = 0;
+function goStep(n, immediate) {
+  n = clamp(Math.round(n), 0, NSTEP - 1);
+  if (immediate || reduce) { initStep(n); fadeA = 1; fadeDir = 0; pending = -1; return; }
+  pending = n; fadeDir = -1;
+}
+
+/* ---------------- Tailles ---------------- */
+function resize() {
+  const r = sceneEl.getBoundingClientRect(), nw = Math.max(280, Math.round(r.width)), nh = Math.max(300, Math.round(r.height)), dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); sizeSec();
+}
+
+/* ---------------- Survol et clics ---------------- */
+let tipKey = '', tipTimer = 0;
+function showTip(key, name, role, x, y) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b></b><span></span>`; tipEl.firstChild.textContent = name; tipEl.lastChild.textContent = role; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight; let tx = x + 14, ty = y + 16; if (tx + tw > W - 6) tx = x - tw - 12; if (ty + th > H - 6) ty = y - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function findSpot(x, y) {
+  for (let i = spots.length - 1; i >= 0; i--) { const s = spots[i]; let hit;
+    if (s.k === 0) hit = Math.hypot(x - s.x, y - s.y) <= s.r;
+    else if (s.k === 1) hit = x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h;
+    else { const dx = s.x2 - s.x, dy = s.y2 - s.y, l2 = dx * dx + dy * dy, t = l2 ? clamp(((x - s.x) * dx + (y - s.y) * dy) / l2, 0, 1) : 0; hit = Math.hypot(x - s.x - t * dx, y - s.y - t * dy) <= s.r; }
+    if (hit) return s; }
+  return null;
+}
+function hoverInfo(x, y) { const S = ST[idx], h = S.hover && S.hover(x, y); if (h) return h; const s = findSpot(x, y); return s ? { key: s.name, name: s.name, role: s.role } : null; }
+const pos2 = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+cv.addEventListener('pointermove', e => {
+  const [x, y] = pos2(e), h = hoverInfo(x, y); cv.style.cursor = (idx < 2 && arHit(x, y) >= 0) ? 'pointer' : 'default'; if (h) showTip(h.key, h.name, h.role, x, y); else hideTip();
+});
+cv.addEventListener('pointerleave', hideTip);
+cv.addEventListener('pointerdown', e => {
+  const [x, y] = pos2(e), S = ST[idx]; if (S.click && S.click(x, y)) { readouts(); }
+  if (e.pointerType !== 'mouse') { const h = hoverInfo(x, y); if (h) { showTip(h.key, h.name, h.role, x, y); clearTimeout(tipTimer); tipTimer = setTimeout(hideTip, 3500); } else hideTip(); }
+});
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) { playing = p; $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : ''; $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture'); }
+const blur = e => e.currentTarget.blur();
+const doOnce = () => { ST[idx].once(); readouts(); };
+$('#bPlay').addEventListener('click', e => { setPlay(!playing); blur(e); });
+$('#bPrev').addEventListener('click', e => { goStep(idx - 1); blur(e); });
+$('#bNext').addEventListener('click', e => { goStep(idx + 1); blur(e); });
+$('#bOnce').addEventListener('click', e => { doOnce(); blur(e); });
+$('#bTen').addEventListener('click', e => { ST[idx].gen(10); readouts(); blur(e); });
+$('#bNew').addEventListener('click', e => { newSeed(); blur(e); });
+$('#bReplay').addEventListener('click', e => { restart(); blur(e); });
+segs.forEach(b => b.addEventListener('click', e => { goStep(+b.dataset.a); blur(e); }));
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target && e.target.tagName, isRange = tg === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tg === 'BUTTON' || isRange || tg === 'A' || tg === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goStep(idx + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if (e.key === 'r' || e.key === 'R') { resetStep(); return; }
+  if (e.key === 'g' || e.key === 'G') { doOnce(); return; }
+  if (/^[1-9]$/.test(e.key)) goStep(+e.key - 1);
+});
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+let last = 0, lastRead = 0;
+function drawScene() {
+  const c = ctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H); spots.length = 0; G = {}; c.globalAlpha = 1;
+  ST[idx].draw(c); c.globalAlpha = 1;
+  if (fadeA < 1) { c.fillStyle = rgba(RGB.fd, 1 - fadeA); c.fillRect(0, 0, W, H); }
+}
+function drawSec() {
+  const S = ST[idx]; if (!S.sec) return; const w = secC.width / dpr, h = secC.height / dpr; sx.setTransform(dpr, 0, 0, dpr, 0, 0); sx.clearRect(0, 0, w, h); S.sec.draw(sx, w, h);
+  const lg = S.sec.leg(); if (lg !== legLast) { legLast = lg; $('#secLeg').innerHTML = lg; }
+}
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (document.hidden) { last = 0; return; }
+  const dr = last ? Math.min(0.05, (now - last) / 1000) : 0.016; last = now;
+  if (fadeDir !== 0) {
+    if (fadeDir < 0) { fadeA -= dr / 0.16; if (fadeA <= 0.05) { fadeA = 0.05; initStep(pending); pending = -1; fadeDir = 1; } }
+    else { fadeA += dr / 0.4; if (fadeA >= 1) { fadeA = 1; fadeDir = 0; } }
+  } else {
+    const S = ST[idx]; if (S.tick) S.tick(dr * TS, playing);
+    if (S.rate && playing) { accum += dr * TS * S.rate; let n = 0; while (accum >= 1 && n < 4) { accum -= 1; S.gen(1); n++; } if (accum > 4) accum = 0; }
+  }
+  drawScene(); drawSec();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochet de vérification (lecture seule pour la QA) ---------------- */
+window.__evo = {
+  step: () => idx,
+  go: i => { goStep(i, true); },
+  setParam: (n, v) => setParam(n, v),
+  seed: n => { seed = (n >>> 0) || 1; syncSeed(); restart(); },
+  gen: n => { ST[idx].gen(Math.max(0, n | 0)); readouts(); },
+  found: () => { if (idx === 7) { ST[7].found(); readouts(); } },
+  state: () => ST[idx].state()
+};
+
+syncSeed(); resize(); initStep(0); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
