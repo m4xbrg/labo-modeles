@@ -168,7 +168,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 Dans cet ordre indicatif : 23 Magnétisme et induction · 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
 
-Le module 23 n'a **aucun modèle**. La maquette « magnétisme » du prototype d'interface a été retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)).
+Le module 23 n'a **aucun modèle**. La maquette « magnétisme » du premier prototype d'interface a été retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)).
 
 Pour 33, 34 et 36, des showcases couvrent déjà une partie du module ; une future production pourrait se limiter à ce qui manque.
 

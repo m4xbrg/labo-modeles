@@ -60,13 +60,13 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 
 ## Organisation du dépôt
 
-- `index.html` : redirection vers l'accueil.
-- `opus-sonnet/` : toutes les pages. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `index.html` est l'accueil actuel, `prealables.html` la théorie préalable, et chaque sous-dossier est un modèle (`index.html` + `explication.html`).
+- `index.html` : redirection vers l'accueil, `labo/index.html`.
+- `labo/` : l'accueil de LABO (lu dans `corpus/`), la feuille de style commune et le gabarit de planche documenté dans `labo/GABARIT.md`.
+- `opus-sonnet/` : toutes les planches. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `prealables.html` est la théorie préalable, chaque sous-dossier un modèle (`index.html` + `explication.html`) ; `index.html`, l'ancien accueil, redirige vers `labo/`.
 - `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe.
-- `prototype/` : la nouvelle direction visuelle LABO (accueil lu dans `corpus/`, gabarit de planche documenté dans `prototype/GABARIT.md`), en cours ; elle ne remplace pas encore l'accueil.
 - `corpus/` : la source de vérité.
 
-Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, ouvrir `opus-sonnet/index.html` ou servir le dossier avec n'importe quel serveur statique.
+Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, servir la racine du dépôt (`python -m http.server`) et ouvrir `/labo/` : l'accueil lit `corpus/*.json`, ce qu'un fichier ouvert directement ne peut pas faire.
 
 ## Fabrication
 
