@@ -35,7 +35,7 @@ Cas particulier : la respiration cellulaire, la chaîne de transport d'électron
 
 ## Absorbée n'est pas effacée
 
-Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46).
+Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46) ; la sélection naturelle, la dérive génétique, l'effet fondateur et le goulot d'étranglement dans *Évolution et génétique des populations* (40).
 
 Ces entrées restent dans l'Atlas avec le statut `absorbed` et un lien vers le modèle. Rien n'empêche qu'un de ces sujets reçoive un jour son propre toy. Une idée dont la fondation d'accueil n'est pas encore construite (la catalyse, module 30) reste `idea`.
 
@@ -200,10 +200,10 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Épidémie SIR | `idea` | 41 | 04, 05 | — |  |
 | Prédateur-proie | `idea` | 41 | 04, 08 | — |  |
 | Compétition entre espèces | `idea` | 41 | 04 | — |  |
-| Sélection naturelle | `idea` | 40 | 07 | — |  |
-| Dérive génétique | `idea` | 40 | 07 | — |  |
-| Effet fondateur | `idea` | 40 | 07 | — |  |
-| Goulot d’étranglement | `idea` | 40 | 07 | — |  |
+| Sélection naturelle | `absorbed` | 40 | 07 | Évolution et génétique des populations | Mécanisme dans A1, A2, B1 et C2 (variation, hérédité, fitness relative, trois formes de sélection). Un showcase sur un cas réel reste à faire. |
+| Dérive génétique | `absorbed` | 40 | 07 | Évolution et génétique des populations | D1 (généalogie de copies, vingt populations) et D2 (sélection contre dérive). |
+| Effet fondateur | `absorbed` | 40 | 07 | Évolution et génétique des populations | E1 (continent et colonies). |
+| Goulot d’étranglement | `absorbed` | 40 | 07 | Évolution et génétique des populations | E2 (taille, allèles, diversité). |
 | Game of Life | `idea` | 42 | — | — |  |
 | Automates cellulaires | `idea` | 42 | — | — |  |
 | Modèle d’Ising | `idea` | 42 | 07, 18 | — |  |

@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**16 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 7 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**17 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 8 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -26,6 +26,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Rotation, gravitation et orbites](../opus-sonnet/fondations-rotation-gravitation/index.html) | foundation | Rotation, gravitation et orbites | — | 12, 13 | 2026-10-01 |
 | [Flux, gradients, champs et fluides](../opus-sonnet/fondations-flux-fluides/index.html) | foundation | Flux, gradients, champs et fluides | — | 16, 20 | 2026-10-01 |
 | [Relativité restreinte](../opus-sonnet/fondations-relativite-restreinte/index.html) | foundation | Relativité restreinte | — | 46 | 2026-10-02 |
+| [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -200,6 +201,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I Deux référentiels · II Horloge lumineuse · III Train et éclairs · IV Diagramme d’espace-temps · V Dilatation et contraction · VI Temps propre · VII Addition des vitesses · VIII Énergie et quantité de mouvement
 - **Interaction** : Actes en trois paillasses ; changement de référentiel, horloge lumineuse, train et éclairs avec reconstruction corrigée des délais, diagramme de Minkowski avec cône de lumière et transformation de Lorentz animée, ruban d’univers, jumeaux à point de demi-tour déplaçable, fusées en étages, poussée à force constante et triangle énergie-impulsion.
 - **Notes** : Une dimension d’espace ; demi-tour instantané ; apparence visuelle (Terrell, aberration, Doppler relativiste) hors champ ; module 47 seulement annoncé.
+
+### Évolution et génétique des populations
+
+- **Identifiant** : `fondations-evolution-populations` · **chemin** : [`opus-sonnet/fondations-evolution-populations/index.html`](../opus-sonnet/fondations-evolution-populations/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-evolution-populations/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Évolution et génétique des populations
+- **Collection** : aucune
+- **Modules** : 40 Évolution et génétique des populations (`full`), 07 Hasard, probabilité et distributions (`supporting`)
+- **Toys** : A1 La composition change, pas les individus · A2 Variation sans hérédité : génotype et phénotype · B1 Ce que veut dire « fitness » · C1 Deux allèles : p + q = 1 · C2 Une sélection sur un allèle · D1 Le hasard de la reproduction · D2 Sélection et dérive à la fois · E1 Effet fondateur · E2 Goulot d'étranglement · F1 Mutation et flux génétique · G1 Et si la population n'était pas mélangée ?
+- **Interaction** : Onze étapes en sept chapitres, toutes stochastiques (générateur semé, « Nouveau tirage » et « Rejouer le même tirage ») : arène de 240 individus où la sélection retire sans jamais modifier un trait, individu et lignée suivis au toucher ; noyau génotype / corps phénotype et curseur h² (R ≈ h²·S) ; courbe de survie, fitness relative et génération suivante attendue sur cinq terrains, bascule « environnement rude » ; réservoir de copies et carré de Punnett proportionnel ; p(t) sous sélection ; généalogie de copies et vingt populations en dérive (N = 10, 50, 500) ; sélection contre dérive avec probabilité de Kimura ; continent et colonies fondatrices ; goulot avec taille, allèles et diversité ; deux îles avec mutation, migration et graphe de Muller ; grille mélangée ou par voisinage.
+- **Notes** : Générations non chevauchantes (Wright-Fisher) ; reproduction à un parent pour le trait continu ; un seul gène, sans recombinaison ; mutations neutres ; modules 41 (espace, réseaux) et 42 (émergence) annoncés en G1, pas couverts. Moteur stochastique testé hors page.
 
 ## Pages d'appui
 
