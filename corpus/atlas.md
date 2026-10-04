@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 10 | 27 | 0 | 149 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 3 | 1 | 54 |
+| Liste historique (18 groupes) | 192 | 6 | 10 | 31 | 0 | 145 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 5 | 1 | 52 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **14** | **30** | **2** | **203** |
+| **Total** | **265** | **16** | **14** | **36** | **2** | **197** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -372,8 +372,8 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 |---|---|---|---|---|---|
 | Traduction ARN → protéine | `idea` | 35 | — | — |  |
 | Repliement / structure des protéines | `idea` | 35 | 28 | — |  |
-| Membrane cellulaire et canaux | `idea` | 32 | 28 | — |  |
-| Transport actif / pompe Na⁺/K⁺ | `idea` | 32 | 34 | — |  |
+| Membrane cellulaire et canaux | `absorbed` | 32 | 28 | Cellule, membrane et transport | Actes I et II des fondations Cellule, membrane et transport (bicouche, canaux, transporteurs). |
+| Transport actif / pompe Na⁺/K⁺ | `absorbed` | 32 | 34 | Cellule, membrane et transport | Acte V des fondations Cellule, membrane et transport (pompe Na⁺/K⁺, symport). |
 | Respiration cellulaire | `built` | 34 | 30, 31 | La respiration cellulaire | Sujet construit dès le 2026-09-29, avant cette liste : voir la note de provenance. |
 | Chaîne de transport d’électrons | `built` | 34 | 31 | La respiration cellulaire | Étape de la planche Respiration cellulaire. |
 | ATP synthase | `built` | 34 | 12 | La respiration cellulaire | La turbine de la planche Respiration cellulaire. |

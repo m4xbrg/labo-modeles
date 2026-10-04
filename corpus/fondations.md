@@ -20,12 +20,12 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-22, 33, 40, 46 (22 modules) |
+| Couverture **full** par au moins un modèle | 01-06, 10-22, 32, 33, 40, 46 (23 modules) |
 | Couverture **partial** | 07, 08, 34, 36, 44 |
-| Seulement **supporting** | 09, 26, 30, 31, 32, 35 |
+| Seulement **supporting** | 09, 26, 30, 31, 35 |
 | Rien | 23-25, 27-29, 37-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -101,7 +101,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 32 | Cellule, membrane et transport | compartiments, membrane, diffusion, transport facilité, pompes | Cellule, membrane et transport (`planned`) | supporting | La mitose (supporting), Le neurone qui apprend (supporting) |
+| 32 | Cellule, membrane et transport | compartiments, membrane, diffusion, transport facilité, pompes | Cellule, membrane et transport (`built`) | **full** | La mitose (supporting), Le neurone qui apprend (supporting), Cellule, membrane et transport (full) |
 | 33 | Bioélectricité et synapses | gradients ioniques, potentiel membranaire, seuil, canaux voltage-dépendants, potentiel d’action, transmission synaptique | Bioélectricité et synapses (`planned`) | **full** | Le neurone qui apprend (full) |
 | 34 | Énergie biologique | ATP, couplage, enzymes, respiration, photosynthèse | Énergie biologique (`planned`) | partial | La respiration cellulaire (partial) |
 | 35 | Information génétique | ADN, nucléotides, chromosomes, transcription, traduction, ADN → ARN → protéine | Information génétique (`planned`) | supporting | La mitose (supporting), La réplication de l’ADN (supporting) |
@@ -162,10 +162,11 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Relativité restreinte | 46 | [Relativité restreinte](../opus-sonnet/fondations-relativite-restreinte/index.html) | Ouvre la branche J · Relativité. Le module 47 est seulement annoncé. |
 | Électricité fondamentale et circuits | 21 · 22 | [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) (prolongé), [Courant et circuits](../opus-sonnet/06-courant-circuits/index.html) | La planche du champ électrique existait depuis le 2026-09-29 ; la production l'a prolongée et a ajouté la planche 06. |
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
+| Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 23 Magnétisme et induction · 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 32 Cellule, membrane et transport · 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
+Dans cet ordre indicatif : 23 Magnétisme et induction · 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
 
 Le module 23 n'a **aucun modèle**. La maquette « magnétisme » du prototype d'interface a été retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)).
 

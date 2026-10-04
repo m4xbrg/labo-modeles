@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Une cellule se lit comme un système ouvert : l'accent vert-sauge (famille des verts du vivant) désigne la membrane et ses protéines ; les couleurs d'espèces suivent le code de la série (Na⁺ orange, K⁺ et O₂ bleus, énergie en jaune, réservée à l'ATP) et la forme dit ce que la couleur ne dit pas.
+  2. Le mouvement ne sert qu'à signifier : les particules ne s'arrêtent jamais, même à l'équilibre (seule la pause de l'utilisateur fige l'image) ; les traversées laissent une brève traînée, le flux net est une flèche, le contour de la cellule ondule et se froisse quand elle rétrécit.
+  3. Le vocabulaire arrive après le phénomène (milieu masqué jusqu'à la stabilisation du volume) ; le moteur est une pile de fonctions séparée du dessin, à pas fixe ; particules, débits et probabilités sont illustratifs, et la page le dit à chaque acte.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cellule, membrane et transport — L’invisible en mouvement, Fondations 32</title>
+<meta name="description" content="Sept actes sur la membrane : ce qui la traverse, la diffusion et l'équilibre dynamique, l'osmose, les pompes qui maintiennent un gradient, surface et volume, compartiments.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#bfe39a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1.35 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.key{margin:10px 0 0;padding-left:11px;border-left:2px solid var(--accent);font:italic 400 16px/1.3 var(--serif);color:var(--texte)}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:18px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden],section[hidden]{display:none}
+#scope,#bars{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:10px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.tb{width:100%;border-collapse:collapse;font:400 11px/1.35 var(--mono)}
+.tb th{font-weight:400;color:var(--texte-2);text-align:left;padding:3px 4px 3px 0;border-bottom:1px solid var(--trait);font-size:10px}
+.tb td{padding:4px 4px 4px 0;border-bottom:1px solid var(--trait);vertical-align:top}
+.tb td.v{font-weight:500}
+.cards{display:grid;gap:8px}
+.card{border:1px solid var(--trait);padding:10px 12px;background:var(--fond)}
+.card b{display:block;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.card p{margin:0;font:400 13.5px/1.4 var(--sans)}
+.card span{display:block;margin-top:6px;font:400 11px/1.4 var(--mono);color:var(--texte-2)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+.btn.sm{padding:7px 9px}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0}
+.sg[data-g=M]{flex:4 1 0}.sg[data-g=C]{flex:3 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene" title="Mouvement réduit : si ton système le demande, l’agitation est divisée par 2 à l’affichage. Elle ne s’arrête jamais, elle est le sujet.">
+    <canvas id="cv" role="img" aria-label="Scène de la membrane : boîte à particules séparée par une membrane, cellule dans un bain, deux cellules de tailles différentes, cellule eucaryote avec ses compartiments."></canvas>
+    <header class="head">
+      <p class="serie">L’invisible en mouvement — Fondations 32</p>
+      <h1>Cellule, membrane et <em>transport</em></h1>
+      <a class="back" href="../index.html">&larr; Accueil de la série</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VII</p>
+      <h2 id="stepTitle">La frontière</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="key" id="key"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <section id="tblSec" hidden>
+      <p class="eyebrow">Tableau mesuré</p>
+      <div id="tbl"></div>
+      <p class="note" style="margin-top:6px">/s/mol. : traversées par seconde, par molécule restée dehors (moyenne glissante de 8 s).</p>
+    </section>
+
+    <section id="recSec">
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps."></canvas></div>
+      <p class="leg" id="leg"></p>
+      <div class="scopeBox" id="barsBox" hidden style="margin-top:12px"><canvas id="bars" role="img" aria-label="Graphique complémentaire de l'acte."></canvas></div>
+      <p class="leg" id="leg3"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="leg" id="leg2"></p>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section id="cards" hidden>
+      <p class="eyebrow">Trois questions ouvertes</p>
+      <div class="cards">
+        <div class="card"><b>Énergie</b><p>Si une cellule dépense sans arrêt de l’énergie pour maintenir son organisation, d’où vient cette énergie ?</p><span>Module 34 (à venir). En attendant : planche 02, la respiration.</span></div>
+        <div class="card"><b>Information</b><p>Comment la cellule sait-elle quelles protéines (canaux, pompes, transporteurs) fabriquer ?</p><span>Module 35 (à venir). En attendant : planche 08, la réplication de l’ADN.</span></div>
+        <div class="card"><b>Électricité</b><p>Que se passe-t-il quand les particules séparées par la membrane portent une charge ?</p><span>Module 33 (à venir). En attendant : planche 03, le neurone.</span></div>
+      </div>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>7</kbd> aller à l'acte</li>
+        <li><kbd>R</kbd> recommencer l'acte · <kbd>M</kbd> membrane (acte I) · <kbd>S</kbd> suivre une particule (acte III) · <kbd>P</kbd> pompes (acte V)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bSpeed" title="Vitesse d’affichage du temps illustratif">×1</button>
+      <button class="btn" id="bReset" title="Recommencer l'acte (R)">Recommencer</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les sept actes">
+      <div class="sg" data-g="M"><span class="sgl"><span class="long">Paillasse M · membrane</span><span class="short">M</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Acte I — La frontière"><b>I</b><span>Frontière</span></button>
+        <button class="seg" data-a="1" title="Acte II — Qui traverse ?"><b>II</b><span>Qui traverse</span></button>
+        <button class="seg" data-a="2" title="Acte III — Gradient et diffusion"><b>III</b><span>Diffusion</span></button>
+        <button class="seg" data-a="3" title="Acte IV — Osmose et volume"><b>IV</b><span>Osmose</span></button>
+      </div></div>
+      <div class="sg" data-g="C"><span class="sgl"><span class="long">Paillasse C · cellule vivante</span><span class="short">C</span></span><div class="sgs">
+        <button class="seg" data-a="4" title="Acte V — Maintenir un gradient"><b>V</b><span>Gradient</span></button>
+        <button class="seg" data-a="5" title="Acte VI — Surface et volume"><b>VI</b><span>Surface</span></button>
+        <button class="seg" data-a="6" title="Acte VII — Compartiments"><b>VII</b><span>Compartiments</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <!-- I -->
+      <div class="grp" data-acts="0"><button class="btn go" id="bMem" title="Membrane (touche M)">Retirer la membrane</button><button class="btn" id="bLoupe" aria-pressed="true"><span class="dot"></span>Loupe sur la membrane</button></div>
+      <!-- II -->
+      <div class="grp" data-acts="1"><span class="gl">Injecter 30 dehors</span><button class="btn sm" data-inj="o2">O₂</button><button class="btn sm" data-inj="ster">stéroïde</button><button class="btn sm" data-inj="eau">H₂O</button><button class="btn sm" data-inj="glu">glucose</button><button class="btn sm" data-inj="na">Na⁺</button><button class="btn sm" id="bVid">Vider</button></div>
+      <div class="grp" data-acts="1"><span class="gl">Membrane</span><button class="btn" id="bBil" aria-pressed="true">Bicouche lipidique</button><button class="btn" id="bTam" aria-pressed="false">Tamis hypothétique</button></div>
+      <div class="grp" data-acts="1"><span class="gl">Protéines</span><button class="btn" id="bAq" aria-pressed="false"><span class="dot"></span>Aquaporines</button><button class="btn" id="bNav" aria-pressed="false"><span class="dot"></span>Canaux Na⁺</button><button class="btn" id="bGlut" aria-pressed="false"><span class="dot"></span>Transporteurs du glucose</button></div>
+      <!-- III -->
+      <div class="grp" data-acts="2"><span class="gl">intérieur au départ</span><input type="range" id="rIn" min="0" max="120" step="1" value="10" aria-label="Nombre de particules A à l'intérieur au départ"><span class="rv" id="vIn"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">extérieur au départ</span><input type="range" id="rOut" min="0" max="120" step="1" value="110" aria-label="Nombre de particules A à l'extérieur au départ"><span class="rv" id="vOut"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">canaux ouverts</span><input type="range" id="rCh" min="1" max="6" step="1" value="4" aria-label="Nombre de canaux ouverts, la perméabilité"><span class="rv" id="vCh"></span></div>
+      <div class="grp" data-acts="2"><button class="btn go" id="bLance">Lancer</button><button class="btn" id="bFollow" aria-pressed="false" title="Suivre une particule (touche S)"><span class="dot"></span>Suivre une particule</button></div>
+      <!-- IV -->
+      <div class="grp" data-acts="3"><span class="gl">C bain</span><input type="range" id="rCo" min="50" max="900" step="10" value="300" aria-label="Concentration du bain en milliosmoles par litre"><span class="rv" id="vCo"></span></div>
+      <div class="grp" data-acts="3"><button class="btn sm" data-co="150">150</button><button class="btn sm" data-co="300">300</button><button class="btn sm" data-co="600">600</button></div>
+      <div class="grp" data-acts="3"><span class="gl">soluté qui traverse lentement (type urée)</span><input type="range" id="rU" min="0" max="600" step="10" value="0" aria-label="Concentration du soluté qui traverse lentement"><span class="rv" id="vU"></span></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bNew">Nouvelle cellule</button></div>
+      <!-- V -->
+      <div class="grp" data-acts="4"><button class="btn go" id="bPump" aria-pressed="false" title="Pompes (touche P)"><span class="dot"></span>Pompes en marche</button><button class="btn" id="bSup" aria-pressed="false"><span class="dot"></span>Apport d’énergie (ATP)</button><button class="btn" id="bSym" aria-pressed="false"><span class="dot"></span>Symport Na⁺–glucose</button></div>
+      <div class="grp" data-acts="4"><span class="gl">fuite</span><input type="range" id="rLeak" min="1" max="3" step="1" value="2" aria-label="Nombre de canaux de fuite de chaque ion"><span class="rv" id="vLeak"></span></div>
+      <!-- VI -->
+      <div class="grp" data-acts="5"><span class="gl">diamètre d de B</span><input type="range" id="rD" min="5" max="100" step="1" value="30" aria-label="Diamètre de la cellule B en micromètres"><span class="rv" id="vD"></span></div>
+      <div class="grp" data-acts="5"><button class="btn" id="bFold" aria-pressed="false"><span class="dot"></span>Replis de la membrane (×3)</button></div>
+      <!-- VII -->
+      <div class="grp" data-acts="6"><button class="btn go" id="bDis" aria-pressed="false">Dissoudre les membranes internes</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* CELL-BEGIN */
+/* Moteur « Cellule, membrane et transport ». Fonctions pures ou mutations
+   explicites d'un objet d'état, pas de dessin. Unités illustratives :
+   boîte de 2 × 1 (x de −1 à 1, y de 0 à 1), membrane verticale en x = 0,
+   intérieur (cellule) à GAUCHE (x < 0), extérieur à DROITE (x > 0).
+   Temps en secondes « d'écran » (temps illustratif). */
+const Cell = (() => {
+  const DT = 1 / 120;          // pas fixe de la simulation
+  const W2 = 1, H = 1;          // demi-largeur, hauteur
+  const MW = 0.07;              // épaisseur de la membrane
+  const HALF = MW / 2;
+
+  // Espèces. bil : probabilité de franchir la bicouche par tentative ;
+  // tamis : probabilité de franchir un tamis à pores aqueux (taille seule).
+  const SPECIES = {
+    o2:   { nom: 'O₂',         role: 'petite molécule non polaire',        D: 0.13, r: 0.010, bil: 0.55,    tamis: 0.70,  charge: 0 },
+    ster: { nom: 'stéroïde',   role: 'grosse molécule non polaire (hormone)', D: 0.06, r: 0.018, bil: 0.30,    tamis: 0.004, charge: 0 },
+    eau:  { nom: 'H₂O',        role: 'petite molécule polaire',             D: 0.13, r: 0.008, bil: 0.005,   tamis: 0.70,  charge: 0 },
+    glu:  { nom: 'glucose',    role: 'molécule polaire plus grosse',        D: 0.07, r: 0.016, bil: 0.00008, tamis: 0.03,  charge: 0 },
+    na:   { nom: 'Na⁺',        role: 'ion (porte une charge)',              D: 0.11, r: 0.011, bil: 0.00002, tamis: 0.55,  charge: 1 },
+    k:    { nom: 'K⁺',         role: 'ion (porte une charge)',              D: 0.11, r: 0.012, bil: 0.00002, tamis: 0.55,  charge: 1 },
+    a:    { nom: 'soluté A',   role: 'soluté polaire (ne traverse pas la bicouche)', D: 0.10, r: 0.013, bil: 0.00005, tamis: 0.5, charge: 0 },
+    b:    { nom: 'soluté B',   role: 'soluté polaire (ne traverse pas la bicouche)', D: 0.10, r: 0.013, bil: 0.00005, tamis: 0.5, charge: 0 },
+  };
+  // Protéines : sélectivité et probabilité de passage par un canal ouvert.
+  const CH_P = 0.85;   // canal ouvert : passage presque sûr pour l'espèce reconnue
+  const PROT_H = 0.075; // hauteur (en y) de l'embouchure d'une protéine
+
+  function rng(seed) {
+    let a = (seed >>> 0) || 1;
+    return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  function gauss(r) { let u = 0, v = 0; while (u === 0) u = r(); v = r();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+  // membrane : 'none' | 'bilayer' | 'tamis'
+  function makeBox(opt = {}) {
+    return { t: 0, membrane: opt.membrane || 'bilayer', parts: [], prots: [], rng: rng(opt.seed || 7),
+      events: [], cross: {}, atp: opt.atp ?? 0, atpSupply: opt.atpSupply ?? 0, atpMax: opt.atpMax ?? 200,
+      atpUsed: 0, nextId: 1, speed: 1 };
+  }
+  const sideOf = x => (x < 0 ? 'in' : 'out');
+
+  function addParticles(box, sp, n, side = 'both') {
+    const r = box.rng;
+    for (let i = 0; i < n; i++) {
+      const s = side === 'both' ? (r() < 0.5 ? 'in' : 'out') : side;
+      const x = (HALF + 0.02 + r() * (W2 - HALF - 0.04)) * (s === 'in' ? -1 : 1);
+      box.parts.push({ id: box.nextId++, sp, x, y: 0.02 + r() * (H - 0.04), lock: null, mark: false });
+    }
+  }
+  function removeParticles(box, sp, side) {
+    box.parts = box.parts.filter(p => !(p.sp === sp && !p.lock && (side == null || sideOf(p.x) === side)));
+  }
+
+  // kind : 'canal' (sel = [espèces], open) | 'glut' (uniport glucose) |
+  //        'pompe' (Na⁺/K⁺-ATPase) | 'sglt' (symport Na⁺-glucose)
+  function addProt(box, kind, y, opt = {}) {
+    const p = { id: box.nextId++, kind, y, open: opt.open ?? true, sel: opt.sel || [],
+      face: 'out', busy: 0, cargo: [], cycles: 0 };
+    box.prots.push(p); return p;
+  }
+  function protAt(box, y) {
+    for (const p of box.prots) if (Math.abs(y - p.y) < PROT_H / 2) return p;
+    return null;
+  }
+
+  function logCross(box, sp, dir) {
+    const c = box.cross[sp] || (box.cross[sp] = { in: 0, out: 0 });
+    c[dir]++; box.events.push({ t: box.t, sp, dir });
+  }
+  // dir : 'in' = de l'extérieur vers l'intérieur (entrée), 'out' = sortie.
+  function rate(box, sp, dir, win = 3) {
+    const t0 = box.t - win; let n = 0;
+    for (let i = box.events.length - 1; i >= 0; i--) { const e = box.events[i]; if (e.t < t0) break;
+      if (e.sp === sp && e.dir === dir) n++; }
+    return n / Math.min(win, Math.max(box.t, 1e-9));
+  }
+  function counts(box) {
+    const c = {}; for (const k in SPECIES) c[k] = { in: 0, out: 0, transit: 0 };
+    for (const p of box.parts) { if (p.lock) c[p.sp].transit++; else c[p.sp][sideOf(p.x)]++; }
+    return c;
+  }
+
+  // Probabilité de passage d'une tentative au point y, pour l'espèce sp.
+  function passProb(box, sp, y) {
+    if (box.membrane === 'none') return 1;
+    const pr = protAt(box, y);
+    if (pr) {
+      if (pr.kind === 'canal') return (pr.open && pr.sel.includes(sp)) ? CH_P : 0;
+      return 0; // transporteurs et pompes : gérés à part (liaison), pas de fuite
+    }
+    return box.membrane === 'tamis' ? SPECIES[sp].tamis : SPECIES[sp].bil;
+  }
+
+  // Une particule verrouillée suit un chemin : approche -> traversée -> sortie.
+  function lockTo(box, p, prot, fromSide, dur) {
+    const sx = fromSide === 'in' ? -1 : 1;
+    p.lock = { prot: prot.id, t: 0, dur, x0: p.x, y0: p.y, ya: prot.y + (box.rng() - 0.5) * 0.02,
+      sx, phase: 0 };
+  }
+  function advanceLocked(box, p, dt) {
+    const L = p.lock; L.t += dt; const u = Math.min(1, L.t / L.dur);
+    // 0–0.3 : approche de l'embouchure ; 0.3–0.85 : traversée ; 0.85–1 : sortie
+    const mouth = L.sx * (HALF + 0.012);
+    if (u < 0.3) { const k = u / 0.3; p.x = L.x0 + (mouth - L.x0) * k; p.y = L.y0 + (L.ya - L.y0) * k; }
+    else if (u < 0.85) { const k = (u - 0.3) / 0.55; p.x = mouth + (-2 * mouth) * k; p.y = L.ya; }
+    else { const k = (u - 0.85) / 0.15; p.x = -mouth - L.sx * 0.03 * k; p.y = L.ya; }
+    if (u >= 1) { const dir = L.sx > 0 ? 'in' : 'out'; logCross(box, p.sp, dir); p.lock = null;
+      p.x = -L.sx * (HALF + 0.035); }
+  }
+
+  // Cherche, du côté `side`, la particule libre de l'espèce sp la plus proche
+  // de l'embouchure de la protéine, à moins de `reach`.
+  function nearest(box, sp, side, prot, reach, taken) {
+    let best = null, bd = reach * reach; const mx = (side === 'in' ? -1 : 1) * HALF;
+    for (const p of box.parts) { if (p.lock || p.sp !== sp || sideOf(p.x) !== side || taken.includes(p)) continue;
+      const d = (p.x - mx) ** 2 + (p.y - prot.y) ** 2; if (d < bd) { bd = d; best = p; } }
+    return best;
+  }
+  function grab(box, prot, list, side, reach) {
+    const taken = [];
+    for (const sp of list) { const q = nearest(box, sp, side, prot, reach, taken); if (!q) return null; taken.push(q); }
+    return taken;
+  }
+
+  const GLUT = { dur: 0.45, flip: 3 };               // uniport : durée d'un transit, bascules à vide /s
+  const PUMP = { dur: 0.6, kmax: 2.2, reach: 0.30 }; // cycles /s au plus, par pompe
+  const SGLT = { dur: 0.6, k: 6, n0: 20 };            // fréquence de liaison = k·(nNa/n0)·(nGlc/n0) par côté
+
+  function stepProts(box, dt) {
+    const r = box.rng;
+    for (const pr of box.prots) {
+      if (pr.busy > 0) { pr.busy -= dt; continue; }
+      if (pr.kind === 'glut') {
+        // uniport à accès alterné : ouvert d'un côté ; lie un glucose qui se
+        // présente de ce côté (voir step) ; à vide, bascule au hasard.
+        if (r() < GLUT.flip * dt) pr.face = pr.face === 'in' ? 'out' : 'in';
+      } else if (pr.kind === 'pompe') {
+        if (!pr.open || box.atp < 1) continue;
+        if (r() < PUMP.kmax * dt) {
+          const nas = grab(box, pr, ['na', 'na', 'na'], 'in', PUMP.reach);
+          const ks = grab(box, pr, ['k', 'k'], 'out', PUMP.reach);
+          if (nas && ks) { box.atp -= 1; box.atpUsed += 1; pr.cycles++; pr.busy = PUMP.dur;
+            nas.forEach(p => lockTo(box, p, pr, 'in', PUMP.dur)); ks.forEach(p => lockTo(box, p, pr, 'out', PUMP.dur)); }
+        }
+      } else if (pr.kind === 'sglt') {
+        if (!pr.open) continue;
+        // symport : 1 Na⁺ + 1 glucose ensemble. Loi d'action de masse : la
+        // fréquence des liaisons d'un côté est proportionnelle au produit des
+        // deux nombres de ce côté. Même constante dans les deux sens : la
+        // protéine n'apporte aucune énergie, le gradient de Na⁺ fait tout.
+        const c = counts(box), sides = r() < 0.5 ? ['out', 'in'] : ['in', 'out'];
+        for (const s of sides) {
+          const p = SGLT.k * (c.na[s] / SGLT.n0) * (c.glu[s] / SGLT.n0) * dt;
+          if (r() < p) { const g = grab(box, pr, ['na', 'glu'], s, 9);
+            if (g) { pr.busy = SGLT.dur; pr.cycles++; g.forEach(q => lockTo(box, q, pr, s, SGLT.dur)); break; } }
+        }
+      }
+    }
+  }
+
+  function step(box, dt = DT) {
+    const r = box.rng; box.t += dt;
+    if (box.atpSupply > 0) box.atp = Math.min(box.atpMax, box.atp + box.atpSupply * dt);
+    stepProts(box, dt);
+    for (const p of box.parts) {
+      if (p.lock) { advanceLocked(box, p, dt); continue; }
+      const S = SPECIES[p.sp], s = Math.sqrt(2 * S.D * dt);
+      let nx = p.x + s * gauss(r), ny = p.y + s * gauss(r);
+      if (ny < 0.01) ny = 0.02 - ny; if (ny > H - 0.01) ny = 2 * (H - 0.01) - ny;
+      if (nx < -W2 + 0.01) nx = 2 * (-W2 + 0.01) - nx; if (nx > W2 - 0.01) nx = 2 * (W2 - 0.01) - nx;
+      const from = sideOf(p.x);
+      if (box.membrane === 'none') {
+        if (sideOf(nx) !== from) logCross(box, p.sp, from === 'in' ? 'out' : 'in');
+        p.x = nx; p.y = ny; continue;
+      }
+      const hits = from === 'in' ? nx > -HALF : nx < HALF;
+      if (hits) {
+        const yy = (p.y + ny) / 2, pr = protAt(box, yy);
+        if (pr && pr.kind === 'glut' && p.sp === 'glu' && pr.busy <= 0 && pr.face === from) {
+          pr.busy = GLUT.dur; pr.face = from === 'in' ? 'out' : 'in'; pr.cycles++;
+          lockTo(box, p, pr, from, GLUT.dur); continue;
+        }
+        if (r() < passProb(box, p.sp, yy)) {
+          const sx = from === 'in' ? 1 : -1;               // signe du côté d'arrivée
+          if (sx * nx < HALF + 0.005) nx = sx * (HALF + 0.005 + r() * 0.01);
+          logCross(box, p.sp, from === 'in' ? 'out' : 'in');
+        } else {
+          const sx = from === 'in' ? -1 : 1;
+          nx = sx * (HALF + Math.abs(sx * HALF - nx) * 0.5 + 0.002);
+        }
+      }
+      p.x = nx; p.y = ny;
+    }
+    if (box.events.length > 6000) box.events.splice(0, box.events.length - 4000);
+  }
+  function run(box, seconds) { const n = Math.round(seconds / DT); for (let i = 0; i < n; i++) step(box, DT); }
+
+  // ---------- Osmose (acte IV) : modèle continu d'une cellule animale ----------
+  // V en unités de V0 ; concentrations en mOsm/L ; b = volume non osmotique.
+  const OSMO = { iso: 300, b: 0.3, kw: 1.2, lyse: 1.75, R0: 30, alpha: 1 / 1500 };
+  function osmoInit() { return { V: 1, nImp: OSMO.iso * (1 - OSMO.b), nU: 0, t: 0, lysed: false, jw: 0 }; }
+  const area = V => Math.pow(V, 2 / 3);
+  function osmoIn(s) { const w = s.V - OSMO.b; return { imp: s.nImp / w, u: s.nU / w, tot: (s.nImp + s.nU) / w }; }
+  // P = { Cout (imperméant, mOsm/L), Uout (soluté perméant lent, mOsm/L), Pu (perméabilité au soluté, /s) }
+  function osmoStep(s, P, dt) {
+    if (s.lysed) return s;
+    const ci = osmoIn(s), A = area(s.V), cout = P.Cout + (P.Uout || 0);
+    s.jw = OSMO.kw * A * (ci.tot - cout) / OSMO.iso;   // > 0 : l'eau entre
+    s.V += s.jw * dt;
+    s.nU += (P.Pu || 0) * A * ((P.Uout || 0) - ci.u) * dt;
+    if (s.nU < 0) s.nU = 0;
+    s.t += dt;
+    if (s.V > OSMO.lyse) { s.lysed = true; }
+    return s;
+  }
+  // Volume d'équilibre (soluté perméant équilibré) : seule la part imperméante compte.
+  function osmoVeq(Cout) { return OSMO.b + OSMO.iso * (1 - OSMO.b) / Cout; }
+  // Débits unidirectionnels de molécules d'eau dessinées (entrée, sortie) par seconde.
+  function waterRates(s, P) {
+    const ci = osmoIn(s), A = area(s.V), cout = P.Cout + (P.Uout || 0);
+    return { in: OSMO.R0 * A * (1 - OSMO.alpha * cout), out: OSMO.R0 * A * (1 - OSMO.alpha * ci.tot) };
+  }
+  function tonicity(Cout, tol = 15) { return Cout < OSMO.iso - tol ? 'hypotonique' : Cout > OSMO.iso + tol ? 'hypertonique' : 'isotonique'; }
+
+  // ---------- Surface et volume (acte VI) : sphère de diamètre d (µm) ----------
+  // Besoin ∝ volume (q par µm³), apport maximal ∝ surface (phi par µm²).
+  const SV = { q: 1, phi: 40 / 6 };                   // diamètre critique d* = 6·phi/q = 40 µm
+  function sv(d, fold = 1) {
+    const A = Math.PI * d * d, V = Math.PI * d * d * d / 6, Aeff = A * fold;
+    const besoin = SV.q * V, apport = SV.phi * Aeff;
+    return { d, A, V, Aeff, ratio: A / V, ratioEff: Aeff / V, besoin, apport, couverture: apport / besoin,
+      dCrit: 6 * SV.phi * fold / SV.q };
+  }
+
+  return { DT, W2, H, MW, HALF, PROT_H, SPECIES, GLUT, PUMP, SGLT, OSMO, SV,
+    rng, makeBox, addParticles, removeParticles, addProt, protAt, step, run, counts, rate, sideOf,
+    osmoInit, osmoStep, osmoIn, osmoVeq, waterRates, tonicity, area, sv };
+})();
+/* CELL-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const barsC = $('#bars'), bctx = barsC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const LILAS = '#b9a3ff', SABLE = '#dcc29a';
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RE = rgb(C.ener), RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RP = rgb(C.pos), RN = rgb(C.neg), RL = rgb(LILAS), RS = rgb(SABLE);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2;
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const trim = (r, t0) => { let i = 0; while (i < r.length && r[i].t < t0) i++; if (i) r.splice(0, i); };
+const SPC = { o2: C.neg, ster: C.texte, eau: C.texte, glu: LILAS, na: C.pos, k: C.neg, a: LILAS, b: SABLE };
+const SPN = { o2: 'O₂', ster: 'stéroïde', eau: 'H₂O', glu: 'glucose', na: 'Na⁺', k: 'K⁺', a: 'soluté A', b: 'soluté B' };
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function arrow(c, x0, y0, x1, y1, col, lw, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 8, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw;
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke();
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.5, y1 - uy * hd + ux * hd * 0.5); c.lineTo(x1 - ux * hd + uy * hd * 0.5, y1 - uy * hd - ux * hd * 0.5); c.closePath(); c.fill();
+  c.restore();
+}
+function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0, spd = 1, animT = 0;
+const NA = 7, ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const SPDS = [1, 2, 4];
+const simK = () => spd * (reduce ? 0.5 : 1);
+const prm = {};
+let loupe = true, loupY = 0.5, loupDrag = false;
+function resetPrm(n) {
+  if (n === 0) Object.assign(prm, { mem: true });
+  if (n === 1) Object.assign(prm, { kind: 'bilayer', aq: false, nav: false, glut: false });
+  if (n === 2) Object.assign(prm, { nIn: 10, nOut: 110, ch: 4, follow: false });
+  if (n === 3) Object.assign(prm, { Cout: 300, U: 0 });
+  if (n === 4) Object.assign(prm, { pumps: false, supply: false, symport: false, leak: 2 });
+  if (n === 5) Object.assign(prm, { d: 30, fold: false });
+  if (n === 6) Object.assign(prm, { dis: false });
+}
+for (let i = 0; i < NA; i++) resetPrm(i);
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [];
+function zone(x0, y0, x1, y1, key, name, role) { zones.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- Enregistreur ---------------- */
+function plotSeries(c, rect, o) {
+  const { x, y, w, h } = rect, xT = t => x + (t - o.t0) / (o.t1 - o.t0) * w;
+  c.save(); c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  c.beginPath(); c.rect(x, y, w, h); c.clip();
+  for (const s of o.ser) {
+    const yO = v => y + h * (1 - (v - s.lo) / (s.hi - s.lo));
+    c.beginPath(); let first = true;
+    for (const r of o.rec) { if (r.t < o.t0 - 1) continue; const v = s.f(r); if (v == null || !isFinite(v)) { first = true; continue; } first ? c.moveTo(xT(r.t), yO(v)) : c.lineTo(xT(r.t), yO(v)); first = false; }
+    c.strokeStyle = s.col; c.lineWidth = s.lw || 1.6; c.setLineDash(s.dash || []); c.stroke(); c.setLineDash([]);
+  }
+  c.restore();
+  c.font = mono(10); c.textBaseline = 'middle';
+  const L = o.ser.find(s => !s.right), R = o.ser.find(s => s.right);
+  if (L) { c.fillStyle = L.col; c.textAlign = 'right'; c.fillText(fmt(L.hi, L.d), x - 4, y + 5); c.fillText(fmt(L.lo, L.d), x - 4, y + h - 5); }
+  if (R) { c.fillStyle = R.col; c.textAlign = 'left'; c.fillText(fmt(R.hi, R.d), x + w + 4, y + 5); c.fillText(fmt(R.lo, R.d), x + w + 4, y + h - 5); }
+}
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+function barsSetup() { const w = barsC.width / dpr, h = barsC.height / dpr; bctx.setTransform(dpr, 0, 0, dpr, 0, 0); bctx.clearRect(0, 0, w, h); return { w, h }; }
+function xlabels(c, x, w, h, l0, l1) { c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillText(l0, x, h - 6); c.textAlign = 'right'; c.fillText(l1, x + w, h - 6); }
+function niceMax(v) { const e = Math.pow(10, Math.floor(Math.log10(Math.max(v, 1e-9)))), m = v / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }
+
+/* ================= Boîte à particules (actes I, II, III, V) ================= */
+let G = { bx: 0, by: 0, bw: 100, bh: 50, sc: 50, X: x => x, Y: y => y };
+let box = null, accS = 0, rec = [], recT = 0, scT = 0, sc3 = [];
+const trails = [], sidesM = new Map(), flash = new Map();
+const fol = { on: false, p: null, side: '', n: 0, tl: 0, pts: [] };
+const inj = {};
+function layout() {
+  const T = W < 620 ? 126 : 112, bot = 36, top = T + 38;
+  const bw = Math.max(200, Math.min(W - 28, 2 * (H - top - bot))), bh = bw / 2, bx = (W - bw) / 2, by = top + Math.max(0, (H - top - bot - bh) / 2);
+  G = { bx, by, bw, bh, sc: bw / 2, X: x => bx + (x + 1) / 2 * bw, Y: y => by + y * bh };
+}
+function newBox(opt) {
+  box = Cell.makeBox(opt); accS = 0; rec = []; recT = 0; scT = 0; sc3 = [];
+  trails.length = 0; sidesM.clear(); flash.clear(); fol.p = null; fol.n = 0; fol.pts = []; fol.tl = 0;
+  for (const k in inj) delete inj[k];
+}
+function recNow() {
+  const c = Cell.counts(box);
+  if (act === 0) { const f = (s, n) => 100 * (c[s].in + (c[s].transit ? 0 : 0)) / n; return { t: box.t, a: f('a', 60), b: f('b', 60), o: f('o2', 40) }; }
+  if (act === 1) { const r = { t: box.t }; for (const s in c) { const n = c[s].in + c[s].out + c[s].transit; r[s] = n ? 100 * (c[s].in + (c[s].transit ? 0 : 0)) / n : NaN; } return r; }
+  if (act === 2) return { t: box.t, ci: c.a.in, ce: c.a.out, ri: Cell.rate(box, 'a', 'in', 3), ro: Cell.rate(box, 'a', 'out', 3) };
+  return { t: box.t, na: c.na.in, k: c.k.in, atp: box.atp, glu: c.glu.in, u: box.atpUsed };
+}
+function followCheck() {
+  const p = fol.p; if (!fol.on || !p) return;
+  if (!p.lock) { const s = Cell.sideOf(p.x); if (s !== fol.side) { fol.n++; fol.side = s; } }
+  if (box.t - fol.tl >= 0.1) { fol.tl = box.t; fol.pts.push({ t: box.t, x: p.x, y: p.y }); trim(fol.pts, box.t - 6); }
+}
+function sampleRec() {
+  if (box.t - recT >= 0.25) { recT = box.t; rec.push(recNow()); trim(rec, box.t - 130); }
+  if (act === 2 && box.t - scT >= 1) {
+    scT = box.t; const c = Cell.counts(box);
+    sc3.push({ t: box.t, dC: c.a.out - c.a.in, net: Cell.rate(box, 'a', 'in', 6) - Cell.rate(box, 'a', 'out', 6) }); trim(sc3, box.t - 120);
+  }
+}
+function detectTrails() {
+  for (const p of box.parts) {
+    if (p.lock) continue;
+    const s = Cell.sideOf(p.x), q = sidesM.get(p.id);
+    if (!q) { sidesM.set(p.id, { s, x: p.x, y: p.y }); continue; }
+    if (q.s !== s) { if (trails.length < 90) trails.push({ sp: p.sp, t: box.t, pts: [[q.x, q.y], [p.x, p.y]], p }); q.s = s; }
+    q.x = p.x; q.y = p.y;
+  }
+  for (let i = trails.length - 1; i >= 0; i--) {
+    const T = trails[i], age = box.t - T.t;
+    if (age > 0.4) { trails.splice(i, 1); continue; }
+    const l = T.pts[T.pts.length - 1]; if (l[0] !== T.p.x || l[1] !== T.p.y) T.pts.push([T.p.x, T.p.y]);
+  }
+}
+function stepBoxN(n) { for (let i = 0; i < n; i++) { Cell.step(box); followCheck(); sampleRec(); } detectTrails(); }
+function advBox(dt) {
+  accS += dt * simK(); let n = 0;
+  while (accS >= Cell.DT && n < 90) { Cell.step(box); followCheck(); sampleRec(); accS -= Cell.DT; n++; }
+  if (accS > 0.2) accS = 0;
+  detectTrails();
+}
+
+/* ---- dessin de la boîte ---- */
+function drawFrame() {
+  const c = ctx;
+  c.fillStyle = rgba(RA, 0.04); c.fillRect(G.bx, G.by, G.bw / 2, G.bh);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(G.bx + 0.5, G.by + 0.5, G.bw - 1, G.bh - 1);
+  c.font = mono(10.5);
+  tagText(c, W < 520 ? 'intérieur' : 'intérieur (cellule)', G.bx + 4, G.by - 5, 'left', 'bottom', C.texte2);
+  tagText(c, 'extérieur', G.bx + G.bw - 4, G.by - 5, 'right', 'bottom', C.texte2);
+}
+function drawMembrane() {
+  const c = ctx, cx = G.X(0), mw = Cell.MW * G.sc, x0 = cx - mw / 2;
+  zone(x0, G.by, x0 + mw, G.by + G.bh, 'mem', 'Membrane plasmique', box.membrane === 'none' ? 'Limite imaginaire : rien ne retient les particules.' : box.membrane === 'tamis' ? 'Tamis hypothétique : des pores qui ne trient que par la taille. Pas une vraie membrane.' : 'Bicouche de phospholipides vue en coupe : un cœur huileux entre deux faces qui aiment l’eau. Elle retient le polaire et les ions, laisse passer le non polaire.');
+  if (box.membrane === 'none') {
+    c.save(); c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1; c.setLineDash([5, 5]); c.beginPath(); c.moveTo(cx + 0.5, G.by); c.lineTo(cx + 0.5, G.by + G.bh); c.stroke(); c.restore();
+    return;
+  }
+  if (box.membrane === 'tamis') {
+    c.fillStyle = 'rgba(138,147,160,0.16)'; c.fillRect(x0, G.by, mw, G.bh);
+    c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 0.5, G.by); c.lineTo(x0 + 0.5, G.by + G.bh); c.moveTo(x0 + mw - 0.5, G.by); c.lineTo(x0 + mw - 0.5, G.by + G.bh); c.stroke();
+    c.fillStyle = rgba(RN, 0.5); const sp = Math.max(9, G.bh / 34); for (let y = G.by + sp / 2; y < G.by + G.bh; y += sp) c.fillRect(x0 + 1.5, y - 1.3, mw - 3, 2.6);
+    return;
+  }
+  c.fillStyle = '#06080b'; c.fillRect(x0, G.by, mw, G.bh);
+  const hr = clamp(mw * 0.17, 2.4, 6), sp = hr * 2.15, n = Math.floor(G.bh / sp), off = (G.bh - n * sp) / 2 + sp / 2, ph = Cell.PROT_H * G.bh * 0.5 + hr;
+  const ys = box.prots.map(p => G.Y(p.y)), skip = y => ys.some(py => Math.abs(y - py) < ph);
+  c.fillStyle = C.accent; c.beginPath();
+  for (let i = 0; i < n; i++) { const y = G.by + off + i * sp; if (skip(y)) continue; for (const s of [-1, 1]) { const x = cx + s * (mw / 2 - hr); c.moveTo(x + hr, y); c.arc(x, y, hr, 0, TAU); } }
+  c.fill();
+  c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1; c.beginPath();
+  for (let i = 0; i < n; i++) {
+    const y = G.by + off + i * sp; if (skip(y)) continue;
+    for (const s of [-1, 1]) { const xh = cx + s * (mw / 2 - hr * 2), L = mw / 2 - hr * 2 - 1.5;
+      for (const k of [-1, 1]) { const yy = y + k * hr * 0.45; c.moveTo(xh, yy); for (let j = 1; j <= 6; j++) { const u = j / 6; c.lineTo(xh - s * L * u, yy + Math.sin(u * 5 + animT * 1.3 + i * 0.9 + k) * hr * 0.35); } } }
+  }
+  c.stroke();
+}
+const PROT_INFO = {
+  eau: ['Aquaporine', 'Canal sélectif à l’eau : H₂O seulement, dans les deux sens, sans énergie.'],
+  na: ['Canal Na⁺', 'Passage aqueux sélectif : Na⁺ passe, K⁺ n’y passerait pas. Dans le sens du gradient, sans énergie.'],
+  k: ['Canal K⁺', 'Passage aqueux sélectif : K⁺ passe, Na⁺ n’y passerait pas. Dans le sens du gradient, sans énergie.'],
+  a: ['Canal du soluté A', 'Pore qui laisse passer A dans les deux sens. Le nombre de canaux ouverts fixe la perméabilité.'],
+  glut: ['Transporteur du glucose (GLUT)', 'Lie un glucose, bascule, le relâche de l’autre côté : un à la fois, il peut saturer. Sans apport d’énergie.'],
+  pompe: ['Pompe Na⁺/K⁺', 'Pompe Na⁺/K⁺ : 3 Na⁺ dehors, 2 K⁺ dedans, 1 ATP par cycle. Transport actif : contre le gradient.'],
+  sglt: ['Symport Na⁺–glucose (SGLT)', 'Fait entrer un Na⁺ et un glucose ensemble. Aucune énergie propre : le gradient de Na⁺ fait le travail.']
+};
+function drawProts() {
+  const c = ctx, cx = G.X(0), mw = Cell.MW * G.sc, x0 = cx - mw / 2 - 5, w = mw + 10, hh = Cell.PROT_H * G.bh * 0.96;
+  for (const pr of box.prots) {
+    const y = G.Y(pr.y), top = y - hh / 2;
+    c.lineWidth = 1.4; c.strokeStyle = C.accent; c.fillStyle = C.fond2;
+    let info;
+    if (pr.kind === 'canal') {
+      const gap = Math.max(4, hh * 0.24), pc = pr.sel[0] === 'eau' ? C.texte : pr.sel[0] === 'na' ? C.pos : pr.sel[0] === 'k' ? C.neg : LILAS;
+      c.fillStyle = rgba(rgb(pc.length === 7 ? pc : C.texte), 0.4); c.fillRect(x0 + 2, y - gap / 2, w - 4, gap);
+      c.fillStyle = C.fond2; rr(c, x0, top, w, hh / 2 - gap / 2, 4); c.fill(); c.stroke();
+      rr(c, x0, y + gap / 2, w, hh / 2 - gap / 2, 4); c.fill(); c.stroke();
+      info = PROT_INFO[pr.sel[0]] || PROT_INFO.a;
+    } else if (pr.kind === 'glut') {
+      const g0 = pr.face === 'in' ? 6 : 0.6, g1 = pr.face === 'in' ? 0.6 : 6;
+      c.fillStyle = C.fond2; c.beginPath(); c.moveTo(x0, top); c.lineTo(x0 + w, top); c.lineTo(x0 + w, y - g1); c.lineTo(x0, y - g0); c.closePath(); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(x0, y + hh / 2); c.lineTo(x0 + w, y + hh / 2); c.lineTo(x0 + w, y + g1); c.lineTo(x0, y + g0); c.closePath(); c.fill(); c.stroke();
+      info = PROT_INFO.glut;
+    } else if (pr.kind === 'pompe') {
+      const on = pr.open && box.atp >= 1, fl = flash.get(pr.id), age = fl ? animT - fl : 9;
+      const hp = hh * 1.08, wx = w + 8;
+      c.fillStyle = '#18202c'; rr(c, cx - wx / 2, y - hp / 2, wx, hp, 6); c.fill(); c.stroke();
+      c.strokeStyle = rgba(RA, 0.5); c.beginPath(); c.moveTo(cx - wx * 0.22, y - hp * 0.32); c.quadraticCurveTo(cx, y, cx - wx * 0.22, y + hp * 0.32); c.moveTo(cx + wx * 0.22, y - hp * 0.32); c.quadraticCurveTo(cx, y, cx + wx * 0.22, y + hp * 0.32); c.stroke();
+      if (on) { c.strokeStyle = rgba(RE, 0.9); c.lineWidth = 1.6; rr(c, cx - wx / 2 + 2.5, y - hp / 2 + 2.5, wx - 5, hp - 5, 4); c.stroke(); }
+      if (age < 0.6) { const k = 1 - age / 0.6, g = c.createRadialGradient(cx, y, 2, cx, y, 34); g.addColorStop(0, rgba(RE, 0.65 * k)); g.addColorStop(1, rgba(RE, 0)); c.fillStyle = g; c.fillRect(cx - 40, y - 40, 80, 80); }
+      info = PROT_INFO.pompe; info = [info[0] + (on ? ' (en action)' : pr.open ? ' (sans ATP)' : ' (arrêtée)'), info[1]];
+    } else {
+      c.fillStyle = C.fond2; rr(c, x0 - 1, top - 2, w + 2, hh + 4, 5); c.fill(); c.stroke();
+      c.beginPath(); c.moveTo(cx, top); c.lineTo(cx, y + hh / 2); c.stroke();
+      c.fillStyle = C.pos; c.beginPath(); c.arc(cx - w * 0.22, y, 2.4, 0, TAU); c.fill(); c.fillStyle = LILAS; c.beginPath(); c.arc(cx + w * 0.22, y, 2.4, 0, TAU); c.fill();
+      info = PROT_INFO.sglt;
+    }
+    zone(x0, top - 2, x0 + w, top + hh + 2, 'pr' + pr.id, info[0], info[1]);
+  }
+}
+function drawTrails() {
+  const c = ctx; c.lineCap = 'round';
+  for (const T of trails) {
+    const age = (box.t - T.t) / 0.4, rgbc = rgb(SPC[T.sp].length === 7 ? SPC[T.sp] : C.texte);
+    c.strokeStyle = rgba(rgbc, 0.8 * (1 - age)); c.lineWidth = 1.6; c.beginPath();
+    T.pts.forEach((q, i) => { const x = G.X(q[0]), y = G.Y(q[1]); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+  }
+  c.lineCap = 'butt';
+}
+function hexPath(c, x, y, R) { for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3 + Math.PI / 6; k ? c.lineTo(x + R * Math.cos(a), y + R * Math.sin(a)) : c.moveTo(x + R * Math.cos(a), y + R * Math.sin(a)); } c.closePath(); }
+function drawParts() {
+  const c = ctx, sc = G.sc, by = {};
+  for (const p of box.parts) (by[p.sp] || (by[p.sp] = [])).push(p);
+  for (const sp in by) {
+    const L = by[sp], S = Cell.SPECIES[sp];
+    if (sp === 'na' || sp === 'k') {
+      const R = Math.max(3.2, S.r * sc * 1.35); c.fillStyle = SPC[sp]; c.beginPath();
+      for (const p of L) { const x = G.X(p.x), y = G.Y(p.y); c.moveTo(x + R, y); c.arc(x, y, R, 0, TAU); } c.fill();
+      if (R >= 3.6) { c.strokeStyle = C.fond; c.lineWidth = 1.1; c.beginPath(); const h = R * 0.55; for (const p of L) { const x = G.X(p.x), y = G.Y(p.y); c.moveTo(x - h, y); c.lineTo(x + h, y); c.moveTo(x, y - h); c.lineTo(x, y + h); } c.stroke(); }
+    } else if (sp === 'o2') {
+      const R = Math.max(2.4, S.r * sc * 1.2); c.strokeStyle = rgba(RN, 0.7); c.lineWidth = 1.5; c.beginPath();
+      for (const p of L) { const x = G.X(p.x), y = G.Y(p.y); c.moveTo(x + R, y); c.arc(x, y, R, 0, TAU); } c.stroke();
+    } else if (sp === 'eau') {
+      const R = Math.max(1.4, S.r * sc * 0.8); c.fillStyle = rgba(RT, 0.55); c.beginPath();
+      for (const p of L) { const x = G.X(p.x), y = G.Y(p.y); c.moveTo(x + R, y); c.arc(x, y, R, 0, TAU); } c.fill();
+    } else if (sp === 'glu') {
+      const R = Math.max(3.4, S.r * sc * 1.3); c.fillStyle = rgba(RL, 0.92); c.beginPath();
+      for (const p of L) hexPath(c, G.X(p.x), G.Y(p.y), R); c.fill();
+    } else if (sp === 'ster') {
+      const R = Math.max(3.4, S.r * sc * 1.0) * 0.8, off = [[-1.0, 0.4], [0, 0], [0.9, 0.4], [1.7, -0.35]]; c.strokeStyle = rgba(RT, 0.9); c.lineWidth = 1.1; c.beginPath();
+      for (const p of L) { const x = G.X(p.x) - 0.35 * R, y = G.Y(p.y); for (const o of off) { c.moveTo(x + o[0] * R + R * 0.62, y + o[1] * R); c.arc(x + o[0] * R, y + o[1] * R, R * 0.62, 0, TAU); } } c.stroke();
+    } else {
+      const R = Math.max(3, S.r * sc * 1.2); c.fillStyle = SPC[sp]; c.beginPath();
+      for (const p of L) { const x = G.X(p.x), y = G.Y(p.y); c.moveTo(x + R, y); c.arc(x, y, R, 0, TAU); } c.fill();
+    }
+  }
+}
+function hitParticle(x, y) {
+  if (!box) return null; let best = null, bd = 1e9;
+  for (const p of box.parts) { const d = Math.hypot(G.X(p.x) - x, G.Y(p.y) - y), r = Math.max(5, Cell.SPECIES[p.sp].r * G.sc * 1.4 + 3); if (d < r && d < bd) { bd = d; best = p; } }
+  return best;
+}
+function drawFollow() {
+  if (!fol.on || !fol.p) return; const c = ctx, p = fol.p;
+  c.strokeStyle = rgba(RE, 0.55); c.lineWidth = 1.3; c.beginPath(); let first = true, px = 0;
+  for (const q of fol.pts) { const x = G.X(q.x), y = G.Y(q.y); if (!first && Math.abs(x - px) > G.bw * 0.5) first = true; first ? c.moveTo(x, y) : c.lineTo(x, y); px = x; first = false; }
+  c.lineTo(G.X(p.x), G.Y(p.y)); c.stroke();
+  const x = G.X(p.x), y = G.Y(p.y); c.strokeStyle = C.ener; c.lineWidth = 1.8; c.beginPath(); c.arc(x, y, 8, 0, TAU); c.stroke();
+}
+function legendFoot(text) { ctx.font = mono(10.5); while (text.length > 8 && ctx.measureText(text).width > W - 34) text = text.slice(0, -2).replace(/[\s·]+$/, '') + '…'; tagText(ctx, text, 14, H - 8, 'left', 'bottom', C.texte2); }
+
+/* ================= Acte I : la frontière ================= */
+function init1() {
+  newBox({ membrane: prm.mem ? 'bilayer' : 'none', seed: 21 });
+  Cell.addParticles(box, 'a', 60, 'in'); Cell.addParticles(box, 'b', 60, 'out'); Cell.addParticles(box, 'o2', 40, 'out');
+}
+function setMem1(on) {
+  prm.mem = !!on; const old = box, nb = Cell.makeBox({ membrane: on ? 'bilayer' : 'none', seed: 22 + (old.parts.length & 7) });
+  nb.parts = old.parts.map(p => ({ ...p, lock: null })); nb.nextId = old.nextId; nb.t = old.t; box = nb; accS = 0; trails.length = 0; sidesM.clear();
+  syncTools(); status();
+}
+function loupeGeom() {
+  const R = clamp(G.bh * 0.43, 60, 108), cx = G.X(0), lo = G.by + R * 0.92, hi = G.by + G.bh - R * 0.92;
+  const cy = clamp(G.by + loupY * G.bh, lo, Math.max(lo, hi)); return { R, cx, cy };
+}
+function drawLoupe() {
+  const c = ctx, { R, cx, cy } = loupeGeom(), hx = R * 0.42, hr = R * 0.085, sp = hr * 2.4;
+  c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+  c.fillStyle = '#0c1118'; c.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+  c.fillStyle = '#05070a'; c.fillRect(cx - hx, cy - R, 2 * hx, 2 * R);
+  // eau : aucune dans le cœur
+  c.fillStyle = rgba(RT, 0.5); c.beginPath();
+  for (let i = 0; i < 70; i++) {
+    const u = (Math.sin(i * 12.9898) * 43758.5453) % 1, v = (Math.sin(i * 78.233) * 12345.6789) % 1, side = i % 2 ? 1 : -1;
+    const bx = Math.abs(u) * (R - hx - hr * 1.6) + hx + hr * 1.7, by = (Math.abs(v) * 2 - 1) * R * 0.95;
+    const x = cx + side * (bx + Math.sin(animT * 0.8 + i) * 2.2), y = cy + by + Math.cos(animT * 0.7 + i * 1.7) * 2.2;
+    c.moveTo(x + 1.9, y); c.arc(x, y, 1.9, 0, TAU);
+  }
+  c.fill();
+  const n = Math.ceil(R * 2 / sp) + 1;
+  c.fillStyle = C.accent; c.beginPath();
+  for (let i = 0; i < n; i++) { const y = cy - R + i * sp; for (const s of [-1, 1]) { const x = cx + s * hx; c.moveTo(x + hr, y); c.arc(x, y, hr, 0, TAU); } }
+  c.fill();
+  c.strokeStyle = rgba(RT2, 0.95); c.lineWidth = 1.2; c.beginPath();
+  for (let i = 0; i < n; i++) {
+    const y = cy - R + i * sp;
+    for (const s of [-1, 1]) for (const k of [-1, 1]) { const xh = cx + s * (hx - hr), yy = y + k * hr * 0.5; c.moveTo(xh, yy);
+      for (let j = 1; j <= 8; j++) { const u = j / 8; c.lineTo(xh - s * (hx - hr - R * 0.05) * u, yy + Math.sin(u * 6 + animT * 1.1 + i * 0.8 + k * 1.2 + (s > 0 ? 1.4 : 0)) * hr * 0.55); } }
+  }
+  c.stroke();
+  c.restore();
+  c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
+  // cote de 5 nm (bicouche) et de 3 nm (cœur)
+  c.strokeStyle = C.texte; c.fillStyle = C.texte; c.lineWidth = 1;
+  const yb = cy + R * 0.78; c.beginPath(); c.moveTo(cx - hx - hr, yb); c.lineTo(cx + hx + hr, yb); c.moveTo(cx - hx - hr, yb - 4); c.lineTo(cx - hx - hr, yb + 4); c.moveTo(cx + hx + hr, yb - 4); c.lineTo(cx + hx + hr, yb + 4); c.stroke();
+  const yc = cy - R * 0.74, xc = hx - hr - R * 0.05; c.beginPath(); c.moveTo(cx - xc, yc); c.lineTo(cx + xc, yc); c.moveTo(cx - xc, yc - 4); c.lineTo(cx - xc, yc + 4); c.moveTo(cx + xc, yc - 4); c.lineTo(cx + xc, yc + 4); c.stroke();
+  c.font = mono(10); const lw = W - (cx + R) > 270;
+  const heads = cy - R * 0.28;
+  if (lw) {
+    const lx = cx + R + 22, items = [
+      ['tête hydrophile (attire l’eau)', cx + hx + hr, heads, C.accent],
+      ['queues hydrophobes (fuient l’eau)', cx + hx * 0.45, cy + R * 0.18, C.texte2],
+      ['cœur huileux ≈ 3 nm', cx + xc * 0.5, yc, C.texte],
+      ['bicouche ≈ 5 nm', cx + hx + hr, yb, C.texte]];
+    items.forEach((it, i) => { const ly = cy - 40 + i * 24; c.strokeStyle = rgba(rgb(it[3]), 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(it[1] + 3, it[2]); c.lineTo(lx - 4, ly); c.stroke(); tagText(c, it[0], lx, ly, 'left', 'middle', it[3]); });
+  } else {
+    const ly0 = G.by + G.bh + 22, items = [['●', 'tête hydrophile (attire l’eau)', C.accent], ['~', 'queues hydrophobes (fuient l’eau)', C.texte2], ['↔', 'cœur huileux ≈ 3 nm ; bicouche ≈ 5 nm', C.texte]];
+    items.forEach((it, i) => { c.fillStyle = it[2]; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(it[0], G.bx + 2, ly0 + i * 16); c.fillStyle = C.texte2; c.fillText(it[1], G.bx + 18, ly0 + i * 16); });
+  }
+  zcirc(cx, cy, R, 'loupe', 'Loupe sur la membrane', 'Coupe grossie de la bicouche (≈ 5 nm en vrai). Glisse-la le long de la membrane.');
+  zoneF((x, y) => Math.hypot(x - cx, y - cy) <= R && Math.abs(Math.abs(x - cx) - hx) < hr + 3, 'lt', 'Tête hydrophile', 'Pastille qui aime l’eau : elle reste au contact de l’eau, sur chaque face.');
+  zoneF((x, y) => Math.hypot(x - cx, y - cy) <= R && Math.abs(x - cx) < hx - hr - 2 && Math.abs(x - cx) > 3, 'lq', 'Queues hydrophobes', 'Deux chaînes huileuses qui fuient l’eau : elles ondulent, la membrane est fluide.');
+  zoneF((x, y) => Math.hypot(x - cx, y - cy) <= R && Math.abs(x - cx) > hx + hr + 3, 'le', 'Eau', 'Des molécules d’eau de chaque côté, aucune dans le cœur huileux.');
+}
+function draw1() {
+  layout(); drawFrame(); drawMembrane(); drawTrails(); drawParts();
+  if (loupe) drawLoupe();
+  legendFoot('chaque particule dessinée représente un très grand nombre de molécules');
+}
+function scope1() {
+  const { w, h } = scopeSetup(), c = sctx, x = 34, pw = w - 44;
+  const t1 = box.t;
+  plotSeries(c, { x, y: 8, w: pw, h: h - 30 }, { t0: t1 - 40, t1, rec, ser: [
+    { f: r => r.a, col: LILAS, lo: 0, hi: 100, d: 0, lw: 2 }, { f: r => r.b, col: SABLE, lo: 0, hi: 100, d: 0, lw: 2, dash: [5, 3] }, { f: r => r.o, col: C.neg, lo: 0, hi: 100, d: 0, lw: 2 }] });
+  xlabels(c, x, pw, h, '−40 s', 'maintenant');
+}
+function bars1() {
+  const { w, h } = barsSetup(), c = bctx, cn = Cell.counts(box), x0 = 66, bw = w - x0 - 10;
+  c.font = mono(10.5); c.textBaseline = 'middle';
+  [['in', 'intérieur', 22], ['out', 'extérieur', 62]].forEach(([s, lab, y]) => {
+    c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText(lab, 4, y + 10);
+    const parts = [['a', LILAS, cn.a[s]], ['b', SABLE, cn.b[s]], ['o2', C.neg, cn.o2[s]]], tot = parts.reduce((q, p) => q + p[2], 0) || 1;
+    let x = x0; c.strokeStyle = C.trait; c.strokeRect(x0 + 0.5, y + 0.5, bw, 20);
+    for (const [sp, col, n] of parts) { const ww = bw * n / tot; if (sp === 'o2') { c.fillStyle = rgba(RN, 0.35); c.fillRect(x, y + 1, ww, 19); c.strokeStyle = C.neg; c.strokeRect(x + 0.5, y + 1.5, Math.max(0, ww - 1), 18); } else { c.fillStyle = col; c.globalAlpha = 0.85; c.fillRect(x, y + 1, ww, 19); c.globalAlpha = 1; } x += ww; }
+  });
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('composition (part de chaque espèce)', x0, h - 8);
+}
+function status1() {
+  return prm.mem ? 'Une frontière qui laisse passer O₂ mais pas A ni B : l’intérieur peut rester différent de l’extérieur.' : 'Sans frontière, tout finit mélangé. Il n’y a plus d’intérieur.';
+}
+
+/* ================= Acte II : qui traverse ? ================= */
+function init2() { newBox({ membrane: prm.kind, seed: 33 }); buildProts2(); }
+function buildProts2() {
+  box.prots.length = 0; box.membrane = prm.kind; if (prm.kind === 'tamis') return;
+  if (prm.aq) for (const y of [0.15, 0.85]) Cell.addProt(box, 'canal', y, { sel: ['eau'] });
+  if (prm.nav) for (const y of [0.32, 0.68]) Cell.addProt(box, 'canal', y, { sel: ['na'] });
+  if (prm.glut) for (const y of [0.42, 0.5, 0.58]) Cell.addProt(box, 'glut', y);
+}
+function inject(sp) {
+  if (act !== 1 || !Cell.SPECIES[sp]) return; Cell.addParticles(box, sp, 30, 'out'); if (inj[sp] == null) inj[sp] = box.t;
+}
+function clear2() { box.parts.length = 0; box.cross = {}; box.events.length = 0; for (const k in inj) delete inj[k]; trails.length = 0; sidesM.clear(); rec = []; }
+const META = { o2: ['petite', 'non polaire'], ster: ['grosse', 'non polaire'], eau: ['petite', 'polaire'], glu: ['grosse', 'polaire'], na: ['petite', 'chargée'] };
+function perMol(sp) {
+  const t0 = inj[sp]; if (t0 == null) return null; const win = Math.min(8, box.t - t0); if (win < 2) return NaN;
+  const t1 = box.t - win; let n = 0;
+  for (let i = box.events.length - 1; i >= 0; i--) { const e = box.events[i]; if (e.t < t1) break; if (e.sp === sp && e.dir === 'in') n++; }
+  const q = Cell.counts(box)[sp]; return n / win / Math.max(5, q.out + q.transit);
+}
+const verdict = r => !isFinite(r) ? 'mesure…' : r >= 0.2 ? 'traverse vite' : r >= 0.005 ? 'traverse lentement' : 'presque jamais';
+function tbl2() {
+  const rows = Object.keys(inj).map(sp => { const r = perMol(sp), cr = box.cross[sp] ? box.cross[sp].in : 0, m = META[sp];
+    return `<tr><td style="color:${SPC[sp]}">${SPN[sp]}</td><td>${m[0]}</td><td>${m[1]}</td><td class="v">${cr}</td><td class="v">${isFinite(r) ? fmt(r, r < 0.1 ? 3 : 2) : '—'}</td><td class="v">${verdict(r)}</td></tr>`; });
+  const html = rows.length ? `<table class="tb"><thead><tr><th>espèce</th><th>taille</th><th>polarité</th><th>entrés</th><th>/s/mol.</th><th>verdict mesuré</th></tr></thead><tbody>${rows.join('')}</tbody></table>` : '<p class="note" style="margin:0">Injecte une espèce du côté extérieur : le tableau se remplit de ce qui est mesuré.</p>';
+  const el = $('#tbl'); if (el.dataset.h !== html) { el.innerHTML = html; el.dataset.h = html; }
+}
+function draw2() {
+  layout(); drawFrame(); drawMembrane(); drawProts(); drawTrails(); drawParts();
+  legendFoot(box.membrane === 'tamis' ? 'tamis hypothétique : pores qui trient par la taille seulement' : 'membrane vue en coupe : cœur huileux (sombre) entre deux rangées de têtes');
+}
+function scope2() {
+  const { w, h } = scopeSetup(), c = sctx, x = 34, pw = w - 44, t1 = box.t;
+  const ser = Object.keys(inj).map(sp => ({ f: r => r[sp], col: SPC[sp], lo: 0, hi: 100, d: 0, lw: 2, dash: sp === 'eau' ? [2, 3] : sp === 'ster' ? [5, 3] : null }));
+  plotSeries(c, { x, y: 8, w: pw, h: h - 30 }, { t0: t1 - 40, t1, rec, ser: ser.length ? ser : [{ f: () => NaN, col: C.texte2, lo: 0, hi: 100, d: 0 }] });
+  xlabels(c, x, pw, h, '−40 s', 'maintenant');
+}
+function status2() {
+  const has = s => inj[s] != null, bil = prm.kind === 'bilayer';
+  if (bil && prm.glut && has('glu')) return 'Le transporteur lie le glucose et le fait basculer de l’autre côté, un à la fois : il peut saturer.';
+  if (bil && prm.nav && has('na')) return 'Même membrane, autre résultat : un canal offre un passage aqueux, et il est sélectif (K⁺ n’y passerait pas).';
+  if (has('na') && has('ster')) return bil ? 'Na⁺ est plus petit que le stéroïde, et pourtant il ne passe pas : sa charge l’empêche d’entrer dans le cœur huileux.' : 'Dans un tamis, seule la taille compte : Na⁺ passe et le stéroïde reste dehors. Bascule en bicouche : c’est l’inverse.';
+  if (!Object.keys(inj).length) return 'Injecte une espèce du côté extérieur, puis regarde si elle traverse et à quelle vitesse.';
+  return bil ? 'Compare avec le tamis hypothétique : « petit = passe » est-il vrai ?' : 'Dans le tamis, seule la taille compte. Injecte Na⁺ et le stéroïde pour le voir.';
+}
+
+/* ================= Acte III : gradient et diffusion ================= */
+function launch3(nIn, nOut, ch) {
+  if (nIn != null) prm.nIn = nIn; if (nOut != null) prm.nOut = nOut; if (ch != null) prm.ch = ch;
+  newBox({ membrane: 'bilayer', seed: 41 + ((prm.nIn * 7 + prm.nOut) & 255) }); buildCh3();
+  Cell.addParticles(box, 'a', prm.nIn, 'in'); Cell.addParticles(box, 'a', prm.nOut, 'out');
+  if (prm.follow) pickFollow();
+}
+function buildCh3() { box.prots.length = 0; for (let i = 0; i < prm.ch; i++) Cell.addProt(box, 'canal', (i + 0.5) / prm.ch, { sel: ['a'] }); }
+function pickFollow() {
+  const L = box.parts.filter(p => p.sp === 'a' && !p.lock); fol.p = L.length ? L[Math.floor(box.rng() * L.length)] : null;
+  fol.n = 0; fol.pts = []; fol.tl = box.t; if (fol.p) fol.side = Cell.sideOf(fol.p.x);
+}
+function setFollow(on) { prm.follow = !!on; if (act !== 2) { syncTools(); return; } fol.on = !!on; if (on) pickFollow(); syncTools(); }
+function draw3() {
+  layout(); drawFrame(); drawMembrane(); drawProts(); drawTrails(); drawParts(); drawFollow();
+  const c = ctx, cx = G.X(0), ri = Cell.rate(box, 'a', 'in', 3), ro = Cell.rate(box, 'a', 'out', 3), net = ri - ro, ya = G.by - 24;
+  c.font = mono(10.5);
+  const lx = W < 520 ? ' ' : ' : ';
+  tagText(c, '← entrées' + lx + fmt(ri, 1) + ' /s', cx - 16, ya - 12, 'right', 'middle', C.texte);
+  tagText(c, 'sorties →' + lx + fmt(ro, 1) + ' /s', cx + 16, ya - 12, 'left', 'middle', C.texte);
+  zone(cx - 190, ya - 20, cx - 12, ya - 4, 'cin', 'Compteur d’entrées', 'Traversées de l’extérieur vers l’intérieur, par seconde (fenêtre de 3 s).');
+  zone(cx + 12, ya - 20, cx + 190, ya - 4, 'cout', 'Compteur de sorties', 'Traversées de l’intérieur vers l’extérieur, par seconde (fenêtre de 3 s).');
+  const L = clamp(Math.abs(net) * 26, 0, G.bw * 0.42), ay = G.by - 8;
+  if (L > 5) { arrow(c, cx + Math.sign(net) * L / 2, ay, cx - Math.sign(net) * L / 2, ay, C.accent, 3.5, 11); zone(cx - L / 2 - 6, ay - 8, cx + L / 2 + 6, ay + 8, 'flux', 'Flux net', 'Entrées moins sorties. Sa longueur est proportionnelle au flux net ; il s’annule à l’équilibre.'); }
+  else { c.fillStyle = C.accent; c.beginPath(); c.arc(cx, ay, 3, 0, TAU); c.fill(); }
+  if (fol.on && fol.p) zcirc(G.X(fol.p.x), G.Y(fol.p.y), 10, 'fol', 'Particule suivie', 'Une particule A marquée : à l’équilibre, elle continue d’aller et venir.');
+}
+function scope3() {
+  const { w, h } = scopeSetup(), c = sctx, x = 34, pw = w - 44, t1 = box.t, h1 = Math.round((h - 34) * 0.58), h2 = h - 34 - h1 - 10;
+  const mx = Math.max(60, ...rec.map(r => Math.max(r.ci, r.ce)));
+  plotSeries(c, { x, y: 6, w: pw, h: h1 }, { t0: t1 - 30, t1, rec, ser: [{ f: r => r.ci, col: C.accent, lo: 0, hi: Math.ceil(mx / 10) * 10, d: 0, lw: 2 }, { f: r => r.ce, col: C.texte, lo: 0, hi: Math.ceil(mx / 10) * 10, d: 0, lw: 1.6, dash: [5, 3] }] });
+  const mr = Math.max(2, ...rec.map(r => Math.max(r.ri, r.ro)));
+  plotSeries(c, { x, y: 6 + h1 + 10, w: pw, h: h2 }, { t0: t1 - 30, t1, rec, ser: [{ f: r => r.ri, col: C.accent, lo: 0, hi: Math.ceil(mr), d: 0, lw: 1.2 }, { f: r => r.ro, col: C.texte, lo: 0, hi: Math.ceil(mr), d: 0, lw: 1.2, dash: [3, 3] }] });
+  xlabels(c, x, pw, h, '−30 s', 'maintenant');
+}
+function bars3() {
+  const { w, h } = barsSetup(), c = bctx, x = 40, y = 8, pw = w - 52, ph = h - 40;
+  const mx = Math.max(30, ...sc3.map(p => Math.abs(p.dC))) * 1.15, my = Math.max(1.5, ...sc3.map(p => Math.abs(p.net))) * 1.15;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, pw - 1, ph - 1);
+  c.beginPath(); c.moveTo(x + pw / 2, y); c.lineTo(x + pw / 2, y + ph); c.moveTo(x, y + ph / 2); c.lineTo(x + pw, y + ph / 2); c.stroke();
+  const X = v => x + pw / 2 + v / mx * pw / 2, Y = v => y + ph / 2 - v / my * ph / 2;
+  let sxy = 0, sxx = 0; for (const p of sc3) { sxy += p.dC * p.net; sxx += p.dC * p.dC; }
+  if (sxx > 1) { const k = sxy / sxx; c.save(); c.setLineDash([4, 4]); c.strokeStyle = rgba(RA, 0.8); c.beginPath(); c.moveTo(X(-mx), Y(-k * mx)); c.lineTo(X(mx), Y(k * mx)); c.stroke(); c.restore(); }
+  sc3.forEach((p, i) => { c.fillStyle = rgba(RA, 0.25 + 0.7 * i / Math.max(1, sc3.length)); c.beginPath(); c.arc(X(p.dC), Y(p.net), 2.6, 0, TAU); c.fill(); });
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'center'; c.fillText('ΔC = C_ext − C_int  (−' + fmt(mx, 0) + ' à +' + fmt(mx, 0) + ')', x + pw / 2, h - 8);
+  c.textAlign = 'right'; c.fillStyle = C.accent; c.fillText('flux net', x - 4, y + 8); c.fillText('/s', x - 4, y + 20);
+}
+function status3() {
+  const c = Cell.counts(box).a, tot = c.in + c.out, ri = Cell.rate(box, 'a', 'in', 6), ro = Cell.rate(box, 'a', 'out', 6), net = ri - ro;
+  if (tot === 0) return 'Aucune particule A : ajoute-en avec les curseurs, puis relance.';
+  if (Math.abs(c.out - c.in) < 0.1 * tot && Math.abs(net) < 0.2 * Math.max(0.5, (ri + ro) / 2) + 0.35) return `Équilibre dynamique : flux net ≈ 0, mais ≈ ${fmt((ri + ro) / 2, 1)} traversées par seconde dans chaque sens. Rien ne s’est arrêté.`;
+  return c.out > c.in ? 'Plus de A à l’extérieur : plus de A frappe la membrane de ce côté, donc plus d’entrées que de sorties.' : 'Plus de A à l’intérieur : plus de A frappe la membrane de ce côté, donc plus de sorties que d’entrées.';
+}
+
+/* ================= Acte IV : osmose et volume ================= */
+const k4 = { s: null, acc: 0, t: 0, rec: [], recT: 0, since: 0, rev: false, water: [], inP: [], bath: [], ur: [], lyseT: -1, spill: [], r: Cell.rng(5), wacc: [0, 0] };
+function cellGeo() {
+  const T = W < 620 ? 126 : 112, cx = W / 2, cy = T + (H - T - 30) / 2, R0 = Math.min(W * 0.26, (H - T - 70) * 0.3);
+  return { T, cx, cy, R0, r: R0 * Math.cbrt(k4.s.V) };
+}
+function init4() {
+  const r = k4.r; k4.s = Cell.osmoInit(); k4.acc = 0; k4.t = 0; k4.rec = []; k4.recT = 0; k4.since = 0; k4.rev = false; k4.water = []; k4.lyseT = -1; k4.spill = []; k4.wacc = [0, 0];
+  const disk = () => { let u, v; do { u = r() * 2 - 1; v = r() * 2 - 1; } while (u * u + v * v > 0.8); return { u, v }; };
+  k4.inP = Array.from({ length: 70 }, disk); k4.ur = Array.from({ length: 70 }, disk);
+  k4.bath = Array.from({ length: 160 }, () => ({ x: r(), y: r() })); k4.bu = Array.from({ length: 90 }, () => ({ x: r(), y: r() }));
+}
+function osmoP() { return { Cout: prm.Cout, Uout: prm.U, Pu: 0.15 }; }
+function setCout(v) { prm.Cout = v; k4.since = 0; k4.rev = false; syncTools(); }
+function setUrea(v) { prm.U = v; k4.since = 0; k4.rev = false; syncTools(); }
+function stepOsmoN(n) {
+  for (let i = 0; i < n; i++) {
+    const was = k4.s.lysed; Cell.osmoStep(k4.s, osmoP(), Cell.DT); k4.t += Cell.DT; k4.since += Cell.DT;
+    if (k4.s.lysed && !was) lyseNow();
+    if (k4.t - k4.recT >= 0.25) { k4.recT = k4.t; const ci = Cell.osmoIn(k4.s); k4.rec.push({ t: k4.t, V: k4.s.V, ci: ci.tot, co: prm.Cout + prm.U }); trim(k4.rec, k4.t - 45); }
+  }
+  if (!k4.rev && (k4.since >= 4 || (k4.since > 1 && Math.abs(k4.s.jw) < 0.01))) k4.rev = true;
+}
+function lyseNow() {
+  const g = cellGeo(), r = k4.r; k4.lyseT = 0;
+  k4.spill = k4.inP.map(q => { const a = 40 + r() * 80; return { x: g.cx + q.u * g.r, y: g.cy + q.v * g.r, vx: q.u * a, vy: q.v * a }; });
+}
+function wander(arr, sig, lim) {
+  const r = k4.r;
+  for (const q of arr) {
+    q.u += sig * (r() + r() + r() - 1.5) * 1.15; q.v += sig * (r() + r() + r() - 1.5) * 1.15;
+    const d = Math.hypot(q.u, q.v); if (d > lim) { q.u *= lim / d; q.v *= lim / d; }
+  }
+}
+function adv4(dt) {
+  const d = dt * simK(), r = k4.r;
+  k4.acc += d; let n = 0; while (k4.acc >= Cell.DT && n < 90) { stepOsmoN(1); k4.acc -= Cell.DT; n++; }
+  if (k4.acc > 0.2) k4.acc = 0;
+  wander(k4.inP, 0.1 * Math.sqrt(d * 60) * 0.35, 0.9); wander(k4.ur, 0.1 * Math.sqrt(d * 60) * 0.35, 0.9);
+  for (const b of k4.bath.concat(k4.bu)) { b.x += 0.006 * Math.sqrt(d * 60) * (r() + r() + r() - 1.5); b.y += 0.006 * Math.sqrt(d * 60) * (r() + r() + r() - 1.5); b.x = (b.x + 1) % 1; b.y = (b.y + 1) % 1; }
+  if (k4.lyseT >= 0) { k4.lyseT += d; for (const q of k4.spill) { q.x += q.vx * d + (r() - 0.5) * 3; q.y += q.vy * d + (r() - 0.5) * 3; const k = Math.pow(0.4, d); q.vx *= k; q.vy *= k; q.x = clamp(q.x, 8, W - 8); q.y = clamp(q.y, 100, H - 40); } }
+  else if (!k4.s.lysed) {
+    const wr = Cell.waterRates(k4.s, osmoP());
+    for (const [i, rate, dir] of [[0, wr.in, 1], [1, wr.out, -1]]) { k4.wacc[i] += rate * d; while (k4.wacc[i] >= 1) { k4.wacc[i]--; k4.water.push({ a: r() * TAU, age: 0, dir }); } }
+  }
+  for (let i = k4.water.length - 1; i >= 0; i--) { k4.water[i].age += d; if (k4.water[i].age > 0.55) k4.water.splice(i, 1); }
+}
+function draw4() {
+  const c = ctx, s = k4.s, g = cellGeo(), { cx, cy } = g, ci = Cell.osmoIn(s), lys = k4.lyseT >= 0;
+  const r = g.r, wob = a => 1 + (0.022 * Math.sin(3 * a + animT * 0.9) + 0.015 * Math.sin(5 * a - animT * 1.3 + 1.2) + 0.008 * Math.sin(8 * a + animT * 2)) * (1 + Math.max(0, 1 - s.V) * 3.2) * (s.V > 1.2 ? 0.45 : 1);
+  // bain
+  const nb = Math.round(prm.Cout / 300 * 48), nu = Math.round(prm.U / 300 * 40), top = g.T - 6;
+  const bx = q => 14 + q.x * (W - 28), by = q => top + q.y * (H - top - 24);
+  const place = (q) => { let x = bx(q), y = by(q); const dx = x - cx, dy = y - cy, d = Math.hypot(dx, dy), lim = r * 1.12 + 8; if (!lys && d < lim) { x = cx + dx / (d || 1) * lim; y = cy + dy / (d || 1) * lim; } return [x, y]; };
+  c.fillStyle = rgba(RS, 0.85); c.beginPath(); for (let i = 0; i < nb; i++) { const [x, y] = place(k4.bath[i]); c.moveTo(x + 2.8, y); c.arc(x, y, 2.8, 0, TAU); } c.fill();
+  c.strokeStyle = rgba(RS, 0.9); c.lineWidth = 1.2; c.beginPath(); for (let i = 0; i < nu; i++) { const [x, y] = place(k4.bu[i]); c.moveTo(x + 3, y); c.arc(x, y, 3, 0, TAU); } c.stroke();
+  // cellule
+  if (!lys) {
+    c.beginPath(); for (let i = 0; i <= 90; i++) { const a = i / 90 * TAU, rr0 = r * wob(a); i ? c.lineTo(cx + rr0 * Math.cos(a), cy + rr0 * Math.sin(a)) : c.moveTo(cx + rr0 * Math.cos(a), cy + rr0 * Math.sin(a)); } c.closePath();
+    c.fillStyle = rgba(RA, 0.06); c.fill(); c.strokeStyle = C.accent; c.lineWidth = 2.6; c.stroke();
+    c.fillStyle = rgba(RL, 0.92); c.beginPath(); for (const q of k4.inP) { const x = cx + q.u * r, y = cy + q.v * r; c.moveTo(x + 3.2, y); c.arc(x, y, 3.2, 0, TAU); } c.fill();
+    const nui = clamp(Math.round(ci.u / 300 * 40), 0, 70);
+    c.strokeStyle = rgba(RS, 0.9); c.lineWidth = 1.2; c.beginPath(); for (let i = 0; i < nui; i++) { const q = k4.ur[i], x = cx + q.u * r, y = cy + q.v * r; c.moveTo(x + 3, y); c.arc(x, y, 3, 0, TAU); } c.stroke();
+    // eau : traits courts, dans les deux sens
+    c.lineWidth = 2; c.lineCap = 'round';
+    for (const w of k4.water) { const u = w.age / 0.55, rad = w.dir > 0 ? r * 1.0 + 14 - 28 * u : r * 1.0 - 14 + 28 * u, a = w.a;
+      const rr0 = r * wob(a) + (rad - r), x = cx + rr0 * Math.cos(a), y = cy + rr0 * Math.sin(a), L = 11 * w.dir;
+      c.strokeStyle = rgba(RT, 0.95 * Math.sin(Math.PI * u)); c.beginPath(); c.moveTo(x, y); c.lineTo(x - L * Math.cos(a), y - L * Math.sin(a)); c.stroke(); }
+    c.lineCap = 'butt';
+    zcirc(cx, cy, r, 'cell', 'Cellule animale', 'Membrane perméable à l’eau, pas au soluté de l’intérieur (points lilas, en nombre fixe). Son volume suit le flux net d’eau.');
+    // flèche de flux net d'eau
+    const jw = s.jw, L = clamp(Math.abs(jw) * 140, 0, 110), nar = W < 620, ax = nar ? cx - L / 2 : cx + r * 1.0 + 40, ay = nar ? cy + r * 1.2 + 22 : cy; c.font = mono(10.5);
+    if (L > 6) { arrow(c, ax + (jw > 0 ? L : 0), ay, ax + (jw > 0 ? 0 : L), ay, C.accent, 3.5, 11); tagText(c, 'flux net d’eau', ax + L / 2, ay - 12, 'center', 'bottom', C.accent); zone(ax - 4, ay - 10, ax + L + 4, ay + 10, 'jw', 'Flux net d’eau', 'Différence entre l’eau qui entre et l’eau qui sort. Le volume suit cette différence.'); }
+    else tagText(c, 'flux net d’eau ≈ 0', nar ? cx : ax, ay - 4, nar ? 'center' : 'left', 'bottom', C.texte2);
+    tagText(c, k4.rev ? 'milieu : ' + Cell.tonicity(prm.Cout) : 'milieu : ?', W - 14, g.T + 4, 'right', 'middle', k4.rev ? C.accent : C.texte2);
+    zone(W - 190, g.T - 4, W - 8, g.T + 12, 'mil', 'Milieu', 'Le nom du milieu reste masqué tant que le volume bouge encore.');
+  } else {
+    const t = k4.lyseT, nF = 10; c.strokeStyle = C.accent; c.lineWidth = 2.6;
+    for (let k = 0; k < nF; k++) { const a0 = k / nF * TAU + 0.05, a1 = (k + 0.7) / nF * TAU, am = (a0 + a1) / 2, d = t * 46, al = Math.max(0, 1 - t / 1.8); if (al <= 0) continue;
+      c.strokeStyle = rgba(RA, al); c.beginPath(); c.arc(cx + d * Math.cos(am), cy + d * Math.sin(am), r, a0, a1); c.stroke(); }
+    c.fillStyle = rgba(RL, 0.92); c.beginPath(); for (const q of k4.spill) { c.moveTo(q.x + 3.2, q.y); c.arc(q.x, q.y, 3.2, 0, TAU); } c.fill();
+  }
+  legendFoot('bain : points sable (soluté qui ne traverse pas) · anneaux sable (traverse lentement) · traits blancs : eau');
+}
+function scope4() {
+  const { w, h } = scopeSetup(), c = sctx, x = 34, pw = w - 80, t1 = k4.t, mx = Math.max(600, ...k4.rec.map(r => Math.max(r.ci, r.co))), hi = Math.ceil(mx / 100) * 100;
+  plotSeries(c, { x, y: 8, w: pw, h: h - 30 }, { t0: t1 - 40, t1, rec: k4.rec, ser: [{ f: r => r.V, col: C.accent, lo: 0, hi: 2, d: 1, lw: 2.2 }, { f: r => r.ci, col: C.texte, lo: 0, hi, d: 0, lw: 1.6, right: true }, { f: r => r.co, col: C.texte2, lo: 0, hi, d: 0, lw: 1.6, dash: [5, 3], right: true }] });
+  xlabels(c, x, pw, h, '−40 s', 'maintenant');
+}
+function status4() {
+  const s = k4.s, ur = 'Au début, l’urée compte comme un soluté qui ne traverse pas : l’eau sort. Puis elle entre à son tour et l’eau la suit. Seul ce qui ne traverse pas décide du volume final.';
+  if (s.lysed) return 'La membrane cède : lyse. Une cellule animale n’a pas de paroi pour résister.';
+  if (k4.rev) {
+    const t = Cell.tonicity(prm.Cout), l = t === 'hypotonique' ? 'hypo : moins de soluté dehors, l’eau entre en net, la cellule gonfle.' : t === 'hypertonique' ? 'hyper : plus de soluté dehors, l’eau sort en net, la cellule rétrécit.' : 'iso : même concentration dedans et dehors, autant d’eau entre qu’il n’en sort, le volume tient.';
+    return l + (prm.U > 0 ? ' ' + ur : '');
+  }
+  if (prm.U > 0) return ur;
+  return s.jw > 0.01 ? 'Plus de molécules d’eau entrent qu’il n’en sort : le volume augmente.' : s.jw < -0.01 ? 'Plus de molécules d’eau sortent qu’il n’en entre : le volume diminue.' : 'Autant d’eau entre qu’il n’en sort : le volume est stable.';
+}
+
+/* ================= Acte V : maintenir un gradient ================= */
+const pcyc = new Map();
+function build5() {
+  newBox({ membrane: 'bilayer', seed: 57, atp: 30, atpMax: 40, atpSupply: prm.supply ? 6 : 0 }); pcyc.clear();
+  leaks5();
+  for (const y of (prm.symport ? [0.36, 0.64] : [0.42, 0.58])) Cell.addProt(box, 'pompe', y, { open: prm.pumps });
+  if (prm.symport) { Cell.addProt(box, 'sglt', 0.5); Cell.addParticles(box, 'glu', 10, 'in'); Cell.addParticles(box, 'glu', 10, 'out'); }
+  Cell.addParticles(box, 'na', 5, 'in'); Cell.addParticles(box, 'na', 55, 'out'); Cell.addParticles(box, 'k', 55, 'in'); Cell.addParticles(box, 'k', 5, 'out');
+}
+function leaks5() {
+  box.prots = box.prots.filter(p => p.kind !== 'canal');
+  const yn = [0.12, 0.2, 0.28], yk = [0.9, 0.82, 0.74];
+  for (let i = 0; i < prm.leak; i++) { Cell.addProt(box, 'canal', yn[i], { sel: ['na'] }); Cell.addProt(box, 'canal', yk[i], { sel: ['k'] }); }
+}
+function setPumps(on) { prm.pumps = !!on; if (box && act === 4) box.prots.filter(p => p.kind === 'pompe').forEach(p => { p.open = prm.pumps; }); syncTools(); }
+function setSupply(on) { prm.supply = !!on; if (box && act === 4) box.atpSupply = on ? 6 : 0; syncTools(); }
+function setSymport(on) {
+  on = !!on; if (on === prm.symport || act !== 4) { if (act !== 4) prm.symport = on; syncTools(); return; } prm.symport = on;
+  const pumps = box.prots.filter(p => p.kind === 'pompe');
+  if (on) { pumps.forEach((p, i) => { p.y = i ? 0.64 : 0.36; }); Cell.addProt(box, 'sglt', 0.5); Cell.addParticles(box, 'glu', 10, 'in'); Cell.addParticles(box, 'glu', 10, 'out'); }
+  else { pumps.forEach((p, i) => { p.y = i ? 0.58 : 0.42; }); box.prots = box.prots.filter(p => p.kind !== 'sglt'); box.parts = box.parts.filter(p => p.sp !== 'glu'); }
+  syncTools();
+}
+function setLeak(v) { prm.leak = v; if (act === 4 && box) leaks5(); syncTools(); }
+function atpRate() {
+  if (rec.length < 2) return 0; const last = rec[rec.length - 1]; let ref = rec[0]; for (let i = rec.length - 1; i >= 0; i--) { if (rec[i].t <= last.t - 6) { ref = rec[i]; break; } ref = rec[i]; }
+  return last.t - ref.t > 0.5 ? (last.u - ref.u) / (last.t - ref.t) : 0;
+}
+function gap5() {
+  const c = Cell.counts(box), ln = x => Math.abs(Math.log((x.out + 1) / (x.in + 1))), ref = Math.log(56 / 6);
+  return clamp(((ln(c.na) + ln(c.k)) / 2) / ref, 0, 1) * 100;
+}
+function draw5() {
+  layout(); drawFrame(); drawMembrane();
+  for (const pr of box.prots) if (pr.kind === 'pompe') { if (pcyc.get(pr.id) !== pr.cycles) { pcyc.set(pr.id, pr.cycles); if (pr.cycles) flash.set(pr.id, animT); } }
+  drawProts(); drawTrails(); drawParts();
+  const c = ctx, gw = Math.min(150, G.bw * 0.4), gx = G.bx + G.bw - gw, gy = G.by + G.bh + 10;
+  c.fillStyle = C.fond2; c.fillRect(gx, gy, gw, 8); c.fillStyle = C.ener; c.fillRect(gx, gy, gw * clamp(box.atp / box.atpMax, 0, 1), 8); c.strokeStyle = C.trait; c.strokeRect(gx + 0.5, gy + 0.5, gw - 1, 7);
+  c.font = mono(10.5); tagText(c, 'réserve d’ATP : ' + fmtI(box.atp), gx + gw, gy + 11, 'right', 'top', C.ener);
+  zone(gx - 4, gy - 4, gx + gw + 4, gy + 24, 'atp', 'Réserve d’ATP', 'Chaque cycle de pompe en consomme un. Quand elle est vide, les pompes s’arrêtent.');
+  legendFoot('1 particule ≈ 2,5 mmol/L · Na⁺ ≈ 12 / 145 et K⁺ ≈ 140 / 5 mmol/L dedans / dehors dans une vraie cellule');
+}
+function scope5() {
+  const { w, h } = scopeSetup(), c = sctx, x = 34, pw = w - 80, t1 = box.t, mx = Math.max(60, ...rec.map(r => Math.max(r.na, r.k, r.glu || 0))), hi = Math.ceil(mx / 10) * 10;
+  plotSeries(c, { x, y: 8, w: pw, h: h - 30 }, { t0: t1 - 90, t1, rec, ser: [{ f: r => r.na, col: C.pos, lo: 0, hi, d: 0, lw: 2 }, { f: r => r.k, col: C.neg, lo: 0, hi, d: 0, lw: 2 }, { f: r => (prm.symport ? r.glu : NaN), col: LILAS, lo: 0, hi, d: 0, lw: 1.6, dash: [4, 3] }, { f: r => r.atp, col: C.ener, lo: 0, hi: box.atpMax, d: 0, lw: 1.6, right: true }] });
+  xlabels(c, x, pw, h, '−90 s', 'maintenant');
+}
+function status5() {
+  const c = Cell.counts(box), rNa = (c.na.out + 1) / (c.na.in + 1), g = gap5();
+  if (prm.pumps && box.atp < 1 && g > 12) return 'La réserve d’ATP est vide : les pompes s’arrêtent (liseré éteint) et la fuite reprend le dessus.';
+  if (prm.symport) {
+    if (rNa > 1.7) return 'Le Na⁺ qui rentre en descendant son gradient entraîne le glucose avec lui, même contre le gradient du glucose. Le gradient de Na⁺ fait un travail.';
+    return 'Sans gradient de Na⁺ maintenu, l’effet s’éteint : le glucose ne s’accumule plus à l’intérieur.';
+  }
+  if (!prm.pumps) return g > 12 ? 'Sans dépense d’énergie, la fuite efface les gradients : vers l’équilibre.' : 'Les gradients sont effacés : Na⁺ et K⁺ sont répartis des deux côtés. Mets les pompes en marche et donne-leur de l’énergie.';
+  if (box.atp < 1) return 'La réserve d’ATP est vide : les pompes s’arrêtent (liseré éteint) et la fuite reprend le dessus.';
+  return 'Les pompes paient en ATP pour renvoyer Na⁺ dehors et K⁺ dedans, contre les gradients : fuite et pompe se compensent, le gradient se maintient loin de l’équilibre.';
+}
+
+/* ================= Acte VI : surface et volume ================= */
+const k6 = { kS: 0, pool: [], t: 0 };
+function init6() { const r = Cell.rng(61); k6.pool = Array.from({ length: 420 }, () => { let u, v; do { u = r() * 2 - 1; v = r() * 2 - 1; } while (u * u + v * v > 0.74); return { u, v, ph: r() * TAU, f: 0.6 + r() * 0.9 }; }); k6.t = 0; k6.kS = 0; }
+function geo6() {
+  const T = W < 620 ? 126 : 112, d = prm.d, gap = 46, kW = (W - 36 - gap) / (10 + d * 1.0), kH = (H - T - 150) / Math.max(10, d), k = Math.min(kW, kH, 14);
+  const kk = k6.kS || k, wA = 10 * kk, wB = d * kk, x0 = (W - (wA + wB + gap)) / 2, cyl = T + (H - T - 60) / 2 + 6;
+  return { k: kk, target: k, xa: x0 + wA / 2, xb: x0 + wA + gap + wB / 2, cy: cyl, ra: wA / 2, rb: wB / 2 };
+}
+function adv6(dt) { const d = dt * simK(), g = geo6(); k6.t += d; k6.kS = k6.kS ? k6.kS + (g.target - k6.kS) * Math.min(1, dt * 6) : g.target; }
+function cell6(c, x, y, r, dia, fold, label, key, isB) {
+  const q = Cell.sv(dia, fold ? 3 : 1), cov = q.couverture, nd = Math.min(220, Math.round(0.15 * dia * dia)), nc = Math.min(400, Math.round(0.012 * dia * dia * dia));
+  const wob = a => 1 + 0.018 * Math.sin(3 * a + animT * 0.8) + 0.012 * Math.sin(5 * a - animT * 1.1) + (fold ? Math.pow(0.5 + 0.5 * Math.sin(34 * a), 3) * 0.075 : 0);
+  c.beginPath(); for (let i = 0; i <= 160; i++) { const a = i / 160 * TAU, rr0 = r * wob(a); i ? c.lineTo(x + rr0 * Math.cos(a), y + rr0 * Math.sin(a)) : c.moveTo(x + rr0 * Math.cos(a), y + rr0 * Math.sin(a)); } c.closePath();
+  if (cov >= 1) c.fillStyle = rgba(RA, 0.07); else { const g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(0,0,0,${0.92 * (1 - cov) + 0.05})`); g.addColorStop(1, rgba(RA, 0.07)); c.fillStyle = g; }
+  c.fill(); c.strokeStyle = C.accent; c.lineWidth = 2; c.stroke();
+  c.strokeStyle = rgba(RA, 0.95); c.lineWidth = nd > 120 ? 1 : 1.6; c.beginPath();
+  for (let i = 0; i < nd; i++) { const a = i / nd * TAU, rr0 = r * wob(a); c.moveTo(x + (rr0 - 4) * Math.cos(a), y + (rr0 - 4) * Math.sin(a)); c.lineTo(x + (rr0 + 3.5) * Math.cos(a), y + (rr0 + 3.5) * Math.sin(a)); } c.stroke();
+  c.fillStyle = rgba(RT, 0.85); c.beginPath();
+  for (let i = 0; i < nc; i++) { const p = k6.pool[i % k6.pool.length], jx = Math.sin(k6.t * p.f + p.ph) * 0.02, jy = Math.cos(k6.t * p.f * 1.3 + p.ph) * 0.02, px = x + (p.u * 1.1 + jx) * r * 0.9, py = y + (p.v * 1.1 + jy) * r * 0.9;
+    if (Math.hypot(px - x, py - y) > r * 0.9) continue; c.moveTo(px + 1.6, py); c.arc(px, py, 1.6, 0, TAU); } c.fill();
+  c.font = mono(10.5); tagText(c, label, clamp(x, 40, W - 40), y + r + 20, 'center', 'middle', C.texte);
+  tagText(c, 'couverture ' + fmtI(cov * 100) + ' %', clamp(x, 62, W - 62), y - r - 14, 'center', 'middle', cov >= 1 ? C.accent : C.texte2);
+  zoneF((px, py) => { const d = Math.hypot(px - x, py - y); return d < r * 0.88; }, 'cons' + key, 'Consommateurs (volume)', 'Densité constante par µm³ : leur nombre croît comme d³ (plafonné à l’affichage). Ils fixent le besoin.');
+  zoneF((px, py) => { const d = Math.hypot(px - x, py - y); return d >= r * 0.88 && d < r + 8; }, 'por' + key, 'Portes (surface)', 'Densité constante par µm² : leur nombre croît comme d² (plafonné à l’affichage). Elles fixent l’apport maximal.');
+}
+function draw6() {
+  const c = ctx, g = geo6();
+  cell6(c, g.xa, g.cy, g.ra, 10, false, 'A · 10 µm', 'A', false);
+  cell6(c, g.xb, g.cy, g.rb, prm.d, prm.fold, 'B · ' + prm.d + ' µm', 'B', true);
+  const y = g.cy + Math.max(g.ra, g.rb) + 44, k = g.k; c.strokeStyle = C.texte; c.lineWidth = 1.2; c.beginPath(); c.moveTo(14, y); c.lineTo(14 + 10 * k, y); c.moveTo(14, y - 4); c.lineTo(14, y + 4); c.moveTo(14 + 10 * k, y - 4); c.lineTo(14 + 10 * k, y + 4); c.stroke();
+  c.font = mono(10.5); tagText(c, '10 µm', 14 + 5 * k, y - 10, 'center', 'bottom', C.texte2);
+  legendFoot('échelle commune · portes plafonnées à 220 et consommateurs à 400 à l’affichage');
+}
+function bars6() {
+  const { w, h } = barsSetup(), c = bctx, x = 38, y = 10, pw = w - 52, ph = h - 40, fold = prm.fold ? 3 : 1;
+  const lx = d => x + (Math.log10(d) - Math.log10(3)) / (Math.log10(150) - Math.log10(3)) * pw, ly = v => y + (1 - (Math.log10(v) - Math.log10(0.03)) / (Math.log10(3) - Math.log10(0.03))) * ph;
+  const crit = Cell.sv(10).dCrit * fold, need = 6 / Cell.sv(10).dCrit;
+  c.fillStyle = rgba(RP, 0.1); c.fillRect(lx(Math.min(150, crit)), y, x + pw - lx(Math.min(150, crit)), ph);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, pw - 1, ph - 1);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'center';
+  for (const d of [5, 10, 20, 50, 100]) { c.beginPath(); c.moveTo(lx(d), y + ph); c.lineTo(lx(d), y + ph + 4); c.stroke(); c.fillText(d, lx(d), y + ph + 13); }
+  c.textAlign = 'right'; for (const v of [0.1, 1]) { c.fillText(fmt(v, v < 1 ? 1 : 0), x - 5, ly(v)); c.beginPath(); c.moveTo(x, ly(v)); c.lineTo(x + 4, ly(v)); c.stroke(); }
+  c.save(); c.strokeStyle = C.ener; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(x, ly(need)); c.lineTo(x + pw, ly(need)); c.stroke(); c.restore();
+  c.fillStyle = C.ener; c.textAlign = 'left'; c.fillText('A/V minimal', x + 6, ly(need) - 7);
+  c.fillStyle = rgba(RP, 0.9); c.textAlign = 'right'; c.fillText('la surface ne suffit plus', x + pw - 5, y + 10);
+  c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); for (let d = 3; d <= 150; d *= 1.04) { const px = lx(d), py = ly(6 * fold / d); d === 3 ? c.moveTo(px, py) : c.lineTo(px, py); } c.stroke();
+  for (const [d, col, lab, f] of [[10, C.texte, 'A', 1], [prm.d, C.accent, 'B', fold]]) { const px = lx(d), py = ly(6 * f / d); c.fillStyle = col; c.beginPath(); c.arc(px, py, 4, 0, TAU); c.fill(); c.fillStyle = col; c.textAlign = 'left'; c.fillText(lab, px + 7, py - 8); }
+  c.textAlign = 'center'; c.fillStyle = C.texte2; c.fillText('d (µm)', x + pw / 2, h - 6);
+  c.save(); c.translate(10, y + ph / 2); c.rotate(-Math.PI / 2); c.fillText('A/V (µm⁻¹)', 0, 0); c.restore();
+}
+function status6() {
+  const q = Cell.sv(prm.d, prm.fold ? 3 : 1);
+  if (prm.d > q.dCrit) return `Au-delà de ≈ ${fmtI(q.dCrit)} µm, la surface ne suffit plus à nourrir le volume.`;
+  return `Tant que d < ${fmtI(q.dCrit)} µm, la surface suffit encore : couverture de ${fmtI(q.couverture * 100)} %. Agrandis B pour voir le centre manquer.`;
+}
+
+/* ================= Acte VII : compartiments ================= */
+const NUC = { x: -0.36, y: -0.02, r: 0.3 }, MIT = { x: 0.45, y: 0.12, a: 0.3, b: 0.15, rot: -0.35 }, LYS = { x: 0.17, y: -0.43, r: 0.085 };
+const k7 = { parts: [], ma: 1, mixed: false, r: Cell.rng(71), t: 0, acc: 0 };
+const inCell = (x, y, p = 0.96) => (x / p) ** 2 + (y / (0.68 * p)) ** 2 < 1;
+const mitL = (x, y) => { const dx = x - MIT.x, dy = y - MIT.y, cs = Math.cos(MIT.rot), sn = Math.sin(MIT.rot); return [dx * cs + dy * sn, -dx * sn + dy * cs]; };
+const inMit = (x, y, pad) => { const [lx, ly] = mitL(x, y); return (lx / (MIT.a - pad)) ** 2 + (ly / (MIT.b - pad)) ** 2 < 1; };
+const inNuc = (x, y, pad = 0) => Math.hypot(x - NUC.x, y - NUC.y) < NUC.r - pad;
+const inLys = (x, y, pad = 0) => Math.hypot(x - LYS.x, y - LYS.y) < LYS.r - pad;
+const inIMS = (x, y) => inMit(x, y, -0.004) && !inMit(x, y, 0.045);
+const inCyt = (x, y) => inCell(x, y) && !inNuc(x, y, -0.03) && !inMit(x, y, -0.012) && !inLys(x, y, -0.015);
+const REG = { dna: (x, y) => inNuc(x, y, 0.04), hm: inIMS, hl: (x, y) => inLys(x, y, 0.014), en: (x, y) => inLys(x, y, 0.02), hc: inCyt };
+function init7() {
+  const r = k7.r, P = []; k7.ma = prm.dis ? 0 : 1; k7.mixed = prm.dis; k7.t = 0; k7.acc = 0;
+  const add = (kind, n) => { for (let i = 0; i < n; i++) { let x, y, g = 0; do { x = (r() * 2 - 1); y = (r() * 2 - 1) * 0.7; g++; } while (!REG[kind](x, y) && g < 4000); P.push({ k: kind, x, y, a: r() * TAU, ph: r() * TAU }); } };
+  add('dna', 5); add('hm', 14); add('hl', 14); add('en', 4); add('hc', 3); k7.parts = P;
+}
+function setDissolve(on) { prm.dis = !!on; if (on) k7.mixed = true; syncTools(); }
+function step7(n) {
+  const r = k7.r, g = () => r() + r() + r() - 1.5;
+  for (let i = 0; i < n; i++) {
+    k7.t += 1 / 60;
+    for (const p of k7.parts) {
+      const s = p.k === 'dna' ? 0.007 : p.k === 'hc' ? 0.013 : 0.011, nx = p.x + s * g() * 1.15, ny = p.y + s * g() * 1.15, ok = k7.mixed ? inCell(nx, ny, 0.95) : REG[p.k](nx, ny);
+      if (ok) { p.x = nx; p.y = ny; } p.a += 0.04 * g();
+    }
+  }
+}
+function adv7(dt) { const d = dt * simK(); k7.acc += d; let n = 0; while (k7.acc >= 1 / 60 && n < 8) { step7(1); k7.acc -= 1 / 60; n++; } if (k7.acc > 0.2) k7.acc = 0; k7.ma += ((prm.dis ? 0 : 1) - k7.ma) * Math.min(1, dt * 3); }
+function geo7() { const T = W < 620 ? 128 : 112, s = Math.min((W - 24) / 2.04, (H - T - 40) / 1.4); return { s, cx: W / 2, cy: T + (H - T - 22) / 2 + 4 }; }
+function count7() {
+  const o = { cyt: 0, lys: 0, ims: 0, oth: 0, dIn: 0 };
+  for (const p of k7.parts) {
+    if (p.k === 'dna') { if (inNuc(p.x, p.y)) o.dIn++; continue; }
+    if (p.k === 'en') continue;
+    if (inLys(p.x, p.y)) o.lys++; else if (inIMS(p.x, p.y)) o.ims++; else if (inCyt(p.x, p.y)) o.cyt++; else o.oth++;
+  }
+  return o;
+}
+function draw7() {
+  const c = ctx, { s, cx, cy } = geo7(), X = x => cx + x * s, Y = y => cy + y * s, ma = k7.ma;
+  // cellule
+  c.beginPath(); for (let i = 0; i <= 120; i++) { const a = i / 120 * TAU, w = 1 + 0.012 * Math.sin(3 * a + animT * 0.6) + 0.008 * Math.sin(5 * a - animT * 0.9); const px = X(Math.cos(a) * w), py = Y(Math.sin(a) * 0.68 * w); i ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath();
+  c.fillStyle = rgba(RA, 0.045); c.fill(); c.strokeStyle = C.accent; c.lineWidth = 3; c.stroke();
+  zoneF((px, py) => inCell((px - cx) / s, (py - cy) / s, 1.04), 'cyt', 'Cytosol', 'Le liquide de la cellule, pH ≈ 7,2. Les compartiments y baignent.');
+  zoneF((px, py) => { const q = ((px - cx) / s) ** 2 + ((py - cy) / (0.68 * s)) ** 2; return q > 0.9 && q < 1.12; }, 'pm', 'Membrane plasmique', 'La frontière de la cellule : la même bicouche qu’aux actes précédents.');
+  // noyau
+  c.save(); c.globalAlpha = 0.05 + 0.95 * ma;
+  c.fillStyle = rgba(RA, 0.08 * ma); c.beginPath(); c.arc(X(NUC.x), Y(NUC.y), NUC.r * s, 0, TAU); c.fill();
+  c.strokeStyle = C.accent; c.lineWidth = 2.2; c.beginPath(); c.arc(X(NUC.x), Y(NUC.y), NUC.r * s, 0, TAU); c.stroke(); c.lineWidth = 1.2; c.beginPath(); c.arc(X(NUC.x), Y(NUC.y), (NUC.r - 0.028) * s, 0, TAU); c.stroke();
+  c.fillStyle = C.fond; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + 0.3; c.beginPath(); c.arc(X(NUC.x + (NUC.r - 0.014) * Math.cos(a)), Y(NUC.y + (NUC.r - 0.014) * Math.sin(a)), 2.4, 0, TAU); c.fill(); }
+  c.restore();
+  // mitochondrie
+  c.save(); c.translate(X(MIT.x), Y(MIT.y)); c.rotate(MIT.rot); c.globalAlpha = 0.15 + 0.85 * ma;
+  c.fillStyle = rgba(RP, 0.07 * ma); c.beginPath(); c.ellipse(0, 0, MIT.a * s, MIT.b * s, 0, 0, TAU); c.fill();
+  c.strokeStyle = C.accent; c.lineWidth = 2.2; c.beginPath(); c.ellipse(0, 0, MIT.a * s, MIT.b * s, 0, 0, TAU); c.stroke();
+  c.lineWidth = 1.2; c.beginPath(); c.ellipse(0, 0, (MIT.a - 0.045) * s, (MIT.b - 0.045) * s, 0, 0, TAU); c.stroke();
+  c.beginPath(); for (let i = -2; i <= 2; i++) { const x = i * 0.1 * s, up = i % 2 ? 1 : -1; c.moveTo(x, up * (MIT.b - 0.045) * s * 0.95); c.lineTo(x, -up * (MIT.b - 0.045) * s * 0.1); } c.stroke();
+  c.restore();
+  // lysosome
+  c.save(); c.globalAlpha = 0.15 + 0.85 * ma; c.fillStyle = rgba(RP, 0.12 * ma); c.beginPath(); c.arc(X(LYS.x), Y(LYS.y), LYS.r * s, 0, TAU); c.fill();
+  c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); c.arc(X(LYS.x), Y(LYS.y), LYS.r * s, 0, TAU); c.stroke(); c.restore();
+  // populations
+  const P = k7.parts;
+  c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath();
+  for (const p of P) if (p.k === 'dna') { const L = 0.075 * s, ca = Math.cos(p.a), sa = Math.sin(p.a); for (let j = 0; j <= 14; j++) { const u = (j / 14 - 0.5) * 2, off = Math.sin(j * 0.9 + animT * 1.4 + p.ph) * 0.012 * s, x = X(p.x) + u * L * ca - off * sa, y = Y(p.y) + u * L * sa + off * ca; j ? c.lineTo(x, y) : c.moveTo(x, y); } } c.stroke();
+  c.fillStyle = C.pos; c.beginPath(); const Rh = Math.max(2.6, s * 0.0085);
+  for (const p of P) if (p.k[0] === 'h') { const x = X(p.x), y = Y(p.y); c.moveTo(x + Rh, y); c.arc(x, y, Rh, 0, TAU); } c.fill();
+  c.strokeStyle = C.fond; c.lineWidth = 1; c.beginPath(); for (const p of P) if (p.k[0] === 'h') { const x = X(p.x), y = Y(p.y), h = Rh * 0.55; c.moveTo(x - h, y); c.lineTo(x + h, y); c.moveTo(x, y - h); c.lineTo(x, y + h); } c.stroke();
+  c.strokeStyle = C.texte; c.lineWidth = 1.2; c.beginPath(); for (const p of P) if (p.k === 'en') { const x = X(p.x), y = Y(p.y), h = Rh * 1.3, ca = Math.cos(p.a), sa = Math.sin(p.a); c.moveTo(x - h * ca, y - h * sa); c.lineTo(x + h * ca, y + h * sa); c.moveTo(x - h * Math.cos(p.a + 1), y - h * Math.sin(p.a + 1)); c.lineTo(x + h * Math.cos(p.a + 1), y + h * Math.sin(p.a + 1)); } c.stroke();
+  // étiquettes
+  c.font = mono(10.5); c.globalAlpha = 1;
+  if (ma > 0.5) { tagText(c, 'noyau', X(NUC.x), Y(NUC.y + NUC.r) + 14, 'center', 'middle', C.texte2); tagText(c, 'mitochondrie', X(MIT.x), Y(MIT.y + 0.21), 'center', 'middle', C.texte2); tagText(c, 'lysosome', X(LYS.x) + LYS.r * s + 6, Y(LYS.y), 'left', 'middle', C.texte2); }
+  tagText(c, 'cytosol', X(0.02), Y(-0.55), 'center', 'middle', C.texte2);
+  // zones des compartiments (priorité > cytosol)
+  const hz = ma > 0.5;
+  if (hz) {
+    zoneF((px, py) => inNuc((px - cx) / s, (py - cy) / s, -0.01), 'nuc', 'Noyau', 'Garde l’ADN à part : module 35. Double membrane percée de pores.');
+    zoneF((px, py) => inMit((px - cx) / s, (py - cy) / s, -0.01), 'mit', 'Mitochondrie', 'Un gradient de protons entre ses deux membranes : module 34 et planche 02.');
+    zoneF((px, py) => inLys((px - cx) / s, (py - cy) / s, -0.01), 'lys', 'Lysosome', 'Un intérieur acide où des enzymes digèrent sans attaquer le reste de la cellule.');
+  }
+  legendFoot('schéma, pas un atlas · H⁺ orange · brins d’ADN · ciseaux : enzymes');
+}
+function status7() {
+  if (!k7.mixed) return 'Chaque compartiment garde ses conditions : le lysosome reste acide (≈ 4,7), le cytosol près de 7,2.';
+  if (prm.dis) return 'Sans membranes internes, les populations diffusent dans tout le cytosol : les concentrations locales s’égalisent.';
+  return 'Remettre une membrane ne trie rien : il faudrait des pompes et de l’énergie pour refaire la différence. Voir l’acte V.';
+}
+
+/* ================= Légendes, mesures, notes ================= */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 10">${inner}</svg>${text}</span>`;
+const ln = (col, w, dash) => `<line x1="0" y1="5" x2="20" y2="5" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const gDisc = col => `<circle cx="10" cy="5" r="3.6" fill="${col}"/>`;
+const gIon = col => `<circle cx="10" cy="5" r="4" fill="${col}"/><path d="M8 5h4M10 3v4" stroke="#0a0d12" stroke-width="1"/>`;
+const gRing = col => `<circle cx="10" cy="5" r="3.2" fill="none" stroke="${col}" stroke-width="1.5"/>`;
+const gHex = col => `<path d="M10 1.2l3.4 1.9v3.8L10 8.8 6.6 6.9V3.1z" fill="${col}"/>`;
+const gSter = `<g fill="none" stroke="#e8e4dc" stroke-width="1"><circle cx="5" cy="6" r="2.3"/><circle cx="9" cy="4" r="2.3"/><circle cx="13" cy="6" r="2.3"/><circle cx="16.4" cy="3.6" r="2"/></g>`;
+const gDot = `<circle cx="10" cy="5" r="1.6" fill="#e8e4dc" fill-opacity=".6"/>`;
+const SP_NOTE = ' Les couleurs désignent des espèces ; une particule dessinée représente un très grand nombre de molécules.';
+const LEG = [
+  [lg(ln(LILAS, 2), 'A dedans (%)') + lg(ln(SABLE, 2, 1), 'B dedans (%)') + lg(ln('#5bb8ff', 2), 'O₂ dedans (%)'), lg(gDisc(LILAS), 'soluté A') + lg(gDisc(SABLE), 'soluté B') + lg(gRing('#5bb8ff'), 'O₂') + `<span>${SP_NOTE}</span>`, 'Composition de l’intérieur et de l’extérieur, en part de particules.'],
+  [lg(ln('#e8e4dc', 2), 'part entrée (%) par espèce, couleur de l’espèce'), lg(gRing('#5bb8ff'), 'O₂') + lg(gSter, 'stéroïde') + lg(gDot, 'H₂O') + lg(gHex(LILAS), 'glucose') + lg(gIon('#ff8a5b'), 'Na⁺') + `<span>${SP_NOTE}</span>`, ''],
+  [lg(ln('#bfe39a', 2), 'C_int') + lg(ln('#e8e4dc', 1.6, 1), 'C_ext') + lg(ln('#bfe39a', 1.2), 'entrées/s') + lg(ln('#e8e4dc', 1.2, 1), 'sorties/s'), lg(gDisc(LILAS), 'soluté A') + `<span>${SP_NOTE}</span>`, 'Flux net en fonction de ΔC : un point par seconde. Flux net ∝ C_ext − C_int.'],
+  [lg(ln('#bfe39a', 2.2), 'V/V₀') + lg(ln('#e8e4dc', 1.6), 'C_int') + lg(ln('#8a93a0', 1.6, 1), 'C_out'), lg(gDisc(LILAS), 'soluté de la cellule') + lg(gDisc(SABLE), 'soluté du bain') + lg(gRing(SABLE), 'traverse lentement') + `<span>${SP_NOTE}</span>`, ''],
+  [lg(ln('#ff8a5b', 2), 'Na⁺ dedans') + lg(ln('#5bb8ff', 2), 'K⁺ dedans') + lg(ln(LILAS, 1.6, 1), 'glucose dedans') + lg(ln('#ffd166', 1.6), 'ATP (axe droit)'), lg(gIon('#ff8a5b'), 'Na⁺') + lg(gIon('#5bb8ff'), 'K⁺') + lg(gHex(LILAS), 'glucose') + lg(gDisc('#ffd166'), 'ATP') + `<span>${SP_NOTE}</span>`, ''],
+  ['', lg(`<path d="M10 0v10" stroke="#bfe39a" stroke-width="2"/>`, 'porte (surface)') + lg(gDisc('#e8e4dc'), 'consommateur (volume)') + '<span>Zone grise : la surface ne suffit plus.</span>', ''],
+  ['', lg(gIon('#ff8a5b'), 'H⁺') + lg(`<path d="M2 5q4-4 8 0t8 0" fill="none" stroke="#bfe39a" stroke-width="1.6"/>`, 'ADN') + lg(`<path d="M3 1l14 8M3 9l14-8" stroke="#e8e4dc" stroke-width="1.2"/>`, 'enzyme') + '<span>Les populations sont des représentants, pas des comptes réels.</span>', '']
+];
+const MEAS = [
+  [['A · dedans | dehors', [['aI', ''], ['aO', '']]], ['B · dedans | dehors', [['bI', ''], ['bO', '']]], ['O₂ · dedans | dehors', [['oI', ''], ['oO', '']]]],
+  [['temps simulé', [['t', 's']]], ['particules', [['n', '']]]],
+  [['C_int (nombre)', [['ci', '']]], ['C_ext (nombre)', [['ce', '']]], ['ΔC = C_ext − C_int', [['dC', '']]], ['entrées /s (3 s)', [['ri', '']]], ['sorties /s (3 s)', [['ro', '']]], ['flux net /s', [['net', '']]], ['particule suivie : traversées', [['fn', '']]]],
+  [['C_int', [['ci', 'mOsm/L']]], ['C_out', [['co', 'mOsm/L']]], ['eau entrée /s', [['wi', '']]], ['eau sortie /s', [['wo', '']]], ['flux net d’eau', [['jw', 'V₀/s']]], ['V / V₀', [['V', '']]], ['milieu', [['mil', '']]]],
+  [['Na⁺ · dedans | dehors', [['nI', ''], ['nO', '']]], ['K⁺ · dedans | dehors', [['kI', ''], ['kO', '']]], ['Na⁺ dehors / dedans', [['rNa', '']]], ['écart à l’équilibre', [['gap', '%']]], ['ATP en réserve', [['atp', '']]], ['ATP consommés /s', [['u', '']]], ['Na⁺ : fuite nette entrante /s', [['fu', '']]], ['Na⁺ : sorties par pompe /s', [['po', '']]], ['glucose · dedans | dehors', [['gI', ''], ['gO', '']]]],
+  [['', [['hA', 'A'], ['hB', 'B']]], ['surface (µm²)', [['sA', ''], ['sB', '']]], ['volume (µm³)', [['vA', ''], ['vB', '']]], ['A/V (µm⁻¹)', [['rA', ''], ['rB', '']]], ['besoin (∝ V)', [['bA', ''], ['bB', '']]], ['apport max (∝ A × replis)', [['pA', ''], ['pB', '']]], ['couverture', [['cA', '%'], ['cB', '%']]]],
+  [['H⁺ relatif · cytosol', [['hc', '']]], ['H⁺ relatif · lysosome', [['hl', '']]], ['H⁺ relatif · espace intermembranaire', [['hm', '']]], ['pH · cytosol | lysosome | IMS', [['pc', ''], ['pl', ''], ['pm', '']]], ['ADN · dans | hors du noyau', [['dI', ''], ['dO', '']]]]
+];
+const MNOTE = [
+  'Bicouche réelle ≈ 5 nm, ici énormément grossie ; phospholipides sans catalogue. 2D, quelques centaines de particules, temps illustratif.',
+  'Probabilités de passage illustratives : l’ordre est réel (gaz et stéroïdes ≫ eau ≫ glucose ≫ ions), les écarts réels couvrent une dizaine de puissances de 10.',
+  'Les deux compartiments ont le même volume : le nombre de particules y est proportionnel à la concentration. Voir la diffusion moléculaire (planche 07, acte IV), J = −D∇c (fondations flux et fluides) et le retour exponentiel (fondations systèmes et hasard).',
+  'Modèle continu (Boyle–van ’t Hoff, volume non osmotique 0,3 V₀), soluté parfaitement imperméant, débits d’eau dessinés à échelle arbitraire. Voir l’osmose moléculaire : planche 07, acte VI.',
+  'Ces ions portent une charge ; on ne compte ici que les concentrations. La tension électrique qui en résulte est le sujet du module 33. Proportions des débits illustratives.',
+  'Sphères ; besoin et apport proportionnels ; nombres illustratifs. Le seuil de 40 µm n’est pas une loi universelle (formes aplaties, allongées, replis, transport interne).',
+  'Schéma, pas un atlas ; mélange illustratif ; valeurs de pH de référence, pas mesurées sur les particules dessinées.'
+];
+const MEYE = ['Enregistreur · % à l’intérieur', 'Enregistreur · % entré', 'Enregistreur · C et flux /s', 'Enregistreur · V/V₀ et C', 'Enregistreur · ions dedans, ATP', 'Graphique · A/V selon d (log)', ''];
+const mEls = {};
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  for (const [lab, vals] of MEAS[n]) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; });
+  }
+  $('#mNote').textContent = MNOTE[n]; $('#rEye').textContent = MEYE[n];
+  $('#leg').innerHTML = LEG[n][0]; $('#leg2').innerHTML = LEG[n][1]; $('#leg3').innerHTML = LEG[n][2] ? `<span>${LEG[n][2]}</span>` : '';
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function readouts() {
+  if (act === 0) { const c = Cell.counts(box); setM('aI', c.a.in); setM('aO', c.a.out); setM('bI', c.b.in); setM('bO', c.b.out); setM('oI', c.o2.in); setM('oO', c.o2.out); }
+  else if (act === 1) { setM('t', fmt(box.t, 1)); setM('n', box.parts.length); tbl2(); }
+  else if (act === 2) { const c = Cell.counts(box).a, ri = Cell.rate(box, 'a', 'in', 3), ro = Cell.rate(box, 'a', 'out', 3); setM('ci', c.in); setM('ce', c.out); setM('dC', fmt(c.out - c.in, 0)); setM('ri', fmt(ri, 1)); setM('ro', fmt(ro, 1)); setM('net', fmt(ri - ro, 1)); setM(fol.on ? 'fn' : 'fn', fol.on && fol.p ? String(fol.n) : '—'); }
+  else if (act === 3) { const s = k4.s, ci = Cell.osmoIn(s), wr = Cell.waterRates(s, osmoP()); setM('ci', fmtI(ci.tot)); setM('co', fmtI(prm.Cout + prm.U)); setM('wi', s.lysed ? '—' : fmt(wr.in, 1)); setM('wo', s.lysed ? '—' : fmt(wr.out, 1)); setM('jw', s.lysed ? '—' : fmt(s.jw, 3)); setM('V', fmt(s.V, 2)); setM('mil', k4.rev ? Cell.tonicity(prm.Cout) : '?'); }
+  else if (act === 4) {
+    const c = Cell.counts(box), ar = atpRate(), fu = Cell.rate(box, 'na', 'in', 6) - (Cell.rate(box, 'na', 'out', 6) - 3 * ar);
+    setM('nI', c.na.in); setM('nO', c.na.out); setM('kI', c.k.in); setM('kO', c.k.out); setM('rNa', fmt((c.na.out + 1) / (c.na.in + 1), 1)); setM('gap', fmtI(gap5())); setM('atp', fmtI(box.atp)); setM('u', fmt(ar, 1)); setM('fu', fmt(fu, 1)); setM('po', fmt(3 * ar, 1)); setM('gI', prm.symport ? c.glu.in : '—'); setM('gO', prm.symport ? c.glu.out : '—');
+  } else if (act === 5) {
+    const a = Cell.sv(10, 1), b = Cell.sv(prm.d, prm.fold ? 3 : 1);
+    setM('sA', fmtI(a.A)); setM('sB', fmtI(b.A)); setM('vA', fmtI(a.V)); setM('vB', fmtI(b.V)); setM('rA', fmt(a.ratio, 2)); setM('rB', fmt(b.ratio, 2)); setM('bA', fmtI(a.besoin)); setM('bB', fmtI(b.besoin)); setM('pA', fmtI(a.apport)); setM('pB', fmtI(b.apport)); setM('cA', fmtI(a.couverture * 100)); setM('cB', fmtI(b.couverture * 100));
+  } else {
+    const o = count7(), N = o.cyt + o.lys + o.ims + o.oth, Ac = 1.969, Aly = Math.PI * 0.073 ** 2, Ai = 0.0657, Acy = 1.45, mean = N / Ac;
+    if (!k7.mixed) { setM('hc', '1'); setM('hl', '≈ 316'); setM('hm', '≈ 2'); setM('pc', '7,2'); setM('pl', '4,7'); setM('pm', '6,9'); }
+    else { setM('hc', fmt(o.cyt / Acy / mean, 1)); setM('hl', fmt(o.lys / Aly / mean, 1)); setM('hm', fmt(o.ims / Ai / mean, 1)); setM('pc', '—'); setM('pl', '—'); setM('pm', '—'); }
+    setM('dI', o.dIn); setM('dO', 5 - o.dIn);
+  }
+  status();
+}
+const STATUS = [status1, status2, status3, status4, status5, status6, status7];
+function status() { const t = STATUS[act](), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
+
+/* ---------------- Actes : textes ---------------- */
+const ACTS = [
+  { t: 'La frontière', x: 'Soixante particules A dedans, soixante B dehors, et de l’O₂ dehors. Retire la membrane, remets-la, et regarde ce qui se mélange et ce qui reste de son côté.', k: 'Une cellule commence par une frontière. Sa structure (un cœur huileux entre deux faces qui aiment l’eau) décide déjà en partie de ce qui passe.' },
+  { t: 'Qui traverse ?', x: 'Injecte une espèce du côté extérieur et mesure combien traversent. Compare la bicouche à un tamis qui ne trierait que par la taille, puis équipe la membrane de protéines.', k: 'Membrane seule ≠ membrane équipée de protéines. Ce qui compte : la charge, la polarité, la taille, et les protéines présentes.' },
+  { t: 'Gradient et diffusion', x: 'Beaucoup de A dehors, peu dedans, et des canaux qui laissent passer A dans les deux sens. Compte les traversées de chaque sens, puis regarde ce qu’il en reste quand les deux compartiments sont égaux.', k: 'Un gradient produit un flux net, sans qu’aucune molécule ne « sache » où aller. À l’équilibre, le flux net s’annule ; le mouvement, jamais.' },
+  { t: 'Osmose et volume', x: 'Une cellule dans un bain. L’eau traverse sa membrane, le soluté de l’intérieur ne la traverse pas. Change la concentration du bain et suis le volume.', k: 'L’eau traverse dans les deux sens. Il entre plus d’eau qu’il n’en sort du côté où le soluté qui ne traverse pas est le plus concentré, et le volume suit ce flux net jusqu’à ce que les concentrations soient égales.' },
+  { t: 'Maintenir un gradient', x: 'Une cellule vivante garde Na⁺ dehors et K⁺ dedans, alors que la membrane fuit. Les pompes sont arrêtées au départ : regarde les gradients s’effacer, puis mets-les en marche.', k: 'Une cellule vivante n’est pas à l’équilibre. Elle paie, en ATP, pour maintenir des différences que la diffusion efface sans cesse. Et une différence maintenue peut servir : elle stocke une possibilité de travail.' },
+  { t: 'Surface et volume', x: 'Deux cellules sphériques. Les portes (surface) laissent entrer ce que les consommateurs (volume) utilisent. Agrandis la cellule B et regarde la couverture.', k: 'Doubler la taille multiplie la surface par 4 mais le volume par 8. Le volume dit combien il faut nourrir ; la surface dit par où ça peut entrer. A/V ∝ 1/L.' },
+  { t: 'Compartiments', x: 'Une cellule eucaryote schématique : des membranes internes isolent des volumes aux conditions différentes. Dissous-les, puis remets-les.', k: 'Une membrane fait un compartiment ; un compartiment garde des conditions locales différentes ; des conditions différentes permettent des fonctions spécialisées.' }
+];
+
+/* ---------------- Mises en page ---------------- */
+function sizeCanvas(c, cssH) { c.style.height = cssH + 'px'; const r = c.getBoundingClientRect(); c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr)); }
+function sizePanelCanvases() {
+  const hb = act === 0 || act === 2 || act === 5;
+  $('#recSec').hidden = act === 6; $('#scopeBox').hidden = act === 5; $('#leg').style.display = act === 5 ? 'none' : '';
+  $('#barsBox').hidden = !hb; $('#leg3').style.display = hb ? '' : 'none'; $('#tblSec').hidden = act !== 1; $('#cards').hidden = act !== 6;
+  if (act !== 5 && act !== 6) sizeCanvas(scopeC, act === 2 ? 232 : 160);
+  if (hb) sizeCanvas(barsC, act === 0 ? 100 : act === 2 ? 150 : 190);
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); sizePanelCanvases();
+}
+
+/* ---------------- Commandes ---------------- */
+const SYNC = [['rIn', 'vIn', () => prm.nIn, v => fmt(v, 0)], ['rOut', 'vOut', () => prm.nOut, v => fmt(v, 0)], ['rCh', 'vCh', () => prm.ch, v => fmt(v, 0)], ['rCo', 'vCo', () => prm.Cout, v => fmt(v, 0) + ' mOsm/L'], ['rU', 'vU', () => prm.U, v => fmt(v, 0) + ' mOsm/L'], ['rLeak', 'vLeak', () => prm.leak, v => fmt(v, 0)], ['rD', 'vD', () => prm.d, v => fmt(v, 0) + ' µm']];
+const PRESS = [['bLoupe', () => loupe], ['bBil', () => prm.kind === 'bilayer'], ['bTam', () => prm.kind === 'tamis'], ['bAq', () => prm.aq], ['bNav', () => prm.nav], ['bGlut', () => prm.glut], ['bFollow', () => prm.follow], ['bPump', () => prm.pumps], ['bSup', () => prm.supply], ['bSym', () => prm.symport], ['bFold', () => prm.fold], ['bDis', () => prm.dis]];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = v; $('#' + vid).textContent = f(v); }
+  for (const [id, get] of PRESS) $('#' + id).setAttribute('aria-pressed', get() ? 'true' : 'false');
+  $('#bMem').textContent = prm.mem ? 'Retirer la membrane' : 'Mettre une membrane';
+  $('#bDis').textContent = prm.dis ? 'Remettre les membranes internes' : 'Dissoudre les membranes internes';
+  for (const id of ['bAq', 'bNav', 'bGlut']) $('#' + id).disabled = prm.kind === 'tamis';
+  $('#bSpeed').textContent = '×' + spd;
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  fol.on = false; fol.p = null; trails.length = 0; sidesM.clear();
+  if (n === 0) init1(); else if (n === 1) init2(); else if (n === 2) { launch3(); fol.on = prm.follow; if (fol.on) pickFollow(); } else if (n === 3) init4(); else if (n === 4) build5(); else if (n === 5) init6(); else init7();
+  hideTip(); syncTools(); buildMeas(n); sizePanelCanvases();
+  if (restart) setPlay(true);
+}
+function updateUI(n) {
+  uiAct = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VII`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x; $('#key').textContent = ACTS[n].k;
+  for (const id of ['#stepTitle', '#stepText', '#key']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, NA - 1);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart; updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; } else fade = -1;
+}
+function setPlay(p) {
+  playing = p; $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+$('#bSpeed').addEventListener('click', e => { spd = SPDS[(SPDS.indexOf(spd) + 1) % SPDS.length]; syncTools(); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+
+const bindRange = (id, fn, ev) => $('#' + id).addEventListener(ev || 'input', e => { fn(+e.currentTarget.value); syncTools(); });
+$('#bMem').addEventListener('click', e => { setMem1(!prm.mem); e.currentTarget.blur(); });
+$('#bLoupe').addEventListener('click', e => { loupe = !loupe; syncTools(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-inj]').forEach(el => el.addEventListener('click', () => { inject(el.dataset.inj); el.blur(); }));
+$('#bVid').addEventListener('click', e => { if (act === 1) clear2(); e.currentTarget.blur(); });
+function setKind(k) { prm.kind = k; if (act === 1) buildProts2(); syncTools(); }
+$('#bBil').addEventListener('click', e => { setKind('bilayer'); e.currentTarget.blur(); });
+$('#bTam').addEventListener('click', e => { setKind('tamis'); e.currentTarget.blur(); });
+function setProt(k, on) { prm[k] = !!on; if (act === 1) buildProts2(); syncTools(); }
+$('#bAq').addEventListener('click', e => { setProt('aq', !prm.aq); e.currentTarget.blur(); });
+$('#bNav').addEventListener('click', e => { setProt('nav', !prm.nav); e.currentTarget.blur(); });
+$('#bGlut').addEventListener('click', e => { setProt('glut', !prm.glut); e.currentTarget.blur(); });
+bindRange('rIn', v => { prm.nIn = v; }); bindRange('rIn', v => launch3(v), 'change');
+bindRange('rOut', v => { prm.nOut = v; }); bindRange('rOut', v => launch3(null, v), 'change');
+bindRange('rCh', v => { prm.ch = v; if (act === 2) buildCh3(); });
+$('#bLance').addEventListener('click', e => { launch3(); e.currentTarget.blur(); });
+$('#bFollow').addEventListener('click', e => { setFollow(!prm.follow); e.currentTarget.blur(); });
+bindRange('rCo', v => setCout(v)); bindRange('rU', v => setUrea(v));
+document.querySelectorAll('[data-co]').forEach(el => el.addEventListener('click', () => { setCout(+el.dataset.co); el.blur(); }));
+$('#bNew').addEventListener('click', e => { init4(); e.currentTarget.blur(); });
+$('#bPump').addEventListener('click', e => { setPumps(!prm.pumps); e.currentTarget.blur(); });
+$('#bSup').addEventListener('click', e => { setSupply(!prm.supply); e.currentTarget.blur(); });
+$('#bSym').addEventListener('click', e => { setSymport(!prm.symport); e.currentTarget.blur(); });
+bindRange('rLeak', v => setLeak(v));
+bindRange('rD', v => { prm.d = v; });
+$('#bFold').addEventListener('click', e => { prm.fold = !prm.fold; syncTools(); e.currentTarget.blur(); });
+$('#bDis').addEventListener('click', e => { setDissolve(!prm.dis); e.currentTarget.blur(); });
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-7]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
+  if (isRange) return;
+  if ((e.key === 'm' || e.key === 'M') && act === 0) setMem1(!prm.mem);
+  if ((e.key === 'p' || e.key === 'P') && act === 4) setPumps(!prm.pumps);
+  if ((e.key === 's' || e.key === 'S') && act === 2) setFollow(!prm.follow);
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol, loupe glissable ---------------- */
+const isBox = () => act === 0 || act === 1 || act === 2 || act === 4;
+cv.addEventListener('pointerdown', e => {
+  if (act !== 0 || !loupe) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, L = loupeGeom();
+  if (Math.hypot(x - L.cx, y - L.cy) < L.R) { loupDrag = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); loupY = (y - G.by) / G.bh; }
+});
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (loupDrag) { loupY = (y - G.by) / G.bh; return; }
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(zones, x, y); let t = z;
+  if (isBox() && (!z || z.key === 'mem' || z.key === 'cyt')) {
+    const p = hitParticle(x, y);
+    if (p && !(z && z.key.startsWith('pr'))) { const S = Cell.SPECIES[p.sp]; t = { key: 'sp' + p.sp, name: S.nom, role: S.role + (p.sp === 'na' || p.sp === 'k' ? ' · la couleur dit l’espèce' : '') }; }
+  }
+  if (t) { showTip(t.key, t.name, t.role, e.clientX, e.clientY); cv.className = t.key === 'loupe' ? 'grab' : ''; } else { hideTip(); cv.className = ''; }
+});
+const endPtr = e => { loupDrag = false; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!loupDrag) { hideTip(); cv.className = ''; } });
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+function advance(dt) {
+  if (act === 3) adv4(dt); else if (act === 5) adv6(dt); else if (act === 6) adv7(dt); else advBox(dt);
+}
+const SCENES = [draw1, draw2, draw3, draw4, draw5, draw6, draw7];
+const SCOPES = [scope1, scope2, scope3, scope4, scope5, null, null], BARS = [bars1, null, bars3, null, null, bars6, null];
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) { animT += dt * (reduce ? 0.5 : 1); advance(dt); }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  SCENES[act](); ctx.restore();
+  if (SCOPES[act]) SCOPES[act]();
+  if (BARS[act]) BARS[act]();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function stateNow() {
+  if (act === 0) { const c = Cell.counts(box); return { act, mem: prm.mem, loupe, a: c.a, b: c.b, o2: c.o2, status: status1() }; }
+  if (act === 1) { const c = Cell.counts(box), o = { act, kind: prm.kind, aq: prm.aq, nav: prm.nav, glut: prm.glut, t: box.t, species: {}, status: status2() }; for (const s in inj) { const r = perMol(s); o.species[s] = { in: c[s].in, out: c[s].out, entres: box.cross[s] ? box.cross[s].in : 0, perMol: r, verdict: verdict(r) }; } return o; }
+  if (act === 2) { const c = Cell.counts(box).a, ri = Cell.rate(box, 'a', 'in', 3), ro = Cell.rate(box, 'a', 'out', 3); return { act, ci: c.in, ce: c.out, dC: c.out - c.in, ri, ro, net: ri - ro, ch: prm.ch, follow: prm.follow, followN: fol.n, nScatter: sc3.length, t: box.t, status: status3() }; }
+  if (act === 3) { const s = k4.s, ci = Cell.osmoIn(s), wr = Cell.waterRates(s, osmoP()); return { act, Cout: prm.Cout, U: prm.U, V: s.V, jw: s.jw, ci: ci.tot, lysed: s.lysed, rev: k4.rev, milieu: k4.rev ? Cell.tonicity(prm.Cout) : '?', waterIn: wr.in, waterOut: wr.out, t: k4.t, status: status4() }; }
+  if (act === 4) { const c = Cell.counts(box); return { act, pumps: prm.pumps, supply: prm.supply, symport: prm.symport, na: c.na, k: c.k, glu: c.glu, atp: box.atp, atpUsed: box.atpUsed, gap: gap5(), atpRate: atpRate(), t: box.t, status: status5() }; }
+  if (act === 5) { const a = Cell.sv(10, 1), b = Cell.sv(prm.d, prm.fold ? 3 : 1); return { act, d: prm.d, fold: prm.fold, A: a, B: b, status: status6() }; }
+  const o = count7(); return { act, dis: prm.dis, mixed: k7.mixed, ma: k7.ma, counts: o, status: status7() };
+}
+function tickSim(n) {
+  if (act === 3) stepOsmoN(n); else if (act === 6) step7(n); else if (act === 5) k6.t += n * Cell.DT; else stepBoxN(n);
+}
+window.__labo = {
+  Cell, get act() { return act; }, goAct, state: stateNow, tick: tickSim, setPlay, box: () => box, prm,
+  membrane: on => { if (act === 0) setMem1(on); }, inject, setMem: setKind, prot: (kind, on) => setProt(/^(aq|eau|h2o)/i.test(kind) ? 'aq' : /^(na|nav|canal)/i.test(kind) ? 'nav' : /^(glu|glut)/i.test(kind) ? 'glut' : kind, on),
+  launch: (a, b, c) => { if (act === 2) launch3(a, b, c); else { if (a != null) prm.nIn = a; if (b != null) prm.nOut = b; if (c != null) prm.ch = c; syncTools(); } }, follow: setFollow, setCout, setUrea, newCell: init4,
+  pumps: setPumps, supply: setSupply, symport: setSymport, restart: () => goAct(4, true),
+  setD: v => { prm.d = v; syncTools(); }, fold: on => { prm.fold = !!on; syncTools(); }, dissolve: setDissolve
+};
+
+resize();
+for (let i = 0; i < NA; i++) resetPrm(i);
+enterAct(0, true); updateUI(0); syncTools();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

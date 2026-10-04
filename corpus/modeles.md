@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**17 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 8 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**18 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 9 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -27,6 +27,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Flux, gradients, champs et fluides](../opus-sonnet/fondations-flux-fluides/index.html) | foundation | Flux, gradients, champs et fluides | — | 16, 20 | 2026-10-01 |
 | [Relativité restreinte](../opus-sonnet/fondations-relativite-restreinte/index.html) | foundation | Relativité restreinte | — | 46 | 2026-10-02 |
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
+| [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -211,6 +212,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Toys** : A1 La composition change, pas les individus · A2 Variation sans hérédité : génotype et phénotype · B1 Ce que veut dire « fitness » · C1 Deux allèles : p + q = 1 · C2 Une sélection sur un allèle · D1 Le hasard de la reproduction · D2 Sélection et dérive à la fois · E1 Effet fondateur · E2 Goulot d'étranglement · F1 Mutation et flux génétique · G1 Et si la population n'était pas mélangée ?
 - **Interaction** : Onze étapes en sept chapitres, toutes stochastiques (générateur semé, « Nouveau tirage » et « Rejouer le même tirage ») : arène de 240 individus où la sélection retire sans jamais modifier un trait, individu et lignée suivis au toucher ; noyau génotype / corps phénotype et curseur h² (R ≈ h²·S) ; courbe de survie, fitness relative et génération suivante attendue sur cinq terrains, bascule « environnement rude » ; réservoir de copies et carré de Punnett proportionnel ; p(t) sous sélection ; généalogie de copies et vingt populations en dérive (N = 10, 50, 500) ; sélection contre dérive avec probabilité de Kimura ; continent et colonies fondatrices ; goulot avec taille, allèles et diversité ; deux îles avec mutation, migration et graphe de Muller ; grille mélangée ou par voisinage.
 - **Notes** : Générations non chevauchantes (Wright-Fisher) ; reproduction à un parent pour le trait continu ; un seul gène, sans recombinaison ; mutations neutres ; modules 41 (espace, réseaux) et 42 (émergence) annoncés en G1, pas couverts. Moteur stochastique testé hors page.
+
+### Cellule, membrane et transport
+
+- **Identifiant** : `fondations-cellule-membrane` · **chemin** : [`opus-sonnet/fondations-cellule-membrane/index.html`](../opus-sonnet/fondations-cellule-membrane/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-cellule-membrane/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Cellule, membrane et transport
+- **Collection** : aucune
+- **Modules** : 32 Cellule, membrane et transport (`full`), 19 Transport thermique et moléculaire (`supporting`), 33 Bioélectricité et synapses (`supporting`), 34 Énergie biologique (`supporting`)
+- **Actes** : I La frontière · II Qui traverse ? · III Gradient et diffusion · IV Osmose et volume · V Maintenir un gradient · VI Surface et volume · VII Compartiments
+- **Interaction** : Sept actes en deux paillasses ; molécules qu’on fait traverser la bicouche (O₂, stéroïde, eau, glucose, ions), gradient et flux net, cellule qui gonfle ou se ratatine, pompe Na⁺/K⁺ et symport.
+- **Notes** : Ouvre la branche F · Cellule et biologie moléculaire (PR n° 17). Se termine sur trois questions vers les modules 33, 34 et 35. Moteur testé hors page.
 
 ## Pages d'appui
 

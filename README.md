@@ -31,17 +31,17 @@ Les fondations ne remplacent pas les grands modèles : elles les rendent possibl
 
 Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-04 :
 
-**Construit : 16 modèles.**
+**Construit : 18 modèles.**
 
 - Planches numérotées 01-09 : La mitose · La respiration cellulaire · Le neurone qui apprend · Le champ électrique · Ondes et interférences · Courant et circuits · Matière, chaleur et transport · La réplication de l'ADN · Supernova par effondrement du cœur. Cinq d'entre elles (mitose, respiration, neurone, réplication, supernova) forment la collection *L'invisible en mouvement*.
-- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46).
+- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32).
 - Les huit productions de fondations définies au départ sont construites ; les planches 06 et 07 en sont issues, et la 04 a été prolongée par l'une d'elles.
 
 **Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 34, 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
 
-**Prévu, rien de construit.** Les fondations 23 (magnétisme et induction) à 37 (signalisation), dans l'ordre de la feuille de route, puis la physiologie, l'évolution, l'astrophysique, le reste de la relativité et la quantique.
+**Prévu, rien de construit.** Les fondations 23 (magnétisme et induction) à 37 (signalisation), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
 
-**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 14 partielles, 30 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 203 restent des idées.
+**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 14 partielles, 36 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 197 restent des idées.
 
 ## Où est la source de vérité
 
