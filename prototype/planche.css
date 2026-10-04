@@ -1,0 +1,155 @@
+/* LABO — gabarit de planche (prototype).
+   Styles communs à toutes les planches maquettes : barre, titre et signature, couches
+   Observer / Manipuler / Comprendre, scène à un ou deux postes, calques posés sur la scène,
+   lectures d'instrument, équations de composition, fiche contextuelle, bande de théorie,
+   planches voisines. À charger après labo.css. Mode d'emploi : GABARIT.md. */
+
+/* ---------- Barre de planche ---------- */
+.barre .ou{display:flex;gap:clamp(14px,3vw,36px);align-items:baseline}
+.barre .retour{font-size:14px;color:var(--encre-2);text-decoration:none}
+.barre .retour:hover{color:var(--encre)}
+.barre .pos{font-family:var(--mono);font-size:12px;color:var(--encre-3);font-variant-numeric:tabular-nums}
+.barre .pos b{color:var(--encre);font-weight:500}
+
+/* ---------- Titre ---------- */
+.titre{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end;padding:clamp(18px,4vw,48px) var(--gouttiere) clamp(18px,2.4vw,28px)}
+.titre h1{font-weight:500;font-size:clamp(38px,6.4vw,92px);line-height:.92;letter-spacing:-.045em}
+.titre .lead{font-size:clamp(17px,1.7vw,22px);line-height:1.35;color:var(--encre-2);margin-top:clamp(12px,1.6vw,20px);max-width:28em;letter-spacing:-.005em}
+.sig{display:grid;grid-template-columns:repeat(3,auto);gap:4px 28px;padding-bottom:6px}
+.sig dt{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3)}
+.sig dd{font-size:13px;color:var(--encre-2);grid-row:2;white-space:nowrap}
+
+/* ---------- Modes ---------- */
+.modes{display:flex;align-items:baseline;gap:clamp(18px,3vw,36px);padding:0 var(--gouttiere) 12px;flex-wrap:wrap}
+.modes [role=tablist]{display:flex;gap:clamp(16px,2.4vw,28px)}
+.modes button{font-size:15px;color:var(--encre-3);padding:6px 0;position:relative;transition:color .3s var(--ease)}
+.modes button span{font-family:var(--mono);font-size:10px;margin-right:6px;vertical-align:.12em}
+.modes button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1.5px;background:var(--encre);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.modes button[aria-selected=true]{color:var(--encre)}
+.modes button[aria-selected=true]::after{transform:scaleX(1)}
+.modes button:hover{color:var(--encre)}
+.modes .indice{font-family:var(--mono);font-size:12px;color:var(--encre-3);transition:opacity .3s}
+
+/* ---------- Corps : scène + théorie ---------- */
+.corps{padding:0 var(--gouttiere)}
+.scene{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:start;background:var(--papier-2);border-top:1px solid var(--encre);min-width:0}
+.scene::after{content:"";position:absolute;left:50%;top:24px;bottom:24px;border-left:1px solid var(--trait)}
+
+.poste{position:relative;aspect-ratio:600/640;container-type:inline-size;min-width:0;overflow:hidden}
+.poste svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;touch-action:none}
+.poste .tag{position:absolute;left:clamp(12px,3cqw,22px);top:clamp(10px,2.6cqw,18px);font-family:var(--mono);font-size:clamp(10px,1.9cqw,11.5px);letter-spacing:.06em;color:var(--encre-3);z-index:2}
+.poste .tag b{color:var(--encre-2);font-weight:500}
+
+/* Calques HTML posés sur la scène (coordonnées en % du viewBox 600×640) */
+.ov{position:absolute;z-index:3;font-size:clamp(11px,2.3cqw,15px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.ov.centre{transform:translate(-50%,-50%)}
+.ov.gauche{transform:translate(0,-50%)}
+.ov.droite{transform:translate(-100%,-50%)}
+/* Visibilité selon le mode */
+.lire,.manip,.comp{opacity:0;pointer-events:none}
+body[data-mode=manipuler] .lire,body[data-mode=comprendre] .lire{opacity:1}
+body[data-mode=manipuler] .manip{opacity:1;pointer-events:auto}
+body[data-mode=comprendre] .comp{opacity:1}
+body[data-mode=comprendre] .manip.aussi{opacity:1;pointer-events:auto}
+svg .lire,svg .manip,svg .comp{transition:opacity .45s var(--ease)}
+
+/* Équations de composition */
+.eqn{font-family:var(--math);font-style:italic;font-size:clamp(22px,5.4cqw,40px);line-height:1;color:var(--encre);white-space:nowrap;letter-spacing:.01em}
+.eqn .op{font-style:normal;color:var(--encre-3);margin:0 .14em}
+.eqn .vec.b{color:var(--champ-b)}
+.eqn .vec.f{color:var(--encre)}
+.eqn .q{color:var(--c-q,var(--positif))}
+.eqn small{display:block;white-space:normal;max-width:17em;font-family:var(--mono);font-style:normal;font-size:clamp(9.5px,1.8cqw,11px);letter-spacing:.06em;color:var(--encre-3);margin-top:.7em}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .1em;font-size:.82em;line-height:1.05}
+.frac > span:first-child{border-bottom:1px solid currentColor;padding:0 .2em .06em}
+.frac > span:last-child{padding-top:.06em}
+
+/* Lectures d'instrument posées sur la scène */
+.ov .lecture{background:color-mix(in srgb,var(--papier-2) 82%,transparent);padding:3px 5px 4px;border-radius:2px}
+.ov.gros{font-size:clamp(13px,3.2cqw,21px)}
+
+/* Petits contrôles contextuels */
+.pas{display:inline-flex;align-items:center;gap:2px;margin-left:6px;vertical-align:middle}
+.pas button{width:1.55em;height:1.55em;border:1px solid var(--trait);border-radius:50%;font-family:var(--mono);font-size:.8em;line-height:1;color:var(--encre-2);background:var(--papier);display:grid;place-items:center;transition:border-color .2s}
+.pas button:hover{border-color:var(--encre);color:var(--encre)}
+.scrub{cursor:ew-resize;border-bottom:1px dotted var(--encre-3)}
+body:not([data-mode=manipuler]):not([data-mode=comprendre]) .scrub{border-bottom-color:transparent}
+.bascule{font-family:var(--mono);font-size:clamp(10px,2cqw,12px);color:var(--encre-2);border:1px solid var(--trait);border-radius:20px;padding:3px 9px 3px 8px;background:var(--papier)}
+.bascule:hover{border-color:var(--encre);color:var(--encre)}
+
+/* Fiche contextuelle de la charge */
+.fiche{position:absolute;z-index:6;width:min(220px,46cqw);background:var(--papier);border:1px solid var(--encre);padding:10px 12px 12px;font-size:13px;
+  box-shadow:0 10px 30px -18px rgba(23,25,27,.5);opacity:0;transform:translateY(4px);pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.fiche.ouverte{opacity:1;transform:none;pointer-events:auto}
+.fiche .label{display:flex;justify-content:space-between}
+.fiche .rangee{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.seg{display:inline-flex;border:1px solid var(--trait);border-radius:2px}
+.seg button{font-family:var(--mono);width:30px;height:24px;font-size:14px;color:var(--encre-3)}
+.seg button[aria-pressed=true]{background:var(--encre);color:var(--papier)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:transparent;margin-top:6px}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--encre-3)}
+input[type=range]::-moz-range-track{height:1px;background:var(--encre-3)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--papier);border:1.5px solid var(--encre);margin-top:-5px}
+input[type=range]::-moz-range-thumb{width:9px;height:9px;border-radius:50%;background:var(--papier);border:1.5px solid var(--encre)}
+
+/* Repères numérotés (Comprendre) */
+.rep{width:1.6em;height:1.6em;border-radius:50%;border:1px solid var(--encre);background:var(--papier);font-family:var(--mono);font-size:clamp(10px,2cqw,12px);display:grid;place-items:center}
+
+/* Théorie : une bande sous la scène, alignée sur les repères numérotés */
+.theorie{overflow:hidden;max-height:0;background:var(--papier)}
+body[data-mode=comprendre] .theorie{max-height:none}
+.theorie .dedans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,.8fr);gap:clamp(20px,3vw,48px);padding:28px 0 8px;border-bottom:1px solid var(--trait);
+  opacity:0;transform:translateY(-8px);transition:opacity .5s var(--ease) .1s,transform .6s var(--ease) .05s}
+body[data-mode=comprendre] .theorie .dedans{opacity:1;transform:none}
+.theorie section{padding:0 0 20px}
+.theorie h3{display:flex;gap:10px;align-items:baseline;font-weight:500;font-size:17px;letter-spacing:-.01em;margin-bottom:8px}
+.theorie h3 .rep{flex:none;font-weight:400;transform:translateY(-1px)}
+.theorie p{font-size:15px;line-height:1.55;color:var(--encre-2)}
+.theorie p + p{margin-top:8px}
+.theorie .formule{font-family:var(--math);font-style:italic;font-size:26px;color:var(--encre);margin:12px 0 6px;white-space:nowrap}
+.theorie .formule .op{font-style:normal;color:var(--encre-3);margin:0 .12em}
+.theorie .plus{display:inline-block;margin-top:14px;font-size:14px;text-decoration:none;border-bottom:1px solid var(--encre)}
+.theorie .ignore{font-size:13px;color:var(--encre-3)}
+.theorie .marge{border-left:1px solid var(--trait);padding-left:clamp(16px,2vw,28px)}
+
+/* ---------- Suite ---------- */
+.suite{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:clamp(48px,7vw,96px) var(--gouttiere) 72px}
+.suite a,.suite div{text-decoration:none;display:block;padding-top:14px;border-top:1px solid var(--encre)}
+.suite .label{display:block;margin-bottom:8px}
+.suite .t{font-size:clamp(20px,2.4vw,30px);letter-spacing:-.025em;line-height:1.1;transition:transform .5s var(--ease);display:inline-block}
+.suite a:hover .t{transform:translateX(-8px)}
+.suite .apres{text-align:right}
+.suite .apres .t{color:var(--encre-3)}
+.suite .apres.lien:hover .t{transform:translateX(8px)}
+
+@media (max-width:980px){
+  .theorie .dedans{grid-template-columns:1fr 1fr}
+  .titre{grid-template-columns:1fr}
+  .sig{justify-content:start}
+}
+@media (max-width:720px){
+  .scene{grid-template-columns:1fr}
+  .scene::after{display:none}
+  .poste + .poste{border-top:1px solid var(--trait)}
+  .barre .pos span{display:none}
+  .suite{grid-template-columns:1fr}
+  .theorie .dedans{grid-template-columns:1fr}
+  .theorie .marge{border-left:0;padding-left:0}
+  .suite .apres{text-align:left}
+}
+
+/* Densité sur laptop : la scène tient dans la hauteur de l'écran, couches visibles,
+   au lieu de déborder sous la ligne de flottaison. */
+@media (min-width:721px) and (max-height:900px){
+  .titre{padding-top:clamp(10px,2vh,24px);padding-bottom:clamp(10px,1.6vh,18px)}
+  .titre h1{font-size:clamp(34px,7.2vh,64px)}
+  .titre .lead{font-size:clamp(15px,2.1vh,19px);margin-top:8px}
+  .modes{padding-bottom:8px}
+  .corps > .scene,.corps > .theorie{max-width:calc((100svh - 252px) * 1200 / 640);margin-inline:auto}
+}
+
+/* Scène à un seul poste (gabarit) : même hauteur qu'une scène à deux postes */
+.scene.un{grid-template-columns:1fr}
+.scene.un::after{display:none}
+.scene.un .poste{aspect-ratio:1200/640}
+@media (max-width:720px){ .scene.un .poste{aspect-ratio:600/640} }

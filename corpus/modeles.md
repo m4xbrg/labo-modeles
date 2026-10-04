@@ -211,7 +211,7 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 
 ## Hors corpus (ne pas prendre pour des modèles)
 
-- **Prototype d'interface LABO** (`prototype/index.html`, `labo.css`, `magnetisme.html`) : sur `main` depuis le 2026-10-02 (PR n° 14), en `noindex`. C'est la nouvelle direction visuelle de LABO ; il ne remplace pas encore l'accueil. La page `magnetisme.html` est une **maquette** du module 23, pas un modèle. Le prototype utilise une numérotation des modules qui diverge de la carte canonique à partir du module 08 : voir [`historique.md`](historique.md#prototype-dinterface-labo).
+- **Prototype d'interface LABO** (`prototype/`) : sur `main` depuis le 2026-10-02 (PR n° 14), en `noindex`. C'est la nouvelle direction visuelle de LABO ; il ne remplace pas encore l'accueil. `gabarit.html` est un gabarit de planche, pas un modèle. La page `magnetisme.html` est une **maquette** du module 23, pas un modèle. Le prototype utilise une numérotation des modules qui diverge de la carte canonique à partir du module 08 : voir [`historique.md`](historique.md#prototype-dinterface-labo).
 - **Version Astra du neurone** : annoncée par l'ancien README (`astra/03-neurone/`), absente du dépôt.
 - **Briefs de showcases non construits** : double pendule, effet tunnel (voir [`atlas.md`](atlas.md#les-deux-idées-sélectionnées)).
 

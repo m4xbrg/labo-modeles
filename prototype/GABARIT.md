@@ -1,0 +1,72 @@
+# Gabarit de planche LABO
+
+Le prototype `prototype/` explore la future interface de LABO. Ce fichier explique comment fabriquer une nouvelle **planche maquette** dans cette direction, à partir de [`gabarit.html`](gabarit.html). Une maquette n'est pas un modèle : elle ne compte pas dans `corpus/` tant qu'elle n'est pas devenue une vraie planche validée.
+
+## Les fichiers
+
+| Fichier | Rôle | À modifier pour une nouvelle planche ? |
+|---|---|---|
+| `labo.css` | Jetons (papier, encre, couleurs des phénomènes, polices), lecture d'instrument, barre. | Non, sauf nouveau jeton de couleur. |
+| `planche.css` | Structure commune : titre et signature, couches, scène, calques, équations, fiche, théorie, voisins, densité laptop et mobile. | Non. |
+| `planche.js` | Couches Observer / Manipuler / Comprendre (onglets, flèches, touches 1 2 3, `?mode=`), Échap, position « NN / 50 » et voisins lus dans le corpus. | Non. |
+| `corpus.js` | Lit `../corpus/*.json`. Aucune donnée. | Non. |
+| `presentation.js` | Habillage : couleur par domaine, formule d'en-tête, pictogramme, textes des phénomènes, **liste des maquettes**. | Oui : une ligne dans `MAQUETTES`. |
+| `gabarit.html` | Squelette commenté d'une planche, avec une scène de démonstration. | On le copie. |
+
+## Fabriquer une planche maquette
+
+1. **Copier** `gabarit.html` sous un nom parlant (`membrane.html`, `orbitales.html`).
+2. **Rattacher** : `<body data-module="NN">` avec le numéro canonique du module (`corpus/modules.json`). La barre affiche alors « Fondations · domaine · NN / 50 » et le bas de page relie les modules voisins, ouverts, en maquette ou à venir. Ne jamais inventer de numéro.
+3. **Déclarer** la maquette dans `presentation.js` : `MAQUETTES: { NN: 'ma-planche.html' }`. L'index la montre alors comme « maquette » au bon module, tant qu'aucun vrai modèle ne l'ouvre.
+4. **Remplacer** les blocs marqués « À REMPLACER » : titre, phrase d'accroche, signature, état du phénomène, dessin. Garder le reste.
+5. **Vérifier** (voir plus bas).
+
+## Les règles de la direction
+
+- **UI silencieuse, phénomène expressif.** Le papier, l'encre et les traits restent neutres ; la couleur appartient au phénomène (`--phenomene`, ou un jeton de `labo.css` comme `--champ-b`, `--vivant`). Pas d'« application bleue » : chaque domaine garde sa teinte.
+- **Trois voix typographiques.** Plex Sans pour l'interface et les titres ; Plex Mono pour les mesures, unités et étiquettes ; Instrument Serif italique **seulement** pour les symboles mathématiques (`.m`, `.vec`, `.eqn`, `.lecture .s`).
+- **Signature** obligatoire sous le titre : Échelle · Temps · Modèle.
+- **Trois couches.** Observer : la scène seule, rien à régler. Manipuler : les valeurs `.scrub` et les `.pas` apparaissent, les objets se touchent. Comprendre : équations et repères numérotés sur la scène, théorie dans la bande du bas. Classes de visibilité : `.lire` (Manipuler et Comprendre), `.manip` (Manipuler ; ajouter `.aussi` pour rester en Comprendre), `.comp` (Comprendre).
+- **Contrôles contextuels.** Pas de panneau de curseurs : on règle une valeur là où elle s'affiche, ou dans une fiche qui s'ouvre sur l'objet touché.
+- **Calques.** Le phénomène se dessine dans un SVG (ou un canvas) au `viewBox` fixe ; les étiquettes HTML se posent par-dessus en pourcentage de ce viewBox (`pc(el, x, y)`). Si des étiquettes suivent un objet mobile, les écarter les unes des autres (tester les rectangles des étiquettes à chaque image et décaler celles qui se recouvrent ou couvrent un objet).
+
+## Composants
+
+**Lecture d'instrument** : symbole, valeur, unité.
+
+```html
+<span class="lecture" style="--c:var(--phenomene)">
+  <span class="s">B</span><span class="eq">=</span><span class="v">16,7</span><span class="u">µT</span>
+</span>
+```
+
+**Équation de composition** : posée dans la scène, à côté de ce qu'elle décrit, avec une légende courte.
+
+```html
+<div class="ov eqn" style="left:57%;top:3%">
+  <span class="vec">F</span><span class="op">=</span>q&#8239;<span class="vec">v</span><span class="op">×</span><span class="vec b">B</span>
+  <small>force sur une charge en mouvement</small>
+</div>
+```
+
+Fraction : `<span class="frac"><span>μ₀ I</span><span>2π r</span></span>`.
+
+**Fiche contextuelle** : `<div class="fiche" role="dialog">`, ouverte par la classe `.ouverte`, fermée par Échap (`Planche.surEchap`), en revenant à Observer (`Planche.surMode`) ou par un clic ailleurs. Contenu : `.label`, `.rangee`, `.seg` (choix), `input[type=range]`.
+
+**Repère numéroté** : `<span class="rep">1</span>` sur la scène (calque `.comp`) et le même dans le `<h3>` de la section de théorie.
+
+## API de `planche.js`
+
+| Appel | Effet |
+|---|---|
+| `Planche.mode('manipuler')` | Change de couche. |
+| `Planche.actif()` | `true` hors Observer. |
+| `Planche.surMode(m => …)` | Réagir à un changement de couche. |
+| `Planche.surEchap(() => …)` | Réagir à Échap. |
+
+## Vérifier
+
+- Servir le dépôt par HTTP (`python -m http.server` à la racine, puis ouvrir `/prototype/…`) : `file://` ne lit pas le corpus.
+- Console propre ; aucun lien cassé ; rendu à 1440 px, 1366 × 768 (la scène doit tenir dans l'écran) et 375 px, sans défilement horizontal.
+- `prefers-reduced-motion` : la boucle ralentit, rien ne clignote.
+- Si le navigateur intégré est masqué, `requestAnimationFrame` s'arrête et la planche paraît figée : tester en navigateur headless (Playwright avec Edge) ou dans un onglet visible.

@@ -158,7 +158,7 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Champ magnétique | `idea` | 23 | 21, 02 | — | Une maquette existe dans `prototype/magnetisme.html` : ce n’est pas un modèle. |
+| Champ magnétique | `idea` | 23 | 21, 02 | — |  |
 | Force de Lorentz | `idea` | 23 | 21, 02, 10 | — |  |
 | Cyclotron | `idea` | 23 | 12, 21 | — |  |
 | Induction électromagnétique | `idea` | 23 | 21, 22 | — |  |

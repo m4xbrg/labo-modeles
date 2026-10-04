@@ -40,11 +40,11 @@ Le projet a commencé par des phénomènes, pas par une carte. Les fondations so
 
 ## Prototype d'interface LABO
 
-Un prototype d'accueil LABO (`prototype/index.html`, `labo.css`, `magnetisme.html`) est sur `main` (en `noindex`). C'est la direction visuelle retenue, mais **ses données ne sont pas une source de vérité** : il doit lire `corpus/`.
+Un prototype d'accueil LABO (`prototype/`) est sur `main` (en `noindex`). C'est la direction visuelle retenue, mais **ses données ne sont pas une source de vérité** : il doit lire `corpus/`.
 
 - Il reprend les modules 01-07 conformément à la carte, mais diverge ensuite : son module 08 est « Incertitude et ajustement », son 09 « Mouvement dans le plan », ses 23-50 suivent un autre découpage (par exemple 26 « Diffraction et interférences lumineuses », 27 « Atomes et tableau périodique »). Un commentaire du code le reconnaît (« la numérotation 08, 09, 12, 13, 24 → 50 est provisoire »).
 - Il marque les modules 12 et 13 « à venir » alors que la page Rotation, gravitation et orbites existe désormais.
-- `magnetisme.html` est une maquette du module 23, pas un modèle.
+- Il contenait une planche maquette `magnetisme.html` (module 23), retirée le 2026-10-04 : présentée comme une planche à part entière, elle n'en était pas une et détonnait à côté des vraies planches. Ses composants (lecture d'instrument, équation de composition, fiche contextuelle, couches) vivent dans le gabarit `prototype/gabarit.html`.
 - Il ne crée pas de modules « Fonctions » ni « Dérivées et intégrales » : le changement et l'accumulation restent au module 03.
 
 Une future interface devra lire `corpus/*.json` plutôt que de porter sa propre liste.

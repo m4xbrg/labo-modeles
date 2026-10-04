@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- GABARIT DE PLANCHE LABO. Copier ce fichier, puis suivre GABARIT.md.
+     Chaque bloc marqué « À REMPLACER » se remplace ; le reste est la structure commune. -->
+<title>Gabarit de planche · LABO</title>
+<meta name="description" content="Prototype LABO : gabarit de planche (structure, composants, couches).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23f3f0e9%27/%3E%3Cpath d=%27M9 6v20h14%27 fill=%27none%27 stroke=%27%2317191b%27 stroke-width=%274%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="labo.css">
+<link rel="stylesheet" href="planche.css">
+<style>
+/* Propre à cette planche : la couleur du phénomène se déclare ici, pas dans l'interface. */
+:root{ --phenomene: var(--onde); }
+</style>
+</head>
+<!-- data-module : numéro canonique (corpus/modules.json). planche.js en tire « NN / 50 » et les voisins.
+     Laisser vide tant que la planche n'est rattachée à aucun module. -->
+<body data-mode="observer" data-module="">
+
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="index.html">LABO</a>
+    <a class="retour" href="index.html#fondations">← Fondations</a>
+  </div>
+  <p class="pos"><span>Gabarit · </span><b>—</b></p>
+</header>
+
+<main>
+  <div class="titre">
+    <div>
+      <h1>Titre du phénomène</h1>                                         <!-- À REMPLACER -->
+      <p class="lead">Une phrase qui dit ce qu’on va voir. Une seconde, au plus.</p>  <!-- À REMPLACER -->
+    </div>
+    <!-- Signature : toujours ces trois rubriques -->
+    <dl class="sig">
+      <dt>Échelle</dt><dd>~ ordre de grandeur</dd>
+      <dt>Temps</dt><dd>~ durée réelle</dd>
+      <dt>Modèle</dt><dd>ce qu’on suppose</dd>
+    </dl>
+  </div>
+
+  <!-- Trois couches. Le texte d'aide de chaque couche est dans data-indice. -->
+  <div class="modes">
+    <div role="tablist" aria-label="Couches de la planche">
+      <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord. Rien à régler."><span>1</span>Observer</button>
+      <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Toucher une valeur soulignée pour la changer."><span>2</span>Manipuler</button>
+      <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Les relations qui gouvernent ce qu’on voit, repérées sur la scène."><span>3</span>Comprendre</button>
+    </div>
+    <p class="indice" id="indice"></p>
+  </div>
+
+  <div class="corps">
+    <!-- Scène : .scene.un pour un poste, .scene sans modificateur pour deux postes côte à côte -->
+    <div class="scene un">
+      <div class="poste" id="pA">
+        <p class="tag">A · <b>Nom du poste</b></p>
+        <!-- Le phénomène se dessine dans un SVG (ou un canvas) au viewBox fixe ; les calques HTML
+             se posent par-dessus en % de ce viewBox (fonction pc() plus bas). -->
+        <svg viewBox="0 0 1200 640" id="svgA" aria-label="Démonstration du gabarit : une onde">
+          <defs><pattern id="grille" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r=".7" fill="#17191b" opacity=".13"/></pattern></defs>
+          <rect width="1200" height="640" fill="url(#grille)"/>
+          <line x1="80" x2="1120" y1="330" y2="330" stroke="#17191b" stroke-width=".7" opacity=".4"/>
+          <path id="courbe" fill="none" stroke="var(--phenomene)" stroke-width="2"/>
+          <circle id="point" r="7" fill="var(--phenomene)"/>
+        </svg>
+
+        <!-- Composant 1 · LECTURE D'INSTRUMENT : symbole (serif italique) > valeur (mono) > unité.
+             .lire = visible en Manipuler et Comprendre ; .scrub = valeur qu'on glisse ; .pas = pas à pas -->
+        <div class="ov gauche" style="left:7%;top:12%">
+          <span class="lecture" style="--c:var(--phenomene)"><span class="s">A</span><span class="eq lire">=</span><span class="v lire scrub" id="vA" title="Glisser pour régler">1,0</span><span class="u lire">cm</span></span><span class="pas manip aussi"><button data-pas="A-" aria-label="Diminuer l’amplitude">−</button><button data-pas="A+" aria-label="Augmenter l’amplitude">+</button></span>
+        </div>
+        <div class="ov gauche lire" id="lY"><span class="lecture"><span class="s">y</span><span class="v" id="vY">0,0</span><span class="u">cm</span></span></div>
+
+        <!-- Composant 2 · ÉQUATION DE COMPOSITION : posée dans la scène, à côté de ce qu'elle décrit -->
+        <div class="ov eqn" style="left:62%;top:9%">
+          <span>y</span><span class="op">=</span><span style="color:var(--phenomene)">A</span>&#8239;<span style="font-style:normal">sin</span>(<span>kx</span><span class="op">−</span><span>ωt</span>)
+          <small>ce que la scène calcule à chaque instant</small>
+        </div>
+
+        <!-- Repères numérotés (Comprendre) : renvoient aux sections de la théorie -->
+        <div class="ov centre comp" style="left:7%;top:51.5%"><span class="rep">1</span></div>
+        <div class="ov centre comp" id="rep2"><span class="rep">2</span></div>
+
+        <!-- Composant 3 · FICHE CONTEXTUELLE : s'ouvre sur l'objet touché, se ferme avec Échap ou ailleurs -->
+        <div class="fiche" id="fiche" role="dialog" aria-label="Réglages du point">
+          <p class="label"><span>Point suivi</span><span>x</span></p>
+          <div style="margin-top:12px"><div class="rangee" style="margin:0"><span class="lecture"><span class="s">x</span></span><span class="lecture"><span class="v" id="vX">6</span><span class="u">cm</span></span></div>
+          <input type="range" id="curX" min="1" max="12" step="1" value="6" aria-label="Position du point suivi"></div>
+          <p class="mono" style="color:var(--encre-3);margin-top:8px;font-size:11px">Toucher le point pour ouvrir cette fiche.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Théorie : une bande sous la scène, visible en Comprendre, une section par repère -->
+    <aside class="theorie" aria-label="Théorie">
+      <div class="dedans">
+        <section>
+          <h3><span class="rep">1</span>Première relation</h3>
+          <p>Ce que la scène montre, en deux ou trois phrases.</p>
+          <p class="formule">y<span class="op">=</span>A sin(kx − ωt)</p>
+        </section>
+        <section>
+          <h3><span class="rep">2</span>Deuxième relation</h3>
+          <p>Ce qui change quand on touche une valeur.</p>
+        </section>
+        <section>
+          <h3><span class="rep">3</span>Troisième relation</h3>
+          <p>Le lien avec une autre fondation, par son nom.</p>
+        </section>
+        <section class="marge">
+          <p class="label" style="margin-bottom:8px">Limites du modèle</p>
+          <p class="ignore">Ce que la planche simplifie, dit franchement.</p>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Planches voisines : remplies par planche.js si data-module est renseigné -->
+  <nav class="suite" aria-label="Planches voisines">
+    <a href="index.html#fondations"><span class="label">←</span><span class="t">Retour aux fondations</span></a>
+    <div class="apres"><span class="label">gabarit</span><span class="t">Pas de voisin</span></div>
+  </nav>
+</main>
+
+<p class="proto">Prototype · gabarit de planche, pas un modèle</p>
+
+<script src="corpus.js"></script>
+<script src="presentation.js"></script>
+<script src="planche.js"></script>
+<script>
+(() => {
+'use strict';
+// ---------- Outils communs à copier tels quels ----------
+const $ = s => document.querySelector(s);
+const fr = (x, d = 1) => x.toFixed(d).replace('.', ',').replace('-', '−');          // nombres à la française
+const pc = (el, x, y) => { el.style.left = (x / 1200 * 100) + '%'; el.style.top = (y / 640 * 100) + '%'; }; // viewBox → %
+const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const { mode, actif } = Planche;
+
+// ---------- État du phénomène : À REMPLACER ----------
+const S = { A: 1, x: 6, PX_CM: 80, Y0: 330, lambda: 6, T: 2.4 };
+const y = (x, t) => S.A * Math.sin(2 * Math.PI * (x / S.lambda - t / S.T));
+
+// ---------- Fiche contextuelle ----------
+const fiche = $('#fiche');
+function placeFiche(){ const px = 80 + S.x * S.PX_CM; fiche.style.left = ((px + 30) / 1200 * 100) + '%'; fiche.style.top = '58%'; fiche.style.transform = px > 800 ? 'translateX(calc(-100% - 60px))' : ''; }
+function ouvreFiche(){ fiche.classList.add('ouverte'); placeFiche(); }
+function fermeFiche(){ fiche.classList.remove('ouverte'); }
+Planche.surMode(m => { if (m === 'observer') fermeFiche(); });
+Planche.surEchap(fermeFiche);
+$('#point').style.cursor = 'pointer';
+$('#point').addEventListener('click', () => { if (!actif()) mode('manipuler'); fiche.classList.contains('ouverte') ? fermeFiche() : ouvreFiche(); });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#fiche,#point')) fermeFiche(); });
+$('#curX').addEventListener('input', e => { S.x = +e.target.value; $('#vX').textContent = S.x; placeFiche(); });
+
+// ---------- Valeur réglable : pas à pas et glissement horizontal ----------
+const regleA = v => { S.A = Math.max(.2, Math.min(2.5, Math.round(v * 10) / 10)); $('#vA').textContent = fr(S.A); };
+document.querySelectorAll('[data-pas]').forEach(b => b.addEventListener('click', () => regleA(S.A + (b.dataset.pas === 'A+' ? .1 : -.1))));
+(() => { const v = $('#vA'); let s = null;
+  v.addEventListener('pointerdown', e => { if (!actif()) return; s = { x: e.clientX, A: S.A }; try { v.setPointerCapture(e.pointerId); } catch (_) {} e.preventDefault(); });
+  v.addEventListener('pointermove', e => { if (s) regleA(s.A + (e.clientX - s.x) / 60); });
+  v.addEventListener('pointerup', () => { s = null; });
+})();
+
+// ---------- Dessin : À REMPLACER ----------
+function dessine(t){
+  let d = '';
+  for (let px = 80; px <= 1120; px += 6){ const x = (px - 80) / S.PX_CM; d += (px > 80 ? 'L' : 'M') + px + ' ' + (S.Y0 - y(x, t) * 60).toFixed(1); }
+  $('#courbe').setAttribute('d', d);
+  const px = 80 + S.x * S.PX_CM, py = S.Y0 - y(S.x, t) * 60;
+  $('#point').setAttribute('cx', px); $('#point').setAttribute('cy', py);
+  $('#vY').textContent = fr(y(S.x, t)); pc($('#lY'), px + 18, py - 26); pc($('#rep2'), px, py + 38);
+}
+
+// ---------- Boucle : s'arrête hors écran, ralentit avec prefers-reduced-motion ----------
+let visible = true;
+new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); }).observe($('.scene'));
+let t = 0, prec = null;
+function image(now){
+  const dt = prec === null ? 0 : Math.min(.05, (now - prec) / 1000); prec = now;
+  if (visible){ t += dt * (calme ? .35 : 1); dessine(t); }
+  requestAnimationFrame(image);
+}
+requestAnimationFrame(image);
+})();
+</script>
+</body>
+</html>

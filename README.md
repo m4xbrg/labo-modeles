@@ -63,7 +63,7 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 - `index.html` : redirection vers l'accueil.
 - `opus-sonnet/` : toutes les pages. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `index.html` est l'accueil actuel, `prealables.html` la théorie préalable, et chaque sous-dossier est un modèle (`index.html` + `explication.html`).
 - `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe.
-- `prototype/` : la nouvelle direction visuelle LABO (accueil et planche maquette *Magnétisme et induction*), en cours ; elle ne remplace pas encore l'accueil.
+- `prototype/` : la nouvelle direction visuelle LABO (accueil lu dans `corpus/`, gabarit de planche documenté dans `prototype/GABARIT.md`), en cours ; elle ne remplace pas encore l'accueil.
 - `corpus/` : la source de vérité.
 
 Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, ouvrir `opus-sonnet/index.html` ou servir le dossier avec n'importe quel serveur statique.
