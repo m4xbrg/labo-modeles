@@ -1,39 +1,73 @@
-# Labo modèles
+# LABO
 
-Banc d'essai perso pour comparer des modèles d'IA sur un même brief. Hors du Second Brain, pas versionné.
+> Modèles pour voir ce qui se passe.
 
-## Essai 1 : « L'invisible en mouvement » (2026-09-29)
+LABO est un laboratoire scientifique personnel, à mi-chemin entre le musée interactif et la bibliothèque de simulations. Chaque modèle rend visible, manipulable ou intuitif un phénomène qu'on ne peut normalement pas voir : trop petit, trop grand, trop rapide, trop lent, trop abstrait, ou trop difficile à imaginer à partir des équations seules. Une cellule qui se divise, une boîte de molécules d'où sortent la température et la pression, un boulet de canon qui tombe sans jamais toucher le sol, le cœur de fer d'une étoile qui s'effondre.
 
-Huit planches scientifiques interactives : mitose, respiration cellulaire, neurone, champ électrique, ondes et interférences, courant et circuits, matière-chaleur-transport, supernova. La série s'appelait d'abord « Mécaniques invisibles » ; `prompts/astra-neurone.md` garde l'ancien nom, tel qu'il a été donné à Astra.
+Le dépôt s'appelle techniquement `labo-modeles`. Site publié : <https://m4xbrg.github.io/labo-modeles/> (pages en `noindex`).
 
-- `prompts/` : la charte commune (`00-direction-artistique.md`), un brief par projet, `PROMPT-SESSION.md` (prompt à coller dans une autre session) et `astra-neurone.md` (tout-en-un pour Astra).
-- `opus-sonnet/` : Opus 5.5 écrit la direction, des sous-agents Sonnet 5.5 construisent (quatre en parallèle pour 01 à 04 ; un constructeur et un relecteur QA pour 05, ajoutée le 2026-10-01). Ouvrir `opus-sonnet/index.html`.
-- Fondations électricité (modules 21-22, 2026-10-01) : la planche 04 est prolongée (tension entre deux points A–B, force F = qE sur 1 nC, forces de Coulomb entre charges, lectures commentées des vues, tableau charge / champ / force / potentiel / tension / énergie dans l'explication) et une planche 06 « Courant et circuits » est ajoutée (Ohm et puissance, charge et décharge RC, aperçu RL et LC amorti ; brief `prompts/06-courant-circuits.md`, construite par Sonnet). Les préalables gagnent une section 06 et un paragraphe sur la tension.
-- `opus-sonnet/fondations-forces-energie/` : batch Fondations (modules 10 et 11, forces, énergie, quantité de mouvement), ajouté le 2026-10-01. Brief : `prompts/fondations-forces-energie.md`. Opus écrit le brief et l'explication, un sous-agent Sonnet construit la page, Opus fait la QA.
-- `opus-sonnet/fondations-rotation-gravitation/` : batch Fondations (module 12, rotation ; module 13, gravitation et orbites), ajouté le 2026-10-01, ≈ 1 ADN. Sept actes en deux paillasses : cinématique de rotation, couple et inertie, conservation du moment cinétique (patineur, anneau), introduction au gyroscope ; canon de Newton (l'orbite comme chute), ellipse et énergie orbitale avec puits de potentiel et Kepler, barycentre. Brief : `prompts/fondations-rotation-gravitation.md`. Opus écrit le brief, le moteur physique (testé hors page) et l'explication ; un sous-agent Sonnet construit la page ; Opus fait la QA.
-- `opus-sonnet/fondations-langage/` : batch Fondations (modules 1 à 3, langage scientifique), ajouté le 2026-10-01. Quatre petits laboratoires dans une page (échelles et unités, graphiques, vecteurs, position-vitesse-accélération) et une explication commune. Brief : `prompts/fondations-langage.md`. Opus écrit le brief, la coquille et l'explication, deux sous-agents Sonnet construisent les toys, un troisième fait la QA.
-- `opus-sonnet/07-matiere-chaleur/` : matière, chaleur et transport (modules canoniques 17, 18 et 19), neuf actes. Opus 5.5 a écrit le brief (`prompts/07-matiere-chaleur-transport.md`) et construit la page autour d'un seul moteur de dynamique moléculaire 2D réutilisé dans huit actes ; des sous-agents Sonnet 5.5 ont rédigé l'explication et fait la QA.
-- `opus-sonnet/08-replication-adn/` : réplication de l'ADN (2026-10-01), une fourche suivie en cinq actes. Opus 5.5 a écrit le brief (`prompts/08-replication-adn.md`) ; des sous-agents Sonnet 5.5 ont construit la page, rédigé l'explication et fait le QA.
-- `opus-sonnet/09-supernova/` : supernova par effondrement du cœur (2026-10-01), planche narrative en huit actes. Opus 5.5 a écrit le brief (`prompts/09-supernova.md`) ; des sous-agents Sonnet 5.5 ont construit la page, rédigé l'explication et fait la QA.
-- `opus-sonnet/fondations-flux-fluides/` : batch Fondations (module 16, flux, gradients et champs continus ; module 20, fluides, pression et débit), ajouté le 2026-10-01. Quatre laboratoires dans une page (champs scalaires et gradient, champs vectoriels avec divergence et rotationnel, flux, conduit) et une explication commune. Brief : `prompts/fondations-flux-fluides.md`. Opus écrit le brief, la coquille et l'explication ; deux sous-agents Sonnet construisent (A+B, C+D) ; un relecteur Sonnet vérifie maths et physique ; Opus intègre et fait la QA.
-- `opus-sonnet/fondations-oscillations-ondes/` : batch Fondations, modules 6, 14 et 15 réunis en une planche (≈ 1 ADN) : cercle et phase, oscillateur et résonance, corde, interférences, modes, Doppler. Brief : `prompts/fondations-oscillations-ondes.md`. Opus direction et QA, un constructeur Sonnet (2026-10-01).
-- `opus-sonnet/fondations-systemes-hasard/` : batch Fondations, modules 4, 5 et 7 réunis en une planche (≈ 1 ADN) : état et taux (Euler pas à pas, champ de pentes), rétroaction et stabilité (cuvette / dôme, logistique), exponentielles et logarithmes (doublement, demi-vie, échelle log, sonde inverse), hasard (dé, marche aléatoire, désintégration). Brief : `prompts/fondations-systemes-hasard.md`. Opus écrit le brief et l'explication (théorie de référence) et fait la QA ; un constructeur Sonnet construit la page (2026-10-01).
-- `opus-sonnet/fondations-relativite-restreinte/` : batch Fondations, module 46 (ouvre la branche J · Relativité), ≈ 1 ADN, ajouté le 2026-10-02. Huit actes en trois paillasses : deux référentiels (Galilée, puis la lumière qui va à c pour tous), horloge lumineuse, train et éclairs (simultanéité relative, avec reconstruction corrigée des délais) ; diagramme d'espace-temps et cône de lumière, dilatation et contraction lues sur la même géométrie, temps propre (jumeaux) ; addition relativiste des vitesses, énergie E = γmc² et E² = (pc)² + (mc²)². Brief : `prompts/fondations-relativite-restreinte.md`. Opus écrit le brief, le moteur (testé hors page) et l'explication ; un sous-agent Sonnet construit la page ; Opus fait la QA. Le module 47 (relativité générale) est seulement annoncé.
-- `astra/03-neurone/` : GPT-6 Astra, même brief, en solo, projet 03 seulement.
+## Ce qu'on y trouve
 
-## Grille de comparaison
+LABO distingue plusieurs niveaux, qu'il ne faut pas confondre :
 
-Pour chaque essai, noter de 1 à 5 :
+> module ≠ production ≠ modèle ≠ collection ≠ idée d'Atlas
 
-| Critère | Opus + Sonnet | Astra |
-|---|---|---|
-| Exactitude scientifique | | |
-| Direction artistique | | |
-| Qualité du motion | | |
-| Interactivité utile | | |
-| Explication (j'ai appris quelque chose) | | |
-| Bugs / erreurs console | | |
+- **Fondations** : une carte de **50 modules canoniques** (01 Mesure et échelles … 50 Spin et intrication), qui forment la grammaire scientifique réutilisable. Un module n'est pas une page.
+- **Productions** : des unités de fabrication qui couvrent un ou plusieurs modules (« Oscillations et ondes » couvre 06 + 14 + 15).
+- **Modèles** : ce qui s'ouvre réellement, une page interactive et son explication « Comprendre ce qui se passe ».
+- **Showcases** : des modèles construits autour d'un phénomène riche, qui mobilisent plusieurs fondations (mitose, réplication de l'ADN, supernova).
+- **Collections** : des séries éditoriales. *L'invisible en mouvement*, qui a longtemps donné son nom au projet, est aujourd'hui une collection de cinq showcases.
+- **Atlas** : le réservoir des phénomènes que LABO pourrait construire un jour. Une idée d'Atlas n'est pas une page.
 
-## Ce que j'en retiens
+## Pourquoi des fondations
 
-(à remplir après l'essai)
+Le projet a commencé par des phénomènes : la **mitose** d'abord, avec la respiration cellulaire, le neurone et le champ électrique. La mitose a montré qu'un mécanisme biologique complexe devient lisible quand la page est conçue autour du mécanisme lui-même. Elle reste un des showcases de référence.
+
+En visant des sujets plus ambitieux, il est devenu clair qu'une supernova ou une collision d'étoiles à neutrons supposent la gravitation, l'énergie, la pression, les noyaux et le rayonnement. Les fondations existent pour ne pas réexpliquer tout cela dans chaque showcase. Elles donnent une intuition juste, le vocabulaire, les relations et les équations utiles ; les showcases peuvent alors se concentrer sur leur phénomène propre.
+
+Les fondations ne remplacent pas les grands modèles : elles les rendent possibles. Et LABO n'est pas un curriculum : les préalables sont des chemins conseillés, pas des verrous, et la forme suit le phénomène (interactive, narrative, contemplative, comparative ou toy).
+
+## État du projet
+
+Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-04 :
+
+**Construit : 16 modèles.**
+
+- Planches numérotées 01-09 : La mitose · La respiration cellulaire · Le neurone qui apprend · Le champ électrique · Ondes et interférences · Courant et circuits · Matière, chaleur et transport · La réplication de l'ADN · Supernova par effondrement du cœur. Cinq d'entre elles (mitose, respiration, neurone, réplication, supernova) forment la collection *L'invisible en mouvement*.
+- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46).
+- Les huit productions de fondations définies au départ sont construites ; les planches 06 et 07 en sont issues, et la 04 a été prolongée par l'une d'elles.
+
+**Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 34, 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
+
+**Prévu, rien de construit.** Les fondations 23 (magnétisme et induction) à 37 (signalisation), dans l'ordre de la feuille de route, puis la physiologie, l'évolution, l'astrophysique, le reste de la relativité et la quantique.
+
+**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 14 partielles, 30 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 203 restent des idées.
+
+## Où est la source de vérité
+
+Le dossier [`corpus/`](corpus/README.md) décrit le corpus et l'emporte sur tout autre document :
+
+| Document | Contenu |
+|---|---|
+| [`corpus/README.md`](corpus/README.md) | Le modèle conceptuel, les statuts, les règles de maintenance. |
+| [`corpus/fondations.md`](corpus/fondations.md) | Les 50 modules, les productions, la couverture réelle, les chaînes de préalables. |
+| [`corpus/modeles.md`](corpus/modeles.md) | Tout ce qui existe vraiment, avec chemins, modules et explications. |
+| [`corpus/atlas.md`](corpus/atlas.md) | Le réservoir des phénomènes, avec la liste historique et les ajouts proposés séparés. |
+| [`corpus/collections.md`](corpus/collections.md) | Les collections, dont *L'invisible en mouvement*. |
+| [`corpus/historique.md`](corpus/historique.md) | Généalogie, anciens noms, anciennes numérotations, statut des documents. |
+
+Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`, `models.json`, `atlas.json`, `collections.json`), pour alimenter plus tard l'accueil de LABO.
+
+## Organisation du dépôt
+
+- `index.html` : redirection vers l'accueil.
+- `opus-sonnet/` : toutes les pages. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `index.html` est l'accueil actuel, `prealables.html` la théorie préalable, et chaque sous-dossier est un modèle (`index.html` + `explication.html`).
+- `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe.
+- `prototype/` : la nouvelle direction visuelle LABO (accueil et planche maquette *Magnétisme et induction*), en cours ; elle ne remplace pas encore l'accueil.
+- `corpus/` : la source de vérité.
+
+Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, ouvrir `opus-sonnet/index.html` ou servir le dossier avec n'importe quel serveur statique.
+
+## Fabrication
+
+Opus 5.5 écrit la direction, les briefs et souvent l'explication ; des sous-agents Sonnet 5.5 construisent ; une relecture vérifie l'exactitude scientifique et le rendu. Le dépôt est né le 2026-09-29 comme banc d'essai pour comparer des modèles d'IA sur un même brief ; cette histoire est racontée dans [`corpus/historique.md`](corpus/historique.md).
