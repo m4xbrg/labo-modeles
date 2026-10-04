@@ -24,7 +24,7 @@ Pièges interdits partout (texte, statut, infobulles) : un observateur qui « vo
 ## Moteur physique : verrouillé et déjà testé
 
 Le moteur est écrit et vérifié (194 tests). Copie **à l'identique** le fichier
-`C:\Users\m4xbr\AppData\Local\Temp\claude\C--Users-m4xbr-dev-labo-modeles--claude-worktrees-relativite-restreinte-fondations-95565c\c3ad02af-97ef-4c65-b2a2-cdb93cbe1c08\scratchpad\phys.js`
+`scratchpad/phys.js` (fichier de travail de la session de construction, hors dépôt)
 dans le `<script>`, du marqueur `/* PHYS-BEGIN */` au marqueur `/* PHYS-END */` inclus (sans la dernière ligne `module.exports`). Ne modifie pas ces fonctions ; si tu as besoin d'un calcul de plus, écris-le hors du bloc. Le test `scratchpad/test.js` doit continuer de passer sur ta page : `node test.js <chemin>/index.html`.
 
 Conventions du moteur : **c = 1**. Un événement est `{t, x}` où `t` est déjà « ct ». Une vitesse est `b = v/c`. S = quai (ou observateur « au sol »), S' = train / fusée, qui se déplace à `+b` selon x par rapport à S.

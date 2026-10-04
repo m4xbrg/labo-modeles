@@ -20,7 +20,7 @@ Intuitions à rendre évidentes (dans cet ordre de priorité) :
 ## Moteur physique : verrouillé et déjà testé
 
 Le moteur est écrit et vérifié. Copie **à l'identique** le fichier
-`C:\Users\m4xbr\AppData\Local\Temp\claude\C--Users-m4xbr-dev-labo-modeles--claude-worktrees-rotation-gravitation-foundations-ff89e5\3a14a035-009c-4a63-95d7-85d2505fa161\scratchpad\phys.js`
+`scratchpad/phys.js` (fichier de travail de la session de construction, hors dépôt)
 dans le `<script>`, du marqueur `/* PHYS-BEGIN */` au marqueur `/* PHYS-END */` inclus (sans la dernière ligne `module.exports`). Ne modifie pas ces fonctions ; si tu as besoin d'un calcul de plus, écris-le hors du bloc. Le test `scratchpad/test.js` doit continuer de passer sur ta page : `node test.js <chemin>/index.html`.
 
 Ce qu'il fournit (unités SI) :

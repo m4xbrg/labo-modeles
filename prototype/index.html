@@ -129,9 +129,9 @@ footer p + p{margin-top:8px}
       <p class="devise">Modèles pour voir ce qui se passe.</p>
       <p class="chapeau">Des expériences à manipuler, de l’échelle de la molécule à celle des étoiles. On observe le phénomène, on touche aux causes, puis on lit la théorie.</p>
       <div class="regle mono">
-        <a href="#fondations">Fondations<b>50</b></a>
-        <a href="#phenomenes">Phénomènes<b>8</b></a>
-        <span style="color:var(--encre-3)">Mis à jour 2026-10-01</span>
+        <a href="#fondations">Fondations<b id="nFond">50</b></a>
+        <a href="#phenomenes">Phénomènes<b id="nPhen">·</b></a>
+        <span style="color:var(--encre-3)" id="maj"></span>
       </div>
     </div>
     <figure class="fig" aria-label="Figure animée : interférence de deux sources">
@@ -145,7 +145,7 @@ footer p + p{margin-top:8px}
     <div class="sect">
       <h2>Fondations</h2>
       <p>Les briques conceptuelles. <span>Mesurer, représenter, faire évoluer : les outils qu’on réutilise partout ailleurs.</span>
-        <span class="compte mono">50 entrées · 18 ouvertes · 1 maquette</span></p>
+        <span class="compte mono" id="compte">Lecture du corpus…</span></p>
     </div>
     <ol class="index" id="index"></ol>
   </section>
@@ -155,11 +155,7 @@ footer p + p{margin-top:8px}
       <h2>Phénomènes</h2>
       <p>Des expériences plus longues, construites autour d’un seul phénomène. <span>On suit ce qui arrive, du début à la fin.</span></p>
     </div>
-    <div class="coll">
-      <p class="label">Collection<br>L’invisible en mouvement
-        <small>Ce qui se passe à des échelles qu’on ne voit jamais : trop petit, trop rapide ou trop loin.</small></p>
-      <ol class="phen" id="invisible"></ol>
-    </div>
+    <div id="collections"></div>
     <div class="coll">
       <p class="label">Hors collection</p>
       <ol class="phen" id="autres"></ol>
@@ -171,111 +167,75 @@ footer p + p{margin-top:8px}
   <span class="marque">LABO</span>
   <div>
     <p>Un laboratoire personnel de modèles scientifiques. Chaque expérience assume ses simplifications et les nomme.</p>
-    <p class="mono">labo-modeles · prototype de direction · <a href="../opus-sonnet/index.html">interface actuelle</a></p>
+    <p class="mono">labo-modeles · prototype de direction · <a href="../opus-sonnet/index.html">interface actuelle</a> · <a href="gabarit.html">gabarit de planche</a></p>
   </div>
 </footer>
 
 <p class="proto">Prototype · <a href="../opus-sonnet/index.html">comparer avec l’actuel</a></p>
 
+<script src="corpus.js"></script>
+<script src="presentation.js"></script>
 <script>
-// ---------- Données (prototype : la numérotation 08, 09, 12, 13, 24 → 50 est provisoire) ----------
-const OS = '../opus-sonnet/';
-const FOND = [
-  ['Langage scientifique', 'Mesurer, représenter, compter'],
-  [1,'Mesure, échelles et représentation scientifique','10⁻¹⁰ → 10¹³ m',OS+'fondations-langage/index.html','#3a8f86'],
-  [2,'Vecteurs et géométrie des quantités','a + b · |a|',OS+'fondations-langage/index.html','#3a8f86'],
-  [3,'Changement et accumulation','v = dx/dt',OS+'fondations-langage/index.html','#3a8f86'],
-  [4,'Systèmes dynamiques et rétroaction','dx/dt = f(x)',OS+'fondations-systemes-hasard/index.html','#8b8f2e'],
-  [5,'Croissance, exponentielles et logarithmes','t½ = ln2 / λ',OS+'fondations-systemes-hasard/index.html','#8b8f2e'],
-  [6,'Cercle, phase et périodicité','T = 1/f',OS+'fondations-oscillations-ondes/index.html','#3f6fa8','phase'],
-  [7,'Hasard, probabilités et distributions','σ = √n',OS+'fondations-systemes-hasard/index.html','#8b8f2e','hasard'],
-  [8,'Incertitude et ajustement','± 1σ',null,'#8b8f2e'],
-  ['Mécanique', 'Ce qui bouge et pourquoi'],
-  [9,'Mouvement dans le plan','~1 m · ~1 s',null,'#7a64b0'],
-  [10,'Forces et lois de Newton','ΣF = ma',OS+'fondations-forces-energie/index.html','#7a64b0'],
-  [11,'Énergie, travail et conservation','Σp = cte',OS+'fondations-forces-energie/index.html','#7a64b0'],
-  [12,'Rotation et moment cinétique','L = Iω',null,'#7a64b0'],
-  [13,'Gravitation et orbites','~1 UA · ~1 an',null,'#b0453c','orbite'],
-  [14,'Oscillateurs et résonance','ω₀ = √(k/m)',OS+'fondations-oscillations-ondes/index.html','#3f6fa8'],
-  [15,'Ondes mécaniques','λ = v/f',OS+'fondations-oscillations-ondes/index.html','#3f6fa8','onde'],
-  ['Champs et matière', 'Du continu au moléculaire'],
-  [16,'Champs, gradients et flux','∇·F · ∇×F',OS+'fondations-flux-fluides/index.html','#b0598a'],
-  [17,'Le monde microscopique des gaz','PV = NkT',OS+'07-matiere-chaleur/index.html','#a5793f','gaz'],
-  [18,'Chaleur, phases et entropie','ΔS ≥ 0',OS+'07-matiere-chaleur/index.html','#a5793f'],
-  [19,'Transport et diffusion','J = −D ∇c',OS+'07-matiere-chaleur/index.html','#a5793f','diffusion'],
-  [20,'Fluides, pression et débit','Q = A·v',OS+'fondations-flux-fluides/index.html','#b0598a'],
-  ['Électromagnétisme et lumière', 'Charges, courants, champs, ondes'],
-  [21,'Électrostatique','F = qE',OS+'04-champ-electrique/index.html','#d4532a'],
-  [22,'Courant et circuits dynamiques','τ = RC',OS+'06-courant-circuits/index.html','#c3920e'],
-  [23,'Magnétisme et induction','ε = −N dΦ/dt','magnetisme.html','#3b4fb8','fil','maquette'],
-  [24,'Onde électromagnétique','c = 1/√(μ₀ε₀)',null,'#3b4fb8','em'],
-  [25,'Optique géométrique','n₁ sin θ₁ = n₂ sin θ₂',null,'#3f6fa8'],
-  [26,'Diffraction et interférences lumineuses','~500 nm',null,'#3f6fa8'],
-  ['Chimie', 'Atomes, liaisons, réactions'],
-  [27,'Atomes et tableau périodique','~0,1 nm',null,'#a5793f'],
-  [28,'Liaisons et géométrie moléculaire','~0,1 nm · ~10⁻¹³ s',null,'#a5793f'],
-  [29,'Réactions et stœchiométrie','n = m/M',null,'#a5793f'],
-  [30,'Équilibres chimiques','K = [C][D]/[A][B]',null,'#a5793f'],
-  [31,'Acides, bases et pH','pH = −log[H⁺]',null,'#a5793f'],
-  [32,'Cinétique et catalyse','k = A e^(−Ea/RT)',null,'#a5793f'],
-  [33,'Oxydoréduction et électrochimie','ΔG = −nFE',null,'#a5793f'],
-  ['Vivant', 'De la molécule à la population'],
-  [34,'La cellule et ses membranes','~10 µm',null,'#3e9a6a'],
-  [35,'Métabolisme et énergie du vivant','ATP · ~1 µm',null,'#3e9a6a'],
-  [36,'Information génétique','~2 nm',null,'#3e9a6a'],
-  [37,'Physiologie : circulation et échanges','~1 m · ~1 s',null,'#3e9a6a'],
-  [38,'Signaux nerveux et hormonaux','~100 mV · ms',null,'#3e9a6a'],
-  [39,'Évolution et sélection','~10⁴ générations',null,'#3e9a6a'],
-  [40,'Populations et écosystèmes','dN/dt = rN(1 − N/K)',null,'#3e9a6a'],
-  ['Univers', 'Étoiles, galaxies, cosmos'],
-  [41,'Lumière des étoiles et spectres','λ_max T = b',null,'#b0453c'],
-  [42,'Vie et mort des étoiles','~10¹⁰ ans',null,'#b0453c'],
-  [43,'Galaxies et expansion','v = H₀ d',null,'#b0453c'],
-  [44,'Cosmologie','~10²⁶ m',null,'#b0453c'],
-  ['Physique moderne', 'Quand le modèle classique cède'],
-  [45,'Relativité restreinte','γ = 1/√(1 − v²/c²)',null,'#55585a'],
-  [46,'Relativité générale','~10⁻⁹ Δt/t',null,'#55585a'],
-  [47,'Quanta et dualité onde-corpuscule','E = hf',null,'#55585a'],
-  [48,'Atome quantique','ΔxΔp ≥ ħ/2',null,'#55585a'],
-  [49,'Noyau et radioactivité','~10⁻¹⁵ m',null,'#55585a'],
-  [50,'Particules et interactions','~10⁻¹⁸ m',null,'#55585a'],
-];
-
-const INVISIBLE = [
-  ['La mitose','Des chromosomes tirés par des câbles, puis une cellule qui se pince en deux.','~20 µm','~1 h',OS+'01-mitose/index.html','#3e9a6a'],
-  ['La respiration cellulaire','Du glucose à l’ATP : une turbine moléculaire mue par des protons.','~1 µm','ms',OS+'02-respiration/index.html','#8a5bc4'],
-  ['Le neurone qui apprend','Une impulsion électrique, puis une synapse qui se renforce à force de répétition.','~100 µm','~2 ms',OS+'03-neurone/index.html','#c2477f'],
-  ['La réplication de l’ADN','Suivre une fourche : un brin se copie d’un trait, l’autre à reculons, par fragments.','~2 nm','30–50 nt/s',OS+'08-replication-adn/index.html','#1f9a8e'],
-  ['Supernova par effondrement du cœur','Un cœur de fer s’écroule en une fraction de seconde, puis une onde de choc traverse l’étoile.','~10⁹ km','~0,3 s → 10⁴ ans',OS+'09-supernova/index.html','#b0453c'],
-];
-const AUTRES = [
-  ['Ondes et interférences','Deux ondes se croisent : ici elles se renforcent, là elles s’annulent.','~1 cm','~0,1 s',OS+'05-ondes-interferences/index.html','#3f6fa8'],
-  ['Le double pendule','Deux tiges, aucune règle cachée, et pourtant aucune prévision possible au-delà de quelques secondes.','~1 m','~10 s',null,'#7a64b0'],
-  ['L’effet tunnel','Une particule franchit une barrière qu’elle ne pourrait jamais escalader.','~1 nm','~10⁻¹⁵ s',null,'#55585a'],
-];
-
+// ---------- Données : tout vient de ../corpus/*.json (corpus.js) ; l'habillage de presentation.js ----------
+const PR = window.LaboPresentation;
 const pad = n => String(n).padStart(2,'0');
-const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-const idx = document.getElementById('index');
-idx.innerHTML = FOND.map(r => {
-  if (typeof r[0] === 'string') return `<li class="dom"><span class="label">${r[0]}</span><span class="label">${r[1]}</span></li>`;
-  const [n,t,meta,href,c,viz,etat] = r;
-  const cls = ['e', href ? 'dispo' : 'venir', etat || ''].join(' ');
-  const inner = `<span class="n"><span>${pad(n)}</span><i></i></span>
-    <span class="ligne"><span class="t">${esc(t)}</span>
-    <span class="viz">${viz ? `<svg viewBox="0 0 128 36" data-viz="${viz}" aria-hidden="true"></svg>` : ''}</span>
-    <span class="meta">${meta}</span><span class="etat">${etat || (href ? '' : 'à venir')}</span></span>`;
-  return `<li class="${cls}" style="--c:${c}">${href ? `<a href="${href}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
-}).join('');
+function rendIndex(C){
+  const idx = document.getElementById('index');
+  let dom = null, html = '';
+  let ouverts = 0, partiels = 0, maquettes = 0;
+  for (const m of C.modules){
+    if (m.code !== dom){
+      dom = m.code;
+      const d = PR.DOMAINES[dom] || {};
+      html += `<li class="dom"><span class="label">${dom} · ${esc(m.domaine)}</span><span class="label">${esc(d.sous || '')}</span></li>`;
+    }
+    const [meta = '', viz = null, cPropre = null] = PR.MODULES[m.id] || [];
+    const c = cPropre || (PR.DOMAINES[m.code] || {}).c || 'var(--encre-3)';
+    const maquette = !m.ouvert && PR.MAQUETTES[m.id];
+    const href = m.ouvert ? m.href : (maquette || null);
+    let etat = '', cls = 'venir';
+    if (m.ouvert){ cls = 'dispo'; ouverts++; if (m.partiel){ etat = 'partiel'; partiels++; } }
+    else if (maquette){ cls = 'dispo maquette'; etat = 'maquette'; maquettes++; }
+    else etat = 'à venir';
+    const titre = m.ouvert ? `${esc(m.titre)} — ouvre « ${esc(m.modele.title)} »` : esc(m.titre);
+    const inner = `<span class="n"><span>${pad(m.id)}</span><i></i></span>
+      <span class="ligne"><span class="t">${esc(m.titre)}</span>
+      <span class="viz">${viz ? `<svg viewBox="0 0 128 36" data-viz="${viz}" aria-hidden="true"></svg>` : ''}</span>
+      <span class="meta">${esc(meta)}</span><span class="etat">${etat}</span></span>`;
+    html += `<li class="e ${cls}" style="--c:${c}">${href ? `<a href="${href}" title="${titre}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
+  }
+  idx.innerHTML = html;
+  document.getElementById('compte').textContent =
+    `${C.modules.length} entrées · ${ouverts} ouvertes` + (partiels ? ` (dont ${partiels} en partie)` : '') + (maquettes ? ` · ${maquettes} maquette${maquettes > 1 ? 's' : ''}` : '');
+  document.getElementById('nFond').textContent = C.modules.length;
+}
 
-const phen = list => list.map(([t,d,ech,tps,href,c]) => {
-  const inner = `<span class="t">${esc(t)}<span class="d">${esc(d)}</span></span>
-    <span class="meta">échelle ${ech}<br>temps ${tps}${href ? '' : '<br>à venir'}</span>`;
-  return `<li class="p ${href ? '' : 'venir'}" style="--c:${c}">${href ? `<a href="${href}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
-}).join('');
-document.getElementById('invisible').innerHTML = phen(INVISIBLE);
-document.getElementById('autres').innerHTML = phen(AUTRES);
+function entreePhen(id, titre, href){
+  const p = PR.PHENOMENES[id] || {};
+  const inner = `<span class="t">${esc(titre)}${p.d ? `<span class="d">${esc(p.d)}</span>` : ''}</span>
+    <span class="meta">${p.e ? `échelle ${p.e}<br>` : ''}${p.t ? `temps ${p.t}` : ''}${href ? '' : '<br>à venir'}</span>`;
+  return `<li class="p ${href ? '' : 'venir'}" style="--c:${p.c || 'var(--encre-3)'}">${href ? `<a href="${href}">${inner}</a>` : `<div>${inner}</div>`}</li>`;
+}
+
+function rendPhenomenes(C){
+  const zone = document.getElementById('collections');
+  zone.innerHTML = C.collections.map(col => `<div class="coll">
+      <p class="label">Collection<br>${esc(col.titre)}<small>${esc(col.description.split('.')[0])}.</small></p>
+      <ol class="phen">${col.membres.map(m => entreePhen(m.id, m.title, C.lien(m.path))).join('')}</ol></div>`).join('');
+  document.getElementById('autres').innerHTML =
+    C.showcasesHorsCollection.map(m => entreePhen(m.id, m.title, C.lien(m.path))).join('') +
+    C.selectionnees.map(e => entreePhen(e.id, e.title, null)).join('');
+  const n = C.collections.reduce((s, col) => s + col.membres.length, 0) + C.showcasesHorsCollection.length;
+  document.getElementById('nPhen').textContent = n;
+  if (C.date) document.getElementById('maj').textContent = 'Mis à jour ' + C.date;
+}
+
+window.LaboCorpus.charge().then(C => { rendIndex(C); rendPhenomenes(C); activeViz(); }).catch(err => {
+  console.warn('LABO : corpus illisible', err);
+  document.getElementById('compte').textContent = 'Corpus illisible : ouvrir cette page par un serveur (GitHub Pages, ou python -m http.server à la racine du dépôt).';
+});
 
 // ---------- Microvisualisations : statiques, elles s'animent seulement au survol ----------
 const NS = 'http://www.w3.org/2000/svg';
@@ -363,15 +323,16 @@ const VIZ = {
 };
 
 const vivants = [];
-document.querySelectorAll('svg[data-viz]').forEach(svg => {
-  const f = VIZ[svg.dataset.viz](svg); const ligne = svg.closest('li');
+function activeViz(){ document.querySelectorAll('svg[data-viz]').forEach(svg => {
+  const fab = VIZ[svg.dataset.viz]; if (!fab) return;
+  const f = fab(svg); const ligne = svg.closest('li');
   const v = { f, actif:false }; vivants.push(v); f(0.35, false);
   if (calme) return;
   ligne.addEventListener('pointerenter', () => { v.actif = true; boucle(); });
   ligne.addEventListener('pointerleave', () => { v.actif = false; });
   ligne.addEventListener('focusin', () => { v.actif = true; boucle(); });
   ligne.addEventListener('focusout', () => { v.actif = false; });
-});
+}); }
 let tourne = false;
 function boucle(){ if (tourne) return; tourne = true;
   const pas = now => { const t = now/1000; let un = false;
