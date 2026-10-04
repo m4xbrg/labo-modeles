@@ -1,4 +1,4 @@
-/* LABO — comportement commun des planches maquettes (prototype).
+/* LABO — comportement commun des planches au gabarit.
    - trois couches Observer / Manipuler / Comprendre (onglets, touches 1 2 3, ?mode=… dans l'URL) ;
    - position « NN / 50 » et planches voisines, lues dans le corpus d'après <body data-module="NN"> ;
    - Échap transmis aux planches (fermer une fiche, etc.).

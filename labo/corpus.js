@@ -1,4 +1,4 @@
-/* LABO — lecture du corpus (prototype).
+/* LABO — lecture du corpus.
    Une seule source de données : ../corpus/*.json. Ce fichier ne contient aucune donnée,
    seulement de quoi les charger et les interpréter (statut d'un module, voisins, etc.).
    Les pages doivent être servies par HTTP (GitHub Pages, ou `python -m http.server` à la

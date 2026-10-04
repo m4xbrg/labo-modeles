@@ -1,6 +1,6 @@
 # Gabarit de planche LABO
 
-Le prototype `prototype/` explore la future interface de LABO. Ce fichier explique comment fabriquer une nouvelle **planche maquette** dans cette direction, à partir de [`gabarit.html`](gabarit.html). Une maquette n'est pas un modèle : elle ne compte pas dans `corpus/` tant qu'elle n'est pas devenue une vraie planche validée.
+Le dossier `labo/` porte l’accueil de LABO et la direction visuelle des planches à venir. Ce fichier explique comment fabriquer une nouvelle **planche maquette** dans cette direction, à partir de [`gabarit.html`](gabarit.html). Une maquette n'est pas un modèle : elle ne compte pas dans `corpus/` tant qu'elle n'est pas devenue une vraie planche validée.
 
 ## Les fichiers
 
@@ -66,7 +66,7 @@ Fraction : `<span class="frac"><span>μ₀ I</span><span>2π r</span></span>`.
 
 ## Vérifier
 
-- Servir le dépôt par HTTP (`python -m http.server` à la racine, puis ouvrir `/prototype/…`) : `file://` ne lit pas le corpus.
+- Servir le dépôt par HTTP (`python -m http.server` à la racine, puis ouvrir `/labo/…`) : `file://` ne lit pas le corpus.
 - Console propre ; aucun lien cassé ; rendu à 1440 px, 1366 × 768 (la scène doit tenir dans l'écran) et 375 px, sans défilement horizontal.
 - `prefers-reduced-motion` : la boucle ralentit, rien ne clignote.
 - Si le navigateur intégré est masqué, `requestAnimationFrame` s'arrête et la planche paraît figée : tester en navigateur headless (Playwright avec Edge) ou dans un onglet visible.

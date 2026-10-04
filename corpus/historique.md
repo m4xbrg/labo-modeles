@@ -11,7 +11,8 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-01 | **Série « L'invisible en mouvement ».** Renommage avec la planche 05 (ondes et interférences), puis supernova (09), réplication de l'ADN (08), courant et circuits (06), matière-chaleur-transport (07). |
 | 2026-10-01 | **Fondations.** La carte des 50 modules entre dans le dépôt par les briefs. Sept productions de fondations sont construites le même jour (langage ; forces-énergie ; oscillations-ondes ; flux-fluides ; matière-thermique sous forme de planche 07 ; électricité sous forme de prolongement de la 04 et de planche 06 ; systèmes-hasard), puis rotation-gravitation (fusionnée le 2026-10-01, PR n° 12). |
 | 2026-10-01 | Un prototype d'interface **LABO** explore la future identité : « LABO — Modèles pour voir ce qui se passe ». Fusionné sur `main` le 2026-10-02 (PR n° 14), avec la relativité restreinte (PR n° 13). |
-| 2026-10-02 → 04 | Ce dossier `corpus/` devient la source de vérité ; le README est réécrit autour de LABO ; l'accueil prend le nom LABO ; la collection *L'invisible en mouvement* est resserrée à cinq showcases. |
+| 2026-10-02 → 04 | Ce dossier `corpus/` devient la source de vérité ; le README est réécrit autour de LABO ; la collection *L'invisible en mouvement* est resserrée à cinq showcases. |
+| 2026-10-04 | Le prototype devient l'accueil : `prototype/` est renommé `labo/`, la racine et l'ancien accueil (`opus-sonnet/index.html`) redirigent vers lui. |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 
@@ -40,14 +41,13 @@ Le projet a commencé par des phénomènes, pas par une carte. Les fondations so
 
 ## Prototype d'interface LABO
 
-Un prototype d'accueil LABO (`prototype/`) est sur `main` (en `noindex`). C'est la direction visuelle retenue, mais **ses données ne sont pas une source de vérité** : il doit lire `corpus/`.
+Un prototype d'accueil LABO a été fusionné le 2026-10-02 (PR n° 14) dans `prototype/`. Dans sa première version :
 
-- Il reprend les modules 01-07 conformément à la carte, mais diverge ensuite : son module 08 est « Incertitude et ajustement », son 09 « Mouvement dans le plan », ses 23-50 suivent un autre découpage (par exemple 26 « Diffraction et interférences lumineuses », 27 « Atomes et tableau périodique »). Un commentaire du code le reconnaît (« la numérotation 08, 09, 12, 13, 24 → 50 est provisoire »).
-- Il marque les modules 12 et 13 « à venir » alors que la page Rotation, gravitation et orbites existe désormais.
-- Il contenait une planche maquette `magnetisme.html` (module 23), retirée le 2026-10-04 : présentée comme une planche à part entière, elle n'en était pas une et détonnait à côté des vraies planches. Ses composants (lecture d'instrument, équation de composition, fiche contextuelle, couches) vivent dans le gabarit `prototype/gabarit.html`.
-- Il ne crée pas de modules « Fonctions » ni « Dérivées et intégrales » : le changement et l'accumulation restent au module 03.
+- il reprenait les modules 01-07 conformément à la carte, mais divergeait ensuite : son module 08 était « Incertitude et ajustement », son 09 « Mouvement dans le plan », ses 23-50 suivaient un autre découpage (par exemple 26 « Diffraction et interférences lumineuses », 27 « Atomes et tableau périodique ») ;
+- il marquait les modules 12 et 13 « à venir » alors que la page Rotation, gravitation et orbites existait ;
+- il contenait une planche maquette `magnetisme.html` (module 23), retirée le 2026-10-04 : présentée comme une planche à part entière, elle n'en était pas une et détonnait à côté des vraies planches.
 
-Une future interface devra lire `corpus/*.json` plutôt que de porter sa propre liste.
+Le 2026-10-04, l'accueil a été branché sur `corpus/*.json` (plus aucune liste en dur), un gabarit de planche a été extrait, puis le dossier est devenu `labo/` et l'accueil officiel. L'ancien accueil sombre de la série est conservé dans l'historique git ; `opus-sonnet/index.html` n'est plus qu'une redirection.
 
 ## Documents du dépôt et leur statut
 
@@ -59,9 +59,9 @@ Une future interface devra lire `corpus/*.json` plutôt que de porter sa propre 
 | `prompts/01-…` à `09-…`, `prompts/fondations-*.md` | **historiques** | Briefs de construction : ils disent ce qui a été demandé, pas forcément ce qui existe. Les écarts relevés sont mineurs (titres d'actes raccourcis dans 07 et 09 ; planche 04 plus riche que son brief). Les chemins locaux qui restaient dans `fondations-rotation-gravitation.md` et `fondations-relativite-restreinte.md` ont été retirés le 2026-10-04 (l'historique git les contient encore). |
 | `prompts/PROMPT-SESSION.md`, `PROMPTS-OPUS-ORCHESTRE.md` | **historiques** | Prompts du banc d'essai (« série de quatre », dossier `opus-orchestre/` jamais créé). |
 | `prompts/astra-neurone.md` | **historique, figé** | Texte donné à Astra, garde l'ancien nom. |
-| `opus-sonnet/index.html` | actuel | Accueil du site, renommé LABO le 2026-10-04 (il portait le titre de la collection). La liste 01-09 reste en place. |
+| `opus-sonnet/index.html` | redirection | Ancien accueil sombre de la série (titré LABO le 2026-10-04), remplacé le même jour par `labo/index.html`. |
 | `opus-sonnet/prealables.html` | actuel, incomplet | Pas de section pour la planche 09 ni pour les fondations. |
-| `index.html` (racine) | actuel | Redirection ; titre passé à « LABO » le 2026-10-02. |
+| `index.html` (racine) | actuel | Redirection vers `labo/`. |
 
 ## Banc d'essai d'origine
 

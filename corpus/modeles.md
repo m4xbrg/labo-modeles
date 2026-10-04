@@ -227,13 +227,14 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 
 | Page | Rôle | État |
 |---|---|---|
-| [`opus-sonnet/index.html`](../opus-sonnet/index.html) | Accueil actuel de tout le site, titré « L'invisible en mouvement » : la collection 01-09, puis une section « Fondations · le langage préalable ». | Construit. Le chapeau énumère huit phénomènes et omet la supernova. |
-| [`opus-sonnet/prealables.html`](../opus-sonnet/prealables.html) | « Avant de commencer » : théorie préalable par planche. | Partiel : sections 01 à 08 ; rien pour la 09 ni pour les fondations. Aucune planche n'y renvoie ; seul l'accueil y mène. |
-| [`index.html`](../index.html) | Redirection de la racine vers l'accueil. | Construit. |
+| [`labo/index.html`](../labo/index.html) | Accueil de LABO depuis le 2026-10-04 : fondations par domaine, phénomènes et collections, tous lus dans `corpus/*.json`. | Construit. |
+| [`opus-sonnet/index.html`](../opus-sonnet/index.html) | Ancien accueil (« L'invisible en mouvement »), devenu une redirection vers `labo/` : les planches y renvoient toutes. | Redirection. |
+| [`opus-sonnet/prealables.html`](../opus-sonnet/prealables.html) | « Avant de commencer » : théorie préalable par planche. | Partiel : sections 01 à 08 ; rien pour la 09 ni pour les fondations. Aucune planche n'y renvoie ; on y arrive par la barre de l'accueil. |
+| [`index.html`](../index.html) | Redirection de la racine vers `labo/`. | Construit. |
 
 ## Hors corpus (ne pas prendre pour des modèles)
 
-- **Prototype d'interface LABO** (`prototype/`) : sur `main` depuis le 2026-10-02 (PR n° 14), en `noindex`. C'est la nouvelle direction visuelle de LABO ; il ne remplace pas encore l'accueil. `gabarit.html` est un gabarit de planche, pas un modèle. La page `magnetisme.html` est une **maquette** du module 23, pas un modèle. Le prototype utilise une numérotation des modules qui diverge de la carte canonique à partir du module 08 : voir [`historique.md`](historique.md#prototype-dinterface-labo).
+- **Gabarit de planche** (`labo/gabarit.html`) : squelette commenté d'une planche, avec une scène de démonstration ; ce n'est pas un modèle. Mode d'emploi : `labo/GABARIT.md`.
 - **Version Astra du neurone** : annoncée par l'ancien README (`astra/03-neurone/`), absente du dépôt.
 - **Briefs de showcases non construits** : double pendule, effet tunnel (voir [`atlas.md`](atlas.md#les-deux-idées-sélectionnées)).
 

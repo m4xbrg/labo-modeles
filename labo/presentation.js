@@ -1,11 +1,11 @@
-/* LABO — habillage du prototype.
+/* LABO — habillage de l’accueil et des planches.
    AUCUNE donnée de vérité ici : numéros, titres, domaines, statuts et liens viennent de
    ../corpus/*.json (voir corpus.js). Ce fichier ne dit que comment montrer les choses :
    couleur d'un domaine, petite formule d'en-tête, pictogramme animé, textes des phénomènes,
-   et les maquettes du prototype. Une entrée absente a un rendu par défaut : rien ne casse
+   et les planches maquettes. Une entrée absente a un rendu par défaut : rien ne casse
    quand le corpus gagne un module ou un modèle.
 
-   Pour ajouter une maquette de planche : la poser dans prototype/ (voir GABARIT.md) puis
+   Pour ajouter une maquette de planche : la poser dans labo/ (voir GABARIT.md) puis
    ajouter une ligne dans MAQUETTES. */
 window.LaboPresentation = {
 
@@ -38,7 +38,7 @@ window.LaboPresentation = {
     48: ['|ψ|²'], 49: ['~1 nm'], 50: ['↑ ou ↓'],
   },
 
-  // Maquettes du prototype (pas des modèles) : module → page dans prototype/
+  // Planches maquettes (pas des modèles) : module → page dans labo/
   MAQUETTES: {},
 
   // Phénomènes : id de modèle (models.json) ou d'idée d'Atlas (atlas.json) → texte et signature
