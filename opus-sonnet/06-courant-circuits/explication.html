@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprendre le courant et les circuits — L’invisible en mouvement 06</title>
+<title>Comprendre le courant et les circuits — LABO</title>
 <meta name="description" content="Ce que montre la simulation du courant et des circuits : loi d'Ohm, condensateur qui se charge et se décharge, oscillation LC. Mécanisme réel, simplifications et ordres de grandeur.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,11 +65,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}th,td{padding:8px 6px;font-size:14px}}
 @media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
-  <p class="serie">L’invisible en mouvement — 06</p>
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 22</p>
   <h1>Comprendre le courant et les <em>circuits</em></h1>
   <p class="lede">Quand on relie deux points de potentiels différents par un conducteur, les charges se mettent en mouvement. Cette planche prolonge l'électrostatique de la <a href="../04-champ-electrique/index.html">planche 04</a> : la tension pousse, la résistance freine, le condensateur stocke, la bobine résiste aux changements.</p>
 
@@ -89,40 +91,89 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <dd>En pointillé, ce qui va arriver ; en trait plein, ce qui est arrivé. Les repères (63 %, τ, tangente, t½) sont calculés. Les barres comparent l'énergie fournie, stockée et dissipée.</dd>
   </dl>
 
-  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m22"><b>22</b>Courant et circuits dynamiques</a></li>
+  </ul>
 
-  <h3><b>Acte I</b>Ohm et puissance</h3>
-  <p>Un <strong>courant</strong> est un débit de charges : des coulombs par seconde. Dans une boucle simple, il est le même partout, car les charges ne s'accumulent nulle part. La pile maintient entre ses bornes une <strong>tension</strong> V (une différence de potentiel, comme une différence d'altitude). Dans la résistance de longueur L, le champ est uniforme, <span class="m">E = V/L</span>, comme entre deux plaques de la planche 04 : c'est lui qui pousse les charges.</p>
-  <div class="eq">I = V / R<br>P = V·I = R·I² = V²/R</div>
-  <p>Dans la scène, <span class="m">I = V/R</span> est la pente de la droite du graphique : changer R la fait pivoter. <span class="m">P</span> est l'énergie convertie en chaleur chaque seconde : c'est l'intensité de la lueur.</p>
+  <!-- ===================== Module 22 ===================== -->
+  <section class="module" id="m22">
+    <header>
+      <p class="num">Module 22</p>
+      <h3>Courant et circuits dynamiques</h3>
+      <p class="etapes">Sur la planche : Acte I Une boucle, un courant · Acte II Le condensateur se charge · Acte III Le condensateur se décharge · Acte IV Bobine et oscillation (circuits RL et LC)</p>
+    </header>
 
-  <h3><b>Acte II</b>Le condensateur se charge</h3>
-  <p>Un <strong>condensateur</strong> stocke de la charge séparée : <span class="m">Q = C·V_C</span>, avec +Q sur une armature et −Q sur l'autre (charge totale nulle). Il stocke l'énergie <span class="m">U = ½·C·V_C²</span>. Le champ qui grandit entre les armatures s'oppose à la pile : le courant diminue à mesure que V_C approche V₀.</p>
-  <div class="eq">dV_C/dt = (V₀ − V_C) / τ  ·  τ = R·C<br>V_C(t) = V₀·(1 − e^(−t/τ))</div>
-  <p>La vitesse de charge est proportionnelle à ce qu'il reste à faire : c'est ce qui donne une exponentielle. À t = τ, V_C vaut 63 % de V₀ ; la tangente à l'origine atteint exactement V₀ à t = τ ; puis 86 % à 2τ, 95 % à 3τ, 99 % à 5τ. Bilan d'énergie : la pile fournit <span class="m">Q·V₀ = C·V₀²</span>, le condensateur garde la moitié, la résistance dissipe l'autre, <strong>quelle que soit R</strong>.</p>
+    <h4 data-n="1">Intuition</h4>
+    <p>Relie deux points de potentiels différents par un conducteur : les charges s’y mettent en mouvement. Le courant est ce débit de charges. La tension est ce qui les pousse, comme une différence d’altitude fait couler l’eau. La résistance freine, et l’énergie freinée devient chaleur. Un condensateur, lui, stocke des charges séparées : en se remplissant, il s’oppose de plus en plus à ce qui le remplit, d’où une charge qui ralentit d’elle-même. Une bobine fait l’inverse : elle s’oppose aux changements du courant, et non au courant lui-même. Associés, condensateur et bobine échangent leur énergie, comme un ressort et une masse, et la résistance finit par éteindre l’oscillation.</p>
 
-  <h3><b>Acte III</b>Le condensateur se décharge</h3>
-  <p>La pile sort du circuit et C se vide dans R. Le courant change de sens : sa valeur devient négative et les électrons repartent à l'envers.</p>
-  <div class="eq">V_C(t) = V₀·e^(−t/τ)  ·  t½ = τ·ln 2 ≈ 0,69 τ</div>
-  <p>La jauge « écart restant » et la flèche « vitesse » rétrécissent ensemble : la vitesse vaut toujours l'écart divisé par τ. À chaque intervalle τ, l'écart est multiplié par 1/e ≈ 0,37. C'est la même loi que la décroissance radioactive ou le refroidissement d'une tasse : ce qui reste diminue d'une même fraction par unité de temps.</p>
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Charge \(Q\)<span class="u">C</span></dt><dd>Quantité d’électricité. La charge élémentaire est \(e = 1{,}6 \times 10^{-19}\) C.</dd></div>
+      <div><dt>Courant \(I\)<span class="u">A</span></dt><dd>Débit de charge : des coulombs par seconde. Le sens conventionnel va du + vers le − à l’extérieur de la pile ; les électrons vont en sens inverse.</dd></div>
+      <div><dt>Tension \(V\)<span class="u">V</span></dt><dd>Différence de potentiel entre deux points : l’énergie par coulomb (module 21).</dd></div>
+      <div><dt>Résistance \(R\)<span class="u">Ω</span></dt><dd>Opposition d’un conducteur au passage du courant : \(R = V/I\). Elle dépend du matériau, de la longueur et de la section.</dd></div>
+      <div><dt>Puissance \(P\)<span class="u">W</span></dt><dd>Énergie convertie par seconde.</dd></div>
+      <div><dt>Capacité \(C\)<span class="u">F</span></dt><dd>Charge stockée par volt appliqué. Pour deux plaques parallèles dans le vide, \(C = \varepsilon_0 S/d\).</dd></div>
+      <div><dt>Inductance \(L\)<span class="u">H</span></dt><dd>Mesure de l’opposition d’une bobine aux variations du courant.</dd></div>
+      <div><dt>Constante de temps \(\tau\)<span class="u">s</span></dt><dd>Durée caractéristique d’une charge ou d’une décharge : \(\tau = RC\) pour un circuit RC, \(\tau = L/R\) pour un circuit RL.</dd></div>
+      <div><dt>Pulsation propre \(\omega_0\)<span class="u">rad/s</span></dt><dd>Rythme naturel du circuit LC sans résistance : \(\omega_0 = 1/\sqrt{LC}\).</dd></div>
+    </dl>
 
-  <h3><b>Acte IV</b>Bobine et oscillation</h3>
-  <p>Une <strong>inductance</strong> s'oppose aux variations du courant : <span class="m">V_L = L·dI/dt</span>. En RC, c'est la tension du condensateur qui ne peut pas sauter ; en RL, c'est le courant dans la bobine. Au premier instant, I = 0 et toute la tension de la pile se retrouve aux bornes de la bobine.</p>
-  <div class="eq">τ = L/R  ·  I(t) = (V₀/R)·(1 − e^(−t/τ))<br>V_L(t) = V₀·e^(−t/τ)</div>
-  <p>Avec un condensateur et une bobine, l'énergie passe de l'un à l'autre : le condensateur se vide, le courant monte, puis recharge le condensateur à l'envers (signes des armatures inversés), et ainsi de suite, comme une masse sur un ressort. La résistance fait fondre l'oscillation.</p>
-  <div class="eq">L·dI/dt + R·I + q/C = 0  ·  I = dq/dt<br>ω₀ = 1/√(LC) = 1000 rad/s  ·  R critique = 2√(L/C) = 20 Ω</div>
-  <table>
-    <thead><tr><th>Circuit LC</th><th>Masse sur un ressort</th></tr></thead>
-    <tbody>
-      <tr><td>q (charge)</td><td>x (position)</td></tr>
-      <tr><td>I = dq/dt</td><td>v = dx/dt (vitesse)</td></tr>
-      <tr><td>L (inductance)</td><td>m (masse)</td></tr>
-      <tr><td>C (1/C = raideur)</td><td>k (ressort)</td></tr>
-      <tr><td>R (résistance)</td><td>frottement</td></tr>
-      <tr><td>½·q²/C · ½·L·I²</td><td>½·k·x² · ½·m·v²</td></tr>
-    </tbody>
-  </table>
-  <p>Sous 20 Ω, l'oscillation est amortie ; à 20 Ω, le retour à zéro est le plus rapide sans dépassement (amortissement critique) ; au-dessus, il est lent et sans oscillation. Pourquoi une bobine réagit ainsi aux variations de courant : c'est l'induction, sujet d'une planche à venir.</p>
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ I = \frac{\dd Q}{\dd t}, \qquad v_d = \frac{I}{n\,e\,S} \]
+      <p>Le courant est un débit de charge. Dans un fil de section \(S\) où les porteurs ont une densité \(n\), ils dérivent très lentement : la vitesse \(v_d\) est minuscule, même pour un courant notable.</p></div>
+    <div class="relation">\[ V = R\,I, \qquad R = \rho\,\frac{L}{S}, \qquad P = V I = R I^2 = \frac{V^2}{R} \]
+      <p>Loi d’Ohm : le courant est proportionnel à la tension, et la pente de la droite \(I(V)\) vaut \(1/R\). La résistance croît avec la longueur et décroît avec la section. La puissance est l’énergie convertie en chaleur chaque seconde.</p></div>
+    <div class="relation">\[ Q = C\,V_C, \qquad U = \tfrac12\,C\,V_C^{\,2} \]
+      <p>Le condensateur porte \(+Q\) sur une armature et \(-Q\) sur l’autre, et stocke de l’énergie dans le champ entre elles.</p></div>
+    <div class="relation">\[ V_C(t) = V_0\left(1 - \mathrm{e}^{-t/\tau}\right) \ \text{(charge)}, \qquad V_C(t) = V_0\,\mathrm{e}^{-t/\tau} \ \text{(décharge)}, \qquad \tau = RC \]
+      <p>La vitesse de charge est proportionnelle à ce qu’il reste à faire, ce qui donne une exponentielle (module 05). Après \(\tau\), \(V_C\) atteint 63 % de \(V_0\) ; après \(5\tau\), plus de 99 %. À la décharge, le courant change de signe. Bilan d’énergie de la charge : la pile fournit \(C V_0^2\), le condensateur garde la moitié, la résistance dissipe l’autre, quelle que soit \(R\).</p></div>
+    <div class="relation">\[ V_L = L\,\frac{\dd I}{\dd t}, \qquad I(t) = \frac{V_0}{R}\left(1 - \mathrm{e}^{-t/\tau}\right), \qquad \tau = \frac{L}{R} \]
+      <p>Circuit RL : le courant ne peut pas sauter. Au premier instant, \(I = 0\) et toute la tension de la pile se retrouve aux bornes de la bobine. Le régime établi est \(I = V_0/R\).</p></div>
+    <div class="relation">\[ L\,\frac{\dd^2 q}{\dd t^2} + R\,\frac{\dd q}{\dd t} + \frac{q}{C} = 0, \qquad \omega_0 = \frac{1}{\sqrt{LC}}, \qquad R_{\mathrm{c}} = 2\sqrt{\frac{L}{C}} \]
+      <p>Circuit RLC : c’est l’oscillateur amorti du module 14, avec \(q\) pour la position, \(I\) pour la vitesse, \(L\) pour la masse, \(1/C\) pour la raideur et \(R\) pour le frottement. Sous \(R_{\mathrm{c}}\), l’oscillation est amortie sous une enveloppe \(\mathrm{e}^{-Rt/2L}\) ; à \(R_{\mathrm{c}}\), le retour à zéro est le plus rapide sans dépassement ; au-dessus, il est lent et sans oscillation.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Le circuit par défaut de la planche : une pile de \(V_0 = 6\) V charge un condensateur de \(C = 100\) µF à travers \(R = 10\) kΩ.</p>
+      <ol>
+        <li>Constante de temps : \(\tau = RC = 10^4 \times 10^{-4} = 1\) s.</li>
+        <li>Courant initial : \(I_0 = V_0/R = 6/10^4 = 0{,}6\) mA. Il décroît comme \(\mathrm{e}^{-t/\tau}\) : à \(t = \tau\), \(I = 0{,}6 \times 0{,}368 \approx 0{,}22\) mA.</li>
+        <li>Tension aux bornes de C : à \(t = \tau\), \(V_C = 6\,(1 - \mathrm{e}^{-1}) \approx 3{,}8\) V ; à \(3\tau\), \(V_C = 6 \times 0{,}950 \approx 5{,}7\) V ; à \(5\tau\), \(V_C \approx 5{,}96\) V, soit plus de 99 % de \(V_0\).</li>
+        <li>Charge finale : \(Q = C V_0 = 600\) µC. Énergie stockée : \(\tfrac12 C V_0^2 = \tfrac12 \times 10^{-4} \times 36 = 1{,}8\) mJ. La pile a fourni \(Q V_0 = 3{,}6\) mJ : les 1,8 mJ restants ont été dissipés dans \(R\).</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire que les électrons parcourent le circuit en une fraction de seconde. Ils dérivent à environ 0,1 mm/s ; c’est le champ qui se propage presque à la vitesse de la lumière, et tous les électrons du fil se mettent en marche presque ensemble.</li>
+      <li>Dire que le courant est « consommé » par la résistance. Dans une boucle simple, il est le même partout : ce qui est dissipé, c’est de l’énergie.</li>
+      <li>Penser qu’un condensateur chargé « laisse passer » le courant. En régime établi, son courant est nul : il se comporte comme un circuit ouvert.</li>
+      <li>Croire que doubler \(R\) réduit l’énergie perdue pendant la charge. Elle reste \(\tfrac12 C V_0^2\) : \(\tau\) double, mais le courant est deux fois plus faible.</li>
+      <li>Confondre le signe du courant et celui de la tension : à la décharge, \(V_C\) reste positive tandis que \(I\) devient négative, car le courant conventionnel repart de l’armature chargée.</li>
+      <li>Oublier qu’une bobine ne s’oppose pas au courant lui-même, mais à ses variations : en régime établi, elle se comporte comme un simple fil.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>21</b><span>La tension est une différence de potentiel : la résistance et le condensateur prolongent l’électrostatique (planche <a href="../04-champ-electrique/index.html">Champ électrique</a>).</span></li>
+      <li><b>05</b><span>La charge et la décharge sont des exponentielles de temps caractéristique \(\tau\), comme une demi-vie ou un refroidissement.</span></li>
+      <li><b>14</b><span>Le circuit RLC est l’oscillateur amorti sous un autre habit, avec le même amortissement critique (planche <a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a>).</span></li>
+      <li><b>23</b><span>La bobine tient sa loi \(V_L = L\,\dd I/\dd t\) de l’induction de Faraday.</span></li>
+      <li><b>33</b><span>La membrane d’un neurone est un circuit RC : mêmes équations (planche <a href="../03-neurone/index.html">Neurone</a>).</span></li>
+      <li><b>11</b><span>Le bilan d’énergie (stockée, dissipée, fournie) reprend la conservation de l’énergie.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un condensateur de 50 µF se charge à travers 2 kΩ depuis une pile de 12 V. Que vaut \(V_C\) après 0,1 s ?</summary>
+      <p>\(\tau = RC = 2000 \times 50 \times 10^{-6} = 0{,}1\) s. On est donc à \(t = \tau\) : \(V_C = 12\,(1 - \mathrm{e}^{-1}) \approx 7{,}6\) V, soit 63 % de 12 V.</p></details>
+    <details><summary>Un circuit LC contient \(L = 10\) mH et \(C = 100\) µF. Quelles sont sa pulsation propre, sa fréquence et sa résistance critique ?</summary>
+      <p>\(\omega_0 = 1/\sqrt{LC} = 1/\sqrt{10^{-6}} = 1000\) rad/s, donc \(f = 1000/2\pi \approx 159\) Hz et \(T \approx 6{,}3\) ms. La résistance critique vaut \(2\sqrt{L/C} = 2\sqrt{100} = 20\) Ω. Sous 20 Ω, le circuit oscille en s’amortissant.</p></details>
+    <details><summary>Dans le circuit LC, où est l’énergie quand le courant est maximal ?</summary>
+      <p>Dans la bobine, sous la forme \(\tfrac12 L I^2\). À cet instant, \(V_C\) passe par zéro : le condensateur est vide. Un quart de période plus tard, l’énergie est de nouveau dans le condensateur, armatures inversées (moins ce que \(R\) a dissipé).</p></details>
+  </section>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
   <ul>
@@ -143,14 +194,6 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <div><b>1 s</b><span>τ = RC du circuit de la planche par défaut (10 kΩ × 100 µF). À 5τ, la charge est complète à moins de 1 %.</span></div>
     <div><b>≈ 1 µF/cm²</b><span>capacité de la membrane d'un neurone, par unité de surface : la même physique RC que cette planche (<a href="../03-neurone/index.html">planche 03</a>).</span></div>
   </div>
-
-  <h2><span>5</span>Teste-toi</h2>
-  <details><summary>Si on double R, que devient l'énergie dissipée au total pendant la charge complète d'un condensateur ?</summary>
-    <p>Elle ne change pas : elle vaut toujours ½·C·V₀², la moitié de ce que la pile fournit. Doubler R double τ (la charge est deux fois plus lente) mais divise par deux le courant : l'énergie perdue sur toute la charge reste la même.</p></details>
-  <details><summary>Pourquoi le courant est-il négatif pendant la décharge ?</summary>
-    <p>Le sens positif est défini par la charge : le courant va vers l'armature du haut. Pendant la décharge, les charges repartent de cette armature vers l'autre à travers R : le courant conventionnel circule à l'inverse, donc I = (V_s − V_C)/R est négatif (V_s = 0). Les électrons, eux, changent aussi de sens.</p></details>
-  <details><summary>Dans le circuit LC, où est l'énergie quand le courant est maximal ?</summary>
-    <p>Dans la bobine, sous forme de ½·L·I². À cet instant V_C passe par zéro : le condensateur est vide. Un quart de période plus tard, tout est de nouveau dans le condensateur, avec des armatures inversées (moins ce que R a dissipé).</p></details>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
 </div>

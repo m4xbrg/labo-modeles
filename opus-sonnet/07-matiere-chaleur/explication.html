@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprendre la matière, la chaleur et le transport — L’invisible en mouvement 07</title>
-<meta name="description" content="Ce que montre la simulation de la matière, de la chaleur et du transport, le mécanisme réel, ses simplifications et les ordres de grandeur à retenir.">
+<title>Comprendre la matière, la chaleur et le transport — LABO</title>
+<meta name="description" content="Théorie des modules 17, 18 et 19 (monde microscopique des gaz, chaleur, phases et entropie, transport thermique et moléculaire) et ce que montre la simulation Matière, chaleur et transport.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -58,11 +58,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 .cta:hover{background:var(--accent);color:var(--fond)}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
-  <p class="serie">L’invisible en mouvement — 07</p>
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 17 · 18 · 19</p>
   <h1>Comprendre la matière, la <em>chaleur</em> et le transport</h1>
   <p class="lede">Une seule boîte de molécules, neuf situations. Température, pression, diffusion, osmose, chaleur : ce sont des moyennes sur un immense nombre de chocs aléatoires. Aucune molécule ne « sait » où aller.</p>
 
@@ -90,43 +92,251 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <dd>Deux scènes compactes et illustratives : un rouleau de fluide qui monte au chaud et descend au froid, et des « photons » entre un corps chaud et un corps froid.</dd>
   </dl>
 
-  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m17"><b>17</b>Monde microscopique des gaz</a></li>
+    <li><a href="#m18"><b>18</b>Chaleur, phases et entropie</a></li>
+    <li><a href="#m19"><b>19</b>Transport thermique et moléculaire</a></li>
+  </ul>
 
-  <h3>Température</h3>
-  <p>La <strong>température</strong> mesure l'énergie cinétique moyenne par molécule. Dans la simulation, en 2D : <span class="m">kT = ⟨½mv²⟩</span>, où k est la constante de Boltzmann. Une molécule seule n'a pas de température : la grandeur n'existe que pour une population. Les vitesses ne sont pas toutes égales ; elles suivent la distribution de Maxwell-Boltzmann (formule 2D) :</p>
-  <div class="eq">f(v) = (m·v / kT) · exp(−m·v² / 2kT)</div>
+  <!-- ===================== Module 17 ===================== -->
+  <section class="module" id="m17">
+    <header>
+      <p class="num">Module 17</p>
+      <h3>Monde microscopique des gaz</h3>
+      <p class="etapes">Sur la planche : actes I Température · II Pression et volume</p>
+    </header>
 
-  <h3>Pression</h3>
-  <p>La <strong>pression</strong> est l'effet moyen d'innombrables chocs sur les parois. En 2D, c'est une force par unité de longueur. Pour un gaz idéal, <span class="m">P·A = N·kT</span> (en 3D : <span class="m">PV = NkT = nRT</span>). Deux relations qualitatives suffisent : si V diminue à T constante, P augmente, car les chocs sont plus nombreux par seconde et par unité de paroi ; si T augmente à V constant, P augmente, car les chocs sont plus fréquents et plus violents. Comprimer un gaz isolé le réchauffe : le piston qui avance renvoie les molécules plus vite qu'elles ne sont arrivées.</p>
+    <h4 data-n="1">Intuition</h4>
+    <p>Un gaz est une foule de molécules qui filent en ligne droite entre deux chocs, à des vitesses très différentes. Rien ne les retient les unes aux autres : elles rebondissent sur les parois et entre elles, sans arrêt. De cette agitation sortent deux grandeurs que l’on mesure sans jamais voir une molécule. La <strong>température</strong> est l’énergie cinétique moyenne d’agitation ; la <strong>pression</strong> est l’effet moyen de tous les chocs sur une paroi. Ni l’une ni l’autre n’a de sens pour une seule molécule : ce sont des moyennes sur une population énorme. Un centimètre cube d’air en contient environ 2,5×10¹⁹, et chacune subit plusieurs milliards de chocs par seconde. Les vitesses ne sont pas toutes égales : elles se répartissent autour d’une valeur typique, selon la distribution de Maxwell-Boltzmann. Enfin, comprimer un gaz isolé le réchauffe : le piston qui avance renvoie les molécules plus vite qu’elles ne sont arrivées.</p>
 
-  <h3>Mouvement brownien</h3>
-  <p>Le grain reçoit des chocs de tous côtés. Leur somme n'est jamais exactement nulle : elle fluctue, et le grain bouge au hasard. Plus il est lourd, plus il est lent : sa vitesse typique varie comme √(m/M), avec m la masse d'une molécule et M celle du grain. Le déplacement quadratique moyen est proportionnel au temps. En 1905, Einstein l'a calculé ; en 1908, Perrin l'a mesuré : c'est la preuve que les molécules existent.</p>
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Quantité de matière \(n\)<span class="u">mol</span></dt><dd>Nombre de molécules rapporté à la mole : \(N = n\,N_\mathrm{A}\), avec \(N_\mathrm{A} \approx 6{,}022\times10^{23}\) mol⁻¹.</dd></div>
+      <div><dt>Constante de Boltzmann \(k\)<span class="u">J/K</span></dt><dd>Fait le pont entre température et énergie par molécule : \(k = 1{,}381\times10^{-23}\) J/K.</dd></div>
+      <div><dt>Constante des gaz \(R\)<span class="u">J/(mol·K)</span></dt><dd>La même chose par mole : \(R = N_\mathrm{A}\,k \approx 8{,}314\) J/(mol·K).</dd></div>
+      <div><dt>Température absolue \(T\)<span class="u">K</span></dt><dd>Mesure de l’agitation moyenne, comptée à partir du zéro absolu : \(T(\mathrm{K}) = \theta(^\circ\mathrm{C}) + 273{,}15\).</dd></div>
+      <div><dt>Pression \(P\)<span class="u">Pa = N/m²</span></dt><dd>Force moyenne exercée par les chocs, par unité de surface de paroi. En 2D, comme dans la simulation, c’est une force par unité de longueur.</dd></div>
+      <div><dt>Volume \(V\)<span class="u">m³</span></dt><dd>Espace accessible aux molécules.</dd></div>
+      <div><dt>Vitesse quadratique \(v_\mathrm{rms}\)<span class="u">m/s</span></dt><dd>Racine de la moyenne des carrés des vitesses : \(v_\mathrm{rms} = \sqrt{\langle v^2\rangle}\). Elle dépasse un peu la vitesse moyenne.</dd></div>
+      <div><dt>Libre parcours moyen \(\ell\)<span class="u">m</span></dt><dd>Distance moyenne parcourue entre deux chocs successifs.</dd></div>
+      <div><dt>Gaz idéal</dt><dd>Gaz de molécules ponctuelles qui n’interagissent que par chocs : modèle d’autant meilleur que le gaz est dilué.</dd></div>
+    </dl>
 
-  <h3>Diffusion, gradient et flux</h3>
-  <p>Un <strong>gradient</strong> est la pente d'une grandeur le long d'une direction. Un <strong>flux</strong> est la quantité nette qui traverse une ligne par unité de temps. Chaque molécule fait une marche aléatoire, sans préférence. Mais là où les A sont nombreux, il y en a davantage qui traversent une ligne donnée vers la droite que vers la gauche : le flux net va de la forte vers la faible concentration, proportionnellement à la pente. C'est la loi de Fick (en 1D seulement) :</p>
-  <div class="eq">J = −D · dc/dx</div>
-  <p>D est le coefficient de diffusion. La version générale (champs scalaires et vectoriels, gradient en plusieurs dimensions, divergence) fait l'objet d'un autre module, pas de celui-ci.</p>
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ \tfrac12\,m\langle v^2\rangle = \tfrac32\,kT \quad (\text{3D}), \qquad \tfrac12\,m\langle v^2\rangle = kT \quad (\text{2D}) \]
+      <p>La température est l’énergie cinétique moyenne par molécule : \(\tfrac12 kT\) par direction de mouvement. La simulation est en 2D, d’où \(kT = \langle\tfrac12 m v^2\rangle\).</p></div>
+    <div class="relation">\[ v_\mathrm{rms} = \sqrt{\frac{3kT}{m}} = \sqrt{\frac{3RT}{M}} \]
+      <p>À température donnée, les molécules légères vont plus vite. Quadrupler \(T\) double la vitesse typique.</p></div>
+    <div class="relation">\[ PV = NkT = nRT \]
+      <p>Loi du gaz idéal. En 2D : \(P\,A = NkT\), avec \(A\) l’aire. Elle relie les trois grandeurs \(P\), \(V\), \(T\) : si l’une varie, au moins une autre doit suivre.</p></div>
+    <div class="relation">\[ P = \frac13\,\frac{N}{V}\,m\langle v^2\rangle = \frac23\,\frac{N}{V}\,\Big\langle \tfrac12 m v^2\Big\rangle \]
+      <p>Origine cinétique de la pression : plus il y a de molécules par unité de volume, et plus elles sont énergiques, plus la paroi est frappée fort.</p></div>
+    <div class="relation">\[ f_{2\mathrm{D}}(v) = \frac{m\,v}{kT}\,\mathrm{e}^{-m v^2/2kT}, \qquad f_{3\mathrm{D}}(v) = 4\pi\Big(\frac{m}{2\pi kT}\Big)^{3/2} v^2\,\mathrm{e}^{-m v^2/2kT} \]
+      <p>Distribution de Maxwell-Boltzmann des vitesses, en 2D (celle de la simulation) puis en 3D. Une bosse : peu de molécules très lentes, peu de très rapides, la majorité autour de la valeur typique. Chauffer décale et étale la bosse.</p></div>
+    <div class="relation">\[ \ell = \frac{V}{\sqrt2\,\pi\,d^2\,N} \]
+      <p>Libre parcours moyen pour des molécules de diamètre \(d\) : plus le gaz est dense, plus il est court.</p></div>
 
-  <h3>Entropie</h3>
-  <p>Oublie « désordre » : l'entropie compte des configurations. Répartis N molécules entre la gauche et la droite. Le nombre de façons d'en avoir n à gauche est <span class="m">Ω(n) = C(N, n)</span>. Les lois du mouvement sont réversibles : rien n'interdit que toutes les molécules retournent du même côté. Mais la probabilité en est 2<sup>−N</sup>. Avec 4 molécules, on le voit souvent ; avec 200, jamais (2<sup>−200</sup> ≈ 10<sup>−60</sup>) ; avec 10²³, jamais dans l'âge de l'univers. Boltzmann a résumé ce décompte :</p>
-  <div class="eq">S = k · ln Ω</div>
-  <p>Le système évolue vers les états macroscopiques compatibles avec immensément plus de configurations. C'est une introduction, pas la thermodynamique statistique complète.</p>
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un mètre cube d’air à \(20\,{}^\circ\mathrm{C}\) (\(T = 293{,}15\) K) et à la pression atmosphérique (\(P = 101\,325\) Pa).</p>
+      <ol>
+        <li>Quantité de matière : \(n = PV/RT = 101\,325 \times 1 / (8{,}314 \times 293{,}15) \approx 41{,}6\) mol.</li>
+        <li>Nombre de molécules : \(N = n\,N_\mathrm{A} \approx 41{,}6 \times 6{,}022\times10^{23} \approx 2{,}5\times10^{25}\), soit \(2{,}5\times10^{19}\) par cm³. Masse : \(41{,}6 \times 0{,}029 \approx 1{,}2\) kg, la masse volumique bien connue de l’air.</li>
+        <li>Énergie thermique : \(kT = 1{,}381\times10^{-23} \times 293{,}15 \approx 4{,}05\times10^{-21}\) J. Pour le diazote, \(m \approx 28 \times 1{,}66\times10^{-27} = 4{,}65\times10^{-26}\) kg, donc \(v_\mathrm{rms} = \sqrt{3 \times 4{,}05\times10^{-21} / 4{,}65\times10^{-26}} \approx 511\) m/s (la vitesse moyenne vaut environ 470 m/s).</li>
+        <li>Avec \(d \approx 3{,}7\times10^{-10}\) m : \(\ell = 1/(\sqrt2\,\pi \times 1{,}37\times10^{-19} \times 2{,}5\times10^{25}) \approx 6{,}6\times10^{-8}\) m, soit environ 66 nm. Chaque molécule subit donc \(470 / 6{,}6\times10^{-8} \approx 7\times10^{9}\) chocs par seconde.</li>
+        <li>Si l’on comprime ce gaz à température constante jusqu’à \(V = 0{,}5\) m³, \(PV\) reste égal à \(NkT\) : la pression double et vaut 202,65 kPa.</li>
+      </ol>
+    </div>
 
-  <h3>Osmose</h3>
-  <p>Une membrane semi-perméable laisse passer l'eau, mais pas le soluté. L'eau traverse dans les deux sens au hasard ; le soluté, lui, rebondit et pousse la membrane. Dans la simulation, la membrane mobile retenue par un ressort recule, l'eau suit statistiquement, et le flux net va vers le côté du soluté. L'équilibre est atteint quand la pression du soluté égale la force de rappel du ressort. Selon van 't Hoff :</p>
-  <div class="eq">π = c · R · T   (ou c<sub>s</sub> · kT par molécule)</div>
-  <p>Aucune molécule d'eau ne « sait » où aller. Dans les vraies cellules, c'est la pression hydrostatique ou la paroi qui joue le rôle du ressort. Honnêteté : dans un liquide réel, l'explication fine fait intervenir les interactions eau-soluté ; le modèle cinétique de van 't Hoff donne toutefois la bonne loi pour les solutions diluées.</p>
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Utiliser des degrés Celsius dans \(PV = nRT\). Il faut des kelvins : 20 °C et 40 °C ne sont pas dans un rapport 2, mais 293 K et 313 K.</li>
+      <li>Parler de la température d’une molécule. Une molécule a une énergie et une vitesse ; la température n’existe que pour une population.</li>
+      <li>Croire que toutes les molécules vont à la même vitesse. Elles suivent Maxwell-Boltzmann : à 20 °C, certaines sont à moins de 100 m/s, d’autres à plus de 1 000 m/s.</li>
+      <li>Confondre pression absolue et pression relative. Un pneu « à 2,2 bars » indique la surpression par rapport à l’atmosphère : la pression absolue du gaz est d’environ 3,2 bars.</li>
+      <li>Expliquer la pression par le poids du gaz. Dans une boîte de gaz, ce sont les chocs sur la paroi qui comptent ; la gravité n’y joue presque aucun rôle.</li>
+      <li>Oublier que la loi du gaz idéal est un modèle : elle se dégrade à haute pression, quand le volume propre des molécules compte (le rapport \(PA/NkT\) de la simulation reste un peu au-dessus de 1 pour cette raison).</li>
+    </ul>
 
-  <h3>Chaleur et conduction</h3>
-  <p>La <strong>chaleur</strong> est un transfert d'énergie dû à une différence de température ; la température, elle, décrit un état. La capacité thermique relie les deux : <span class="m">C = Q/ΔT</span>. Par conduction, les molécules rapides du côté chaud transmettent de l'énergie par chocs à leurs voisines plus lentes. La loi de Fourier (1D) a la même forme que celle de Fick :</p>
-  <div class="eq">q = −κ · dT/dx</div>
-  <p>Dans un solide, ce sont les vibrations des atomes qui transportent l'énergie (et, dans un métal, les électrons).</p>
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>18</b><span>La température fixe l’énergie interne d’un gaz ; chauffer, c’est augmenter l’agitation moyenne.</span></li>
+      <li><b>19</b><span>Les mêmes chocs aléatoires expliquent le mouvement brownien, la diffusion et la conduction.</span></li>
+      <li><b>07</b><span>Maxwell-Boltzmann est une distribution de probabilité ; voir la planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>.</span></li>
+      <li><b>11</b><span>L’énergie cinétique \(\tfrac12 mv^2\) est le même objet à l’échelle des molécules.</span></li>
+      <li><b>20</b><span>La pression d’un fluide est cette même force moyenne par unité de surface ; voir la planche <a href="../fondations-flux-fluides/index.html">Flux, gradients, champs et fluides</a>.</span></li>
+      <li><b>44</b><span>Au cœur d’une étoile, la pression d’un gaz chaud retient l’effondrement gravitationnel.</span></li>
+    </ul>
 
-  <h3>Changement de phase</h3>
-  <p>Pendant la fusion ou la vaporisation, l'énergie apportée sert à briser des liaisons (énergie potentielle) plutôt qu'à augmenter l'agitation : la température plafonne. C'est le palier, et l'énergie en cause est la chaleur latente. Pour l'eau : 334 kJ/kg pour fondre, 2 260 kJ/kg pour vaporiser, contre 4,18 kJ/(kg·K) pour chauffer l'eau liquide.</p>
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un pneu est gonflé à 220 kPa (pression absolue) par 20 °C. La nuit, il fait −10 °C. Quelle est la pression, si le volume et le nombre de molécules ne changent pas ?</summary>
+      <p>\(P\) est proportionnelle à \(T\) en kelvins : \(P' = 220 \times 263{,}15 / 293{,}15 \approx 197\) kPa. L’air n’a pas fui : ses molécules, moins rapides, tapent moins souvent et moins fort.</p></details>
+    <details><summary>On passe d’une température de 300 K à 1 200 K. Que devient la vitesse quadratique des molécules ?</summary>
+      <p>Elle est proportionnelle à \(\sqrt T\) : le facteur 4 sur \(T\) devient un facteur 2 sur \(v_\mathrm{rms}\). Elle double.</p></details>
+    <details><summary>Pourquoi comprimer rapidement un gaz isolé le réchauffe-t-il ?</summary>
+      <p>Une molécule qui rebondit sur un piston qui avance repart plus vite qu’elle n’est arrivée : elle gagne de l’énergie cinétique. En moyenne, l’agitation augmente, donc \(T\) aussi. À l’acte II, avec le thermostat coupé, on le voit directement.</p></details>
+  </section>
 
-  <h3>Convection et rayonnement</h3>
-  <p>La <strong>convection</strong> transporte l'énergie par un mouvement d'ensemble du fluide : le fluide chaud, moins dense, monte. Le <strong>rayonnement</strong> la transporte par des ondes électromagnétiques, même dans le vide ; la puissance émise est proportionnelle à T⁴ (Stefan-Boltzmann, σ = 5,67×10⁻⁸ W·m⁻²·K⁻⁴).</p>
+  <!-- ===================== Module 18 ===================== -->
+  <section class="module" id="m18">
+    <header>
+      <p class="num">Module 18</p>
+      <h3>Chaleur, phases et entropie</h3>
+      <p class="etapes">Sur la planche : actes V Pourquoi ça ne revient pas · VII Chaleur et conduction · VIII Changement de phase</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>La <strong>chaleur</strong> n’est pas une substance qui se trouve dans un corps : c’est de l’énergie en transit, qui passe d’un corps à un autre parce que leurs températures diffèrent. La température, elle, décrit un état. Quand on apporte de l’énergie à une substance, deux issues sont possibles. Soit l’agitation augmente et la température monte ; soit l’énergie sert à défaire les liaisons entre molécules, et la température reste bloquée pendant que la substance change de phase : c’est le palier de la fusion ou de la vaporisation. L’<strong>entropie</strong> dit pourquoi les échanges ont un sens. Elle compte les configurations microscopiques compatibles avec un état. Les lois du mouvement sont réversibles, et rien n’interdit à des molécules mélangées de se retrier d’elles-mêmes ; mais les états mélangés sont si incomparablement plus nombreux que le retour n’arrive jamais. Oublie « désordre » : pense « nombre de façons de réaliser l’état ».</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Énergie interne \(U\)<span class="u">J</span></dt><dd>Somme des énergies cinétiques d’agitation et des énergies potentielles d’interaction des molécules.</dd></div>
+      <div><dt>Chaleur \(Q\)<span class="u">J</span></dt><dd>Énergie transférée entre deux systèmes à cause d’une différence de température. Positive si le système la reçoit.</dd></div>
+      <div><dt>Travail \(W\)<span class="u">J</span></dt><dd>Énergie transférée par une force qui déplace son point d’application, par exemple un piston. Positif si le système le reçoit.</dd></div>
+      <div><dt>Capacité thermique \(C\)<span class="u">J/K</span></dt><dd>Énergie à fournir pour élever la température d’un corps de 1 K : \(C = Q/\Delta T\).</dd></div>
+      <div><dt>Capacité thermique massique \(c\)<span class="u">J/(kg·K)</span></dt><dd>La même chose par kilogramme : \(C = mc\). Pour l’eau liquide, \(c \approx 4{,}18\) kJ/(kg·K).</dd></div>
+      <div><dt>Chaleur latente \(L\)<span class="u">J/kg</span></dt><dd>Énergie par kilogramme nécessaire pour changer de phase à température constante. Pour l’eau : \(L_\mathrm{fus} = 334\) kJ/kg et \(L_\mathrm{vap} = 2\,260\) kJ/kg.</dd></div>
+      <div><dt>Configurations \(\Omega\)</dt><dd>Nombre de façons microscopiques de réaliser un même état macroscopique.</dd></div>
+      <div><dt>Entropie \(S\)<span class="u">J/K</span></dt><dd>Mesure logarithmique de \(\Omega\) : \(S = k\ln\Omega\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ Q = C\,\Delta T = m\,c\,\Delta T \]
+      <p>Chauffer sans changer de phase : l’énergie nécessaire est proportionnelle à la masse et à l’écart de température.</p></div>
+    <div class="relation">\[ Q = m\,L \]
+      <p>Changer de phase à température constante. Pendant ce palier, l’énergie apportée va à l’énergie potentielle (les liaisons), pas à l’agitation : la température ne bouge pas.</p></div>
+    <div class="relation">\[ \Delta U = Q + W \]
+      <p>Premier principe : l’énergie d’un système ne varie que par la chaleur et le travail reçus. L’énergie ne se crée ni ne se perd (module 11).</p></div>
+    <div class="relation">\[ S = k\ln\Omega, \qquad \Omega(n) = \binom{N}{n} = \frac{N!}{n!\,(N-n)!} \]
+      <p>Formule de Boltzmann. Pour \(N\) molécules réparties entre la gauche et la droite, \(\Omega(n)\) compte les façons d’en avoir \(n\) à gauche. Le maximum est à \(n = N/2\).</p></div>
+    <div class="relation">\[ p_\text{retour total} = 2^{-N}, \qquad \Delta S = \frac{Q}{T} \;\;(\text{à } T \text{ constante}) \]
+      <p>Toutes les molécules du même côté : une configuration sur \(2^N\) équiprobables. Et le lien avec la chaleur : un échange de chaleur \(Q\) à température \(T\) change l’entropie de \(Q/T\) (Clausius).</p></div>
+    <div class="relation">\[ \Delta S_\text{système isolé} \;\geq\; 0 \]
+      <p>Deuxième principe : un système isolé évolue vers les macro-états compatibles avec le plus de configurations. C’est une loi statistique, pas une interdiction absolue.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>On chauffe 1 kg de glace, de \(-10\,{}^\circ\mathrm{C}\) à de la vapeur à \(110\,{}^\circ\mathrm{C}\), à la pression atmosphérique. Capacités massiques : glace 2,09 kJ/(kg·K), eau 4,18 kJ/(kg·K), vapeur environ 2,0 kJ/(kg·K).</p>
+      <ol>
+        <li>Chauffer la glace de \(-10\) à \(0\,{}^\circ\mathrm{C}\) : \(1 \times 2{,}09 \times 10 \approx 20{,}9\) kJ.</li>
+        <li>Fondre à \(0\,{}^\circ\mathrm{C}\) : \(1 \times 334 = 334\) kJ, à température constante (premier palier).</li>
+        <li>Chauffer l’eau de 0 à \(100\,{}^\circ\mathrm{C}\) : \(1 \times 4{,}18 \times 100 = 418\) kJ.</li>
+        <li>Vaporiser à \(100\,{}^\circ\mathrm{C}\) : \(1 \times 2\,260 = 2\,260\) kJ (second palier).</li>
+        <li>Chauffer la vapeur de 100 à \(110\,{}^\circ\mathrm{C}\) : \(1 \times 2{,}0 \times 10 = 20\) kJ.</li>
+        <li>Total : \(20{,}9 + 334 + 418 + 2\,260 + 20 \approx 3\,053\) kJ, soit 3,05 MJ. La vaporisation à elle seule en représente les trois quarts.</li>
+        <li>Entropie aux paliers : fusion, \(\Delta S = 334\,000 / 273{,}15 \approx 1\,223\) J/K ; vaporisation, \(\Delta S = 2\,260\,000 / 373{,}15 \approx 6\,056\) J/K. Le saut d’entropie à la vaporisation vaut environ cinq fois celui de la fusion : passer en gaz libère bien plus de configurations que passer en liquide.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Confondre chaleur et température. Une casserole d’eau tiède contient plus d’énergie thermique qu’une goutte bouillante ; la chaleur est un transfert, la température un état.</li>
+      <li>Croire qu’un corps « contient de la chaleur ». Il contient de l’énergie interne ; la chaleur n’existe que pendant l’échange.</li>
+      <li>Penser que la température monte tant qu’on chauffe. Pendant un changement de phase, elle plafonne : l’énergie défait les liaisons (dans la simulation, le palier est arrondi parce que l’amas est petit).</li>
+      <li>Voir l’entropie comme du « désordre ». C’est un décompte de configurations, comme celui de \(\binom{N}{n}\) pour les molécules à gauche ou à droite.</li>
+      <li>Croire que le retour à l’état séparé est impossible. Il est permis par les lois du mouvement, mais sa probabilité est de \(2^{-N}\) : avec 4 molécules on le voit souvent, avec 200 jamais (\(2^{-200}\approx10^{-60}\)), avec \(10^{23}\) jamais dans l’âge de l’univers.</li>
+      <li>Oublier les signes. Une chaleur reçue est positive, une chaleur cédée négative ; un refroidissement donne \(Q \lt 0\).</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>17</b><span>L’énergie cinétique moyenne, base de la température, est ce que \(Q = mc\Delta T\) fait varier.</span></li>
+      <li><b>19</b><span>La chaleur voyage par conduction, convection et rayonnement.</span></li>
+      <li><b>11</b><span>Le premier principe est la conservation de l’énergie étendue à la chaleur.</span></li>
+      <li><b>30</b><span>Les réactions chimiques libèrent ou absorbent de la chaleur ; leur sens dépend aussi de l’entropie.</span></li>
+      <li><b>34</b><span>Le métabolisme est un bilan d’énergie et d’entropie chez le vivant.</span></li>
+      <li><b>42</b><span>L’émergence relie le décompte des configurations microscopiques aux propriétés d’ensemble.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Quelle énergie faut-il pour chauffer 200 g d’eau de 20 à 100 °C, puis pour la vaporiser entièrement ?</summary>
+      <p>Chauffage : \(0{,}2 \times 4{,}18 \times 80 \approx 66{,}9\) kJ. Vaporisation : \(0{,}2 \times 2\,260 = 452\) kJ, soit près de sept fois plus. Faire bouillir de l’eau coûte bien plus que la chauffer jusqu’à l’ébullition.</p></details>
+    <details><summary>Pourquoi l’eau qui bout reste-t-elle à 100 °C malgré le feu ?</summary>
+      <p>L’énergie apportée sert à briser les liaisons entre molécules (chaleur latente de vaporisation, 2 260 kJ/kg) et non à augmenter l’agitation. L’énergie cinétique moyenne ne change pas, donc la température non plus, jusqu’à ce que tout le liquide soit vaporisé.</p></details>
+    <details><summary>Dix molécules sont toutes à gauche d’une boîte. Quelle est la probabilité, à un instant donné, de les retrouver toutes à gauche, et pourquoi un mélange ne se « démélange »-t-il jamais ?</summary>
+      <p>\(2^{-10} = 1/1\,024 \approx 0{,}1\,\%\). Avec un nombre réaliste de molécules, \(2^{-N}\) devient astronomiquement faible : les lois du mouvement permettent le démélange, mais les configurations mélangées sont immensément plus nombreuses que les configurations séparées.</p></details>
+  </section>
+
+  <!-- ===================== Module 19 ===================== -->
+  <section class="module" id="m19">
+    <header>
+      <p class="num">Module 19</p>
+      <h3>Transport thermique et moléculaire</h3>
+      <p class="etapes">Sur la planche : actes III Mouvement brownien · IV Diffusion, gradient, flux · VI Osmose · VII Chaleur et conduction · IX Convection et rayonnement</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Aucune molécule ne « sait » où aller : chacune fait une marche au hasard, faite de chocs. Pourtant, s’il y en a plus d’un côté que de l’autre, davantage traversent une ligne donnée de la forte vers la faible concentration. Voilà la diffusion : un flux net né du hasard, proportionnel à la pente du profil (le <strong>gradient</strong>). Pour la chaleur, les molécules rapides du côté chaud transmettent leur énergie à leurs voisines plus lentes : c’est la <strong>conduction</strong>, du chaud vers le froid. Un gros grain, poussé par des chocs qui ne se compensent jamais exactement, suit lui aussi une marche au hasard : le <strong>mouvement brownien</strong>. La <strong>convection</strong> déplace l’énergie avec le fluide lui-même (le chaud, moins dense, monte), et le <strong>rayonnement</strong> la transporte par des ondes, même dans le vide. L’<strong>osmose</strong> est la diffusion de l’eau à travers une membrane qui laisse passer l’eau mais pas le soluté.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Concentration \(c\)<span class="u">mol/m³</span></dt><dd>Quantité de matière d’une espèce par unité de volume.</dd></div>
+      <div><dt>Gradient \(\dd c/\dd x\)<span class="u">mol/m⁴</span></dt><dd>Pente d’une grandeur le long d’une direction, ici en une dimension ; le cas général relève du module 16.</dd></div>
+      <div><dt>Flux de matière \(J\)<span class="u">mol/(m²·s)</span></dt><dd>Matière nette qui traverse une surface unité par seconde.</dd></div>
+      <div><dt>Coefficient de diffusion \(D\)<span class="u">m²/s</span></dt><dd>Rapidité de la diffusion. Pour une petite molécule dans l’eau, \(D \approx 10^{-9}\) m²/s.</dd></div>
+      <div><dt>Flux thermique \(q\)<span class="u">W/m²</span></dt><dd>Énergie thermique qui traverse une surface unité par seconde.</dd></div>
+      <div><dt>Conductivité thermique \(\kappa\)<span class="u">W/(m·K)</span></dt><dd>Aptitude à conduire la chaleur : environ 0,026 pour l’air, 0,6 pour l’eau, 400 pour le cuivre.</dd></div>
+      <div><dt>Coefficient d’échange \(h\)<span class="u">W/(m²·K)</span></dt><dd>Pour la convection entre une surface à \(T_\mathrm{s}\) et un fluide à \(T_\mathrm{f}\) : \(q = h\,(T_\mathrm{s} - T_\mathrm{f})\). Ordre de grandeur de 5 à 25 pour l’air calme.</dd></div>
+      <div><dt>Constante de Stefan-Boltzmann \(\sigma\)<span class="u">W/(m²·K⁴)</span></dt><dd>\(\sigma = 5{,}67\times10^{-8}\) W·m⁻²·K⁻⁴.</dd></div>
+      <div><dt>Pression osmotique \(\pi\)<span class="u">Pa</span></dt><dd>Pression à appliquer côté soluté pour arrêter le flux net d’eau.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ q = -\kappa\,\frac{\dd T}{\dd x} \]
+      <p>Loi de Fourier (1D) : la chaleur va du chaud vers le froid, proportionnellement à la pente de température ; le signe moins dit que le flux va contre le gradient. Dans une plaque d’épaisseur \(L\), \(q = \kappa\,\Delta T/L\).</p></div>
+    <div class="relation">\[ J = -D\,\frac{\dd c}{\dd x} \]
+      <p>Loi de Fick (1D) : même forme que Fourier, avec un flux de matière de la forte vers la faible concentration. La version générale est l’objet du module 16.</p></div>
+    <div class="relation">\[ \langle x^2\rangle = 2\,D\,t, \qquad t \approx \frac{x^2}{2D} \]
+      <p>Einstein (1905) : le déplacement quadratique moyen croît comme le temps, donc la distance typique comme \(\sqrt t\). En 2D, comme dans la simulation, \(\langle r^2\rangle = 4Dt\). Perrin l’a mesuré en 1908, preuve que les molécules existent.</p></div>
+    <div class="relation">\[ D = \frac{kT}{6\pi\eta r} \]
+      <p>Stokes-Einstein, pour une sphère de rayon \(r\) dans un fluide de viscosité \(\eta\) : l’agitation thermique \(kT\) face à la résistance du fluide. Plus le grain est lourd (masse \(M\) contre \(m\) pour une molécule), plus il est lent : sa vitesse typique varie comme \(\sqrt{m/M}\).</p></div>
+    <div class="relation">\[ P_\mathrm{ray} = \varepsilon\,\sigma\,A\,T^4 \]
+      <p>Stefan-Boltzmann : puissance rayonnée par une surface \(A\) à la température absolue \(T\) (émissivité \(\varepsilon\) entre 0 et 1, égale à 1 pour un corps noir). Doubler \(T\) multiplie la puissance par 16.</p></div>
+    <div class="relation">\[ \pi = c\,R\,T \quad (\text{ou } c_\mathrm{s}\,kT \text{ par molécule}) \]
+      <p>Van ’t Hoff : pour une solution diluée, la pression osmotique est celle qu’aurait le soluté en gaz seul dans le volume. L’équilibre survient quand elle égale la force de rappel (le ressort de la simulation, la paroi d’une cellule végétale).</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Dans un verre d’eau à \(20\,{}^\circ\mathrm{C}\), \(\eta \approx 1{,}0\times10^{-3}\) Pa·s.</p>
+      <ol>
+        <li>Une goutte de colorant (\(D \approx 10^{-9}\) m²/s) : sur \(x = 1\) mm, \(t \approx (10^{-3})^2/(2\times10^{-9}) = 500\) s, environ 8 minutes ; sur 1 cm, \(5\times10^{4}\) s, environ 14 heures ; sur 10 cm, \(5\times10^{6}\) s, environ 2 mois : distance ×10, temps ×100.</li>
+        <li>Un grain de rayon \(r = 0{,}5\) µm : \(D = 4{,}05\times10^{-21} / (6\pi \times 10^{-3} \times 0{,}5\times10^{-6}) \approx 4{,}3\times10^{-13}\) m²/s.</li>
+        <li>Son déplacement typique selon un axe en 1 s est \(\sqrt{2Dt} = \sqrt{2 \times 4{,}3\times10^{-13} \times 1} \approx 0{,}9\) µm ; en 1 minute, \(\sqrt{2 \times 4{,}3\times10^{-13} \times 60} \approx 7\) µm, soit \(\sqrt{60} \approx 7{,}7\) fois plus seulement.</li>
+        <li>Rayonnement : une surface noire à 300 K émet \(\sigma T^4 = 5{,}67\times10^{-8} \times 300^4 \approx 459\) W/m². À 600 K : \(16 \times 459 \approx 7\,350\) W/m².</li>
+        <li>Osmose : une solution à \(c = 300\) mol/m³ (0,30 osmol/L, de l’ordre de celle du sang) à 310 K donne \(\pi = 300 \times 8{,}314 \times 310 \approx 7{,}7\times10^{5}\) Pa, soit environ 7,6 atmosphères.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire que les molécules « choisissent » la faible concentration. Chacune va au hasard ; c’est le décompte qui produit le flux net.</li>
+      <li>Penser que la diffusion est rapide partout. Efficace au micromètre, elle devient très lente sur de grandes distances, car \(t\) croît comme \(x^2\).</li>
+      <li>Croire qu’un grain brownien va « dans une direction ». Son déplacement croît comme \(\sqrt t\), pas comme \(t\) : tripler la durée ne l’éloigne que d’un facteur \(\sqrt3\).</li>
+      <li>Imaginer que l’eau est « aspirée » dans l’osmose. Elle traverse dans les deux sens, au hasard ; le flux net va vers le côté du soluté.</li>
+      <li>Confondre conduction et convection. La conduction transmet l’énergie de proche en proche sans déplacement de matière ; la convection la transporte avec un mouvement d’ensemble du fluide.</li>
+      <li>Croire que seul un corps chaud rayonne, ou que le rayonnement exige un milieu. Tout corps émet selon sa température, et le Soleil éclaire à travers le vide. La loi en \(T^4\) exige des kelvins.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>16</b><span>Gradient, flux et divergence au sens général, dont Fick et Fourier sont des cas 1D ; voir la planche <a href="../fondations-flux-fluides/index.html">Flux, gradients, champs et fluides</a>.</span></li>
+      <li><b>32</b><span>Osmose et diffusion à travers la membrane cellulaire ; voir la planche <a href="../fondations-cellule-membrane/index.html">Cellule, membrane et transport</a>.</span></li>
+      <li><b>07</b><span>Le mouvement brownien est une marche aléatoire ; voir la planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>.</span></li>
+      <li><b>43</b><span>Le rayonnement thermique de tout corps chaud mène au corps noir et à la loi de Planck.</span></li>
+      <li><b>20</b><span>Écoulements et débits : le transport par le mouvement d’ensemble du fluide.</span></li>
+      <li><b>44</b><span>Dans une étoile, l’énergie remonte du cœur par rayonnement et par convection.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un mur de briques de 20 cm (\(\kappa \approx 0{,}7\) W/(m·K)) sépare un intérieur à 20 °C d’un extérieur à 0 °C. Quelle puissance traverse 10 m² de mur en régime permanent ?</summary>
+      <p>\(q = \kappa\,\Delta T / L = 0{,}7 \times 20 / 0{,}2 = 70\) W/m². Sur 10 m² : 700 W. Un isolant dont \(\kappa\) est dix fois plus petit réduit les pertes d’autant.</p></details>
+    <details><summary>Un corps noir passe de 300 K à 600 K. De combien sa puissance rayonnée augmente-t-elle ?</summary>
+      <p>Elle est proportionnelle à \(T^4\) : \(2^4 = 16\) fois plus.</p></details>
+    <details><summary>Une cellule végétale dans de l’eau pure : que se passe-t-il, et pourquoi ?</summary>
+      <p>L’intérieur contient des solutés, pas l’extérieur. L’eau traverse dans les deux sens, mais le flux net entre dans la cellule, qui gonfle. La paroi joue le rôle du ressort : la pression interne monte jusqu’à égaler la pression osmotique, et la cellule devient turgescente sans éclater.</p></details>
+  </section>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
   <p><strong>Réellement simulé.</strong></p>
@@ -157,21 +367,14 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
   <h2><span>4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
     <div><b>≈ 2,7×10¹⁹</b><span>molécules par cm³ d'air, dans les conditions normales.</span></div>
-    <div><b>≈ 500 m/s</b><span>vitesse moyenne d'une molécule de O₂ ou de N₂ à 20 °C.</span></div>
+    <div><b>≈ 450 à 500 m/s</b><span>vitesse typique d'une molécule de O₂ ou de N₂ à 20 °C (moyenne ≈ 440 à 470 m/s, quadratique ≈ 480 à 510 m/s).</span></div>
     <div><b>≈ 70 nm</b><span>libre parcours moyen dans l'air : la distance entre deux chocs successifs.</span></div>
     <div><b>10⁹ à 10¹⁰ /s</b><span>collisions par seconde subies par chaque molécule (environ 500 m/s divisés par 70 nm).</span></div>
     <div><b>≈ 10⁻⁹ m²/s</b><span>coefficient de diffusion d'une petite molécule dans l'eau. Avec t ≈ x²/2D : environ 8 minutes pour 1 mm, environ 2 mois pour 10 cm. La diffusion est rapide sur de courtes distances et très lente sur de longues.</span></div>
   </div>
 
-  <h2><span>5</span>Teste-toi</h2>
-  <details><summary>Pourquoi un pneu gonflé en hiver semble-t-il dégonflé ?</summary>
-    <p>Le volume du pneu est à peu près constant et le nombre de molécules ne change pas. Quand T baisse, les molécules sont moins rapides : chocs moins fréquents et moins violents, donc P diminue. L'air n'a pas fui, il pousse simplement moins fort.</p></details>
-  <details><summary>Pourquoi un mélange ne se « démélange »-t-il jamais spontanément, alors que rien ne l'interdit ?</summary>
-    <p>Les lois du mouvement sont réversibles, donc le démélange est permis. Mais les configurations mélangées sont immensément plus nombreuses que les configurations séparées : le retour a une probabilité de l'ordre de 2<sup>−N</sup>, qui devient astronomiquement faible pour un nombre réaliste de molécules.</p></details>
-  <details><summary>Pourquoi l'eau qui bout reste-t-elle à 100 °C malgré le feu ?</summary>
-    <p>L'énergie apportée sert à briser les liaisons entre molécules (chaleur latente de vaporisation, 2 260 kJ/kg) et non à augmenter l'agitation. L'énergie cinétique moyenne ne change pas, donc la température non plus, jusqu'à ce que tout le liquide soit vaporisé.</p></details>
-  <details><summary>Une cellule végétale dans de l'eau pure : que se passe-t-il, et pourquoi ?</summary>
-    <p>L'intérieur contient des solutés, pas l'extérieur. L'eau traverse la membrane dans les deux sens, mais le flux net entre dans la cellule, qui gonfle. La paroi cellulaire joue le rôle du ressort : elle résiste, la pression interne monte jusqu'à égaler la pression osmotique, et la cellule devient turgescente sans éclater.</p></details>
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Dans un liquide réel, l’osmose fait intervenir des interactions eau-soluté ; la loi de van ’t Hoff reste valable pour les solutions diluées.</p>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
 </div>

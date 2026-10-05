@@ -4,13 +4,11 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprendre le langage scientifique — L’invisible en mouvement, Fondations 1·2·3</title>
-<meta name="description" content="Ce que montrent les quatre laboratoires des fondations : échelles et unités, graphiques, vecteurs, position, vitesse et accélération. Ce qu'ils simplifient, et ce qu'ils permettront de lire ensuite.">
+<title>Comprendre le langage scientifique — LABO</title>
+<meta name="description" content="Théorie des modules 01, 02 et 03 (mesure et échelles, vecteurs, changement et accumulation) et ce que montrent les quatre laboratoires des fondations.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -33,24 +31,14 @@ a{color:var(--accent);text-underline-offset:3px}
 .top a:hover{color:var(--texte)}
 .serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
 h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
-h1 em,h2 em{color:var(--accent)}
+h1 em{color:var(--accent)}
 .lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
-.sommaire{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:36px 0 0;border-top:1px solid var(--trait)}
-.sommaire a{display:block;padding:12px 10px 12px 0;text-decoration:none;color:var(--texte-2);font:400 12px/1.35 var(--mono);border-bottom:1px solid var(--trait);transition:color .3s var(--ease)}
-.sommaire a b{display:block;color:var(--accent);font-weight:500;margin-bottom:2px}
-.sommaire a:hover{color:var(--texte)}
 h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
 h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
-h3{font:500 16px var(--sans);margin:28px 0 8px;color:var(--accent)}
 p{margin:0 0 16px}
 ul{padding-left:20px;margin:0 0 16px}
 li{margin-bottom:8px}
 code,.m{font-family:var(--mono);font-size:.9em}
-.eq{font:400 16px/1.6 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
-.katex{font-size:1.05em;color:inherit}
-.eq .katex{font-size:1.1em}
-.tex-bloc{display:block;overflow-x:auto;overflow-y:hidden}
-.tex-bloc .katex-display{margin:4px 0}
 .pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.lil{color:var(--acc-a)}.dim{color:var(--texte-2)}
 dl{margin:0 0 16px;border-top:1px solid var(--trait)}
 dt{font:500 15px var(--sans);padding-top:12px}
@@ -58,9 +46,6 @@ dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--
 .chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
 .chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
 .chiffres b{font:500 17px var(--mono);color:var(--energie)}
-.suite{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
-.suite div{display:grid;grid-template-columns:minmax(120px,170px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
-.suite b{font:500 15px var(--sans);color:var(--texte)}
 details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
 summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
 summary::-webkit-details-marker{display:none}
@@ -69,126 +54,284 @@ details[open] summary::before{content:"\2713"}
 details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 .cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
 .cta:hover{background:var(--accent);color:var(--fond)}
-@media (max-width:560px){
-  .chiffres div,.suite div{grid-template-columns:1fr;gap:2px}
-  h2{font-size:28px}
-  .sommaire{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour aux laboratoires</a><a href="../index.html">Accueil de la série</a></nav>
-  <p class="serie">L’invisible en mouvement — Fondations 1·2·3</p>
+  <nav class="top"><a href="index.html">&larr; Retour aux laboratoires</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 01 · 02 · 03</p>
   <h1>Comprendre <em>les fondations</em></h1>
   <p class="lede">Les planches de la série affichent des µm, des mV, des flèches, des courbes et des pentes sans les expliquer. Ces quatre laboratoires donnent ce vocabulaire : on y manipule les idées avant de les nommer.</p>
-  <nav class="sommaire" aria-label="Les quatre laboratoires">
-    <a href="#echelles"><b>A</b>Échelles</a>
-    <a href="#graphiques"><b>B</b>Graphiques</a>
-    <a href="#vecteurs"><b>C</b>Vecteurs</a>
-    <a href="#mouvement"><b>D</b>Mouvement</a>
-  </nav>
 
-  <h2 id="echelles"><span>A · Échelles</span>Mesurer, c'est comparer à une unité</h2>
-  <h3>Ce que tu vois</h3>
-  <p>Un champ de vision dont on fait varier la largeur, de la taille d'un atome à l'orbite de Neptune. Les objets sont dessinés à leur vraie taille relative, tous centrés au même point. La barre d'échelle et la réglette de préfixes suivent le zoom.</p>
-  <h3>La représentation</h3>
-  <p>Une <strong>grandeur physique</strong> s'écrit toujours <em>nombre × unité</em> : « 7,5 µm » veut dire 7,5 fois un micromètre. Sans l'unité, le nombre ne dit rien. La <strong>notation scientifique</strong> sépare les deux informations : <span data-tex="7{,}5 \times 10^{-6}\ \mathrm{m}">7,5 × 10⁻⁶ m</span> donne les chiffres (7,5) et la puissance de dix. L'<strong>ordre de grandeur</strong> est la puissance de dix la plus proche : 10⁻⁵ m ici, puisque 7,5 est plus près de 10 que de 1 (sur une échelle log, la frontière est à √10 ≈ 3,2). Les <strong>préfixes</strong> sont des raccourcis pour les puissances de mille :</p>
-  <div class="eq"><span class="tex-bloc" data-tex="\underset{10^{-9}}{\mathrm{n}}\quad \underset{10^{-6}}{\text{µ}}\quad \underset{10^{-3}}{\mathrm{m}}\quad \underset{10^{0}}{\cdot}\quad \underset{10^{3}}{\mathrm{k}}\quad \underset{10^{6}}{\mathrm{M}}\quad \underset{10^{9}}{\mathrm{G}}\quad \underset{10^{12}}{\mathrm{T}}">n = 10⁻⁹, µ = 10⁻⁶, m = 10⁻³, k = 10³, M = 10⁶, G = 10⁹, T = 10¹²</span></div>
-  <h3>Les relations à retenir</h3>
-  <ul>
-    <li>Un cran de ×10 change toutes les tailles d'un facteur dix. Trois crans font ×1000, donc on change de préfixe. Du globule rouge (7,5 µm) à l'humain (1,7 m), il y a un facteur d'environ 2 × 10⁵, un peu plus de cinq crans.</li>
-    <li><strong>Échelle linéaire ou logarithmique.</strong> Sur un axe linéaire, des distances égales ajoutent la même quantité (+1 m). Sur un axe logarithmique, elles multiplient par le même facteur (×10). Dès que les objets couvrent plusieurs ordres de grandeur, l'axe linéaire écrase presque tout contre zéro ; l'axe log les espace également.</li>
-    <li><strong>Valeur et précision sont deux informations.</strong> « <span data-tex="7{,}3 \pm 0{,}05\ \mathrm{cm}">7,3 ± 0,05 cm</span> » donne une valeur (7,3) et une incertitude (± 0,05). Ici, l'incertitude vaut la moitié de la plus petite graduation, une convention courante pour une lecture directe. Les <strong>chiffres significatifs</strong> trahissent la précision : 7,30 cm affirme qu'on connaît le dixième de millimètre, 7,3 cm non.</li>
-  </ul>
-  <h3>Les dimensions</h3>
-  <p>Derrière les unités, il y a les <strong>dimensions</strong> : longueur [L], temps [T], masse [M]. Une vitesse est une longueur divisée par un temps, <span data-tex="[v] = \mathsf{L}\,\mathsf{T}^{-1}">[L/T]</span>, quelle que soit l'unité choisie (m/s, km/h). L'<strong>analyse dimensionnelle</strong> vérifie une formule sans la comprendre : chaque terme d'une égalité doit avoir la même dimension. </p>
-  <div class="eq"><span class="tex-bloc" data-tex="x = v\,t \;\Rightarrow\; \tfrac{\mathrm{m}}{\mathrm{s}}\times\mathrm{s} = \mathrm{m}\quad \textcolor{#6fd6c8}{\checkmark}">x = v·t → m/s × s = m (cohérent)</span><span class="tex-bloc" data-tex="x = \frac{v}{t} \;\Rightarrow\; \tfrac{\mathrm{m}}{\mathrm{s}^2} \neq \mathrm{m}\quad \textcolor{#ff8a5b}{\times}">x = v/t → m/s², pas une longueur (faux)</span></div>
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">A · Échelles</span></dt>
+    <dd>Un champ de vision dont on fait varier la largeur, de la taille d’un atome à l’orbite de Neptune. Les objets sont dessinés à leur vraie taille relative, tous centrés au même point. La barre d’échelle et la réglette de préfixes suivent le zoom.</dd>
+    <dt><span class="acc">B · Graphiques</span></dt>
+    <dd>Un réservoir rempli par un robinet, et le graphe du volume V (en L) en fonction du temps t (en min). Le débit Q (en L/min) est ce qu’on règle : positif, le réservoir se remplit ; négatif, il se vide.</dd>
+    <dt><span class="acc">C · Vecteurs</span></dt>
+    <dd>Des flèches sur un plan quadrillé, qu’on saisit par la pointe. Leurs composantes, leur longueur et leur angle s’affichent en direct.</dd>
+    <dt><span class="acc">D · Mouvement</span></dt>
+    <dd>Un chariot sur une piste graduée en mètres, et trois graphes alignés sur le même axe du temps : la <strong>position</strong> x(t) en m, la <span class="acc">vitesse</span> v(t) en m/s, l’<span class="lil">accélération</span> a(t) en m/s². On modèle le mouvement en saisissant les paliers de l’accélération ; la vitesse et la position se recalculent aussitôt.</dd>
+  </dl>
 
-  <h2 id="graphiques"><span>B · Graphiques</span>Une relation, <em>vue d'un coup d'œil</em></h2>
-  <h3>Ce que tu vois</h3>
-  <p>Un réservoir rempli par un robinet, et le graphe du volume V (en L) en fonction du temps t (en min). Le débit Q (en L/min) est ce qu'on règle : positif, le réservoir se remplit ; négatif, il se vide.</p>
-  <h3>La représentation</h3>
-  <p>Un graphe met une grandeur sur chaque axe, chacune avec son unité. Lire un graphe, c'est d'abord lire ses axes : « V (L) » en ordonnée, « t (min) » en abscisse. La forme de la courbe dit ensuite comment l'une dépend de l'autre.</p>
-  <h3>Les relations à retenir</h3>
-  <ul>
-    <li><strong>Proportionnalité</strong> : départ vide et débit constant, <span data-tex="V = Q\,t">V = Q·t</span>. Une droite qui passe par l'origine ; doubler le temps double le volume. Avec un volume de départ V₀, la relation <span data-tex="V = V_0 + Q\,t">V = V₀ + Q·t</span> reste une droite, mais elle n'est plus proportionnelle : doubler t ne double plus V.</li>
-    <li><strong>La pente</strong>, c'est <span data-tex="\dfrac{\Delta V}{\Delta t}">ΔV / Δt</span> : de combien la grandeur verticale change quand l'horizontale avance d'une unité. Son unité est celle de l'axe vertical divisée par celle de l'axe horizontal : L/min, ici le débit lui-même. <span class="pos">Pente positive</span> : ça monte. <span class="neg">Pente négative</span> : ça descend. <span class="dim">Pente nulle</span> : rien ne change.</li>
-    <li><strong>L'aire sous la courbe</strong> du débit Q(t) vaut le volume ajouté : <span data-tex="\mathrm{\tfrac{L}{min}} \times \mathrm{min} = \mathrm{L}">L/min × min = L</span>. Si le débit change en cours de route, l'aire s'additionne rectangle par rectangle. Une aire sous l'axe compte négativement : c'est de l'eau qui part.</li>
-    <li><strong>Non linéaire</strong> : un réservoir qui se vide par un trou au fond se vide vite quand il est plein (forte pression), puis de plus en plus lentement. La courbe V(t) s'aplatit. Sa pente n'est plus une seule valeur : elle change d'un point à l'autre, et la tangente donne le débit à cet instant.</li>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m01"><b>01</b>Mesure, échelles et représentation scientifique</a></li>
+    <li><a href="#m02"><b>02</b>Vecteurs et géométrie des quantités</a></li>
+    <li><a href="#m03"><b>03</b>Changement et accumulation</a></li>
   </ul>
 
-  <h2 id="vecteurs"><span>C · Vecteurs</span>Une flèche, <em>pas un nombre</em></h2>
-  <h3>Ce que tu vois</h3>
-  <p>Des flèches sur un plan quadrillé, qu'on saisit par la pointe. Leurs composantes, leur longueur et leur angle s'affichent en direct.</p>
-  <h3>La représentation</h3>
-  <p>Une <strong>grandeur scalaire</strong> est entièrement décrite par un nombre et une unité : 20 °C, 70 kg, 3 s. Une <strong>grandeur vectorielle</strong> a aussi une direction : « 5 m » ne dit pas où l'on arrive, seulement que l'on arrive quelque part sur un cercle de 5 m de rayon. La flèche choisit un point. Le déplacement, la vitesse, la force et le champ électrique sont des vecteurs.</p>
-  <h3>Les relations à retenir</h3>
-  <ul>
-    <li>Un vecteur se décrit de deux façons équivalentes : par ses <strong>composantes</strong> <span data-tex="(A_x,\,A_y)">(Ax, Ay)</span>, ou par sa <strong>norme</strong> <span data-tex="\lvert\vec A\rvert">|A|</span> et sa <strong>direction</strong> <span data-tex="\theta">θ</span>. Le passage de l'une à l'autre est le théorème de Pythagore : <span data-tex="\lvert\vec A\rvert = \sqrt{A_x^2 + A_y^2}">|A| = √(Ax² + Ay²)</span>. Une composante a un signe : <span class="pos">positive</span> si elle va vers +x (ou +y), <span class="neg">négative</span> sinon.</li>
-    <li><strong>Additionner deux vecteurs</strong>, c'est les mettre bout à bout. Les composantes s'additionnent comme des nombres (<span data-tex="R_x = A_x + B_x">Rx = Ax + Bx</span>), mais pas les normes : 3 m puis 4 m à angle droit font 5 m, pas 7 m. La somme des normes n'est atteinte que si les deux flèches pointent dans le même sens.</li>
-    <li><strong>Projeter</strong> un vecteur sur une direction, c'est mesurer son ombre le long de cette direction : <span data-tex="F_\parallel = \lvert\vec F\rvert\cos\alpha">F∥ = |F| cos α</span>. Seule cette part de la force fait avancer un wagon sur son rail. Perpendiculaire au rail, la force ne le fait ni avancer ni reculer.</li>
-  </ul>
+  <!-- ===================== Module 01 ===================== -->
+  <section class="module" id="m01">
+    <header>
+      <p class="num">Module 01</p>
+      <h3>Mesure, échelles et représentation scientifique</h3>
+      <p class="etapes">Sur la planche : laboratoire A Échelles (Zoom · Linéaire ou log · Précision) · laboratoire B Graphiques (Proportionnalité · Pente · Aire · Non linéaire)</p>
+    </header>
 
-  <h2 id="mouvement"><span>D · Mouvement</span>Trois graphes, <em>un seul mouvement</em></h2>
-  <h3>Ce que tu vois</h3>
-  <p>Un chariot sur une piste graduée en mètres, et trois graphes alignés sur le même axe du temps : la <strong>position</strong> x(t) en m, la <span class="acc">vitesse</span> v(t) en m/s, l'<span class="lil">accélération</span> a(t) en m/s². On modèle le mouvement en saisissant les paliers de l'accélération ; la vitesse et la position se recalculent aussitôt.</p>
-  <h3>La représentation</h3>
-  <p>Les trois graphes décrivent le même mouvement, à trois niveaux. La position dit <em>où</em> est le chariot. La vitesse dit <em>à quel rythme</em> la position change (m par s). L'accélération dit à quel rythme la vitesse change (m/s par s, donc m/s²). Sur le chariot, les flèches de v et de a rappellent que ce sont des vecteurs : en une dimension, leur signe est leur direction.</p>
-  <h3>Les relations à retenir</h3>
-  <ul>
-    <li><strong>La pente d'un graphe est le graphe du dessous.</strong> La pente de x(t) est la vitesse ; la pente de v(t) est l'accélération. Une sécante entre t et t + Δt donne une pente moyenne, <span data-tex="\Delta x / \Delta t">Δx / Δt</span>. Quand Δt rétrécit, la sécante se confond avec la tangente : sa pente devient la vitesse <em>à cet instant</em>. C'est exactement ce qu'on appelle la <strong>dérivée</strong> : <span data-tex="v = \dfrac{dx}{dt} = \lim_{\Delta t \to 0}\dfrac{\Delta x}{\Delta t}">v = dx/dt</span>.</li>
-    <li><strong>L'aire sous un graphe est le changement du graphe du dessus.</strong> L'aire sous v(t), de 0 à t, vaut le déplacement Δx = x(t) − x₀ (<span data-tex="\mathrm{\tfrac{m}{s}} \times \mathrm{s} = \mathrm{m}">m/s × s = m</span>). L'aire sous a(t) vaut le changement de vitesse Δv. Accumuler de petites tranches v·Δt, c'est l'<strong>intégrale</strong> : <span data-tex="\Delta x = \displaystyle\int_0^t v\,dt">Δx = ∫ v dt</span>.</li>
-    <li>Quelques lectures qualitatives : quand v = 0, x atteint un sommet ou un creux (pente nulle). Quand a et v ont des signes opposés, le chariot ralentit, même si a est « positive ». Une accélération nulle ne veut pas dire immobile : la vitesse est simplement constante.</li>
-  </ul>
-  <div class="eq"><span class="tex-bloc" data-tex="x(t) \xrightarrow{\ \text{pente}\ } \textcolor{#6fd6c8}{v(t)} \xrightarrow{\ \text{pente}\ } \textcolor{#c38bff}{a(t)}">x(t) —pente→ v(t) —pente→ a(t)</span><span class="tex-bloc" data-tex="\textcolor{#c38bff}{a(t)} \xrightarrow{\ \text{aire}\ } \Delta v \qquad \textcolor{#6fd6c8}{v(t)} \xrightarrow{\ \text{aire}\ } \Delta x">a(t) —aire→ Δv ; v(t) —aire→ Δx</span></div>
+    <h4 data-n="1">Intuition</h4>
+    <p>Mesurer, c’est comparer à une référence : « 7,5 µm » veut dire sept fois et demie un micromètre. Un nombre sans unité ne dit rien. Les grandeurs de la nature couvrent des écarts énormes, d’un atome à une galaxie, et le bon réflexe est de compter en facteurs de dix plutôt qu’en différences. Un graphe, lui, met deux grandeurs face à face et laisse l’œil lire leur lien : la pente dit à quelle vitesse l’une change quand l’autre avance, l’aire dit ce qui s’est accumulé. Enfin, toute mesure a une précision limitée, et la dire fait partie du résultat.</p>
 
-  <h2><span>Honnêteté</span>Ce que les laboratoires simplifient</h2>
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Grandeur physique</dt><dd>Propriété qu’on peut mesurer. Elle s’écrit toujours <em>nombre × unité</em>.</dd></div>
+      <div><dt>Unité SI</dt><dd>Référence commune : mètre (m), kilogramme (kg), seconde (s), ampère (A), kelvin (K), mole (mol), candela (cd). Les autres unités s’en déduisent (L, km/h, N).</dd></div>
+      <div><dt>Préfixe</dt><dd>Raccourci pour une puissance de mille : n = 10⁻⁹, µ = 10⁻⁶, m = 10⁻³, k = 10³, M = 10⁶, G = 10⁹, T = 10¹².</dd></div>
+      <div><dt>Notation scientifique</dt><dd>Écriture \(a \times 10^{n}\) avec \(1 \le a \lt 10\). Elle sépare les chiffres de la puissance de dix.</dd></div>
+      <div><dt>Ordre de grandeur</dt><dd>La puissance de dix la plus proche d’une valeur.</dd></div>
+      <div><dt>Dimension</dt><dd>Nature d’une grandeur, indépendante de l’unité choisie : longueur \(\mathsf{L}\), temps \(\mathsf{T}\), masse \(\mathsf{M}\). On note \([v] = \mathsf{L}\,\mathsf{T}^{-1}\).</dd></div>
+      <div><dt>Incertitude \(\Delta x\)</dt><dd>Demi-largeur de l’intervalle où la valeur vraie se trouve probablement, dans l’unité de \(x\).</dd></div>
+      <div><dt>Chiffres significatifs</dt><dd>Chiffres qui portent de l’information : 7,30 en a trois, 7,3 en a deux.</dd></div>
+      <div><dt>Pente</dt><dd>Variation verticale divisée par variation horizontale. Son unité est celle de l’axe vertical sur celle de l’axe horizontal.</dd></div>
+      <div><dt>Aire sous la courbe</dt><dd>Produit des deux axes, cumulé tranche par tranche. Elle a pour unité le produit des unités des axes.</dd></div>
+      <div><dt>Proportionnalité</dt><dd>Relation \(y = k\,x\) : une droite qui passe par l’origine.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ x = a\times 10^{n},\quad 1\le a\lt 10 \;\Rightarrow\; \text{ordre de grandeur} = \begin{cases} 10^{n} & \text{si } a \lt \sqrt{10}\approx 3{,}16\\[2pt] 10^{n+1} & \text{si } a \ge \sqrt{10} \end{cases} \]
+      <p>La frontière est à \(\sqrt{10}\) et non à 5 : sur une échelle logarithmique, le « milieu » entre 1 et 10 est \(\sqrt{10}\). Le rapport de deux grandeurs en crans de dix est \(\log_{10}(x_2/x_1)\).</p></div>
+    <div class="relation">\[ [\text{gauche}] = [\text{droite}], \qquad x = v\,t \;\Rightarrow\; \frac{\mathrm{m}}{\mathrm{s}}\times \mathrm{s} = \mathrm{m} \]
+      <p>Les deux membres d’une égalité ont la même dimension, et on n’additionne que des grandeurs de même dimension. La formule fausse \(x = v/t\) donne des m/s², pas une longueur : l’analyse dimensionnelle la rejette sans calcul.</p></div>
+    <div class="relation">\[ \text{pente} = \frac{\Delta y}{\Delta x}, \qquad \text{aire} = \int y\,\dd x \]
+      <p>Pour un réservoir, la pente de \(V(t)\) est le débit \(Q\) (L/min), et l’aire sous \(Q(t)\) est le volume ajouté (L/min × min = L). Une aire sous l’axe compte négativement. Si la courbe n’est pas une droite, la pente change d’un point à l’autre : la tangente donne la pente à cet instant (module 03).</p></div>
+    <div class="relation">\[ y = k\,x \quad\text{(proportionnelle)}, \qquad y = y_0 + k\,x \quad\text{(affine)} \]
+      <p>Les deux sont des droites. Seule la première passe par l’origine : doubler \(x\) double \(y\). Dans la seconde, la pente est la même, mais doubler \(x\) ne double plus \(y\).</p></div>
+    <div class="relation">\[ x = x_{\text{mesuré}} \pm \Delta x, \qquad \delta = \frac{\Delta x}{\lvert x\rvert}, \qquad \Delta(a+b) = \Delta a + \Delta b \]
+      <p>L’incertitude relative \(\delta\) n’a pas d’unité. Pour une somme, les incertitudes absolues s’ajoutent (majorant simple) ; pour un produit, ce sont les incertitudes relatives. À la lecture d’une graduation, on prend souvent la moitié de la plus petite graduation.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Trois calculs avec les mêmes outils.</p>
+      <ol>
+        <li>Globule rouge (7,5 µm) et humain (1,7 m). Rapport : \(1{,}7 / (7{,}5\times 10^{-6}) \approx 2{,}3\times 10^{5}\), soit \(\log_{10}(2{,}3\times 10^{5}) \approx 5{,}4\) crans de dix. Ordres de grandeur : \(7{,}5 \ge 3{,}16\), donc \(10^{-5}\) m ; \(1{,}7 \lt 3{,}16\), donc \(10^{0}\) m. L’écart est bien de l’ordre de \(10^{5}\).</li>
+        <li>Un réservoir contient 10 L au départ et reçoit 2,5 L/min pendant 12 min. Aire sous \(Q\) : \(2{,}5 \times 12 = 30\) L. Volume final : \(10 + 30 = 40\) L. La pente de \(V(t)\) vaut 2,5 L/min, c’est le débit. La relation est affine : le volume de départ n’est pas nul.</li>
+        <li>Une longueur lue à la règle graduée en mm : \(7{,}3 \pm 0{,}05\) cm. Incertitude relative : \(0{,}05 / 7{,}3 \approx 0{,}0068\), soit environ 0,7 %.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Écrire un nombre sans unité, ou mélanger des unités sans convertir : 90 km/h ne s’additionne pas à 5 m/s tant qu’on n’a pas écrit 90 km/h = 25 m/s.</li>
+      <li>Convertir une aire ou un volume comme une longueur : 1 m² vaut \(10^{4}\) cm², pas \(10^{2}\), et 1 m³ vaut \(10^{6}\) cm³.</li>
+      <li>Confondre une droite et une proportionnalité : \(V = V_0 + Q\,t\) est une droite, mais doubler \(t\) ne double pas \(V\).</li>
+      <li>Lire la hauteur d’une courbe quand la question porte sur sa pente : un graphe peut être très haut et presque plat.</li>
+      <li>Sur un axe logarithmique, lire des différences : des distances égales y signifient des facteurs égaux (×10), pas des ajouts égaux (+10).</li>
+      <li>Donner trop de chiffres significatifs : 7,30 cm affirme qu’on connaît le dixième de millimètre, 7,3 cm non.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>03</b><span>La pente et l’aire d’un graphe deviennent la dérivée et l’intégrale.</span></li>
+      <li><b>05</b><span>Les échelles logarithmiques et les exponentielles : un facteur constant par unité de temps.</span></li>
+      <li><b>07</b><span>Mesurer plusieurs fois, c’est étudier une dispersion : l’incertitude devient statistique.</span></li>
+      <li><b>11</b><span>Le travail d’une force est l’aire sous la courbe \(F(x)\) (planche <a href="../fondations-forces-energie/index.html">Forces, énergie et conservation</a>).</span></li>
+      <li><b>45</b><span>Les distances cosmiques, de l’UA aux milliards d’années-lumière, n’ont de sens qu’en notation scientifique.</span></li>
+      <li><b>33</b><span>La planche du <a href="../03-neurone/index.html">neurone</a> parle en mV et en ms : des préfixes, encore.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Convertis 90 km/h en m/s.</summary>
+      <p>\(90 \times 1000\ \mathrm{m} / 3600\ \mathrm{s} = 25\) m/s. On divise par 3,6 pour passer de km/h à m/s.</p></details>
+    <details><summary>La période d’un pendule est donnée par \(T = 2\pi\sqrt{L/g}\), avec \(L\) une longueur et \(g\) une accélération. La formule est-elle cohérente ?</summary>
+      <p>\(L/g\) a pour unité \(\mathrm{m} / (\mathrm{m/s^2}) = \mathrm{s^2}\), et sa racine donne des secondes : c’est bien un temps. Le facteur \(2\pi\) n’a pas de dimension, l’analyse dimensionnelle ne peut pas le vérifier.</p></details>
+    <details><summary>Un réservoir de 20 L se vide à un débit constant de 1,5 L/min. Combien de temps faut-il, et que représente la pente de \(V(t)\) ?</summary>
+      <p>\(20 / 1{,}5 \approx 13{,}3\) min. La pente de \(V(t)\) vaut \(-1{,}5\) L/min : négative, puisque le volume baisse ; sa valeur absolue est le débit.</p></details>
+  </section>
+
+  <!-- ===================== Module 02 ===================== -->
+  <section class="module" id="m02">
+    <header>
+      <p class="num">Module 02</p>
+      <h3>Vecteurs et géométrie des quantités</h3>
+      <p class="etapes">Sur la planche : laboratoire C Vecteurs (Scalaire ou vecteur · Composantes · Addition · Projection)</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Certaines grandeurs se disent avec un seul nombre : 20 °C, 70 kg, 3 s. D’autres ont aussi une direction : « 5 m » ne dit pas où l’on arrive, seulement qu’on arrive quelque part sur un cercle de 5 m de rayon. Le vecteur est la flèche qui lève l’ambiguïté : sa longueur donne la grandeur, son orientation donne la direction. Deux informations, donc deux façons équivalentes de le décrire : par sa longueur et son angle, ou par ses deux « pattes » le long des axes. Additionner des flèches, c’est les mettre bout à bout, et projeter une flèche, c’est mesurer son ombre sur une direction choisie.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Scalaire</dt><dd>Grandeur décrite par un nombre et une unité : température, masse, durée, énergie.</dd></div>
+      <div><dt>Vecteur \(\vec A\)</dt><dd>Grandeur décrite par une norme, une direction et un sens : déplacement, vitesse, force, champ électrique.</dd></div>
+      <div><dt>Norme (magnitude) \(\lvert\vec A\rvert\)</dt><dd>Longueur de la flèche, toujours positive, dans l’unité du vecteur.</dd></div>
+      <div><dt>Angle \(\theta\)<span class="u">rad ou °</span></dt><dd>Orientation de la flèche, mesurée depuis l’axe \(+x\), dans le sens antihoraire.</dd></div>
+      <div><dt>Composantes \(A_x,\,A_y\)</dt><dd>Les deux parts de la flèche le long des axes. Elles ont un signe : positives vers \(+x\) ou \(+y\), négatives sinon. Même unité que \(\vec A\).</dd></div>
+      <div><dt>Résultante \(\vec R\)</dt><dd>Somme de plusieurs vecteurs.</dd></div>
+      <div><dt>Projection \(A_\parallel\)</dt><dd>Part d’un vecteur le long d’une direction donnée, comptée avec son signe.</dd></div>
+      <div><dt>Produit scalaire \(\vec A\cdot\vec B\)</dt><dd>Nombre qui mesure combien deux vecteurs pointent dans le même sens : \(\lvert\vec A\rvert\,\lvert\vec B\rvert\cos\theta\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ A_x = \lvert\vec A\rvert\cos\theta, \qquad A_y = \lvert\vec A\rvert\sin\theta \]
+      <p>De la norme et de l’angle aux composantes. C’est la trigonométrie du triangle rectangle dont la flèche est l’hypoténuse.</p></div>
+    <div class="relation">\[ \lvert\vec A\rvert = \sqrt{A_x^{2} + A_y^{2}}, \qquad \theta = \operatorname{atan2}(A_y,\,A_x) \]
+      <p>Des composantes à la norme : le théorème de Pythagore. Pour l’angle, tenir compte des signes de \(A_x\) et \(A_y\) donne le bon quadrant ; un simple \(\arctan(A_y/A_x)\) ne distingue pas \((3;4)\) de \((-3;-4)\).</p></div>
+    <div class="relation">\[ R_x = A_x + B_x, \qquad R_y = A_y + B_y \]
+      <p>On additionne les composantes, jamais les normes. La somme des normes n’est atteinte que si les deux flèches pointent dans le même sens ; on a toujours \(\lvert\vec A + \vec B\rvert \le \lvert\vec A\rvert + \lvert\vec B\rvert\).</p></div>
+    <div class="relation">\[ k\,\vec A = (k A_x,\; k A_y), \qquad -\vec A = (-A_x,\,-A_y) \]
+      <p>Multiplier par un nombre étire ou comprime la flèche ; un nombre négatif la retourne. Soustraire, c’est ajouter l’opposé.</p></div>
+    <div class="relation">\[ A_\parallel = \vec A\cdot\hat u = \lvert\vec A\rvert\cos\alpha, \qquad \vec A\cdot\vec B = A_x B_x + A_y B_y \]
+      <p>La projection sur la direction du vecteur unitaire \(\hat u\), à l’angle \(\alpha\) de \(\vec A\). Le produit scalaire se calcule indifféremment avec les angles ou avec les composantes. À 90° la projection est nulle : la partie perpendiculaire n’agit pas sur la direction choisie.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Deux déplacements : \(\vec A = (4\,;\,3)\) m puis \(\vec B = (3\,;\,-2)\) m. Une force de 50 N tire un wagon sur un rail orienté à 20° de la force.</p>
+      <ol>
+        <li>Normes : \(\lvert\vec A\rvert = \sqrt{16 + 9} = 5\) m ; \(\lvert\vec B\rvert = \sqrt{9 + 4} \approx 3{,}61\) m.</li>
+        <li>Résultante : \(\vec R = (4 + 3\,;\,3 - 2) = (7\,;\,1)\) m, donc \(\lvert\vec R\rvert = \sqrt{49 + 1} = \sqrt{50} \approx 7{,}07\) m, à \(\arctan(1/7) \approx 8{,}1°\) au-dessus de l’axe \(+x\).</li>
+        <li>La somme des normes vaudrait \(5 + 3{,}61 = 8{,}61\) m : c’est plus que la vraie distance, puisque les deux flèches ne sont pas alignées.</li>
+        <li>Part utile de la force le long du rail : \(F_\parallel = 50\cos 20° \approx 50 \times 0{,}940 \approx 47{,}0\) N. Part perpendiculaire : \(50\sin 20° \approx 17{,}1\) N. Contrôle : \(47{,}0^{2} + 17{,}1^{2} \approx 2501 \approx 50^{2}\).</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Additionner les normes : 3 m puis 4 m à angle droit font 5 m, pas 7 m.</li>
+      <li>Oublier le signe d’une composante : une composante négative n’est pas une erreur, elle indique le sens.</li>
+      <li>Calculer \(\arctan(A_y/A_x)\) sans regarder le quadrant, et trouver un angle de 53° pour un vecteur qui pointe en bas à gauche.</li>
+      <li>Calculer cos ou sin avec une calculatrice réglée dans la mauvaise unité d’angle (degrés ou radians).</li>
+      <li>Confondre cos et sin dans la projection : avec l’angle mesuré entre le vecteur et la direction, la part parallèle est en cosinus, la part perpendiculaire en sinus.</li>
+      <li>Croire qu’un vecteur est attaché à un endroit : on peut le translater sans le changer, tant qu’on garde sa norme et son orientation.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>10</b><span>Les forces s’additionnent comme des vecteurs ; la résultante fixe l’accélération.</span></li>
+      <li><b>11</b><span>Le travail d’une force est le produit scalaire de la force et du déplacement.</span></li>
+      <li><b>12</b><span>Le couple et le moment cinétique ajoutent une orientation dans l’espace (planche <a href="../fondations-rotation-gravitation/index.html">Rotation, gravitation et orbites</a>).</span></li>
+      <li><b>16</b><span>Un champ vectoriel associe une flèche à chaque point de l’espace (planche <a href="../fondations-flux-fluides/index.html">Flux, gradients, champs et fluides</a>).</span></li>
+      <li><b>21</b><span>Le champ électrique total est la somme vectorielle des champs de chaque charge (planche <a href="../04-champ-electrique/index.html">Champ électrique</a>).</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un vecteur de norme 10 m fait un angle de 30° avec l’axe \(+x\). Quelles sont ses composantes ?</summary>
+      <p>\(A_x = 10\cos 30° \approx 8{,}66\) m et \(A_y = 10\sin 30° = 5{,}00\) m. Vérification : \(\sqrt{8{,}66^{2} + 5^{2}} = \sqrt{100} = 10\) m.</p></details>
+    <details><summary>Additionne \(\vec A = (2\,;\,-1)\) m et \(\vec B = (-5\,;\,4)\) m. Quelle est la norme de la résultante ?</summary>
+      <p>\(\vec R = (-3\,;\,3)\) m, donc \(\lvert\vec R\rvert = \sqrt{9 + 9} = \sqrt{18} \approx 4{,}24\) m. La flèche pointe en haut à gauche, à 135° de l’axe \(+x\).</p></details>
+    <details><summary>Une force de 30 N fait 60° avec le rail. Quelle part fait avancer le wagon ?</summary>
+      <p>\(F_\parallel = 30\cos 60° = 15\) N. La part perpendiculaire, \(30\sin 60° \approx 26\) N, est reprise par le rail et ne fait pas avancer le wagon.</p></details>
+  </section>
+
+  <!-- ===================== Module 03 ===================== -->
+  <section class="module" id="m03">
+    <header>
+      <p class="num">Module 03</p>
+      <h3>Changement et accumulation</h3>
+      <p class="etapes">Sur la planche : laboratoire D Mouvement (réglages Immobile · Vitesse constante · Départ arrêté · Freinage · Aller-retour · Ralentir, s’arrêter, repartir ; regards Pente · Aire · Pente + aire) · laboratoire B Graphiques, modes Pente et Aire</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Un mouvement se raconte à trois niveaux. La position dit où l’on est. La vitesse dit à quel rythme la position change. L’accélération dit à quel rythme la vitesse change. Chaque niveau est le « rythme de changement » du précédent : c’est la dérivée, la pente du graphe. À l’inverse, si l’on connaît le rythme, on retrouve ce qui s’est accumulé en additionnant de petites tranches : c’est l’intégrale, l’aire sous le graphe. Pente et aire sont deux gestes inverses, et ils valent pour n’importe quelle grandeur, pas seulement le mouvement : un débit et un volume, un courant et une charge.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Position \(x(t)\)<span class="u">m</span></dt><dd>Où se trouve l’objet sur l’axe, à l’instant \(t\), par rapport à une origine choisie.</dd></div>
+      <div><dt>Déplacement \(\Delta x\)<span class="u">m</span></dt><dd>Changement de position, \(x(t_2) - x(t_1)\). Il a un signe ; ce n’est pas la distance parcourue.</dd></div>
+      <div><dt>Vitesse moyenne \(\bar v\)<span class="u">m/s</span></dt><dd>Déplacement divisé par la durée : \(\Delta x/\Delta t\). C’est la pente de la sécante.</dd></div>
+      <div><dt>Vitesse \(v(t)\)<span class="u">m/s</span></dt><dd>Vitesse à un instant précis : la pente de la tangente à \(x(t)\). Son signe donne le sens du mouvement.</dd></div>
+      <div><dt>Accélération \(a(t)\)<span class="u">m/s²</span></dt><dd>Rythme de changement de la vitesse : la pente de \(v(t)\).</dd></div>
+      <div><dt>Dérivée</dt><dd>Pente locale d’une courbe, obtenue en rétrécissant l’intervalle \(\Delta t\) vers zéro.</dd></div>
+      <div><dt>Intégrale</dt><dd>Somme d’une infinité de tranches infiniment minces : l’aire sous une courbe, avec son signe.</dd></div>
+      <div><dt>Mouvement uniforme</dt><dd>Vitesse constante, accélération nulle.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ v = \frac{\dd x}{\dd t} = \lim_{\Delta t\to 0}\frac{\Delta x}{\Delta t}, \qquad a = \frac{\dd v}{\dd t} = \frac{\dd^{2}x}{\dd t^{2}} \]
+      <p>Les deux dérivées. Sur un graphe, la vitesse est la pente de \(x(t)\) et l’accélération la pente de \(v(t)\). Quand \(\Delta t\) rétrécit, la sécante se confond avec la tangente.</p></div>
+    <div class="relation">\[ \Delta x = \int_{0}^{t} v\,\dd t, \qquad \Delta v = \int_{0}^{t} a\,\dd t \]
+      <p>Les deux intégrales. L’aire sous \(v(t)\) est le déplacement (m/s × s = m) ; l’aire sous \(a(t)\) est le changement de vitesse (m/s² × s = m/s). Orange au-dessus de zéro, bleu au-dessous dans la simulation : l’aire sous l’axe compte en négatif.</p></div>
+    <div class="relation">\[ x(t) \xrightarrow{\ \text{pente}\ } v(t) \xrightarrow{\ \text{pente}\ } a(t), \qquad a(t) \xrightarrow{\ \text{aire}\ } \Delta v, \quad v(t) \xrightarrow{\ \text{aire}\ } \Delta x \]
+      <p>La pente fait descendre d’un niveau, l’aire fait monter. Les deux se défont l’une l’autre, à une constante près : la valeur de départ, \(x_0\) ou \(v_0\).</p></div>
+    <div class="relation">\[ v = v_0 + a\,t, \qquad x = x_0 + v_0\,t + \tfrac{1}{2}\,a\,t^{2} \]
+      <p>Cas d’une accélération constante, obtenu en intégrant deux fois. La position est alors une parabole. La simulation les applique palier par palier.</p></div>
+    <div class="relation">\[ v^{2} = v_0^{2} + 2\,a\,\Delta x \]
+      <p>Même cas, sans le temps : utile quand on connaît la distance de freinage et non la durée.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Réglage « Freinage » du laboratoire D : départ en \(x_0 = -8\) m avec \(v_0 = 4\) m/s, accélération \(-0{,}5\) m/s² pendant 8 s, puis 0 pendant 2 s.</p>
+      <ol>
+        <li>Vitesse après 8 s : \(v = 4 + (-0{,}5)(8) = 0\) m/s. Le chariot s’arrête.</li>
+        <li>Position après 8 s : \(x = -8 + 4(8) + \tfrac12(-0{,}5)(8)^{2} = -8 + 32 - 16 = 8\) m.</li>
+        <li>Contrôle par l’aire : \(v(t)\) est un triangle de base 8 s et de hauteur 4 m/s, d’aire \(\tfrac12 \times 8 \times 4 = 16\) m, donc \(x = -8 + 16 = 8\) m. La vitesse moyenne est \(16/8 = 2\) m/s, la moyenne de 4 et 0.</li>
+        <li>Contrôle sans le temps : \(v^{2} = v_0^{2} + 2a\,\Delta x\) donne \(0 = 16 - 2(0{,}5)\,\Delta x\), soit \(\Delta x = 16\) m.</li>
+        <li>De 8 s à 10 s, \(a = 0\) et \(v = 0\) : le chariot reste en \(x = 8\) m.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire qu’une accélération nulle veut dire « immobile » : la vitesse est simplement constante, éventuellement non nulle.</li>
+      <li>Croire qu’une accélération positive veut dire « va plus vite » : si \(a\) et \(v\) ont des signes opposés, le chariot ralentit.</li>
+      <li>Penser que \(v = 0\) veut dire \(a = 0\) : au sommet d’un lancer vertical, la vitesse est nulle et l’accélération vaut encore \(-9{,}8\) m/s².</li>
+      <li>Lire la hauteur de \(x(t)\) comme la vitesse : c’est sa pente qui compte. Un sommet ou un creux de \(x(t)\) correspond à \(v = 0\).</li>
+      <li>Confondre déplacement et distance parcourue : un aller-retour peut avoir un déplacement nul. La distance est l’aire sous \(\lvert v\rvert\).</li>
+      <li>Utiliser \(x = x_0 + v_0 t + \tfrac12 a t^{2}\) quand l’accélération change : la formule suppose \(a\) constante, il faut découper en paliers.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>04</b><span>Une équation d’évolution relie un taux de changement à l’état du système : c’est une dérivée qui dépend de la valeur actuelle (planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>).</span></li>
+      <li><b>10</b><span>La deuxième loi de Newton relie la force résultante à l’accélération : tout le laboratoire D est la cinématique dont elle a besoin (planche <a href="../fondations-forces-energie/index.html">Forces, énergie et conservation</a>).</span></li>
+      <li><b>11</b><span>La puissance est le rythme de changement de l’énergie, l’impulsion est l’aire sous la force dans le temps.</span></li>
+      <li><b>22</b><span>Le courant est la pente de la charge, \(I = \dd q/\dd t\) ; la charge accumulée est l’aire sous \(I(t)\).</span></li>
+      <li><b>16</b><span>Les flux et les gradients sont des dérivées et des intégrales dans l’espace plutôt que dans le temps.</span></li>
+      <li><b>46</b><span>La relativité restreinte repose sur une définition précise de la position et de la vitesse dans un référentiel.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Sur un graphe \(x(t)\), la courbe est une droite qui descend. Que valent \(v\) et \(a\) ?</summary>
+      <p>La pente est constante et négative : la vitesse est constante et négative, le mobile recule à rythme régulier. La vitesse ne change pas, donc l’accélération est nulle.</p></details>
+    <details><summary>Une position suit \(x(t) = 3t^{2}\) (en m, avec \(t\) en s). Quelles sont la vitesse et l’accélération à \(t = 2\) s ?</summary>
+      <p>\(v = \dd x/\dd t = 6t = 12\) m/s et \(a = \dd v/\dd t = 6\) m/s², constante. On retrouve la forme \(x = \tfrac12 a t^{2}\) avec \(a = 6\) m/s².</p></details>
+    <details><summary>Le réglage « Ralentir, s’arrêter, repartir » donne \(a = -1{,}5 ; 0 ; 0 ; +1{,}5 ; 0\) m/s² sur cinq paliers de 2 s, avec \(x_0 = -8\) m et \(v_0 = 3\) m/s. Où est le chariot à \(t = 10\) s ?</summary>
+      <p>Palier 1 : \(v\) passe de 3 à 0, déplacement \(\tfrac12 \times 3 \times 2 = 3\) m. Paliers 2 et 3 : arrêt. Palier 4 : \(v\) passe de 0 à 3 m/s, déplacement 3 m. Palier 5 : \(v = 3\) m/s pendant 2 s, soit 6 m. Total : \(3 + 3 + 6 = 12\) m, donc \(x = -8 + 12 = 4\) m.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que les laboratoires simplifient</h2>
   <ul>
-    <li><strong>Tailles.</strong> Les objets de l'explorateur d'échelles ont une taille typique arrondie : une bactérie, un virus ou un immeuble varient d'un facteur deux ou plus. Les silhouettes sont schématiques et centrées au même point pour la comparaison, pas placées comme dans la réalité.</li>
-    <li><strong>Mesure.</strong> L'incertitude affichée est celle de la lecture seule (½ graduation). Une vraie mesure ajoute d'autres sources : instrument mal étalonné, objet mal aligné, répétabilité.</li>
+    <li><strong>Tailles.</strong> Les objets de l’explorateur d’échelles ont une taille typique arrondie : une bactérie, un virus ou un immeuble varient d’un facteur deux ou plus. Les silhouettes sont schématiques et centrées au même point pour la comparaison, pas placées comme dans la réalité.</li>
+    <li><strong>Mesure.</strong> L’incertitude affichée est celle de la lecture seule (½ graduation). Une vraie mesure ajoute d’autres sources : instrument mal étalonné, objet mal aligné, répétabilité.</li>
     <li><strong>Réservoir.</strong> Débit idéal, sans délai ni éclaboussure. La vidange par le fond suit une loi simplifiée (débit proportionnel à la racine du volume), sans les constantes réelles du trou ni la forme du réservoir.</li>
-    <li><strong>Vecteurs.</strong> Deux dimensions seulement. On parle de projection sans nommer le produit scalaire, et d'angle sans développer la trigonométrie.</li>
-    <li><strong>Mouvement.</strong> Une seule dimension, et une accélération constante par morceaux : elle saute d'une valeur à l'autre instantanément, ce qu'aucun vrai véhicule ne fait (il faudrait une force qui change en un instant). En revanche, à l'intérieur du modèle, tout est exact : v et x sont calculées analytiquement, pas approchées image par image.</li>
+    <li><strong>Vecteurs.</strong> Deux dimensions seulement. La projection est présentée par l’ombre d’une flèche sur un rail ; le produit scalaire n’est pas manipulé en tant que tel, et la trigonométrie reste réduite à l’essentiel.</li>
+    <li><strong>Mouvement.</strong> Une seule dimension, et une accélération constante par morceaux : elle saute d’une valeur à l’autre instantanément, ce qu’aucun vrai véhicule ne fait (il faudrait une force qui change en un instant). En revanche, à l’intérieur du modèle, tout est exact : v et x sont calculées analytiquement, pas approchées image par image.</li>
   </ul>
 
-  <h2><span>Ordres de grandeur</span>Les chiffres à retenir</h2>
+  <h2><span>4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
-    <div><b>10⁻¹⁰ m</b><span>la taille d'un atome. Une cellule humaine fait de 10 à 100 µm, cent mille à un million de fois plus.</span></div>
-    <div><b>1,5 × 10¹¹ m</b><span>la distance Terre–Soleil, une unité astronomique (UA). L'explorateur couvre environ 23 ordres de grandeur, de l'atome à l'orbite de Neptune.</span></div>
-    <div><b>9,8 m/s²</b><span>l'accélération de la chute libre près du sol : la vitesse d'un objet qui tombe augmente de 9,8 m/s à chaque seconde.</span></div>
-    <div><b>100 km/h ≈ 28 m/s</b><span>la même vitesse dans deux unités : 100 000 m / 3600 s. Changer d'unité ne change pas la grandeur.</span></div>
+    <div><b>10⁻¹⁰ m</b><span>la taille d’un atome. Une cellule humaine fait de 10 à 100 µm, cent mille à un million de fois plus.</span></div>
+    <div><b>1,5 × 10¹¹ m</b><span>la distance Terre–Soleil, une unité astronomique (UA). L’explorateur couvre environ 23 ordres de grandeur, de l’atome à l’orbite de Neptune.</span></div>
+    <div><b>9,8 m/s²</b><span>l’accélération de la chute libre près du sol : la vitesse d’un objet qui tombe augmente de 9,8 m/s à chaque seconde.</span></div>
+    <div><b>100 km/h ≈ 28 m/s</b><span>la même vitesse dans deux unités : 100 000 m / 3600 s. Changer d’unité ne change pas la grandeur.</span></div>
     <div><b>3,0 × 10⁸ m/s</b><span>la vitesse de la lumière dans le vide, la plus grande vitesse de la physique.</span></div>
   </div>
 
-  <h2><span>Et ensuite</span>Ce que ces notions permettront de lire</h2>
-  <div class="suite">
-    <div><b>Mécanique</b><span>Les forces sont des vecteurs qui s'additionnent ; la deuxième loi de Newton relie la force résultante à l'accélération. Tout le laboratoire D est la cinématique dont la mécanique a besoin.</span></div>
-    <div><b>Champs</b><span>Un champ est un vecteur en chaque point de l'espace. Dans <a href="../04-champ-electrique/index.html">la planche du champ électrique</a>, les contributions de chaque charge s'additionnent bout à bout, composante par composante.</span></div>
-    <div><b>Énergie</b><span>Le travail d'une force est sa projection le long du déplacement, multipliée par ce déplacement ; quand la force varie, c'est l'aire sous F(x). La puissance est la pente de l'énergie dans le temps.</span></div>
-    <div><b>Ondes</b><span>Une onde se lit sur deux graphes, u(x) à un instant et u(t) en un point. Dans <a href="../05-ondes-interferences/index.html">la planche des ondes</a>, λ se mesure en cm et l'intensité se compare souvent sur une échelle logarithmique (décibels).</span></div>
-    <div><b>Circuits</b><span>Le courant est la pente de la charge (I = dq/dt) ; la charge accumulée est l'aire sous I(t). <a href="../03-neurone/index.html">Le neurone</a> parle en mV et en ms : des préfixes, encore.</span></div>
-    <div><b>Thermodynamique</b><span>Le travail d'un gaz est l'aire sous la courbe pression–volume ; les échelles de température se convertissent comme des unités.</span></div>
-    <div><b>Astrophysique</b><span>Les distances vont de l'UA à des milliards d'années-lumière ; sans notation scientifique ni échelle logarithmique, aucun graphe n'y tiendrait.</span></div>
-  </div>
-
-  <h2><span>Teste-toi</span>Quatre questions</h2>
-  <details><summary>Sur un graphe x(t), la courbe est une droite qui descend. Que valent v et a ?</summary>
-    <p>La pente est constante et négative : la vitesse est constante et négative, le mobile recule à rythme régulier. La vitesse ne change pas, donc l'accélération est nulle.</p></details>
-  <details><summary>Deux déplacements de 3 m et de 4 m : quelle distance finale peut-on obtenir ?</summary>
-    <p>N'importe quelle valeur entre 1 m (sens opposés) et 7 m (même sens). À angle droit, <span data-tex="\sqrt{3^2 + 4^2} = 5\ \mathrm{m}">√(3² + 4²) = 5 m</span>. La direction compte autant que la longueur.</p></details>
-  <details><summary>L'aire sous a(t) entre 0 et 4 s vaut 8. En quelle unité, et qu'est-ce qu'elle représente ?</summary>
-    <p>m/s² × s = m/s. C'est le changement de vitesse : le mobile va 8 m/s plus vite (dans le sens +x) à 4 s qu'au départ, quelle que soit sa vitesse initiale.</p></details>
-  <details><summary>Quelqu'un propose x = v · t². La formule peut-elle être juste ?</summary>
-    <p>Non : <span data-tex="\mathrm{\tfrac{m}{s}} \times \mathrm{s}^2 = \mathrm{m\cdot s}">m/s × s² = m·s</span>, qui n'est pas une longueur. L'analyse dimensionnelle la rejette sans calcul. La formule correcte pour une accélération constante depuis l'arrêt, <span data-tex="x = \tfrac12 a t^2">x = ½ a t²</span>, donne bien <span data-tex="\mathrm{\tfrac{m}{s^2}} \times \mathrm{s}^2 = \mathrm{m}">m/s² × s² = m</span>.</p></details>
-
   <a class="cta" href="index.html"><span>Retour aux laboratoires</span><span aria-hidden="true">&rarr;</span></a>
 </div>
-<script>
-// Formules : KaTeX si disponible, sinon le texte Unicode de repli reste affiché.
-if (window.katex) document.querySelectorAll('[data-tex]').forEach(el => {
-  try { katex.render(el.dataset.tex, el, { throwOnError: false, displayMode: el.classList.contains('tex-bloc'), output: 'html' }); } catch (e) {}
-});
-</script>
 </body>
 </html>

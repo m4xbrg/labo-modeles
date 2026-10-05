@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comprendre l'évolution des populations — Fondations 40</title>
+<title>Comprendre l'évolution des populations — LABO</title>
 <meta name="description" content="La théorie derrière la planche Évolution et génétique des populations : variation, hérédité, fitness relative, sélection, fréquences d'allèles, Hardy-Weinberg, dérive génétique, effet fondateur, goulot, mutation et flux génétique.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,11 +69,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 .cta:hover{background:var(--accent);color:var(--fond)}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}code,.m{white-space:normal}.piege{grid-template-columns:1fr}.piege div:nth-child(odd){border-bottom:none;padding-bottom:0}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../index.html">Accueil de la série</a></nav>
-  <p class="serie">Fondations — module 40</p>
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 40</p>
   <h1>Comprendre l'évolution des <em>populations</em></h1>
   <p class="lede">Une idée fausse très répandue : les êtres vivants se transformeraient parce qu'ils « ont besoin » de s'adapter. Rien dans la planche ne fonctionne comme ça. Aucun individu ne change de trait, aucun gène ne sait ce qui serait utile. Ce qui change, c'est la <strong>composition</strong> d'une population, génération après génération : quelles variantes sont fréquentes, lesquelles sont rares. L'évolution est un changement statistique. Elle a deux grands moteurs, la sélection et le hasard, et la planche les fait tourner séparément puis ensemble.</p>
 
@@ -97,112 +99,100 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <dd>Des aires empilées : à chaque génération, la hauteur de chaque couleur est la fréquence de cet allèle. Une mutation y naît comme un filet très fin.</dd>
   </dl>
 
-  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m40"><b>40</b>Évolution et génétique des populations</a></li>
+  </ul>
 
-  <h3><small>Chapitre A</small>Une population, pas un individu</h3>
-  <p>À chaque génération, trois choses arrivent, dans cet ordre : certains individus meurent avant de se reproduire (la probabilité dépend de leur coloration et du terrain) ; les survivants ont des descendants qui leur ressemblent ; la génération des parents disparaît. Rien d'autre. Personne ne fonce ni ne pâlit. Pourtant, sur un terrain sombre, la coloration moyenne descend de génération en génération : les individus clairs, plus visibles, laissent en moyenne moins de descendants, et la population se recompose.</p>
-  <p>En A2 on sépare ce qui est vu de ce qui est transmis. Si toute la variation de coloration vient de l'environnement (h² = 0), la sélection trie bien les individus à chaque génération, mais leurs descendants n'héritent pas de la différence : la moyenne ne bouge pas. Sélection sans hérédité ne produit pas d'évolution.</p>
+  <!-- ===================== Module 40 ===================== -->
+  <section class="module" id="m40">
+    <header>
+      <p class="num">Module 40</p>
+      <h3>Évolution et génétique des populations</h3>
+      <p class="etapes">Sur la planche : étapes A1 Composition · A2 Hérédité · B1 Fitness · C1 Fréquences · C2 Sélection · D1 Dérive · D2 Sél.+dérive · E1 Fondateur · E2 Goulot · F1 Mutation · G1 Espace</p>
+    </header>
 
-  <h3><small>Chapitre B</small>Sélection</h3>
-  <p>La courbe de survie dit, pour chaque coloration, la probabilité d'atteindre l'âge de se reproduire. Ce qui compte pour la composition future, ce n'est pas sa hauteur absolue, c'est la comparaison avec la moyenne w̄ : un variant dont la survie dépasse w̄ gagne en fréquence, un variant sous w̄ en perd. Le bouton « environnement rude » divise toutes les survies par deux : la population souffre, mais sa composition évolue exactement comme avant. Trois formes de sélection apparaissent selon le terrain : <em>directionnelle</em> (la moyenne glisse), <em>stabilisante</em> (les extrêmes sont éliminés, la distribution se resserre), <em>disruptive</em> (les intermédiaires sont éliminés, la distribution s'étale ou se dédouble).</p>
+    <h4 data-n="1">Intuition</h4>
+    <p>Aucun individu n’évolue : chacun garde ses gènes toute sa vie. Ce qui change, c’est la <em>composition</em> d’une population. Deux moteurs la font bouger. La <strong>sélection</strong> est un biais : certaines variantes laissent plus de descendants que d’autres, dans un environnement donné. La <strong>dérive</strong> est un hasard : une génération finie n’est qu’un échantillon de la précédente, et les proportions fluctuent, surtout si la population est petite. Elle n’a ni but ni prévoyance : elle trie ce qui existe, et suppose variation et hérédité.</p>
 
-  <h3><small>Chapitre C</small>Fréquences d'allèles</h3>
-  <p>On quitte le trait continu pour un seul gène à deux variantes. La population devient un réservoir de 2N copies. Si les copies s'apparient au hasard, les génotypes suivent les aires du carré de Punnett proportionnel : AA avec la probabilité p², aa avec q², Aa avec 2pq. En C2, l'allèle A donne un petit avantage : sa fréquence monte en S, lentement quand il est rare (peu d'individus le portent, la sélection a peu de prise), vite au milieu, lentement à la fin.</p>
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Variante, trait</dt><dd>Caractère mesurable (coloration, taille) et valeur possible de ce caractère.</dd></div>
+      <div><dt>Allèle</dt><dd>Version d’un gène (séquence d’ADN à un endroit donné). Un diploïde en porte deux copies, une par parent.</dd></div>
+      <div><dt>Génotype \(g\)</dt><dd>Information génétique d’un individu, transmise aux descendants.</dd></div>
+      <div><dt>Phénotype \(z\)</dt><dd>Caractère observable, produit par le génotype et l’environnement (modèle additif : \(z = g + e\)). C’est ce que la sélection « voit ».</dd></div>
+      <div><dt>Héritabilité \(h^2\)</dt><dd>Part de la variance du trait due aux différences génétiques, entre 0 et 1. Elle décrit une population, pas un individu.</dd></div>
+      <div><dt>Différentielle de sélection \(S\)<span class="u">unité du trait</span></dt><dd>Écart entre la moyenne des parents reproducteurs et celle de la population.</dd></div>
+      <div><dt>Réponse à la sélection \(R\)<span class="u">unité du trait</span></dt><dd>Déplacement de la moyenne d’une génération à la suivante.</dd></div>
+      <div><dt>Fitness \(w\)</dt><dd>Succès reproductif moyen d’une variante. Seule compte la fitness <em>relative</em> \(w/\bar{w}\), rapportée à la moyenne \(\bar{w}\) de la population.</dd></div>
+      <div><dt>Coefficient de sélection \(s\)</dt><dd>Avantage de fitness : AA vaut \(1+s\), Aa vaut \(1+s/2\), aa vaut 1.</dd></div>
+      <div><dt>Fréquences \(p\), \(q\)</dt><dd>Proportions des allèles A et a parmi les \(2N\) copies de \(N\) diploïdes : \(p = n(\mathrm{A})/2N\), et \(p + q = 1\).</dd></div>
+      <div><dt>Dérive, fixation</dt><dd>Dérive : variation de fréquence due au seul échantillonnage. Un allèle est fixé à la fréquence 1, perdu à 0.</dd></div>
+      <div><dt>Effet fondateur, goulot</dt><dd>Fondateur : une colonie de \(k\) individus emporte un petit échantillon de la source. Goulot : la population s’effondre puis repousse depuis les rares survivants.</dd></div>
+      <div><dt>Diversité \(H\)</dt><dd>\(H = 1 - \sum p_i^2\) : probabilité que deux copies tirées au hasard diffèrent.</dd></div>
+      <div><dt>Mutation, migration \(m\)</dt><dd>Mutation : erreur de copie, rare et aveugle à l’environnement, qui crée des variantes. Migration : fraction de copies venue d’une autre population à chaque génération.</dd></div>
+    </dl>
 
-  <h3><small>Chapitre D</small>Dérive génétique</h3>
-  <p>Ici, aucun avantage : les copies <span class="A">A</span> et <span class="a">a</span> ont exactement les mêmes chances. Mais une génération finie est un <em>échantillon</em> de la précédente : certaines copies sont recopiées deux ou trois fois, d'autres zéro. La fréquence fait donc une marche aléatoire, jusqu'à ce qu'un allèle disparaisse et que l'autre soit <strong>fixé</strong> (fréquence 1). Vingt populations identiques au départ divergent ; plus elles sont petites, plus vite. En D2, sélection et dérive agissent ensemble : un allèle avantageux peut se perdre par malchance dans une petite population, alors qu'il gagne presque à coup sûr dans une grande.</p>
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ R \approx h^2\,S \]
+      <p>L’équation de l’éleveur. Si \(h^2 = 0\), les descendants n’héritent de rien : la moyenne ne bouge pas (étape A2).</p></div>
+    <div class="relation">\[ p^2 + 2pq + q^2 = (p+q)^2 = 1 \]
+      <p>Hardy-Weinberg : à appariement aléatoire, AA vaut \(p^2\), Aa vaut \(2pq\), aa vaut \(q^2\). Sans sélection, dérive, mutation ni migration, les fréquences restent fixes : modèle nul (étape C1).</p></div>
+    <div class="relation">\[ \Delta p = \frac{pq\,(s/2)}{\bar{w}} \approx \frac{s}{2}\,p\,q \]
+      <p>Sélection sur un allèle, pour \(s\) petit. Le produit \(pq\) est petit aux deux bouts : d’où la courbe en S, comme la logistique (étape C2).</p></div>
+    <div class="relation">\[ n(\mathrm{A}) \sim \mathrm{Binomiale}(2N,\,p), \qquad \sigma(\Delta p) = \sqrt{\frac{pq}{2N}} \]
+      <p>Dérive : chaque génération tire ses \(2N\) copies au hasard parmi les anciennes. Un allèle neutre se fixe avec la probabilité \(p\) : une nouvelle mutation, une fois sur \(2N\) (étape D1).</p></div>
+    <div class="relation">\[ H_t = H_0\left(1 - \frac{1}{2N}\right)^t \approx H_0\,\mathrm{e}^{-t/2N} \]
+      <p>La dérive érode la diversité à taux constant : demi-vie \(\approx 1{,}4\,N\) générations. Goulots et fondateurs en sont le cas extrême (étapes E1, E2).</p></div>
+    <div class="relation">\[ P_{\text{fix}} \approx \frac{1 - \mathrm{e}^{-2Ns\,p}}{1 - \mathrm{e}^{-2Ns}} \]
+      <p>Sélection contre dérive (approximation de Kimura, seulement nommée). Si \(Ns \ll 1\), l’allèle se comporte comme un neutre ; si \(Ns \gg 1\), la sélection domine (étape D2).</p></div>
 
-  <h3><small>Chapitre E</small>Fondateur et goulot</h3>
-  <p>Quelques individus partent fonder une colonie : ils emportent un échantillon des copies du continent, et un petit échantillon reproduit mal les proportions (des allèles rares manquent, d'autres sont surreprésentés). Une population qui s'effondre puis repousse subit la même chose dans le temps : pendant le goulot, la dérive est très forte et des allèles disparaissent ; quand la population repousse, ses membres descendent tous des rares survivants. La taille revient, la diversité perdue ne revient pas. Ces deux effets ne sont pas des règles à part : ce sont l'échantillonnage et la dérive, poussés à l'extrême.</p>
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p><strong>Trait héritable.</strong> Des papillons ont une envergure moyenne de 10,0 mm. Les parents retenus ont en moyenne 12,0 mm, avec \(h^2 = 0{,}4\).</p>
+      <ol>
+        <li>\(S = 12{,}0 - 10{,}0 = 2{,}0\) mm.</li>
+        <li>\(R \approx h^2 S = 0{,}4 \times 2{,}0 = 0{,}8\) mm : la moyenne suivante est d’environ 10,8 mm.</li>
+      </ol>
+      <p><strong>Un gène, \(N = 50\) diploïdes, soit 100 copies.</strong> L’allèle A est en 30 copies : \(p = 0{,}3\) et \(q = 0{,}7\).</p>
+      <ol>
+        <li>Hardy-Weinberg : AA \(= 0{,}09\), Aa \(= 2 \times 0{,}3 \times 0{,}7 = 0{,}42\), aa \(= 0{,}49\). Total : 1.</li>
+        <li>Avec \(s = 0{,}1\) : \(\Delta p \approx 0{,}05 \times 0{,}21 \approx 0{,}0105\). Le calcul exact avec \(\bar{w} = 1{,}03\) donne \(0{,}0102\).</li>
+        <li>Dérive : \(\sigma(\Delta p) = \sqrt{0{,}21/100} \approx 0{,}046\), environ quatre fois le déplacement dû à la sélection. D’une génération à l’autre le hasard domine ; à long terme, avec \(2Ns = 10\), la sélection l’emporte presque toujours (\(P_{\text{fix}} \approx 0{,}95\)).</li>
+      </ol>
+      <p><strong>Un fondateur.</strong> Une colonie de \(k = 5\) individus emporte \(2k = 10\) copies. Un allèle rare de fréquence 0,02 est absent de l’échantillon avec la probabilité \(0{,}98^{10} \approx 0{,}82\). La diversité attendue tombe à \(H_0\,(1 - 1/10) = 0{,}9\,H_0\).</p>
+    </div>
 
-  <h3><small>Chapitre F</small>Mutation et flux génétique</h3>
-  <p>La dérive et la sélection ne font que trier des variantes qui existent déjà. Les nouvelles viennent de la <strong>mutation</strong> : une erreur de copie, rare, qui tombe au hasard sur une copie, sans rapport avec ce qui serait utile. La plupart des nouvelles variantes disparaissent par dérive en quelques générations ; quelques-unes s'étendent. Entre deux populations séparées, la dérive creuse des différences ; la <strong>migration</strong> (ou flux génétique : des individus ou des gamètes qui passent de l'une à l'autre) les recoud.</p>
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« Les girafes ont allongé leur cou. » Aucun individu ne modifie ses gènes : des variantes déjà présentes ont laissé plus de descendants.</li>
+      <li>« La mutation apparaît quand elle est utile. » Elle tombe au hasard, à un taux indépendant de l’utilité.</li>
+      <li>« L’évolution va vers le progrès. » La sélection ne trie que les variantes présentes, sans direction propre, et sa direction change avec le terrain.</li>
+      <li>« Fitness = le plus fort. » C’est un succès reproductif relatif, dans un environnement donné. Multiplier toutes les fitness par le même facteur (« environnement rude », B1) ne change aucune fréquence.</li>
+      <li>« Toute différence entre populations vient de la sélection. » Deux îles peuplées par des échantillons différents divergent sans aucun avantage : fondateur et dérive suffisent.</li>
+      <li>« Après un goulot, la taille est revenue, donc la diversité aussi. » Les allèles perdus ne reviennent que par mutation (très lente) ou par migration.</li>
+    </ul>
 
-  <h2><span>3</span>Les idées, une par une</h2>
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>04</b><span>La logistique \(\dd N/\dd t = rN(1 - N/K)\) a la même forme que \(\Delta p \approx (s/2)pq\) : rétroaction positive puis saturation.</span></li>
+      <li><b>05</b><span>La perte de diversité \(\mathrm{e}^{-t/2N}\) est une décroissance exponentielle, avec sa demi-vie.</span></li>
+      <li><b>07</b><span>Une fréquence observée fluctue autour de la vraie proportion : l’échantillonnage, comme les dés.</span></li>
+      <li><b>35, 36</b><span>Gènes, allèles et copie de l’ADN, où naissent les mutations (voir la planche <a href="../08-replication-adn/index.html">La réplication de l’ADN</a>).</span></li>
+      <li><b>41, 42</b><span>Sans mélange parfait (étape G1), ce qui se propage suit la structure des contacts. Voir <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>.</span></li>
+    </ul>
 
-  <div class="idee"><b class="n">Individu et population</b>
-    <p>Un individu naît avec un génotype et le garde toute sa vie. Une population est un ensemble d'individus qui se reproduisent entre eux. C'est elle qui évolue : sa composition change d'une génération à la suivante.</p>
-    <p><span class="k">Dans la page</span>A1, l'individu suivi : son trait ne bouge pas, la moyenne de la population, si.</p></div>
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Une population de papillons devient plus sombre en 30 générations. Un papillon a-t-il foncé ?</summary>
+      <p>Non. Chaque papillon garde sa couleur. Les sombres ont laissé plus de descendants, qui leur ressemblent : leur proportion a augmenté.</p></details>
+    <details><summary>Dans une population, \(p = 0{,}2\). Quelles proportions de génotypes attend-on sous Hardy-Weinberg ?</summary>
+      <p>AA : \(0{,}2^2 = 0{,}04\). Aa : \(2 \times 0{,}2 \times 0{,}8 = 0{,}32\). aa : \(0{,}8^2 = 0{,}64\). Total : 1.</p></details>
+    <details><summary>Un allèle avantageux (\(s = 0{,}02\)) apparaît en une seule copie dans une grande population. Est-il sûr de s’imposer ?</summary>
+      <p>Non. Sa probabilité de fixation est d’environ \(s = 2\,\%\) : en quelques copies, le hasard peut l’éliminer avant que la sélection ait prise.</p></details>
+  </section>
 
-  <div class="idee"><b class="n">Trait, variante, allèle</b>
-    <p>Un <em>trait</em> est un caractère qu'on peut mesurer (coloration, taille). Une <em>variante</em> est une valeur ou une forme possible de ce trait. Un <em>allèle</em> est une version d'un gène, c'est-à-dire une séquence d'ADN à un endroit donné du génome. Un trait peut dépendre de nombreux gènes et de l'environnement : un allèle n'est pas un trait visible.</p></div>
-
-  <div class="idee"><b class="n">Génotype et phénotype</b>
-    <p>Le <em>génotype</em> est l'information génétique d'un individu (ici, ses deux copies du gène, ou sa valeur génétique g). Le <em>phénotype</em> est le caractère observable, produit par le génotype <em>et</em> l'environnement. La sélection voit les phénotypes ; l'hérédité transmet les génotypes.</p>
-    <div class="eq">phénotype = génotype + environnement<small>modèle additif de la planche : z = g + e</small></div></div>
-
-  <div class="idee"><b class="n">Variation et héritabilité</b>
-    <p>Sans variation, rien à trier. Sans hérédité, le tri ne se transmet pas. L'<em>héritabilité</em> h² est la part de la variance du trait due aux différences génétiques. La réponse à la sélection R (le déplacement de la moyenne d'une génération à la suivante) est environ la différentielle de sélection S (l'écart entre la moyenne des parents qui se reproduisent et celle de toute la population), multipliée par h².</p>
-    <div class="eq">R ≈ h² · S<small>« équation de l'éleveur » ; h² = 0 ⇒ aucune réponse, quelle que soit la sélection</small></div>
-    <p><span class="k">Limite</span>h² décrit une population dans un environnement donné ; elle ne dit pas « à quel point un trait est génétique » chez un individu.</p></div>
-
-  <div class="idee"><b class="n">Fitness relative</b>
-    <p>La <em>fitness</em> d'un variant est son succès reproductif : combien de descendants il laisse, en moyenne. Ce qui fait changer les fréquences, c'est la fitness <em>relative</em>, w/w̄, rapportée à la moyenne de la population. Multiplier toutes les fitness par le même facteur ne change rien aux fréquences.</p>
-    <div class="eq">fréquence après sélection = fréquence avant × w / w̄</div>
-    <p>La fitness n'est ni la force, ni la santé, ni une qualité absolue : la même coloration est avantageuse sur un terrain et désavantageuse sur l'autre.</p></div>
-
-  <div class="idee"><b class="n">Sélection</b>
-    <p>La sélection est un <em>biais</em> systématique dans la reproduction : certains variants laissent, en moyenne, plus de descendants que d'autres, dans un environnement donné. Elle n'a pas de but et ne voit pas l'avenir ; elle trie ce qui existe, génération par génération. Selon la forme de la courbe de fitness : directionnelle, stabilisante ou disruptive.</p></div>
-
-  <div class="idee"><b class="n">Fréquence allélique</b>
-    <p>Une fréquence est une proportion de copies : le nombre de copies de A divisé par le nombre total de copies du gène dans la population (2N chez des diploïdes). Avec deux allèles, les deux fréquences se complètent.</p>
-    <div class="eq">p = n(A) / 2N      q = n(a) / 2N      p + q = 1</div></div>
-
-  <div class="idee"><b class="n">Hardy-Weinberg, le modèle nul</b>
-    <p>Si les copies se rencontrent au hasard (comme deux tirages indépendants dans un même réservoir), la probabilité de tirer A puis A est p·p, celle de tirer a puis a est q·q, celle d'obtenir un hétérozygote est p·q + q·p. C'est le carré de Punnett proportionnel de C1, et les quatre aires font le carré entier :</p>
-    <div class="eq">p² + 2pq + q² = (p + q)² = 1</div>
-    <p>Sans sélection, sans dérive, sans mutation ni migration, les fréquences ne changent pas. Ce n'est pas une loi de l'évolution : c'est la référence qui permet de repérer ce qui la fait bouger.</p></div>
-
-  <div class="idee"><b class="n">La sélection sur un allèle : une logistique</b>
-    <p>Avec les fitness de la planche (AA : 1 + s, Aa : 1 + s/2, aa : 1) et s petit, la fréquence de A change d'environ</p>
-    <div class="eq">Δp ≈ (s/2) · p · q<small>c'est la croissance logistique de 4·5·7 (dN/dt = rN(1 − N/K)) avec p à la place de N/K</small></div>
-    <p>D'où la courbe en S de C2 : lente quand A est rare, rapide au milieu, lente près de la fixation.</p></div>
-
-  <div class="idee"><b class="n">Dérive génétique</b>
-    <p>À chaque génération, les 2N nouvelles copies sont tirées au hasard parmi les anciennes : le nombre de copies de A suit une loi binomiale. C'est exactement l'entonnoir des dés du module 7 : une fréquence observée sur un échantillon fluctue autour de la vraie proportion, avec un écart-type en racine de p·q sur la taille de l'échantillon.</p>
-    <div class="eq">n(A) ~ Binomiale(2N, p)      écart-type de Δp = √(p·q / 2N)</div>
-    <p>Ces petits écarts s'accumulent comme une marche aléatoire, mais une marche qui a deux murs : à p = 0 ou p = 1, il n'y a plus rien à tirer, l'allèle est perdu ou fixé. Pour un allèle neutre, la probabilité d'être fixé un jour est simplement sa fréquence actuelle p : une nouvelle mutation neutre (une copie parmi 2N) se fixe une fois sur 2N.</p>
-    <p>La diversité H = 1 − Σpᵢ² (la probabilité que deux copies tirées au hasard soient différentes) décroît en moyenne d'un facteur constant à chaque génération : c'est une exponentielle du module 5.</p>
-    <div class="eq">H_t = H₀ · (1 − 1/2N)^t ≈ H₀ · e^(−t/2N)<small>demi-vie de la diversité ≈ 1,4·N générations : 14 pour N = 10, 1400 pour N = 1000</small></div></div>
-
-  <div class="idee"><b class="n">Sélection contre dérive</b>
-    <p>La sélection pousse dans une direction, d'environ s/2 par génération ; la dérive secoue, d'environ 1/√(2N). Quand N·s est bien plus petit que 1, la dérive domine et l'allèle se comporte presque comme s'il était neutre ; quand N·s est bien plus grand que 1, la sélection domine. La probabilité de fixation d'un allèle de fréquence p (approximation de Kimura) résume les deux :</p>
-    <div class="eq">P(fixation) ≈ (1 − e^(−2Ns·p)) / (1 − e^(−2Ns))<small>N·s → 0 : P → p (neutre) ; nouvel allèle avantageux dans une grande population : P ≈ s</small></div>
-    <p>Conséquence contre-intuitive : même très avantageux, un allèle nouveau est perdu le plus souvent, parce qu'au début il n'existe qu'en une copie, à la merci d'un tirage.</p></div>
-
-  <div class="idee"><b class="n">Effet fondateur</b>
-    <p>Une nouvelle population fondée par k individus emporte 2k copies tirées dans la population d'origine. Ses fréquences sont celles de l'échantillon, pas celles de la source. Diversité attendue juste après la fondation : H₀·(1 − 1/2k) ; mais surtout, des allèles rares manquent, et la petite colonie dérive ensuite fortement.</p></div>
-
-  <div class="idee"><b class="n">Goulot d'étranglement</b>
-    <p>Pendant le goulot, la taille est petite et le facteur (1 − 1/2N) mord fort : chaque génération à N = 5 retire 10 % de la diversité. Les générations à grande taille, avant et après, n'en retirent presque rien, mais elles ne rendent rien non plus. C'est la taille la plus faible qui compte le plus : la « taille efficace » d'une population qui a varié est proche de la moyenne harmonique de ses tailles, dominée par les petites.</p></div>
-
-  <div class="idee"><b class="n">Mutation</b>
-    <p>Une mutation est un changement de la séquence d'ADN, le plus souvent une erreur de copie ou un dommage mal réparé. Son taux est faible et ne dépend pas de l'utilité de son résultat : la mutation est aveugle à l'environnement. La sélection, elle, ne l'est pas, et c'est leur combinaison qui produit l'adaptation. Si chaque mutation crée un allèle neuf, l'équilibre entre mutation (qui ajoute de la diversité) et dérive (qui en retire) vaut :</p>
-    <div class="eq">H* = θ / (1 + θ)      θ = 4Nμ<small>μ : probabilité de mutation par copie et par génération</small></div></div>
-
-  <div class="idee"><b class="n">Flux génétique</b>
-    <p>Quand une fraction m des copies d'une population vient d'une autre population à chaque génération, les fréquences des deux se rapprochent. Sans migration, deux populations isolées dérivent chacune de leur côté et finissent par ne plus rien partager ; un peu de migration (de l'ordre d'un migrant par génération, m·N ≈ 1) suffit à les garder semblables.</p></div>
-
-  <h2><span>4</span>Pièges</h2>
-  <p>À gauche, ce qu'on entend souvent ; à droite, ce que la planche montre.</p>
-  <div class="piege">
-    <div>« Les girafes ont allongé leur cou pour atteindre les feuilles. »</div>
-    <div>Aucun individu ne modifie ses gènes. Des variantes à cou plus long, déjà présentes, ont pu laisser plus de descendants.</div>
-    <div>« L'espèce s'adapte pour survivre. »</div>
-    <div>Une espèce n'a pas d'intention. La composition d'une population change parce que la reproduction est inégale, ou par hasard.</div>
-    <div>« La mutation apparaît quand elle est utile. »</div>
-    <div>Les mutations tombent au hasard ; leur taux ne dépend pas de ce qui serait utile. Seul le tri qui suit en dépend.</div>
-    <div>« La sélection produit l'organisme optimal. »</div>
-    <div>Elle ne trie que les variantes présentes, l'environnement change, et la dérive peut l'emporter.</div>
-    <div>« Fitness = le plus fort. »</div>
-    <div>Fitness = succès reproductif relatif, dans un environnement donné. Un variant « fort » peut avoir une fitness faible.</div>
-    <div>« Toute évolution est adaptative. »</div>
-    <div>Une fréquence peut changer sans aucun avantage : dérive, fondateur, goulot.</div>
-    <div>« L'évolution va vers le progrès. »</div>
-    <div>Elle n'a ni but ni direction. Sur un terrain qui change, la direction de la sélection change avec lui.</div>
-  </div>
-
-  <h2><span>5</span>Ce que la simulation simplifie</h2>
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
   <ul>
     <li><strong>Générations séparées.</strong> Tout le monde se reproduit en même temps puis disparaît (modèle de Wright-Fisher). Les vraies populations ont des âges qui se chevauchent.</li>
     <li><strong>Reproduction des chapitres A et B.</strong> Chaque descendant a un seul parent et hérite de sa valeur génétique, plus une toute petite variation (mutation). La reproduction sexuée mélange les génotypes de deux parents ; la logique de la sélection reste la même.</li>
@@ -215,7 +205,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <li><strong>Le hasard est pseudo-aléatoire</strong>, produit par un générateur semé : vraiment imprévisible d'un tirage à l'autre, mais rejouable à l'identique.</li>
   </ul>
 
-  <h2><span>6</span>Les chiffres à retenir</h2>
+  <h2><span>4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
     <div><b>≈ 60 à 70</b><span>nouvelles mutations dans le génome de chaque nouveau-né humain, absentes chez ses parents (environ 1 par 100 millions de lettres d'ADN). La plupart n'ont aucun effet.</span></div>
     <div><b>1 / 2N</b><span>chance qu'une nouvelle mutation neutre finisse par se fixer ; il lui faut alors en moyenne environ 4N générations.</span></div>
@@ -224,30 +214,9 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <div><b>≈ 1 sur 1 850</b><span>naissances touchées par la tyrosinémie héréditaire de type 1 au Saguenay–Lac-Saint-Jean, contre environ 1 sur 100 000 ailleurs : un allèle rare, présent chez quelques fondateurs, devenu fréquent dans une population issue d'eux.</span></div>
   </div>
 
-  <h2><span>7</span>Où tu reverras ce langage</h2>
-  <ul>
-    <li><strong>41 · Populations et propagation sur réseaux.</strong> G1 lève l'hypothèse du mélange parfait : quand chacun n'interagit qu'avec ses voisins, ses contacts ou son réseau, ce qui se propage (une variante, une maladie, une rumeur) suit la structure. Croissance, compétition, prédateur-proie et épidémies SIR y prolongent la logistique et les fréquences de ce module.</li>
-    <li><strong>42 · Émergence.</strong> Dans la grille « voisinage », chaque cellule ne fait que copier un voisin, et des taches grandissent que personne ne dessine. Des règles individuelles simples, un comportement collectif difficile à prévoir : c'est le thème du module 42 (automates, phénomènes collectifs).</li>
-    <li><strong>Les showcases à venir</strong> : sélection naturelle, dérive génétique, effet fondateur, goulot d'étranglement, chacun sur un cas réel.</li>
-    <li><strong>En amont</strong> : les distributions, la moyenne, la variance et la loi binomiale du module 7, l'exponentielle du module 5, la logistique et la rétroaction du module 4 (<a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>), et la copie de l'ADN dans <a href="../08-replication-adn/index.html">la réplication</a>, où naissent les erreurs qui deviennent des mutations.</li>
-  </ul>
-
-  <h2><span>8</span>Seulement introduit ici</h2>
+  <h2><span>5</span>Seulement introduit ici</h2>
   <p>La génétique mendélienne complète (dominance, plusieurs gènes, liaison et recombinaison), la sélection sur plusieurs gènes à la fois, la coalescence (remonter les généalogies vers l'ancêtre commun), la phylogénie, la spéciation, l'écologie des populations, la théorie des jeux évolutionnaire et les structures spatiales en réseau sont hors de cette planche. La notion de taille efficace et l'approximation de Kimura sont seulement nommées.</p>
 
-  <h2><span>9</span>Teste-toi</h2>
-  <details><summary>Une population de papillons devient plus sombre en 30 générations. Un papillon a-t-il foncé ?</summary>
-    <p>Non. Chaque papillon garde sa couleur toute sa vie. Les papillons sombres ont laissé, en moyenne, plus de descendants (sur ce terrain, dans cet environnement), et ces descendants leur ressemblent : c'est la proportion de papillons sombres qui a augmenté.</p></details>
-  <details><summary>On sélectionne les plus grands individus d'un élevage pendant 10 générations, et la taille moyenne ne change pas. Qu'est-ce qui peut l'expliquer ?</summary>
-    <p>La variation de taille était surtout due à l'environnement (nourriture, conditions de croissance) et peu héritable : h² ≈ 0, donc R ≈ h²·S ≈ 0. C'est l'étape A2.</p></details>
-  <details><summary>Dans une population, p = 0,2. Quelles proportions de génotypes attend-on sous Hardy-Weinberg ?</summary>
-    <p>AA : 0,2² = 0,04 ; Aa : 2 × 0,2 × 0,8 = 0,32 ; aa : 0,8² = 0,64. Total : 1.</p></details>
-  <details><summary>Deux îles ont reçu la même espèce au même moment. Trois siècles plus tard, leurs fréquences alléliques diffèrent nettement, alors que les deux environnements sont identiques. Est-ce forcément de la sélection ?</summary>
-    <p>Non. Effet fondateur (les deux groupes de départ étaient deux échantillons différents) et dérive (deux tirages indépendants à chaque génération) suffisent, surtout si les populations sont petites et qu'il y a peu de migration entre elles.</p></details>
-  <details><summary>Un allèle avantageux (s = 0,02) apparaît en une seule copie. Est-il sûr de s'imposer dans une grande population ?</summary>
-    <p>Non. Sa probabilité de fixation est d'environ s = 2 %. Tant qu'il est en une ou quelques copies, le hasard de la reproduction peut l'éliminer avant que la sélection ait eu prise. Il faut en général beaucoup de mutations semblables pour qu'une finisse par s'établir.</p></details>
-  <details><summary>Après un goulot, une population revient à sa taille d'origine en 20 générations. Sa diversité génétique est-elle revenue ?</summary>
-    <p>Non. Les allèles perdus pendant le goulot ne reviennent que par mutation (très lente) ou par migration depuis une autre population. La taille se reconstruit par reproduction ; la diversité, non.</p></details>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
 </div>
