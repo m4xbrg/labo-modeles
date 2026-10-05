@@ -48,9 +48,18 @@
 
 /* Teste-toi, à l'intérieur d'un module */
 .module details p,.module details ol{padding:0 16px 4px 50px}
+/* Une réponse repliée contient des formules : elle ne doit pas élargir la page */
+.wrap details{position:relative;overflow:hidden}
 
 .katex{font-size:1.08em}
+/* Une équation en bloc trop large défile dans son conteneur au lieu d’élargir la page (mobile) */
+.katex-display{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:2px 0;position:relative}  /* position : le MathML caché (absolu) reste dedans */
+.module .tab{overflow-x:auto;max-width:100%}
+.module,.module p,.module li,.module dd{min-width:0;overflow-wrap:break-word}
 @media (max-width:560px){
+  /* Formule en ligne trop longue pour la colonne : elle défile dans sa propre boîte */
+  .wrap .katex:not(.katex-display .katex){display:inline-block;max-width:100%;overflow-x:auto;overflow-y:hidden;vertical-align:middle;position:relative}
+  .wrap table{display:block;max-width:100%;overflow-x:auto}
   .defs > div{grid-template-columns:1fr;gap:2px}
   .module h3{font-size:26px}
 }

@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comprendre la cellule, la membrane et le transport — LABO</title>
-<meta name="description" content="Ce que montre le laboratoire de la cellule : une frontière, une bicouche lipidique sélective, la diffusion et l'équilibre dynamique, l'osmose et le volume, le transport passif et actif, la pompe Na⁺/K⁺, le rapport surface/volume et les compartiments, avec les simplifications assumées.">
+<meta name="description" content="Théorie du module 32 (cellule, membrane et transport) et ce que montre la planche : une frontière, une bicouche lipidique sélective, la diffusion et l'équilibre dynamique, l'osmose et le volume, le transport passif et actif, la pompe Na⁺/K⁺, le rapport surface/volume et les compartiments, avec les simplifications assumées.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -69,6 +69,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}}
 @media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -91,70 +93,102 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <dd>Trois changements d'échelle : une cellule entière qui gonfle ou rétrécit dans son bain, deux cellules de tailles différentes, une cellule eucaryote schématique avec un noyau, une mitochondrie et un lysosome.</dd>
   </dl>
 
-  <h2><span>2</span>Ce qui se passe vraiment</h2>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Cette planche couvre un seul module, mais en entier. Il suit le plan commun : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m32"><b>32</b>Cellule, membrane et transport</a></li>
+  </ul>
 
-  <h3>Une cellule commence par une frontière</h3>
-  <p>Sans frontière, l'agitation thermique mélange tout : c'est la diffusion de la planche 07. Il n'y a alors ni intérieur ni extérieur. La première condition de la vie cellulaire est une paroi qui empêche ce mélange, au moins pour certaines substances. L'acte I le montre : retirer la membrane, et les deux solutés finissent répartis partout ; la remettre, et chacun reste de son côté.</p>
+  <!-- ===================== Module 32 ===================== -->
+  <section class="module" id="m32">
+    <header>
+      <p class="num">Module 32</p>
+      <h3>Cellule, membrane et transport</h3>
+      <p class="etapes">Sur la planche : actes I Frontière · II Qui traverse · III Diffusion · IV Osmose · V Gradient · VI Surface et volume · VII Compartiments</p>
+    </header>
 
-  <h3>La bicouche : un cœur huileux entre deux faces qui aiment l'eau</h3>
-  <p>Un phospholipide a une tête <strong>hydrophile</strong> (polaire, souvent chargée : elle interagit bien avec l'eau) et deux queues <strong>hydrophobes</strong> (des chaînes d'hydrocarbures, comme une huile). Dans l'eau, ces molécules se rangent d'elles-mêmes en double couche : les têtes vers l'eau des deux côtés, les queues cachées au centre. Personne ne les assemble ; c'est l'arrangement le plus stable.</p>
-  <p>Conséquence directe : pour traverser, une molécule doit passer par environ 3 nm d'un milieu huileux. Ce qui se dissout bien dans l'huile (O₂, CO₂, hormones stéroïdes) passe facilement. Ce qui est polaire passe mal. Ce qui porte une charge (un ion) ne passe presque jamais : il devrait quitter les molécules d'eau qui l'entourent, et cela coûte très cher en énergie. <strong>La structure de la membrane explique une bonne partie de sa sélectivité.</strong></p>
+    <h4 data-n="1">Intuition</h4>
+    <p>Une cellule n’est pas un sac d’organites : c’est un système ouvert qui garde un intérieur différent de son environnement. Sans frontière, l’agitation thermique mélange tout et il n’y a plus ni dedans ni dehors. La frontière est une double couche de lipides, huileuse en son cœur, qui laisse passer ce qui se dissout dans l’huile et arrête ce qui est polaire ou chargé. Des protéines plantées dans cette paroi ouvrent des passages choisis. Les passages passifs suivent la pente des concentrations. Seule une dépense d’énergie, celle des pompes, peut la remonter. La cellule vivante vit donc loin de l’équilibre : elle dépense en permanence pour maintenir des différences que la diffusion efface, et ces différences deviennent à leur tour une réserve de travail.</p>
 
-  <h3>Qui traverse ? Pas seulement une question de taille</h3>
-  <p>La règle « petit = passe, gros = bloqué » serait celle d'un tamis. Le mode « tamis hypothétique » de l'acte II la montre : Na⁺ passe, le stéroïde est bloqué. Dans une vraie bicouche, c'est l'inverse : Na⁺, pourtant plus petit, est arrêté par sa charge ; le stéroïde, gros mais non polaire, se dissout dans le cœur de la membrane et passe. La taille compte, mais après la charge et la polarité.</p>
-  <div class="tab"><table>
-    <tr><th>Molécule</th><th>Taille</th><th>Nature</th><th>À travers la bicouche seule</th></tr>
-    <tr><td>O₂, CO₂</td><td>petite</td><td>non polaire</td><td>vite</td></tr>
-    <tr><td>hormone stéroïde</td><td>grosse</td><td>non polaire</td><td>assez vite</td></tr>
-    <tr><td>H₂O</td><td>très petite</td><td>polaire</td><td>lentement</td></tr>
-    <tr><td>glucose</td><td>moyenne</td><td>polaire</td><td>presque jamais</td></tr>
-    <tr><td>Na⁺, K⁺</td><td>très petite</td><td>chargée</td><td>presque jamais</td></tr>
-  </table></div>
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Membrane plasmique</dt><dd>Frontière de la cellule : bicouche lipidique d’environ 5 nm, parsemée de protéines.</dd></div>
+      <div><dt>Phospholipide</dt><dd>Tête hydrophile (attirée par l’eau) et deux queues hydrophobes (chaînes d’hydrocarbures). Dans l’eau, elle s’assemble seule en bicouche : têtes vers l’eau, queues au centre.</dd></div>
+      <div><dt>Concentration \(C\)<span class="u">mol/m³ (= mmol/L)</span></dt><dd>Quantité de soluté par volume.</dd></div>
+      <div><dt>Gradient de concentration</dt><dd>Différence de concentration entre l’extérieur et l’intérieur.</dd></div>
+      <div><dt>Flux net \(J\)<span class="u">mol·m⁻²·s⁻¹</span></dt><dd>Quantité qui traverse une unité de membrane par seconde : entrées moins sorties.</dd></div>
+      <div><dt>Perméabilité \(P\)<span class="u">m/s</span></dt><dd>Facilité de traversée d’une substance : elle regroupe la bicouche et les protéines ouvertes.</dd></div>
+      <div><dt>Canal</dt><dd>Pore aqueux qui laisse passer très vite une espèce précise (jusqu’à des millions d’ions par seconde). L’aquaporine : canal à eau.</dd></div>
+      <div><dt>Transporteur</dt><dd>Lie sa molécule d’un côté, change de forme, la relâche de l’autre. Plus lent qu’un canal, et saturable.</dd></div>
+      <div><dt>Pompe</dt><dd>Transporteur qui consomme de l’ATP pour déplacer une substance contre son gradient. Un symport fait passer deux espèces ensemble, l’une descendant son gradient, l’autre le remontant.</dd></div>
+      <div><dt>Osmolarité<span class="u">mOsm/L</span></dt><dd>Concentration totale des particules dissoutes (plasma sanguin : ≈ 300 mOsm/L).</dd></div>
+      <div><dt>Osmose, tonicité</dt><dd>Osmose : flux net d’eau vers le côté où le soluté qui ne traverse pas est le plus concentré. Tonicité : comparaison du bain et de la cellule pour ce seul soluté (hypo-, iso-, hypertonique).</dd></div>
+      <div><dt>Rapport \(A/V\)<span class="u">µm⁻¹</span></dt><dd>Surface divisée par volume : membrane disponible par unité de volume à servir.</dd></div>
+      <div><dt>Compartiment</dt><dd>Espace délimité par une membrane (noyau, lysosome, mitochondrie), aux conditions propres.</dd></div>
+    </dl>
 
-  <h3>Canaux et transporteurs : la membrane équipée</h3>
-  <p>Une membrane réelle est truffée de protéines, et ce sont elles qui décident de la plupart des passages. Un <strong>canal</strong> est un pore aqueux à travers la protéine : il laisse passer très vite (jusqu'à des millions d'ions par seconde) une espèce précise, et pas les autres (un canal Na⁺ laisse passer Na⁺, pas K⁺). Une aquaporine est un canal à eau. Un <strong>transporteur</strong> lie sa molécule d'un côté, change de forme, la relâche de l'autre : c'est plus lent, une molécule à la fois, et il peut <strong>saturer</strong> quand toutes ses places sont occupées. Membrane seule ≠ membrane équipée de protéines : la même bicouche, avec d'autres protéines, laisse passer d'autres choses.</p>
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ J = P\,(C_{\text{ext}} - C_{\text{int}}), \qquad P = \frac{K\,D}{e} \]
+      <p>C’est \(J = -D\,\dd c/\dd x\) (module 16) sur une paroi mince : le gradient devient une différence de part et d’autre. \(P\) dépend du coefficient de diffusion \(D\), de l’épaisseur \(e\) et du coefficient de partage huile/eau \(K\) : minuscule pour un ion, d’où son passage presque nul. À l’équilibre, \(J_{\text{entrée}} = J_{\text{sortie}} \neq 0\) : seule la différence disparaît.</p></div>
+    <div class="relation">\[ \frac{\dd C_{\text{int}}}{\dd t} = \frac{P A}{V}\,(C_{\text{ext}} - C_{\text{int}}) \quad\Rightarrow\quad C_{\text{int}}(t) = C_{\text{ext}} + (C_0 - C_{\text{ext}})\,\mathrm{e}^{-t/\tau}, \quad \tau = \frac{V}{P A} \]
+      <p>Le flux diminue à mesure que l’écart se comble : retour exponentiel, rétroaction négative (modules 04 et 05), d’autant plus rapide que \(A/V\) est grand.</p></div>
+    <div class="relation">\[ C_{\text{int}}\,(V - b) = n = \text{constante}, \qquad V_{\text{éq}} = b + \frac{n}{C_{\text{ext}}}, \qquad \Pi = \Delta C\,R\,T \]
+      <p>La quantité \(n\) de soluté qui ne traverse pas est fixe ; \(b\) est la part du volume qui ne gonfle pas ; le volume s’ajuste jusqu’à égaler les concentrations. \(\Pi\) est la pression qui empêcherait l’eau d’entrer (van ’t Hoff, \(\Delta C\) en mol/m³).</p></div>
+    <div class="relation">\[ J = J_{\max}\,\frac{C}{K_m + C} \]
+      <p>Un transporteur sature : proportionnel à \(C\) si \(C \ll K_m\), plafonné à \(J_{\max}\) quand toutes ses places sont prises.</p></div>
+    <div class="relation">\[ J_{\text{fuite}}(\mathrm{Na^+}) = J_{\text{pompe}}(\mathrm{Na^+}) = 3\,J_{\text{ATP}}, \qquad \frac{C_{\text{glu}}^{\text{int}}}{C_{\text{glu}}^{\text{ext}}} \to \frac{C_{\mathrm{Na}}^{\text{ext}}}{C_{\mathrm{Na}}^{\text{int}}} \]
+      <p>La pompe Na⁺/K⁺ sort 3 Na⁺ et fait entrer 2 K⁺ par ATP. À l’état stationnaire, ce qu’elle sort égale ce qui fuit vers l’intérieur : régime constant, hors équilibre. Le symport Na⁺-glucose, sans énergie propre, accumule le glucose jusqu’à l’égalité des deux rapports (modèle simplifié de la planche).</p></div>
+    <div class="relation">\[ A = \pi d^2, \quad V = \frac{\pi d^3}{6}, \quad \frac{A}{V} = \frac{6}{d}, \qquad t_{\text{diff}} \approx \frac{L^2}{2D} \]
+      <p>Doubler le diamètre multiplie \(A\) par 4 et \(V\) par 8. Le temps de diffusion croît comme le carré de la distance \(L\).</p></div>
+    <div class="tab"><table>
+      <tr><th>Mode</th><th>Sens</th><th>Énergie</th><th>Exemple</th></tr>
+      <tr><td>diffusion simple</td><td>du plus au moins concentré</td><td>aucune</td><td>O₂ à travers la bicouche</td></tr>
+      <tr><td>diffusion facilitée (canal)</td><td>idem</td><td>aucune</td><td>Na⁺ par un canal, eau par une aquaporine</td></tr>
+      <tr><td>diffusion facilitée (transporteur)</td><td>idem, saturable</td><td>aucune</td><td>glucose par GLUT</td></tr>
+      <tr><td>actif primaire</td><td>contre le gradient</td><td>ATP</td><td>pompe Na⁺/K⁺</td></tr>
+      <tr><td>actif secondaire (symport)</td><td>une espèce contre son gradient</td><td>un autre gradient</td><td>Na⁺ + glucose (SGLT)</td></tr>
+    </table></div>
 
-  <h3>Gradient, diffusion et flux net</h3>
-  <p>Une <strong>concentration</strong> est une quantité par volume. Quand elle diffère d'un côté à l'autre, on parle de <strong>gradient de concentration</strong>. Aucune molécule ne « sait » où aller : chacune bouge au hasard. Mais du côté le plus concentré, plus de molécules frappent la membrane chaque seconde, donc plus la traversent. Le résultat est un <strong>flux net</strong> du côté concentré vers l'autre, proportionnel à la différence :</p>
-  <div class="eq">flux net entrant ∝ C_ext − C_int</div>
-  <p>C'est la loi de la fondation 16 (<a href="../fondations-flux-fluides/index.html">Flux, gradients, champs et fluides</a>), <span class="m">J = −D∇c</span>, appliquée à une paroi mince : le gradient devient une différence de part et d'autre, et la difficulté à traverser (bicouche, nombre de canaux ouverts) est rangée dans un seul coefficient, la perméabilité. Le petit graphe de l'acte III le vérifie : chaque point (ΔC, flux net) tombe sur une droite qui passe par l'origine. Comme le flux diminue à mesure que l'écart se comble, le retour vers l'équilibre est exponentiel (modules 04 et 05, <a href="../fondations-systemes-hasard/index.html">rétroaction négative</a>).</p>
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Une cellule sphérique de diamètre \(d = 20\) µm, de 300 mOsm/L, avec \(b = 0{,}3\,V_0\).</p>
+      <ol>
+        <li>Géométrie : \(A = \pi d^2 \approx 1{,}26 \times 10^3\) µm², \(V = \pi d^3/6 \approx 4{,}19 \times 10^3\) µm³, donc \(A/V = 6/d = 0{,}30\) µm⁻¹.</li>
+        <li>Diffusion jusqu’au centre (\(L = 10\) µm, \(D \approx 10^{-9}\) m²/s) : \(t \approx (10^{-5})^2/(2 \times 10^{-9}) = 0{,}05\) s. Pour \(L = 1\) mm : \(10^{-6}/(2 \times 10^{-9}) = 500\) s, soit environ 8 minutes.</li>
+        <li>Bain à 150 mOsm/L (hypotonique) : \(n = 300 \times 0{,}7 = 210\) (en \(V_0\)·mOsm/L), donc \(V_{\text{éq}} = 0{,}3 + 210/150 = 1{,}7\,V_0\). La cellule gonfle de 70 % : tout près du seuil de lyse (1,75 \(V_0\) dans la simulation).</li>
+        <li>Bain à 600 mOsm/L (hypertonique) : \(V_{\text{éq}} = 0{,}3 + 210/600 = 0{,}65\,V_0\). La cellule rétrécit d’un tiers.</li>
+        <li>Pression osmotique du bain à 150 mOsm/L, à 310 K : \(\Pi = 150 \times 8{,}314 \times 310 \approx 3{,}9 \times 10^5\) Pa, soit 3,9 bar.</li>
+      </ol>
+    </div>
 
-  <h3>L'équilibre est dynamique</h3>
-  <p>Quand les concentrations sont égales, autant de molécules frappent la membrane de chaque côté : les entrées et les sorties s'égalisent. C'est cela, l'<strong>équilibre</strong>.</p>
-  <div class="eq">flux net = entrées − sorties = 0     mais     entrées = sorties ≠ 0</div>
-  <p>Les compteurs de l'acte III ne tombent jamais à zéro, et la particule suivie continue d'aller et venir. À l'échelle des molécules, rien ne s'arrête ; c'est seulement la différence qui disparaît. Retenir ceci évite une erreur très répandue : « équilibre » ne veut pas dire « immobile ».</p>
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire que « petit = passe », règle d’un tamis. Na⁺, très petit mais chargé, est arrêté ; un stéroïde, gros mais non polaire, se dissout dans le cœur huileux. Charge et polarité d’abord, taille ensuite, protéines en plus.</li>
+      <li>Croire qu’à l’équilibre plus rien ne bouge. Les molécules continuent de traverser dans les deux sens.</li>
+      <li>Confondre concentration du bain et tonicité. Seul le soluté qui <em>ne traverse pas</em> décide du volume final : l’urée fait d’abord sortir l’eau, puis entre et l’eau la suit.</li>
+      <li>Croire qu’un canal ou un transporteur passif choisit le sens. Le flux net suit le gradient ; seule une source d’énergie le remonte.</li>
+      <li>Voir dans le symport un transport « gratuit ». Il ne consomme pas d’ATP, mais le gradient de Na⁺ qui l’alimente a été payé en amont par la pompe.</li>
+      <li>Penser que l’on peut grossir indéfiniment. L’apport passe par la surface (en \(L^2\)), le besoin suit le volume (en \(L^3\)). D’où les cellules petites, aplaties ou à membrane repliée (microvillosités).</li>
+    </ul>
 
-  <h3>L'osmose : l'eau aussi diffuse</h3>
-  <p>L'eau traverse la membrane (lentement à travers la bicouche, très vite par les aquaporines), dans les deux sens. Prends une cellule dont le soluté intérieur ne traverse pas. Si le bain contient <em>moins</em> de ce type de soluté qu'elle, l'eau y est proportionnellement plus abondante : il entre un peu plus de molécules d'eau qu'il n'en sort. Le volume augmente, ce qui dilue l'intérieur, jusqu'à ce que les concentrations soient égales. C'est l'<strong>osmose</strong> : un flux net d'eau à travers une membrane, vers le côté où le soluté qui ne traverse pas est le plus concentré.</p>
-  <p>Une fois le phénomène vu, les mots. Le bain est <strong>hypotonique</strong> s'il contient moins de soluté non diffusible que la cellule (elle gonfle, et une cellule animale, sans paroi, peut éclater : la <strong>lyse</strong>), <strong>isotonique</strong> s'il en contient autant (rien ne change en net), <strong>hypertonique</strong> s'il en contient plus (elle rétrécit). Le volume final suit une règle simple : la quantité de soluté intérieur ne change pas, donc</p>
-  <div class="eq">C_int · (V − b) = constante     →     à l'équilibre, C_int = C_ext</div>
-  <p>où b est la part du volume occupée par des structures qui ne gonflent pas. Le préréglage « soluté qui traverse lentement » montre pourquoi on dit « tonicité » plutôt que « concentration » : l'urée fait d'abord sortir l'eau, puis elle entre à son tour et l'eau la suit. Seul ce qui <em>ne traverse pas</em> décide du volume final. La planche 07 (<a href="../07-matiere-chaleur/index.html">acte VI</a>) montre la même osmose à l'échelle des molécules, et la pression qui apparaît quand la membrane ne peut pas bouger.</p>
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>16</b><span>Flux et gradient, \(J = -D\,\nabla c\) (planche <a href="../fondations-flux-fluides/index.html">Flux, gradients, champs et fluides</a>).</span></li>
+      <li><b>04 · 05</b><span>Retour exponentiel, rétroaction négative (planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>).</span></li>
+      <li><b>19</b><span>Diffusion et osmose entre molécules (planche <a href="../07-matiere-chaleur/index.html">Matière, chaleur et transport</a>, actes IV et VI).</span></li>
+      <li><b>33</b><span>Les charges séparées par la membrane : potentiel de membrane, neurone (planche <a href="../03-neurone/index.html">Le neurone</a>).</span></li>
+      <li><b>34</b><span>D’où vient l’énergie des gradients : ATP, mitochondrie (planche <a href="../02-respiration/index.html">La respiration cellulaire</a>).</span></li>
+      <li><b>35</b><span>Comment la cellule fabrique canaux et pompes (planche <a href="../08-replication-adn/index.html">La réplication de l’ADN</a>).</span></li>
+    </ul>
 
-  <h3>Transport passif, transport actif</h3>
-  <div class="tab"><table>
-    <tr><th>Mode</th><th>Sens</th><th>Énergie</th><th>Exemple</th></tr>
-    <tr><td>diffusion simple</td><td>du plus concentré au moins concentré</td><td>aucune</td><td>O₂ à travers la bicouche</td></tr>
-    <tr><td>diffusion facilitée (canal)</td><td>idem</td><td>aucune</td><td>Na⁺ par un canal Na⁺, eau par une aquaporine</td></tr>
-    <tr><td>diffusion facilitée (transporteur)</td><td>idem, saturable</td><td>aucune</td><td>glucose par GLUT</td></tr>
-    <tr><td>transport actif primaire</td><td>contre le gradient</td><td>ATP</td><td>pompe Na⁺/K⁺</td></tr>
-    <tr><td>transport actif secondaire (symport)</td><td>une espèce contre son gradient</td><td>un autre gradient</td><td>Na⁺ + glucose (SGLT)</td></tr>
-  </table></div>
-  <p>Un canal ou un transporteur passif ne choisit pas le sens : il offre un passage, et le flux net suit le gradient. Seule une source d'énergie peut faire monter une substance <em>contre</em> son gradient.</p>
-
-  <h3>La pompe : maintenir un état loin de l'équilibre</h3>
-  <p>La pompe Na⁺/K⁺ (une ATPase) utilise l'énergie d'une molécule d'ATP pour faire sortir 3 Na⁺ et entrer 2 K⁺. Dans toutes les cellules animales, elle maintient le Na⁺ bas à l'intérieur et le K⁺ haut. Pendant ce temps, les ions refluent par des canaux de fuite : la diffusion efface sans cesse ce que la pompe construit. À l'état stationnaire de l'acte V, les deux flux s'égalisent : autant de Na⁺ entrent par fuite qu'il en sort par la pompe. Ce n'est pas un équilibre, c'est un <strong>état stationnaire hors équilibre</strong>, qui dure seulement tant que l'énergie arrive. Coupe l'apport d'ATP : la réserve s'épuise, les pompes s'arrêtent, les gradients s'effacent.</p>
-  <div class="aside"><b>L'idée à garder</b>Une cellule vivante ne vit pas près de l'équilibre. Elle dépense de l'énergie en permanence pour maintenir des différences que la physique tend à effacer. Une cellule à l'équilibre avec son milieu est une cellule morte.</div>
-
-  <h3>Un gradient stocke une possibilité de travail</h3>
-  <p>Un gradient maintenu ressemble à de l'eau retenue derrière un barrage : en redescendant, elle peut entraîner quelque chose. Le symport Na⁺–glucose de l'acte V ne consomme aucun ATP lui-même ; il ne fait passer Na⁺ <em>qu'accompagné</em> d'un glucose. Comme Na⁺ entre beaucoup plus facilement qu'il ne sort, le glucose est entraîné vers l'intérieur jusqu'à y être plus concentré que dehors. Dans le modèle simplifié de la page, l'accumulation s'arrête quand le rapport du glucose (intérieur/extérieur) égale celui du Na⁺ (extérieur/intérieur). L'énergie vient, en amont, de l'ATP dépensé par la pompe. Ce schéma (une pompe crée un gradient, le gradient fait le travail) se retrouvera partout : dans l'intestin, dans le rein, dans la mitochondrie avec les protons, dans le neurone avec la tension électrique.</p>
-
-  <h3>Surface et volume</h3>
-  <p>Ce qu'une cellule doit soutenir (ses réactions, sa consommation d'O₂ et de nutriments) croît avec son <strong>volume</strong>. Ce qui peut entrer et sortir passe par sa <strong>surface</strong>. Or, pour une forme donnée de taille L :</p>
-  <div class="eq">A ∝ L²     V ∝ L³     A/V ∝ 1/L     (sphère : A/V = 6/d)</div>
-  <p>Doubler le diamètre multiplie la surface par 4 et le volume par 8 : chaque micromètre carré de membrane doit alors nourrir deux fois plus de volume. Au-delà d'une certaine taille, la surface ne suffit plus. La diffusion aggrave encore le problème : le temps qu'il faut pour diffuser croît comme le carré de la distance (environ 0,1 s pour traverser 10 µm, une dizaine de minutes pour 1 mm). D'où les cellules petites, aplaties ou allongées, et les membranes repliées (microvillosités de l'intestin) qui multiplient la surface sans changer le volume.</p>
-
-  <h3>Compartiments internes</h3>
-  <p>Ce qui vaut pour la membrane plasmique vaut à l'intérieur : une membrane crée un compartiment, un compartiment peut garder des conditions locales différentes, et des conditions différentes permettent des fonctions spécialisées. Le <strong>noyau</strong> garde l'ADN à part. Le <strong>lysosome</strong> maintient un intérieur acide (pH ≈ 4,7, contre 7,2 dans le cytosol) où ses enzymes digèrent sans attaquer le reste de la cellule. La <strong>mitochondrie</strong>, entourée de deux membranes, accumule des protons entre elles : un gradient qui fera tourner l'ATP synthase (planche 02, module 34). L'acte VII montre aussi l'envers : dissoudre les membranes mélange tout, et les remettre ne trie rien. Refaire la différence demanderait des pompes et de l'énergie.</p>
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Une cellule passe de 10 à 30 µm de diamètre sans changer de forme. Par combien sont multipliés sa surface, son volume et son rapport A/V ?</summary>
+      <p>Diamètre × 3 : surface × 9, volume × 27, \(A/V = 6/d\) divisé par 3 (de 0,6 à 0,2 µm⁻¹).</p></details>
+    <details><summary>Des globules rouges (300 mOsm/L, \(b = 0{,}3\,V_0\)) sont plongés dans une eau salée à 600 mOsm/L, qui ne traverse pas la membrane. Que devient leur volume, et pourquoi ?</summary>
+      <p>Bain hypertonique : il sort plus d’eau qu’il n’en entre. \(n = 300 \times 0{,}7 = 210\), donc \(V_{\text{éq}} = 0{,}3 + 210/600 = 0{,}65\,V_0\).</p></details>
+    <details><summary>Un poison bloque la production d’ATP. Que deviennent peu à peu les gradients de Na⁺ et de K⁺, et l’entrée de glucose par le symport ?</summary>
+      <p>Les pompes s’arrêtent, la fuite continue : Na⁺ entre, K⁺ sort, les gradients s’effacent. Sans gradient de Na⁺, le symport ne concentre plus le glucose, il l’équilibre seulement.</p></details>
+  </section>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
   <ul>
@@ -175,24 +209,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <div><b>10⁹ /s</b><span>l'ordre de grandeur du nombre de molécules d'eau qu'une seule aquaporine laisse passer par seconde, dans les deux sens.</span></div>
   </div>
 
-  <h2><span>5</span>Teste-toi</h2>
-  <details><summary>À l'équilibre de l'acte III, les concentrations sont égales. Une molécule de A située à l'intérieur peut-elle encore sortir ?</summary>
-    <p>Oui. Elle continue de bouger au hasard et finit par repasser par un canal. Simplement, en moyenne, une autre molécule entre dans le même temps : les entrées et les sorties s'égalisent. Le flux net est nul ; le mouvement ne l'est pas.</p></details>
-  <details><summary>Pourquoi un ion Na⁺, plus petit qu'une hormone stéroïde, traverse-t-il beaucoup moins bien la bicouche ?</summary>
-    <p>Parce que le cœur de la bicouche est hydrophobe. Le stéroïde, non polaire, s'y dissout. L'ion, chargé et entouré d'eau, devrait abandonner cette eau pour entrer dans un milieu huileux, ce qui coûte énormément d'énergie. Il lui faut un canal.</p></details>
-  <details><summary>On plonge des globules rouges dans de l'eau très salée (bien plus de 300 mOsm/L). Que se passe-t-il, et pourquoi ?</summary>
-    <p>Le bain est hypertonique : à l'extérieur, le soluté qui ne traverse pas est plus concentré. Il sort un peu plus de molécules d'eau qu'il n'en entre, et la cellule rétrécit jusqu'à ce que sa concentration intérieure égale celle du bain.</p></details>
-  <details><summary>Un poison bloque la production d'ATP. Que deviennent, peu à peu, les gradients de Na⁺ et de K⁺ ? Et l'entrée de glucose par le symport ?</summary>
-    <p>Les pompes s'arrêtent quand la réserve d'ATP est épuisée. La fuite continue : Na⁺ entre, K⁺ sort, et les gradients s'effacent. Sans gradient de Na⁺, le symport ne peut plus concentrer le glucose : il ne fait plus que l'équilibrer.</p></details>
-  <details><summary>Une cellule passe de 10 à 30 µm de diamètre sans changer de forme. Par combien sont multipliés sa surface, son volume et son rapport A/V ?</summary>
-    <p>Surface × 9, volume × 27, A/V ÷ 3. Chaque unité de membrane doit nourrir trois fois plus de volume.</p></details>
-
-  <h2><span>6</span>Pour la suite : trois questions ouvertes</h2>
-  <div class="q3">
-    <div><b class="ener">Énergie</b>Si une cellule dépense sans arrêt de l'énergie pour maintenir son organisation, d'où vient cette énergie ? <span class="m" style="color:var(--texte-2)">→ module 34, Énergie biologique (à venir) · en attendant, <a href="../02-respiration/index.html">la respiration cellulaire</a></span></div>
-    <div><b class="acc">Information</b>Comment la cellule sait-elle quels composants (canaux, pompes, transporteurs) fabriquer ? <span class="m" style="color:var(--texte-2)">→ module 35, Information génétique (à venir) · <a href="../08-replication-adn/index.html">la réplication de l'ADN</a></span></div>
-    <div><b class="pos">Électricité</b>Que se passe-t-il quand les particules séparées par la membrane portent une charge électrique ? <span class="m" style="color:var(--texte-2)">→ module 33, Bioélectricité et synapses (à venir) · <a href="../03-neurone/index.html">le neurone</a></span></div>
-  </div>
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu'effleurées et méritent leur propre étude : le <strong>potentiel de membrane</strong> (la tension qui s'établit quand des charges sont séparées, module 33), le <strong>transport par vésicules</strong> (endocytose et exocytose, non montré), la <strong>cinétique enzymatique</strong> des transporteurs au-delà de la saturation, et la <strong>diversité réelle des organites</strong>.</p>
 
   <a class="cta" href="index.html"><span>Retour au laboratoire</span><span aria-hidden="true">&rarr;</span></a>
 </div>

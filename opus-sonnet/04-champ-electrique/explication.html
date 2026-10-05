@@ -63,6 +63,8 @@ table.mots td.m{font-family:var(--mono);font-size:14px;white-space:nowrap}
 .tablewrap{overflow-x:auto}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
 </style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -89,36 +91,96 @@ table.mots td.m{font-family:var(--mono);font-size:14px;white-space:nowrap}
     <dd>Le point de référence d'un voltmètre (bouton « Point A ») ; la sonde joue le rôle de la deuxième pointe, B. Le pointillé qui passe par A est son équipotentielle : partout dessus, la tension avec A est nulle.</dd>
   </dl>
 
-  <h2><span>2</span>Ce qui se passe vraiment</h2>
-  <p>Une charge ponctuelle <em>q</em> crée à la distance <em>r</em> un champ électrique, c'est-à-dire la force qu'elle exercerait sur une charge de 1 C placée là. Sa valeur suit la loi de Coulomb :</p>
-  <div class="eq">E = k·q / r²&nbsp;&nbsp;&nbsp;V = k·q / r<br>k ≈ 8,99×10⁹ N·m²/C²</div>
-  <p>Le champ est un <strong>vecteur</strong> (une grandeur qui a une valeur, une direction et un sens). Le potentiel V, lui, est un <strong>scalaire</strong> : un simple nombre en volts, l'énergie potentielle par coulomb.</p>
-  <p>Avec plusieurs charges, on applique la <strong>superposition</strong> : le champ total est la somme vectorielle des champs individuels, et le potentiel total, la somme ordinaire des potentiels. Déplace une charge dans la simulation : tout est recalculé parce que chaque terme de la somme change.</p>
-  <p>Les <strong>lignes de champ</strong> sont obtenues en avançant pas à pas dans la direction de E, avec une méthode d'intégration numérique de Runge-Kutta. Elles ne peuvent pas se croiser, car en un point le champ n'a qu'une direction. Elles ne sont pas tracées au hasard : elles partent de chaque charge positive à angles réguliers.</p>
-  <p>Les équipotentielles sont toujours <strong>perpendiculaires</strong> aux lignes de champ. Raison : déplacer une charge le long d'une équipotentielle ne change pas son énergie, donc E ne fait aucun travail (E·dl = 0) et E est perpendiculaire à ce déplacement. C'est aussi pourquoi, sur un conducteur à l'équilibre, le champ est perpendiculaire à la surface.</p>
-  <p>La charge test suit la deuxième loi de Newton : F = qE, donc a = qE/m. Elle accélère, gagne de l'énergie cinétique et perd autant d'énergie potentielle : E<sub>c</sub> + qV reste constante (le panneau l'affiche) tant que les charges sources ne bougent pas. Attention : sa trajectoire n'est pas une ligne de champ. La ligne indique la direction de la force, pas celle de la vitesse, et la charge a de l'inertie.</p>
-  <p><strong>Le condensateur plan.</strong> Entre deux plaques de charges opposées, chaque charge pousse ou tire à la fois vers le bas et sur le côté ; par symétrie, les composantes latérales s'annulent en s'éloignant des bords, et il reste la composante qui traverse. On obtient un champ presque uniforme, d'où des lignes parallèles et des équipotentielles également espacées. Aux bords, les lignes s'incurvent : c'est l'effet de bord.</p>
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m21"><b>21</b>Électrostatique</a></li>
+  </ul>
 
-  <h3 style="font:500 17px var(--sans);margin:34px 0 10px">Six mots pour une même situation</h3>
-  <p>La planche montre une seule réalité (des charges immobiles) sous plusieurs lectures. Chaque mot répond à une question différente ; les confondre est l'erreur la plus fréquente en électricité.</p>
-  <div class="tablewrap"><table class="mots">
-    <tr><th>Grandeur</th><th>Question</th><th>Nature, unité</th><th>Dans la planche</th></tr>
-    <tr><td>Charge q</td><td>Qui crée, qui subit ?</td><td class="m">scalaire signé, C</td><td>Les disques. La charge nette (panneau) ne change que si tu ajoutes ou retires une charge : elle se conserve.</td></tr>
-    <tr><td>Champ E</td><td>Ici, quelle poussée par coulomb ?</td><td class="m">vecteur, N/C = V/m</td><td>Lignes, vecteurs, valeur |E| de la sonde. Existe même là où il n'y a aucune charge.</td></tr>
-    <tr><td>Force F</td><td>Sur cette charge-là, quelle poussée ?</td><td class="m">vecteur, N</td><td>F = qE : flèche verte de la charge test, flèches jaunes. Pas de charge, pas de force.</td></tr>
-    <tr><td>Potentiel V</td><td>Ici, quelle énergie par coulomb ?</td><td class="m">scalaire, V = J/C</td><td>Carte de couleur, équipotentielles, valeur V de la sonde. Défini à une constante près (ici, 0 V à l'infini).</td></tr>
-    <tr><td>Tension U</td><td>Entre deux points, quel écart ?</td><td class="m">scalaire, V</td><td>U = V<sub>B</sub> − V<sub>A</sub> : la section « Tension » avec le point A. Ne dépend pas du choix du zéro.</td></tr>
-    <tr><td>Énergie U<sub>e</sub></td><td>Combien pour cette charge-là ?</td><td class="m">scalaire, J</td><td>qV pour la charge test ; qU pour aller de A à B.</td></tr>
-  </table></div>
-  <p><strong>Potentiel ≠ champ.</strong> Le potentiel est une altitude, le champ est la pente. Entre deux charges identiques, le champ est nul au milieu (terrain plat, un col) alors que V y est élevé. Inversement, là où V vaut 0 sur la médiatrice d'un dipôle, le champ est intense. Ce qui compte pour la force, ce n'est pas la valeur de V, c'est la vitesse à laquelle elle change d'un point à l'autre : E ≈ ΔV / Δd, ce qui explique l'unité V/m.</p>
-  <p><strong>Tension = différence de potentiel.</strong> Un voltmètre a toujours deux pointes : il ne mesure jamais « le potentiel d'un point », seulement l'écart entre deux. Amener une charge q de A à B demande un travail W = qU, quel que soit le chemin. C'est ce qu'une pile fait en permanence dans un circuit : elle maintient une tension entre ses bornes, et cette tension met les charges en mouvement dans les fils. Suite dans la <a href="../06-courant-circuits/index.html">planche 06, courant et circuits</a>.</p>
+  <!-- ===================== Module 21 ===================== -->
+  <section class="module" id="m21">
+    <header>
+      <p class="num">Module 21</p>
+      <h3>Électrostatique</h3>
+      <p class="etapes">Sur la planche (un seul bac à sable, sans étapes numérotées) : préréglages Dipôle · Deux identiques · Condensateur · Quadrupôle · affichages Lignes · Équipotentielles · Carte de V · Vecteurs · Forces · outils Lâcher une charge test · Point A</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Une charge modifie l’espace autour d’elle, même quand il n’y a rien à cet endroit. Cette modification est le champ : en chaque point, il dit quelle poussée une charge d’essai ressentirait. Le potentiel est une autre lecture de la même situation. Imagine un relief : le potentiel est l’altitude, le champ est la pente, et la force sur une charge est la pente qu’elle sent sous ses pieds. Une charge positive est une colline d’où tout descend, une charge négative est un creux. Les lignes de champ suivent la plus grande pente, les équipotentielles sont les courbes de niveau, et les deux se coupent toujours à angle droit. Chaque grandeur répond à une question différente, et les confondre est l’erreur la plus fréquente en électricité.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Charge \(q\)<span class="u">C</span></dt><dd>Grandeur scalaire signée, qui crée un champ et en subit un. Elle se conserve et vient par multiples de \(e = 1{,}6\times10^{-19}\) C.</dd></div>
+      <div><dt>Champ électrique \(\vec E\)<span class="u">N/C = V/m</span></dt><dd>Vecteur : la force par coulomb en un point, \(\vec E = \vec F/q\). Il existe même là où aucune charge n’est posée.</dd></div>
+      <div><dt>Force \(\vec F\)<span class="u">N</span></dt><dd>Vecteur : la poussée subie par une charge précise placée dans un champ. Pas de charge, pas de force.</dd></div>
+      <div><dt>Potentiel \(V\)<span class="u">V = J/C</span></dt><dd>Scalaire : l’énergie potentielle par coulomb en un point. Il est défini à une constante près (ici, 0 V à l’infini).</dd></div>
+      <div><dt>Tension \(U\)<span class="u">V</span></dt><dd>Scalaire : l’écart de potentiel entre deux points, \(U = V_B - V_A\). Elle ne dépend pas du choix du zéro.</dd></div>
+      <div><dt>Énergie potentielle \(E_p\)<span class="u">J</span></dt><dd>Énergie d’une charge placée en un point : \(E_p = qV\).</dd></div>
+      <div><dt>Ligne de champ</dt><dd>Courbe dont la tangente donne la direction de \(\vec E\). Elle part d’une charge positive et finit sur une négative.</dd></div>
+      <div><dt>Équipotentielle</dt><dd>Ensemble des points de même potentiel. Elle est perpendiculaire aux lignes de champ.</dd></div>
+      <div><dt>Constantes \(k\), \(\varepsilon_0\)<span class="u">N·m²/C², F/m</span></dt><dd>\(k = 1/(4\pi\varepsilon_0) \approx 8{,}99\times10^{9}\) N·m²/C², avec \(\varepsilon_0 \approx 8{,}85\times10^{-12}\) F/m.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ E = \frac{k\,|q|}{r^2}, \qquad V = \frac{k\,q}{r}, \qquad \vec F = q\,\vec E \]
+      <p>Loi de Coulomb pour une charge ponctuelle. Le champ s’éloigne d’une charge positive et va vers une négative. Il varie en \(1/r^2\), le potentiel en \(1/r\).</p></div>
+    <div class="relation">\[ \vec E = \sum_i \vec E_i, \qquad V = \sum_i V_i \]
+      <p>Superposition : les champs s’additionnent comme des vecteurs, les potentiels comme de simples nombres. Déplace une charge et tout est recalculé, car chaque terme de la somme change.</p></div>
+    <div class="relation">\[ E_x = -\frac{\dd V}{\dd x}, \qquad \vec E = -\vec\nabla V \]
+      <p>Le champ est la pente du potentiel, orientée vers les potentiels décroissants. D’où l’unité V/m, et la perpendicularité aux équipotentielles : le long de l’une, \(V\) ne varie pas.</p></div>
+    <div class="relation">\[ W = q\,U = q\,(V_B - V_A) \]
+      <p>Travail à fournir pour amener \(q\) de A à B, quel que soit le chemin. Sur une équipotentielle, il est nul.</p></div>
+    <div class="relation">\[ E_c + qV = \text{constante} \]
+      <p>Une charge libre dans un champ fixe gagne de l’énergie cinétique exactement autant qu’elle perd d’énergie potentielle. Avec \(\vec F = q\vec E = m\vec a\), elle accélère en \(a = qE/m\).</p></div>
+    <div class="relation">\[ E = \frac{U}{d} = \frac{\sigma}{\varepsilon_0} \]
+      <p>Condensateur plan idéal (deux plaques parallèles de charges opposées, distantes de \(d\), de densité \(\sigma\)) : champ uniforme entre elles, lignes parallèles, équipotentielles également espacées.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un dipôle : \(+2\) nC en \(x = 0\) et \(-2\) nC en \(x = 20\) cm. On pose \(kq = 8{,}99\times10^{9} \times 2\times10^{-9} = 17{,}98\) N·m²/C.</p>
+      <ol>
+        <li>Au milieu (\(r = 0{,}10\) m de chaque charge) : chaque charge donne \(17{,}98/0{,}01 \approx 1\,798\) N/C, dirigé vers la charge négative. Les deux s’ajoutent : \(E \approx 3\,596\) N/C, soit environ \(3{,}6\times10^{3}\) N/C. Le potentiel y vaut \(17{,}98/0{,}1 - 17{,}98/0{,}1 = 0\) V : la médiatrice est une équipotentielle, avec pourtant un champ intense.</li>
+        <li>Force sur une charge d’essai de 1 nC : \(F = qE \approx 3{,}6\times10^{-6}\) N. Avec \(m = 10\) mg \(= 10^{-5}\) kg : \(a = F/m \approx 0{,}36\) m/s².</li>
+        <li>Au point \(x = -10\) cm (à 10 cm de la positive, 30 cm de la négative) : \(V = 17{,}98\,(1/0{,}10 - 1/0{,}30) \approx 17{,}98 \times 6{,}67 \approx 120\) V.</li>
+        <li>Tension entre le milieu et ce point : \(U = 120 - 0 = 120\) V. Travail pour y amener 1 nC : \(W = qU = 10^{-9} \times 120 = 1{,}2\times10^{-7}\) J, soit 120 nJ.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Confondre champ et potentiel. Entre deux charges positives identiques, \(E = 0\) au milieu alors que \(V\) y est élevé (un col). Sur la médiatrice d’un dipôle, c’est l’inverse. Ce qui fait la force, c’est la variation de \(V\), pas sa valeur.</li>
+      <li>Croire que le champ dépend de la charge qu’on y pose. Il est créé par les autres charges : changer \(+1\) nC en \(-3\) nC multiplie la force par \(-3\), pas le champ.</li>
+      <li>Chercher « le potentiel d’un point » avec un voltmètre. Il a deux pointes et mesure une différence. Le zéro est un choix, la tension n’en dépend pas.</li>
+      <li>Supposer que la charge d’essai suit la ligne de champ. La ligne donne la direction de la force, pas celle de la vitesse : la charge a de l’inertie et sa trajectoire s’en écarte dès que la ligne se courbe.</li>
+      <li>Croire que deux lignes de champ peuvent se croiser. En un point, le champ n’a qu’une direction. Aux points où \(E = 0\), aucune ligne ne passe.</li>
+      <li>Oublier le signe : \(E_c + qV\) est constante, mais une charge négative gagne de l’énergie cinétique en montant vers les potentiels croissants.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>22</b><span>La tension d’une pile met les charges en mouvement dans un circuit : <a href="../06-courant-circuits/index.html">planche Courant et circuits</a>. Le condensateur y reprend le champ uniforme de deux plaques.</span></li>
+      <li><b>02</b><span>Superposition des champs : une addition de vecteurs, avec composantes et projections.</span></li>
+      <li><b>13</b><span>Même structure en \(1/r^2\) pour la gravitation, avec un potentiel en \(1/r\) et des orbites.</span></li>
+      <li><b>16</b><span>Champ scalaire (\(V\)), champ vectoriel (\(\vec E\)), gradient : la version générale de \(\vec E = -\vec\nabla V\).</span></li>
+      <li><b>23</b><span>Quand les charges bougent, un champ magnétique apparaît (force de Lorentz, induction).</span></li>
+      <li><b>33</b><span>Une membrane cellulaire est un condensateur : potentiel membranaire et potentiel d’action.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Une charge de 3 nC est isolée. Que valent \(E\) et \(V\) à 30 cm ? Et à 60 cm ?</summary>
+      <p>\(kq = 8{,}99\times10^{9} \times 3\times10^{-9} \approx 27{,}0\) N·m²/C. À 0,30 m : \(E = 27{,}0/0{,}09 \approx 300\) N/C et \(V = 27{,}0/0{,}30 \approx 90\) V. À 0,60 m, la distance double : \(E\) est divisé par 4 (75 N/C) et \(V\) par 2 (45 V).</p></details>
+    <details><summary>Au milieu de deux charges positives identiques, \(|E| = 0\). Le potentiel y est-il nul aussi ?</summary>
+      <p>Non, il est même élevé : les deux potentiels positifs s’additionnent. Le champ est nul parce que \(V\) y atteint un col et ne varie pas pour un tout petit pas. \(\vec E\) est la pente de \(V\), pas sa valeur.</p></details>
+    <details><summary>A et B sont sur la même équipotentielle, dans une région où le champ est intense. Que valent la tension \(U\) et le travail pour amener une charge de A à B ?</summary>
+      <p>\(U = 0\) et \(W = qU = 0\). Le champ y est fort, mais perpendiculaire à l’équipotentielle : il pousse de côté, jamais le long d’un chemin qui reste dessus. Comme le travail ne dépend pas du chemin, il est nul aussi par n’importe quel autre trajet.</p></details>
+  </section>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
   <ul>
     <li><strong>Échelle.</strong> 1 pixel = 1 mm. La scène mesure donc environ un mètre : les valeurs en N/C et en V sont cohérentes avec cette échelle, mais elles changeraient si on la modifiait (E varie en 1/r²).</li>
     <li><strong>Adoucissement.</strong> Près d'une charge, E tend vers l'infini et une intégration numérique diverge. On remplace r² par r² + ε² avec ε = 2 mm : le champ reste fini. La charge test est en plus « captée » quand elle touche une charge de signe opposé, au lieu de la faire rebondir ou orbiter.</li>
     <li><strong>Lignes en coupe.</strong> Les charges sont dans un plan et les lignes dessinées y restent (c'est exact par symétrie), mais leur nombre est proportionnel à |q| avec des angles réguliers dans le plan. Dans l'espace réel, la densité de lignes ne représente |E| qu'approximativement.</li>
-    <li><strong>Plaques.</strong> Une rangée de charges ponctuelles n'est pas une vraie plaque continue : le champ entre elles n'est pas parfaitement uniforme (il varie un peu avec la distance aux rangées). Une plaque infinie donnerait E = σ/ε₀ exactement uniforme.</li>
+    <li><strong>Plaques.</strong> Une rangée de charges ponctuelles n'est pas une vraie plaque continue : le champ entre elles n'est pas parfaitement uniforme (il varie un peu avec la distance aux rangées). Deux plaques infinies de charges opposées donneraient E = σ/ε₀ exactement uniforme entre elles.</li>
     <li><strong>Électrostatique.</strong> Les charges sont fixes ou déplacées lentement, et le champ se met à jour instantanément (en réalité, l'information voyage à la vitesse de la lumière). La charge test est trop petite pour perturber les sources, ne rayonne pas et n'est pas relativiste. Pas de conducteurs ni de diélectriques.</li>
   </ul>
 
@@ -130,21 +192,6 @@ table.mots td.m{font-family:var(--mono);font-size:14px;white-space:nowrap}
     <div><b>≈ 3×10⁶ V/m</b><span>champ à partir duquel l'air devient conducteur et laisse jaillir une étincelle.</span></div>
     <div><b>≈ 5×10¹¹ N/C</b><span>champ du proton à la distance de l'électron dans l'atome d'hydrogène (0,53×10⁻¹⁰ m).</span></div>
   </div>
-
-  <h2><span>5</span>Teste-toi</h2>
-  <details><summary>Si on double la distance à une charge ponctuelle, que deviennent E et V ?</summary>
-    <p>E est divisé par 4 (il varie en 1/r²) et V par 2 (il varie en 1/r). Tu peux le vérifier avec la sonde sur une charge isolée.</p></details>
-  <details><summary>Pourquoi deux lignes de champ ne se croisent-elles jamais ?</summary>
-    <p>En un point de l'espace, le champ total a une seule direction et un seul sens. Une intersection en donnerait deux. (Aux points où E = 0, comme au milieu de deux charges identiques, il n'y a tout simplement pas de ligne qui passe.)</p></details>
-  <details><summary>Une charge test positive est lâchée au repos dans un champ non uniforme. Suit-elle exactement la ligne de champ qui passe par son point de départ ?</summary>
-    <p>Non. Elle démarre dans la direction de la ligne, mais elle acquiert une vitesse. Quand la ligne se courbe, la charge continue en partie sur son élan : sa trajectoire s'écarte de la ligne. Elles coïncident seulement si la ligne est droite.</p></details>
-
-  <details><summary>Au milieu de deux charges positives identiques, |E| = 0. Le potentiel y est-il nul aussi ?</summary>
-    <p>Non, il est même élevé : les deux potentiels positifs s'additionnent. Le champ est nul parce que le potentiel y est à un col : il ne varie pas quand on fait un tout petit pas, comme le sommet d'une selle. Champ et potentiel décrivent la même situation, mais E est la pente de V, pas sa valeur.</p></details>
-  <details><summary>Tu places A et B sur la même équipotentielle, dans une région où le champ est intense. Que vaut la tension U entre eux ? Combien coûte le déplacement d'une charge de A à B ?</summary>
-    <p>U = 0 et le travail W = qU = 0. Le champ y est fort, mais il est perpendiculaire à l'équipotentielle : il pousse de côté, jamais le long du chemin qui relie A et B en restant dessus. Et comme le travail ne dépend pas du chemin, il est nul aussi par n'importe quel autre trajet.</p></details>
-  <details><summary>À un même point, on place successivement une charge de +1 nC puis de −3 nC. Qu'est-ce qui change : le champ, la force, ou les deux ?</summary>
-    <p>Seulement la force. Le champ en ce point est créé par les autres charges ; il ne dépend pas de la charge qu'on y pose. La force F = qE est trois fois plus grande et de sens opposé pour −3 nC.</p></details>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
 </div>
