@@ -32,6 +32,33 @@
   --gouttiere:clamp(16px,4vw,56px);
 }
 
+/* Thème sombre : suit le système (sauf choix « clair »), ou forcé par data-theme="dark".
+   Même structure neutre, encre et papier inversés ; les couleurs des phénomènes
+   reprennent les teintes vives des planches sombres. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=light]){
+    --papier:#0e1114; --papier-2:#151a1f; --papier-3:#1c2229;
+    --encre:#e8e4dc; --encre-2:#a9a59d; --encre-3:#77756f;
+    --trait:#272d35; --trait-fin:rgba(232,228,220,.10);
+    --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166; --champ-b:#8a97f2; --induit:#45c9a0;
+    --onde:#74a6dc; --matiere:#d6a86c; --vivant:#6cc495; --astre:#e2786b;
+    color-scheme:dark;
+  }
+}
+:root[data-theme=dark]{
+  --papier:#0e1114; --papier-2:#151a1f; --papier-3:#1c2229;
+  --encre:#e8e4dc; --encre-2:#a9a59d; --encre-3:#77756f;
+  --trait:#272d35; --trait-fin:rgba(232,228,220,.10);
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166; --champ-b:#8a97f2; --induit:#45c9a0;
+  --onde:#74a6dc; --matiere:#d6a86c; --vivant:#6cc495; --astre:#e2786b;
+  color-scheme:dark;
+}
+:root[data-theme=light]{ color-scheme:light; }
+
+/* Bascule de thème (barre) */
+.bascule-theme{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--encre-3);border:1px solid var(--trait);border-radius:20px;padding:3px 10px}
+.bascule-theme:hover{color:var(--encre);border-color:var(--encre)}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--papier);color:var(--encre);-webkit-text-size-adjust:100%}
 body{font-family:var(--sans);font-size:16px;line-height:1.5;background:var(--papier);overflow-x:hidden;
