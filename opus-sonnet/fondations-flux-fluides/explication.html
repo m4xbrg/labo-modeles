@@ -97,76 +97,76 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     </header>
 
     <h4 data-n="1">Intuition</h4>
-    <p>Beaucoup de grandeurs existent partout à la fois : la température d'une pièce, la pression de l'air, la vitesse de l'eau d'un ruisseau. Un champ attache une valeur à chaque point de l'espace : un seul nombre (champ scalaire) ou une flèche (champ vectoriel). Quatre questions suffisent pour le lire. Vers où ça monte, et à quel rythme ? C'est le gradient. Combien traverse cette surface ? C'est le flux. Naît-il ou disparaît-il quelque chose ici ? C'est la divergence. Le champ fait-il tourner un petit objet sur lui-même ? C'est le rotationnel. Une règle très générale relie le tout : ce qui diffuse (chaleur, soluté) va du plus vers le moins, c'est-à-dire en descendant le gradient.</p>
+    <p>Beaucoup de grandeurs existent partout à la fois : la température d'une pièce, la pression de l'air, la vitesse de l'eau d'un ruisseau. Un champ attache une valeur à chaque point de l'espace : un nombre (champ scalaire) ou une flèche (champ vectoriel). Quatre questions suffisent pour le lire. Vers où ça monte, et à quel rythme ? Le gradient. Combien traverse cette surface ? Le flux. Naît-il ou disparaît-il quelque chose ici ? La divergence. Le champ fait-il tourner un petit objet sur lui-même ? Le rotationnel. Ce qui diffuse (chaleur, soluté) descend le gradient, du plus vers le moins.</p>
 
     <h4 data-n="2">Définitions</h4>
     <dl class="defs">
-      <div><dt>Champ scalaire \(f(x,y)\)</dt><dd>Un nombre en chaque point : température, concentration, pression, potentiel. L'unité est celle de la grandeur.</dd></div>
-      <div><dt>Ligne de niveau</dt><dd>Courbe où \(f\) garde la même valeur (isotherme, isobare, équipotentielle). Serrées, elles signalent une pente raide.</dd></div>
-      <div><dt>Gradient \(\nabla f\)<span class="u">unité de f par m</span></dt><dd>Flèche qui pointe vers la montée la plus raide ; sa longueur est cette pente maximale. Elle est perpendiculaire aux lignes de niveau.</dd></div>
-      <div><dt>Champ vectoriel \(\vec v\)</dt><dd>Une flèche en chaque point : vitesse d'un fluide, champ électrique, flux de chaleur. Deux composantes en 2D, trois en 3D.</dd></div>
-      <div><dt>Normale \(\hat n\)</dt><dd>Vecteur de longueur 1, perpendiculaire à une surface. Il fixe le sens compté positivement.</dd></div>
-      <div><dt>Flux \(\Phi\)<span class="u">m³/s pour une vitesse</span></dt><dd>Quantité qui traverse une surface par unité de temps, comptée selon la normale. En 2D (laboratoires A à C), la « surface » est un segment et le flux s'exprime par unité de profondeur (cm²/s).</dd></div>
+      <div><dt>Champ scalaire \(f(x,y)\)</dt><dd>Un nombre en chaque point : température, concentration, pression, potentiel.</dd></div>
+      <div><dt>Ligne de niveau</dt><dd>Courbe où \(f\) est constante (isotherme, isobare, équipotentielle) ; serrée, elle signale une pente raide.</dd></div>
+      <div><dt>Gradient \(\nabla f\)<span class="u">unité de f par m</span></dt><dd>Flèche vers la montée la plus raide, de longueur égale à cette pente ; perpendiculaire aux lignes de niveau.</dd></div>
+      <div><dt>Champ vectoriel \(\vec v\)</dt><dd>Une flèche en chaque point : vitesse d'un fluide, champ électrique, flux de chaleur.</dd></div>
+      <div><dt>Normale \(\hat n\)</dt><dd>Vecteur unitaire perpendiculaire à une surface ; il fixe le sens positif.</dd></div>
+      <div><dt>Flux \(\Phi\)<span class="u">m³/s pour une vitesse</span></dt><dd>Quantité qui traverse une surface par unité de temps, comptée selon la normale. En 2D, la « surface » est un segment : flux par unité de profondeur (cm²/s).</dd></div>
       <div><dt>Densité de flux \(\vec q\), \(\vec J\)<span class="u">W/m² pour la chaleur</span></dt><dd>Flux par unité de surface : ce qui s'écoule, en chaque point.</dd></div>
-      <div><dt>Divergence \(\nabla\cdot\vec v\)<span class="u">s⁻¹ pour une vitesse</span></dt><dd>Flux sortant d'un petit contour divisé par son aire, quand l'aire tend vers zéro : positive pour une source, négative pour un puits.</dd></div>
+      <div><dt>Divergence \(\nabla\cdot\vec v\)<span class="u">s⁻¹ pour une vitesse</span></dt><dd>Flux sortant d'un petit contour divisé par son aire : positive pour une source, négative pour un puits.</dd></div>
       <div><dt>Circulation \(\Gamma\)<span class="u">m²/s pour une vitesse</span></dt><dd>Somme de la composante de \(\vec v\) le long d'un contour fermé.</dd></div>
-      <div><dt>Rotationnel \(\nabla\times\vec v\)<span class="u">s⁻¹ pour une vitesse</span></dt><dd>Circulation d'un petit contour divisée par son aire : la tendance à tourner sur soi.</dd></div>
-      <div><dt>Nabla \(\nabla\)</dt><dd>Sténographie \(\nabla = (\partial/\partial x,\ \partial/\partial y)\) : \(\partial f/\partial x\) est la pente de \(f\) quand on ne bouge qu'en \(x\).</dd></div>
+      <div><dt>Rotationnel \(\nabla\times\vec v\)<span class="u">s⁻¹ pour une vitesse</span></dt><dd>Circulation d'un petit contour divisée par son aire : tendance à tourner sur soi.</dd></div>
+      <div><dt>Nabla \(\nabla\)</dt><dd>\(\nabla = (\partial/\partial x,\ \partial/\partial y)\) ; \(\partial f/\partial x\) est la pente de \(f\) en ne bougeant qu'en \(x\).</dd></div>
     </dl>
 
     <h4 data-n="3">Relations clés</h4>
     <div class="relation">\[ \frac{\dd f}{\dd s} = \nabla f\cdot\hat u = \lvert\nabla f\rvert\cos\theta, \qquad \nabla f = \left(\frac{\partial f}{\partial x},\ \frac{\partial f}{\partial y}\right) \]
-      <p>Pente de \(f\) dans la direction \(\hat u\) ; \(\theta\) est l'angle entre \(\hat u\) et le gradient. Maximale à \(\theta = 0\), nulle le long d'une ligne de niveau (\(\theta = 90°\)), négative à l'opposé.</p></div>
+      <p>Pente de \(f\) dans la direction \(\hat u\), \(\theta\) étant l'angle avec le gradient. Maximale à \(\theta = 0\), nulle le long d'une ligne de niveau (\(\theta = 90°\)).</p></div>
     <div class="relation">\[ \vec q = -k\,\nabla T, \qquad \vec J = -D\,\nabla c, \qquad \vec E = -\nabla V \]
-      <p>Ce qui s'écoule descend le gradient : chaleur (Fourier), soluté (Fick), champ électrique. Le signe moins est toute la physique ; la constante dit à quelle vitesse.</p></div>
+      <p>Ce qui s'écoule descend le gradient : chaleur (Fourier), soluté (Fick), champ électrique. Le signe moins est toute la physique ; la constante fixe la vitesse.</p></div>
     <div class="relation">\[ \Phi = \iint_S \vec v\cdot\hat n\,\dd A, \qquad \Phi = v\,A\cos\theta \ \ \text{(champ uniforme, surface plane)} \]
-      <p>Le flux additionne, morceau par morceau, la part du champ qui traverse. Il change de signe si on retourne la normale ; parallèle au courant, il est nul.</p></div>
+      <p>Le flux additionne la part du champ qui traverse. Il change de signe si on retourne la normale ; parallèle au courant, il est nul.</p></div>
     <div class="relation">\[ \nabla\cdot\vec v = \frac{\partial v_x}{\partial x} + \frac{\partial v_y}{\partial y} = \lim_{A\to 0}\frac{\Phi_{\text{sortant}}}{A}, \qquad \oint \vec v\cdot\hat n\,\dd\ell = \iint \nabla\cdot\vec v\,\dd A \]
-      <p>Le flux sortant d'un contour fermé ne dépend que de ce qui est produit dedans. En 3D, c'est le théorème de Gauss : le flux sortant d'une surface fermée est l'intégrale de la divergence sur le volume.</p></div>
+      <p>Le flux sortant d'un contour fermé ne dépend que de ce qui est produit dedans. En 3D, c'est le théorème de Gauss, sur une surface fermée et son volume.</p></div>
     <div class="relation">\[ (\nabla\times\vec v)_z = \frac{\partial v_y}{\partial x} - \frac{\partial v_x}{\partial y} = \lim_{A\to 0}\frac{\Gamma}{A}, \qquad \omega = \tfrac12\,\nabla\times\vec v \]
-      <p>Un moulinet minuscule tourne à la vitesse angulaire \(\omega\), antihoraire si le rotationnel est positif.</p></div>
+      <p>Un moulinet minuscule tourne à \(\omega\), antihoraire si le rotationnel est positif.</p></div>
     <div class="relation">\[ \frac{\partial c}{\partial t} = -\nabla\cdot\vec J = D\,\nabla^2 c \]
-      <p>La concentration monte là où le flux converge. Avec \(\vec J = -D\nabla c\), on obtient l'équation de diffusion, où \(\nabla^2\) est « la divergence du gradient ».</p></div>
+      <p>La concentration monte là où le flux converge : avec \(\vec J = -D\nabla c\), c'est l'équation de diffusion (\(\nabla^2\) : « divergence du gradient »).</p></div>
 
     <h4 data-n="4">Exemple chiffré</h4>
     <div class="exemple">
       <p>Une plaque a pour température \(T(x,y) = 20 + 4x + 3y\) (en °C, avec \(x\) et \(y\) en cm).</p>
       <ol>
-        <li>Gradient : \(\nabla T = (4;\ 3)\) °C/cm, de longueur \(\sqrt{16 + 9} = 5\) °C/cm, orienté à \(\arctan(3/4) \approx 37°\) de l'axe \(x\). La température monte le plus vite dans cette direction.</li>
+        <li>Gradient : \(\nabla T = (4;\ 3)\) °C/cm, de longueur \(\sqrt{16 + 9} = 5\) °C/cm, à \(\arctan(3/4) \approx 37°\) de l'axe \(x\).</li>
         <li>Pente à 45° : \(\nabla T\cdot\hat u = (4 + 3)/\sqrt2 \approx 4{,}95\) °C/cm, soit \(5\cos 8°\). Le long de la direction \((-3;\ 4)/5\), on trouve \(-12 + 12 = 0\) : c'est l'isotherme.</li>
-        <li>Si la plaque était de l'eau (\(k \approx 0{,}6\) W/(m·K)), avec \(5\) °C/cm \(= 500\) K/m : \(q = 0{,}6 \times 500 = 300\) W/m², dans le sens opposé au gradient.</li>
-        <li>Flux d'un courant uniforme de 3 cm/s à travers une fenêtre de 4 cm dont la normale fait 60° avec le courant : \(\Phi = 3 \times 4 \times \cos 60° = 6\) cm²/s.</li>
-        <li>Divergence du champ \(\vec v = (x,\,y)\) (cm/s) : \(\nabla\cdot\vec v = 1 + 1 = 2\) s⁻¹. Contrôle sur un cercle de rayon 3 cm : \(\vec v\cdot\hat n = 3\) cm/s partout, donc \(\Phi = 3 \times 2\pi \times 3 \approx 56{,}5\) cm²/s, et \(2 \times \pi \times 3^2 \approx 56{,}5\) cm²/s aussi.</li>
-        <li>Cisaillement \(\vec v = (y,\,0)\) : \(\nabla\cdot\vec v = 0\), mais \((\nabla\times\vec v)_z = 0 - 1 = -1\) s⁻¹, donc \(\omega = -0{,}5\) s⁻¹ : le moulinet tourne dans le sens horaire, bien que les lignes de courant soient droites.</li>
+        <li>Pour de l'eau (\(k \approx 0{,}6\) W/(m·K)), \(5\) °C/cm \(= 500\) K/m : \(q = 0{,}6 \times 500 = 300\) W/m², opposé au gradient.</li>
+        <li>Courant de 3 cm/s, fenêtre de 4 cm dont la normale fait 60° avec lui :\(\Phi = 3 \times 4 \times \cos 60° = 6\) cm²/s.</li>
+        <li>Divergence du champ \(\vec v = (x,\,y)\) (cm/s) : \(\nabla\cdot\vec v = 1 + 1 = 2\) s⁻¹. Contrôle sur un cercle de rayon 3 cm : \(\vec v\cdot\hat n = 3\) cm/s, donc \(\Phi = 3 \times 2\pi \times 3 \approx 56{,}5\) cm²/s, soit aussi \(2 \times \pi \times 3^2\).</li>
+        <li>Cisaillement \(\vec v = (y,\,0)\) : \(\nabla\cdot\vec v = 0\), mais \((\nabla\times\vec v)_z = 0 - 1 = -1\) s⁻¹, donc \(\omega = -0{,}5\) s⁻¹ : le moulinet tourne dans le sens horaire malgré les lignes droites.</li>
       </ol>
     </div>
 
     <h4 data-n="5">Pièges fréquents</h4>
     <ul class="pieges">
-      <li>Croire que des flèches qui s'écartent signalent une divergence. Loin d'une source, elles s'écartent mais faiblissent (en \(1/r\) en 2D, en \(1/r^2\) en 3D) juste assez pour que ce qui entre dans un petit cercle en ressorte : la divergence y est nulle.</li>
-      <li>Croire que des flèches qui font des cercles signalent un rotationnel. Autour d'un tourbillon libre, la vitesse décroît en \(1/r\) et le moulinet fait le tour du centre sans tourner sur lui-même ; dans un cisaillement aux lignes droites, il tourne.</li>
-      <li>Oublier le signe moins : le gradient pointe vers la montée, et ce qui s'écoule va dans l'autre sens, du chaud vers le froid.</li>
-      <li>Traiter le gradient comme un nombre. C'est une flèche : la pente dans une direction donnée est un nombre, qui vaut \(\lvert\nabla f\rvert\cos\theta\).</li>
-      <li>Oublier que le flux est algébrique : il dépend du côté choisi pour la normale. Une source située hors d'un contour donne un flux net nul, car ce qui entre ressort.</li>
+      <li>Croire que des flèches qui s'écartent signalent une divergence. Loin d'une source, elles s'écartent mais faiblissent (\(1/r\) en 2D, \(1/r^2\) en 3D) juste assez pour que ce qui entre dans un petit cercle en ressorte : divergence nulle.</li>
+      <li>Croire que des flèches qui font des cercles signalent un rotationnel. Autour d'un tourbillon libre (vitesse en \(1/r\)), le moulinet fait le tour du centre sans tourner sur lui-même ; dans un cisaillement aux lignes droites, il tourne.</li>
+      <li>Oublier le signe moins : le gradient pointe vers la montée, ce qui s'écoule va du chaud vers le froid.</li>
+      <li>Traiter le gradient comme un nombre. C'est une flèche ; seule la pente dans une direction donnée est un nombre, \(\lvert\nabla f\rvert\cos\theta\).</li>
+      <li>Oublier que le flux est algébrique : il dépend de la normale choisie. Une source hors d'un contour donne un flux net nul : ce qui entre ressort.</li>
     </ul>
 
     <h4 data-n="6">Où ça resservira</h4>
     <ul class="resert">
-      <li><b>03</b><span>La dérivée du module 03 devient ici une dérivée partielle, et le flux est une intégrale : mêmes idées, en plusieurs dimensions.</span></li>
-      <li><b>19</b><span>Fourier et Fick sont des flux proportionnels à un gradient ; voir la planche <a href="../07-matiere-chaleur/index.html">Matière, chaleur et transport</a>.</span></li>
-      <li><b>20</b><span>Dans un conduit, la pression est un champ scalaire, son gradient pousse, le débit est un flux et la continuité s'écrit \(\nabla\cdot\vec v = 0\).</span></li>
-      <li><b>21</b><span>\(\vec E = -\nabla V\), lignes de champ perpendiculaires aux équipotentielles, théorème de Gauss ; voir la planche <a href="../04-champ-electrique/index.html">Le champ électrique</a>.</span></li>
+      <li><b>03</b><span>La dérivée du module 03 devient partielle, et le flux est une intégrale.</span></li>
+      <li><b>19</b><span>Fourier et Fick : flux proportionnels à un gradient ; voir la planche <a href="../07-matiere-chaleur/index.html">Matière, chaleur et transport</a>.</span></li>
+      <li><b>20</b><span>Dans un conduit, le gradient de pression pousse, le débit est un flux et la continuité s'écrit \(\nabla\cdot\vec v = 0\).</span></li>
+      <li><b>21</b><span>\(\vec E = -\nabla V\), équipotentielles, théorème de Gauss ; voir la planche <a href="../04-champ-electrique/index.html">Le champ électrique</a>.</span></li>
       <li><b>23</b><span>Le champ magnétique n'a ni source ni puits (\(\nabla\cdot\vec B = 0\)) ; un flux magnétique qui varie crée une tension (Faraday).</span></li>
       <li><b>24</b><span>Les équations de Maxwell s'écrivent entièrement avec des divergences et des rotationnels.</span></li>
     </ul>
 
     <h4 data-n="7">Teste-toi</h4>
-    <details><summary>La température en un point vaut 40 °C et le gradient y mesure 2 °C/cm vers le nord. Quelle température à 1 mm à l'est ? à 1 mm au nord-est ?</summary>
-      <p>À l'est, on se déplace perpendiculairement au gradient, donc le long de l'isotherme : environ 40 °C. Au nord-est, \(\theta = 45°\) : pente \(= 2\cos 45° \approx 1{,}41\) °C/cm, soit \(+0{,}14\) °C pour 1 mm, donc environ 40,14 °C. La chaleur, elle, s'écoule vers le sud.</p></details>
-    <details><summary>Les flèches d'un champ s'écartent les unes des autres en s'éloignant d'un point. La divergence est-elle forcément positive partout ?</summary>
-      <p>Non. Ce qui compte, c'est le bilan sur un petit contour : si les flèches faiblissent en s'écartant juste assez (\(1/r\) en 2D, \(1/r^2\) en 3D), ce qui entre ressort et la divergence est nulle. Elle n'est positive que là où quelque chose est réellement produit, au cœur de la source.</p></details>
-    <details><summary>Une fenêtre de 4 cm est placée dans un courant de 3 cm/s, sa normale à 60° du courant. Quel est le flux ? Et si on la tourne jusqu'à 90° ?</summary>
-      <p>\(\Phi = 3 \times 4 \times \cos 60° = 6\) cm²/s (par cm de profondeur). À 90°, la fenêtre est parallèle au courant : \(\cos 90° = 0\), plus rien ne la traverse.</p></details>
+    <details><summary>Température de 40 °C en un point, gradient de 2 °C/cm vers le nord : quelle température à 1 mm à l'est ? au nord-est ?</summary>
+      <p>À l'est, on suit l'isotherme (perpendiculaire au gradient) : environ 40 °C. Au nord-est, \(\theta = 45°\) : pente \(= 2\cos 45° \approx 1{,}41\) °C/cm, soit \(+0{,}14\) °C pour 1 mm, donc environ 40,14 °C. La chaleur s'écoule vers le sud.</p></details>
+    <details><summary>Des flèches s'écartent en s'éloignant d'un point : la divergence est-elle positive partout ?</summary>
+      <p>Non. Ce qui compte, c'est le bilan sur un petit contour : si les flèches faiblissent en s'écartant (\(1/r\) en 2D, \(1/r^2\) en 3D), ce qui entre ressort et la divergence est nulle. Elle n'est positive qu'au cœur de la source.</p></details>
+    <details><summary>Fenêtre de 4 cm dans un courant de 3 cm/s, normale à 60° du courant : quel flux ? Et à 90° ?</summary>
+      <p>\(\Phi = 3 \times 4 \times \cos 60° = 6\) cm²/s (par cm de profondeur). À 90°, la fenêtre est parallèle au courant : \(\cos 90° = 0\), rien ne la traverse.</p></details>
   </section>
 
   <!-- ===================== Module 20 ===================== -->

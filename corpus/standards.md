@@ -22,7 +22,7 @@ L'explication d'une page de fondations (`explication.html`) contient une partie 
 | 6 | Où ça resservira | 3 à 6 renvois vers d'autres modules par numéro canonique, et vers des planches existantes. |
 | 7 | Teste-toi | 3 questions avec réponse dans `<details>`, dont au moins une calculatoire. |
 
-Repères : 700 à 1 100 mots par module, toutes rubriques comprises. « Les bases, mais assez complet » : quelqu'un qui a lu la section doit pouvoir faire l'exemple chiffré seul et reconnaître le concept dans une autre planche.
+Repères : **800 à 1 150 mots de prose par module**, toutes rubriques comprises, formules exclues (une formule en ligne compte pour un mot, une formule en bloc pour zéro). Relations clés : 3 à 6 blocs. Teste-toi : exactement 3 questions. « Les bases, mais assez complet » : quelqu'un qui a lu la section doit pouvoir faire l'exemple chiffré seul et reconnaître le concept dans une autre planche.
 
 Le reste de l'explication garde son rôle : **Ce que tu vois** (avant la théorie), puis **Ce que la simulation simplifie**, **Les chiffres à retenir**, **Seulement introduit ici** (après).
 

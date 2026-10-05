@@ -100,7 +100,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     </header>
 
     <h4 data-n="1">Intuition</h4>
-    <p>Tout ce qui revient à l’identique, encore et encore, se décrit par un cycle : un point sur une roue, la marée, la tension du secteur, une corde qui vibre. Le cycle le plus simple est celui d’un point qui tourne à vitesse constante sur un cercle. Sa hauteur, tracée dans le temps, dessine une sinusoïde. Retenir le cercle plutôt que la courbe est le bon réflexe : la phase n’est qu’un angle sur ce cercle, et un déphasage, l’écart entre deux points qui tournent ensemble.</p>
+    <p>Tout ce qui revient à l’identique, encore et encore, se décrit par un cycle : un point sur une roue, la marée, la tension du secteur, une corde qui vibre. Le cycle le plus simple est celui d’un point qui tourne à vitesse constante sur un cercle. Sa hauteur, tracée dans le temps, dessine une sinusoïde. Retenir le cercle plutôt que la courbe est le bon réflexe : la phase n’est qu’un angle sur ce cercle, et un déphasage, l’écart entre deux points qui tournent ensemble. Pourquoi le sinus plutôt qu’une autre forme ? Parce que c’est la réponse naturelle de tout système rappelé vers son équilibre par une force proportionnelle à l’écart (module 14), et parce que toute forme périodique se décompose en sinus (module 09). Apprendre à lire un sinus, c’est apprendre à lire une bonne part de la physique.</p>
 
     <h4 data-n="2">Définitions</h4>
     <dl class="defs">
@@ -110,6 +110,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <div><dt>Pulsation \(\omega\)<span class="u">rad/s</span></dt><dd>Vitesse angulaire du point sur le cercle : \(\omega = 2\pi f\).</dd></div>
       <div><dt>Phase \(\varphi(t)\)<span class="u">rad ou °</span></dt><dd>Position dans le cycle à l’instant \(t\) : \(\varphi(t) = \omega t + \varphi_0\). Un tour complet vaut \(2\pi\) rad, soit 360°.</dd></div>
       <div><dt>Déphasage \(\Delta\varphi\)</dt><dd>Écart de phase entre deux oscillations de même fréquence. À 90°, elles sont en <em>quadrature</em> ; à 180°, en <em>opposition de phase</em>.</dd></div>
+      <div><dt>Radian<span class="u">rad</span></dt><dd>Angle qui intercepte sur le cercle un arc égal au rayon. Un tour vaut \(2\pi \approx 6{,}28\) rad. C’est l’unité naturelle des formules : avec elle, la vitesse du point vaut simplement \(A\omega\).</dd></div>
+      <div><dt>Valeur efficace \(y_{\text{eff}}\)</dt><dd>Pour une grandeur sinusoïdale, \(A/\sqrt2\) : la valeur constante qui produirait la même puissance moyenne (module 22).</dd></div>
     </dl>
 
     <h4 data-n="3">Relations clés</h4>
@@ -119,6 +121,10 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <p>Un déphasage est un décalage dans le temps, mesuré en fraction de période : 90° de retard, c’est un quart de période.</p></div>
     <div class="relation">\[ \frac{\dd y}{\dd t} = A\omega\cos(\omega t + \varphi_0) = A\omega\sin\!\left(\omega t + \varphi_0 + \tfrac{\pi}{2}\right) \]
       <p>La vitesse est elle-même une sinusoïde, en avance de 90° et d’amplitude \(A\omega\) : elle est maximale quand \(y\) passe par zéro, nulle aux extrêmes (module 03).</p></div>
+    <div class="relation">\[ A\sin(\omega t) + A\sin(\omega t + \Delta\varphi) = 2A\cos\frac{\Delta\varphi}{2}\,\sin\!\left(\omega t + \frac{\Delta\varphi}{2}\right) \]
+      <p>Deux sinusoïdes de même fréquence donnent encore une sinusoïde de même fréquence : on met les flèches tournantes bout à bout. Amplitude \(2A\) en phase, nulle en opposition (étape A2).</p></div>
+    <div class="relation">\[ \langle y \rangle = 0, \qquad y_{\text{eff}} = \sqrt{\langle y^2 \rangle} = \frac{A}{\sqrt2} \]
+      <p>Sur un cycle complet, un sinus est autant positif que négatif : sa moyenne est nulle. Son carré ne l’est jamais, et sa moyenne vaut \(A^2/2\). C’est pour cela qu’une tension alternative se caractérise par sa valeur efficace.</p></div>
 
     <h4 data-n="4">Exemple chiffré</h4>
     <div class="exemple">
@@ -127,6 +133,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
         <li>Période : \(T = 1/60 \approx 16{,}7\) ms ; pulsation : \(\omega = 2\pi \cdot 60 \approx 377\) rad/s.</li>
         <li>En triphasé, les trois tensions sont décalées de 120°, soit \(\Delta t = \tfrac{120}{360}\,T = T/3 \approx 5{,}6\) ms.</li>
         <li>Une tension de crête \(A = 170\) V varie au plus vite au passage par zéro, à \(A\omega \approx 170 \times 377 \approx 6{,}4 \times 10^4\) V/s.</li>
+        <li>Cette crête de 170 V correspond à \(170/\sqrt2 \approx 120\) V efficaces : c’est la valeur inscrite sur les appareils.</li>
+        <li>Entre deux phases décalées de 120°, la tension est la différence de deux sinusoïdes : son amplitude vaut \(2A\sin 60° = \sqrt3\,A\). D’où les \(\sqrt3 \times 120 \approx 208\) V entre deux phases d’un bâtiment commercial alimenté en 120/208 V.</li>
       </ol>
     </div>
 
@@ -137,6 +145,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Prendre la phase pour une durée : un déphasage de 90° ne dit rien en secondes tant qu’on ne connaît pas \(T\).</li>
       <li>Oublier qu’un déphasage de 360° revient à aucun déphasage : la phase se lit modulo un tour.</li>
       <li>Lire l’écart crête-à-crête comme l’amplitude : il vaut \(2A\).</li>
+      <li>Additionner les amplitudes de deux signaux déphasés : 3 V et 4 V en quadrature donnent \(\sqrt{3^2 + 4^2} = 5\) V, pas 7 V.</li>
     </ul>
 
     <h4 data-n="6">Où ça resservira</h4>
@@ -145,6 +154,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>15</b><span>Une onde, c’est une phase qui dépend aussi de la position : \(kx - \omega t\).</span></li>
       <li><b>09</b><span>Fourier décompose presque tout signal en une somme de sinusoïdes.</span></li>
       <li><b>22</b><span>Courant alternatif et circuits RLC : tensions et courants déphasés.</span></li>
+      <li><b>24</b><span>Une onde lumineuse est un champ électrique qui oscille sinusoïdalement, autour de \(5 \times 10^{14}\) Hz pour la lumière visible.</span></li>
       <li><b>48</b><span>La phase quantique est un angle du même genre, porté par une amplitude complexe.</span></li>
     </ul>
 
@@ -166,7 +176,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     </header>
 
     <h4 data-n="1">Intuition</h4>
-    <p>Un système oscille quand deux choses sont réunies : une force qui le ramène vers l’équilibre, et une inertie qui l’emporte au-delà. La masse au bout d’un ressort en est le modèle : elle repasse par le repos à pleine vitesse, dépasse, est freinée, repart. Son énergie passe sans cesse d’un réservoir à l’autre, du ressort comprimé (potentielle) à la masse en mouvement (cinétique). Un frottement vide peu à peu les réservoirs ; une poussée périodique peut les remplir, surtout si elle arrive au bon rythme : c’est la résonance.</p>
+    <p>Un système oscille quand deux choses sont réunies : une force qui le ramène vers l’équilibre, et une inertie qui l’emporte au-delà. La masse au bout d’un ressort en est le modèle : elle repasse par le repos à pleine vitesse, dépasse, est freinée, repart. Son énergie passe sans cesse d’un réservoir à l’autre, du ressort comprimé (potentielle) à la masse en mouvement (cinétique). Un frottement vide peu à peu les réservoirs ; une poussée périodique peut les remplir, surtout si elle arrive au bon rythme : c’est la résonance. Le même schéma revient partout où une grandeur est rappelée vers l’équilibre par une force proportionnelle à l’écart : pendule aux petits angles, molécule qui vibre, circuit électrique, immeuble qui oscille sous le vent.</p>
 
     <h4 data-n="2">Définitions</h4>
     <dl class="defs">
@@ -176,6 +186,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <div><dt>Amortissement \(\beta\)<span class="u">s⁻¹</span></dt><dd>\(\beta = b/2m\) : l’amplitude décroît comme \(\mathrm{e}^{-\beta t}\).</dd></div>
       <div><dt>Facteur de qualité \(Q\)</dt><dd>\(Q = \omega_0/2\beta\) : grand quand les pertes sont faibles. Il fixe la finesse de la résonance.</dd></div>
       <div><dt>Forçage \(\Omega\)<span class="u">rad/s</span></dt><dd>Pulsation de la poussée périodique \(F_0\cos(\Omega t)\) imposée de l’extérieur.</dd></div>
+      <div><dt>Régimes</dt><dd>Selon \(\beta\) comparé à \(\omega_0\) : pseudo-périodique (\(\beta \lt \omega_0\), oscille en s’amortissant), critique (\(\beta = \omega_0\), retour le plus rapide sans dépasser), apériodique (\(\beta \gt \omega_0\), retour lent sans osciller).</dd></div>
     </dl>
 
     <h4 data-n="3">Relations clés</h4>
@@ -185,6 +196,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <p>Deuxième loi de Newton (module 10) appliquée à la masse : inertie, frottement, rappel, poussée.</p></div>
     <div class="relation">\[ x(t) = A\cos(\omega_0 t + \varphi_0), \qquad E = \tfrac12 m v^2 + \tfrac12 k x^2 = \tfrac12 k A^2 \]
       <p>Sans frottement ni poussée : un sinus à la pulsation propre, et une énergie totale constante qui s’échange deux fois par période.</p></div>
+    <div class="relation">\[ \omega_0 = \sqrt{\frac{g}{\ell}} \qquad \text{(pendule simple, petits angles)} \]
+      <p>Pour un petit angle, \(\sin\theta \approx \theta\) et le pendule devient un oscillateur harmonique : sa période ne dépend ni de la masse ni de l’amplitude. À 30°, l’écart à cette formule n’est encore que de 1,7 %.</p></div>
     <div class="relation">\[ x(t) = A_0\,\mathrm{e}^{-\beta t}\cos(\omega_d t + \varphi_0), \qquad \omega_d = \sqrt{\omega_0^2 - \beta^2} \]
       <p>Avec un frottement faible (\(\beta \lt \omega_0\)) : l’oscillation continue, un peu plus lente, sous une enveloppe exponentielle (module 05).</p></div>
     <div class="relation">\[ A(\Omega) = \frac{F_0/m}{\sqrt{(\omega_0^2 - \Omega^2)^2 + (2\beta\Omega)^2}} \]
@@ -197,6 +210,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
         <li>\(\omega_0 = \sqrt{200/0{,}5} = 20\) rad/s, donc \(f_0 = 20/2\pi \approx 3{,}2\) Hz et \(T \approx 0{,}31\) s.</li>
         <li>Énergie : \(E = \tfrac12 \cdot 200 \cdot 0{,}05^2 = 0{,}25\) J. Vitesse maximale : \(v_{\max} = \omega_0 A = 1\) m/s, et l’on vérifie \(\tfrac12 \cdot 0{,}5 \cdot 1^2 = 0{,}25\) J.</li>
         <li>Avec \(b = 0{,}4\) kg/s : \(\beta = 0{,}4\) s⁻¹ et \(Q = 20/0{,}8 = 25\). L’amplitude est divisée par \(\mathrm{e}\) en \(1/\beta = 2{,}5\) s, soit environ \(Q/\pi \approx 8\) oscillations.</li>
+        <li>Un pendule de 1 m : \(\omega_0 = \sqrt{9{,}81/1} \approx 3{,}13\) rad/s, donc \(T \approx 2{,}0\) s. C’est la « seconde battante » des horloges de parquet : un aller en une seconde.</li>
       </ol>
     </div>
 
@@ -207,6 +221,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Croire que l’amplitude à la résonance devient infinie. Elle se stabilise quand l’amortissement retire, à chaque cycle, autant d’énergie que la force en apporte.</li>
       <li>Dire que le frottement « détruit » l’énergie : il la convertit en chaleur.</li>
       <li>Oublier le sur-amortissement : si \(\beta \gt \omega_0\), la masse revient au repos sans osciller.</li>
+      <li>Croire que le meilleur amortisseur est le plus fort : au-delà du régime critique, le retour au repos ralentit. Une suspension de voiture vise le voisinage du critique.</li>
     </ul>
 
     <h4 data-n="6">Où ça resservira</h4>
@@ -235,7 +250,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     </header>
 
     <h4 data-n="1">Intuition</h4>
-    <p>Une onde transporte une perturbation et de l’énergie, pas de la matière. Sur une corde, chaque perle monte et descend sur place, comme un oscillateur du module 14, mais avec un retard qui grandit avec la distance : la phase dépend à la fois du temps et de la position. Deux ondes qui se croisent s’additionnent puis repartent intactes ; une onde qui se réfléchit sur elle-même peut former une figure immobile, l’onde stationnaire.</p>
+    <p>Une onde transporte une perturbation et de l’énergie, pas de la matière. Sur une corde, chaque perle monte et descend sur place, comme un oscillateur du module 14, mais avec un retard qui grandit avec la distance : la phase dépend à la fois du temps et de la position. Deux ondes qui se croisent s’additionnent puis repartent intactes ; une onde qui se réfléchit sur elle-même peut former une figure immobile, l’onde stationnaire. Il en existe deux grandes familles : les ondes <em>transversales</em>, où le milieu bouge perpendiculairement à la propagation (corde, lumière), et les ondes <em>longitudinales</em>, où il bouge dans le même sens (son dans l’air, fait de compressions et de détentes).</p>
 
     <h4 data-n="2">Définitions</h4>
     <dl class="defs">
@@ -245,6 +260,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <div><dt>Superposition</dt><dd>Le déplacement total est la somme des déplacements de chaque onde.</dd></div>
       <div><dt>Nœud, ventre</dt><dd>Dans une onde stationnaire : points immobiles (nœuds), points d’amplitude maximale (ventres).</dd></div>
       <div><dt>Mode \(n\)</dt><dd>Une des façons de vibrer qu’autorisent les bords ; le mode \(n\) compte \(n\) ventres.</dd></div>
+      <div><dt>Intensité \(I\)<span class="u">W/m²</span></dt><dd>Puissance transportée par l’onde à travers un mètre carré perpendiculaire à sa direction.</dd></div>
+      <div><dt>Transversale, longitudinale</dt><dd>Selon que le milieu vibre perpendiculairement à la propagation, ou dans sa direction.</dd></div>
     </dl>
 
     <h4 data-n="3">Relations clés</h4>
@@ -258,6 +275,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <p>Une onde et son retour forment une onde stationnaire. Sur une corde fixée aux deux bouts, seuls les modes de fréquence \(f_n\) tiennent ; deux nœuds voisins sont à \(\lambda/2\).</p></div>
     <div class="relation">\[ f' = \frac{f}{1 - v_s/c}\ \text{(devant)}, \qquad f' = \frac{f}{1 + v_s/c}\ \text{(derrière)} \]
       <p>Effet Doppler pour une source qui avance à \(v_s\) dans un milieu au repos, observateur immobile : les fronts se tassent devant, s’étirent derrière.</p></div>
+    <div class="relation">\[ I \propto A^2, \qquad I = \frac{P}{4\pi r^2}\ \ \text{(source ponctuelle, en 3D)} \]
+      <p>L’énergie d’une onde va comme le carré de l’amplitude : doubler l’amplitude quadruple l’intensité. Depuis une source ponctuelle de puissance \(P\), cette puissance s’étale sur une sphère : à deux fois la distance, quatre fois moins d’intensité.</p></div>
 
     <h4 data-n="4">Exemple chiffré</h4>
     <div class="exemple">
@@ -267,6 +286,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
         <li>Le troisième mode vibre à \(f_3 = 3f_1 = 330\) Hz, avec deux nœuds intermédiaires.</li>
         <li>Dans l’air, ce son a une longueur d’onde \(\lambda = 343/110 \approx 3{,}1\) m : même fréquence, autre milieu, autre \(\lambda\).</li>
         <li>Doppler : une sirène de 700 Hz sur un véhicule à 30 m/s s’entend à \(700/(1 - 30/343) \approx 767\) Hz quand il approche, \(700/(1 + 30/343) \approx 644\) Hz quand il s’éloigne.</li>
+        <li>Intensité : à 2 m d’un haut-parleur, on reçoit quatre fois moins qu’à 1 m, soit environ 6 dB de moins (\(10\log_{10}4 \approx 6\)).</li>
       </ol>
     </div>
 
@@ -277,6 +297,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Oublier qu’une extrémité fixe renvoie l’onde inversée, une extrémité libre sans inversion.</li>
       <li>Croire que deux ondes qui s’annulent détruisent de l’énergie : elle se retrouve ailleurs (franges claires) ou n’a jamais été injectée.</li>
       <li>Penser que la source change de fréquence dans l’effet Doppler : elle émet toujours \(f\) ; c’est la fréquence reçue qui change.</li>
+      <li>Croire que le son transporte l’air de la source à l’oreille : chaque molécule oscille sur place, de bien moins d’un millimètre ; seule la perturbation voyage.</li>
     </ul>
 
     <h4 data-n="6">Où ça resservira</h4>
