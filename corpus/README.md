@@ -13,6 +13,7 @@ Ce dossier décrit **ce qu'est le corpus de LABO** : la carte conceptuelle des f
 | [`atlas.md`](atlas.md) | humain | Le grand réservoir de phénomènes : la liste historique, les ajouts proposés, leurs statuts. |
 | [`collections.md`](collections.md) | humain | Les regroupements éditoriaux, dont « L'invisible en mouvement ». |
 | [`historique.md`](historique.md) | humain | Généalogie du projet, anciennes numérotations, anciens noms, statut des documents historiques. |
+| [`standards.md`](standards.md) | humain | Ce que toutes les pages partagent : en-tête LABO, plan de théorie des fondations (une section par module, LaTeX), taille des pages (un chapitre par module). |
 | `modules.json`, `productions.json`, `models.json`, `atlas.json`, `collections.json` | machine | Les mêmes données, structurées, pour alimenter plus tard l'accueil de LABO. |
 
 Les fichiers `.json` et les fichiers `.md` décrivent les mêmes choses. Quand on change un statut, on change les deux.

@@ -1,0 +1,56 @@
+/* LABO — théorie des fondations : une section par module canonique, même plan partout.
+   Utilise les jetons des pages d'explication (--fond, --fond-2, --trait, --texte, --texte-2,
+   --accent, --energie, --serif, --sans, --mono). Plan d'une section : voir corpus/standards.md. */
+
+/* Sommaire des modules */
+.sommaire{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 0;padding:0;list-style:none}
+.sommaire a{display:inline-flex;gap:8px;align-items:baseline;padding:6px 12px;border:1px solid var(--trait);text-decoration:none;color:var(--texte);font:400 13px var(--sans)}
+.sommaire a b{font:500 11px var(--mono);color:var(--accent);letter-spacing:.06em}
+.sommaire a:hover{border-color:var(--accent)}
+
+/* Un module */
+.module{margin:72px 0 0;padding-top:26px;border-top:1px solid var(--texte-2);scroll-margin-top:24px}
+.module > header{margin-bottom:22px}
+.module .num{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.module h3{font:400 30px/1.15 var(--serif);margin:8px 0 6px}
+.module .etapes{font:400 12px var(--mono);color:var(--texte-2)}
+.module h4{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--texte-2);margin:34px 0 12px;display:flex;gap:10px;align-items:baseline}
+.module h4::before{content:attr(data-n);color:var(--accent)}
+
+/* Définitions : terme, symbole, unité */
+.defs{display:grid;grid-template-columns:minmax(0,1fr);border-top:1px solid var(--trait);margin:0 0 16px}
+.defs > div{display:grid;grid-template-columns:minmax(150px,210px) 1fr;gap:16px;padding:10px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.defs dt{font:500 15px var(--sans);padding:0}
+.defs dt .katex{font-size:1.05em}
+.defs dd{margin:0;padding:0;border:0;opacity:.92}
+.defs .u{font:400 12px var(--mono);color:var(--texte-2);margin-left:6px}
+
+/* Relations clés : équations encadrées, chacune avec ce qu'elle dit */
+.relation{background:var(--fond-2);border-left:2px solid var(--accent);padding:14px 18px 12px;margin:14px 0}
+.relation .katex-display{margin:4px 0 8px;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.relation p{margin:0;font-size:15px;opacity:.88}
+
+/* Exemple chiffré : étapes de calcul */
+.exemple{border:1px solid var(--trait);padding:14px 18px;margin:0 0 16px}
+.exemple p{margin:0 0 10px}
+.exemple ol{margin:0;padding-left:20px}
+.exemple li{margin-bottom:6px}
+
+/* Pièges fréquents */
+.pieges{list-style:none;padding:0;margin:0 0 16px}
+.pieges li{position:relative;padding:0 0 0 26px;margin-bottom:12px}
+.pieges li::before{content:"≠";position:absolute;left:0;top:0;font:500 15px var(--mono);color:var(--positif,#ff8a5b)}
+
+/* Où ça resservira */
+.resert{list-style:none;padding:0;margin:0 0 16px;display:grid;gap:8px}
+.resert li{margin:0;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline}
+.resert li > b{font:500 12px var(--mono);color:var(--accent);white-space:nowrap}
+
+/* Teste-toi, à l'intérieur d'un module */
+.module details p,.module details ol{padding:0 16px 4px 50px}
+
+.katex{font-size:1.08em}
+@media (max-width:560px){
+  .defs > div{grid-template-columns:1fr;gap:2px}
+  .module h3{font-size:26px}
+}
