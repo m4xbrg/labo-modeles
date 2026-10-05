@@ -70,3 +70,23 @@ Fraction : `<span class="frac"><span>μ₀ I</span><span>2π r</span></span>`.
 - Console propre ; aucun lien cassé ; rendu à 1440 px, 1366 × 768 (la scène doit tenir dans l'écran) et 375 px, sans défilement horizontal.
 - `prefers-reduced-motion` : la boucle ralentit, rien ne clignote.
 - Si le navigateur intégré est masqué, `requestAnimationFrame` s'arrête et la planche paraît figée : tester en navigateur headless (Playwright avec Edge) ou dans un onglet visible.
+
+## Migrer une planche existante (planche à étapes)
+
+Les planches de `opus-sonnet/` ont leur propre simulation (canvas ou SVG), souvent plusieurs milliers de lignes. On ne les réécrit pas : on les **habille**. Référence complète : [`opus-sonnet/fondations-oscillations-ondes/index.html`](../opus-sonnet/fondations-oscillations-ondes/index.html).
+
+**Principe.** La scène reste un *écran d'instrument* : son fond sombre, ses couleurs, ses lueurs et tout son JavaScript de simulation sont conservés. Tout ce qui l'entoure suit le thème LABO (clair ou sombre) : barre, titre et signature, chapitres et étapes, couches, panneau de lecture, contrôles.
+
+**Recette.**
+
+1. `<head>` : après le `<style>` de la page, ajouter `../../labo/labo.css`, `../../labo/planche-etapes.css` et `../../labo/theme.js`. Le style de la page reste : il porte les jetons de l'écran (`--fond`, `--texte`, `--accent`…) que lit le JavaScript.
+2. `<body class="labo-etapes" data-mode="observer" data-touches="omc">` (les chiffres servent aux étapes, donc les couches passent sur O, M, C).
+3. Avant le conteneur principal, insérer la coque : `header.barre` (LABO, ← Fondations ou ← Phénomènes, `p.pos`, bouton de thème), `div.titre` (h1, `p.lead` d'une phrase, `dl.sig` Échelle · Temps · Modèle), `nav.chapitres#stepper`, `div.modes` (trois onglets avec `data-indice`, `p.indice#indice`).
+4. **Chapitres.** Page de fondations : un `div.chap` par module canonique (`p.chap-t` avec `<b>NN</b>` et le titre canonique), contenant 2 à 4 boutons d'étape. Les codes d'étape sont `NN.k` (`14.2`). Showcase : un seul chapitre, le phénomène, et ses actes.
+5. Chaque bouton d'étape garde la classe et l'attribut d'origine (`.seg`, `data-a`, ou ce que le JavaScript lit) pour que la navigation existante continue de marcher. Pour regrouper deux scènes en une étape sans toucher à la physique : un bouton avec deux index (`data-a` et `data-b`), et une bascule « Scène : … | … » dans les contrôles.
+6. Sortir le titre superposé de la scène, et réduire la réserve que le dessin lui laissait (`headH()` ou équivalent).
+7. **Couches** dans le panneau : classe `couche-lire` sur les mesures et graphes (visibles en Manipuler et Comprendre), `couche-comp` sur le texte explicatif et le lien de théorie (Comprendre seulement). Les réglages (`#tools` ou équivalent) disparaissent en Observer.
+8. Le lien « Comprendre ce qui se passe » devient « Théorie du module NN » vers `explication.html#mNN`, mis à jour à chaque étape.
+9. En fin de page, charger `../../labo/planche.js` (couches, hauteur de l'écran ajustée à la fenêtre).
+
+**Vérifier** : console propre ; aucune requête en échec ; pas de défilement horizontal à 375 px ; l'écran et ses contrôles tiennent dans 1366 × 768 ; chaque étape s'ouvre et le bon module est marqué ; clair et sombre.

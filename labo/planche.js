@@ -26,9 +26,12 @@ onglets.forEach((b, i) => {
     const n = onglets[(i + d + onglets.length) % onglets.length]; n.focus(); mode(n.dataset.m); e.preventDefault();
   });
 });
+// Touches des couches : 1 2 3 par défaut ; <body data-touches="omc"> quand les chiffres servent déjà
+// à choisir une étape (planches à étapes).
+const TOUCHES = (document.body.dataset.touches || '123').split('');
 addEventListener('keydown', e => {
-  if (e.target.closest('input,textarea,select')) return;
-  const k = { '1': 'observer', '2': 'manipuler', '3': 'comprendre' }[e.key];
+  if (e.target.closest('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = { [TOUCHES[0]]: 'observer', [TOUCHES[1]]: 'manipuler', [TOUCHES[2]]: 'comprendre' }[e.key.toLowerCase()];
   if (k) mode(k);
   if (e.key === 'Escape') echap.forEach(f => f());
 });
@@ -53,6 +56,14 @@ if (num && window.LaboCorpus) window.LaboCorpus.charge().then(C => {
   const suite = $('.suite');
   if (suite) suite.innerHTML = carte(avant, -1) + carte(apres, 1);
 }).catch(err => console.warn('LABO : corpus illisible, position et voisins laissés tels quels', err));
+
+// Planches à étapes : l'écran occupe la hauteur restante de la fenêtre, contrôles compris.
+const app = document.body.classList.contains('labo-etapes') && $('.app');
+if (app){
+  const ajuste = () => { if (innerWidth <= 860) return; document.body.style.setProperty('--chrome', Math.round(app.getBoundingClientRect().top + scrollY + 10) + 'px'); };
+  addEventListener('resize', ajuste); abonnes.push(() => requestAnimationFrame(ajuste)); ajuste();
+  if (document.fonts) document.fonts.ready.then(ajuste);
+}
 
 const m0 = new URLSearchParams(location.search).get('mode');
 mode(onglets.some(b => b.dataset.m === m0) ? m0 : (document.body.dataset.mode || 'observer'));
