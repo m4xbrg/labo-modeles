@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 36 | 0 | 139 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 8 | 1 | 49 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 37 | 0 | 138 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 9 | 1 | 48 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **44** | **2** | **188** |
+| **Total** | **265** | **16** | **15** | **46** | **2** | **186** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -163,7 +163,7 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Cyclotron | `partial` | 23 | 12, 21 | Magnétisme et induction | Acte II : période indépendante de la vitesse (deux protons) ; pas d’accélération entre les dés. |
 | Induction électromagnétique | `absorbed` | 23 | 21, 22 | Magnétisme et induction | Acte III des fondations Magnétisme et induction (aimant et bobine, deux bobines de Faraday). |
 | Transformateur | `idea` | 23 | 22 | — |  |
-| Onde électromagnétique | `idea` | 24 | 15, 21, 23 | — |  |
+| Onde électromagnétique | `absorbed` | 24 | 15, 21, 23 | L’onde électromagnétique | Étapes 1 et 2 des fondations L’onde électromagnétique (charge secouée dont la ride part à c ; E et B en phase, E = cB). |
 | Circuit RC | `absorbed` | 22 | 05, 21 | Courant et circuits |  |
 | Circuit RLC | `absorbed` | 22 | 14, 21 | Courant et circuits |  |
 | Résonance RLC | `idea` | 22 | 14 | — |  |
@@ -427,7 +427,7 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 | Dipôle magnétique | `absorbed` | 23 | — | Magnétisme et induction | Acte I (spire et aimant vus de loin). |
 | Courants de Foucault | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (aimant qui tombe dans un tube de cuivre). |
 | Induction motrice | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (tige sur des rails, ε = Bℓv). |
-| Propagation EM depuis une source oscillante | `idea` | 24 | 15 | — |  |
+| Propagation EM depuis une source oscillante | `absorbed` | 24 | 15 | L’onde électromagnétique | Étape 1 des fondations L’onde électromagnétique (charge qui oscille : onde sortante, λ = c/f, rien dans l’axe). |
 
 ### Optique
 

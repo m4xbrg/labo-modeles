@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**19 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 10 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**20 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 11 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -29,6 +29,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
+| [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -233,6 +234,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I D’où vient le champ · II Une force qui dévie · III Faire varier le flux · IV L’induction freine
 - **Interaction** : Quatre actes en deux paillasses, chacun avec deux ou trois scènes au choix ; lignes de champ exactes et boussoles qui pivotent autour d’un aimant (qu’on coupe ou compare à une bobine), d’un fil, d’une spire ou d’une bobine, sonde glissable ; particule chargée qui tourne à énergie constante, deux protons de vitesses différentes, sélecteur de vitesse, hélice, balançoire de Laplace ; aimant glissé à la main dans une bobine avec flux et f.é.m. tracés l’un sous l’autre, génératrice et lampe, deux bobines de Faraday ; tige tirée sur des rails avec barres d’énergie et « Lenz à l’envers », aimant qui tombe dans des tubes de plastique, d’aluminium, de cuivre ou de cuivre fendu.
 - **Notes** : Première page de fondations construite au standard d’une page à un module (quatre étapes). Moteur verrouillé versionné dans `prompts/moteurs/magnetisme.js` (112 tests, aussi lancés sur la page). Sans matériaux magnétiques ; particules non relativistes ; inductance propre de la bobine réceptrice négligée. Se termine sur trois questions vers le module 24, la planche Courant et circuits et le module 50.
+
+### L’onde électromagnétique
+
+- **Identifiant** : `fondations-onde-electromagnetique` · **chemin** : [`opus-sonnet/fondations-onde-electromagnetique/index.html`](../opus-sonnet/fondations-onde-electromagnetique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-onde-electromagnetique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Onde électromagnétique et spectre
+- **Collection** : aucune
+- **Modules** : 24 Onde électromagnétique (`full`), 15 Ondes (`supporting`), 21 Électrostatique (`supporting`), 23 Magnétisme et induction (`supporting`), 27 Quantification, photons et spectres atomiques (`supporting`)
+- **Étapes** (un chapitre, Module 24) : 1 Secouer une charge · 2 E et B, ensemble · 3 Un seul phénomène, tout le spectre · 4 Ce que l’onde transporte
+- **Interaction** : Charge qu’on saisit et secoue (ou coup sec, ou oscillation) dont les lignes de champ font un coude sur un cercle qui grandit à c, sonde et enregistreur qui montrent le retard r/c, partie rayonnée seule (nulle dans l’axe) ; onde plane en perspective avec E et B en phase, boucle-sonde et plaque qui se relaient, préréglages Soleil, téléphone, laser ; règle du spectre de 10⁴ m à 10⁻¹² m avec onde à l’échelle d’un objet de comparaison, ce qui répond dans la matière, énergie du photon, seuil d’ionisation et fenêtres de l’atmosphère ; source ponctuelle, détecteur qu’on éloigne (1/r²), pression de radiation et voile réfléchissante.
+- **Notes** : Construite au standard d’une page à un module (quatre étapes). Moteur EMW écrit et testé avant la page (tests aussi lancés sur la page livrée). Vitesse de la lumière ralentie et champ de rayonnement non relativiste à l’étape 1 ; onde plane idéale ; domaines du spectre conventionnels. Photon seulement nommé. Se termine sur trois questions vers les modules 25, 27 et 43.
 
 ## Pages d'appui
 
