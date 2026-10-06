@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**19 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 10 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**20 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 11 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -29,6 +29,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
+| [L’énergie du vivant](../opus-sonnet/fondations-energie-biologique/index.html) | foundation | Énergie biologique | — | 34 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -58,7 +59,7 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Modules** : 34 Énergie biologique (`partial`), 31 Acide-base, redox et électrochimie (`supporting`), 16 Flux, gradients et champs continus (`supporting`)
 - **Étapes** : Glycolyse · Pyruvate · Cycle de Krebs · Chaîne de transport et ATP synthase · Tout le trajet
 - **Interaction** : Étapes narratives, curseur d’O₂ qui pilote le gradient de protons, frise, identification au survol.
-- **Notes** : Couvre ATP, enzymes et respiration du module 34 ; la photosynthèse et le couplage énergétique général n’y sont pas.
+- **Notes** : Couvre le mécanisme de la respiration (chaîne, gradient de protons, ATP synthase) ; la comptabilité de l’énergie, les enzymes et la photosynthèse sont dans *L’énergie du vivant*, qui renvoie ici.
 
 ### Le neurone qui apprend
 
@@ -233,6 +234,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I D’où vient le champ · II Une force qui dévie · III Faire varier le flux · IV L’induction freine
 - **Interaction** : Quatre actes en deux paillasses, chacun avec deux ou trois scènes au choix ; lignes de champ exactes et boussoles qui pivotent autour d’un aimant (qu’on coupe ou compare à une bobine), d’un fil, d’une spire ou d’une bobine, sonde glissable ; particule chargée qui tourne à énergie constante, deux protons de vitesses différentes, sélecteur de vitesse, hélice, balançoire de Laplace ; aimant glissé à la main dans une bobine avec flux et f.é.m. tracés l’un sous l’autre, génératrice et lampe, deux bobines de Faraday ; tige tirée sur des rails avec barres d’énergie et « Lenz à l’envers », aimant qui tombe dans des tubes de plastique, d’aluminium, de cuivre ou de cuivre fendu.
 - **Notes** : Première page de fondations construite au standard d’une page à un module (quatre étapes). Moteur verrouillé versionné dans `prompts/moteurs/magnetisme.js` (112 tests, aussi lancés sur la page). Sans matériaux magnétiques ; particules non relativistes ; inductance propre de la bobine réceptrice négligée. Se termine sur trois questions vers le module 24, la planche Courant et circuits et le module 50.
+
+### L’énergie du vivant
+
+- **Identifiant** : `fondations-energie-biologique` · **chemin** : [`opus-sonnet/fondations-energie-biologique/index.html`](../opus-sonnet/fondations-energie-biologique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-energie-biologique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Énergie biologique
+- **Collection** : aucune
+- **Modules** : 34 Énergie biologique (`full`), 30 Réactions chimiques (`supporting`), 31 Acide-base, redox et électrochimie (`supporting`), 27 Quantification, photons et spectres atomiques (`supporting`)
+- **Étapes** : 1 Descendre pour monter : le couplage · 2 Les enzymes · 3 Du glucose à l’ATP, en bilan · 4 La lumière entre : la photosynthèse
+- **Interaction** : Quatre étapes, un chapitre : flèche d’hydrolyse de l’ATP glissée contre une réaction qui monte sur une échelle d’énergie libre, porte-monnaie d’ATP que la respiration recharge, conditions de la cellule ; enzymes immobiles dans un bain de substrats qui diffusent, points mesurés qui dessinent l’hyperbole de Michaelis-Menten, inhibiteur compétitif ; diagramme de flux de l’énergie d’un glucose avec et sans oxygène, escalier de redox, sprint et lactate ; feuille et chloroplaste sous une lumière dont on règle la couleur, spectre de la chlorophylle, bulles d’O₂, courbe de réponse à la lumière, grand cycle plante-animal.
+- **Notes** : Une seule page de quatre étapes pour un module candidat au découpage : la comptabilité (couplage, ATP monnaie), les enzymes, un bilan de la respiration et la photosynthèse ; le mécanisme de la chaîne respiratoire et l’ATP synthase restent dans *La respiration cellulaire*. Moteur verrouillé versionné dans `prompts/moteurs/energie-biologique.js` (tests aussi lancés sur la page). ΔG°′ standard, enzymes immobiles en 2D, 30 ATP par glucose selon une convention citée, spectre de la chlorophylle approché. Se termine sur trois questions vers les modules 35, 33 et 41.
 
 ## Pages d'appui
 
