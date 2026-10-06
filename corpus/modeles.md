@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**18 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 9 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**19 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 10 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -28,6 +28,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Relativité restreinte](../opus-sonnet/fondations-relativite-restreinte/index.html) | foundation | Relativité restreinte | — | 46 | 2026-10-02 |
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
+| [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -222,6 +223,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I La frontière · II Qui traverse ? · III Gradient et diffusion · IV Osmose et volume · V Maintenir un gradient · VI Surface et volume · VII Compartiments
 - **Interaction** : Sept actes en deux paillasses ; molécules qu’on fait traverser la bicouche (O₂, stéroïde, eau, glucose, ions), gradient et flux net, cellule qui gonfle ou se ratatine, pompe Na⁺/K⁺ et symport.
 - **Notes** : Ouvre la branche F · Cellule et biologie moléculaire (PR n° 17). Se termine sur trois questions vers les modules 33, 34 et 35. Moteur testé hors page.
+
+### Magnétisme et induction
+
+- **Identifiant** : `fondations-magnetisme-induction` · **chemin** : [`opus-sonnet/fondations-magnetisme-induction/index.html`](../opus-sonnet/fondations-magnetisme-induction/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-magnetisme-induction/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Magnétisme et induction
+- **Collection** : aucune
+- **Modules** : 23 Magnétisme et induction (`full`), 21 Électrostatique (`supporting`), 22 Courant et circuits dynamiques (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
+- **Actes** : I D’où vient le champ · II Une force qui dévie · III Faire varier le flux · IV L’induction freine
+- **Interaction** : Quatre actes en deux paillasses, chacun avec deux ou trois scènes au choix ; lignes de champ exactes et boussoles qui pivotent autour d’un aimant (qu’on coupe ou compare à une bobine), d’un fil, d’une spire ou d’une bobine, sonde glissable ; particule chargée qui tourne à énergie constante, deux protons de vitesses différentes, sélecteur de vitesse, hélice, balançoire de Laplace ; aimant glissé à la main dans une bobine avec flux et f.é.m. tracés l’un sous l’autre, génératrice et lampe, deux bobines de Faraday ; tige tirée sur des rails avec barres d’énergie et « Lenz à l’envers », aimant qui tombe dans des tubes de plastique, d’aluminium, de cuivre ou de cuivre fendu.
+- **Notes** : Première page de fondations construite au standard d’une page à un module (quatre étapes). Moteur verrouillé versionné dans `prompts/moteurs/magnetisme.js` (112 tests, aussi lancés sur la page). Sans matériaux magnétiques ; particules non relativistes ; inductance propre de la bobine réceptrice négligée. Se termine sur trois questions vers le module 24, la planche Courant et circuits et le module 50.
 
 ## Pages d'appui
 

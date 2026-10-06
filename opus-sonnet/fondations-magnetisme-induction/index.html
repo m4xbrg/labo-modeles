@@ -1,0 +1,1943 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Trois couleurs portent tout : le champ B en bleu-lavande (lignes, aiguilles, ⊙ ⊗), le courant imposé en orange comme la charge +, et tout ce qui est induit (f.é.m., courant, force de freinage) dans le vert d'accent : l'œil voit d'où vient l'effet et ce qu'il produit.
+  2. Le mouvement ne sert qu'à signifier : aiguilles amorties qui se calent sur B, particule dont la traînée tourne pendant que sa jauge d'énergie reste plate, aimant glissé à la main dont la vitesse fait la tension, tige et aimant freinés dont l'énergie se lit en barres W = K + Q.
+  3. Le moteur (objet Mag, verrouillé et testé) calcule des champs exacts en trois dimensions ; la page ne fait que dessiner une coupe, lisser les gestes et afficher les ralentis.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magnétisme et induction — LABO</title>
+<meta name="description" content="Deux paillasses : d'où vient le champ magnétique et la force qu'il exerce sur les charges en mouvement, puis l'induction : un flux qui varie crée une tension, et le courant induit freine toujours ce qui le crée.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#45c9a0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --champ-b:#8a97f2;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:270px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:36px}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden]{display:none}
+#scope,#bars{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.note a{color:var(--texte);text-underline-offset:2px}
+.cards{display:grid;gap:8px}
+.cards[hidden]{display:none}
+.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}
+.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}
+.card a{color:var(--texte-2)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+.btn.sm{padding:7px 9px}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0;flex:1 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:64px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:52px}
+  .tools{gap:10px 16px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Paillasse de magnétisme : aimants, fils, spires et bobines avec leurs lignes de champ et des boussoles ; particules chargées qui tournent dans un champ ; aimant et bobine reliés à un galvanomètre ; rails, tige et tubes où l'induction freine le mouvement."></canvas>
+    <header class="head">
+      <p class="serie">LABO · Fondations 23</p>
+      <h1>Magnétisme et <em>induction</em></h1>
+      <a class="back" href="../../labo/index.html">&larr; LABO</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur IV</p>
+      <h2 id="stepTitle">D’où vient le champ</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps, ou du champ en fonction de la distance."></canvas></div>
+      <p class="leg" id="leg"></p>
+      <div class="scopeBox" id="barsBox" hidden style="margin-top:12px"><canvas id="bars" role="img" aria-label="Barres d'énergie : énergie fournie, énergie cinétique, chaleur."></canvas></div>
+      <p class="leg" id="leg2"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+      <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
+      <div class="card"><b>Lumière</b>Un champ magnétique qui varie fait naître un champ électrique. Un champ électrique qui varie fait-il naître un champ magnétique ?<small>Module 24 · onde électromagnétique (à venir)</small></div>
+      <div class="card"><b>Inductance</b>Une bobine sent son propre champ. Que se passe-t-il quand son courant change ?<small><a href="../06-courant-circuits/index.html">Planche Courant et circuits, acte IV</a></small></div>
+      <div class="card"><b>Matière</b>D’où vient le champ d’un aimant, sans pile ni fil ?<small>Module 50 · spin (à venir)</small></div>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>4</kbd> aller à l'acte · <kbd>R</kbd> réinitialiser</li>
+        <li><kbd>C</kbd> couper l'aimant (I) · <kbd>D</kbd> deux protons (II) · <kbd>V</kbd> va-et-vient (III) · <kbd>T</kbd> tirer (IV) · <kbd>L</kbd> lâcher (IV)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les quatre actes">
+      <div class="sg"><span class="sgl"><span class="long">Paillasse B · champ et force</span><span class="short">B</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Acte I — D’où vient le champ"><b>I</b><span>Le champ</span></button>
+        <button class="seg" data-a="1" title="Acte II — Une force qui dévie"><b>II</b><span>La force</span></button>
+      </div></div>
+      <div class="sg"><span class="sgl"><span class="long">Paillasse I · induction</span><span class="short">I</span></span><div class="sgs">
+        <button class="seg" data-a="2" title="Acte III — Faire varier le flux"><b>III</b><span>Le flux</span></button>
+        <button class="seg" data-a="3" title="Acte IV — L’induction freine"><b>IV</b><span>Le freinage</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <!-- I -->
+      <div class="grp" data-acts="0"><span class="gl">Source</span><button class="btn sm" data-src="aimant">Aimant</button><button class="btn sm" data-src="fil">Fil</button><button class="btn sm" data-src="spire">Spire</button><button class="btn sm" data-src="bobine">Bobine</button></div>
+      <div class="grp" data-acts="0"><span class="gl">Voir</span><button class="btn sm" data-vue="lignes">Lignes</button><button class="btn sm" data-vue="boussoles">Boussoles</button><button class="btn sm" data-vue="deux">Les deux</button></div>
+      <div class="grp" data-acts="0"><button class="btn" id="bEarth" aria-pressed="true"><span class="dot"></span>Champ terrestre</button></div>
+      <div class="grp" data-acts="0" data-seg="fil"><span class="gl">I</span><input type="range" id="rIf" min="-20" max="20" step="0.5" value="0" aria-label="Courant dans le fil en ampères"><span class="rv" id="vIf"></span></div>
+      <div class="grp" data-acts="0" data-seg="spire bobine"><span class="gl">I</span><input type="range" id="rIs" min="-5" max="5" step="0.1" value="2" aria-label="Courant en ampères"><span class="rv" id="vIs"></span></div>
+      <div class="grp" data-acts="0" data-seg="bobine"><span class="gl">N</span><input type="range" id="rNb" min="10" max="400" step="10" value="200" aria-label="Nombre de spires de la bobine"><span class="rv" id="vNb"></span></div>
+      <div class="grp" data-acts="0" data-seg="aimant"><button class="btn" id="bFlip">Retourner</button><button class="btn go" id="bCut" title="Couper l'aimant (C)">Couper en deux</button><button class="btn" id="bCmpB" aria-pressed="false"><span class="dot"></span>Comparer à une bobine</button></div>
+      <!-- II -->
+      <div class="grp" data-acts="1"><button class="btn sm" data-seg2="charge">Une charge</button><button class="btn sm" data-seg2="fil">Un fil</button></div>
+      <div class="grp" data-acts="1" data-seg="charge"><span class="gl">Particule</span><button class="btn sm" data-part="p">proton</button><button class="btn sm" data-part="e">électron</button><button class="btn sm" data-part="d">deutéron</button><button class="btn sm" data-part="a">alpha</button></div>
+      <div class="grp" data-acts="1" data-seg="charge"><span class="gl">B</span><input type="range" id="rB2" min="-0.2" max="0.2" step="0.005" value="0.1" aria-label="Champ magnétique en teslas, positif vers toi"><span class="rv" id="vB2"></span></div>
+      <div class="grp" data-acts="1" data-seg="charge"><span class="gl">v</span><input type="range" id="rV2" min="5.30103" max="6.47712" step="0.005" value="6" aria-label="Vitesse de la particule, échelle logarithmique"><span class="rv" id="vV2"></span></div>
+      <div class="grp" data-acts="1" data-seg="charge"><button class="btn go" id="bTwin" title="Deux protons (D)">Deux protons</button><button class="btn" id="bE" aria-pressed="false"><span class="dot"></span>Champ électrique</button><button class="btn" id="bVpar" aria-pressed="false"><span class="dot"></span>Vitesse le long de B</button></div>
+      <div class="grp" data-acts="1" data-seg="charge" id="gE"><span class="gl">E</span><input type="range" id="rE" min="0" max="300000" step="2500" value="100000" aria-label="Champ électrique en volts par mètre"><span class="rv" id="vE"></span></div>
+      <div class="grp" data-acts="1" data-seg="fil"><span class="gl">I</span><input type="range" id="rIw" min="-6" max="6" step="0.1" value="0" aria-label="Courant dans la tige en ampères"><span class="rv" id="vIw"></span></div>
+      <div class="grp" data-acts="1" data-seg="fil"><span class="gl">B</span><input type="range" id="rBw" min="0" max="0.2" step="0.005" value="0.1" aria-label="Champ de l'aimant en U en teslas"><span class="rv" id="vBw"></span></div>
+      <!-- III -->
+      <div class="grp" data-acts="2"><button class="btn sm" data-seg3="aimant">Aimant et bobine</button><button class="btn sm" data-seg3="rotor">Spire qui tourne</button><button class="btn sm" data-seg3="paire">Deux bobines</button></div>
+      <div class="grp" data-acts="2" data-seg="aimant"><span class="gl">N</span><input type="range" id="rN3" min="50" max="400" step="10" value="200" aria-label="Nombre de spires de la bobine réceptrice"><span class="rv" id="vN3"></span></div>
+      <div class="grp" data-acts="2" data-seg="aimant"><button class="btn" id="bShut" aria-pressed="false" title="Va-et-vient (V)"><span class="dot"></span>Va-et-vient</button><span class="gl">f</span><input type="range" id="rF3" min="0.2" max="2" step="0.05" value="0.5" aria-label="Fréquence du va-et-vient en hertz"><span class="rv" id="vF3"></span><button class="btn" id="bFlip3">Retourner l’aimant</button></div>
+      <div class="grp" data-acts="2" data-seg="rotor"><span class="gl">rotation</span><input type="range" id="rTps" min="0.2" max="3" step="0.05" value="1" aria-label="Vitesse de rotation en tours par seconde"><span class="rv" id="vTps"></span></div>
+      <div class="grp" data-acts="2" data-seg="paire"><button class="btn go" id="bSw">Fermer l’interrupteur</button></div>
+      <!-- IV -->
+      <div class="grp" data-acts="3"><button class="btn sm" data-seg4="rails">Rails</button><button class="btn sm" data-seg4="tube">Aimant dans un tube</button></div>
+      <div class="grp" data-acts="3" data-seg="rails"><span class="gl">F</span><input type="range" id="rF4" min="0" max="0.4" step="0.01" value="0.2" aria-label="Force appliquée en newtons"><span class="rv" id="vF4"></span></div>
+      <div class="grp" data-acts="3" data-seg="rails"><span class="gl">R</span><input type="range" id="rR4" min="0.05" max="1" step="0.01" value="0.1" aria-label="Résistance du circuit en ohms"><span class="rv" id="vR4"></span></div>
+      <div class="grp" data-acts="3" data-seg="rails"><span class="gl">B</span><input type="range" id="rB4" min="0" max="1" step="0.01" value="0.5" aria-label="Champ magnétique en teslas"><span class="rv" id="vB4"></span></div>
+      <div class="grp" data-acts="3" data-seg="rails"><button class="btn go" id="bPull" aria-pressed="false" title="Tirer (T)">Tirer</button><button class="btn" id="bLaunch">Lancer</button><button class="btn" id="bOpen" aria-pressed="false"><span class="dot"></span>Circuit ouvert</button><button class="btn" id="bRev" aria-pressed="false"><span class="dot"></span>Lenz à l’envers</button></div>
+      <div class="grp" data-acts="3" data-seg="tube"><span class="gl">Tube</span><button class="btn sm" data-mat="plastique">Plastique</button><button class="btn sm" data-mat="aluminium">Aluminium</button><button class="btn sm" data-mat="cuivre">Cuivre</button><button class="btn sm" data-mat="fendu">Cuivre fendu</button></div>
+      <div class="grp" data-acts="3" data-seg="tube"><button class="btn go" id="bDrop" title="Lâcher (L)">Lâcher</button><button class="btn" id="bX4" aria-pressed="false"><span class="dot"></span>×4</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* MAG-BEGIN */
+const Mag = (function () {
+  'use strict';
+  const PI = Math.PI;
+  const MU0 = 4e-7 * PI;
+  const QE = 1.602176634e-19;
+  const MP = 1.67262192e-27;      // proton
+  const MD = 3.3435837768e-27;    // deutéron
+  const MA = 6.6446573450e-27;    // particule alpha
+  const ME = 9.1093837015e-31;    // électron
+  const G = 9.81;
+  const B_TERRE_H = 18e-6;        // composante horizontale vers Montréal, ≈ 18 µT
+  const B_TERRE = 53e-6;          // champ total vers Montréal, ≈ 53 µT
+  const RHO = { cuivre: 1.68e-8, aluminium: 2.65e-8 };   // résistivités, Ω·m
+  const DENS_NDFEB = 7500;        // kg/m³
+
+  // ---------- Intégrales elliptiques complètes K(m), E(m), m = k², par la moyenne arithmético-géométrique
+  function ellipKE(m) {
+    if (m < 0) m = 0;
+    if (m > 1 - 1e-15) m = 1 - 1e-15;
+    let a = 1, b = Math.sqrt(1 - m), c = Math.sqrt(m);
+    let sum = 0.5 * c * c, p2 = 0.5;
+    for (let i = 0; i < 40 && Math.abs(c) > 1e-15; i++) {
+      const an = 0.5 * (a + b);
+      c = 0.5 * (a - b);
+      b = Math.sqrt(a * b);
+      a = an;
+      p2 *= 2;
+      sum += p2 * c * c;
+    }
+    const K = PI / (2 * a);
+    return { K: K, E: K * (1 - sum) };
+  }
+
+  // ---------- Spire circulaire (rayon a, courant I) : champ exact au point (dz, rho)
+  // dz : position axiale relative au plan de la spire ; rho : distance signée à l'axe.
+  function loopField(I, a, dz, rho) {
+    const s = rho < 0 ? -1 : 1;
+    const r = Math.abs(rho);
+    const C = MU0 * I / PI;
+    if (r < 1e-7 * a) {
+      const d = a * a + dz * dz;
+      return { bz: MU0 * I * a * a / (2 * Math.pow(d, 1.5)),
+               brho: s * 3 * MU0 * I * a * a * dz * r / (4 * Math.pow(d, 2.5)) };
+    }
+    const r2 = a * a + r * r + dz * dz;
+    let alpha2 = r2 - 2 * a * r;
+    const amin = 1e-3 * a;
+    if (alpha2 < amin * amin) alpha2 = amin * amin;   // adoucissement sur le conducteur
+    const beta2 = r2 + 2 * a * r;
+    const beta = Math.sqrt(beta2);
+    const ke = ellipKE(1 - alpha2 / beta2);
+    const bz = C / (2 * alpha2 * beta) * ((a * a - r * r - dz * dz) * ke.E + alpha2 * ke.K);
+    const brho = C * dz / (2 * alpha2 * beta * r) * ((a * a + r * r + dz * dz) * ke.E - alpha2 * ke.K);
+    return { bz: bz, brho: s * brho };
+  }
+
+  // ---------- Inductance mutuelle de deux cercles coaxiaux (Maxwell) : flux dans le cercle b
+  // dû à 1 A dans le cercle a, distance axiale d.
+  function mutual(a, b, d) {
+    const k2 = 4 * a * b / ((a + b) * (a + b) + d * d);
+    const k = Math.sqrt(k2);
+    const ke = ellipKE(k2);
+    return MU0 * Math.sqrt(a * b) * ((2 / k - k) * ke.K - (2 / k) * ke.E);
+  }
+
+  // ---------- Sources
+  // {kind:'fil', I, x, y}
+  // {kind:'spire', I, a, x, y}
+  // {kind:'bobine', I, N, a, L, x, y}          N spires réparties sur la longueur L
+  // {kind:'aimant', Br, a, L, x, y, dir}       cylindre aimanté uniformément ; dir = +1 : nord à droite
+  // {kind:'uniforme', bx, by}
+  // Spires représentatives d'une bobine ou d'un aimant : espacement ≤ a/4, entre 12 et NREP
+  const NREP = 80;
+  function nRep(src) { return Math.min(NREP, Math.max(12, Math.ceil(4 * src.L / src.a))); }
+  function loopsOf(src) {
+    if (src.kind === 'spire') return [{ a: src.a, x: src.x, y: src.y, I: src.I }];
+    let n, Iloop;
+    if (src.kind === 'bobine') {
+      n = Math.min(src.N, nRep(src));
+      Iloop = src.I * src.N / n;
+    } else if (src.kind === 'aimant') {
+      n = nRep(src);
+      Iloop = (src.dir === -1 ? -1 : 1) * (src.Br / MU0) * src.L / n;   // courant de surface K = M = Br/μ0
+    } else return [];
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      out.push({ a: src.a, x: src.x - src.L / 2 + (i + 0.5) * src.L / n, y: src.y, I: Iloop });
+    }
+    return out;
+  }
+
+  // Champ total au point (x, y) du plan de la scène : {bx, by, b}
+  function fieldAt(sources, x, y) {
+    let bx = 0, by = 0;
+    for (let i = 0; i < sources.length; i++) {
+      const s = sources[i];
+      if (s.kind === 'uniforme') { bx += s.bx; by += s.by; continue; }
+      if (s.kind === 'fil') {
+        const dx = x - s.x, dy = y - s.y;
+        let r2 = dx * dx + dy * dy;
+        if (r2 < 1e-12) r2 = 1e-12;
+        const f = MU0 * s.I / (2 * PI * r2);
+        bx += -f * dy; by += f * dx;
+        continue;
+      }
+      const L = s._loops || loopsOf(s);
+      for (let j = 0; j < L.length; j++) {
+        const l = L[j];
+        const f = loopField(l.I, l.a, x - l.x, y - l.y);
+        bx += f.bz; by += f.brho;
+      }
+    }
+    return { bx: bx, by: by, b: Math.hypot(bx, by) };
+  }
+
+  // Précalcule les spires d'une liste de sources (à rappeler après tout changement de paramètre)
+  function prepare(sources) {
+    for (const s of sources) if (s.kind === 'spire' || s.kind === 'bobine' || s.kind === 'aimant') s._loops = loopsOf(s);
+    return sources;
+  }
+
+  // Points où les conducteurs traversent le plan de la scène, pour dessiner ⊙ et ⊗
+  // sens : +1 sort de l'écran, -1 y entre
+  function crossings(src) {
+    if (src.kind === 'fil') return [{ x: src.x, y: src.y, sens: src.I >= 0 ? 1 : -1 }];
+    const L = loopsOf(src), out = [];
+    for (const l of L) {
+      const s = l.I >= 0 ? 1 : -1;
+      out.push({ x: l.x, y: l.y + l.a, sens: s }, { x: l.x, y: l.y - l.a, sens: -s });
+    }
+    return out;
+  }
+
+  // ---------- Lignes de champ : RK4 sur la direction de B, pas de longueur ds
+  // opts : {ds, nmax, xmin, xmax, ymin, ymax, both (deux sens, défaut true), rStop (arrêt près d'un conducteur)}
+  // Renvoie {pts:[[x,y]...], closed}
+  function traceLine(sources, x0, y0, opts) {
+    const o = Object.assign({ ds: 0.002, nmax: 3000, both: true, rStop: 0 }, opts || {});
+    const cr = [];
+    if (o.rStop > 0) for (const s of sources) if (s.kind !== 'uniforme') for (const c of crossings(s)) cr.push(c);
+    function dir(x, y, sg) {
+      const f = fieldAt(sources, x, y);
+      if (f.b === 0) return null;
+      return [sg * f.bx / f.b, sg * f.by / f.b];
+    }
+    function inside(x, y) {
+      if (o.xmin !== undefined && (x < o.xmin || x > o.xmax || y < o.ymin || y > o.ymax)) return false;
+      for (const c of cr) if (Math.hypot(x - c.x, y - c.y) < o.rStop) return false;
+      return true;
+    }
+    function run(sg) {
+      const pts = [];
+      let x = x0, y = y0, travelled = 0, closed = false;
+      for (let i = 0; i < o.nmax; i++) {
+        const k1 = dir(x, y, sg); if (!k1) break;
+        const k2 = dir(x + 0.5 * o.ds * k1[0], y + 0.5 * o.ds * k1[1], sg); if (!k2) break;
+        const k3 = dir(x + 0.5 * o.ds * k2[0], y + 0.5 * o.ds * k2[1], sg); if (!k3) break;
+        const k4 = dir(x + o.ds * k3[0], y + o.ds * k3[1], sg); if (!k4) break;
+        x += o.ds / 6 * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
+        y += o.ds / 6 * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+        travelled += o.ds;
+        if (!inside(x, y)) break;
+        pts.push([x, y]);
+        if (travelled > 20 * o.ds && Math.hypot(x - x0, y - y0) < 0.75 * o.ds) { closed = true; pts.push([x0, y0]); break; }
+      }
+      return { pts: pts, closed: closed };
+    }
+    const fwd = run(1);
+    if (fwd.closed || !o.both) return { pts: [[x0, y0]].concat(fwd.pts), closed: fwd.closed };
+    const bwd = run(-1);
+    return { pts: bwd.pts.reverse().concat([[x0, y0]], fwd.pts), closed: false };
+  }
+
+  // Graines conseillées : à travers une source axiale (plan médian), ou sur un rayon pour un fil
+  function seeds(src, n) {
+    const out = [];
+    if (src.kind === 'fil') {
+      for (let i = 1; i <= n; i++) out.push([src.x + 0.012 * i * i, src.y]);
+      return out;
+    }
+    for (let i = 0; i < n; i++) {
+      const u = -1 + (2 * i + 1) / n;     // ]-1, 1[
+      out.push([src.x, src.y + 0.92 * src.a * u]);
+    }
+    return out;
+  }
+
+  // ---------- Boussole : aiguille amortie qui s'aligne sur B (réponse plafonnée pour rester stable)
+  // st : {th, w} ; renvoie st. Période ≈ 0,6 s dans 53 µT, plus courte dans un champ plus fort.
+  function compassStep(st, bx, by, dt) {
+    const b = Math.min(Math.hypot(bx, by), 2e-3);
+    if (b === 0) { st.w *= Math.exp(-2 * dt); st.th += st.w * dt; return st; }
+    const target = Math.atan2(by, bx);
+    const w0 = Math.min(2 * PI / 0.6 * Math.sqrt(b / B_TERRE), 60);
+    const n = Math.max(1, Math.ceil(w0 * dt / 0.2));
+    const h = dt / n;
+    for (let i = 0; i < n; i++) {
+      const acc = -w0 * w0 * Math.sin(st.th - target) - 2 * 0.18 * w0 * st.w;
+      st.w += acc * h;
+      st.th += st.w * h;
+    }
+    st.th = Math.atan2(Math.sin(st.th), Math.cos(st.th));
+    return st;
+  }
+
+  // ---------- Force de Lorentz : intégrateur de Boris (3D)
+  // p : {x,y,z,vx,vy,vz} ; E, B : {x,y,z}. Modifie et renvoie p.
+  function boris(p, q, m, E, B, dt) {
+    const h = q * dt / (2 * m);
+    let vx = p.vx + h * E.x, vy = p.vy + h * E.y, vz = p.vz + h * E.z;
+    const tx = h * B.x, ty = h * B.y, tz = h * B.z;
+    const t2 = tx * tx + ty * ty + tz * tz;
+    const sx = 2 * tx / (1 + t2), sy = 2 * ty / (1 + t2), sz = 2 * tz / (1 + t2);
+    const px = vx + (vy * tz - vz * ty), py = vy + (vz * tx - vx * tz), pz = vz + (vx * ty - vy * tx);
+    vx += py * sz - pz * sy; vy += pz * sx - px * sz; vz += px * sy - py * sx;
+    p.vx = vx + h * E.x; p.vy = vy + h * E.y; p.vz = vz + h * E.z;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+    return p;
+  }
+
+  // Mouvement cyclotron : rayon, période, fréquence, pulsation, pas de l'hélice
+  function gyro(m, q, vperp, B, vpar) {
+    const w = Math.abs(q) * B / m;
+    const T = 2 * PI / w;
+    return { r: m * Math.abs(vperp) / (Math.abs(q) * B), T: T, f: 1 / T, omega: w, pas: Math.abs(vpar || 0) * T };
+  }
+
+  // Force sur une charge : F = q (E + v × B), vecteurs {x,y,z}
+  function lorentz(q, v, E, B) {
+    return { x: q * (E.x + v.y * B.z - v.z * B.y), y: q * (E.y + v.z * B.x - v.x * B.z), z: q * (E.z + v.x * B.y - v.y * B.x) };
+  }
+
+  // Dérive E × B (sélecteur de vitesse) : vitesse = E × B / B²
+  function drift(E, B) {
+    const b2 = B.x * B.x + B.y * B.y + B.z * B.z;
+    return { x: (E.y * B.z - E.z * B.y) / b2, y: (E.z * B.x - E.x * B.z) / b2, z: (E.x * B.y - E.y * B.x) / b2 };
+  }
+
+  // ---------- Force de Laplace : balançoire (tige de longueur L, masse m, suspendue par des fils de longueur ell)
+  // dans un champ B horizontal, perpendiculaire à la tige. F = I L B (horizontale).
+  function laplace(I, L, B, angle) { return I * L * B * (angle === undefined ? 1 : Math.sin(angle)); }
+  function swingEq(I, L, B, m) { return Math.atan2(I * L * B, m * G); }
+  // st : {th, w} ; p : {I, L, B, m, ell, gamma}
+  function swingStep(st, p, dt) {
+    const F = p.I * p.L * p.B;
+    const n = Math.max(1, Math.ceil(dt / 0.002)), h = dt / n;
+    for (let i = 0; i < n; i++) {
+      const acc = (-G * Math.sin(st.th) + (F / p.m) * Math.cos(st.th)) / p.ell - (p.gamma === undefined ? 1.5 : p.gamma) * st.w;
+      st.w += acc * h;
+      st.th += st.w * h;
+    }
+    return st;
+  }
+  // Deux fils parallèles : force par mètre (> 0 : attraction, courants de même sens)
+  function wiresForce(I1, I2, d) { return MU0 * I1 * I2 / (2 * PI * d); }
+
+  // ---------- Flux et induction
+  // Bobine réceptrice : {N, b (rayon), x, y, L (longueur, 0 = spires confondues), R (résistance totale du circuit, Ω)}
+  // Liaison de flux Λ = N Φ (Wb), compté selon +x, due aux sources axiales coaxiales (même y).
+  function linkage(sources, coil) {
+    const nT = coil.L > 0 ? Math.min(coil.N, 12) : 1;
+    const w = coil.N / nT;
+    let lam = 0;
+    for (let t = 0; t < nT; t++) {
+      const xt = coil.L > 0 ? coil.x - coil.L / 2 + (t + 0.5) * coil.L / nT : coil.x;
+      for (const s of sources) {
+        if (s.kind === 'uniforme') { lam += w * s.bx * PI * coil.b * coil.b; continue; }
+        if (s.kind === 'fil') continue;
+        const Ls = s._loops || loopsOf(s);
+        for (const l of Ls) lam += w * mutual(l.a, coil.b, xt - l.x) * l.I;
+      }
+    }
+    return lam;
+  }
+  // Flux moyen par spire, Φ = Λ / N
+  function fluxPerTurn(sources, coil) { return linkage(sources, coil) / coil.N; }
+
+  // dΛ/dx de l'aimant (ou de toute source) déplacé en bloc selon x : différence centrée
+  function dLinkageDx(src, coil, others) {
+    const h = 1e-4;
+    const x0 = src.x;
+    const ext = others || [];
+    src.x = x0 + h; src._loops = loopsOf(src);
+    const lp = linkage([src].concat(ext), coil);
+    src.x = x0 - h; src._loops = loopsOf(src);
+    const lm = linkage([src].concat(ext), coil);
+    src.x = x0; src._loops = loopsOf(src);
+    return (lp - lm) / (2 * h);
+  }
+  // f.é.m. induite quand la source se déplace à vx : ε = −dΛ/dt = −(dΛ/dx)·vx
+  function emfMoving(src, coil, vx, others) { return -dLinkageDx(src, coil, others) * vx; }
+
+  // Génératrice : N spires de surface A tournant à ω dans un champ uniforme B
+  // Φ par spire = B A cos(ωt + φ0) ; ε = N B A ω sin(ωt + φ0)
+  function generator(p, t) {
+    const ph = p.omega * t + (p.phi0 || 0);
+    return { phi: p.B * p.A * Math.cos(ph), lam: p.N * p.B * p.A * Math.cos(ph), emf: p.N * p.B * p.A * p.omega * Math.sin(ph) };
+  }
+
+  // Deux bobines (expérience de Faraday, 1831) : primaire RL alimenté par V0 à t = 0
+  // courant I1(t) = (V0/R1)(1 − e^(−t/τ)), τ = L1/R1 ; ε2 = −M dI1/dt
+  function inductance(coil) {
+    // inductance propre approchée d'une bobine : formule de Wheeler (spires jointives), en H
+    const a = coil.b, L = Math.max(coil.L, 1e-4);
+    return MU0 * coil.N * coil.N * PI * a * a / (L + 0.9 * a);
+  }
+  function mutualCoils(c1, c2) {
+    const one = { kind: 'bobine', I: 1, N: c1.N, a: c1.b, L: Math.max(c1.L, 1e-4), x: c1.x, y: c1.y };
+    one._loops = loopsOf(one);
+    return linkage([one], c2);
+  }
+  function faradayPair(p, t) {
+    // p : {V0, R1, L1, M, ton, toff} ; interrupteur fermé de ton à toff (toff facultatif)
+    const tau = p.L1 / p.R1, Imax = p.V0 / p.R1;
+    let I1 = 0, dI = 0;
+    if (t >= p.ton) {
+      if (p.toff === undefined || t < p.toff) {
+        const e = Math.exp(-(t - p.ton) / tau);
+        I1 = Imax * (1 - e); dI = Imax * e / tau;
+      } else {
+        const Ioff = Imax * (1 - Math.exp(-(p.toff - p.ton) / tau));
+        const e = Math.exp(-(t - p.toff) / tau);
+        I1 = Ioff * e; dI = -Ioff * e / tau;
+      }
+    }
+    return { I1: I1, dI1: dI, emf2: -p.M * dI, tau: tau };
+  }
+
+  // ---------- Freinage par induction : mouvement à frottement linéaire, pas exact
+  // m dv/dt = F − k v ; s : {x, v, W (travail de F), Q (énergie dissipée)} ; p : {m, F, k}
+  // k < 0 est accepté pour l'expérience de pensée « Lenz inversé » : la vitesse diverge et Q devient
+  // négatif (de l'énergie sortie de nulle part). La page plafonne alors la vitesse et le dit.
+  function dragStep(s, p, dt) {
+    const m = p.m, F = p.F, k = p.k;
+    if (!k || !isFinite(k)) {
+      const v1 = s.v + F / m * dt;
+      const dx = 0.5 * (s.v + v1) * dt;
+      s.x += dx; s.W += F * dx; s.v = v1;
+      return s;
+    }
+    const tau = m / k, vT = F / k, u = s.v - vT;
+    const e = Math.exp(-dt / tau), e2 = e * e;
+    const dx = vT * dt + u * tau * (1 - e);
+    s.Q += k * (vT * vT * dt + 2 * vT * u * tau * (1 - e) + u * u * tau / 2 * (1 - e2));
+    s.W += F * dx;
+    s.x += dx;
+    s.v = vT + u * e;
+    return s;
+  }
+
+  // Rails : tige de longueur ell, masse m, circuit de résistance R, champ B perpendiculaire au plan des rails
+  // k = B² ell² / R ; ε = B ell v ; I = ε / R ; force de freinage = −I ell B (s'oppose toujours à v)
+  function rails(p) {
+    const open = p.open || !(p.R > 0);
+    const k = open ? 0 : p.B * p.B * p.ell * p.ell / p.R;
+    return { k: k, tau: k > 0 ? p.m / k : Infinity, vT: k > 0 ? p.F / k : Infinity };
+  }
+  function railsState(p, v) {
+    const emf = p.B * p.ell * v;
+    const I = (p.open || !(p.R > 0)) ? 0 : emf / p.R;
+    return { emf: emf, I: I, Ffrein: -I * p.ell * p.B, Pjoule: I * I * (p.R || 0), Pmeca: p.F * v };
+  }
+
+  // Aimant qui tombe dans un tube conducteur : le tube est découpé en anneaux de hauteur dz.
+  // Chaque anneau de rayon moyen b, d'épaisseur w, résistance R = ρ 2π b / (w dz), reçoit ε = −(dΦ/dz) v.
+  // Puissance dissipée = v² Σ (dΦ/dz)² / R = k v², d'où k = (w / (2π b ρ)) ∫ (dΦ/dz)² dz.
+  // tube : {b (rayon intérieur), w (épaisseur de paroi), rho (Ω·m), fendu (bool)} ; magnet : source 'aimant'
+  // (inductance propre des anneaux négligée : valable tant que le freinage est lent)
+  function tubeBrake(magnet, tube) {
+    if (tube.fendu || !(tube.rho > 0) || !(tube.w > 0)) return 0;
+    const bm = tube.b + tube.w / 2;
+    const ring = { N: 1, b: bm, x: 0, y: magnet.y, L: 0 };
+    const src = Object.assign({}, magnet, { x: 0 });
+    src._loops = loopsOf(src);
+    const span = 12 * Math.max(magnet.L, magnet.a, bm), n = 1200, h = 2 * span / n;
+    let integ = 0, prev = null;
+    for (let i = 0; i <= n; i++) {
+      ring.x = -span + i * h;
+      const phi = linkage([src], ring);
+      if (prev !== null) { const d = (phi - prev) / h; integ += d * d * h; }
+      prev = phi;
+    }
+    return tube.w / (2 * PI * bm * tube.rho) * integ;
+  }
+  // Profil de flux d'un anneau du tube autour de l'aimant : pour n positions dz ∈ [−span, span]
+  // (dz = position de l'anneau moins centre de l'aimant, selon l'axe nord), renvoie {dz, phi, dphi}.
+  // f.é.m. de l'anneau quand l'aimant avance à v selon son axe : ε = +dphi · v (l'anneau recule de v
+  // par rapport à l'aimant) ; courant = ε / R_anneau, sens direct autour de l'axe si > 0.
+  function ringProfile(magnet, tube, n, span) {
+    const bm = tube.b + tube.w / 2;
+    const ring = { N: 1, b: bm, x: 0, y: magnet.y, L: 0 };
+    const src = Object.assign({}, magnet, { x: 0 });
+    src._loops = loopsOf(src);
+    const out = [], h = 1e-4;
+    for (let i = 0; i < n; i++) {
+      const dz = -span + 2 * span * i / (n - 1);
+      ring.x = dz; const phi = linkage([src], ring);
+      ring.x = dz + h; const pp = linkage([src], ring);
+      ring.x = dz - h; const pm = linkage([src], ring);
+      out.push({ dz: dz, phi: phi, dphi: (pp - pm) / (2 * h) });
+    }
+    return out;
+  }
+  function magnetMass(magnet) { return DENS_NDFEB * PI * magnet.a * magnet.a * magnet.L; }
+
+  return {
+    MU0, QE, MP, MD, MA, ME, G, B_TERRE, B_TERRE_H, RHO, NREP,
+    ellipKE, loopField, mutual, loopsOf, prepare, fieldAt, crossings, traceLine, seeds, compassStep,
+    boris, gyro, lorentz, drift, laplace, swingEq, swingStep, wiresForce,
+    linkage, fluxPerTurn, dLinkageDx, emfMoving, generator, inductance, mutualCoils, faradayPair,
+    dragStep, rails, railsState, tubeBrake, ringProfile, magnetMass
+  };
+})();
+/* MAG-END */
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const barsC = $('#bars'), bctx = barsC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), champ: tok('--champ-b'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RE = rgb(C.ener), RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RP = rgb(C.pos), RN = rgb(C.neg), RB = rgb(C.champ), RF2 = rgb(C.fond2);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, PI = Math.PI;
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const sig = (v, s) => { if (!isFinite(v)) return '—'; if (v === 0) return '0'; const d = clamp((s || 3) - 1 - Math.floor(Math.log10(Math.abs(v))), 0, 6); return fmt(v, d); };
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const trim = (r, t0) => { let i = 0; while (i < r.length && r[i].t < t0) i++; if (i) r.splice(0, i); };
+const PFX = [[1e-12, 'p'], [1e-9, 'n'], [1e-6, 'µ'], [1e-3, 'm'], [1, ''], [1e3, 'k'], [1e6, 'M']];
+function si(v, unit, s) { // valeur avec préfixe SI : [texte, unité]
+  if (!isFinite(v)) return ['—', unit]; if (v === 0) return ['0', unit];
+  const a = Math.abs(v); let p = PFX[0]; for (const q of PFX) if (a >= q[0] * 0.9995) p = q;
+  return [sig(v / p[0], s || 3), p[1] + unit];
+}
+const fmtB = b => si(b, 'T');
+const eV = J => J / Mag.QE;
+const niceZ = z => { const e = Math.pow(10, Math.floor(Math.log10(z))), m = z / e; return (m < 2 ? 1 : m < 5 ? 2 : m < 10 ? 5 : 10) * e; };
+const niceMax = v => { if (!(v > 0)) return 1; const e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; };
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function arrow(c, x0, y0, x1, y1, col, lw, dash, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 7, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill();
+  c.restore();
+}
+function hatch(c, x, y, w, h, col, gap) {
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.strokeStyle = col; c.lineWidth = 1; c.beginPath();
+  for (let k = -h; k < w; k += gap || 5) { c.moveTo(x + k, y + h); c.lineTo(x + k + h, y); }
+  c.stroke(); c.restore();
+}
+// ⊙ (sens = +1, vers toi) ou ⊗ (sens = −1, s'éloigne)
+function dotCross(c, x, y, r, sens, col, lw) {
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw || 1.2;
+  c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke();
+  if (sens > 0) { c.beginPath(); c.arc(x, y, Math.max(1.2, r * 0.28), 0, TAU); c.fill(); }
+  else { const k = r * 0.62; c.beginPath(); c.moveTo(x - k, y - k); c.lineTo(x + k, y + k); c.moveTo(x + k, y - k); c.lineTo(x - k, y + k); c.stroke(); }
+  c.restore();
+}
+// Aimant droit horizontal : (x0, y0) centre écran, w × h px, dir = +1 nord à droite
+function drawMagnet(c, x0, y0, w, h, dir, alpha) {
+  c.save(); c.globalAlpha *= alpha == null ? 1 : alpha;
+  const xl = x0 - w / 2, yt = y0 - h / 2, half = w / 2;
+  c.fillStyle = C.fond2; c.fillRect(xl, yt, w, h);
+  c.fillStyle = rgba(RT, 0.10); c.fillRect(dir > 0 ? x0 : xl, yt, half, h);
+  c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.strokeRect(xl + 0.5, yt + 0.5, w - 1, h - 1);
+  c.beginPath(); c.moveTo(x0, yt + 2); c.lineTo(x0, yt + h - 2); c.strokeStyle = rgba(RT2, 0.5); c.stroke();
+  if (h >= 10 && w >= 22) {
+    c.font = mono(Math.min(12, h * 0.7)); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = C.texte;
+    c.fillText(dir > 0 ? 'S' : 'N', x0 - w / 4, y0 + 0.5); c.fillText(dir > 0 ? 'N' : 'S', x0 + w / 4, y0 + 0.5);
+  }
+  c.restore();
+}
+function drawGalva(c, cx, cy, r, th, unit) {
+  c.save();
+  c.fillStyle = C.fond2; c.strokeStyle = C.texte2; c.lineWidth = 1.2;
+  c.beginPath(); c.arc(cx, cy, r, PI, 0); c.lineTo(cx + r, cy + r * 0.25); c.lineTo(cx - r, cy + r * 0.25); c.closePath(); c.fill(); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1;
+  for (let i = -5; i <= 5; i++) { const a = -PI / 2 + i * 0.1745, r0 = i === 0 ? r * 0.7 : r * 0.78; c.beginPath(); c.moveTo(cx + r0 * Math.cos(a), cy + r0 * Math.sin(a)); c.lineTo(cx + r * 0.88 * Math.cos(a), cy + r * 0.88 * Math.sin(a)); c.stroke(); }
+  const a = -PI / 2 + clamp(th, -1.05, 1.05);
+  c.strokeStyle = C.accent; c.lineWidth = 1.8; c.beginPath(); c.moveTo(cx, cy + r * 0.12); c.lineTo(cx + r * 0.84 * Math.cos(a), cy + r * 0.84 * Math.sin(a)); c.stroke();
+  c.fillStyle = C.texte2; c.beginPath(); c.arc(cx, cy + r * 0.12, 2.5, 0, TAU); c.fill();
+  c.font = mono(9); c.textAlign = 'center'; c.textBaseline = 'bottom'; c.fillText(unit || 'mA', cx, cy + r * 0.22);
+  c.restore();
+}
+// Aiguille de galvanomètre : second ordre amorti vers la cible (angle)
+function needleStep(n, target, dt) {
+  if (reduce) { n.th += (target - n.th) * (1 - Math.exp(-dt / 0.12)); n.w = 0; return; }
+  const w0 = TAU / 0.35, z = 0.6, h = dt / 4;
+  for (let i = 0; i < 4; i++) { n.w += (w0 * w0 * (target - n.th) - 2 * z * w0 * n.w) * h; n.th += n.w * h; }
+}
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true;
+const NA = 4, ROM = ['I', 'II', 'III', 'IV'];
+const prm = {};
+function resetPrm(n) {
+  if (n === 0) Object.assign(prm, { src: 'aimant', vue: 'deux', earth: true, If: 0, Is: 2, Nb: 200, dir: 1, cut: false, cmpB: false });
+  if (n === 1) Object.assign(prm, { seg2: 'charge', part: 'p', B2: 0.1, v2: 1e6, Eon: false, E: 1e5, vpar: false, twin: false, Iw: 0, Bw: 0.1 });
+  if (n === 2) Object.assign(prm, { seg3: 'aimant', N3: 200, f3: 0.5, shuttle: false, dir3: 1, tps: 1 });
+  if (n === 3) Object.assign(prm, { seg4: 'rails', F4: 0.2, R4: 0.1, B4: 0.5, pull: false, open: false, rev: false, mat: 'cuivre', x4: false });
+}
+for (let i = 0; i < NA; i++) resetPrm(i);
+const segOf = n => n === 0 ? prm.src : n === 1 ? prm.seg2 : n === 2 ? prm.seg3 : prm.seg4;
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [];
+function zone(x0, y0, x1, y1, key, name, role) { zones.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- Enregistreur : panneaux empilés sur un même axe ---------------- */
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+// panels : [{lo, hi, d, name, series:[{rec, f, col, dash, lw}], refs:[{v, col, dash}]}]
+function stack(panels, t0, t1, xl0, xl1) {
+  const { w, h } = scopeSetup(), c = sctx, padL = 46, padR = 8, padT = 6, padB = 16, gap = 8, n = panels.length;
+  const ph = (h - padT - padB - gap * (n - 1)) / n, pw = w - padL - padR;
+  const xT = t => padL + (t - t0) / (t1 - t0) * pw;
+  c.font = mono(10);
+  panels.forEach((P, i) => {
+    const y0 = padT + i * (ph + gap), yv = v => y0 + ph * (1 - (v - P.lo) / (P.hi - P.lo));
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, y0 + 0.5, pw, ph);
+    c.save(); c.beginPath(); c.rect(padL, y0, pw, ph); c.clip();
+    if (P.lo < 0 && P.hi > 0) { c.strokeStyle = C.trait; c.setLineDash([2, 4]); c.beginPath(); c.moveTo(padL, yv(0)); c.lineTo(padL + pw, yv(0)); c.stroke(); c.setLineDash([]); }
+    for (const r of P.refs || []) { c.strokeStyle = r.col; c.lineWidth = 1; c.setLineDash(r.dash || [4, 3]); c.beginPath(); c.moveTo(padL, yv(r.v)); c.lineTo(padL + pw, yv(r.v)); c.stroke(); c.setLineDash([]); }
+    for (const s of P.series) {
+      c.beginPath(); let first = true;
+      for (const r of s.rec) { if (r.t < t0 - 0.5) continue; const x = xT(r.t), y = yv(s.f(r)); if (!isFinite(y)) continue; first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; }
+      c.strokeStyle = s.col; c.lineWidth = s.lw || 1.6; c.setLineDash(s.dash || []); c.stroke(); c.setLineDash([]);
+    }
+    c.restore();
+    c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'middle';
+    c.fillText(fmt(P.hi, P.d), padL - 4, y0 + 5); c.fillText(fmt(P.lo, P.d), padL - 4, y0 + ph - 5);
+    c.textAlign = 'right'; c.textBaseline = 'top'; c.fillStyle = P.col || C.texte2; c.fillText(P.name, padL + pw - 4, y0 + 3);
+  });
+  c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillText(xl0, padL, h - 7); c.textAlign = 'right'; c.fillText(xl1, padL + pw, h - 7);
+  return { padL, pw, xT };
+}
+function symRange(rec, f, min) { let m = min; for (const r of rec) { const v = Math.abs(f(r)); if (v > m) m = v; } m = niceMax(m * 1.05); return [-m, m]; }
+function posRange(rec, f, min) { let m = min; for (const r of rec) { const v = f(r); if (v > m) m = v; } return [0, niceMax(m * 1.05)]; }
+
+/* ================= Acte I : d'où vient le champ ================= */
+const MAG_A = 0.006, MAG_L = 0.024;
+const A1 = { key: '', lines: [], layer: document.createElement('canvas'), tFine: 0, needFine: false, gap: 0, comp: [], probe: { x: 0.05, y: 0.012 }, drag: false, S: null, view: null, scr: [] };
+function view1() { const top = 104, bot = 16, ah = Math.max(120, H - top - bot), s = Math.min((W - 40) / 0.24, ah / 0.14); return { cx: W / 2, cy: top + ah / 2, s }; }
+const X1 = x => A1.view.cx + x * A1.view.s, Y1 = y => A1.view.cy - y * A1.view.s;
+function sources1() {
+  const own = [];
+  if (prm.src === 'aimant') {
+    if (prm.cut || A1.gap > 1e-6) { const g = A1.gap; own.push({ kind: 'aimant', Br: 1.2, a: MAG_A, L: MAG_L / 2, x: -(MAG_L / 4 + g / 2), y: 0, dir: prm.dir }, { kind: 'aimant', Br: 1.2, a: MAG_A, L: MAG_L / 2, x: MAG_L / 4 + g / 2, y: 0, dir: prm.dir }); }
+    else own.push({ kind: 'aimant', Br: 1.2, a: MAG_A, L: MAG_L, x: 0, y: 0, dir: prm.dir });
+  } else if (prm.src === 'fil') own.push({ kind: 'fil', I: prm.If, x: 0, y: 0 });
+  else if (prm.src === 'spire') own.push({ kind: 'spire', I: prm.Is, a: 0.03, x: 0, y: 0 });
+  else own.push({ kind: 'bobine', I: prm.Is, N: prm.Nb, a: 0.015, L: 0.06, x: 0, y: 0 });
+  Mag.prepare(own);
+  const all = own.slice(); if (prm.earth) all.push({ kind: 'uniforme', bx: Mag.B_TERRE_H, by: 0 });
+  return { own, all };
+}
+function srcActive1() { const s = A1.S.own[0]; return s.kind === 'aimant' || (s.kind === 'fil' ? Math.abs(s.I) > 1e-3 : Math.abs(s.I) > 1e-3); }
+function bounds1() { const v = A1.view; return { xmin: -v.cx / v.s - 0.01, xmax: (W - v.cx) / v.s + 0.01, ymin: -(H - v.cy) / v.s - 0.01, ymax: v.cy / v.s + 0.01 }; }
+function trace1(coarse) {
+  const S = A1.S, b = bounds1(), ds = (coarse ? 2.2 : 1) * Math.max(0.0005, 1.4 / A1.view.s);
+  const seeds = [];
+  if (srcActive1()) {
+    for (const s of S.own) {
+      if (s.kind === 'fil') { for (const r of [0.006, 0.011, 0.017, 0.025, 0.035, 0.048, 0.064, 0.085]) seeds.push([r, 0]); }
+      else for (const p of Mag.seeds(s, s.kind === 'aimant' ? (S.own.length > 1 ? 7 : 12) : s.kind === 'spire' ? 10 : 12)) seeds.push(p);
+    }
+  }
+  if (prm.earth) { const n = 9; for (let i = 0; i < n; i++) seeds.push([b.xmin + 0.002, b.ymin + (b.ymax - b.ymin) * (i + 0.5) / n]); }
+  A1.lines = seeds.map(([x, y]) => {
+    const l = Mag.traceLine(S.all, x, y, Object.assign({ ds, nmax: coarse ? 1400 : 2600, rStop: 0.0012 }, b));
+    const bs = l.pts.map((p, i) => i % 3 === 0 ? Mag.fieldAt(S.all, p[0], p[1]).b : NaN);
+    for (let i = 0; i < bs.length; i++) if (isNaN(bs[i])) bs[i] = bs[i - (i % 3)];
+    return { pts: l.pts, bs, closed: l.closed };
+  });
+  renderLayer1();
+}
+function lineAlpha(b) { return 0.16 + 0.7 * clamp((Math.log10(b) - Math.log10(5e-6)) / (Math.log10(0.3) - Math.log10(5e-6)), 0, 1); }
+function renderLayer1() {
+  const L = A1.layer; L.width = cv.width; L.height = cv.height;
+  const c = L.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+  c.lineWidth = 1.1; c.lineCap = 'round';
+  A1.scr = [];
+  for (const ln of A1.lines) {
+    const P = ln.pts, scr = [];
+    for (let i = 0; i + 1 < P.length; i += 4) {
+      const j = Math.min(P.length - 1, i + 4);
+      c.strokeStyle = rgba(RB, lineAlpha(ln.bs[i])); c.beginPath(); c.moveTo(X1(P[i][0]), Y1(P[i][1]));
+      for (let k = i + 1; k <= j; k++) c.lineTo(X1(P[k][0]), Y1(P[k][1]));
+      c.stroke();
+    }
+    // chevrons de sens tous les ~80 px
+    let acc = 40;
+    for (let i = 1; i < P.length; i++) {
+      const x0 = X1(P[i - 1][0]), y0 = Y1(P[i - 1][1]), x1 = X1(P[i][0]), y1 = Y1(P[i][1]), d = Math.hypot(x1 - x0, y1 - y0);
+      if (i % 2 === 0) scr.push([x1, y1]);
+      acc += d;
+      if (acc > 80 && d > 0) {
+        acc = 0; const ux = (x1 - x0) / d, uy = (y1 - y0) / d, a = lineAlpha(ln.bs[i]);
+        c.strokeStyle = rgba(RB, Math.min(1, a + 0.15)); c.lineWidth = 1.2; c.beginPath();
+        c.moveTo(x1 - ux * 5 - uy * 3.5, y1 - uy * 5 + ux * 3.5); c.lineTo(x1, y1); c.lineTo(x1 - ux * 5 + uy * 3.5, y1 - uy * 5 - ux * 3.5); c.stroke(); c.lineWidth = 1.1;
+      }
+    }
+    A1.scr.push(scr);
+  }
+}
+function key1() { return [prm.src, prm.If, prm.Is, prm.Nb, prm.dir, prm.cut, A1.gap.toFixed(5), prm.earth, W, H, dpr].join('|'); }
+function inBody1(x, y) { for (const s of A1.S.own) if (s.kind === 'aimant' && Math.abs(x - s.x) < s.L / 2 + 0.0015 && Math.abs(y - s.y) < s.a + 0.0015) return true; return false; }
+function nearWire1(x, y) { for (const s of A1.S.own) for (const p of Mag.crossings(s)) if (Math.hypot(x - p.x, y - p.y) < 0.0055) return true; return false; }
+function compasses1() {
+  A1.comp = A1.comp.length ? A1.comp : [];
+  const cols = clamp(Math.round(0.24 * A1.view.s / 60), 7, 13), rows = clamp(Math.round(0.14 * A1.view.s / 60), 4, 7), out = [];
+  if (A1.comp.length !== cols * rows) A1.comp = [];
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+    const x = -0.12 + 0.24 * (i + 0.5) / cols, y = -0.07 + 0.14 * (j + 0.5) / rows, k = j * cols + i;
+    const old = A1.comp[k];
+    out.push({ x, y, th: old ? old.th : 0, w: old ? old.w : 0, hide: inBody1(x, y) || nearWire1(x, y), bx: 0, by: 0 });
+  }
+  for (const c of out) { const f = Mag.fieldAt(A1.S.all, c.x, c.y); c.bx = f.bx; c.by = f.by; }
+  A1.comp = out;
+}
+function reset1() { A1.key = ''; A1.gap = prm.cut ? 0.01 : 0; A1.probe = { x: 0.05, y: 0.012 }; A1.comp = []; A1.drag = false; }
+function update1(now, dt) {
+  A1.view = view1();
+  // coupe : les deux moitiés s'écartent en 1,2 s
+  const gT = prm.cut ? 0.01 : 0;
+  if (A1.gap !== gT) { const st = 0.01 / 1.2 * dt; A1.gap = Math.abs(gT - A1.gap) <= st ? gT : A1.gap + Math.sign(gT - A1.gap) * st; }
+  A1.S = sources1();
+  const k = key1();
+  if (k !== A1.key) { const first = !A1.key; A1.key = k; compasses1(); trace1(!first); A1.needFine = !first; A1.tFine = now; }
+  else if (A1.needFine && now - A1.tFine > 160) { trace1(false); A1.needFine = false; }
+  if (dt > 0) for (const c of A1.comp) {
+    if (reduce) { const t = Math.atan2(c.by, c.bx); let d = t - c.th; d = Math.atan2(Math.sin(d), Math.cos(d)); c.th += d * (1 - Math.exp(-dt / 0.25)); c.w = 0; }
+    else Mag.compassStep(c, c.bx, c.by, dt);
+  }
+}
+function adv1(dt) { /* le temps de l'acte I est porté par update1 (aiguilles et coupe) */ }
+function draw1() {
+  const c = ctx, v = A1.view, s = v.s;
+  const showL = prm.vue !== 'boussoles', showC = prm.vue !== 'lignes';
+  if (showL) { c.drawImage(A1.layer, 0, 0, W, H); }
+  // zone de la sonde de lignes
+  zoneF((x, y) => { for (const scr of A1.scr) for (const p of scr) if (Math.abs(p[0] - x) < 4 && Math.abs(p[1] - y) < 4) return showL; return false; }, 'ligne', 'Ligne de champ', 'En chaque point, elle suit la direction de B. Ce n’est pas une trajectoire : rien ne circule le long d’elle. Les lignes de B se referment toujours.');
+  // sources
+  for (const src of A1.S.own) {
+    if (src.kind === 'aimant') {
+      const x0 = X1(src.x), y0 = Y1(src.y), w = src.L * s, h = 2 * src.a * s;
+      drawMagnet(c, x0, y0, w, h, src.dir, 0.92);
+      zone(x0 - w / 2, y0 - h / 2, x0 + w / 2, y0 + h / 2, 'aimant' + src.x, 'Aimant', 'Pôle nord : là où les lignes sortent ; sud : là où elles entrent. Pas de rouge et bleu ici : un pôle n’est pas une charge.');
+    }
+    if (src.kind === 'fil') {
+      const x0 = X1(0), y0 = Y1(0), I = src.I;
+      c.fillStyle = C.fond2; c.beginPath(); c.arc(x0, y0, 9, 0, TAU); c.fill();
+      if (Math.abs(I) > 1e-3) dotCross(c, x0, y0, 7, Math.sign(I), C.pos, 1.5); else { c.strokeStyle = C.texte2; c.beginPath(); c.arc(x0, y0, 7, 0, TAU); c.stroke(); }
+      zcirc(x0, y0, 12, 'fil', 'Fil rectiligne', 'Perpendiculaire à l’écran. ⊙ : le courant vient vers toi ; ⊗ : il s’éloigne. Son champ tourne autour de lui.');
+    }
+    if (src.kind === 'spire' || src.kind === 'bobine') {
+      const cr = Mag.crossings(src), on = Math.abs(src.I) > 1e-3;
+      if (src.kind === 'bobine') { c.strokeStyle = rgba(RT2, 0.5); c.setLineDash([3, 3]); c.strokeRect(X1(-src.L / 2), Y1(src.a), src.L * s, 2 * src.a * s); c.setLineDash([]); }
+      const rr = src.kind === 'spire' ? 6 : Math.max(2.5, Math.min(5, src.L * s / Mag.loopsOf(src).length * 0.45));
+      for (const p of cr) dotCross(c, X1(p.x), Y1(p.y), rr, p.sens, on ? C.pos : C.texte2, 1.1);
+      zone(X1(-(src.L || 0) / 2) - 8, Y1(src.a) - 8, X1((src.L || 0) / 2) + 8, Y1(src.a) + 8, 'cond', src.kind === 'spire' ? 'Spire, vue en coupe' : 'Bobine, vue en coupe', '⊙ en haut : le courant sort de l’écran ; ⊗ en bas : il y rentre. C’est une seule boucle (ou N boucles) qui traverse le plan de coupe deux fois.');
+      zone(X1(-(src.L || 0) / 2) - 8, Y1(-src.a) - 8, X1((src.L || 0) / 2) + 8, Y1(-src.a) + 8, 'cond2', '⊙ et ⊗', 'Un sens perpendiculaire à l’écran : une pointe de flèche qui vient vers toi, une queue de flèche qui s’éloigne.');
+    }
+  }
+  // comparer à une bobine : spires équivalentes en tireté
+  if (prm.src === 'aimant' && prm.cmpB && !prm.cut && A1.gap < 1e-6) {
+    const n = 12;
+    for (let i = 0; i < n; i++) { const x = -MAG_L / 2 + (i + 0.5) * MAG_L / n; dotCross(c, X1(x), Y1(MAG_A) - 6, 3, prm.dir, rgba(RP, 0.75), 1); dotCross(c, X1(x), Y1(-MAG_A) + 6, 3, -prm.dir, rgba(RP, 0.75), 1); }
+    c.strokeStyle = rgba(RP, 0.55); c.setLineDash([4, 3]); c.strokeRect(X1(-MAG_L / 2) - 2, Y1(MAG_A) - 11, MAG_L * s + 4, 2 * MAG_A * s + 22); c.setLineDash([]);
+    c.font = mono(11); tagText(c, 'bobine équivalente : ≈ 23 000 ampères-tours', X1(0), Y1(MAG_A) - 18, 'center', 'bottom', C.pos);
+  }
+  // boussoles
+  if (showC) {
+    const sp = 0.24 / clamp(Math.round(0.24 * s / 60), 7, 13) * s, len = Math.min(0.42 * sp, 15);
+    for (const k of A1.comp) {
+      if (k.hide) continue;
+      const x = X1(k.x), y = Y1(k.y), ca = Math.cos(k.th), sa = Math.sin(k.th);
+      c.fillStyle = rgba(RF2, 0.85); c.beginPath(); c.arc(x, y, len + 2, 0, TAU); c.fill();
+      c.strokeStyle = rgba(RT2, 0.35); c.lineWidth = 1; c.stroke();
+      c.fillStyle = C.champ; c.beginPath(); c.moveTo(x + ca * len, y - sa * len); c.lineTo(x - sa * 2.6, y - ca * 2.6); c.lineTo(x + sa * 2.6, y + ca * 2.6); c.closePath(); c.fill();
+      c.fillStyle = rgba(RT2, 0.8); c.beginPath(); c.moveTo(x - ca * len, y + sa * len); c.lineTo(x - sa * 2.6, y - ca * 2.6); c.lineTo(x + sa * 2.6, y + ca * 2.6); c.closePath(); c.fill();
+    }
+    zoneF((x, y) => A1.comp.some(k => !k.hide && Math.hypot(x - X1(k.x), y - Y1(k.y)) < len + 2), 'bous', 'Boussole', 'Une petite aiguille aimantée : sa pointe (bleu-lavande) se cale sur la direction de B à cet endroit. Elle oscille un peu avant de se caler.');
+  }
+  if (prm.earth) { c.font = mono(11); tagText(c, 'nord géographique →', W - 14, H - 16, 'right', 'middle', C.texte2); }
+  // échelle
+  const bar = 0.02 * s; c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(16, H - 16); c.lineTo(16 + bar, H - 16); c.moveTo(16, H - 20); c.lineTo(16, H - 12); c.moveTo(16 + bar, H - 20); c.lineTo(16 + bar, H - 12); c.stroke();
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillText('2 cm', 16, H - 22);
+  // sonde
+  const px = X1(A1.probe.x), py = Y1(A1.probe.y), f = Mag.fieldAt(A1.S.all, A1.probe.x, A1.probe.y);
+  c.strokeStyle = C.texte; c.lineWidth = 1.2; c.beginPath(); c.arc(px, py, 9, 0, TAU); c.moveTo(px - 14, py); c.lineTo(px - 5, py); c.moveTo(px + 5, py); c.lineTo(px + 14, py); c.moveTo(px, py - 14); c.lineTo(px, py - 5); c.moveTo(px, py + 5); c.lineTo(px, py + 14); c.stroke();
+  if (f.b > 0) { const L = 22 + 10 * clamp(Math.log10(f.b / 1e-5), 0, 4); arrow(c, px, py, px + f.bx / f.b * L, py - f.by / f.b * L, C.champ, 2, null, 7); }
+  const bt = fmtB(f.b); c.font = mono(11); tagText(c, `B = ${bt[0]} ${bt[1]}`, px + 16, py + 14, 'left', 'top', C.champ);
+  zcirc(px, py, 16, 'sonde', 'Sonde', 'Glisse-la : elle mesure B ici, en grandeur et en direction.');
+  if (!srcActive1() && !prm.earth) { c.font = mono(12); tagText(c, 'aucune source : aucun champ', W / 2, A1.view.cy + 40, 'center', 'middle', C.texte2); }
+}
+function scope1() {
+  // B le long de l'horizontale de la sonde, en échelle log-log
+  const { w, h } = scopeSetup(), c = sctx, padL = 46, padR = 8, padT = 8, padB = 18, pw = w - padL - padR, ph = h - padT - padB;
+  const d0 = 0.003, d1 = 0.12, b0 = 1e-6, b1 = 1;
+  const xd = d => padL + Math.log10(d / d0) / Math.log10(d1 / d0) * pw, yb = b => padT + ph * (1 - Math.log10(clamp(b, b0, b1) / b0) / Math.log10(b1 / b0));
+  c.strokeStyle = C.trait; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (const [b, t] of [[1e-6, '1 µT'], [1e-4, '100 µT'], [1e-2, '10 mT'], [1, '1 T']]) c.fillText(t, padL - 4, yb(b));
+  c.textAlign = 'center'; c.textBaseline = 'top'; for (const [d, t] of [[0.003, '3 mm'], [0.01, '1 cm'], [0.03, '3 cm'], [0.1, '10 cm']]) c.fillText(t, xd(d), padT + ph + 3);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  c.strokeStyle = C.texte2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(padL, yb(Mag.B_TERRE)); c.lineTo(padL + pw, yb(Mag.B_TERRE)); c.stroke(); c.setLineDash([]);
+  const sg = A1.probe.x >= 0 ? 1 : -1, y = A1.probe.y;
+  c.strokeStyle = C.champ; c.lineWidth = 1.8; c.beginPath();
+  for (let i = 0; i <= 80; i++) { const d = d0 * Math.pow(d1 / d0, i / 80), f = Mag.fieldAt(A1.S.all, sg * d, y); i ? c.lineTo(xd(d), yb(f.b)) : c.moveTo(xd(d), yb(f.b)); }
+  c.stroke();
+  const dp = Math.abs(A1.probe.x), fp = Mag.fieldAt(A1.S.all, A1.probe.x, y);
+  if (dp >= d0 && dp <= d1) { c.fillStyle = C.texte; c.beginPath(); c.arc(xd(dp), yb(fp.b), 3.5, 0, TAU); c.fill(); }
+  c.restore();
+  c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'top'; c.fillText('Terre 53 µT', padL + pw - 4, yb(Mag.B_TERRE) + 2);
+}
+function status1() {
+  const s = prm.src;
+  if (s === 'fil') {
+    const I = Math.abs(prm.If);
+    if (I < 0.05) return prm.earth ? 'I = 0 : seule la Terre agit, toutes les boussoles montrent le nord. Fais passer un courant.' : 'I = 0 : pas de courant, pas de champ.';
+    if (I >= 5) return 'Un courant fait tourner une boussole. À 5 cm, 10 A donnent 40 µT : autant que la Terre.' + (prm.If < 0 ? ' Courant inversé : les boussoles tournent dans l’autre sens.' : '');
+    return 'Près du fil, les boussoles commencent à s’enrouler autour de lui ; plus loin, la Terre l’emporte encore.';
+  }
+  if (s === 'aimant') {
+    if (prm.cut || A1.gap > 1e-6) return 'Deux aimants, chacun avec son nord et son sud. On ne peut pas isoler un pôle : les lignes de B n’ont ni début ni fin.';
+    if (prm.cmpB) return 'Un aimant se comporte comme une bobine parcourue par un courant énorme. Ce courant n’a pas de fil : il vient des électrons de la matière (module 50).';
+    return 'Les lignes sortent du nord, entrent au sud, et se referment à l’intérieur de l’aimant. Coupe-le pour voir.';
+  }
+  if (s === 'spire') return Math.abs(prm.Is) < 0.05 ? 'Pas de courant dans la spire : pas de champ.' : 'Une seule boucle de courant. Au centre, B = μ₀I/2a ; vue de loin, elle se comporte comme un petit aimant.';
+  return Math.abs(prm.Is) < 0.05 ? 'Pas de courant dans la bobine : pas de champ.' : 'Des spires empilées : dedans, le champ est presque uniforme, B ≈ μ₀nI ; dehors, c’est le champ d’un aimant droit.';
+}
+
+/* ================= Acte II : une force qui dévie ================= */
+const PART = {
+  p: { nom: 'proton', m: Mag.MP, q: Mag.QE, u: 1.007 },
+  e: { nom: 'électron', m: Mag.ME, q: -Mag.QE, u: 0.000549 },
+  d: { nom: 'deutéron', m: Mag.MD, q: Mag.QE, u: 2.014 },
+  a: { nom: 'particule alpha', m: Mag.MA, q: 2 * Mag.QE, u: 4.002 }
+};
+const isE = () => prm.part === 'e';
+const slow2 = () => TAU * (isE() ? Mag.ME : Mag.MP) / (Mag.QE * 0.1) / 3;         // secondes réelles par seconde d'écran
+const lref2 = () => (isE() ? Mag.ME : Mag.MP) * 1e6 / (Mag.QE * 0.1);              // rayon de référence
+const K2 = { parts: [], ts: 0, rec: [], view: null, tv: null, sw: { th: 0, w: 0 }, srec: [], tsw: 0 };
+function circ2(v) { const P = PART[prm.part], B = prm.B2; if (prm.Eon || Math.abs(B) < 1e-4) return null; return { r: P.m * v / (Math.abs(P.q) * Math.abs(B)), sg: Math.sign(P.q * B) }; }
+function launch2() {
+  const v = prm.v2, P = PART[prm.part], ci = circ2(v), vz = prm.vpar ? 0.3 * v : 0, L = lref2();
+  K2.parts = []; K2.rec = []; K2.ts = 0;
+  const mk = (x, y, vv, twin, dx) => ({ p: { x, y, z: 0, vx: (dx || 1) * vv, vy: 0, vz }, trail: [], twin, v0: vv });
+  if (ci) {
+    const twin = prm.twin, y0 = ci.sg * (twin ? 1.5 : 1) * ci.r;
+    K2.parts.push(mk(0, y0, v, false));
+    let ymin = y0 - ci.sg * ci.r - ci.r, ymax = y0 - ci.sg * ci.r + ci.r, hw = ci.r;
+    if (twin) { K2.parts.push(mk(0, y0, 2 * v, true)); const yc = y0 - ci.sg * 2 * ci.r; ymin = Math.min(ymin, yc - 2 * ci.r); ymax = Math.max(ymax, yc + 2 * ci.r); hw = 2 * ci.r; }
+    K2.tv = { xc: 0, yc: (ymin + ymax) / 2, hw: hw * 1.25, hh: (ymax - ymin) / 2 * 1.25 };
+  } else {
+    const hw = 3.2 * L * Math.max(1, v / 1e6) ;
+    K2.tv = { xc: 0, yc: 0, hw, hh: hw * 0.55 };
+    const dx = prm.B2 < 0 ? -1 : 1;   // la dérive E × B va selon +x si B > 0 : on lance dans ce sens
+    K2.parts.push(mk(-dx * 0.92 * hw, 0, v, false, dx));
+  }
+  K2.parts.forEach(q => { q.Ek0 = 0.5 * P.m * (q.v0 * q.v0 + vz * vz); });
+  if (!K2.view) K2.view = Object.assign({}, K2.tv);
+}
+function geo2() {
+  const top = 146, bot = 18, side = 20, aw = W - 2 * side - 54, ah = Math.max(120, H - top - bot), v = K2.view;
+  const s = Math.min(aw / (2 * v.hw), ah / (2 * v.hh));
+  return { s, cx: side + aw / 2 - v.xc * s, cy: top + ah / 2 + v.yc * s };
+}
+function adv2(dt) {
+  if (prm.seg2 === 'fil') {
+    Mag.swingStep(K2.sw, { I: prm.Iw, L: 0.05, B: prm.Bw, m: 0.010, ell: 0.15 }, dt);
+    K2.tsw += dt; K2.srec.push({ t: K2.tsw, th: K2.sw.th }); trim(K2.srec, K2.tsw - 8);
+    return;
+  }
+  const P = PART[prm.part], S = slow2() * (reduce ? 0.5 : 1), simDt = dt * S;
+  const Bz = prm.B2, E = { x: 0, y: prm.Eon ? prm.E : 0, z: 0 }, B = { x: 0, y: 0, z: Bz };
+  const T = Math.abs(Bz) > 1e-4 ? TAU * P.m / (Math.abs(P.q) * Math.abs(Bz)) : Infinity;
+  K2.ts += dt;
+  const tv = K2.tv, out = (p) => Math.abs(p.x - tv.xc) > tv.hw * 1.15 || Math.abs(p.y - tv.yc) > tv.hh * 1.15;
+  let relaunch = false;
+  for (const q of K2.parts) {
+    const h0 = isFinite(T) ? T / 400 : lref2() / q.v0 / 60;
+    const n = Math.min(4000, Math.max(1, Math.ceil(simDt / h0))), h = simDt / n;
+    for (let i = 0; i < n; i++) Mag.boris(q.p, P.q, P.m, E, B, h);
+    q.trail.push({ t: K2.ts, x: q.p.x, y: q.p.y, z: q.p.z });
+    trim(q.trail, K2.ts - (reduce ? 3 : 6));
+    if (out(q.p)) relaunch = true;
+  }
+  const m = K2.parts[0];
+  if (m) { const v2 = m.p.vx * m.p.vx + m.p.vy * m.p.vy + m.p.vz * m.p.vz; K2.rec.push({ t: K2.ts, ek: eV(0.5 * P.m * v2), vx: m.p.vx / 1e6, vy: m.p.vy / 1e6 }); trim(K2.rec, K2.ts - 6); }
+  if (relaunch) launch2();
+}
+function rMeas2() {
+  const m = K2.parts[0], ci = circ2(prm.v2); if (!m || !ci) return NaN;
+  const Ts = TAU * PART[prm.part].m / (Math.abs(PART[prm.part].q) * Math.abs(prm.B2)) / (slow2() * (reduce ? 0.5 : 1));
+  const tr = m.trail; if (!tr.length || tr[tr.length - 1].t - tr[0].t < Ts * 1.02) return NaN;
+  let lo = Infinity, hi = -Infinity; const t1 = tr[tr.length - 1].t;
+  for (const p of tr) if (p.t >= t1 - Ts) { lo = Math.min(lo, p.y); hi = Math.max(hi, p.y); }
+  return (hi - lo) / 2;
+}
+function draw2() { if (prm.seg2 === 'fil') return drawSwing(); drawCharge(); }
+function drawCharge() {
+  const c = ctx, P = PART[prm.part], g = geo2(), X = x => g.cx + x * g.s, Y = y => g.cy - y * g.s;
+  // champ B : grille de ⊙ / ⊗
+  const B = prm.B2, aB = Math.abs(B);
+  if (aB > 1e-4) {
+    const sp = 38, al = 0.12 + 0.5 * aB / 0.2, ox = ((g.cx % sp) + sp) % sp, oy = ((g.cy % sp) + sp) % sp;
+    for (let x = ox; x < W; x += sp) for (let y = oy + 140; y < H; y += sp) dotCross(c, x, y, 4, Math.sign(B), rgba(RB, al), 1);
+    zoneF((x, y) => y > 140 && x < W - 60, 'B2', B > 0 ? 'Champ B ⊙' : 'Champ B ⊗', 'Uniforme, perpendiculaire à l’écran : ⊙ il vient vers toi, ⊗ il s’éloigne. Une queue de flèche ou une pointe de flèche.');
+  }
+  // plaques du champ électrique
+  if (prm.Eon) {
+    const tv = K2.tv, yT = Y(tv.yc + tv.hh * 0.92), yB = Y(tv.yc - tv.hh * 0.92);
+    c.fillStyle = rgba(RN, 0.75); c.fillRect(20, yT - 5, W - 94, 4);
+    c.fillStyle = rgba(RP, 0.75); c.fillRect(20, yB + 1, W - 94, 4);
+    c.font = mono(11); c.fillStyle = C.neg; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillText('− − −', 24, yT - 7);
+    c.fillStyle = C.pos; c.textBaseline = 'top'; c.fillText('+ + +  E ↑ ' + sig(prm.E / 1000, 3) + ' kV/m', 24, yB + 7);
+    for (let x = 60; x < W - 90; x += 90) arrow(c, x, yB - 6, x, yT + 10, rgba(RT2, 0.25), 1, null, 6);
+    zone(20, yT - 8, W - 74, yT + 2, 'plq', 'Plaques chargées', 'Elles créent un champ électrique uniforme E, de + vers −. Lui peut changer l’énergie de la particule.');
+  }
+  // traînées
+  for (const q of K2.parts) {
+    const tr = q.trail; if (tr.length < 2) continue; const t1 = tr[tr.length - 1].t, span = reduce ? 3 : 6;
+    for (let i = 1; i < tr.length; i++) { const a = 1 - (t1 - tr[i].t) / span; c.strokeStyle = rgba(P.q > 0 ? RP : RN, 0.1 + 0.6 * a); c.lineWidth = q.twin ? 1.4 : 1.8; c.beginPath(); c.moveTo(X(tr[i - 1].x), Y(tr[i - 1].y)); c.lineTo(X(tr[i].x), Y(tr[i].y)); c.stroke(); }
+  }
+  // particules et vecteurs
+  for (const q of K2.parts) {
+    const x = X(q.p.x), y = Y(q.p.y), vv = Math.hypot(q.p.vx, q.p.vy);
+    if (vv > 0) {
+      const ux = q.p.vx / vv, uy = q.p.vy / vv, F = Mag.lorentz(P.q, { x: q.p.vx, y: q.p.vy, z: q.p.vz }, { x: 0, y: prm.Eon ? prm.E : 0, z: 0 }, { x: 0, y: 0, z: prm.B2 }), Fm = Math.hypot(F.x, F.y);
+      arrow(c, x, y, x + ux * 46, y - uy * 46, C.texte, 1.2, null, 7);
+      if (!q.twin) { c.font = mono(11); tagText(c, 'v', x + ux * 54, y - uy * 54, 'center', 'middle', C.texte); }
+      const frefS = Math.abs(P.q) * prm.v2 * Math.max(Math.abs(prm.B2), 0.02);
+      if (Fm > 0.03 * frefS) {
+        const fref = Math.abs(P.q) * prm.v2 * Math.max(Math.abs(prm.B2), 0.02), L = clamp(38 * Fm / fref, 8, 70), fx = F.x / Fm, fy = F.y / Fm;
+        arrow(c, x, y, x + fx * L, y - fy * L, C.texte, 2.6, null, 9);
+        if (!q.twin) { tagText(c, 'F', x + fx * (L + 9), y - fy * (L + 9), 'center', 'middle', C.texte); }
+        if (!prm.Eon && !q.twin) { const k = 8; c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1; c.beginPath(); c.moveTo(x + ux * k, y - uy * k); c.lineTo(x + ux * k + fx * k, y - uy * k - fy * k); c.lineTo(x + fx * k, y - fy * k); c.stroke(); }
+      }
+    }
+    c.fillStyle = P.q > 0 ? C.pos : C.neg; c.beginPath(); c.arc(x, y, q.twin ? 6 : 7, 0, TAU); c.fill();
+    c.fillStyle = C.fond; c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(P.q > 0 ? '+' : '−', x, y + 0.5);
+    if (q.twin) { c.font = mono(10); tagText(c, '2v', x + 10, y - 12, 'left', 'middle', C.texte2); }
+    zcirc(x, y, 12, 'part' + (q.twin ? 2 : 1), PART[prm.part].nom[0].toUpperCase() + PART[prm.part].nom.slice(1) + (q.twin ? ' (deux fois plus rapide)' : ''), 'Une charge en mouvement. La force F = qv × B est perpendiculaire à v (flèche fine) et à B : elle courbe la trajectoire sans changer la vitesse.');
+  }
+  // jauge d'énergie cinétique
+  const m = K2.parts[0];
+  if (m) {
+    const ek = 0.5 * P.m * (m.p.vx * m.p.vx + m.p.vy * m.p.vy + m.p.vz * m.p.vz), r = ek / m.Ek0;
+    const bx = W - 46, by0 = H - 40, bh = Math.min(220, H - 190), bw = 14;
+    c.strokeStyle = C.trait; c.strokeRect(bx + 0.5, by0 - bh + 0.5, bw, bh);
+    const hh = clamp(r * bh * 0.6, 0, bh); c.fillStyle = rgba(RT, 0.85); c.fillRect(bx + 1, by0 - hh, bw - 1, hh);
+    c.strokeStyle = C.texte2; c.setLineDash([3, 2]); c.beginPath(); c.moveTo(bx - 4, by0 - bh * 0.6); c.lineTo(bx + bw + 4, by0 - bh * 0.6); c.stroke(); c.setLineDash([]);
+    c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText('Ec', bx + bw / 2, by0 + 4);
+    zone(bx - 6, by0 - bh, bx + bw + 6, by0, 'jauge', 'Énergie cinétique', 'Le tireté marque la valeur de départ. Avec B seul, la barre ne bouge pas : la force magnétique ne travaille jamais.');
+  }
+  // échelle
+  const z = niceZ(110 / g.s), bar = z * g.s, zl = si(z, 'm', 2);
+  c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(16, H - 16); c.lineTo(16 + bar, H - 16); c.moveTo(16, H - 20); c.lineTo(16, H - 12); c.moveTo(16 + bar, H - 20); c.lineTo(16 + bar, H - 12); c.stroke();
+  c.font = mono(10); tagText(c, zl.join(' ') + (isE() ? ' · échelle de l’électron' : ''), 16, H - 22, 'left', 'bottom', C.texte2);
+  // vue de côté (hélice)
+  if (prm.vpar && m && m.trail.length > 2) {
+    const iw = Math.min(200, W * 0.32), ih = 74, ix = 16, iy = H - 40 - ih;
+    c.fillStyle = rgba(RF2, 0.92); c.fillRect(ix, iy, iw, ih); c.strokeStyle = C.trait; c.strokeRect(ix + 0.5, iy + 0.5, iw, ih);
+    const tr = m.trail, z1 = tr[tr.length - 1].z, zs = (iw - 20) / Math.max(1e-12, (z1 - tr[0].z) || 1), xs = (ih - 20) / (2 * Math.max(1e-12, (circ2(prm.v2) || { r: lref2() }).r) * 1.1);
+    c.strokeStyle = rgba(P.q > 0 ? RP : RN, 0.85); c.lineWidth = 1.4; c.beginPath();
+    tr.forEach((p, i) => { const x = ix + 10 + (p.z - tr[0].z) * zs, y = iy + ih / 2 - (p.x) * xs; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+    c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('vue de côté · B →', ix + 6, iy + 4);
+  }
+  c.font = mono(11); tagText(c, 'ralenti : 1 s à l’écran = ' + si(slow2() * (reduce ? 0.5 : 1), 's', 2).join(' '), 16, 124, 'left', 'top', C.texte2);
+}
+function geoSwing() { const top = 110, ah = Math.max(140, H - top - 30), s = Math.min(ah / 0.26, (W - 80) / 0.4); return { s, px: W / 2, py: top + 0.035 * s }; }
+function drawSwing() {
+  const c = ctx, g = geoSwing(), s = g.s, ell = 0.15, th = K2.sw.th;
+  const rx = g.px + Math.sin(th) * ell * s, ry = g.py + Math.cos(th) * ell * s;
+  // aimant en U : pôles haut (N) et bas (S), champ vertical vers le bas
+  const yN = g.py + 0.08 * s, yS = g.py + 0.21 * s, hw = 0.07 * s, al = 0.25 + 0.6 * prm.Bw / 0.2;
+  c.save(); c.globalAlpha = 0.55; c.fillStyle = C.fond2; c.fillRect(g.px - hw, yN - 26, 2 * hw, 22); c.fillRect(g.px - hw, yS + 4, 2 * hw, 22);
+  c.strokeStyle = C.texte2; c.strokeRect(g.px - hw + 0.5, yN - 26 + 0.5, 2 * hw, 22); c.strokeRect(g.px - hw + 0.5, yS + 4.5, 2 * hw, 22); c.restore();
+  c.font = mono(11); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('N', g.px, yN - 15); c.fillText('S', g.px, yS + 15);
+  if (prm.Bw > 0) for (let i = -3; i <= 3; i++) { const x = g.px + i * hw / 3.6; arrow(c, x, yN, x, yS, rgba(RB, al), 1.1, null, 6); }
+  zone(g.px - hw, yN - 26, g.px + hw, yS + 26, 'U', 'Aimant en U (en arrière-plan)', 'Entre ses pôles, un champ presque uniforme, ici vertical, du nord vers le sud.');
+  // fils et pivot
+  c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.beginPath(); c.moveTo(g.px, g.py); c.lineTo(rx, ry); c.stroke();
+  c.fillStyle = C.texte2; c.fillRect(g.px - 30, g.py - 4, 60, 3);
+  // tige vue de bout
+  c.fillStyle = C.fond2; c.beginPath(); c.arc(rx, ry, 10, 0, TAU); c.fill();
+  if (Math.abs(prm.Iw) > 0.01) dotCross(c, rx, ry, 8, Math.sign(prm.Iw), C.pos, 1.6); else { c.strokeStyle = C.texte2; c.beginPath(); c.arc(rx, ry, 8, 0, TAU); c.stroke(); }
+  zcirc(rx, ry, 14, 'tige', 'Tige conductrice, vue de bout', 'Longue de 5 cm, 10 g, suspendue par deux fils. ⊙ : le courant vient vers toi. Chaque charge en mouvement subit qv × B.');
+  // vecteurs
+  const kN = 500, mg = 0.010 * Mag.G, F = prm.Iw * 0.05 * prm.Bw;
+  arrow(c, rx, ry, rx, ry + mg * kN, C.texte, 1.6, null, 8); c.font = mono(11); tagText(c, 'mg', rx + 6, ry + mg * kN, 'left', 'middle', C.texte);
+  if (Math.abs(F) > 1e-5) { arrow(c, rx, ry, rx + F * kN, ry, C.texte, 2.6, null, 9); tagText(c, 'F = ILB', rx + F * kN + (F > 0 ? 8 : -8), ry - 12, F > 0 ? 'left' : 'right', 'middle', C.texte); }
+  const T = Math.hypot(F, mg); arrow(c, rx, ry, rx - Math.sin(th) * T * kN, ry - Math.cos(th) * T * kN, C.texte2, 1.2, [4, 3], 7);
+  zone(rx - 4, ry, rx + 4, ry + mg * kN, 'mg', 'Poids', 'mg ≈ 98 mN, vers le bas.');
+  c.font = mono(11); tagText(c, 'vue de bout : la tige traverse l’écran', 16, H - 16, 'left', 'middle', C.texte2);
+}
+function scope2() {
+  if (prm.seg2 === 'fil') {
+    const eq = Mag.swingEq(prm.Iw, 0.05, prm.Bw, 0.010) * 180 / PI, t1 = Math.max(8, K2.tsw);
+    stack([{ lo: -35, hi: 35, d: 0, name: 'θ (°)', series: [{ rec: K2.srec, f: r => r.th * 180 / PI, col: C.texte }], refs: [{ v: eq, col: C.accent }] }], t1 - 8, t1, '−8 s', 'maintenant');
+    return;
+  }
+  const t1 = Math.max(6, K2.ts), m = K2.parts[0], ek0 = m ? eV(m.Ek0) : 1, sc = ek0 >= 1000 ? 1e-3 : 1, un = ek0 >= 1000 ? 'keV' : 'eV';
+  const vr = symRange(K2.rec, r => Math.max(Math.abs(r.vx), Math.abs(r.vy)), prm.v2 / 1e6);
+  stack([
+    { lo: 0, hi: niceMax(ek0 * sc * 1.6), d: ek0 * sc * 1.6 < 10 ? 1 : 0, name: 'Ec (' + un + ')', series: [{ rec: K2.rec, f: r => r.ek * sc, col: C.texte, lw: 2 }], refs: [{ v: ek0 * sc, col: C.texte2 }] },
+    { lo: vr[0], hi: vr[1], d: 1, name: 'vx · vy (10⁶ m/s)', series: [{ rec: K2.rec, f: r => r.vx, col: C.texte }, { rec: K2.rec, f: r => r.vy, col: C.texte2, dash: [4, 3] }] }
+  ], t1 - 6, t1, '−6 s', 'maintenant');
+}
+function status2() {
+  if (prm.seg2 === 'fil') {
+    if (Math.abs(prm.Iw) < 0.05) return 'Pas de courant : la tige pend, le champ ne fait rien.';
+    if (prm.Bw < 0.001) return 'Pas de champ : le courant passe, mais rien ne pousse la tige.';
+    return 'Un courant, c’est des charges en mouvement : chacune subit qv × B, et la tige entière est poussée' + (prm.Iw > 0 ? ' vers la droite.' : ' vers la gauche.') + ' Inverse I : elle part de l’autre côté.';
+  }
+  if (Math.abs(prm.B2) < 1e-4) return prm.Eon ? 'B = 0 : seul le champ électrique agit, il dévie la particule et change son énergie.' : 'B = 0 : aucune force, la particule file droit.';
+  if (prm.Eon) {
+    const vs = prm.E / Math.abs(prm.B2);
+    return 'Le champ électrique change l’énergie ; le champ magnétique, jamais. Ensemble, ils trient les vitesses.' + (Math.abs(prm.v2 - vs) / vs < 0.03 ? ' Ici v = E/B : les deux forces s’annulent, la particule file droit.' : ' Seule la vitesse v = E/B passe droit.');
+  }
+  if (K2.parts.length > 1) return 'Deux fois plus vite, deux fois plus grand, même durée par tour : T = 2πm/qB. C’est le principe du cyclotron.';
+  return 'La force est toujours perpendiculaire à la vitesse. Elle tourne la vitesse sans jamais changer sa grandeur : B ne fait aucun travail.';
+}
+
+/* ================= Acte III : faire varier le flux ================= */
+const COIL3 = { b: 0.015, L: 0.02, R: 10 };
+const K3 = {
+  xm: -0.1, vm: 0, mode: 'rest', ph: 0, lam: 0, emf: 0, I: 0, needle: { th: 0, w: 0 }, rec: [], t: 0, tRest: 0, side: -1, crossed: false, fluxShown: false, tFlux: -10, lines: null, linesDir: 0, lamMax: 1,
+  drag: false, px: 0, lastPx: null,
+  rot: { t: 0, rec: [] },
+  pr: { ts: 0, t: 0, on: false, ton: -1, toff: undefined, rec: [], needle: { th: 0, w: 0 }, M: 0, L1: 0, lines: null, last: '' }
+};
+const mag3 = () => ({ kind: 'aimant', Br: 1.2, a: MAG_A, L: MAG_L, x: K3.xm, y: 0, dir: prm.dir3 });
+const coil3 = () => ({ N: prm.N3, b: COIL3.b, x: 0, y: 0, L: COIL3.L });
+function geo3() { const top = 110, bot = 20, ah = Math.max(140, H - top - bot), s = Math.min((W - 40) / (W < 640 ? 0.2 : 0.30), ah / 0.17); return { s, cx: W / 2, cy: top + ah * 0.42 }; }
+function reset3() {
+  K3.xm = -0.1; K3.vm = 0; K3.mode = 'rest'; K3.rec = []; K3.t = 0; K3.tRest = 0; K3.side = -1; K3.crossed = false; K3.fluxShown = false; K3.tFlux = -10; K3.needle = { th: 0, w: 0 };
+  prm.shuttle = false;
+  const m = mag3(); m.x = 0; Mag.prepare([m]); K3.lamMax = Mag.linkage([m], coil3());
+  K3.rot = { t: 0, rec: [] };
+  const P = K3.pr; P.ts = 0; P.t = 0; P.on = false; P.ton = -1; P.toff = undefined; P.rec = []; P.needle = { th: 0, w: 0 }; P.last = '';
+}
+function lines3() {
+  if (K3.lines && K3.linesDir === prm.dir3) return K3.lines;
+  const m = mag3(); m.x = 0; Mag.prepare([m]);
+  K3.lines = Mag.seeds(m, 12).map(([x, y]) => Mag.traceLine([m], x, y, { ds: 0.0008, nmax: 2500, xmin: -0.32, xmax: 0.32, ymin: -0.16, ymax: 0.16 }).pts);
+  K3.linesDir = prm.dir3; return K3.lines;
+}
+function startShuttle(on) { prm.shuttle = on; if (on) { K3.mode = 'shuttle'; K3.ph = Math.asin(clamp(K3.xm / 0.08, -1, 1)); } else { K3.mode = 'rest'; } syncTools(); }
+function adv3(dt) {
+  if (prm.seg3 === 'aimant') {
+    const prev = K3.xm;
+    if (K3.mode === 'shuttle') { K3.ph += TAU * prm.f3 * dt; K3.xm = 0.08 * Math.sin(K3.ph); K3.vm = 0.08 * TAU * prm.f3 * Math.cos(K3.ph); }
+    else if (K3.mode === 'drag') { const ve = dt > 0 ? (K3.px - prev) / dt : 0; K3.xm = K3.px; K3.vm += (ve - K3.vm) * (1 - Math.exp(-dt / 0.08)); }
+    else if (K3.mode === 'rest') { K3.vm = 0; }
+    const m = mag3(); Mag.prepare([m]); const c = coil3();
+    K3.lam = Mag.linkage([m], c); K3.emf = Math.abs(K3.vm) > 1e-6 ? Mag.emfMoving(m, c, K3.vm) : 0; K3.I = K3.emf / COIL3.R;
+    K3.t += dt; K3.rec.push({ t: K3.t, phi: K3.lam / prm.N3 * 1e6, emf: K3.emf * 1e3 }); trim(K3.rec, K3.t - 8);
+    needleStep(K3.needle, clamp(K3.I / 0.1, -1, 1) * 0.95, dt);
+    if (Math.abs(K3.vm) < 0.005 && Math.abs(K3.xm) < 0.004) K3.tRest += dt; else K3.tRest = 0;
+    if (Math.abs(K3.xm) > 0.03) { const sd = Math.sign(K3.xm); if (sd !== K3.side) K3.crossed = true; K3.side = sd; }
+    if (!K3.fluxShown && Math.abs(K3.lam) > 0.05 * K3.lamMax) { K3.fluxShown = true; K3.tFlux = K3.t; }
+  } else if (prm.seg3 === 'rotor') {
+    const R = K3.rot; R.t += dt * (reduce ? 0.5 : 1);
+    const g = Mag.generator({ N: 200, B: 0.2, A: 0.01, omega: TAU * prm.tps }, R.t);
+    R.g = g; R.rec.push({ t: R.t, phi: g.phi * 1e3, emf: g.emf }); trim(R.rec, R.t - 6);
+  } else {
+    const P = K3.pr; P.t += dt; P.ts += dt / 200;
+    const f = Mag.faradayPair({ V0: 6, R1: 2, L1: P.L1, M: P.M, ton: P.ton < 0 ? Infinity : P.ton, toff: P.toff }, P.ts);
+    P.f = f; P.rec.push({ t: P.t, I1: f.I1, e2: f.emf2 }); trim(P.rec, P.t - 6);
+    needleStep(P.needle, clamp(f.emf2 / 10 / 0.1, -1, 1) * 0.95, dt);
+  }
+}
+function setSwitch(on) {
+  const P = K3.pr; if (on === P.on) return; P.on = on;
+  if (on) { P.ton = P.ts; P.toff = undefined; } else { P.toff = P.ts; }
+  syncTools();
+}
+// bobine en perspective légère : n spires, centre (cx, cy), rayon r px, longueur l px ; front = true pour la moitié avant
+function coilTurns(c, cx, cy, r, l, n, front, col, lw) {
+  const rx = Math.max(3, r * 0.26);
+  c.strokeStyle = col; c.lineWidth = lw;
+  for (let i = 0; i < n; i++) {
+    const x = cx - l / 2 + (i + 0.5) * l / n;
+    c.beginPath(); c.ellipse(x, cy, rx, r, 0, front ? -PI / 2 : PI / 2, front ? PI / 2 : 3 * PI / 2); c.stroke();
+  }
+}
+// courant le long des moitiés avant : tirets qui descendent si I > 0 (sens direct autour de +x)
+function coilCurrent(c, cx, cy, r, l, n, I, phase, col) {
+  if (Math.abs(I) < 1e-9) return;
+  const rx = Math.max(3, r * 0.26), sg = Math.sign(I);
+  c.save(); c.strokeStyle = col; c.lineWidth = 2.2; c.setLineDash([5, 9]); c.lineDashOffset = -sg * phase;
+  for (let i = 0; i < n; i++) { const x = cx - l / 2 + (i + 0.5) * l / n; c.beginPath(); c.ellipse(x, cy, rx, r, 0, -PI / 2, PI / 2); c.stroke(); }
+  c.restore();
+}
+let phase3 = 0;
+function draw3() { if (prm.seg3 === 'aimant') drawMagCoil(); else if (prm.seg3 === 'rotor') drawRotor(); else drawPair(); }
+function drawMagCoil() {
+  const c = ctx, g = geo3(), s = g.s, X = x => g.cx + x * s, Y = y => g.cy - y * s;
+  const L = lines3(), xm = K3.xm;
+  // lignes de l'aimant : celles qui traversent la bobine un peu plus marquées
+  for (const pts of L) {
+    let thr = false; for (let i = 1; i < pts.length; i++) { const a = pts[i - 1][0] + xm, b = pts[i][0] + xm; if ((a < 0) !== (b < 0) && Math.abs(pts[i][1]) < COIL3.b) { thr = true; break; } }
+    c.strokeStyle = rgba(RB, thr ? 0.55 : 0.2); c.lineWidth = thr ? 1.3 : 1; c.beginPath();
+    pts.forEach((p, i) => { const x = X(p[0] + xm), y = Y(p[1]); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+  }
+  const r = COIL3.b * s, l = COIL3.L * s, n = clamp(Math.round(prm.N3 / 20), 5, 20);
+  coilTurns(c, X(0), Y(0), r, l, n, false, rgba(RT2, 0.45), 1.2);
+  const mw = MAG_L * s, mh = 2 * MAG_A * s; drawMagnet(c, X(xm), Y(0), mw, mh, prm.dir3, 1);
+  zone(X(xm) - mw / 2, Y(0) - mh / 2, X(xm) + mw / 2, Y(0) + mh / 2, 'mag3', 'Aimant (glisse-le)', 'Ø 12 × 24 mm, néodyme. Glisse-le le long de l’axe : c’est sa vitesse qui compte.');
+  coilTurns(c, X(0), Y(0), r, l, n, true, rgba(RT, 0.8), 1.3);
+  phase3 += Math.min(40, Math.abs(K3.I) * 6000) * 0.016;
+  coilCurrent(c, X(0), Y(0), r, l, n, K3.I, phase3, C.accent);
+  zone(X(0) - l / 2 - 6, Y(0) - r - 6, X(0) + l / 2 + 6, Y(0) + r + 6, 'coil3', 'Bobine réceptrice', prm.N3 + ' spires de rayon 1,5 cm, reliées au galvanomètre. Rien ne la touche : seul le flux qui la traverse compte.');
+  // pôles induits
+  if (Math.abs(K3.I) > 1e-3) {
+    const nR = K3.I > 0, al = clamp(Math.abs(K3.I) / 0.02, 0.3, 1);
+    c.font = mono(13); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = rgba(RA, al);
+    c.fillText(nR ? 'S' : 'N', X(0) - l / 2 - 14, Y(0) - r - 12); c.fillText(nR ? 'N' : 'S', X(0) + l / 2 + 14, Y(0) - r - 12);
+    zone(X(0) - l / 2 - 24, Y(0) - r - 22, X(0) + l / 2 + 24, Y(0) - r - 2, 'poles3', 'Pôles induits', 'Parcourue par le courant induit, la bobine devient un aimant. Face à l’aimant qui approche, elle présente le même pôle.');
+  }
+  // fils et galvanomètre
+  const gx = X(0), gy = Y(0) + r + Math.min(90, 0.045 * s) + 30, gr = 34;
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1.2; c.beginPath();
+  c.moveTo(X(0) - l / 2, Y(0) + r); c.lineTo(X(0) - l / 2, gy - 10); c.lineTo(gx - gr, gy - 10);
+  c.moveTo(X(0) + l / 2, Y(0) + r); c.lineTo(X(0) + l / 2, gy - 10); c.lineTo(gx + gr, gy - 10); c.stroke();
+  drawGalva(c, gx, gy, gr, K3.needle.th, 'mA');
+  c.font = mono(11); tagText(c, `I = ${sig(K3.I * 1e3, 2)} mA`, gx + gr + 10, gy, 'left', 'middle', C.accent);
+  zcirc(gx, gy - 8, gr, 'galva', 'Galvanomètre à zéro central', 'Son aiguille dévie dans un sens ou dans l’autre selon le sens du courant induit. Pleine échelle : 100 mA. Circuit : 10 Ω.');
+  // étiquette du flux, qui se révèle
+  if (K3.fluxShown && K3.t - K3.tFlux < 7) {
+    c.font = mono(11);
+    if (W < 640) { tagText(c, 'flux : combien de champ traverse', X(0), Y(0) - r - 48, 'center', 'bottom', C.champ); tagText(c, 'la surface d’une spire', X(0), Y(0) - r - 32, 'center', 'bottom', C.champ); }
+    else tagText(c, 'flux : combien de champ traverse la surface d’une spire', X(0), Y(0) - r - 34, 'center', 'bottom', C.champ);
+  }
+  c.font = mono(11); tagText(c, 'axe de l’aimant et de la bobine', 16, H - 16, 'left', 'middle', C.texte2);
+}
+function drawPoles(c, x, y, w, h, letter) {
+  c.fillStyle = C.fond2; c.fillRect(x, y, w, h); c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+  c.font = mono(13); c.fillStyle = C.texte; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letter, x + w / 2, y + h / 2);
+}
+function drawRotor() {
+  const c = ctx, top = 110, ah = Math.max(160, H - top - 30), s = Math.min((W - 40) / 0.44, ah / 0.27), cx = W / 2, cy = top + ah * 0.40;
+  const R = K3.rot, g = R.g || Mag.generator({ N: 200, B: 0.2, A: 0.01, omega: TAU * prm.tps }, 0), th = TAU * prm.tps * R.t;
+  const P = (x, y, z) => [cx + (x - 0.38 * z) * s, cy - (y - 0.2 * z) * s];
+  // pôles et champ uniforme
+  const pw = 0.04 * s, ph = 0.16 * s;
+  drawPoles(c, cx - 0.17 * s - pw, cy - ph / 2, pw, ph, 'N'); drawPoles(c, cx + 0.17 * s, cy - ph / 2, pw, ph, 'S');
+  for (let i = -3; i <= 3; i++) { const y = cy + i * ph / 7.5; arrow(c, cx - 0.165 * s, y, cx + 0.165 * s, y, rgba(RB, 0.3), 1, null, 6); }
+  zone(cx - 0.17 * s - pw, cy - ph / 2, cx - 0.17 * s, cy + ph / 2, 'polN', 'Pièces polaires', 'Entre elles, un champ uniforme de 0,2 T, du nord vers le sud.');
+  // bobine rectangulaire : n̂ = (cosθ, 0, sinθ), côtés le long de u = (−sinθ, 0, cosθ) et de y
+  const w = 0.05, hh = 0.05, ux = -Math.sin(th), uz = Math.cos(th);
+  const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => P(a * w * ux, b * hh, a * w * uz));
+  const front = Math.sin(th) < 0; // face qui regarde vers nous
+  c.fillStyle = rgba(RT, front ? 0.05 : 0.025); c.beginPath(); corners.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.fill();
+  for (let k = 0; k < 3; k++) { c.strokeStyle = rgba(RT, 0.75 - k * 0.2); c.lineWidth = 1.3; c.beginPath(); corners.forEach((p, i) => { const q = [p[0] + k * 1.5, p[1] - k * 1.5]; i ? c.lineTo(q[0], q[1]) : c.moveTo(q[0], q[1]); }); c.closePath(); c.stroke(); }
+  // courant induit le long du cadre
+  if (Math.abs(g.emf) > 1e-6) { c.save(); c.strokeStyle = C.accent; c.lineWidth = 2.2; c.setLineDash([5, 9]); phase3 += Math.min(60, Math.abs(g.emf) * 12) * 0.016; c.lineDashOffset = -Math.sign(g.emf) * phase3; c.beginPath(); corners.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); c.stroke(); c.restore(); }
+  // normale
+  const o = P(0, 0, 0), nn = P(0.06 * Math.cos(th), 0, 0.06 * Math.sin(th)); arrow(c, o[0], o[1], nn[0], nn[1], C.texte2, 1.3, null, 7); c.font = mono(11); tagText(c, 'n̂', nn[0] + 6, nn[1] - 6, 'left', 'bottom', C.texte2);
+  zcirc(o[0], o[1], 0.05 * s, 'cadre', 'Bobine qui tourne', '200 spires, 100 cm². Le flux à travers elle vaut BA cos θ, où θ est l’angle entre sa normale n̂ et B.');
+  // axe, bagues, balais, lampe
+  const a0 = P(0, -hh, 0), a1 = P(0, -hh - 0.05, 0);
+  c.strokeStyle = C.texte2; c.lineWidth = 1.4; c.beginPath(); c.moveTo(a0[0], a0[1]); c.lineTo(a1[0], a1[1]); c.stroke();
+  for (const dy of [0.018, 0.034]) { const q = P(0, -hh - dy, 0); c.beginPath(); c.ellipse(q[0], q[1], 9, 3, 0, 0, TAU); c.stroke(); }
+  const lx = cx + 0.13 * s, ly = a1[1] + 4, b1 = P(0, -hh - 0.018, 0), b2 = P(0, -hh - 0.034, 0);
+  c.beginPath(); c.moveTo(b1[0] + 9, b1[1]); c.lineTo(lx, b1[1]); c.lineTo(lx, ly - 10); c.moveTo(b2[0] + 9, b2[1]); c.lineTo(lx + 16, b2[1]); c.lineTo(lx + 16, ly - 10); c.stroke();
+  const glow = clamp(Math.abs(g.emf) / 7.5, 0, 1);
+  if (glow > 0.01) { const gr = c.createRadialGradient(lx + 8, ly - 22, 0, lx + 8, ly - 22, 40); gr.addColorStop(0, rgba(RE, 0.55 * Math.sqrt(glow))); gr.addColorStop(1, rgba(RE, 0)); c.fillStyle = gr; c.beginPath(); c.arc(lx + 8, ly - 22, 40, 0, TAU); c.fill(); }
+  c.strokeStyle = C.texte2; c.beginPath(); c.arc(lx + 8, ly - 22, 10, 0, TAU); c.stroke(); c.fillStyle = rgba(RE, 0.15 + 0.85 * Math.sqrt(glow)); c.beginPath(); c.arc(lx + 8, ly - 22, 6, 0, TAU); c.fill();
+  zcirc(lx + 8, ly - 22, 14, 'lampe', 'Lampe', 'Sa lueur suit ε² : elle brille quand la f.é.m. est grande, s’éteint quand le flux passe par un maximum.');
+  zcirc(b1[0], b1[1], 14, 'bagues', 'Bagues et balais', 'Ils relient la bobine qui tourne au circuit fixe sans tordre les fils.');
+  c.font = mono(11); tagText(c, `θ = ${fmtI(((th * 180 / PI) % 360 + 360) % 360)}°   ε = ${sig(g.emf, 2)} V`, 16, H - 16, 'left', 'middle', C.accent);
+}
+function drawPair() {
+  const c = ctx, P = K3.pr, f = P.f || { I1: 0, dI1: 0, emf2: 0 }, g = geo3(), s = g.s * 0.9, X = x => g.cx + x * s, Y = y => g.cy - y * s;
+  if (!P.lines) { const src = { kind: 'bobine', I: 1, N: 300, a: 0.02, L: 0.04, x: -0.025, y: 0 }; Mag.prepare([src]); P.lines = Mag.seeds(src, 10).map(([x, y]) => Mag.traceLine([src], x, y, { ds: 0.0009, nmax: 2400, xmin: -0.3, xmax: 0.3, ymin: -0.16, ymax: 0.16 }).pts); }
+  const al = clamp(f.I1 / 3, 0, 1);
+  if (al > 0.01) for (const pts of P.lines) { c.strokeStyle = rgba(RB, 0.6 * al); c.lineWidth = 1.1; c.beginPath(); pts.forEach((p, i) => { const x = X(p[0]), y = Y(p[1]); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); }
+  const r = 0.02 * s, l = 0.04 * s;
+  coilTurns(c, X(-0.025), Y(0), r, l, 12, false, rgba(RT2, 0.45), 1.2); coilTurns(c, X(0.025), Y(0), r, l, 12, false, rgba(RT2, 0.45), 1.2);
+  coilTurns(c, X(-0.025), Y(0), r, l, 12, true, rgba(RT, 0.8), 1.3); coilTurns(c, X(0.025), Y(0), r, l, 12, true, rgba(RT, 0.8), 1.3);
+  phase3 += 0.016 * 30;
+  if (f.I1 > 1e-3) coilCurrent(c, X(-0.025), Y(0), r, l, 12, f.I1, phase3 * clamp(f.I1 / 3, 0.2, 1), C.pos);
+  coilCurrent(c, X(0.025), Y(0), r, l, 12, f.emf2, phase3, C.accent);
+  zone(X(-0.025) - l / 2, Y(0) - r, X(-0.025) + l / 2, Y(0) + r, 'prim', 'Primaire', '300 spires, reliées à une pile de 6 V par un interrupteur. Son courant fait son champ.');
+  zone(X(0.025) - l / 2, Y(0) - r, X(0.025) + l / 2, Y(0) + r, 'sec', 'Secondaire', '300 spires, reliées seulement au galvanomètre. Aucun fil ne la relie au primaire : seul le champ passe.');
+  // circuit primaire : pile, interrupteur
+  const by = Y(0) + r + 46, x0 = X(-0.025) - l / 2, x1 = X(-0.025) + l / 2;
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, Y(0) + r); c.lineTo(x0, by); c.lineTo(x0 + 18, by); c.moveTo(x1, Y(0) + r); c.lineTo(x1, by); c.lineTo(x1 - 14, by); c.stroke();
+  const pxc = (x0 + x1) / 2 - 6; c.strokeStyle = C.texte; c.beginPath(); c.moveTo(pxc - 4, by - 10); c.lineTo(pxc - 4, by + 10); c.moveTo(pxc + 3, by - 5); c.lineTo(pxc + 3, by + 5); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.7); c.beginPath(); c.moveTo(x0 + 18, by); c.lineTo(pxc - 4, by); c.stroke();
+  const sx = pxc + 3; c.beginPath(); c.moveTo(sx, by); c.lineTo(sx + 6, by); c.stroke();
+  c.strokeStyle = P.on ? C.pos : C.texte; c.lineWidth = 1.6; c.beginPath(); c.moveTo(sx + 6, by); c.lineTo(x1 - 14, P.on ? by : by - 12); c.stroke();
+  c.fillStyle = C.texte; c.beginPath(); c.arc(sx + 6, by, 2.2, 0, TAU); c.arc(x1 - 14, by, 2.2, 0, TAU); c.fill();
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText('6 V', pxc, by + 13);
+  zone(pxc - 12, by - 14, x1, by + 12, 'inter', 'Pile et interrupteur', 'Ferme-le : le courant du primaire monte en quelques millisecondes (ralenti ×200 ici), puis reste constant.');
+  // galvanomètre du secondaire
+  const gx = X(0.025), gy = by + 6, gr = 30, y0s = Y(0) + r;
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1.2; c.beginPath(); c.moveTo(gx - l / 2, y0s); c.lineTo(gx - l / 2, gy - 8); c.lineTo(gx - gr, gy - 8); c.moveTo(gx + l / 2, y0s); c.lineTo(gx + l / 2, gy - 8); c.lineTo(gx + gr, gy - 8); c.stroke();
+  drawGalva(c, gx, gy, gr, P.needle.th, 'mA');
+  zcirc(gx, gy - 6, gr, 'galva2', 'Galvanomètre', 'Il ne bouge que pendant que le courant du primaire change.');
+  c.font = mono(11); tagText(c, 'ralenti ×200', 16, 112, 'left', 'top', C.texte2);
+  tagText(c, `I₁ = ${sig(f.I1, 2)} A   ε₂ = ${sig(f.emf2 * 1e3, 2)} mV`, 16, H - 16, 'left', 'middle', C.texte2);
+}
+function scope3() {
+  if (prm.seg3 === 'aimant') {
+    const t1 = Math.max(8, K3.t), pr = symRange(K3.rec, r => r.phi, 10), er = symRange(K3.rec, r => r.emf, 20);
+    stack([{ lo: pr[0], hi: pr[1], d: 0, name: 'Φ par spire (µWb)', col: C.champ, series: [{ rec: K3.rec, f: r => r.phi, col: C.champ, lw: 1.8 }] },
+           { lo: er[0], hi: er[1], d: 0, name: 'ε (mV)', col: C.accent, series: [{ rec: K3.rec, f: r => r.emf, col: C.accent, lw: 1.8 }] }], t1 - 8, t1, '−8 s', 'maintenant');
+  } else if (prm.seg3 === 'rotor') {
+    const R = K3.rot, t1 = Math.max(6, R.t), em = 200 * 0.2 * 0.01 * TAU * prm.tps;
+    stack([{ lo: -2.4, hi: 2.4, d: 1, name: 'Φ par spire (mWb)', col: C.champ, series: [{ rec: R.rec, f: r => r.phi, col: C.champ, lw: 1.8 }] },
+           { lo: -niceMax(em * 1.05), hi: niceMax(em * 1.05), d: 1, name: 'ε (V)', col: C.accent, series: [{ rec: R.rec, f: r => r.emf, col: C.accent, lw: 1.8 }] }], t1 - 6, t1, '−6 s', 'maintenant');
+  } else {
+    const P = K3.pr, t1 = Math.max(6, P.t);
+    stack([{ lo: 0, hi: 3.5, d: 1, name: 'I₁ (A)', col: C.pos, series: [{ rec: P.rec, f: r => r.I1, col: C.pos, lw: 1.8 }] },
+           { lo: -0.7, hi: 0.7, d: 1, name: 'ε₂ (V)', col: C.accent, series: [{ rec: P.rec, f: r => r.e2, col: C.accent, lw: 1.8 }] }], t1 - 6, t1, '−6 s à l’écran', 'maintenant');
+  }
+}
+function status3() {
+  if (prm.seg3 === 'aimant') {
+    if (K3.tRest >= 1) return 'Flux maximal, et pourtant ε = 0. Ce n’est pas le flux qui compte, c’est sa variation.';
+    if (Math.abs(K3.vm) < 0.003) return Math.abs(K3.xm) > 0.03 ? 'Rien ne change, rien ne passe. Glisse l’aimant vers la bobine, ou lance le va-et-vient.' : 'L’aimant est immobile : le flux ne change pas, l’aiguille revient à zéro.';
+    return (K3.crossed ? 'Loi de Faraday : ε = −N dΦ/dt. ' : '') + 'Plus vite : même variation de flux en moins de temps, tension plus grande.' + (Math.abs(K3.I) > 1e-3 ? ' Face à l’aimant, la bobine présente le même pôle.' : '');
+  }
+  if (prm.seg3 === 'rotor') return 'Le flux est maximal quand la spire fait face au champ, et c’est là que ε est nulle ; ε est maximale quand la spire est de profil, là où le flux change le plus vite.';
+  const P = K3.pr, f = P.f || { I1: 0, emf2: 0 };
+  if (!P.on && f.I1 < 0.01) return 'Interrupteur ouvert : aucun courant, aucun champ. Ferme-le en regardant l’aiguille.';
+  if (P.on && Math.abs(f.emf2) > 0.01) return 'Le courant monte dans le primaire : son champ grandit à travers le secondaire, et l’aiguille dévie.';
+  if (P.on) return 'Le courant du primaire est établi, son champ traverse le secondaire, et l’aiguille est revenue à zéro. Rien ne bouge, mais rien ne change non plus.';
+  return 'On coupe : le champ s’effondre, l’aiguille part de l’autre côté.';
+}
+
+/* ================= Acte IV : l'induction freine ================= */
+const RAIL = { ell: 0.2, m: 0.05, x0: 0.3 };
+const K4 = { s: { x: 0, v: 0, W: 0, Q: 0 }, K0: 0, t: 0, rec: [], capped: false, lenzShown: false, cam: 0.5, ph: 0,
+  tube: { k: {}, prof: null, L: null, R: null, run: false, t: 0, rec: [], reached: false } };
+const magT = { kind: 'aimant', Br: 1.2, a: 0.006, L: 0.012, x: 0, y: 0, dir: 1 };
+const massT = Mag.magnetMass(magT), TUBE = { b: 0.0075, w: 0.0015 };
+function kTube(mat) {
+  const T = K4.tube; if (T.k[mat] !== undefined) return T.k[mat];
+  const k = mat === 'plastique' ? 0 : Mag.tubeBrake(magT, { b: TUBE.b, w: TUBE.w, rho: Mag.RHO[mat === 'aluminium' ? 'aluminium' : 'cuivre'], fendu: mat === 'fendu' });
+  T.k[mat] = k; return k;
+}
+function railP() { return { B: prm.B4, ell: RAIL.ell, R: prm.R4, m: RAIL.m, F: prm.pull ? prm.F4 : 0, open: prm.open }; }
+function kRail() { const r = Mag.rails(railP()); return prm.rev && !prm.open ? -r.k : r.k; }
+function reset4() {
+  K4.s = { x: 0, v: 0, W: 0, Q: 0 }; K4.K0 = 0; K4.t = 0; K4.rec = []; K4.capped = false; K4.cam = 0.5; prm.pull = false;
+  resetTube();
+}
+function resetTube() { const T = K4.tube; T.L = { x: 0, v: 0, W: 0, Q: 0, t: 0, done: false }; T.R = { x: 0, v: 0, W: 0, Q: 0, t: 0, done: false }; T.run = false; T.t = 0; T.rec = []; T.reached = false; }
+function dropTube() { if (act !== 3) return; prm.seg4 = 'tube'; resetTube(); K4.tube.run = true; syncTools(); buildMeas(); setPlay(true); }
+function launch4(v0) { K4.s = { x: K4.s.x, v: v0, W: 0, Q: 0 }; K4.K0 = 0.5 * RAIL.m * v0 * v0; K4.capped = false; prm.pull = false; syncTools(); }
+function adv4(dt) {
+  if (prm.seg4 === 'rails') {
+    if (K4.capped) return;
+    const p = railP(), k = kRail();
+    Mag.dragStep(K4.s, { m: RAIL.m, F: p.F, k }, dt);
+    if (prm.rev && K4.s.v > 10) { K4.s.v = 10; K4.capped = true; }
+    if (prm.rev) K4.lenzShown = true;
+    K4.t += dt; const st = Mag.railsState(p, K4.s.v);
+    K4.rec.push({ t: K4.t, v: K4.s.v, pm: p.F * K4.s.v, pj: prm.open ? 0 : (prm.rev ? -1 : 1) * st.Pjoule }); trim(K4.rec, K4.t - 8);
+  } else {
+    const T = K4.tube; if (!T.run) return;
+    const d = dt * (prm.x4 ? 4 : 1) * (reduce ? 0.5 : 1); T.t += d;
+    const kL = kTube(prm.mat);
+    for (const [s, k] of [[T.L, kL], [T.R, 0]]) {
+      if (s.done) continue;
+      Mag.dragStep(s, { m: massT, F: massT * Mag.G, k }, d); s.t += d;
+      if (s.x >= 1) { s.t -= s.v > 0 ? (s.x - 1) / s.v : 0; s.x = 1; s.done = true; }
+    }
+    if (kL > 0 && T.L.v > 0.98 * massT * Mag.G / kL) T.reached = true;
+    T.rec.push({ t: T.t, vL: T.L.done ? NaN : T.L.v * 100, vR: T.R.done ? NaN : T.R.v * 100 }); trim(T.rec, T.t - 30);
+    if (T.L.done && T.R.done) T.run = false;
+  }
+}
+function draw4() { if (prm.seg4 === 'rails') drawRails(); else drawTube(); }
+function drawRails() {
+  const c = ctx, top = 112, ah = Math.max(140, H - top - 40), s = Math.min((W - 40) / 1.1, ah / 0.42), cy = top + ah * 0.48;
+  const rodX = RAIL.x0 + K4.s.x; K4.cam += (Math.max(0.5, rodX) - K4.cam) * 0.25;
+  const X = x => W / 2 + (x - K4.cam) * s, Y = y => cy - y * s, hw = W / 2 / s;
+  // champ ⊗ (grille fixe dans le monde)
+  const sp = 0.06, al = 0.1 + 0.45 * prm.B4;
+  if (prm.B4 > 0) for (let gx = Math.floor((K4.cam - hw) / sp) * sp; gx < K4.cam + hw; gx += sp) for (let gy = -0.18; gy <= 0.181; gy += sp) dotCross(c, X(gx + sp / 2), Y(gy), 3.5, -1, rgba(RB, al), 1);
+  zoneF((x, y) => y > Y(0.2) && y < Y(-0.2), 'B4', 'Champ B ⊗', 'Uniforme, il s’éloigne de toi (queue de flèche), perpendiculaire au plan des rails.');
+  // rails et résistance
+  const yT = Y(RAIL.ell / 2), yB = Y(-RAIL.ell / 2);
+  c.strokeStyle = C.texte2; c.lineWidth = 2; c.beginPath(); c.moveTo(Math.max(0, X(0)), yT); c.lineTo(W, yT); c.moveTo(Math.max(0, X(0)), yB); c.lineTo(W, yB); c.stroke();
+  for (let d = 0; d < K4.cam + hw; d += 0.5) if (X(d) > -20) { c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; c.beginPath(); c.moveTo(X(d), yB + 3); c.lineTo(X(d), yB + 9); c.stroke(); c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText(fmt(d, 1) + ' m', X(d), yB + 11); }
+  if (X(0) > -30) {
+    const rx = X(0); c.strokeStyle = C.texte2; c.lineWidth = 2;
+    if (prm.open) { c.beginPath(); c.moveTo(rx, yT); c.lineTo(rx, yT + (yB - yT) * 0.3); c.moveTo(rx, yB); c.lineTo(rx, yB - (yB - yT) * 0.3); c.stroke(); }
+    else { c.beginPath(); c.moveTo(rx, yT); c.lineTo(rx, yT + (yB - yT) * 0.3); for (let i = 0; i <= 8; i++) c.lineTo(rx + (i % 2 ? 6 : -6), yT + (yB - yT) * (0.3 + 0.4 * i / 8)); c.lineTo(rx, yB - (yB - yT) * 0.3); c.lineTo(rx, yB); c.stroke(); }
+    c.font = mono(11); tagText(c, prm.open ? 'circuit ouvert' : 'R = ' + sig(prm.R4, 2) + ' Ω', rx + 12, (yT + yB) / 2, 'left', 'middle', C.texte2);
+    zone(rx - 10, yT, rx + 10, yB, 'res', 'Résistance', 'Elle ferme le circuit. Le courant induit y dégage de la chaleur : RI² par seconde.');
+  }
+  // courant induit : rotatif dans la boucle (monte dans la tige si v > 0)
+  const st = Mag.railsState(railP(), K4.s.v), I = prm.open ? 0 : st.I * (prm.rev ? -1 : 1), xr = X(rodX);
+  if (Math.abs(I) > 1e-3 && !prm.open) {
+    K4.ph += Math.min(80, Math.abs(I) * 14) * 0.016;
+    c.save(); c.strokeStyle = C.accent; c.lineWidth = 2.4; c.setLineDash([6, 12]); c.lineDashOffset = Math.sign(I) * K4.ph;
+    c.beginPath(); c.moveTo(xr, yB); c.lineTo(xr, yT); c.lineTo(X(0), yT); c.lineTo(X(0), yB); c.closePath(); c.stroke(); c.restore();
+  }
+  // tige
+  c.strokeStyle = C.texte; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.moveTo(xr, yT - 12); c.lineTo(xr, yB + 12); c.stroke(); c.lineCap = 'butt';
+  zone(xr - 10, yT - 14, xr + 10, yB + 14, 'tige4', 'Tige mobile', '50 g, posée en travers des rails. En glissant dans B, elle devient une pile : ε = Bℓv.');
+  // forces
+  const kf = 260, Fa = railP().F, Fi = prm.open ? 0 : -kRail() * K4.s.v;
+  if (Fa > 0) { arrow(c, xr, Y(0) - 14, xr + Fa * kf, Y(0) - 14, C.texte, 2.4, null, 9); c.font = mono(11); tagText(c, 'F appliquée', xr + Fa * kf + 6, Y(0) - 14, 'left', 'middle', C.texte); }
+  if (Math.abs(Fi) > 1e-4) {
+    const L = clamp(Fi * kf, -200, 200), col = prm.rev ? C.texte2 : C.accent;
+    arrow(c, xr, Y(0) + 14, xr + L, Y(0) + 14, col, 2.4, prm.rev ? [5, 4] : null, 9);
+    c.font = mono(11); tagText(c, prm.rev ? 'force induite (impossible)' : (K4.lenzShown ? 'force induite (Lenz)' : 'force induite'), xr + L + (L < 0 ? -6 : 6), Y(0) + 14, L < 0 ? 'right' : 'left', 'middle', col);
+  }
+  // énergie fournie et état
+  c.font = mono(11); tagText(c, `v = ${fmt(K4.s.v, 2)} m/s   ε = ${sig(st.emf, 2)} V   I = ${sig(I, 2)} A`, 16, H - 16, 'left', 'middle', C.accent);
+  if (K4.capped) { c.font = mono(12); tagText(c, 'la tige s’emballe : vitesse plafonnée à 10 m/s', W / 2, top + 6, 'center', 'top', C.texte2); }
+}
+function drawTube() {
+  const c = ctx, T = K4.tube, top = 112, ah = Math.max(160, H - top - 64), s = ah / 1.04, y0 = top + 4, ex = 4;
+  const Y = d => y0 + d * s, tw = (TUBE.b + TUBE.w) * 2 * s * ex, tin = TUBE.b * 2 * s * ex;
+  const xs = [W * 0.28, W * 0.46];
+  const mats = [prm.mat, 'plastique'], names = { plastique: 'plastique', aluminium: 'aluminium', cuivre: 'cuivre', fendu: 'cuivre fendu' };
+  xs.forEach((x, i) => {
+    const m = mats[i], metal = m !== 'plastique';
+    c.fillStyle = metal ? 'rgba(214,168,108,0.18)' : rgba(RT2, 0.08); c.fillRect(x - tw / 2, Y(0), (tw - tin) / 2, s); c.fillRect(x + tin / 2, Y(0), (tw - tin) / 2, s);
+    c.strokeStyle = metal ? 'rgba(214,168,108,0.7)' : rgba(RT2, 0.5); c.lineWidth = 1; c.strokeRect(x - tw / 2 + 0.5, Y(0) + 0.5, tw - 1, s); c.strokeRect(x - tin / 2 + 0.5, Y(0) + 0.5, tin - 1, s);
+    if (m === 'fendu') { c.strokeStyle = C.fond; c.lineWidth = 2; c.beginPath(); c.moveTo(x + tin / 2 + (tw - tin) / 4, Y(0)); c.lineTo(x + tin / 2 + (tw - tin) / 4, Y(1)); c.stroke(); }
+    const S = i === 0 ? T.L : T.R, my = Y(S.x), mw = 2 * magT.a * s * ex, mh = magT.L * s * ex;
+    c.save(); c.translate(x, my); c.rotate(PI / 2); drawMagnet(c, 0, 0, mh, mw, 1, 1); c.restore();
+    c.font = mono(11); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText(names[m], x, Y(1) + magT.L * s * ex / 2 + 6);
+    if (S.done) { c.fillStyle = C.texte; c.fillText(fmt(S.t, 2) + ' s', x, Y(1) + magT.L * s * ex / 2 + 20); }
+    zone(x - tw / 2 - 6, Y(0), x + tw / 2 + 6, Y(1), 'tube' + i, 'Tube de ' + names[m], (metal ? (m === 'fendu' ? 'Fendu sur toute sa longueur : le courant ne peut plus faire le tour.' : 'Conducteur. Il ne touche jamais l’aimant.') : 'Isolant : aucun courant ne peut y circuler.') + ' 1 m de haut ; largeur ×4 sur le dessin.');
+  });
+  // graduations
+  c.strokeStyle = rgba(RT2, 0.4); c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (let d = 0; d <= 1.001; d += 0.25) { c.beginPath(); c.moveTo(xs[0] - tw / 2 - 14, Y(d)); c.lineTo(xs[0] - tw / 2 - 8, Y(d)); c.stroke(); c.fillText(fmt(d, 2) + ' m', xs[0] - tw / 2 - 16, Y(d)); }
+  // loupe sur l'aimant du tube de gauche
+  const lr = Math.min(96, W * 0.17, ah * 0.32), lx = Math.min(W - lr - 18, W * 0.74), ly = clamp(Y(T.L.x), top + lr + 4, Y(1) - lr), sl = lr / 0.032;
+  c.save(); c.beginPath(); c.arc(lx, ly, lr, 0, TAU); c.fillStyle = C.fond; c.fill(); c.clip();
+  const metal = prm.mat !== 'plastique';
+  const wx0 = TUBE.b * sl, wx1 = (TUBE.b + TUBE.w) * sl;
+  c.fillStyle = metal ? 'rgba(214,168,108,0.22)' : rgba(RT2, 0.1); c.fillRect(lx - wx1, ly - lr, wx1 - wx0, 2 * lr); c.fillRect(lx + wx0, ly - lr, wx1 - wx0, 2 * lr);
+  c.save(); c.translate(lx, ly); c.rotate(PI / 2); drawMagnet(c, 0, 0, magT.L * sl, 2 * magT.a * sl, 1, 1); c.restore();
+  if (metal && prm.mat !== 'fendu') {
+    if (!T.prof) T.prof = Mag.ringProfile(magT, TUBE, 31, 0.03);
+    const vT = massT * Mag.G / kTube('cuivre'), pm = Math.max(...T.prof.map(q => Math.abs(q.dphi)));
+    for (const q of T.prof) {
+      const I = q.dphi * T.L.v / (pm * vT), a = clamp(Math.abs(I), 0, 1); if (a < 0.04) continue;
+      const y = ly + q.dz * sl, rr = 2 + 3 * a, sg = Math.sign(I);
+      dotCross(c, lx + (wx0 + wx1) / 2, y, rr, sg, rgba(RA, 0.25 + 0.75 * a), 1); dotCross(c, lx - (wx0 + wx1) / 2, y, rr, -sg, rgba(RA, 0.25 + 0.75 * a), 1);
+    }
+  }
+  c.restore();
+  c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.arc(lx, ly, lr, 0, TAU); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.35); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(xs[0] + tw / 2 + 4, Y(T.L.x)); c.lineTo(lx - lr, ly); c.stroke(); c.setLineDash([]);
+  c.font = mono(10); tagText(c, 'loupe : coupe du tube', lx, ly + lr + 6, 'center', 'top', C.texte2);
+  zcirc(lx, ly, lr, 'loupe', 'Loupe sur la paroi', 'Coupe du tube autour de l’aimant, à l’échelle. Les ⊙ ⊗ verts sont des courants qui tournent dans la paroi : sens opposés devant et derrière l’aimant.');
+  c.font = mono(11); tagText(c, (prm.x4 ? 'affichage ×4 · ' : '') + 'largeur des tubes ×4 sur le dessin', 16, H - 16, 'left', 'middle', C.texte2);
+}
+function scope4() {
+  if (prm.seg4 === 'rails') {
+    const p = railP(), r = Mag.rails(p), t1 = Math.max(8, K4.t), vm = posRange(K4.rec, q => q.v, Math.min(isFinite(r.vT) ? r.vT : 3, 10)), pm = posRange(K4.rec, q => Math.max(Math.abs(q.pm), Math.abs(q.pj)), 0.2);
+    stack([{ lo: 0, hi: vm[1], d: 1, name: 'v (m/s)', series: [{ rec: K4.rec, f: q => q.v, col: C.texte, lw: 1.8 }], refs: isFinite(r.vT) && p.F > 0 && !prm.rev ? [{ v: r.vT, col: C.texte2 }] : [] },
+           { lo: prm.rev ? -pm[1] : 0, hi: pm[1], d: 1, name: 'Fv · RI² (W)', series: [{ rec: K4.rec, f: q => q.pm, col: C.texte }, { rec: K4.rec, f: q => q.pj, col: C.ener, dash: [4, 3] }] }], t1 - 8, t1, '−8 s', 'maintenant');
+  } else {
+    const T = K4.tube, t1 = Math.max(4, T.t), span = prm.mat === 'plastique' || prm.mat === 'fendu' ? 1 : 20;
+    stack([{ lo: 0, hi: span === 1 ? 500 : 10, d: 0, name: 'v (cm/s)', series: [{ rec: T.rec, f: q => q.vL, col: C.accent, lw: 1.8 }, { rec: T.rec, f: q => q.vR, col: C.texte2, dash: [4, 3] }] }], Math.max(0, t1 - span), Math.max(span, t1), 't (s)', '');
+  }
+}
+function bars4() {
+  const w = barsC.width / dpr, h = barsC.height / dpr, c = bctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  let items;
+  if (prm.seg4 === 'rails') { const K = 0.5 * RAIL.m * K4.s.v * K4.s.v; items = [['fourni', K4.s.W + K4.K0, 'W'], ['cinétique', K, 'K'], ['chaleur', K4.s.Q, 'Q']]; }
+  else { const S = K4.tube.L; items = [['Ep perdue', massT * Mag.G * S.x, 'W'], ['cinétique', 0.5 * massT * S.v * S.v, 'K'], ['chaleur', S.Q, 'Q']]; }
+  const mx = niceMax(Math.max(1e-6, ...items.map(i => Math.abs(i[1]))) * 1.1), x0 = 90, bw = w - x0 - 60, rh = (h - 16) / 3;
+  c.font = mono(11); c.textBaseline = 'middle';
+  items.forEach(([lab, v, kind], i) => {
+    const y = 8 + i * rh, bh = rh * 0.56, len = Math.abs(v) / mx * bw;
+    c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText(lab, x0 - 8, y + rh / 2);
+    if (v < 0) { c.strokeStyle = C.texte2; c.setLineDash([4, 3]); c.strokeRect(x0 + 0.5, y + (rh - bh) / 2, len, bh); c.setLineDash([]); c.beginPath(); c.moveTo(x0, y + rh / 2); c.lineTo(x0 + len, y + rh / 2); c.stroke(); }
+    else if (kind === 'Q') { c.fillStyle = rgba(RE, 0.08); c.fillRect(x0, y + (rh - bh) / 2, len, bh); hatch(c, x0, y + (rh - bh) / 2, len, bh, rgba(RE, 0.7), 5); }
+    else { c.fillStyle = kind === 'K' ? rgba(RT, 0.85) : rgba(RE, 0.9); c.fillRect(x0, y + (rh - bh) / 2, len, bh); }
+    c.fillStyle = C.texte; c.textAlign = 'left'; const e = si(v, 'J', 3); c.fillText(e.join(' '), x0 + Math.max(0, len) + 6, y + rh / 2);
+  });
+}
+function status4() {
+  if (prm.seg4 === 'rails') {
+    if (prm.rev) return 'Si le courant induit aidait le mouvement, la tige s’accélérerait toute seule et chaufferait la résistance gratuitement. Le signe moins de la loi de Faraday, c’est la conservation de l’énergie : la loi de Lenz.';
+    if (prm.open) return 'Circuit ouvert : pas de courant, donc pas de force induite. La tige accélère sans limite à F/m.';
+    const p = railP(), r = Mag.rails(p);
+    if (p.F > 0) return K4.s.v > 0.95 * r.vT ? 'Vitesse limite : la force induite égale la force appliquée. Tout le travail fourni part en chaleur, Fv = RI².' : 'La force induite grandit avec v et s’oppose au mouvement : la tige approche d’une vitesse limite.';
+    if (K4.s.v > 0.01) return 'Livrée à elle-même, la tige ralentit : son énergie cinétique devient de la chaleur dans la résistance.';
+    return 'Tire la tige (T) ou lance-la : le courant induit va s’opposer au mouvement.';
+  }
+  const T = K4.tube;
+  if (!T.run && T.L.x === 0) return 'Lâche les deux aimants (L) : à droite, un tube de plastique ; à gauche, le tube choisi.';
+  if (prm.mat === 'plastique') return 'Le plastique ne conduit pas : pas de courant, chute libre.';
+  if (prm.mat === 'fendu') return 'Coupé, le tube ne laisse plus le courant faire le tour : plus de freinage.';
+  if (T.reached) return 'Vitesse limite : le poids est exactement compensé par la force des courants induits dans le tube, les courants de Foucault. L’énergie potentielle perdue chauffe le tube.';
+  return 'Le tube ne touche pas l’aimant, et pourtant il le freine : l’aimant qui passe fait varier le flux dans chaque anneau du tube.';
+}
+
+/* ---------------- Panneau : mesures, légendes ---------------- */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const bx = (col, op) => `<rect x="0" y="0" width="20" height="8" fill="${col}" fill-opacity="${op || 1}"/>`;
+function measSpec() {
+  if (act === 0) {
+    const base = [['source', [['src', '']]], ['|B| à la sonde', [['b', 'µT']]], ['direction (0° = →)', [['dir', '°']]], ['B / B_Terre (53 µT)', [['rt', '']]], ['distance au centre', [['r', 'cm']]]];
+    if (prm.src === 'fil') return [['I', [['I', 'A']]], ...base, ['μ₀I / 2πr', [['th', 'µT']]]];
+    if (prm.src === 'spire') return [['I', [['I', 'A']]], ...base, ['B centre · μ₀I/2a', [['bc', ''], ['th', 'µT']]]];
+    if (prm.src === 'bobine') return [['I · N', [['I', 'A'], ['N', 'spires']]], ...base, ['B centre · μ₀nI', [['bc', ''], ['th', 'mT']]]];
+    return [['Br (néodyme)', [['I', 'T']]], ...base, ['ampères-tours équivalents', [['th', 'A·tr']]]];
+  }
+  if (act === 1) {
+    if (prm.seg2 === 'fil') return [['I · B', [['I', 'A'], ['B', 'T']]], ['F = ILB', [['F', 'mN']]], ['mg', [['mg', 'mN']]], ['θ mesuré', [['th', '°']]], ['θ attendu = atan(ILB/mg)', [['te', '°']]]];
+    const r = [['particule', [['p', '']]], ['q · m', [['q', 'e'], ['m', 'u']]], ['v', [['v', 'km/s']]], ['B', [['B', 'T']]], ['r mesuré · mv/|q|B', [['rm', ''], ['rt', 'cm']]], ['T = 2πm/|q|B', [['T', 'ns']]], ['Ec', [['ek', 'keV']]], ['ralenti : 1 s écran =', [['sl', 'µs']]]];
+    if (prm.Eon) r.push(['E · v = E/B', [['E', 'kV/m'], ['ve', 'km/s']]]);
+    if (prm.vpar) r.push(['pas de l’hélice', [['pas', 'cm']]]);
+    return r;
+  }
+  if (act === 2) {
+    if (prm.seg3 === 'aimant') return [['N · R du circuit', [['N', ''], ['R', 'Ω']]], ['position de l’aimant', [['x', 'cm']]], ['v de l’aimant', [['v', 'm/s']]], ['Φ par spire', [['phi', 'µWb']]], ['Λ = NΦ', [['lam', 'mWb']]], ['ε = −N dΦ/dt', [['e', 'mV']]], ['I induit', [['I', 'mA']]]];
+    if (prm.seg3 === 'rotor') return [['N · A · B', [['N', ''], ['A', 'cm²'], ['B', 'T']]], ['rotation', [['f', 'tr/s']]], ['Φ par spire = BA cos θ', [['phi', 'mWb']]], ['ε = NBAω sin θ', [['e', 'V']]], ['ε crête = NBAω', [['ec', 'V']]], ['à 50 Hz : ε crête', [['e50', 'V']]]];
+    return [['M · L₁', [['M', 'mH'], ['L1', 'mH']]], ['τ = L₁/R₁', [['tau', 'ms']]], ['I₁', [['I1', 'A']]], ['dI₁/dt', [['dI', 'A/s']]], ['ε₂ = −M dI₁/dt', [['e2', 'mV']]], ['I₂ (10 Ω)', [['I2', 'mA']]]];
+  }
+  if (prm.seg4 === 'rails') return [['B · ℓ · m', [['B', 'T'], ['l', 'm'], ['m', 'kg']]], ['v · v_lim', [['v', ''], ['vT', 'm/s']]], ['τ = mR/B²ℓ²', [['tau', 's']]], ['ε = Bℓv', [['e', 'V']]], ['I = ε/R', [['I', 'A']]], ['force induite', [['Fi', 'N']]], ['Fv · RI²', [['pm', ''], ['pj', 'W']]], ['fourni = K + Q ?', [['chk', '']]]];
+  return [['tube', [['mat', '']]], ['v · v_lim', [['v', ''], ['vT', 'cm/s']]], ['temps', [['t', 's']]], ['chute libre (1 m)', [['tf', 's']]], ['Ep perdue', [['ep', 'mJ']]], ['cinétique · chaleur', [['k', ''], ['q', 'mJ']]], ['masse de l’aimant', [['m', 'g']]]];
+}
+const NOTES = [
+  'Champ exact en trois dimensions, dessiné dans un plan de coupe. Aimant uniformément aimanté (courant de surface équivalent). Boussoles amorties, réponse plafonnée dans les champs forts. Les lignes de E, elles, commencent et finissent sur des charges : <a href="../04-champ-electrique/index.html">Le champ électrique</a>.',
+  'Non relativiste (v ≤ 1 % de c), une seule particule, sans rayonnement ; ralenti énorme, affiché. Travail et énergie : <a href="../fondations-forces-energie/index.html">Forces et énergie</a> ; mouvement circulaire : <a href="../fondations-rotation-gravitation/index.html">Rotation</a>.',
+  'Bobines sans noyau ; galvanomètre amorti ; inductance propre de la bobine réceptrice négligée. Flux d’un champ à travers une surface : <a href="../fondations-flux-fluides/index.html">Flux et fluides</a>.',
+  'Rails sans frottement mécanique. Tube supposé infini par rapport à l’aimant, inductance des anneaux négligée ; un vrai tube fendu freine encore un peu. Bilan d’énergie : <a href="../fondations-forces-energie/index.html">Forces et énergie</a>.'
+];
+const NOTE3 = {
+  rotor: 'Champ uniforme, rotation à vitesse constante imposée. Φ en cosinus, ε en sinus : un quart de tour de décalage, comme dans <a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a>.',
+  paire: 'Primaire RL réel (τ = L₁/R₁ ≈ 1,2 ms), affiché au ralenti ×200. Une bobine traversée par son propre champ réagit de la même façon à ses propres variations : c’est l’inductance de la planche <a href="../06-courant-circuits/index.html">Courant et circuits</a>.'
+};
+const NOTE4T = 'Aimant Ø 12 × 12 mm, 1,2 T ; tubes Ø 15/18 mm. Chaque anneau du tube est un circuit : R = ρ·2πb/(w·dz). Inductance des anneaux négligée ; un vrai tube fendu freine encore un peu.';
+const LEGS = () => {
+  if (act === 0) return [lg(ln(C.champ, 2), '|B| le long de l’horizontale de la sonde') + lg(ln(C.texte2, 1.4, 1), 'champ terrestre'), ''];
+  if (act === 1) return prm.seg2 === 'fil' ? [lg(ln(C.texte, 1.8), 'θ') + lg(ln(C.accent, 1.2, 1), 'θ attendu'), ''] : [lg(ln(C.texte, 2), 'Ec') + lg(ln(C.texte2, 1.2, 1), 'Ec au départ') + lg(ln(C.texte, 1.6), 'vx') + lg(ln(C.texte2, 1.6, 1), 'vy'), ''];
+  if (act === 2) return prm.seg3 === 'paire' ? [lg(ln(C.pos, 1.8), 'I₁ (primaire)') + lg(ln(C.accent, 1.8), 'ε₂ (secondaire)'), ''] : [lg(ln(C.champ, 1.8), 'Φ') + lg(ln(C.accent, 1.8), 'ε'), ''];
+  return prm.seg4 === 'rails'
+    ? [lg(ln(C.texte, 1.8), 'v') + lg(ln(C.texte2, 1.2, 1), 'v_lim') + lg(ln(C.texte, 1.6), 'Fv') + lg(ln(C.ener, 1.6, 1), 'RI²'), lg(bx(C.ener, 0.9), 'énergie fournie') + lg(bx(C.texte, 0.85), 'cinétique') + lg('<rect x="0.5" y="0.5" width="19" height="7" fill="none" stroke="#ffd166"/><path d="M0 8L8 0M6 8L14 0M12 8L20 0" stroke="#ffd166" stroke-width="1"/>', 'chaleur')]
+    : [lg(ln(C.accent, 1.8), 'tube choisi') + lg(ln(C.texte2, 1.6, 1), 'plastique (chute libre)'), lg(bx(C.ener, 0.9), 'Ep perdue') + lg(bx(C.texte, 0.85), 'cinétique') + lg('<rect x="0.5" y="0.5" width="19" height="7" fill="none" stroke="#ffd166"/><path d="M0 8L8 0M6 8L14 0M12 8L20 0" stroke="#ffd166" stroke-width="1"/>', 'chaleur')];
+};
+const EYE = () => act === 0 ? 'B en fonction de la distance (log-log)' : act === 1 ? (prm.seg2 === 'fil' ? 'Enregistreur · angle de la balançoire' : 'Enregistreur · énergie et vitesse') : act === 2 ? (prm.seg3 === 'paire' ? 'Enregistreur · primaire et secondaire' : 'Enregistreur · flux et f.é.m.') : (prm.seg4 === 'rails' ? 'Enregistreur · vitesse et puissances' : 'Enregistreur · vitesse des aimants');
+const mEls = {};
+function buildMeas() {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  for (const [lab, vals] of measSpec()) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = { b: r.querySelectorAll('b')[i], i: r.querySelectorAll('i')[i] }; });
+  }
+  $('#mNote').innerHTML = act === 2 && NOTE3[prm.seg3] ? NOTE3[prm.seg3] : act === 3 && prm.seg4 === 'tube' ? NOTE4T : NOTES[act];
+  $('#rEye').textContent = EYE();
+  const L = LEGS(); $('#leg').innerHTML = L[0]; $('#leg2').innerHTML = L[1];
+  $('#cards').hidden = act !== 3;
+  sizePanelCanvases();
+}
+function setM(k, s, unit) { const e = mEls[k]; if (!e) return; if (e.b.textContent !== s) e.b.textContent = s; if (unit !== undefined && e.i.textContent !== unit) e.i.textContent = unit; }
+function setSI(k, v, unit, s) { const r = si(v, unit, s); setM(k, r[0], r[1]); }
+function readouts() {
+  if (act === 0) {
+    const f = Mag.fieldAt(A1.S.all, A1.probe.x, A1.probe.y), names = { aimant: 'aimant Ø 12 × 24 mm', fil: 'fil rectiligne', spire: 'spire, a = 3 cm', bobine: 'bobine, a = 1,5 cm, 6 cm' };
+    setM('src', names[prm.src]); setSI('b', f.b, 'T'); setM('dir', fmt(Math.atan2(f.by, f.bx) * 180 / PI, 0)); setM('rt', sig(f.b / Mag.B_TERRE, 3)); setM('r', fmt(Math.hypot(A1.probe.x, A1.probe.y) * 100, 1));
+    if (prm.src === 'fil') { setM('I', fmt(prm.If, 1)); setSI('th', Mag.MU0 * Math.abs(prm.If) / (TAU * Math.hypot(A1.probe.x, A1.probe.y)), 'T'); }
+    else if (prm.src === 'spire') { setM('I', fmt(prm.Is, 1)); setM('bc', sig(Mag.fieldAt(A1.S.own, 0, 0).bx * 1e6, 3)); setM('th', sig(Mag.MU0 * prm.Is / 0.06 * 1e6, 3)); }
+    else if (prm.src === 'bobine') { setM('I', fmt(prm.Is, 1)); setM('N', fmtI(prm.Nb)); setM('bc', sig(Mag.fieldAt(A1.S.own, 0, 0).bx * 1e3, 3)); setM('th', sig(Mag.MU0 * prm.Nb / 0.06 * prm.Is * 1e3, 3)); }
+    else { setM('I', '1,2'); setM('th', fmtI(Math.round(1.2 / Mag.MU0 * MAG_L / 100) * 100)); }
+  } else if (act === 1) {
+    if (prm.seg2 === 'fil') {
+      setM('I', fmt(prm.Iw, 1)); setM('B', fmt(prm.Bw, 3)); setM('F', fmt(prm.Iw * 0.05 * prm.Bw * 1e3, 1)); setM('mg', fmt(0.010 * Mag.G * 1e3, 1));
+      setM('th', fmt(K2.sw.th * 180 / PI, 1)); setM('te', fmt(Mag.swingEq(prm.Iw, 0.05, prm.Bw, 0.010) * 180 / PI, 1));
+    } else {
+      const P = PART[prm.part], ci = circ2(prm.v2), m = K2.parts[0];
+      setM('p', P.nom); setM('q', fmt(P.q / Mag.QE, 0)); setM('m', P.u < 0.01 ? '0,000549' : fmt(P.u, 3)); setM('v', fmtI(prm.v2 / 1000)); setM('B', fmt(prm.B2, 3));
+      const rm = rMeas2(); setSI('rm', rm, 'm'); if (ci) setSI('rt', ci.r, 'm'); else setM('rt', '∞', '');
+      if (Math.abs(prm.B2) > 1e-4) setSI('T', TAU * P.m / (Math.abs(P.q) * Math.abs(prm.B2)), 's'); else setM('T', '∞', '');
+      if (m) { const v2 = m.p.vx * m.p.vx + m.p.vy * m.p.vy + m.p.vz * m.p.vz; setSI('ek', eV(0.5 * P.m * v2), 'eV', 4); }
+      setSI('sl', slow2() * (reduce ? 0.5 : 1), 's', 2);
+      if (prm.Eon) { setM('E', fmtI(prm.E / 1000)); setM('ve', Math.abs(prm.B2) > 1e-4 ? fmtI(prm.E / Math.abs(prm.B2) / 1000) : '∞'); }
+      if (prm.vpar) { const g = Math.abs(prm.B2) > 1e-4 ? Mag.gyro(P.m, P.q, prm.v2, Math.abs(prm.B2), 0.3 * prm.v2) : null; if (g) setSI('pas', g.pas, 'm'); else setM('pas', '∞', ''); }
+    }
+  } else if (act === 2) {
+    if (prm.seg3 === 'aimant') { setM('N', fmtI(prm.N3)); setM('R', '10'); setM('x', fmt(K3.xm * 100, 1)); setM('v', fmt(K3.vm, 2)); setM('phi', sig(K3.lam / prm.N3 * 1e6, 3)); setM('lam', sig(K3.lam * 1e3, 3)); setM('e', sig(K3.emf * 1e3, 3)); setM('I', sig(K3.I * 1e3, 3)); }
+    else if (prm.seg3 === 'rotor') { const g = K3.rot.g || { phi: 0, emf: 0 }; setM('N', '200'); setM('A', '100'); setM('B', '0,2'); setM('f', fmt(prm.tps, 2)); setM('phi', fmt(g.phi * 1e3, 2)); setM('e', sig(g.emf, 3)); setM('ec', sig(200 * 0.2 * 0.01 * TAU * prm.tps, 3)); setM('e50', fmt(200 * 0.2 * 0.01 * TAU * 50, 0)); }
+    else { const P = K3.pr, f = P.f || { I1: 0, dI1: 0, emf2: 0 }; setM('M', sig(P.M * 1e3, 3)); setM('L1', sig(P.L1 * 1e3, 3)); setM('tau', sig(P.L1 / 2 * 1e3, 3)); setM('I1', fmt(f.I1, 2)); setM('dI', sig(f.dI1, 3)); setM('e2', sig(f.emf2 * 1e3, 3)); setM('I2', sig(f.emf2 / 10 * 1e3, 3)); }
+  } else {
+    if (prm.seg4 === 'rails') {
+      const p = railP(), r = Mag.rails(p), st = Mag.railsState(p, K4.s.v), sg = prm.rev ? -1 : 1, K = 0.5 * RAIL.m * K4.s.v * K4.s.v;
+      setM('B', fmt(prm.B4, 2)); setM('l', '0,2'); setM('m', '0,05'); setM('v', fmt(K4.s.v, 2)); setM('vT', p.F > 0 && isFinite(r.vT) && !prm.rev ? fmt(r.vT, 2) : '—'); setM('tau', isFinite(r.tau) ? fmt(r.tau, 2) : '∞');
+      setM('e', sig(st.emf, 3)); setM('I', prm.open ? '0' : sig(sg * st.I, 3)); setM('Fi', prm.open ? '0' : sig(sg * st.Ffrein, 3)); setM('pm', sig(st.Pmeca, 3)); setM('pj', prm.open ? '0' : sig(sg * st.Pjoule, 3));
+      const fin = K4.s.W + K4.K0; setM('chk', Math.abs(fin - K - K4.s.Q) < 1e-6 + 1e-6 * Math.abs(fin) ? `${sig(fin, 3)} = ${sig(K, 3)} + ${sig(K4.s.Q, 3)} J` : 'écart');
+    } else {
+      const T = K4.tube, k = kTube(prm.mat), S = T.L, names = { plastique: 'plastique', aluminium: 'aluminium', cuivre: 'cuivre', fendu: 'cuivre fendu' };
+      setM('mat', names[prm.mat]); setM('v', fmt(S.v * 100, 1)); setM('vT', k > 0 ? fmt(massT * Mag.G / k * 100, 1) : '∞'); setM('t', fmt(S.t, 2)); setM('tf', T.R.done ? fmt(T.R.t, 2) : fmt(Math.sqrt(2 / Mag.G), 2));
+      setM('ep', fmt(massT * Mag.G * S.x * 1e3, 1)); setM('k', fmt(0.5 * massT * S.v * S.v * 1e3, 2)); setM('q', fmt(S.Q * 1e3, 1)); setM('m', fmt(massT * 1e3, 1));
+    }
+  }
+  status();
+}
+function statusText() { return act === 0 ? status1() : act === 1 ? status2() : act === 2 ? status3() : status4(); }
+function status() { const t = statusText(), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
+
+/* ---------------- Actes ---------------- */
+const ACTS = [
+  { t: 'D’où vient le champ', x: 'Un aimant, un fil parcouru par un courant, une spire, une bobine : quatre sources du même champ magnétique B. Glisse la sonde, regarde les boussoles se caler, coupe l’aimant. Les lignes de B se referment toujours.' },
+  { t: 'Une force qui dévie', x: 'Une charge qui bouge dans un champ magnétique subit F = qv × B, perpendiculaire à sa vitesse. Regarde sa trajectoire tourner pendant que sa jauge d’énergie reste plate. Un fil parcouru par un courant est poussé de la même façon.' },
+  { t: 'Faire varier le flux', x: 'Glisse l’aimant dans la bobine, fais tourner une spire, ferme un interrupteur : à chaque fois, le flux magnétique à travers une bobine change, et une tension apparaît. Regarde quand elle apparaît, et quand elle s’annule.' },
+  { t: 'L’induction freine', x: 'Une tige glisse sur des rails dans un champ, un aimant tombe dans un tube de cuivre. Le courant induit s’oppose toujours à ce qui le crée, et l’énergie se retrouve en chaleur. C’est le prix de l’électricité produite.' }
+];
+const SYNC = [
+  ['rIf', 'vIf', () => prm.If, v => fmt(v, 1) + ' A'], ['rIs', 'vIs', () => prm.Is, v => fmt(v, 1) + ' A'], ['rNb', 'vNb', () => prm.Nb, v => fmtI(v) + ' sp.'],
+  ['rB2', 'vB2', () => prm.B2, v => fmt(v, 3) + ' T'], ['rV2', 'vV2', () => Math.log10(prm.v2), v => fmtI(Math.pow(10, v) / 1000) + ' km/s'], ['rE', 'vE', () => prm.E, v => fmtI(v / 1000) + ' kV/m'],
+  ['rIw', 'vIw', () => prm.Iw, v => fmt(v, 1) + ' A'], ['rBw', 'vBw', () => prm.Bw, v => fmt(v, 3) + ' T'],
+  ['rN3', 'vN3', () => prm.N3, v => fmtI(v) + ' sp.'], ['rF3', 'vF3', () => prm.f3, v => fmt(v, 2) + ' Hz'], ['rTps', 'vTps', () => prm.tps, v => fmt(v, 2) + ' tr/s'],
+  ['rF4', 'vF4', () => prm.F4, v => fmt(v, 2) + ' N'], ['rR4', 'vR4', () => prm.R4, v => fmt(v, 2) + ' Ω'], ['rB4', 'vB4', () => prm.B4, v => fmt(v, 2) + ' T']
+];
+const PRESS = [['bEarth', () => prm.earth], ['bCmpB', () => prm.cmpB], ['bE', () => prm.Eon], ['bVpar', () => prm.vpar], ['bShut', () => prm.shuttle], ['bPull', () => prm.pull], ['bOpen', () => prm.open], ['bRev', () => prm.rev], ['bX4', () => prm.x4]];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = v; $('#' + vid).textContent = f(v); }
+  for (const [id, get] of PRESS) $('#' + id).setAttribute('aria-pressed', get() ? 'true' : 'false');
+  const pr = (sel, attr, val) => document.querySelectorAll(sel).forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] === val ? 'true' : 'false'));
+  pr('[data-src]', 'src', prm.src); pr('[data-vue]', 'vue', prm.vue); pr('[data-seg2]', 'seg2', prm.seg2); pr('[data-part]', 'part', prm.part); pr('[data-seg3]', 'seg3', prm.seg3); pr('[data-seg4]', 'seg4', prm.seg4); pr('[data-mat]', 'mat', prm.mat);
+  $('#bCut').textContent = prm.cut ? 'Recoller' : 'Couper en deux';
+  $('#bSw').textContent = K3.pr.on ? 'Ouvrir l’interrupteur' : 'Fermer l’interrupteur';
+  $('#bTwin').disabled = prm.Eon; $('#bTwin').textContent = prm.part === 'p' ? 'Deux protons' : 'Deux particules';
+  $('#gE').hidden = act !== 1 || prm.seg2 !== 'charge' || !prm.Eon;
+  $('#bCmpB').disabled = prm.cut;
+  visTools();
+}
+function visTools() {
+  const sg = segOf(act);
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => {
+    let on = gp.dataset.acts.split(' ').includes(String(act));
+    if (on && gp.dataset.seg) on = gp.dataset.seg.split(' ').includes(sg);
+    if (gp.id === 'gE') on = on && prm.Eon;
+    gp.hidden = !on;
+  });
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  if (n === 0) reset1(); else if (n === 1) { K2.view = null; K2.sw = { th: 0, w: 0 }; K2.srec = []; K2.tsw = 0; launch2(); } else if (n === 2) reset3(); else reset4();
+  hideTip(); syncTools(); buildMeas();
+  if (restart) setPlay(true);
+}
+function updateUI(n) {
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur IV`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, NA - 1);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; }
+  else fade = -1;
+}
+function setSeg(name) {
+  if (act === 0 && ['aimant', 'fil', 'spire', 'bobine'].includes(name)) { prm.src = name; prm.cut = false; A1.gap = 0; prm.cmpB = false; }
+  else if (act === 1 && ['charge', 'fil'].includes(name)) { prm.seg2 = name; if (name === 'charge') launch2(); }
+  else if (act === 2 && ['aimant', 'rotor', 'paire'].includes(name)) { prm.seg3 = name; }
+  else if (act === 3 && ['rails', 'tube'].includes(name)) { prm.seg4 = name; }
+  else return;
+  hideTip(); syncTools(); buildMeas();
+}
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+function bindRange(id, set) { const el = $('#' + id); el.addEventListener('input', () => { set(+el.value); syncTools(); }); }
+bindRange('rIf', v => { prm.If = v; }); bindRange('rIs', v => { prm.Is = v; }); bindRange('rNb', v => { prm.Nb = v; });
+bindRange('rB2', v => { prm.B2 = Math.abs(v) < 0.0025 ? 0 : v; launch2(); }); bindRange('rV2', v => { prm.v2 = Math.round(Math.pow(10, v) / 1000) * 1000; launch2(); }); bindRange('rE', v => { prm.E = v; });
+bindRange('rIw', v => { prm.Iw = v; }); bindRange('rBw', v => { prm.Bw = v; });
+bindRange('rN3', v => { prm.N3 = v; const m = mag3(); m.x = 0; Mag.prepare([m]); K3.lamMax = Mag.linkage([m], coil3()); }); bindRange('rF3', v => { prm.f3 = v; }); bindRange('rTps', v => { prm.tps = v; });
+bindRange('rF4', v => { prm.F4 = v; }); bindRange('rR4', v => { prm.R4 = v; }); bindRange('rB4', v => { prm.B4 = v; });
+const click = (sel, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener('click', e => { fn(el, e); el.blur(); }));
+click('[data-src]', el => setSeg(el.dataset.src));
+click('[data-vue]', el => { prm.vue = el.dataset.vue; syncTools(); });
+click('[data-seg2]', el => setSeg(el.dataset.seg2));
+click('[data-part]', el => { prm.part = el.dataset.part; prm.twin = false; K2.view = null; launch2(); syncTools(); buildMeas(); });
+click('[data-seg3]', el => setSeg(el.dataset.seg3));
+click('[data-seg4]', el => setSeg(el.dataset.seg4));
+click('[data-mat]', el => { prm.mat = el.dataset.mat; resetTube(); syncTools(); });
+click('#bEarth', () => { prm.earth = !prm.earth; syncTools(); });
+click('#bFlip', () => { prm.dir = -prm.dir; });
+click('#bCut', () => cut1(!prm.cut));
+click('#bCmpB', () => { prm.cmpB = !prm.cmpB; syncTools(); });
+function cut1(on) { if (act !== 0) return; if (prm.src !== 'aimant') setSeg('aimant'); prm.cut = on; if (on) prm.cmpB = false; syncTools(); }
+function twin() { if (act !== 1 || prm.Eon) return; if (prm.seg2 !== 'charge') setSeg('charge'); prm.twin = true; launch2(); }
+click('#bTwin', () => twin());
+click('#bE', () => { prm.Eon = !prm.Eon; prm.twin = false; K2.view = null; launch2(); syncTools(); buildMeas(); });
+click('#bVpar', () => { prm.vpar = !prm.vpar; launch2(); syncTools(); buildMeas(); });
+click('#bShut', () => startShuttle(!prm.shuttle));
+click('#bFlip3', () => { prm.dir3 = -prm.dir3; });
+click('#bSw', () => setSwitch(!K3.pr.on));
+click('#bPull', () => { if (K4.capped) return; prm.pull = !prm.pull; syncTools(); });
+click('#bLaunch', () => launch4(3));
+click('#bOpen', () => { prm.open = !prm.open; syncTools(); });
+click('#bRev', () => { prm.rev = !prm.rev; if (!prm.rev) { K4.capped = false; K4.s = { x: K4.s.x, v: 0, W: 0, Q: 0 }; K4.K0 = 0; } syncTools(); });
+click('#bDrop', () => dropTube());
+click('#bX4', () => { prm.x4 = !prm.x4; syncTools(); });
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') { if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+  if (isRange) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if (e.key === 'r' || e.key === 'R') { goAct(act, true); return; }
+  if (/^[1-4]$/.test(e.key)) { goAct(+e.key - 1); return; }
+  if (e.repeat) return;
+  const k = e.key.toLowerCase();
+  if (k === 'c' && act === 0) cut1(!prm.cut);
+  if (k === 'd' && act === 1) twin();
+  if (k === 'v' && act === 2) { if (prm.seg3 !== 'aimant') setSeg('aimant'); startShuttle(!prm.shuttle); }
+  if (k === 't' && act === 3) { if (prm.seg4 !== 'rails') setSeg('rails'); if (!K4.capped) { prm.pull = !prm.pull; syncTools(); } }
+  if (k === 'l' && act === 3) dropTube();
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol, sonde (I), aimant (III) ---------------- */
+function ptr(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+cv.addEventListener('pointerdown', e => {
+  const [x, y] = ptr(e), tol = e.pointerType === 'touch' ? 30 : 16;
+  if (act === 0 && A1.view && Math.hypot(x - X1(A1.probe.x), y - Y1(A1.probe.y)) < tol) { A1.drag = true; }
+  else if (act === 2 && prm.seg3 === 'aimant') { const g = geo3(), mx = g.cx + K3.xm * g.s; if (Math.abs(x - mx) < MAG_L * g.s / 2 + tol && Math.abs(y - g.cy) < MAG_A * g.s + tol) { K3.drag = true; K3.mode = 'drag'; K3.px = K3.xm; prm.shuttle = false; syncTools(); } }
+  if (A1.drag || K3.drag) { try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); }
+});
+cv.addEventListener('pointermove', e => {
+  const [x, y] = ptr(e);
+  if (A1.drag) { A1.probe.x = clamp((x - A1.view.cx) / A1.view.s, -0.13, 0.13); A1.probe.y = clamp((A1.view.cy - y) / A1.view.s, -0.075, 0.075); return; }
+  if (K3.drag) { const g = geo3(); K3.px = clamp((x - g.cx) / g.s, -0.13, 0.13); return; }
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(zones, x, y);
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.className = z.key === 'sonde' || z.key === 'mag3' ? 'grab' : ''; }
+  else { hideTip(); cv.className = ''; }
+});
+const endPtr = e => { if (K3.drag) { K3.drag = false; K3.mode = 'rest'; } A1.drag = false; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { if (!A1.drag && !K3.drag) { hideTip(); cv.className = ''; } });
+
+/* ---------------- Tailles ---------------- */
+function sizeCanvas(c, cssH) { c.style.height = cssH + 'px'; const r = c.getBoundingClientRect(); c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr)); }
+const hasBars = () => act === 3;
+function sizePanelCanvases() {
+  $('#barsBox').hidden = !hasBars(); $('#leg2').style.display = hasBars() ? '' : 'none';
+  sizeCanvas(scopeC, act === 0 || (act === 1 && prm.seg2 === 'fil') || (act === 3 && prm.seg4 === 'tube') ? 150 : 176);
+  if (hasBars()) sizeCanvas(barsC, 92);
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height)), dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases();
+}
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+function advance(dt) { if (act === 0) adv1(dt); else if (act === 1) adv2(dt); else if (act === 2) adv3(dt); else adv4(dt); }
+const SCENES = [draw1, draw2, draw3, draw4], SCOPES = [scope1, scope2, scope3, scope4];
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (act === 0) update1(now, playing ? dt : 0);
+  if (act === 1 && K2.view && K2.tv) { const k = 1 - Math.exp(-dt * 5); for (const p of ['xc', 'yc', 'hw', 'hh']) K2.view[p] += (K2.tv[p] - K2.view[p]) * k; }
+  if (playing && fade <= 0) advance(dt);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  SCENES[act](); ctx.restore();
+  SCOPES[act]();
+  if (act === 3) bars4();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function stateNow() {
+  if (act === 0) { const f = Mag.fieldAt(A1.S.all, A1.probe.x, A1.probe.y); return { act, src: prm.src, earth: prm.earth, cut: prm.cut, gap: A1.gap, probe: Object.assign({}, A1.probe), B: f.b, bx: f.bx, by: f.by, nLines: A1.lines.length, closed: A1.lines.filter(l => l.closed).length, compass: A1.comp.filter(c => !c.hide).map(c => ({ x: c.x, y: c.y, th: c.th, target: Math.atan2(c.by, c.bx) })) }; }
+  if (act === 1) {
+    if (prm.seg2 === 'fil') return { act, seg: 'fil', I: prm.Iw, B: prm.Bw, th: K2.sw.th, thEq: Mag.swingEq(prm.Iw, 0.05, prm.Bw, 0.010), F: prm.Iw * 0.05 * prm.Bw };
+    const P = PART[prm.part], ci = circ2(prm.v2);
+    return { act, seg: 'charge', part: prm.part, B: prm.B2, v: prm.v2, E: prm.Eon ? prm.E : 0, rTheo: ci ? ci.r : Infinity, rMeas: rMeas2(), T: Math.abs(prm.B2) > 1e-4 ? TAU * P.m / (Math.abs(P.q) * Math.abs(prm.B2)) : Infinity, slow: slow2(),
+      parts: K2.parts.map(q => ({ x: q.p.x, y: q.p.y, z: q.p.z, v: Math.hypot(q.p.vx, q.p.vy, q.p.vz), Ek: 0.5 * P.m * (q.p.vx * q.p.vx + q.p.vy * q.p.vy + q.p.vz * q.p.vz), Ek0: q.Ek0, twin: q.twin })), ts: K2.ts };
+  }
+  if (act === 2) {
+    if (prm.seg3 === 'aimant') return { act, seg: 'aimant', N: prm.N3, x: K3.xm, v: K3.vm, lam: K3.lam, phi: K3.lam / prm.N3, emf: K3.emf, I: K3.I, needle: K3.needle.th, crossed: K3.crossed, tRest: K3.tRest };
+    if (prm.seg3 === 'rotor') { const g = K3.rot.g || {}; return { act, seg: 'rotor', tps: prm.tps, t: K3.rot.t, phi: g.phi, emf: g.emf, peak: 200 * 0.2 * 0.01 * TAU * prm.tps }; }
+    const P = K3.pr, f = P.f || {}; return { act, seg: 'paire', on: P.on, ts: P.ts, M: P.M, L1: P.L1, I1: f.I1, dI1: f.dI1, emf2: f.emf2, needle: P.needle.th };
+  }
+  if (prm.seg4 === 'rails') { const p = railP(), r = Mag.rails(p), K = 0.5 * RAIL.m * K4.s.v * K4.s.v; return { act, seg: 'rails', x: K4.s.x, v: K4.s.v, vT: r.vT, tau: r.tau, W: K4.s.W + K4.K0, K, Q: K4.s.Q, pull: prm.pull, open: prm.open, rev: prm.rev, capped: K4.capped, state: Mag.railsState(p, K4.s.v) }; }
+  const T = K4.tube, k = kTube(prm.mat); return { act, seg: 'tube', mat: prm.mat, k, vT: k > 0 ? massT * Mag.G / k : Infinity, m: massT, L: Object.assign({}, T.L), R: Object.assign({}, T.R), run: T.run, reached: T.reached };
+}
+const ensure = (n, sg) => { if (act !== n) { goAct(n); if (pendingAct >= 0) { enterAct(pendingAct, false); pendingAct = -1; fade = 0; sceneA = 1; } } if (sg && segOf(n) !== sg) setSeg(sg); };
+window.__labo = {
+  Mag, get act() { return act; }, goAct(n, r) { goAct(n, r); if (pendingAct >= 0) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; } },
+  get state() { return stateNow(); }, prm, setPlay,
+  tick: n => { const steps = n || 1; for (let i = 0; i < steps; i++) { if (act === 0) update1(performance.now(), 1 / 60); advance(1 / 60); } return stateNow(); },
+  run(sec) { const n = Math.ceil(sec * 60); for (let i = 0; i < n; i++) { if (act === 0) update1(performance.now(), 1 / 60); advance(1 / 60); } return stateNow(); },
+  seg: setSeg,
+  // I
+  source(k) { ensure(0); setSeg(k); }, setI(I) { if (prm.src === 'fil') prm.If = I; else prm.Is = I; syncTools(); }, setN(N) { if (act === 2) { prm.N3 = N; } else prm.Nb = N; syncTools(); },
+  earth(on) { prm.earth = !!on; syncTools(); }, cut(on) { ensure(0); cut1(!!on); }, flip() { if (act === 2) prm.dir3 = -prm.dir3; else prm.dir = -prm.dir; }, probe(x, y) { A1.probe = { x, y }; },
+  // II
+  particle(k) { ensure(1, 'charge'); prm.part = k; prm.twin = false; K2.view = null; launch2(); syncTools(); buildMeas(); }, setB(B) { if (prm.seg2 === 'fil') prm.Bw = B; else { prm.B2 = B; launch2(); } syncTools(); },
+  setV(v) { prm.v2 = v; launch2(); syncTools(); }, efield(on, E) { ensure(1, 'charge'); prm.Eon = !!on; if (E != null) prm.E = E; prm.twin = false; launch2(); syncTools(); buildMeas(); }, twin() { ensure(1, 'charge'); twin(); },
+  vpar(on) { prm.vpar = !!on; launch2(); syncTools(); buildMeas(); }, swing(I, B) { ensure(1, 'fil'); prm.Iw = I; if (B != null) prm.Bw = B; syncTools(); },
+  // III
+  moveMagnet(x, vx) { ensure(2, 'aimant'); prm.shuttle = false; K3.mode = 'test'; K3.xm = x; K3.vm = vx || 0; adv3(0); return stateNow(); }, shuttle(on, f) { ensure(2, 'aimant'); if (f != null) prm.f3 = f; startShuttle(!!on); },
+  rotor(tps) { ensure(2, 'rotor'); prm.tps = tps; syncTools(); }, closeSwitch(on) { ensure(2, 'paire'); setSwitch(!!on); },
+  // IV
+  pull(on, F) { ensure(3, 'rails'); if (F != null) prm.F4 = F; prm.pull = !!on; syncTools(); }, launch(v0) { ensure(3, 'rails'); launch4(v0); }, setR(R) { prm.R4 = R; syncTools(); },
+  open(on) { prm.open = !!on; syncTools(); }, reverse(on) { prm.rev = !!on; syncTools(); }, tube(m) { ensure(3, 'tube'); prm.mat = m; resetTube(); syncTools(); }, drop() { ensure(3, 'tube'); dropTube(); }
+};
+
+/* ---------------- Démarrage ---------------- */
+{ const P = K3.pr, c1 = { N: 300, b: 0.02, x: -0.025, y: 0, L: 0.04 }, c2 = { N: 300, b: 0.02, x: 0.025, y: 0, L: 0.04 }; P.M = Mag.mutualCoils(c1, c2); P.L1 = Mag.inductance(c1); }
+resize();
+for (let i = 0; i < NA; i++) resetPrm(i);
+enterAct(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
