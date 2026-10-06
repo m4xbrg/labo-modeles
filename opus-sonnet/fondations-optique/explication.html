@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre l’optique — LABO</title>
+<meta name="description" content="Théorie du module 25 (optique fondamentale : réfraction, lentilles, couleurs, polarisation) et ce que montre la planche Optique : la lumière qui tourne.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#f6c6a0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 25</p>
+  <h1>Comprendre l’optique : la lumière qui <em>tourne</em></h1>
+  <p class="lede">Un rayon qui entre dans l’eau ou dans le verre change de direction, et ce simple fait explique les lentilles, l’arc-en-ciel et la fibre optique. La planche te le fait voir sur une table d’optique, vue de dessus : la lumière tourne parce qu’elle ralentit. Cette page nomme ce que tu regardes et donne la théorie qui va avec.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <p>Toutes les étapes se passent sur la même table d’optique sombre, vue de dessus. Les rayons sont des lignes fines : blanches quand la lumière est blanche, colorées quand on isole une longueur d’onde. Un milieu transparent (eau, verre, diamant) est un aplat avec un liseré, rayé de hachures d’autant plus serrées que son indice \(n\) est grand.</p>
+  <dl>
+    <dt><span class="acc">Étape 1 · Le laser et l’interface</span></dt>
+    <dd>Une ligne horizontale sépare deux milieux. Le laser s’oriente à la souris, en tirant sa poignée ; un curseur règle aussi l’angle d’incidence. Il envoie un rayon incident. Une partie de la lumière repart en réflexion : ce rayon réfléchi est d’autant plus pâle que la fraction réfléchie \(R\) est petite. L’autre partie traverse : c’est le rayon réfracté, qui tourne.</dd>
+    <dt>La normale et les angles</dt>
+    <dd>Le tireté perpendiculaire à l’interface est la normale. Les angles, tracés en arcs fins avec leur valeur, se mesurent depuis elle, jamais depuis la surface.</dd>
+    <dt>Les fronts d’onde</dt>
+    <dd>Une bascule remplace le rayon par un faisceau large, dessiné comme une suite de fronts plans, en traits fins de la couleur d’accent. Dans le milieu dense, ils se resserrent et pivotent : tu vois la règle de Snell-Descartes naître du ralentissement.</dd>
+    <dt>Les milieux, l’inversion et le compteur</dt>
+    <dd>Le milieu du bas se choisit : eau, verre ou diamant. Le bouton « Inverser » fait partir le laser de l’intérieur vers l’air. Au-delà de l’angle critique, le rayon réfracté disparaît et le compteur de \(R\) affiche 100 %.</dd>
+    <dt>La fibre optique</dt>
+    <dd>Dans cette sous-scène, un cylindre courbe se déforme avec deux poignées. Un laser entre d’un côté ; la lumière rebondit en zigzag sur la paroi. Si la courbure est trop forte, elle fuit.</dd>
+    <dt><span class="acc">Étape 2 · L’axe, la lentille et ses foyers</span></dt>
+    <dd>Un axe optique traverse une lentille mince, avec ses deux foyers de part et d’autre. L’objet est une flèche de la couleur d’accent, que tu fais glisser. Trois rayons particuliers sont tracés : parallèle à l’axe, par le centre, par le foyer objet.</dd>
+    <dt>L’image et l’écran</dt>
+    <dd>L’image se forme là où les rayons se croisent : flèche pleine si elle est réelle, flèche tiretée, avec des prolongements tiretés, si elle est virtuelle. Un écran déplaçable montre une image nette seulement à la bonne distance.</dd>
+    <dt>Les rayons réels</dt>
+    <dd>Une bascule remplace la lentille idéale par une lentille épaisse traversée par 15 rayons tracés exactement. Ceux du bord se croisent un peu plus près que ceux du centre : c’est l’aberration sphérique. Le retour à la lentille mince est étiqueté « modèle idéal ».</dd>
+    <dt><span class="acc">Étape 3 · Le prisme, le spectre et la goutte</span></dt>
+    <dd>Un faisceau blanc entre dans un prisme et ressort étalé en spectre sur un écran. Une bascule isole une seule couleur (curseur de longueur d’onde) : elle dévie sans s’étaler. Un deuxième prisme, inversé, recompose le blanc. L’autre bascule montre la coupe d’une goutte d’eau sphérique, où les rayons entrent, se réfléchissent une fois au fond et ressortent. Un petit graphe donne \(n\) en fonction de \(\lambda\).</dd>
+    <dt><span class="acc">Étape 4 · Les polariseurs et le détecteur</span></dt>
+    <dd>Le faisceau traverse des polariseurs, des disques rayés de traits parallèles (l’axe), vus de biais ; tu les tournes à la souris. Sur le faisceau, une double flèche donne la direction de vibration du champ électrique \(\vec E\). Pour la lumière naturelle, ce sont plusieurs directions qui changent vite. Au bout, un détecteur affiche l’intensité en barre. Un bouton glisse un troisième polariseur entre les deux autres, et une bascule montre le reflet sur une vitre, éteint par un polariseur bien orienté. La loi de Malus est tracée, avec le point courant.</dd>
+    <dt>Le panneau et l’enregistreur</dt>
+    <dd>À chaque étape, le panneau donne les mesures de l’étape (angles et indices, distances et grandissement, \(n\) et déviations, intensités après chaque polariseur), une phrase de statut qui réagit à ce que tu fais, une phrase-clé et une note d’honnêteté. L’enregistreur de chaque étape trace une courbe : à l’étape 3, le graphe de \(n(\lambda)\) ; à l’étape 4, la loi de Malus avec le point courant.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Ce module suit le même plan que les autres : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m25"><b>25</b>Optique fondamentale</a></li>
+  </ul>
+
+  <!-- ===================== Module 25 ===================== -->
+  <section class="module" id="m25">
+    <header>
+      <p class="num">Module 25</p>
+      <h3>Optique fondamentale</h3>
+      <p class="etapes">Sur la planche : étapes 1 Réfraction · 2 Lentilles · 3 Couleurs · 4 Polarisation</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Un front d’onde est une ligne de points qui vibrent ensemble. Quand un front arrive en biais sur du verre, son bout qui entre le premier ralentit pendant que l’autre, encore dans l’air, garde sa vitesse. Le front pivote, comme une rangée de marcheurs dont une extrémité s’enfonce dans la boue, et la direction de propagation, perpendiculaire aux fronts, tourne avec lui : c’est la réfraction. Tout le reste en découle. Du verre vers l’air, le pivotement a une limite : passé un certain angle, rien ne sort. Dans une lentille, le centre retarde plus les fronts que le bord : ils se referment sur un point. Comme la vitesse dépend un peu de la couleur, un prisme dévie plus le bleu que le rouge : il trie ce que la lumière blanche contenait déjà. Enfin, la lumière vibre perpendiculairement à son trajet, et un polariseur ne garde qu’une direction de cette vibration.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Indice \(n\)</dt><dd>Rapport entre la vitesse de la lumière dans le vide et dans le milieu. Sans unité : air 1,00, eau 1,33, verre 1,5, diamant 2,42.</dd></div>
+      <div><dt>Vitesse \(v\)<span class="u">m/s</span></dt><dd>Vitesse de la lumière dans le milieu : \(v = c/n\), avec \(c \approx 3 \times 10^{8}\) m/s dans le vide.</dd></div>
+      <div><dt>Normale</dt><dd>Perpendiculaire à la surface au point d’impact. Les angles se mesurent depuis elle.</dd></div>
+      <div><dt>Angles \(\theta_1\), \(\theta_2\)<span class="u">°</span></dt><dd>Angles d’incidence et de réfraction. Le rayon réfléchi fait le même angle que l’incident.</dd></div>
+      <div><dt>Angle critique \(\theta_c\)<span class="u">°</span></dt><dd>Plus grand angle d’incidence pour lequel un rayon sort encore d’un milieu lent vers un milieu rapide.</dd></div>
+      <div><dt>Réflexion totale</dt><dd>Au-delà de \(\theta_c\), toute la lumière est réfléchie.</dd></div>
+      <div><dt>Coefficients \(R\), \(T\)</dt><dd>Fractions de l’intensité réfléchie et transmise : \(R + T = 1\).</dd></div>
+      <div><dt>Angle de Brewster \(\theta_B\)<span class="u">°</span></dt><dd>Incidence où le reflet est entièrement polarisé : \(\tan\theta_B = n_2/n_1\).</dd></div>
+      <div><dt>Foyer, focale \(f\)<span class="u">mm</span></dt><dd>Point où se croisent les rayons parallèles à l’axe ; \(f\) est sa distance à la lentille, négative si elle diverge.</dd></div>
+      <div><dt>Distances \(d_o\), \(d_i\)<span class="u">mm</span></dt><dd>Distances de l’objet et de l’image à la lentille. Les distances réelles sont positives ; \(d_i \lt 0\) signale une image virtuelle.</dd></div>
+      <div><dt>Grandissement \(m\)</dt><dd>Taille de l’image sur taille de l’objet ; négatif si elle est renversée.</dd></div>
+      <div><dt>Image réelle, virtuelle</dt><dd>Réelle : les rayons s’y croisent, un écran la recueille. Virtuelle : seuls leurs prolongements s’y croisent.</dd></div>
+      <div><dt>Dispersion, loi de Cauchy</dt><dd>L’indice varie avec la longueur d’onde : \(n \approx A + B/\lambda^2\), plus grand pour le bleu que pour le rouge.</dd></div>
+      <div><dt>Polariseur</dt><dd>Filtre qui ne laisse passer que la part du champ électrique parallèle à son axe.</dd></div>
+      <div><dt>Lumière naturelle</dt><dd>Lumière non polarisée : sa vibration change de direction au hasard. Un polariseur idéal en laisse passer la moitié.</dd></div>
+      <div><dt>Loi de Malus</dt><dd>Intensité après un polariseur dont l’axe fait l’angle \(\theta\) avec la polarisation incidente.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ n = \frac{c}{v} \]
+      <p>Plus \(n\) est grand, plus la lumière est lente. À la traversée d’une interface, la fréquence ne change pas ; la longueur d’onde devient \(\lambda/n\). Ralentir n’affaiblit pas la lumière.</p></div>
+    <div class="relation">\[ n_1\sin\theta_1 = n_2\sin\theta_2 \]
+      <p>Loi de Snell-Descartes, la géométrie du pivotement des fronts. Dans un milieu plus lent, le rayon se rapproche de la normale.</p></div>
+    <div class="relation">\[ \sin\theta_c = \frac{n_2}{n_1} \qquad (n_1 \gt n_2) \]
+      <p>Vers un milieu plus rapide, \(\theta_2\) atteint 90° quand \(\theta_1 = \theta_c\). Au-delà, Snell n’a plus de solution : la réflexion est totale, ce qui piège la lumière dans une fibre.</p></div>
+    <div class="relation">\[ \frac{1}{d_o} + \frac{1}{d_i} = \frac{1}{f}, \qquad m = -\frac{d_i}{d_o} \]
+      <p>Lentille mince : de la position de l’objet, on tire celle de l’image et sa taille.</p></div>
+    <div class="relation">\[ R = \left(\frac{n_1 - n_2}{n_1 + n_2}\right)^2 \qquad \text{(incidence normale)} \]
+      <p>Une partie est toujours réfléchie, même en entrant : 4 % pour l’air et le verre, dans les deux sens.</p></div>
+    <div class="relation">\[ I = I_0\cos^2\theta \]
+      <p>Un polariseur projette la vibration sur son axe, et l’intensité va comme le carré de l’amplitude.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un objectif de focale \(f = 50\) mm photographie une personne de 1,70 m, à 3 m.</p>
+      <ol>
+        <li>Distance de l’image : \(d_i = \dfrac{d_o f}{d_o - f} = \dfrac{3000 \times 50}{3000 - 50} \approx 50{,}85\) mm. Vérification : \(1/3000 + 1/50{,}85 = 1/50\).</li>
+        <li>Grandissement : \(m = -d_i/d_o \approx -0{,}0169\), soit environ \(-1/59\) : image renversée, 59 fois plus petite.</li>
+        <li>Taille sur le capteur : \(1700 \times 0{,}0169 \approx 28{,}8\) mm. Un capteur plein format mesure 24 mm sur 36 mm : en portrait, la personne tient dans le cadre.</li>
+        <li>Elle s’approche à 1 m : \(d_i = \dfrac{1000 \times 50}{1000 - 50} \approx 52{,}63\) mm. L’objectif s’éloigne du capteur de \(52{,}63 - 50{,}85 \approx 1{,}8\) mm : c’est la mise au point.</li>
+        <li>À 1 m, \(m \approx -0{,}0526\) et l’image ferait 89 mm, plus du double de la hauteur du capteur : on ne verrait que 68 cm de la personne.</li>
+      </ol>
+      <p>Ordre de grandeur : tant que l’objet est loin, \(d_i\) reste près de \(f\) ; passer de 3 m à 1 m déplace l’objectif de moins de 2 mm.</p>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Mesurer les angles depuis la surface. Snell-Descartes utilise la normale : un rayon perpendiculaire à la surface (\(\theta_1 = 0\)) ne tourne pas.</li>
+      <li>Croire que la lumière ralentie perd de l’énergie. La fréquence ne change pas, seule la longueur d’onde devient \(\lambda/n\) ; l’intensité ne baisse que de la part \(R\) réfléchie.</li>
+      <li>Penser qu’une image virtuelle n’existe pas. L’œil la voit, dans un miroir ; seul un écran ne peut pas la recueillir.</li>
+      <li>Confondre foyer et point image. Le foyer est fixé par la lentille ; la position de l’image dépend de celle de l’objet.</li>
+      <li>Dire que le prisme colore la lumière. Il trie : le bleu, un peu plus ralenti, dévie plus que le rouge, et un second prisme recompose le blanc.</li>
+      <li>Croire qu’un polariseur de plus ne peut qu’assombrir. Glissé à 45° entre deux polariseurs croisés, il fait passer \(I_0/8\) d’une lumière naturelle au lieu de rien.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>15</b><span>Fronts d’onde et \(\lambda = v/f\) ; interférences et diffraction dans la planche <a href="../05-ondes-interferences/index.html">Ondes et interférences</a>.</span></li>
+      <li><b>24</b><span>La lumière est une onde électromagnétique dont le champ \(\vec E\) est transverse : d’où la polarisation.</span></li>
+      <li><b>27</b><span>La spectroscopie lit les longueurs d’onde d’un atome ; le prisme en fut le premier outil.</span></li>
+      <li><b>43</b><span>La couleur d’une étoile renseigne sur sa température.</span></li>
+      <li><b>47</b><span>Une masse courbe la trajectoire de la lumière : la lentille gravitationnelle.</span></li>
+      <li><b>48</b><span>Un photon sur un polariseur à 45° : transmis ou absorbé, avec la probabilité de Malus. Suite au module 50.</span></li>
+      <li><b>38</b><span>L’œil est une lentille qui forme une image réelle sur la rétine, si ce module le traite un jour.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un rayon, dans le verre (\(n = 1{,}5\)), frappe l’air à 45°. Sort-il ?</summary>
+      <p>Non. L’angle critique est \(\theta_c = \arcsin(1/1{,}5) \approx 41{,}8°\), et 45° le dépasse. Autrement : \(\sin\theta_2 = 1{,}5 \times \sin 45° \approx 1{,}06\), plus que 1, impossible. Réflexion totale.</p></details>
+    <details><summary>Une loupe de focale 100 mm est à 60 mm d’un insecte. Où est l’image, et pourquoi ne peut-on pas la projeter sur un mur ?</summary>
+      <p>\(1/d_i = 1/100 - 1/60\), donc \(d_i = -150\) mm : image virtuelle, du côté de l’insecte, avec \(m = +150/60 = 2{,}5\). Aucun rayon ne passe par ce point, seuls leurs prolongements s’y croisent.</p></details>
+    <details><summary>Deux polariseurs croisés éteignent un faisceau naturel. Que passe-t-il si l’on glisse entre eux un troisième, à 45° ?</summary>
+      <p>Le premier laisse passer \(I_0/2\). Le deuxième, à 45°, garde \(\cos^2 45° = 1/2\) de cela : \(I_0/4\). Le dernier est à 45° du deuxième : encore la moitié, donc \(I_0/8\), soit 12,5 %.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Optique géométrique :</strong> la lumière est tracée en rayons, et la diffraction est ignorée. Les rayons n’ont pas de largeur.</li>
+    <li><strong>Lentille mince idéale :</strong> c’est le modèle par défaut. La lentille épaisse réelle n’apparaît qu’en mode « rayons réels ».</li>
+    <li><strong>Loi de Cauchy approchée :</strong> \(n \approx A + B/\lambda^2\) avec deux coefficients par verre, ce qui suffit dans le visible.</li>
+    <li><strong>Polariseurs idéaux :</strong> ils laissent passer toute la composante parallèle à l’axe et rien de l’autre.</li>
+    <li><strong>Couleurs approximatives :</strong> la conversion d’une longueur d’onde en couleur d’écran (sRGB) est approchée, et les intensités des couleurs ne sont pas pondérées par la sensibilité de l’œil.</li>
+    <li><strong>Lumière naturelle :</strong> figurée par une direction de vibration qui change au hasard, d’une image à l’autre.</li>
+    <li><strong>Fibre :</strong> une tige de verre d’indice 1,50 dans l’air, plutôt qu’un vrai cœur entouré d’une gaine.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>300 000 km/s</b><span>vitesse de la lumière dans le vide ; environ 200 000 km/s dans le verre, 225 000 km/s dans l’eau.</span></div>
+    <div><b>41,8°</b><span>angle critique verre / air ; 48,6° pour l’eau, 24,4° pour le diamant.</span></div>
+    <div><b>4 %</b><span>part réfléchie par une vitre sous incidence normale.</span></div>
+    <div><b>56,3°</b><span>angle de Brewster pour le verre (53,1° pour l’eau).</span></div>
+    <div><b>1,514 à 1,522</b><span>indice du verre BK7, du rouge (656 nm) au bleu (486 nm).</span></div>
+    <div><b>≈ 42,4° et 40,6°</b><span>angle de l’arc-en-ciel primaire, pour le rouge (656 nm) et le violet (400 nm).</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées et méritent leur propre étude : le <strong>principe de Fermat</strong> (entre deux points, la lumière suit un chemin dont la durée est stationnaire, c’est-à-dire qu’elle ne varie pas au premier ordre quand on le déforme un peu : de là viennent Snell et les lentilles), la <strong>diffraction</strong> (la lumière contourne un peu les obstacles ; planche Ondes et interférences, module 15), la <strong>diffusion de Rayleigh</strong> (elle explique le bleu du ciel), la <strong>biréfringence</strong> (un cristal où l’indice dépend de la polarisation) et les <strong>instruments à plusieurs lentilles</strong> (microscope, télescope).</p>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
