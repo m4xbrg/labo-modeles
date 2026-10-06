@@ -98,4 +98,4 @@ Les fondations ne sont pas une fin : elles rendent les showcases moins lourds. A
 | | |
 |---|---|
 | Briefs écrits | 23 (toutes les vagues et la piste A) |
-| Construites depuis cette feuille de route | 1 (23 · magnétisme et induction) |
+| Construites depuis cette feuille de route | 2 (23 · magnétisme et induction ; 28 · 29 · molécules et mole) |
