@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les réactions chimiques — LABO</title>
+<meta name="description" content="Théorie du module 30 (collisions et énergie d'activation, vitesse de réaction, catalyse, équilibre dynamique et principe de Le Chatelier) et ce que montre la planche Réactions : vitesse et équilibre.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#ffb36b;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+.lil{color:#b9a3ff}.sab{color:#dcc29a}.no2{color:#c8763a}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="../../labo/index.html">&larr; LABO</a><a href="index.html">Retour à la planche</a></nav>
+  <p class="serie">LABO · Fondations 30</p>
+  <h1>Réactions : vitesse et <em>équilibre</em></h1>
+  <p class="lede">Une réaction chimique est d’abord une affaire de collisions : presque toutes échouent, quelques-unes franchissent la barrière. Cette page explique ce que la planche te fait voir en quatre étapes (les chocs, la vitesse, la catalyse, l’équilibre) et pose la théorie qui va avec.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="lil">Molécules A</span> et <span class="sab">molécules B</span> (étape 1)</dt>
+    <dd>Des disques dans une boîte à deux dimensions. Chaque A porte un petit trait : son site réactif. Quand un A et un B se heurtent assez fort, avec le site tourné vers B, un éclat <span class="ener">jaune</span> marque le choc et la paire devient deux produits, en <span class="acc">orangé pâle</span>. Un choc qui échoue ne laisse rien. Les produits redeviennent des réactifs après un moment, pour que la boîte reste en marche.</dd>
+    <dt>L’histogramme des énergies de collision</dt>
+    <dd>Pour chaque choc A-B, l’énergie du mouvement le long de la ligne qui joint les deux centres. La courbe tiretée est la prédiction. Une ligne verticale marque Ea, et la queue au-delà est coloriée en <span class="ener">jaune</span> : ce sont les seuls chocs capables de réagir. Les curseurs T et Ea la déplacent ; la bascule « Orientation exigée » retire ou remet la condition sur le site.</dd>
+    <dt>Le profil d’énergie, en haut</dt>
+    <dd>Réactifs à gauche, produits à droite, et le col au sommet, en <span class="ener">jaune</span>. À chaque choc, un point monte la pente jusqu’à l’énergie du choc, puis retombe s’il n’atteint pas le sommet. Les énergies sont en unités réduites, avec Ea à environ 3 kT : une réaction réelle a plutôt une vingtaine de kT, ce que montre l’étape 2.</dd>
+    <dt>Les trois boîtes et les courbes (étape 2)</dt>
+    <dd>Une réaction en solution, avec Ea = 50 kJ/mol : la référence, la boîte où [A]₀ est doublée et celle à T + 10 °C. Les réactions viennent de tirages au hasard ; les courbes [A](t) mesurées zigzaguent autour de la courbe moyenne tiretée. Chaque « Essai » ajoute un point au graphe de ln k en fonction de 1/T : les points s’alignent.</dd>
+    <dt>Le deuxième chemin (étape 3)</dt>
+    <dd>Sur le profil, un chemin plus bas apparaît en tireté <span class="acc">orangé</span> : même départ, même arrivée, col plus bas. Deux boîtes côte à côte, à la même température, dont l’une contient des grains de catalyseur où A se fixe un instant. Le préréglage « eau oxygénée » compare l’absence de catalyseur, le dioxyde de manganèse et la catalase, avec des bulles d’O₂.</dd>
+    <dt>Le piston (étape 4)</dt>
+    <dd>Un gaz de N₂O₄ (incolore, contour gris) et de <span class="no2">NO₂</span> (brun-orangé) : la teinte brune suit la quantité de NO₂. La loupe montre les molécules qui se dissocient et se recombinent. Deux compteurs donnent les dissociations par seconde, en <span class="pos">orange</span>, et les recombinaisons par seconde, en <span class="neg">bleu</span> : ils deviennent égaux sans jamais tomber à zéro. Q, K et le sens d’évolution s’affichent ; chauffer, comprimer, injecter du NO₂ et ajouter un catalyseur sont des gestes de la planche.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Le module suit le plan habituel : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et trois questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m30"><b>30</b>Réactions chimiques</a></li>
+  </ul>
+
+  <!-- ===================== Module 30 ===================== -->
+  <section class="module" id="m30">
+    <header>
+      <p class="num">Module 30</p>
+      <h3>Réactions chimiques : vitesse et équilibre</h3>
+      <p class="etapes">Sur la planche : étapes 1 Collisions · 2 Vitesse · 3 Catalyse · 4 Équilibre</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Dans l’air, une molécule subit de l’ordre de 10⁹ à 10¹⁰ chocs par seconde, et presque aucun ne change quoi que ce soit. Pour réagir, un choc doit fournir assez d’énergie pour défaire des liaisons avant d’en former d’autres, et souvent les molécules doivent être bien orientées. L’énergie minimale est la barrière d’activation. Les énergies de choc sont très inégales : la plupart sont faibles, quelques-unes sont grandes. Chauffer allonge surtout cette petite queue de grands chocs, et c’est pourquoi la vitesse réagit si fort à la température. Un catalyseur laisse le portrait des chocs intact : il ouvre un autre chemin, au col plus bas. Enfin, une réaction réversible ne s’arrête pas quand les quantités cessent de varier : la réaction directe et la réaction inverse continuent, à la même vitesse. L’équilibre est un régime, pas un arrêt.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Vitesse de réaction \(v\)<span class="u">mol L⁻¹ s⁻¹</span></dt><dd>Quantité de réactif consommée par litre et par seconde.</dd></div>
+      <div><dt>Concentration \([X]\)<span class="u">mol/L</span></dt><dd>Quantité de l’espèce X par litre ; pour un gaz, on utilise aussi sa pression partielle.</dd></div>
+      <div><dt>Constante de vitesse \(k\)<span class="u">selon l’ordre</span></dt><dd>Coefficient entre \(v\) et les concentrations. Il dépend de la température, pas des concentrations : s⁻¹ au premier ordre, L mol⁻¹ s⁻¹ au second.</dd></div>
+      <div><dt>Ordre<span class="u">sans unité</span></dt><dd>Exposant d’une concentration dans la loi de vitesse. Il se mesure : il ne se lit pas dans l’équation.</dd></div>
+      <div><dt>Demi-vie \(t_{1/2}\)<span class="u">s</span></dt><dd>Durée pour que la quantité de réactif diminue de moitié.</dd></div>
+      <div><dt>Énergie d’activation \(E_a\)<span class="u">J/mol, kJ/mol</span></dt><dd>Énergie minimale, par mole de chocs, pour franchir le col entre réactifs et produits.</dd></div>
+      <div><dt>État de transition</dt><dd>Arrangement instable au sommet du profil, où des liaisons sont à moitié rompues et à moitié formées. On ne peut pas l’isoler.</dd></div>
+      <div><dt>Facteur préexponentiel \(A\)<span class="u">comme \(k\)</span></dt><dd>Ce que vaudrait \(k\) si tous les chocs suffisaient : fréquence des rencontres, orientation comprise.</dd></div>
+      <div><dt>Constante des gaz \(R\)<span class="u">8,314 J mol⁻¹ K⁻¹</span></dt><dd>Convertit l’agitation thermique en énergie par mole : \(RT \approx 2{,}48\) kJ/mol à 298 K.</dd></div>
+      <div><dt>Température \(T\)<span class="u">K</span></dt><dd>En kelvins dans ces formules : 298 K vaut 25 °C.</dd></div>
+      <div><dt>Enthalpie de réaction \(\Delta H\)<span class="u">J/mol, kJ/mol</span></dt><dd>Chaleur échangée à pression constante : négative si la réaction en dégage, positive si elle en absorbe. Elle compare départ et arrivée, rien de plus.</dd></div>
+      <div><dt>Catalyseur</dt><dd>Substance qui offre un chemin d’énergie d’activation plus basse et ressort intacte. Il ne change ni \(\Delta H\) ni \(K\).</dd></div>
+      <div><dt>Constante d’équilibre \(K\)<span class="u">sans unité</span></dt><dd>Valeur du quotient de réaction à l’équilibre, fixée par la température. Les pressions se rapportent à \(P^\circ = 1\) bar.</dd></div>
+      <div><dt>Quotient de réaction \(Q\)<span class="u">sans unité</span></dt><dd>Même expression que \(K\), calculée avec les quantités présentes à l’instant considéré.</dd></div>
+      <div><dt>Coefficient \(\nu_i\)<span class="u">sans unité</span></dt><dd>Nombre devant \(X_i\) dans l’équation : positif pour un produit, négatif pour un réactif.</dd></div>
+      <div><dt>Degré de dissociation \(\alpha\)<span class="u">sans unité</span></dt><dd>Fraction des molécules de N₂O₄ de départ qui se sont dissociées.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ k = A\,e^{-E_a/RT} \]
+      <p>Seule la fraction \(e^{-E_a/RT}\) des chocs franchit le col, et \(A\) regroupe la fréquence des rencontres et l’orientation. Pour \(E_a = 50\) kJ/mol à 298 K, cette fraction vaut environ \(2 \times 10^{-9}\).</p></div>
+    <div class="relation">\[ \ln\frac{k_2}{k_1} = \frac{E_a}{R}\left(\frac{1}{T_1} - \frac{1}{T_2}\right) \]
+      <p>Deux mesures de \(k\) donnent \(E_a\). Porté en fonction de \(1/T\), \(\ln k\) est une droite de pente \(-E_a/R\) : c’est le graphe de l’étape 2.</p></div>
+    <div class="relation">\[ v = k\,[A]\,[B] \]
+      <p>Loi de vitesse mesurée : doubler \([A]\) double \(v\), car il y a deux fois plus de rencontres avec B. Les exposants sont des ordres mesurés, égaux aux coefficients seulement pour une réaction en une étape.</p></div>
+    <div class="relation">\[ t_{1/2} = \frac{\ln 2}{k} \quad \text{(premier ordre)} \]
+      <p>La demi-vie ne dépend pas de la quantité de départ. Au second ordre, \(t_{1/2} = 1/(k[A]_0)\) en dépend.</p></div>
+    <div class="relation">\[ K = \frac{[\text{NO}_2]^2}{[\text{N}_2\text{O}_4]}, \qquad K = \prod_i [X_i]^{\nu_i} \]
+      <p>Produits au numérateur, réactifs au dénominateur, chacun à la puissance de son coefficient. Pour un gaz, on écrit les pressions partielles en bar : \(K_p \approx 0{,}147\) à 298 K. \(K\) ne change qu’avec la température, et grandit quand on chauffe ici, car \(\Delta H^\circ \gt 0\).</p></div>
+    <div class="relation">\[ \begin{aligned} Q \lt K &\Rightarrow \text{vers la droite}\\ Q = K &\Rightarrow \text{équilibre}\\ Q \gt K &\Rightarrow \text{vers la gauche} \end{aligned} \]
+      <p>Si \(Q \lt K\), les produits manquent et la réaction directe domine ; si \(Q \gt K\), l’inverse. Comprimer ou injecter du NO₂ fait varier \(Q\) sans toucher à \(K\), et le déplacement absorbe en partie la perturbation (Le Chatelier).</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Vérifier la règle « +10 °C, vitesse doublée » pour \(E_a = 50\) kJ/mol, entre 298 K et 308 K.</p>
+      <ol>
+        <li>\(1/T_1 - 1/T_2 = 1/298 - 1/308 = 1{,}0895 \times 10^{-4}\) K⁻¹.</li>
+        <li>\(E_a/R = 50\,000 / 8{,}314 = 6\,014\) K, donc \(6\,014 \times 1{,}0895 \times 10^{-4} = 0{,}655\).</li>
+        <li>\(k_2/k_1 = e^{0{,}655} = 1{,}93\) : presque le double. La fréquence des chocs, elle, ne gagne que \(\sqrt{308/298} = 1{,}017\), soit 1,7 %.</li>
+        <li>Pour \(E_a = 100\) kJ/mol, l’argument vaut 1,310 et le facteur 3,71. Pour 25 kJ/mol, il vaut 0,328 et le facteur 1,39. La règle du doublement tient autour de 53 kJ/mol seulement : c’est une règle, pas une loi.</li>
+        <li>La fraction des chocs assez énergiques : \(E_a/RT = 50\,000/(8{,}314 \times 298) = 20{,}2\), donc \(e^{-20{,}2} \approx 1{,}7 \times 10^{-9}\), environ un choc sur \(6 \times 10^{8}\).</li>
+        <li>Un catalyseur qui abaisse \(E_a\) de 75 à 50 kJ/mol multiplie \(k\), à \(A\) égal, par \(e^{25\,000/(8{,}314 \times 298)} = e^{10{,}09} \approx 2{,}4 \times 10^{4}\).</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« Un catalyseur déplace l’équilibre. » Non : il accélère la réaction directe et l’inverse du même facteur. \(K\) et \(\Delta H\) restent les mêmes ; seul le temps d’arrivée raccourcit.</li>
+      <li>« À l’équilibre, les concentrations sont égales. » Elles sont stables, pas égales : à 298 K et 1 bar, N₂O₄ garde une pression partielle de 0,68 bar contre 0,32 bar pour NO₂. Ce qui est égal, ce sont les deux vitesses.</li>
+      <li>« À l’équilibre, la réaction s’arrête. » Les deux compteurs de l’étape 4 restent loin de zéro : les molécules continuent de se dissocier et de se recombiner.</li>
+      <li>« Exothermique signifie rapide. » \(\Delta H\) compare le départ et l’arrivée ; la vitesse dépend de la hauteur du col. L’eau oxygénée libère environ 98 kJ par mole décomposée, et une bouteille se conserve pourtant longtemps.</li>
+      <li>« Plus chaud, donc plus de chocs, donc plus vite. » La fréquence des chocs gagne 1,7 % pour 10 K ; c’est la fraction assez énergique qui gagne un facteur 1,93.</li>
+      <li>Lire l’ordre dans les coefficients de l’équation : il se mesure.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>31</b><span>Acide-base et oxydoréduction : \(K_a\) est une constante d’équilibre, lue avec \(Q\).</span></li>
+      <li><b>32</b><span>L’équilibre dynamique de la <a href="../fondations-cellule-membrane/index.html">membrane</a> : des traversées dans les deux sens, à flux égaux.</span></li>
+      <li><b>34</b><span>Les enzymes sont des catalyseurs ; la polymérase de la <a href="../08-replication-adn/index.html">réplication de l’ADN</a> (planche 08) est un catalyseur au travail.</span></li>
+      <li><b>37</b><span>Les cascades de signalisation enchaînent des réactions dont les vitesses se répondent.</span></li>
+      <li><b>44 · 49</b><span>La fusion nucléaire franchit une barrière, coulombienne cette fois, que l’effet tunnel aide à passer.</span></li>
+      <li><b>17 · 18</b><span>En amont : la planche <a href="../07-matiere-chaleur/index.html">Matière, chaleur et transport</a> montre la distribution des vitesses dont la queue fait réagir.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>La vitesse d’une réaction double quand on passe de 300 K à 310 K. Quelle est son énergie d’activation ?</summary>
+      <p>\(E_a = R \ln 2 \big/ (1/300 - 1/310) = 8{,}314 \times 0{,}693 / 1{,}075 \times 10^{-4} \approx 5{,}4 \times 10^{4}\) J/mol, soit 54 kJ/mol.</p></details>
+    <details><summary>On ajoute un catalyseur à N₂O₄ ⇌ 2 NO₂ à l’équilibre. Que voit-on, et pourquoi ?</summary>
+      <p>Rien : la teinte reste la même. Le catalyseur multiplie les deux vitesses du même facteur, donc \(K\) et la composition ne changent pas, et les deux compteurs montent ensemble. Depuis un mélange hors équilibre, on y arriverait plus vite.</p></details>
+    <details><summary>À 298 K, un mélange contient 0,50 bar de NO₂ et 0,50 bar de N₂O₄. Dans quel sens évolue-t-il ?</summary>
+      <p>\(Q = 0{,}50^2/0{,}50 = 0{,}50\), plus grand que \(K_p = 0{,}147\). Les recombinaisons dominent : le mélange évolue vers N₂O₄ et pâlit.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Boîte à deux dimensions, unités réduites :</strong> disques durs de même masse et de même taille pour toutes les molécules, chocs élastiques, énergies en unités de kT. Quelques centaines de molécules et des tirages au hasard : les mesures fluctuent.</li>
+    <li><strong>Barrière à environ 3 kT :</strong> pour qu’on voie des réactions, la boîte choisit Ea près de 3 kT ; une réaction réelle en a une vingtaine, et sa fraction réactive est de l’ordre de 10⁻⁹.</li>
+    <li><strong>Facteur stérique schématique :</strong> un site de 90° sur A donne P = 1/4. Les orientations tournent librement, sans échange d’énergie.</li>
+    <li><strong>Préfacteur de la boîte :</strong> en théorie des collisions, il dépend un peu de T (∝ √T). Si l’on traçait \(\ln k\) de la boîte de l’étape 1 en fonction de \(1/T\), la droite serait à peine courbée, de pente \(-(E_a + \tfrac12 k_BT)/k_B\) au lieu de \(-E_a/k_B\). L’étape 2 suit exactement \(k = A\,e^{-E_a/RT}\).</li>
+    <li><strong>Produits renouvelés :</strong> après un moment, les produits redeviennent des réactifs, pour garder la boîte en marche. Ce n’est pas une réaction réelle.</li>
+    <li><strong>Étape 2 :</strong> les réactions viennent de tirages au hasard avec \(k = A e^{-E_a/RT}\), \(E_a = 50\) kJ/mol et \(A\) fixé (\(k \approx 0{,}126\) L/(mol·s) à 298 K). Les molécules dessinées (30 par mol/L) dérivent au hasard, sans produire les réactions.</li>
+    <li><strong>Catalyse :</strong> grains fixes, A retenu un temps aléatoire, B qui le frappe réagit (mécanisme d’Eley-Rideal). Les abaissements de Ea sont illustratifs ; pour l’eau oxygénée, on suppose le même \(A\) partout.</li>
+    <li><strong>Équilibre :</strong> NO₂ et N₂O₄ sont des gaz parfaits, \(\Delta H^\circ = 57{,}2\) kJ/mol et \(\Delta S^\circ = 176\) J/(mol·K) constants. Le temps est ralenti : la vraie réaction s’équilibre bien plus vite.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 2 × 10⁻⁹</b><span>fraction des chocs qui atteignent 50 kJ/mol à 298 K (\(e^{-E_a/RT}\)).</span></div>
+    <div><b>× 1,93</b><span>gain de vitesse pour +10 K, de 298 K à 308 K, avec \(E_a\) = 50 kJ/mol ; × 1,39 pour 25 kJ/mol, × 3,7 pour 100 kJ/mol.</span></div>
+    <div><b>× 2,4 × 10⁴</b><span>gain à 298 K quand \(E_a\) passe de 75 à 50 kJ/mol. La catalase (≈ 8 kJ/mol, valeur de manuel) décompose 10⁶ à 10⁷ H₂O₂ par seconde et par enzyme.</span></div>
+    <div><b>10⁹ à 10¹⁰ s⁻¹</b><span>chocs par molécule d’air à 1 atm et 25 °C (calcul pour N₂ : environ 7 × 10⁹).</span></div>
+    <div><b>K<sub>p</sub> = 0,147</b><span>pour N₂O₄ ⇌ 2 NO₂ à 298 K : α = 19 % à 1 bar ; à 350 K, K<sub>p</sub> = 4,5 et α = 73 %.</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées : l’<strong>énergie libre de Gibbs</strong> et le lien \(\Delta G^\circ = -RT\ln K\) (ici, \(K\) est donné, pas expliqué : \(\Delta H^\circ - T\Delta S^\circ = 57{,}2 - 298 \times 0{,}176 = +4{,}75\) kJ/mol, ce qui redonne \(K_p = 0{,}147\)), les <strong>mécanismes en plusieurs étapes</strong>, la <strong>cinétique enzymatique</strong> (module 34) et les <strong>réactions oscillantes</strong>.</p>
+
+  <a class="cta" href="index.html"><span>Revenir à la planche</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
