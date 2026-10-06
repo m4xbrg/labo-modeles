@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**19 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 10 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**20 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 11 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -29,6 +29,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
+| [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | foundation | Réactions chimiques | — | 30 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -233,6 +234,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I D’où vient le champ · II Une force qui dévie · III Faire varier le flux · IV L’induction freine
 - **Interaction** : Quatre actes en deux paillasses, chacun avec deux ou trois scènes au choix ; lignes de champ exactes et boussoles qui pivotent autour d’un aimant (qu’on coupe ou compare à une bobine), d’un fil, d’une spire ou d’une bobine, sonde glissable ; particule chargée qui tourne à énergie constante, deux protons de vitesses différentes, sélecteur de vitesse, hélice, balançoire de Laplace ; aimant glissé à la main dans une bobine avec flux et f.é.m. tracés l’un sous l’autre, génératrice et lampe, deux bobines de Faraday ; tige tirée sur des rails avec barres d’énergie et « Lenz à l’envers », aimant qui tombe dans des tubes de plastique, d’aluminium, de cuivre ou de cuivre fendu.
 - **Notes** : Première page de fondations construite au standard d’une page à un module (quatre étapes). Moteur verrouillé versionné dans `prompts/moteurs/magnetisme.js` (112 tests, aussi lancés sur la page). Sans matériaux magnétiques ; particules non relativistes ; inductance propre de la bobine réceptrice négligée. Se termine sur trois questions vers le module 24, la planche Courant et circuits et le module 50.
+
+### Réactions : vitesse et équilibre
+
+- **Identifiant** : `fondations-reactions-chimiques` · **chemin** : [`opus-sonnet/fondations-reactions-chimiques/index.html`](../opus-sonnet/fondations-reactions-chimiques/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-reactions-chimiques/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Réactions chimiques
+- **Collection** : aucune
+- **Modules** : 30 Réactions chimiques (`full`), 17 Monde microscopique des gaz (`supporting`), 18 Chaleur, phases et entropie (`supporting`), 07 Hasard, probabilité et distributions (`supporting`), 05 Exponentielles et logarithmes (`supporting`)
+- **Étapes** : 1 Collisions et énergie d’activation · 2 Ce qui règle la vitesse · 3 La catalyse · 4 L’équilibre dynamique et Le Chatelier
+- **Interaction** : Un chapitre de quatre étapes ; boîte de disques durs où seuls les chocs assez énergiques (et bien orientés) changent A + B en produits, histogramme des énergies de collision avec la queue au-delà de Ea, profil d’énergie qu’un point gravit à chaque choc ; trois boîtes de réaction en solution (référence, [A] doublée, +10 °C) avec courbes [A](t) et droite d’Arrhenius qui se remplit à chaque essai ; chemin catalysé plus bas, grains de catalyseur où A se fixe un instant, préréglage eau oxygénée avec bulles d’O₂ ; piston de N₂O₄ et de NO₂ dont la teinte suit la composition, dissociations et recombinaisons tirées au hasard, compteurs directs et inverses, Q et K, chauffage, compression, injection de NO₂, catalyseur.
+- **Notes** : Construite au standard d’une page à un module (quatre étapes), avant 28·29. Moteur `Rxn` écrit et testé avant la page (42 tests, aussi lancés sur la page livrée). Boîte 2D en unités réduites (Ea ≈ 3 kT), facteur stérique schématique, produits renouvelés en réactifs ; abaissements de Ea illustratifs ; gaz parfaits, quelques centaines de molécules. Se termine sur trois questions vers les modules 31, 34 et 18.
 
 ## Pages d'appui
 

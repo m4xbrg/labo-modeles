@@ -20,12 +20,12 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-23, 32, 33, 40, 46 (24 modules) |
+| Couverture **full** par au moins un modèle | 01-06, 10-23, 30, 32, 33, 40, 46 (25 modules) |
 | Couverture **partial** | 07, 08, 34, 36, 44 |
-| Seulement **supporting** | 09, 26, 30, 31, 35 |
+| Seulement **supporting** | 09, 26, 31, 35 |
 | Rien | 24, 25, 27-29, 37-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Réactions chimiques* (module 30), est construite le même jour au même standard, avant 28·29 dans la branche E ; son moteur est testé avant la page (42 tests) et ses résultats sont cités dans la PR. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -38,6 +38,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 - **46** : une seule dimension d’espace ; accélération propre, quadrivecteurs, aberration et Doppler relativistes hors champ. Le module 47 est annoncé en fin de planche, pas couvert.
 - **40** : générations non chevauchantes, un seul gène, reproduction à un parent pour le trait continu, mutations neutres ; ni recombinaison, ni coalescence, ni spéciation. Les modules 41 et 42 sont annoncés en fin de planche (grille mélangée ou par voisinage), pas couverts.
 - **23** : sources à symétrie axiale et fils infinis seulement, sans matériaux magnétiques (ni fer, ni hystérésis) ; particules non relativistes ; inductance propre de la bobine réceptrice et des anneaux du tube négligée. Auto-induction, transformateur et moteur seulement introduits ; le module 24 est annoncé en fin de planche.
+- **30** : boîte de collisions à deux dimensions en unités réduites (même masse, même taille ; Ea ≈ 3 kT au lieu de ≈ 20 kT pour une vraie réaction), facteur stérique schématique, une seule réaction à la fois ; catalyse sur des grains schématiques, abaissements de Ea illustratifs ; N₂O₄ et NO₂ en gaz parfaits, ΔH° et ΔS° constants, quelques centaines de molécules. Énergie libre de Gibbs, mécanismes en plusieurs étapes et cinétique enzymatique seulement introduits ; les modules 31, 34 et 18 sont annoncés en fin de planche.
 - **16** est enseigné par *Flux, gradients, champs et fluides*. Le gradient et le flux qui apparaissent dans *Matière, chaleur et transport* restent `supporting`.
 
 ## Les 50 modules
@@ -50,9 +51,9 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 02 | Vecteurs et géométrie des quantités | magnitude, direction, composantes, addition, projection | Langage scientifique fondamental (`built`) | **full** | Le champ électrique (supporting), Langage scientifique (full), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
 | 03 | Changement et accumulation | dérivée, intégrale, position, vitesse, accélération | Langage scientifique fondamental (`built`) | **full** | Langage scientifique (full), Systèmes, croissance et hasard (supporting), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
 | 04 | Systèmes qui évoluent dans le temps | EDO intuitives, état, taux de changement, conditions initiales, feedback positif/négatif | Systèmes, croissance et hasard (`built`) | **full** | Le neurone qui apprend (supporting), Systèmes, croissance et hasard (full), Oscillations et ondes (supporting) |
-| 05 | Exponentielles et logarithmes | croissance, décroissance, demi-vie, temps caractéristique, échelles logarithmiques | Systèmes, croissance et hasard (`built`) | **full** | Courant et circuits (supporting), Langage scientifique (supporting), Systèmes, croissance et hasard (full) |
+| 05 | Exponentielles et logarithmes | croissance, décroissance, demi-vie, temps caractéristique, échelles logarithmiques | Systèmes, croissance et hasard (`built`) | **full** | Courant et circuits (supporting), Langage scientifique (supporting), Systèmes, croissance et hasard (full), Réactions : vitesse et équilibre (supporting) |
 | 06 | Sinusoïdes, cycles et phase | amplitude, fréquence, période, phase, déphasage | Oscillations et ondes (`built`) | **full** | Ondes et interférences (supporting), Oscillations et ondes (full) |
-| 07 | Hasard, probabilité et distributions | probabilité, moyenne, variance, distributions, échantillonnage | Systèmes, croissance et hasard (`built`) | partial | Systèmes, croissance et hasard (partial) |
+| 07 | Hasard, probabilité et distributions | probabilité, moyenne, variance, distributions, échantillonnage | Systèmes, croissance et hasard (`built`) | partial | Systèmes, croissance et hasard (partial), Réactions : vitesse et équilibre (supporting) |
 | 08 | Non-linéarité, stabilité et chaos | non-linéarité, points fixes, stabilité, attracteurs, sensibilité aux conditions initiales | — | partial | Systèmes, croissance et hasard (partial) |
 | 09 | Signaux et Fourier | décomposition en fréquences, spectre, fréquence dominante, reconstruction | — | supporting | Oscillations et ondes (supporting) |
 
@@ -72,8 +73,8 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 17 | Monde microscopique des gaz | température, collisions, pression, P/V/T, gaz idéal | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full) |
-| 18 | Chaleur, phases et entropie | chaleur, capacité thermique, changement de phase, chaleur latente, entropie | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full) |
+| 17 | Monde microscopique des gaz | température, collisions, pression, P/V/T, gaz idéal | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full), Réactions : vitesse et équilibre (supporting) |
+| 18 | Chaleur, phases et entropie | chaleur, capacité thermique, changement de phase, chaleur latente, entropie | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full), Réactions : vitesse et équilibre (supporting) |
 | 19 | Transport thermique et moléculaire | conduction, convection, rayonnement, mouvement brownien, diffusion, osmose | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full) |
 | 20 | Fluides, pression et débit | pression fluide, débit, continuité, viscosité / résistance, Bernoulli (éventuel) | Flux, gradients, champs et fluides (`built`) | **full** | Flux, gradients, champs et fluides (full) |
 
@@ -95,7 +96,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`planned`) | — | — |
 | 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
 | 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
-| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting) |
+| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`built`) | **full** | La réplication de l’ADN (supporting), Réactions : vitesse et équilibre (full) |
 | 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`planned`) | supporting | La respiration cellulaire (supporting) |
 
 ### F · Cellule et biologie moléculaire
@@ -165,10 +166,11 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
+| Réactions chimiques | 30 | [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | Un chapitre de quatre étapes : collisions et énergie d'activation, ce qui règle la vitesse, catalyse, équilibre dynamique et Le Chatelier. Construite avant 28·29 ; prépare 31, 34 et 37, et la planche 08 (polymérase). |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
+Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
 
 La maquette « magnétisme » du premier prototype d'interface, retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)), n'a rien à voir avec la planche *Magnétisme et induction* construite le 2026-10-06.
 
