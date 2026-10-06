@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre l’énergie du vivant — LABO</title>
+<meta name="description" content="Théorie du module 34 (énergie libre, couplage et ATP, enzymes, respiration et fermentation, photosynthèse) et ce que montre la planche L’énergie du vivant.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#e0b48a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+.lil{color:#b9a3ff}.sab{color:#dcc29a}.chl{color:#7ec27a}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 34</p>
+  <h1>Comprendre l’énergie du <em>vivant</em></h1>
+  <p class="lede">Cette planche ne montre pas un organisme : elle montre une comptabilité. Où l’énergie entre, par quelles réactions elle passe, ce qui décide de la vitesse de chacune, et où elle finit. Tu fais monter une réaction contre sa pente, tu règles une enzyme, tu brûles un glucose avec et sans oxygène, puis tu allumes la feuille.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">L’échelle d’énergie libre</span></dt>
+    <dd>Chaque réaction est une flèche verticale. Une flèche qui descend (<span class="ener">l’hydrolyse de l’ATP</span>) libère de l’énergie libre ; une flèche grise qui monte (glucose-6-phosphate, glutamine, coup de rame d’une myosine, pompe Na⁺/K⁺) en demande. En glissant la flèche de l’ATP contre elle, tu obtiens une flèche totale qui descend : la réaction se fait.</dd>
+    <dt><span class="ener">L’ATP et l’ADP</span></dt>
+    <dd>L’ATP porte trois perles, dont la dernière luit ; l’ADP en porte deux. La perle qui part est un groupement phosphate : dans un couplage, il passe à l’autre molécule ; dans une hydrolyse simple, il part en phosphate inorganique (Pi).</dd>
+    <dt>Le porte-monnaie</dt>
+    <dd>Une barre qui représente la réserve d’ATP et d’ADP de la cellule, 4,5 mmol/L au total. Elle baisse à chaque dépense et la respiration la recharge. Si tu coupes la recharge, elle se vide en environ 20 s. La bascule « Conditions de la cellule » remplace ΔG°′ par le ΔG réel, environ −49,5 kJ/mol pour l’ATP.</dd>
+    <dt><span class="acc">Les enzymes</span>, <span class="lil">les substrats</span>, les produits, <span class="sab">les inhibiteurs</span></dt>
+    <dd>Des croissants immobiles dont l’échancrure est le site actif. Les substrats lilas diffusent, les produits ambre repartent, les inhibiteurs sable occupent le site sans réagir. À côté, des points mesurés s’alignent sur une hyperbole : Km vaut 60 molécules par boîte, kcat 0,8 s⁻¹, Ki 30.</dd>
+    <dt>Le diagramme de flux</dt>
+    <dd>Une mole de glucose, soit 2 870 kJ, se partage en bandes dont l’épaisseur est proportionnelle à l’énergie : ATP, transporteurs d’électrons (NADH et FADH₂, environ 2 495 kJ portés vers l’O₂), chaleur. Sans O₂, la fermentation lactique laisse environ 2 674 kJ dans le lactate. La chaîne respiratoire reste une boîte fermée : son mécanisme est dans la planche <a href="../02-respiration/index.html">La respiration cellulaire</a>.</dd>
+    <dt>La loupe</dt>
+    <dd>Des électrons descendent une chaîne de réactions redox jusqu’à l’O₂. C’est cette descente, par petites marches, qui permet de capter l’énergie en ATP.</dd>
+    <dt><span class="chl">La feuille et le chloroplaste</span></dt>
+    <dd>Un faisceau dont tu règles la couleur de 400 à 700 nm, ou la lumière blanche. Le spectre d’absorption de la chlorophylle a (pics vers 430 et 662 nm) et b (453 et 642 nm) montre le creux du vert. Des bulles d’O₂ sortent de la phase lumineuse ; le CO₂ devient sucre dans la fixation du carbone.</dd>
+    <dt>Le grand cycle</dt>
+    <dd>Plante et animal côte à côte : la matière (CO₂, O₂, glucose) tourne en cycle, l’énergie traverse, de la lumière vers la chaleur.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Le module suit le même plan que les autres : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où il resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m34"><b>34</b>Énergie biologique</a></li>
+  </ul>
+
+  <!-- ===================== Module 34 ===================== -->
+  <section class="module" id="m34">
+    <header>
+      <p class="num">Module 34</p>
+      <h3>Énergie biologique</h3>
+      <p class="etapes">Sur la planche : étapes 1 Couplage · 2 Enzymes · 3 Bilan · 4 Lumière</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Le vivant ne fabrique pas d’énergie : il la capte, sous forme de lumière ou de nourriture, puis la fait circuler. Une molécule comme le glucose est riche en énergie utilisable parce que ses produits possibles, le CO₂ et l’eau, sont bien plus bas sur l’échelle. Mais beaucoup de réactions nécessaires vont dans le sens contraire : seules, elles ne se font pas. Elles se font quand une enzyme les enchaîne à une réaction qui descend davantage, le plus souvent l’hydrolyse de l’ATP. L’ATP n’est donc pas une réserve, mais une monnaie : elle est refaite et dépensée sans cesse, en une minute à peine dans une cellule active. Les enzymes déterminent quelle réaction se produit et à quelle vitesse, et leur vitesse plafonne. La photosynthèse remonte ce que la respiration descend, avec la lumière pour source.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Énergie libre \(G\)<span class="u">kJ/mol</span></dt><dd>Part de l’énergie d’un système qui peut produire du travail à température et pression constantes.</dd></div>
+      <div><dt>Variation \(\Delta G\)<span class="u">kJ/mol</span></dt><dd>\(G\) des produits moins \(G\) des réactifs, dans les conditions réelles. Négative : la réaction peut se faire seule.</dd></div>
+      <div><dt>\(\Delta G^{\circ\prime}\)<span class="u">kJ/mol</span></dt><dd>Valeur tabulée dans les conditions standard biochimiques : pH 7, autres espèces à 1 mol/L.</dd></div>
+      <div><dt>Quotient \(Q\)</dt><dd>Produits sur réactifs, en concentrations réelles (mol/L), sans l’eau. À l’équilibre, \(Q = K\).</dd></div>
+      <div><dt>\(R\) et \(T\)</dt><dd>\(R = 8{,}314\) J/(mol·K), \(T = 310\) K (37 °C) : \(RT \approx 2{,}58\) kJ/mol.</dd></div>
+      <div><dt>Exergonique, endergonique</dt><dd>\(\Delta G \lt 0\), ou \(\Delta G \gt 0\) : la réaction « descend », ou « monte ».</dd></div>
+      <div><dt>Couplage, intermédiaire commun</dt><dd>Deux réactions réunies en une seule transformation par une enzyme, grâce à une espèce qu’elles partagent (ici le phosphate transféré).</dd></div>
+      <div><dt>ATP, ADP, Pi</dt><dd>Adénosine triphosphate (trois phosphates), adénosine diphosphate (deux), phosphate inorganique. ATP + H₂O → ADP + Pi : \(\Delta G^{\circ\prime} = -30{,}5\) kJ/mol.</dd></div>
+      <div><dt>Enzyme, site actif, substrat</dt><dd>Catalyseur biologique, souvent une protéine ; creux où le substrat se lie ; molécule transformée.</dd></div>
+      <div><dt>\(v\), \([S]\), \([E]_{\text{tot}}\)</dt><dd>Vitesse de la réaction (produits par seconde), concentrations de substrat et d’enzyme totale.</dd></div>
+      <div><dt>\(V_{\max}\)</dt><dd>Vitesse quand tous les sites sont occupés.</dd></div>
+      <div><dt>\(k_{\text{cat}}\)<span class="u">s⁻¹</span></dt><dd>Substrats transformés par site actif et par seconde, à saturation.</dd></div>
+      <div><dt>\(K_m\)<span class="u">unité de \([S]\)</span></dt><dd>Concentration de substrat où \(v = V_{\max}/2\).</dd></div>
+      <div><dt>Inhibiteur compétitif, \(K_i\), \([I]\)</dt><dd>Molécule qui occupe le site actif sans réagir ; \(K_i\) mesure la force de sa liaison, \([I]\) est sa concentration.</dd></div>
+      <div><dt>Respiration cellulaire</dt><dd>Oxydation du glucose par l’O₂, en CO₂ et eau, avec production d’environ 30 ATP.</dd></div>
+      <div><dt>Fermentation</dt><dd>Glucose en lactate sans O₂ : 2 ATP seulement.</dd></div>
+      <div><dt>Photosynthèse</dt><dd>Synthèse de glucose et d’O₂ à partir de CO₂ et d’eau, avec l’énergie de la lumière.</dd></div>
+      <div><dt>Rendement</dt><dd>Énergie captée en ATP divisée par l’énergie libérée par le glucose : \(30 \times 30{,}5 / 2\,870 \approx 32\,\%\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ \Delta G = \Delta G^{\circ\prime} + RT\ln Q \]
+      <p>Le sens et l’ampleur d’une réaction dépendent des concentrations. Pour l’ATP, \(Q\) est très petit dans la cellule, donc le \(\Delta G\) réel vaut environ \(-50\) kJ/mol, plus bas que \(-30{,}5\).</p></div>
+    <div class="relation">\[ \Delta G_{\text{tot}} = \Delta G_1 + \Delta G_2 \lt 0 \]
+      <p>Une réaction qui monte (\(\Delta G_1 \gt 0\)) se fait si on l’enchaîne à une qui descend davantage : le total seul décide. Glucose + ATP : \(13{,}8 - 30{,}5 = -16{,}7\) kJ/mol.</p></div>
+    <div class="relation">\[ v = \frac{V_{\max}[S]}{K_m + [S]}, \qquad V_{\max} = k_{\text{cat}}[E]_{\text{tot}} \]
+      <p>À faible \([S]\), \(v\) croît avec \([S]\) ; à forte \([S]\), elle plafonne à \(V_{\max}\). Doubler l’enzyme double \(V_{\max}\), pas \(K_m\).</p></div>
+    <div class="relation">\[ K_m^{\text{app}} = K_m\left(1 + \frac{[I]}{K_i}\right) \]
+      <p>Un inhibiteur compétitif fait paraître \(K_m\) plus grand, mais \(V_{\max}\) ne change pas : à très forte \([S]\), le substrat l’emporte.</p></div>
+    <div class="relation">\[ \text{C}_6\text{H}_{12}\text{O}_6 + 6\,\text{O}_2 \to 6\,\text{CO}_2 + 6\,\text{H}_2\text{O}, \qquad \Delta G^{\circ\prime} \approx -2\,870\ \text{kJ/mol} \]
+      <p>La respiration. La photosynthèse en est la réaction inverse, de \(\Delta G^{\circ\prime} \approx +2\,870\) kJ/mol : elle monte, donc la lumière doit l’alimenter.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Quelle masse d’ATP un humain de 100 W renouvelle-t-il par jour ? Hypothèses : les 100 W viennent de l’oxydation du glucose (2 870 kJ/mol), avec 30 ATP par glucose ; \(M_{\text{ATP}} = 507\) g/mol.</p>
+      <ol>
+        <li>Glucose : \(100 / (2{,}870 \times 10^{6}) \approx 3{,}48 \times 10^{-5}\) mol/s.</li>
+        <li>ATP : \(30 \times 3{,}48 \times 10^{-5} \approx 1{,}05 \times 10^{-3}\) mol/s.</li>
+        <li>Par jour : \(1{,}05 \times 10^{-3} \times 86\,400 \approx 90\) mol.</li>
+        <li>Masse : \(90 \times 507 \approx 4{,}6 \times 10^{4}\) g, soit environ 46 kg : du même ordre que la masse d’un corps, recyclée chaque jour.</li>
+        <li>Vérification : la puissance qui transite par l’ATP vaut \(1{,}05 \times 10^{-3} \times 49{,}5 \times 10^{3} \approx 52\) W, soit \(30 \times 49{,}5 / 2\,870\) des 100 W. Si les 100 W passaient tous par l’ATP à 49,5 kJ/mol, on obtiendrait la borne haute, environ 88 kg.</li>
+        <li>Réserve : un cerveau actif (20 W, 30 ATP par glucose) consomme \(2{,}1 \times 10^{-4}\) mol/s. Avec 1 L d’eau cellulaire à 4 mmol/L, soit \(4 \times 10^{-3}\) mol, la réserve dure \(4 \times 10^{-3} / 2{,}1 \times 10^{-4} \approx 19\) s sans recyclage.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« L’énergie est dans les liaisons de l’ATP. » Casser une liaison coûte toujours de l’énergie. L’hydrolyse descend parce que l’ADP et le Pi, séparés et hydratés, sont bien plus stables que l’ATP et l’eau, avec moins de répulsion entre charges négatives voisines. Ce qui compte, c’est l’écart entre l’état avant et l’état après.</li>
+      <li>« Les enzymes sont consommées. » Non : elles ressortent intactes de la réaction et resservent, \(k_{\text{cat}}\) fois par seconde.</li>
+      <li>« Plus d’enzymes changent \(K_m\). » Non : elles changent \(V_{\max}\). \(K_m\) dépend de l’enzyme et du substrat, pas de la quantité d’enzyme.</li>
+      <li>« Les plantes ne respirent pas » ou « seulement la nuit ». Elles respirent tout le temps. Le jour, la photosynthèse fait simplement plus de sucre que la respiration n’en oxyde.</li>
+      <li>« La photosynthèse fabrique de l’énergie. » Elle convertit l’énergie de la lumière en énergie libre de molécules ; rien ne se crée.</li>
+      <li>« Le lactate cause les courbatures. » Non : elles viennent de microlésions des fibres musculaires. Le lactate est évacué ou réutilisé en une heure environ.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>33</b><span>Coût des pompes et de l’influx nerveux : voir les planches <a href="../03-neurone/index.html">Le neurone</a> et <a href="../fondations-cellule-membrane/index.html">Cellule, membrane et transport</a>.</span></li>
+      <li><b>35</b><span>Les enzymes sont codées par les gènes (à venir).</span></li>
+      <li><b>37</b><span>Cascades enzymatiques, où le produit d’une enzyme est le substrat de la suivante (à venir).</span></li>
+      <li><b>38</b><span>Le muscle et son ATP (à venir).</span></li>
+      <li><b>41</b><span>Chaînes alimentaires : chaque maillon perd la plus grande part en chaleur (à venir).</span></li>
+      <li><b>02</b><span>Le mécanisme de la chaîne respiratoire : planche <a href="../02-respiration/index.html">La respiration cellulaire</a>.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary><span>Quel est le \(\Delta G\) réel de l’hydrolyse de l’ATP à 310 K si [ATP] = 4 mmol/L, [Pi] = 5 mmol/L et [ADP] = 0,05 mmol/L ?</span></summary>
+      <p>\(Q = \dfrac{0{,}05 \times 5}{4} \times 10^{-3} = 6{,}25 \times 10^{-5}\), donc \(\ln Q \approx -9{,}68\). \(\Delta G = -30{,}5 + 2{,}58 \times (-9{,}68) \approx -55{,}4\) kJ/mol : moins d’ADP, plus de pente.</p></details>
+    <details><summary><span>Un sprint exige 60 ATP. Combien de glucose, avec puis sans O₂ ?</span></summary>
+      <p>Avec O₂ : \(60/30 = 2\) glucose. Sans O₂ : \(60/2 = 30\) glucose, soit quinze fois plus pour le même travail.</p></details>
+    <details><summary><span>Avec \(K_m = 60\) et un inhibiteur compétitif à \([I] = K_i\), que valent \(K_m^{\text{app}}\), puis \(v/V_{\max}\) à \([S] = 60\) et à \([S] = 600\) ?</span></summary>
+      <p>\(K_m^{\text{app}} = 60 \times 2 = 120\). À \([S] = 60\) : \(60/180 = 1/3\). À \([S] = 600\) : \(600/720 \approx 0{,}83\), contre \(600/660 \approx 0{,}91\) sans inhibiteur : le substrat l’emporte presque.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>ΔG°′ standard :</strong> les valeurs sont celles des conditions standard biochimiques ; le ΔG réel n’est calculé que pour l’ATP.</li>
+    <li><strong>Myosine et pompe :</strong> ordres de grandeur calculés, 5 pN sur 8 nm pour la myosine ; 145/12 mmol/L de Na⁺, 4/140 de K⁺ et −70 mV pour la pompe.</li>
+    <li><strong>Porte-monnaie :</strong> la réserve et la consommation de fond sont choisies pour que la chute se voie en environ 20 s.</li>
+    <li><strong>Enzymes :</strong> immobiles, en deux dimensions, dans un bain à concentration constante. La diffusion rend la vitesse mesurée quelques pour cent plus lente que Michaelis-Menten (environ 4 % en moyenne).</li>
+    <li><strong>Bilans :</strong> selon une convention : 30 ATP avec la navette glycérol-phosphate, 32 avec la navette malate-aspartate. Les anciens manuels disaient 36 ou 38.</li>
+    <li><strong>Chloroplaste :</strong> schématique. Le spectre de la chlorophylle est approché par des gaussiennes.</li>
+    <li><strong>Feuille mince :</strong> une vraie feuille absorbe bien plus de vert (70 à 80 %), parce que la lumière s’y diffuse et la traverse plusieurs fois.</li>
+    <li><strong>Courbe de réponse et limite par le CO₂ :</strong> modèles empiriques (courbe de Webb) et saturable, pas des lois déduites.</li>
+    <li><strong>Illustratif :</strong> les lueurs et les fondus entre étapes n’ont pas de contrepartie physique.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>−30,5 / ≈ −50 kJ/mol</b><span>ΔG de l’hydrolyse de l’ATP : valeur standard, puis valeur réelle dans la cellule (−49,5).</span></div>
+    <div><b>30 contre 2</b><span>ATP par glucose avec O₂ (convention à 30, ou 32) et sans O₂.</span></div>
+    <div><b>≈ 32 %</b><span>rendement de la respiration : 30 × 30,5 / 2 870. Le reste, environ 1 955 kJ, part en chaleur.</span></div>
+    <div><b>≈ 46 kg par jour</b><span>masse d’ATP renouvelée par un humain de 100 W (environ 90 mol).</span></div>
+    <div><b>≈ 20 s</b><span>durée de la réserve d’ATP d’un cerveau actif sans recyclage.</span></div>
+    <div><b>8 photons par O₂</b><span>soit 48 par glucose ; le rendement d’un champ est de 1 à 2 %.</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées et méritent leur propre étude : le <strong>cycle de Krebs</strong> en détail, les <strong>photosystèmes</strong>, le <strong>NADH et le FADH₂</strong> comme transporteurs d’électrons, la <strong>régulation allostérique</strong> des enzymes. La catalyse et l’équilibre relèvent du module 30, les réactions redox du module 31, le photon et \(E = hf\) des modules 24 et 27. Hors champ : le métabolisme des lipides et des protéines, le cycle de Calvin en détail, la photorespiration, les plantes C4 et la thermodynamique hors équilibre.</p>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
