@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les atomes, les noyaux et la lumière — LABO</title>
+<meta name="description" content="Théorie des modules 26 et 27 (architecture atomique et nucléaire ; quantification, photons et spectres atomiques) et ce que montre la planche Atomes, noyaux et lumière.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#e9b6ff;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="../../labo/index.html">&larr; LABO</a><a href="index.html">Revenir à la planche</a></nav>
+  <p class="serie">LABO · Fondations 26 · 27</p>
+  <h1>Atomes, noyaux et <em>lumière</em></h1>
+  <p class="lede">Cette planche part d’une expérience, tirer sur une feuille d’or, et arrive à ce que la lumière raconte des atomes. Entre les deux, sept étapes en deux chapitres : un noyau minuscule et massif avec ce qu’il peut libérer d’énergie, puis des électrons dont l’énergie ne prend que certaines valeurs, ce qui donne aux atomes leurs empreintes lumineuses.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">1 · Tirer sur une feuille d’or</span></dt>
+    <dd>Des particules α partent d’une source vers une feuille d’or épaisse d’un seul atome ; un écran circulaire garde un éclat à chaque impact. Tu bascules entre deux modèles : Thomson (charge positive étalée, déviations faibles) et Rutherford (charge concentrée dans un noyau, quelques α qui rebroussent chemin). C’est l’expérience de Geiger et Marsden, interprétée par Rutherford en 1911. Une loupe montre la trajectoire d’une α autour d’un noyau, à l’échelle du femtomètre.</dd>
+    <dt><span class="acc">2 · Protons, neutrons, isotopes</span></dt>
+    <dd>Tu construis un noyau nucléon par nucléon et la carte des nucléides situe le résultat : protons en ordonnée, neutrons en abscisse. Les nucléides stables forment une vallée étroite. Ajouter des neutrons au carbone 12 donne le 13 (stable) puis le 14, celui de la datation, qui ne l’est pas.</dd>
+    <dt><span class="acc">3 · Énergie de liaison</span></dt>
+    <dd>La courbe de l’énergie de liaison par nucléon monte jusqu’au fer, puis redescend doucement. Une balance montre un noyau plus léger que ses nucléons séparés ; la fusion du deutérium et du tritium, celle de l’hélium et la fission de l’uranium 235 sont des déplacements sur la courbe, avec l’énergie libérée comparée au méthane. Au-delà du fer, la fusion coûte de l’énergie : c’est ce qui prépare l’effondrement du cœur d’une étoile massive (planche <a href="../09-supernova/index.html">Supernova</a>).</dd>
+    <dt><span class="acc">4 · Radioactivité</span></dt>
+    <dd>400 noyaux d’un même nucléide, ¹⁴C, ³H, ¹⁸F, ¹³¹I, ⁶⁰Co ou ²²²Rn, se désintègrent un à un, au hasard ; chacun prend la couleur de son noyau fils et la carte des nucléides montre la flèche de la transmutation. Trois écrans (papier, aluminium, plomb) montrent qui arrête les α, les β et les γ. La courbe de décroissance est celle de la planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a> ; ici, on regarde ce qui change dans le noyau.</dd>
+    <dt><span class="acc">5 · Une échelle d’énergies</span></dt>
+    <dd>L’hydrogène est dessiné comme une échelle de barres horizontales (n = 1 à 6) et d’un continuum au-dessus de 0 eV, avec le nuage schématique de l’état occupé. Un canon envoie un photon d’énergie réglable : il est absorbé seulement si son énergie égale un écart entre deux niveaux, sinon il passe. L’atome excité se désexcite ensuite au hasard en émettant un ou plusieurs photons, à la couleur de leur longueur d’onde.</dd>
+    <dt><span class="acc">6 · Des raies comme des empreintes</span></dt>
+    <dd>Un tube à décharge (hydrogène, hélium, sodium, mercure, néon) donne, à travers un prisme, un spectre d’émission : des raies brillantes sur fond noir. En absorption, de la lumière blanche traverse le gaz froid et le spectre continu est barré de raies sombres aux mêmes places. C’est ainsi que l’hélium a été repéré dans le Soleil, en 1868, avant d’être isolé sur Terre. Le « gaz mystère » te demande de reconnaître les éléments d’un mélange.</dd>
+    <dt><span class="acc">7 · Des paquets de lumière</span></dt>
+    <dd>Une lumière de couleur et d’intensité réglables éclaire une plaque de métal (sodium, potassium, zinc, cuivre) dans une ampoule vide ; les électrons éjectés vont vers une électrode, avec une tension de freinage réglable. Sous le seuil, aucune intensité ne les libère ; au-dessus, doubler l’intensité double leur nombre sans les rendre plus rapides. Le graphe de la tension d’arrêt en fonction de la fréquence est une droite de pente h/e. C’est l’interprétation d’Einstein (1905).</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m26"><b>26</b>Architecture atomique et nucléaire</a></li>
+    <li><a href="#m27"><b>27</b>Quantification, photons et spectres atomiques</a></li>
+  </ul>
+
+  <!-- ===================== Module 26 ===================== -->
+  <section class="module" id="m26">
+    <header>
+      <p class="num">Module 26</p>
+      <h3>Architecture atomique et nucléaire</h3>
+      <p class="etapes">Sur la planche : étapes 1 Tirer sur une feuille d’or · 2 Protons, neutrons, isotopes · 3 Énergie de liaison · 4 Radioactivité</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Un atome est presque vide. Son centre, le noyau, est environ 20 000 fois plus petit que lui : pour l’or, 7 fm de rayon contre 144 pm. Si le noyau était une bille de 1 cm, l’atome ferait environ 200 m de diamètre. Pourtant ce noyau porte toute la charge positive et plus de 99,9 % de la masse. Il est fait de protons, chargés positivement, et de neutrons, neutres, chacun environ 1 840 fois plus lourd qu’un électron. Autant d’électrons que de protons rendent l’atome neutre. Le nombre de protons fait l’élément ; le nombre de neutrons fait l’isotope. Les protons se repoussent électriquement, mais une autre interaction, très forte à courte portée, tient les nucléons ensemble. Un noyau lié pèse moins que ses nucléons séparés : cette différence de masse est l’énergie de liaison, que libèrent la fusion et la fission. Enfin, certains noyaux sont instables : ils se transforment au hasard, sans que leur âge compte.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Atome</dt><dd>Noyau entouré d’électrons, électriquement neutre. Taille : environ 10⁻¹⁰ m.</dd></div>
+      <div><dt>Noyau</dt><dd>Centre de l’atome, chargé positivement, presque toute la masse. Taille : 10⁻¹⁵ à 10⁻¹⁴ m.</dd></div>
+      <div><dt>Nucléon</dt><dd>Proton ou neutron.</dd></div>
+      <div><dt>Proton \(p\)<span class="u">+e</span></dt><dd>Charge \(+e = 1{,}602 \times 10^{-19}\) C, masse 1,007 276 u.</dd></div>
+      <div><dt>Neutron \(n\)<span class="u">0</span></dt><dd>Sans charge, masse 1,008 665 u.</dd></div>
+      <div><dt>Électron \(e^-\)<span class="u">−e</span></dt><dd>Masse 5,486 × 10⁻⁴ u, soit 1/1 836 de celle du proton.</dd></div>
+      <div><dt>Numéro atomique \(Z\)</dt><dd>Nombre de protons. Il fixe l’élément.</dd></div>
+      <div><dt>Nombre de neutrons \(N\)</dt><dd>Nombre de neutrons du noyau.</dd></div>
+      <div><dt>Nombre de masse \(A\)</dt><dd>Nombre de nucléons, \(A = Z + N\). Sans unité.</dd></div>
+      <div><dt>Nucléide</dt><dd>Noyau défini par \(Z\) et \(N\), noté avec \(A\) en exposant : ¹⁴C, ²³⁵U.</dd></div>
+      <div><dt>Isotopes</dt><dd>Même \(Z\), \(N\) différent : ¹²C, ¹³C et ¹⁴C.</dd></div>
+      <div><dt>Unité de masse atomique u<span class="u">kg</span></dt><dd>Douzième de la masse d’un atome de ¹²C : \(1\ \text{u} = 1{,}6605 \times 10^{-27}\) kg, \(1\ \text{u}\,c^2 = 931{,}494\) MeV.</dd></div>
+      <div><dt>Défaut de masse \(\Delta m\)<span class="u">u</span></dt><dd>Masse des nucléons séparés moins masse du noyau.</dd></div>
+      <div><dt>Énergie de liaison \(B\)<span class="u">MeV</span></dt><dd>Énergie pour séparer un noyau en nucléons libres. \(B/A\) : par nucléon.</dd></div>
+      <div><dt>Valeur \(Q\) d’une réaction<span class="u">MeV</span></dt><dd>Énergie libérée par une réaction ; positive si elle en libère.</dd></div>
+      <div><dt>Désintégration α</dt><dd>Émission d’un noyau d’hélium 4 : \(Z-2\), \(N-2\).</dd></div>
+      <div><dt>Désintégration β⁻, β⁺</dt><dd>β⁻ : un neutron devient proton, avec un électron et un antineutrino (\(Z+1\), \(N-1\)). β⁺ : l’inverse, avec un positon.</dd></div>
+      <div><dt>Désintégration γ</dt><dd>Photon de très haute énergie émis par un noyau excité. \(Z\) et \(N\) restent.</dd></div>
+      <div><dt>Demi-vie \(t_{1/2}\)<span class="u">s, j, a</span></dt><dd>Durée après laquelle la moitié des noyaux d’un grand échantillon s’est désintégrée.</dd></div>
+      <div><dt>Activité \(\mathcal{A}\)<span class="u">Bq</span></dt><dd>Désintégrations par seconde ; 1 Bq = 1 s⁻¹. Notée \(\mathcal{A}\) pour ne pas la confondre avec \(A\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ A = Z + N \]
+      <p>Le nombre de nucléons est la somme des protons et des neutrons ; la charge du noyau est \(+Ze\). Pour le ¹⁴C : \(Z = 6\), \(N = 8\).</p></div>
+    <div class="relation">\[ r \approx 1{,}2\ \text{fm} \times A^{1/3} \]
+      <p>Le volume croît comme \(A\) : les nucléons sont serrés, la densité est à peu près constante, environ 2 × 10¹⁷ kg/m³. L’or (\(A = 197\)) : 7 fm.</p></div>
+    <div class="relation">\[ E = \Delta m\,c^2, \qquad 1\ \text{u}\,c^2 = 931{,}494\ \text{MeV} \]
+      <p>Une variation de masse et une variation d’énergie sont la même chose comptée de deux façons (module 46).</p></div>
+    <div class="relation">\[ B = \left(Z\,m_p + N\,m_n - m_{\text{noyau}}\right)c^2 \]
+      <p>L’énergie de liaison est le défaut de masse converti en énergie. Les tables donnent des masses d’atomes : on remplace \(m_p\) par la masse de l’atome ¹H et \(m_{\text{noyau}}\) par celle de l’atome ; les électrons s’équilibrent.</p></div>
+    <div class="relation">\[ Q = \left(\sum m_{\text{réactifs}} - \sum m_{\text{produits}}\right)c^2 \]
+      <p>Bilan d’une réaction, avec des masses atomiques : la charge et le nombre de nucléons se conservent, pas la masse. Si \(Q \gt 0\), de l’énergie est libérée.</p></div>
+    <div class="relation">\[ N(t) = N_0\,2^{-t/t_{1/2}}, \qquad \mathcal{A} = \lambda N, \qquad \lambda = \frac{\ln 2}{t_{1/2}} \]
+      <p>Chaque noyau a la même chance de se désintégrer à chaque instant, quel que soit son âge : le nombre de noyaux est divisé par deux à chaque demi-vie (module 05). \(\lambda\) est la probabilité par seconde ; l’activité suit le nombre de noyaux.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un gramme d’un mélange de deutérium et de tritium qui fusionne, comparé à un gramme de méthane qui brûle. On calcule avec les masses atomiques.</p>
+      <ol>
+        <li>Pour étalonner la méthode, le défaut de masse du ⁴He : \(2 \times 1{,}007\,825 + 2 \times 1{,}008\,665 - 4{,}002\,603 = 0{,}030\,377\) u. En énergie, \(0{,}030\,377 \times 931{,}494 = 28{,}30\) MeV, soit \(B/A = 28{,}30/4 = 7{,}07\) MeV par nucléon.</li>
+        <li>La réaction ²H + ³H → ⁴He + n. Réactifs : \(2{,}014\,102 + 3{,}016\,049 = 5{,}030\,151\) u. Produits : \(4{,}002\,603 + 1{,}008\,665 = 5{,}011\,268\) u. Défaut : \(0{,}018\,883\) u.</li>
+        <li>\(Q = 0{,}018\,883 \times 931{,}494 = 17{,}59\) MeV par réaction, emportés surtout par le neutron.</li>
+        <li>En joules : \(17{,}59 \times 1{,}602 \times 10^{-13} = 2{,}818 \times 10^{-12}\) J par réaction.</li>
+        <li>Masse engagée par réaction : \(5{,}030\,151 \times 1{,}6605 \times 10^{-27} = 8{,}353 \times 10^{-27}\) kg.</li>
+        <li>Énergie par kilogramme : \(2{,}818 \times 10^{-12} / 8{,}353 \times 10^{-27} = 3{,}37 \times 10^{14}\) J/kg. Pour 1 g : \(3{,}37 \times 10^{11}\) J, soit \(3{,}37 \times 10^{11} / 3{,}6 \times 10^{9} \approx 94\) MWh.</li>
+        <li>Le méthane libère environ 50 MJ/kg, donc \(5{,}0 \times 10^{4}\) J pour 1 g. Rapport : \(3{,}37 \times 10^{11} / 5{,}0 \times 10^{4} \approx 6{,}7 \times 10^{6}\).</li>
+        <li>Ordre de grandeur : quelques eV par molécule en chimie, quelques MeV par noyau ici, un million de fois plus : cohérent.</li>
+        <li>Un dernier ordre de grandeur, pour la feuille d’or : une α de 5 MeV qui fonce sur un noyau d’or s’arrête à \(d = 2Ze^2/(4\pi\varepsilon_0 E) = 2 \times 79 \times 1{,}44 / 5 = 45{,}5\) fm, plus de six fois le rayon du noyau (7 fm). Elle n’y touche jamais : la répulsion de Coulomb la renvoie avant (module 21).</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« Isotope veut dire radioactif. » Non : le ¹²C et le ¹³C sont stables, seul le ¹⁴C se désintègre.</li>
+      <li>« La masse se conserve dans une réaction nucléaire. » La charge et le nombre de nucléons se conservent ; la masse diminue de \(\Delta m\), et l’énergie correspondante apparaît ailleurs.</li>
+      <li>« La demi-vie, c’est la moitié de la vie d’un noyau. » Un noyau n’a pas de durée de vie programmée : après deux demi-vies il reste un quart des noyaux, pas zéro.</li>
+      <li>« La fission libère de l’énergie parce que le noyau éclate. » Casser un noyau coûte de l’énergie. Ce qui en libère, c’est que les fragments sont plus liés par nucléon (courbe de l’étape 3) que le noyau d’origine.</li>
+      <li>« Le rayonnement rend radioactif. » Un objet exposé à des α, β ou γ ne devient pas radioactif : une radiographie ne rend pas la main radioactive. Seuls les neutrons peuvent activer, en étant capturés.</li>
+      <li>« L’atome est une bille pleine. » Le noyau, presque toute la masse, est 10⁴ à 10⁵ fois plus petit que lui, et les électrons n’ont pas de trajectoire de petite bille (module 27).</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>21</b><span>La force de Coulomb entre le noyau et la particule α, ou entre deux noyaux à fusionner : <a href="../04-champ-electrique/index.html">planche Le champ électrique</a>.</span></li>
+      <li><b>05</b><span>Décroissance exponentielle et demi-vie, avec le toy de désintégration : <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>.</span></li>
+      <li><b>46</b><span>\(E = mc^2\) : <a href="../fondations-relativite-restreinte/index.html">Relativité restreinte</a>.</span></li>
+      <li><b>44</b><span>Fusion et nucléosynthèse : la courbe de liaison dit pourquoi une étoile fusionne jusqu’au fer (<a href="../09-supernova/index.html">planche Supernova</a>).</span></li>
+      <li><b>28</b><span>Le nombre de protons fixe le nombre d’électrons : couches et liaisons.</span></li>
+      <li><b>30</b><span>Énergie de réaction en chimie : même bilan \(Q\), en eV par molécule.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary><span>Un échantillon d’iode 131 (\(t_{1/2} = 8{,}02\) j) est conservé 24 jours. Quelle fraction des noyaux reste-t-elle ?</span></summary>
+      <p>24 jours valent \(24/8{,}02 = 2{,}99\) demi-vies, donc \(2^{-2{,}99} = 0{,}126\) : environ un huitième. L’activité baisse du même facteur.</p></details>
+    <details><summary><span>Un noyau de ¹⁴C (\(Z = 6\)) subit une désintégration β⁻. Quel noyau obtient-on ?</span></summary>
+      <p>Un neutron devient proton : \(Z = 7\), \(N = 7\), \(A = 14\) inchangé. C’est l’azote 14, stable.</p></details>
+    <details><summary><span>Le ⁴He pèse 0,030 377 u de moins que 2 protons et 2 neutrons séparés. Où est passée cette masse ?</span></summary>
+      <p>Quand les nucléons se sont liés, l’énergie \(\Delta m\,c^2 = 28{,}30\) MeV a été libérée (photons, énergie cinétique) et a quitté le système. Séparer le noyau exigerait de la rendre.</p></details>
+  </section>
+
+  <!-- ===================== Module 27 ===================== -->
+  <section class="module" id="m27">
+    <header>
+      <p class="num">Module 27</p>
+      <h3>Quantification, photons et spectres atomiques</h3>
+      <p class="etapes">Sur la planche : étapes 5 Une échelle d’énergies · 6 Des raies comme des empreintes · 7 Des paquets de lumière</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>L’énergie d’un électron lié à un noyau ne peut pas prendre n’importe quelle valeur : seules certaines sont permises, les niveaux d’énergie. L’image juste est celle d’une échelle : on se tient sur un barreau, jamais entre deux. Pour changer de barreau, l’atome échange de l’énergie avec la lumière, qui n’en échange que par paquets, les photons, dont l’énergie est fixée par la fréquence. Un photon n’est donc absorbé que si son énergie égale exactement un écart entre deux niveaux, et l’atome qui redescend en émet un de même énergie. Chaque élément a ses niveaux, donc ses raies : un code-barres lisible à des milliards de kilomètres. Le même échange par paquets explique l’effet photoélectrique : un photon donne toute son énergie à un seul électron, ou rien. Le modèle utilisé ici ne donne que des énergies : ni trajectoire ni orbite, et le nuage dessiné est schématique (module 48).</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Photon</dt><dd>Paquet minimal d’énergie qu’une onde électromagnétique échange avec la matière.</dd></div>
+      <div><dt>Constante de Planck \(h\)<span class="u">J·s</span></dt><dd>\(h = 6{,}626 \times 10^{-34}\) J·s \(= 4{,}136 \times 10^{-15}\) eV·s.</dd></div>
+      <div><dt>Fréquence \(f\)<span class="u">Hz</span></dt><dd>Nombre d’oscillations de l’onde par seconde.</dd></div>
+      <div><dt>Longueur d’onde \(\lambda\)<span class="u">m, nm</span></dt><dd>Distance entre deux crêtes ; dans le vide, \(\lambda f = c\).</dd></div>
+      <div><dt>Électronvolt<span class="u">eV</span></dt><dd>Énergie gagnée par un électron sous 1 V : \(1\ \text{eV} = 1{,}602 \times 10^{-19}\) J.</dd></div>
+      <div><dt>Niveau d’énergie \(E_n\)<span class="u">eV</span></dt><dd>Valeur permise de l’énergie d’un électron lié, repérée par un entier \(n\). Le zéro est l’électron libre au repos : les niveaux liés sont négatifs.</dd></div>
+      <div><dt>État fondamental</dt><dd>Niveau le plus bas (\(n = 1\)).</dd></div>
+      <div><dt>État excité</dt><dd>Tout niveau au-dessus du fondamental.</dd></div>
+      <div><dt>Ionisation</dt><dd>Arrachement de l’électron. Au-delà de 0 eV, il est libre et son énergie n’est plus quantifiée.</dd></div>
+      <div><dt>Énergie d’ionisation<span class="u">eV</span></dt><dd>Énergie minimale pour arracher l’électron depuis le fondamental : 13,6 eV pour l’hydrogène.</dd></div>
+      <div><dt>Raie d’émission</dt><dd>Ligne brillante : photons émis quand l’atome descend d’un niveau.</dd></div>
+      <div><dt>Raie d’absorption</dt><dd>Ligne sombre dans un spectre continu : photons absorbés quand l’atome monte d’un niveau.</dd></div>
+      <div><dt>Série de Balmer</dt><dd>Raies de l’hydrogène qui aboutissent au niveau \(n = 2\) : Hα, Hβ, Hγ, Hδ sont visibles.</dd></div>
+      <div><dt>Spectre continu</dt><dd>Lumière contenant toutes les longueurs d’onde, comme celle d’un solide chaud.</dd></div>
+      <div><dt>Constante de Rydberg \(R_H\)<span class="u">m⁻¹</span></dt><dd>\(R_H = 1{,}0968 \times 10^{7}\) m⁻¹, pour l’hydrogène.</dd></div>
+      <div><dt>Travail d’extraction \(W\)<span class="u">eV</span></dt><dd>Énergie minimale pour arracher un électron à un métal. Elle dépend du métal.</dd></div>
+      <div><dt>Fréquence seuil \(f_0\)<span class="u">Hz</span></dt><dd>Fréquence sous laquelle aucun électron ne sort : \(f_0 = W/h\).</dd></div>
+      <div><dt>Énergie cinétique maximale \(K_{\max}\)<span class="u">eV</span></dt><dd>Énergie des électrons éjectés les plus rapides.</dd></div>
+      <div><dt>Tension d’arrêt \(V_{\text{arrêt}}\)<span class="u">V</span></dt><dd>Tension de freinage qui arrête juste les plus rapides : \(e\,V_{\text{arrêt}} = K_{\max}\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ E = hf = \frac{hc}{\lambda}, \qquad hc = 1\,240\ \text{eV·nm} \]
+      <p>L’énergie d’un photon est proportionnelle à sa fréquence, donc inversement proportionnelle à sa longueur d’onde : 500 nm, 2,48 eV. Le visible va de 380 à 750 nm, soit de 3,3 à 1,7 eV.</p></div>
+    <div class="relation">\[ E_n = -\frac{13{,}6\ \text{eV}}{n^2}, \qquad n = 1, 2, 3, \dots \]
+      <p>Niveaux de l’hydrogène (modèle de Bohr) : −13,6 ; −3,40 ; −1,51 ; −0,85 eV, de plus en plus serrés vers 0, l’ionisation. Pour l’hydrogène seulement.</p></div>
+    <div class="relation">\[ hf = |E_m - E_n| \]
+      <p>Conservation de l’énergie : le photon émis ou absorbé a l’énergie de l’écart entre les deux niveaux. Émission en descendant, absorption en montant, à la même longueur d’onde.</p></div>
+    <div class="relation">\[ \frac{1}{\lambda} = R_H\left(\frac{1}{n_1^2} - \frac{1}{n_2^2}\right), \qquad R_H = 1{,}0968 \times 10^{7}\ \text{m}^{-1} \]
+      <p>Formule de Rydberg, les trois relations précédentes réunies pour l’hydrogène (\(n_2 \gt n_1\), \(R_H = 13{,}6\ \text{eV}/hc\)). Balmer : \(n_1 = 2\). La longueur d’onde est celle du vide.</p></div>
+    <div class="relation">\[ K_{\max} = hf - W, \qquad e\,V_{\text{arrêt}} = K_{\max} \]
+      <p>Effet photoélectrique : un photon donne toute son énergie à un électron, qui en dépense \(W\) pour sortir. Si \(hf \lt W\), rien ne sort, quelle que soit l’intensité.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>La raie rouge de l’hydrogène, Hα, puis le seuil photoélectrique du sodium.</p>
+      <ol>
+        <li>Niveaux : \(E_2 = -13{,}6/4 = -3{,}40\) eV et \(E_3 = -13{,}6/9 = -1{,}51\) eV.</li>
+        <li>Écart : \(E_3 - E_2 = 13{,}6 \times (1/4 - 1/9) = 13{,}6 \times 5/36 = 1{,}889\) eV.</li>
+        <li>Longueur d’onde : \(\lambda = 1\,240 / 1{,}889 \approx 656\) nm, une lumière rouge. Par la formule de Rydberg : \(1/\lambda = 1{,}0968 \times 10^{7} \times 5/36 = 1{,}523 \times 10^{6}\) m⁻¹, donc \(\lambda = 656{,}5\) nm dans le vide.</li>
+        <li>Mesurée dans l’air, la raie est à 656,28 nm : l’indice de l’air raccourcit la longueur d’onde de 0,19 nm. Hβ, Hγ et Hδ suivent à 486,13, 434,05 et 410,17 nm (dans l’air).</li>
+        <li>Sodium, \(W = 2{,}28\) eV. Seuil : \(\lambda_0 = 1\,240/2{,}28 \approx 544\) nm (vert) et \(f_0 = W/h = 2{,}28/4{,}136 \times 10^{-15} = 5{,}51 \times 10^{14}\) Hz.</li>
+        <li>À 400 nm : \(E = 1\,240/400 = 3{,}10\) eV, donc \(K_{\max} = 3{,}10 - 2{,}28 = 0{,}82\) eV et \(V_{\text{arrêt}} = 0{,}82\) V.</li>
+        <li>Vitesse maximale : \(K_{\max} = 0{,}82 \times 1{,}602 \times 10^{-19} = 1{,}31 \times 10^{-19}\) J, donc \(v = \sqrt{2K_{\max}/m_e} = \sqrt{2 \times 1{,}31 \times 10^{-19} / 9{,}109 \times 10^{-31}} \approx 5{,}4 \times 10^{5}\) m/s, soit 0,2 % de \(c\) : le calcul non relativiste suffit.</li>
+        <li>À 600 nm : \(E = 1\,240/600 = 2{,}07\) eV, moins que \(W\). Aucun électron, même avec mille fois plus de lumière : chaque photon seul n’en a pas assez. À 400 nm, doubler l’intensité double le nombre d’électrons et laisse \(K_{\max}\) intact.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Voir des orbites planétaires. Le modèle de Bohr ne donne ici que des énergies, et un nuage n’est pas une trajectoire (module 48).</li>
+      <li>« Plus de lumière éjecte des électrons plus rapides. » L’intensité change le nombre de photons, donc d’électrons. La vitesse maximale ne dépend que de la fréquence.</li>
+      <li>« L’électron absorbe tout photon d’énergie supérieure à l’écart. » Non : sous l’ionisation, l’énergie doit égaler un écart permis. Au-delà de 13,6 eV pour l’hydrogène, tout photon ionise et le surplus devient l’énergie cinétique de l’électron libre : 14 eV laissent 0,4 eV.</li>
+      <li>Confondre raies d’émission et d’absorption. Les longueurs d’onde sont les mêmes, mais l’absorption exige que le niveau de départ soit peuplé : Balmer n’apparaît que dans un gaz chaud, comme l’atmosphère d’une étoile. Un hydrogène froid, au fondamental, n’absorbe que dans l’ultraviolet.</li>
+      <li>« Un photon est une petite bille dans l’onde. » Il échange son énergie d’un bloc, mais se propage comme une onde : interférences, diffraction. Ni bille ni onde ordinaire (module 48).</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>24</b><span>Spectre électromagnétique : \(E = hf\) vaut des ondes radio aux rayons γ.</span></li>
+      <li><b>28</b><span>Plusieurs électrons : couches, énergies d’ionisation, liaisons.</span></li>
+      <li><b>43</b><span>Spectre continu d’un corps chaud, raies sombres de l’atmosphère d’une étoile.</span></li>
+      <li><b>44</b><span>La lumière d’une étoile, lue en raies, donne sa composition.</span></li>
+      <li><b>48</b><span>Pourquoi l’énergie d’un électron lié est quantifiée : la planche pose la question sans y répondre.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary><span>Du zinc (\(W = 4{,}31\) eV) est éclairé à 250 nm. Quelle est l’énergie cinétique maximale des électrons ?</span></summary>
+      <p>\(E = 1\,240/250 = 4{,}96\) eV, donc \(K_{\max} = 4{,}96 - 4{,}31 = 0{,}65\) eV, avec une tension d’arrêt de 0,65 V.</p></details>
+    <details><summary><span>Un photon de 11,0 eV frappe un atome d’hydrogène dans son état fondamental. Est-il absorbé ? Et un photon de 14 eV ?</span></summary>
+      <p>Les écarts depuis \(n = 1\) valent 10,2 eV (vers \(n = 2\)), 12,09 eV (vers 3), 12,75 eV (vers 4) : 11,0 eV n’égale aucun d’eux, le photon passe. 14 eV dépasse l’ionisation (13,6 eV) : l’électron est arraché et emporte \(14 - 13{,}6 = 0{,}4\) eV.</p></details>
+    <details><summary><span>On double l’intensité d’une lumière violette éclairant du sodium. Que deviennent le nombre d’électrons éjectés et leur énergie maximale ?</span></summary>
+      <p>Il y a deux fois plus de photons par seconde, donc deux fois plus d’électrons. Mais chaque photon porte la même énergie : \(K_{\max}\) ne change pas.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Échelles :</strong> elles ne sont pas respectées dans les vues d’ensemble (le noyau serait invisible). Seules les loupes et la bascule « Échelles » montrent les vrais rapports.</li>
+    <li><strong>Feuille d’or :</strong> épaisse d’un seul atome, et les tirs visent un disque de 1 000 fm de rayon autour d’un noyau, ce qui rend les retours environ 10⁴ fois plus fréquents qu’avec une vraie feuille. Le noyau d’or est fixe ; les électrons sont ignorés dans la déviation.</li>
+    <li><strong>Noyaux :</strong> les nucléons sont dessinés en billes, sans couches. La courbe continue de l’énergie de liaison vient d’une formule semi-empirique (coefficients de Rohlf) ; les points sont des masses mesurées (AME2020).</li>
+    <li><strong>Table des nucléides :</strong> NUBASE2020, jusqu’à Z = 26, avec les demi-vies de plus d’une milliseconde, plus quelques repères plus lourds.</li>
+    <li><strong>Radioactivité :</strong> les noyaux fils sont supposés stables, sans chaînes de désintégration. Écrans : portées et atténuations simplifiées (α arrêtée net, β à une seule énergie maximale, γ de 1,25 MeV).</li>
+    <li><strong>Hydrogène :</strong> modèle de Bohr, pour les énergies seulement ; les nuages sont schématiques. La tolérance d’absorption de 0,03 eV est bien plus large que la largeur réelle des raies, et les temps de désexcitation sont ralentis. Les intensités relatives des raies sont approximatives.</li>
+    <li><strong>Effet photoélectrique :</strong> métal sans structure de bandes, travaux d’extraction typiques, énergies des électrons éjectés supposées réparties uniformément entre 0 et \(K_{\max}\).</li>
+    <li><strong>Illustratif :</strong> les éclats, les traînées et les fondus entre étapes n’ont pas de contrepartie physique.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>10⁻¹⁰ m</b><span>taille d’un atome ; celle d’un noyau est de 10⁻¹⁵ à 10⁻¹⁴ m.</span></div>
+    <div><b>931,5 MeV</b><span>énergie d’une unité de masse atomique : 1 u c².</span></div>
+    <div><b>≈ 8,8 MeV</b><span>énergie de liaison par nucléon maximale, au ⁵⁶Fe et au ⁶²Ni : le sommet de la courbe.</span></div>
+    <div><b>17,6 MeV</b><span>énergie libérée par une fusion deutérium-tritium. Une fission de ²³⁵U libère environ 200 MeV (173 MeV pour la réaction montrée, avec ses fragments et ses neutrons).</span></div>
+    <div><b>5 700 ans</b><span>demi-vie du ¹⁴C.</span></div>
+    <div><b>13,6 eV</b><span>énergie d’ionisation de l’hydrogène.</span></div>
+    <div><b>1,7 à 3,3 eV</b><span>énergie des photons de lumière visible (750 à 380 nm).</span></div>
+    <div><b>4,136 × 10⁻¹⁵ eV·s</b><span>constante de Planck : \(E = hf\).</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées et méritent leur propre étude : la <strong>force nucléaire forte</strong> qui lie les nucléons, l’<strong>interaction faible</strong> (désintégration β et neutrino), le <strong>modèle en couches du noyau</strong>, les <strong>orbitales et les nombres quantiques</strong> (modules 48 et 49), le <strong>spin et le principe de Pauli</strong> (module 50, seulement nommés pour les couches) et les <strong>spectres moléculaires</strong>.</p>
+
+  <a class="cta" href="index.html"><span>Revenir à la planche</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>
