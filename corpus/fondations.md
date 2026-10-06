@@ -20,12 +20,12 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-23, 32, 33, 40, 46 (24 modules) |
+| Couverture **full** par au moins un modèle | 01-06, 10-23, 25, 32, 33, 40, 46 (25 modules) |
 | Couverture **partial** | 07, 08, 34, 36, 44 |
-| Seulement **supporting** | 09, 26, 30, 31, 35 |
-| Rien | 24, 25, 27-29, 37-39, 41-43, 45, 47-50 |
+| Seulement **supporting** | 09, 24, 26, 30, 31, 35 |
+| Rien | 27-29, 37-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Optique fondamentale* (module 25), est construite le même jour, avant le module 24 : la planche n'utilise de l'onde électromagnétique que la vibration transverse de E (polarisation), sans l'enseigner. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -38,6 +38,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 - **46** : une seule dimension d’espace ; accélération propre, quadrivecteurs, aberration et Doppler relativistes hors champ. Le module 47 est annoncé en fin de planche, pas couvert.
 - **40** : générations non chevauchantes, un seul gène, reproduction à un parent pour le trait continu, mutations neutres ; ni recombinaison, ni coalescence, ni spéciation. Les modules 41 et 42 sont annoncés en fin de planche (grille mélangée ou par voisinage), pas couverts.
 - **23** : sources à symétrie axiale et fils infinis seulement, sans matériaux magnétiques (ni fer, ni hystérésis) ; particules non relativistes ; inductance propre de la bobine réceptrice et des anneaux du tube négligée. Auto-induction, transformateur et moteur seulement introduits ; le module 24 est annoncé en fin de planche.
+- **25** : optique géométrique (ni diffraction ni interférences de couches minces) ; lentille mince idéale par défaut, lentille épaisse seulement pour montrer l'aberration sphérique ; loi de Cauchy approchée ; polariseurs idéaux ; fibre figurée par une tige de verre dans l'air. Principe de Fermat, diffusion, biréfringence et instruments à plusieurs lentilles seulement introduits ; les modules 15, 47, 48 et 50 sont annoncés en fin de planche.
 - **16** est enseigné par *Flux, gradients, champs et fluides*. Le gradient et le flux qui apparaissent dans *Matière, chaleur et transport* restent `supporting`.
 
 ## Les 50 modules
@@ -47,7 +48,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
 | 01 | Mesure, échelles et représentation scientifique | grandeurs, unités, ordres de grandeur, notation scientifique, dimensions, graphiques, pente, aire, proportionnalité, analyse dimensionnelle, incertitude, chiffres significatifs | Langage scientifique fondamental (`built`) | **full** | Langage scientifique (full), Systèmes, croissance et hasard (supporting), Flux, gradients, champs et fluides (supporting) |
-| 02 | Vecteurs et géométrie des quantités | magnitude, direction, composantes, addition, projection | Langage scientifique fondamental (`built`) | **full** | Le champ électrique (supporting), Langage scientifique (full), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
+| 02 | Vecteurs et géométrie des quantités | magnitude, direction, composantes, addition, projection | Langage scientifique fondamental (`built`) | **full** | Le champ électrique (supporting), Langage scientifique (full), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting), Optique : la lumière qui tourne (supporting) |
 | 03 | Changement et accumulation | dérivée, intégrale, position, vitesse, accélération | Langage scientifique fondamental (`built`) | **full** | Langage scientifique (full), Systèmes, croissance et hasard (supporting), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
 | 04 | Systèmes qui évoluent dans le temps | EDO intuitives, état, taux de changement, conditions initiales, feedback positif/négatif | Systèmes, croissance et hasard (`built`) | **full** | Le neurone qui apprend (supporting), Systèmes, croissance et hasard (full), Oscillations et ondes (supporting) |
 | 05 | Exponentielles et logarithmes | croissance, décroissance, demi-vie, temps caractéristique, échelles logarithmiques | Systèmes, croissance et hasard (`built`) | **full** | Courant et circuits (supporting), Langage scientifique (supporting), Systèmes, croissance et hasard (full) |
@@ -65,7 +66,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 12 | Rotation | couple, vitesse angulaire, moment d’inertie, moment cinétique, précession (extension) | Rotation, gravitation et orbites (`built`) | **full** | Rotation, gravitation et orbites (full) |
 | 13 | Gravitation et orbites | gravitation newtonienne, potentiel, énergie orbitale, orbites elliptiques, vitesse de libération | Rotation, gravitation et orbites (`built`) | **full** | Supernova par effondrement du cœur (supporting), Rotation, gravitation et orbites (full) |
 | 14 | Oscillateurs et résonance | masse-ressort, oscillateur harmonique, amortissement, forçage, résonance | Oscillations et ondes (`built`) | **full** | Courant et circuits (supporting), Oscillations et ondes (full) |
-| 15 | Ondes | propagation, amplitude, fréquence, longueur d’onde, superposition, interférence, ondes stationnaires, modes, Doppler | Oscillations et ondes (`built`) | **full** | Ondes et interférences (partial), Oscillations et ondes (full) |
+| 15 | Ondes | propagation, amplitude, fréquence, longueur d’onde, superposition, interférence, ondes stationnaires, modes, Doppler | Oscillations et ondes (`built`) | **full** | Ondes et interférences (partial), Oscillations et ondes (full), Optique : la lumière qui tourne (supporting) |
 | 16 | Flux, gradients et champs continus | flux, gradient, champ scalaire, champ vectoriel, divergence, rotationnel | Flux, gradients, champs et fluides (`built`) | **full** | La respiration cellulaire (supporting), Le champ électrique (supporting), Matière, chaleur et transport (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (full) |
 
 ### C · Matière, thermique et transport
@@ -84,8 +85,8 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 21 | Électrostatique | charge, champ électrique, potentiel, tension | Électricité fondamentale et circuits (`built`) | **full** | Le champ électrique (full), Courant et circuits (supporting), Magnétisme et induction (supporting) |
 | 22 | Courant et circuits dynamiques | courant, résistance, loi d’Ohm, condensateur, RC / RL / RLC | Électricité fondamentale et circuits (`built`) | **full** | Courant et circuits (full), Magnétisme et induction (supporting) |
 | 23 | Magnétisme et induction | champ magnétique, force de Lorentz, flux magnétique, Faraday, Lenz | Magnétisme et induction (`built`) | **full** | Magnétisme et induction (full) |
-| 24 | Onde électromagnétique | E et B couplés, propagation, fréquence, longueur d’onde, énergie, spectre EM | Onde électromagnétique et spectre (`planned`) | — | — |
-| 25 | Optique fondamentale | réflexion, réfraction, indice, réflexion totale, lentilles, dispersion, polarisation | Optique fondamentale (`planned`) | — | — |
+| 24 | Onde électromagnétique | E et B couplés, propagation, fréquence, longueur d’onde, énergie, spectre EM | Onde électromagnétique et spectre (`planned`) | supporting | Optique : la lumière qui tourne (supporting) |
+| 25 | Optique fondamentale | réflexion, réfraction, indice, réflexion totale, lentilles, dispersion, polarisation | Optique fondamentale (`built`) | **full** | Optique : la lumière qui tourne (full) |
 
 ### E · Atomes, chimie et noyaux
 
@@ -165,10 +166,11 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
+| Optique fondamentale | 25 | [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | Un chapitre de quatre étapes (réfraction et réflexion totale, lentilles, couleurs, polarisation) sur une même table d'optique. Moteur testé hors page (61 tests, aussi lancés sur la page). Construite avant le module 24. |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
+Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
 
 La maquette « magnétisme » du premier prototype d'interface, retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)), n'a rien à voir avec la planche *Magnétisme et induction* construite le 2026-10-06.
 

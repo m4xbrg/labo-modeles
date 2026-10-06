@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**19 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 10 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**20 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 11 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -29,6 +29,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
+| [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | foundation | Optique fondamentale | — | 25 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 

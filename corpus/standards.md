@@ -53,5 +53,6 @@ Ce standard s'applique au fil de la migration des planches vers le gabarit LABO 
 | Évolution et génétique des populations | 40 | 11 | étapes à plat | Trop long pour un module : 4 étapes, ou scinder si une partie relève de 41. |
 | Relativité restreinte | 46 | 8 | actes en paillasses | Trop long pour un module : 4 étapes. |
 | Magnétisme et induction | 23 | 4 | actes en paillasses, scènes au choix dans chaque acte | Conforme (construite au standard le 2026-10-06). |
+| Optique : la lumière qui tourne | 25 | 4 | étapes à plat, un chapitre, sous-scènes en bascule | Conforme (construite au standard le 2026-10-06). |
 
 « Trop long pour un module » ne veut pas dire qu'il faut jeter du contenu : une étape peut regrouper deux scènes voisines, et ce qui dépasse le module (ouverture vers 41 ou 47) peut devenir le premier chapitre d'une page future.
