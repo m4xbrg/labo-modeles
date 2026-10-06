@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les protons et les électrons qui passent — LABO</title>
+<meta name="description" content="Ce que montre la planche Acide-base, redox et électrochimie, la théorie du module 31 (pH, tampons, couples redox, pile Daniell, lois de Nernst et de Faraday), ce que la simulation simplifie et les chiffres à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9ef0f0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 31</p>
+  <h1>Comprendre les protons et les <em>électrons</em> qui passent</h1>
+  <p class="lede">Un acide cède des protons et une base en reçoit : c’est un échange de particules. Un réducteur cède des électrons et un oxydant en reçoit : c’en est un autre. Dans les deux cas, on peut mesurer où l’équilibre se place, avec un pH ou avec une tension, et la planche te laisse faire les deux en quatre étapes : le pH, les tampons, le redox, la pile.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt><span class="acc">La règle des pH</span></dt>
+    <dd>Une échelle verticale de 0 à 14. Chaque graduation est un facteur dix sur la concentration en <span class="pos">H₃O⁺</span>, de 10⁻⁰ mol/L en haut à 10⁻¹⁴ mol/L en bas. Des repères du quotidien y sont posés : citron, café, eau pure, sang, eau de mer, eau de Javel. Le dégradé reste neutre : le pH n’a pas de couleur.</dd>
+    <dt>Le bécher et la loupe de 1 µm³</dt>
+    <dd>Un tout petit volume d’eau est agrandi. Les <span class="pos">H₃O⁺ (orange, « + »)</span> et les <span class="neg">OH⁻ (bleu, « − »)</span> y sont dessinés en nombre réduit, et la règle « 1 point = 10<sup>k</sup> ions » dit combien d’ions vaut chaque point. À pH 7, il y en a une soixantaine de chaque sorte, un point par ion.</dd>
+    <dt>La barre pH + pOH = 14</dt>
+    <dd>Une barre empilée : quand le pH monte, le pOH descend du même nombre d’unités, et la somme reste à 14.</dd>
+    <dt>Les deux béchers de 100 mL</dt>
+    <dd>Eau pure d’un côté, tampon de l’autre (acétique, ammonium ou phosphate). Les deux reçoivent la même goutte de 0,05 mL d’acide ou de base à 1 mol/L, soit 5 × 10⁻⁵ mol. Dans l’eau pure, une goutte d’acide fait passer le pH de 7 à 3,3. Une loupe sur le tampon montre HA avec son proton et A⁻ sans proton.</dd>
+    <dt>La courbe de titrage</dt>
+    <dd>Le pH en fonction de la quantité de base ajoutée. La <span class="acc">bande tampon</span> couvre pK<sub>a</sub> ± 1. En mode « titrage complet », 25 mL d’acide faible à 0,10 mol/L reçoivent de la soude à 0,10 mol/L, jusqu’à 50 mL : demi-équivalence à 12,5 mL, équivalence à 25 mL.</dd>
+    <dt>La lame et la solution (étape 3)</dt>
+    <dd>Une lame de zinc, fer, plomb, cuivre ou argent plonge dans 100 mL d’ions à 0,10 mol/L. Avec Cu²⁺, la solution est bleue et pâlit, et le cuivre se dépose en rougeâtre. La loupe montre un atome qui cède deux électrons à un ion. L’échelle des couples va de −0,76 V à +0,80 V, et la bascule « Je prédis » te demande de répondre avant de plonger.</dd>
+    <dt>La pile Daniell</dt>
+    <dd>Zn dans Zn²⁺ et Cu dans Cu²⁺, à 1 mol/L et 100 mL chacun, reliés par un pont salin et par un fil portant un voltmètre et une résistance de charge. Les <span class="neg">électrons</span> filent dans le fil du zinc vers le cuivre ; dans le pont, les anions vont vers le zinc et les cations vers le cuivre. La résistance interne est de 2 Ω.</dd>
+    <dt><span class="ener">L’enregistreur U(t)</span></dt>
+    <dd>La tension aux bornes, tracée en jaune pendant que la pile s’use, avec le temps accéléré. La bascule « Générateur » remplace la résistance par une source : au-delà de 1,10 V, la réaction s’inverse. Le bouton « Retirer le pont salin » coupe le courant.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Ce module suit le plan commun : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m31"><b>31</b>Acide-base, redox et électrochimie</a></li>
+  </ul>
+
+  <!-- ===================== Module 31 ===================== -->
+  <section class="module" id="m31">
+    <header>
+      <p class="num">Module 31</p>
+      <h3>Acide-base, redox et électrochimie</h3>
+      <p class="etapes">Sur la planche : étapes 1 Le pH · 2 Tampons · 3 Redox · 4 La pile</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Deux sortes de particules changent de mains. Dans une réaction acide-base, c’est un proton : un acide en cède un, une base le reçoit. Dans une réaction redox, c’est un électron : un réducteur en cède un, un oxydant le reçoit. Chaque échange s’arrête à un équilibre qu’un compteur mesure. Le pH compte les protons libres sur une échelle logarithmique : une unité, c’est un facteur dix. La tension d’une pile compte l’écart entre deux couples d’électrons et baisse quand les concentrations changent. Un tampon amortit le premier compteur ; un fil, par où les électrons doivent passer, rend le second utilisable.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Acide, base</dt><dd>Un acide peut céder un proton, une base peut en capter un (Brønsted).</dd></div>
+      <div><dt>Couple acide/base \(\text{HA}/\text{A}^-\)</dt><dd>Un acide et la base qui reste après la perte du proton : sa <em>base conjuguée</em>.</dd></div>
+      <div><dt>Ion hydronium \(\text{H}_3\text{O}^+\)</dt><dd>Proton lié à une molécule d’eau : sa forme en solution.</dd></div>
+      <div><dt>Concentration \([\text{X}]\)<span class="u">mol/L</span></dt><dd>Quantité de X par litre.</dd></div>
+      <div><dt>pH, pOH<span class="u">sans unité</span></dt><dd>\(-\log[\text{H}_3\text{O}^+]\) et \(-\log[\text{OH}^-]\) (logarithme en base 10) ; à 25 °C, pH + pOH = 14.</dd></div>
+      <div><dt>Produit ionique \(K_w\)</dt><dd>\([\text{H}_3\text{O}^+][\text{OH}^-]\) : \(10^{-14}\) à 25 °C.</dd></div>
+      <div><dt>Constante d’acidité \(K_a\), \(\text{p}K_a\)</dt><dd>Constante d’équilibre de la perte du proton par HA ; \(\text{p}K_a = -\log K_a\).</dd></div>
+      <div><dt>Acide fort, faible</dt><dd>Un acide fort est entièrement ionisé dans l’eau ; un acide faible l’est en partie.</dd></div>
+      <div><dt>Tampon</dt><dd>Acide faible et sa base conjuguée en quantités comparables : le pH varie peu quand on ajoute un peu d’acide ou de base.</dd></div>
+      <div><dt>Équivalence</dt><dd>Moment d’un titrage où la base ajoutée a réagi avec tout l’acide de départ.</dd></div>
+      <div><dt>Oxydation, réduction</dt><dd>Perte d’électrons, gain d’électrons. L’une ne va pas sans l’autre.</dd></div>
+      <div><dt>Oxydant, réducteur</dt><dd>L’oxydant capte des électrons ; le réducteur en cède.</dd></div>
+      <div><dt>Couple redox</dt><dd>Un oxydant et son réducteur : \(\text{Cu}^{2+}/\text{Cu}\).</dd></div>
+      <div><dt>Potentiel standard \(E^\circ\)<span class="u">V</span></dt><dd>Tension d’un couple par rapport à \(\text{H}^+/\text{H}_2\) (zéro), à 1 mol/L et 25 °C. Plus elle est haute, plus l’oxydant capte facilement les électrons.</dd></div>
+      <div><dt>F.é.m. \(E\)<span class="u">V</span></dt><dd>Tension d’une pile qui ne débite pas ; \(\Delta E^\circ\) est sa valeur à 1 mol/L.</dd></div>
+      <div><dt>Anode, cathode</dt><dd>Électrode où se produit l’oxydation, électrode où se produit la réduction.</dd></div>
+      <div><dt>Pont salin</dt><dd>Tube de solution ionique entre deux béchers : ses ions gardent chaque bécher neutre.</dd></div>
+      <div><dt>Électrons échangés \(n\)</dt><dd>Par atome ou ion dans la demi-réaction : 2 pour \(\text{Cu}^{2+}/\text{Cu}\), 1 pour \(\text{Ag}^+/\text{Ag}\).</dd></div>
+      <div><dt>Faraday \(F\)<span class="u">C/mol</span></dt><dd>Charge d’une mole d’électrons : 96 485 C/mol.</dd></div>
+      <div><dt>Charge \(Q\)<span class="u">C</span></dt><dd>Électricité qui a traversé le fil : \(Q = It\), \(I\) en A, \(t\) en s.</dd></div>
+      <div><dt>Quotient de réaction \(Q_r\)</dt><dd>Concentrations des produits sur celles des réactifs, à un instant donné ; pour la Daniell, \([\text{Zn}^{2+}]/[\text{Cu}^{2+}]\). Ce n’est pas la charge \(Q\).</dd></div>
+      <div><dt>Masse molaire \(M\)<span class="u">g/mol</span></dt><dd>Masse d’une mole de métal ; \(m\) est la masse déposée ou dissoute.</dd></div>
+      <div><dt>Électrolyse</dt><dd>Réaction forcée en sens inverse par une source de tension supérieure à la f.é.m.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ \text{pH} = -\log[\text{H}_3\text{O}^+], \qquad [\text{H}_3\text{O}^+][\text{OH}^-] = K_w \]
+      <p>Une unité de pH, c’est un facteur dix sur \([\text{H}_3\text{O}^+]\). Dans l’eau neutre, les deux concentrations valent \(10^{-7}\) mol/L : pH 7.</p></div>
+    <div class="relation">\[ K_a = \frac{[\text{H}_3\text{O}^+][\text{A}^-]}{[\text{HA}]} \]
+      <p>À l’équilibre, le rapport est fixe pour un acide donné, à température donnée.</p></div>
+    <div class="relation">\[ \text{pH} = \text{p}K_a + \log\frac{[\text{A}^-]}{[\text{HA}]} \]
+      <p>La relation précédente en logarithmes. À égalité entre HA et A⁻, pH = p\(K_a\). Un ajout ne change que le rapport, donc peu le logarithme.</p></div>
+    <div class="relation">\[ \Delta E^\circ = E^\circ_{\text{cathode}} - E^\circ_{\text{anode}} \]
+      <p>La tension standard d’une pile est l’écart entre ses deux couples. La réaction va dans le sens où cette valeur est positive.</p></div>
+    <div class="relation">\[ E = \Delta E^\circ - \frac{0{,}0592}{n}\log Q_r \qquad (25\ ^\circ\text{C}) \]
+      <p>Quand les produits s’accumulent, \(Q_r\) grandit et \(E\) baisse. La pile s’use ainsi, jusqu’à \(E = 0\) à l’équilibre.</p></div>
+    <div class="relation">\[ m = \frac{Q\,M}{nF} \]
+      <p>Loi de Faraday : \(Q/(nF)\) est le nombre de moles de métal déposées ou dissoutes, et \(M\) les convertit en grammes.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p><b>a. Un tampon contre l’eau pure.</b> On verse 0,010 mol de HCl dans 1 L de tampon acétique à 0,10 mol/L de HA et 0,10 mol/L de A⁻, puis dans 1 L d’eau pure.</p>
+      <ol>
+        <li>Avant l’ajout : \(\text{pH} = 4{,}76 + \log(0{,}10/0{,}10) = 4{,}76\).</li>
+        <li>Les 0,010 mol de H₃O⁺ réagissent avec A⁻ pour former HA : il reste 0,09 mol/L de A⁻ et 0,11 mol/L de HA (le volume ne change presque pas).</li>
+        <li>Après : \(\text{pH} = 4{,}76 + \log(0{,}09/0{,}11) = 4{,}76 - 0{,}09 = 4{,}67\).</li>
+        <li>Dans l’eau pure, rien ne capte les protons : \([\text{H}_3\text{O}^+] = 0{,}010\) mol/L, pH 2,00.</li>
+        <li>Bilan : le pH recule de 0,09 unité dans le tampon et de 5 unités dans l’eau, soit environ soixante fois moins.</li>
+      </ol>
+      <p><b>b. Une pile Daniell qui débite.</b> Elle fournit 0,50 A pendant 2,0 h.</p>
+      <ol>
+        <li>Charge : \(Q = It = 0{,}50 \times 7\,200 = 3\,600\) C, soit \(3\,600/96\,485 = 0{,}0373\) mol d’électrons.</li>
+        <li>Cuivre déposé (\(n = 2\), \(M = 63{,}5\) g/mol) : \(m = 3\,600 \times 63{,}5 / (2 \times 96\,485) = 1{,}19\) g.</li>
+        <li>Zinc dissous (\(M = 65{,}4\) g/mol) : \(m = 3\,600 \times 65{,}4 / (2 \times 96\,485) = 1{,}22\) g, pour la même charge.</li>
+        <li>Plus loin dans la décharge, si \([\text{Cu}^{2+}]\) est tombée à 0,010 mol/L avec \([\text{Zn}^{2+}] = 1\) mol/L : \(Q_r = 100\), \(E = 1{,}10 - \tfrac{0{,}0592}{2}\log 100 = 1{,}04\) V.</li>
+      </ol>
+      <p>Ordre de grandeur : dans 100 mL à 1 mol/L, ces 3 600 C consomment 0,019 mol sur 0,100 mol de Cu²⁺, soit moins du cinquième.</p>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire que pH 4 est deux fois plus acide que pH 2. Deux unités font un facteur 100, et pH 4 contient cent fois moins de H₃O⁺.</li>
+      <li>Confondre acide faible et acide dilué. La force est la fraction ionisée ; la dilution, la quantité par litre. L’acide acétique à 0,10 mol/L est ionisé à 1,3 % (pH 2,88) ; HCl au même titre, entièrement (pH 1,00).</li>
+      <li>Penser qu’un tampon a un pH de 7. Son pH est proche de son p\(K_a\) (4,76 pour l’acétique) et il tamponne de p\(K_a - 1\) à p\(K_a + 1\).</li>
+      <li>Croire que les électrons traversent la solution. Ils circulent dans le fil ; dans la solution et le pont salin, ce sont les ions qui portent le courant.</li>
+      <li>Inverser anode et cathode. L’anode est toujours le siège de l’oxydation, que la cellule débite ou soit en électrolyse : dans la Daniell forcée en sens inverse, le zinc devient la cathode.</li>
+      <li>Dire que la pile contient de l’électricité. Elle contient des réactifs ; la charge circule dans le fil et l’énergie chimique est convertie.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>32 · 33</b><span>Une membrane qui sépare des ions de concentrations différentes suit le même logarithme : le potentiel d’équilibre de Nernst (<a href="../fondations-cellule-membrane/index.html">planche Cellule, membrane et transport</a>).</span></li>
+      <li><b>34</b><span>Chaîne respiratoire et photosynthèse : des redox en cascade ; la planche <a href="../02-respiration/index.html">Respiration</a> montre le gradient de protons.</span></li>
+      <li><b>37</b><span>Le pH du sang, tenu entre 7,35 et 7,45 par des tampons : l’homéostasie.</span></li>
+      <li><b>29 · 30</b><span>En amont : mole et concentration (29), équilibre et quotient de réaction (30). Pages à venir.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Une solution de HCl à \(10^{-8}\) mol/L a-t-elle un pH de 8 ?</summary>
+      <p>Non : un acide ne rend jamais une solution basique. L’eau fournit déjà \(10^{-7}\) mol/L de H₃O⁺, plus que l’acide. Le bilan de charge, \([\text{H}_3\text{O}^+] = C + [\text{OH}^-]\), devient \(h^2 - Ch - K_w = 0\), d’où \(h = 1{,}05 \times 10^{-7}\) mol/L et pH 6,98.</p></details>
+    <details><summary>Quelle masse d’argent se dépose avec 0,20 A pendant 30 min ?</summary>
+      <p>\(Q = 0{,}20 \times 1\,800 = 360\) C. Avec \(n = 1\) et \(M = 107{,}9\) g/mol : \(m = 360 \times 107{,}9 / 96\,485 = 0{,}40\) g.</p></details>
+    <details><summary>Quelle lame se couvre de métal : cuivre dans Ag⁺, ou argent dans Cu²⁺ ?</summary>
+      <p>Le cuivre dans Ag⁺. \(E^\circ(\text{Ag}^+/\text{Ag}) = 0{,}80\) V dépasse \(E^\circ(\text{Cu}^{2+}/\text{Cu}) = 0{,}34\) V : Ag⁺ capte les électrons du cuivre, avec \(\Delta E^\circ = 0{,}46\) V. L’argent dans Cu²⁺ ne réagit pas.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Activités = concentrations :</strong> les solutions sont traitées comme idéales. À forte concentration, les valeurs réelles s’écartent un peu.</li>
+    <li><strong>25 °C partout :</strong> \(K_w\), les p\(K_a\) et le facteur 0,0592 en dépendent.</li>
+    <li><strong>Acides traités comme monoacides :</strong> pour le phosphate, seul le couple H₂PO₄⁻/HPO₄²⁻ (p\(K_a\) 7,21) est retenu ; pour l’acide carbonique, la première acidité apparente (6,35).</li>
+    <li><strong>Particules en nombre très réduit :</strong> la règle d’échelle (« 1 point = 10<sup>k</sup> ions ») dit ce que vaut un point.</li>
+    <li><strong>Dépôt illustratif :</strong> en vrai, il prend de quelques minutes à quelques heures, pas quelques secondes.</li>
+    <li><strong>Résistance interne constante :</strong> 2 Ω, alors qu’elle varie dans une vraie pile.</li>
+    <li><strong>Temps de la décharge accéléré :</strong> l’enregistreur compresse des heures en quelques secondes.</li>
+    <li><strong>Électrolyse idéale :</strong> surtensions et dégagements gazeux ignorés.</li>
+    <li><strong>Potentiels standards arrondis</strong> aux valeurs du programme.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>10⁻¹⁴</b><span>le produit ionique \(K_w\) de l’eau à 25 °C : \([\text{H}_3\text{O}^+][\text{OH}^-]\), en mol²/L².</span></div>
+    <div><b>≈ 60</b><span>ions H₃O⁺ dans 1 µm³ d’eau pure, parmi environ 3 × 10¹⁰ molécules d’eau : un ion pour 5,5 × 10⁸ molécules.</span></div>
+    <div><b>7,35 à 7,45</b><span>le pH du sang, soit \([\text{H}_3\text{O}^+]\) de 3,5 à 4,5 × 10⁻⁸ mol/L.</span></div>
+    <div><b>1,10 V</b><span>la f.é.m. de la pile Daniell à 1 mol/L, soit \(0{,}34 - (-0{,}76)\).</span></div>
+    <div><b>96 485 C/mol</b><span>un faraday : la charge d’une mole d’électrons.</span></div>
+    <div><b>1,19 g</b><span>de cuivre déposé par ampère-heure (3 600 C, \(n = 2\)).</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées et méritent leur propre étude : l’<strong>activité</strong> (la vraie grandeur derrière la concentration), la <strong>constante de solubilité</strong>, les <strong>indicateurs colorés</strong>, les <strong>piles à combustible</strong>, la <strong>corrosion</strong>, les <strong>batteries lithium-ion</strong>, le lien avec l’énergie libre \(\Delta G = -nFE\) (seulement mentionné) et les <strong>acides polyprotiques</strong>.</p>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

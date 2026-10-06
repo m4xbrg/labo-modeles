@@ -20,12 +20,12 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-23, 32, 33, 40, 46 (24 modules) |
+| Couverture **full** par au moins un modèle | 01-06, 10-23, 31-33, 40, 46 (25 modules) |
 | Couverture **partial** | 07, 08, 34, 36, 44 |
-| Seulement **supporting** | 09, 26, 30, 31, 35 |
-| Rien | 24, 25, 27-29, 37-39, 41-43, 45, 47-50 |
+| Seulement **supporting** | 09, 26, 29, 30, 35 |
+| Rien | 24, 25, 27, 28, 37-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Acide-base, redox et électrochimie* (module 31), ouvre le versant chimique de la branche E le même jour, au même standard (un chapitre, quatre étapes), avant les modules 29 et 30 qu'elle suppose : la page renvoie à leurs numéros sans lien. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -38,6 +38,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 - **46** : une seule dimension d’espace ; accélération propre, quadrivecteurs, aberration et Doppler relativistes hors champ. Le module 47 est annoncé en fin de planche, pas couvert.
 - **40** : générations non chevauchantes, un seul gène, reproduction à un parent pour le trait continu, mutations neutres ; ni recombinaison, ni coalescence, ni spéciation. Les modules 41 et 42 sont annoncés en fin de planche (grille mélangée ou par voisinage), pas couverts.
 - **23** : sources à symétrie axiale et fils infinis seulement, sans matériaux magnétiques (ni fer, ni hystérésis) ; particules non relativistes ; inductance propre de la bobine réceptrice et des anneaux du tube négligée. Auto-induction, transformateur et moteur seulement introduits ; le module 24 est annoncé en fin de planche.
+- **31** : 25 °C, activités assimilées aux concentrations, acides traités comme monoacides (phosphate et carbonique réduits à un couple) ; cinétique du dépôt illustrative, résistance interne de la pile constante, surtensions ignorées. Solubilité, indicateurs colorés, corrosion, piles à combustible et lithium-ion seulement introduits.
 - **16** est enseigné par *Flux, gradients, champs et fluides*. Le gradient et le flux qui apparaissent dans *Matière, chaleur et transport* restent `supporting`.
 
 ## Les 50 modules
@@ -82,7 +83,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
 | 21 | Électrostatique | charge, champ électrique, potentiel, tension | Électricité fondamentale et circuits (`built`) | **full** | Le champ électrique (full), Courant et circuits (supporting), Magnétisme et induction (supporting) |
-| 22 | Courant et circuits dynamiques | courant, résistance, loi d’Ohm, condensateur, RC / RL / RLC | Électricité fondamentale et circuits (`built`) | **full** | Courant et circuits (full), Magnétisme et induction (supporting) |
+| 22 | Courant et circuits dynamiques | courant, résistance, loi d’Ohm, condensateur, RC / RL / RLC | Électricité fondamentale et circuits (`built`) | **full** | Courant et circuits (full), Magnétisme et induction (supporting), Protons et électrons qui passent (supporting) |
 | 23 | Magnétisme et induction | champ magnétique, force de Lorentz, flux magnétique, Faraday, Lenz | Magnétisme et induction (`built`) | **full** | Magnétisme et induction (full) |
 | 24 | Onde électromagnétique | E et B couplés, propagation, fréquence, longueur d’onde, énergie, spectre EM | Onde électromagnétique et spectre (`planned`) | — | — |
 | 25 | Optique fondamentale | réflexion, réfraction, indice, réflexion totale, lentilles, dispersion, polarisation | Optique fondamentale (`planned`) | — | — |
@@ -94,9 +95,9 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`planned`) | supporting | Supernova par effondrement du cœur (supporting) |
 | 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`planned`) | — | — |
 | 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
-| 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
-| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting) |
-| 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`planned`) | supporting | La respiration cellulaire (supporting) |
+| 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`planned`) | supporting | Protons et électrons qui passent (supporting) |
+| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting), Protons et électrons qui passent (supporting) |
+| 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`built`) | **full** | Protons et électrons qui passent (full), La respiration cellulaire (supporting) |
 
 ### F · Cellule et biologie moléculaire
 
@@ -165,10 +166,11 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
+| Acide-base, redox et électrochimie | 31 | [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | Un chapitre de quatre étapes (pH, tampons, redox, pile et électrolyse). Moteur verrouillé : `prompts/moteurs/acide-base-redox.js`. Construite avant les modules 29 et 30 qu'elle suppose. |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
+Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 30 Réactions chimiques · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
 
 La maquette « magnétisme » du premier prototype d'interface, retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)), n'a rien à voir avec la planche *Magnétisme et induction* construite le 2026-10-06.
 
