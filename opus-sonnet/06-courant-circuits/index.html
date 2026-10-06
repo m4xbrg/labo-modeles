@@ -1003,8 +1003,8 @@ function updateUI() {
   $('#stepTitle').textContent = info.t; $('#stepText').innerHTML = info.x;
   for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#eq').innerHTML = info.eq.replace(/\n/g, '<br>');
-  $('#note').textContent = act === 4
-    ? (mode === 'RL' ? 'Ralenti ×10 : 1 s à l’écran = 0,1 s réelle. ' : 'Ralenti ×500 : 1 s à l’écran = 2 ms réelles. ') + 'Pourquoi une bobine réagit ainsi aux variations de courant : c’est l’induction, sujet d’une planche à venir.'
+  $('#note').innerHTML = act === 4
+    ? (mode === 'RL' ? 'Ralenti ×10 : 1 s à l’écran = 0,1 s réelle. ' : 'Ralenti ×500 : 1 s à l’écran = 2 ms réelles. ') + 'Pourquoi une bobine réagit ainsi aux variations de courant : c’est l’induction, sujet de la planche <a href="../fondations-magnetisme-induction/index.html">Magnétisme et induction</a>.'
     : act === 1 ? 'Composants idéaux, fils sans résistance. Vitesse des électrons exagérée (la vraie : ~0,1 mm/s).'
     : 'Temps réel (pas de ralenti). Les courbes pointillées montrent ce qui va arriver.';
   document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === act) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });

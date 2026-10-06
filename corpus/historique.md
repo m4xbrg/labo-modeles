@@ -13,6 +13,7 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-01 | Un prototype d'interface **LABO** explore la future identité : « LABO — Modèles pour voir ce qui se passe ». Fusionné sur `main` le 2026-10-02 (PR n° 14), avec la relativité restreinte (PR n° 13). |
 | 2026-10-02 → 04 | Ce dossier `corpus/` devient la source de vérité ; le README est réécrit autour de LABO ; la collection *L'invisible en mouvement* est resserrée à cinq showcases. |
 | 2026-10-04 | Le prototype devient l'accueil : `prototype/` est renommé `labo/`, la racine et l'ancien accueil (`opus-sonnet/index.html`) redirigent vers lui. |
+| 2026-10-06 | **Fondations 23 · Magnétisme et induction.** Première page de fondations construite au standard d'une page à un module (quatre étapes), à partir d'un brief et d'un moteur verrouillé versionnés dans `prompts/` (`prompts/moteurs/magnetisme.js`). |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre le magnétisme et l’induction — LABO</title>
+<meta name="description" content="Ce que montre la planche Magnétisme et induction, la théorie du module 23 (champ magnétique, force de Lorentz, flux, lois de Faraday et de Lenz), ce que la simulation simplifie et les chiffres à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#45c9a0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --champ-b:#8a97f2;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.chb{color:var(--champ-b)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}}
+@media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour au laboratoire</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 23</p>
+  <h1>Comprendre le magnétisme et l’<em>induction</em></h1>
+  <p class="lede">Le magnétisme n’est pas une affaire d’aimants : c’est l’autre face de l’électricité. Des charges en mouvement créent un champ magnétique ; un champ magnétique pousse les charges en mouvement ; et un champ magnétique qui varie à travers un circuit y met des charges en mouvement. Ces trois phrases suffisent à comprendre la boussole, le moteur, l’alternateur et le frein des trains.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <p>Trois couleurs portent toute la planche. Le champ magnétique est <span class="chb">bleu-lavande</span> : lignes de champ, pointes des boussoles, symboles ⊙ et ⊗. Le courant imposé par une pile est <span class="pos">orange</span>, comme les charges positives dans toute la série. Tout ce qui est <span class="acc">induit</span> (tension, courant, force de freinage) est vert. Les pôles des aimants restent gris : un pôle n’est pas une charge.</p>
+  <dl>
+    <dt>B · Champ et force</dt>
+    <dd><b>I. D’où vient le champ.</b> Un aimant, un fil, une spire et une bobine, vus en coupe. Les lignes de champ sont calculées en trois dimensions ; des boussoles pivotent et se calent sur B, avec le champ terrestre en fond. On peut couper l’aimant et le comparer à une bobine. <b>II. Une force qui dévie.</b> Une particule chargée tourne dans un champ uniforme pendant que sa jauge d’énergie reste plate ; un second proton deux fois plus rapide revient au départ en même temps. Des plaques chargées ajoutent un champ électrique ; une balançoire de Laplace montre la même force sur un fil.</dd>
+    <dt>I · Induction</dt>
+    <dd><b>III. Faire varier le flux.</b> Un aimant qu’on glisse dans une bobine reliée à un galvanomètre, avec le flux et la tension tracés l’un sous l’autre ; une bobine qui tourne entre deux pôles et allume une lampe ; deux bobines côte à côte, l’expérience de Faraday en 1831. <b>IV. L’induction freine.</b> Une tige tirée sur des rails, avec ses barres d’énergie et une expérience de pensée où la loi de Lenz serait inversée ; un aimant qui tombe dans un tube de cuivre, en course avec un aimant en chute libre.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m23"><b>23</b>Magnétisme et induction</a></li>
+  </ul>
+
+  <!-- ===================== Module 23 ===================== -->
+  <section class="module" id="m23">
+    <header>
+      <p class="num">Module 23</p>
+      <h3>Magnétisme et induction</h3>
+      <p class="etapes">Sur la planche : actes I D’où vient le champ · II Une force qui dévie · III Faire varier le flux · IV L’induction freine</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Une charge immobile crée un champ électrique. Dès qu’elle bouge, elle crée en plus un champ magnétique, qui tourne autour de sa trajectoire. Un fil parcouru par un courant est entouré de lignes de champ fermées ; empile des boucles de courant et tu obtiens une bobine, dont le champ ressemble trait pour trait à celui d’un aimant. Ce champ, à son tour, ne pousse que les charges qui bougent, et toujours de côté : il courbe leur trajectoire sans les accélérer. Enfin, quand le champ qui traverse un circuit change, une tension apparaît dans ce circuit. Elle pousse un courant dont le propre champ s’oppose au changement.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Champ magnétique \(\vec B\)<span class="u">T</span></dt><dd>Champ de vecteurs qui dit quelle force subit une charge en mouvement en chaque point. Le tesla est une grosse unité : la Terre fait environ 50 µT.</dd></div>
+      <div><dt>Perméabilité du vide \(\mu_0\)<span class="u">T·m/A</span></dt><dd>Constante qui relie un courant au champ qu’il crée : \(\mu_0 \approx 4\pi \times 10^{-7}\) T·m/A.</dd></div>
+      <div><dt>Ligne de champ</dt><dd>Courbe tangente à B en chaque point. Ce n’est pas une trajectoire ; les lignes de B se referment toujours sur elles-mêmes.</dd></div>
+      <div><dt>Force de Lorentz</dt><dd>Force sur une charge \(q\) de vitesse \(\vec v\) : \(q\,\vec v \times \vec B\), perpendiculaire à la fois à \(\vec v\) et à \(\vec B\).</dd></div>
+      <div><dt>Force de Laplace<span class="u">N</span></dt><dd>La somme de ces forces sur les charges qui circulent dans un fil : la force sur le fil entier.</dd></div>
+      <div><dt>Flux magnétique \(\Phi\)<span class="u">Wb</span></dt><dd>Quantité de champ qui traverse une surface : B fois l’aire, pondéré par l’orientation. 1 Wb = 1 T·m².</dd></div>
+      <div><dt>Liaison de flux \(N\Phi\)<span class="u">Wb</span></dt><dd>Flux total à travers une bobine de \(N\) spires : chaque spire compte une fois.</dd></div>
+      <div><dt>Force électromotrice \(\varepsilon\)<span class="u">V</span></dt><dd>Tension qui apparaît dans un circuit : le travail fourni par charge qui fait le tour.</dd></div>
+      <div><dt>Courant induit<span class="u">A</span></dt><dd>Courant que pousse la f.é.m. induite dans un circuit fermé, \(I = \varepsilon / R\).</dd></div>
+      <div><dt>Ampère-tour<span class="u">A</span></dt><dd>Courant multiplié par le nombre de spires, \(NI\) : ce qui fixe le champ d’une bobine.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ \begin{gathered} B_{\text{fil}} = \frac{\mu_0 I}{2\pi r} \\ B_{\text{bobine}} \approx \mu_0 n I, \quad n = N/L \end{gathered} \]
+      <p>Le champ d’un fil décroît comme \(1/r\) et tourne autour de lui (règle de la main droite). Dans une bobine longue, il est presque uniforme et ne dépend que des ampères-tours par mètre.</p></div>
+    <div class="relation">\[ \begin{gathered} \vec F = q\,\vec v \times \vec B \\ r = \frac{mv}{|q|B}, \qquad T = \frac{2\pi m}{|q|B} \end{gathered} \]
+      <p>La force est perpendiculaire à la vitesse : elle ne travaille pas, et la vitesse garde sa grandeur. Dans un champ uniforme, la trajectoire est un cercle dont la période ne dépend pas de la vitesse.</p></div>
+    <div class="relation">\[ \vec F = I\,\vec L \times \vec B \]
+      <p>Force de Laplace sur un fil rectiligne de longueur \(L\). Elle vaut \(ILB\) quand le fil est perpendiculaire au champ, zéro quand il lui est parallèle.</p></div>
+    <div class="relation">\[ \Phi = B A \cos\theta \qquad \left(\Phi = \int \vec B \cdot \dd\vec A\right) \]
+      <p>Le flux à travers une spire plane dans un champ uniforme, \(\theta\) étant l’angle entre B et la normale de la spire. On le fait varier en changeant B, l’aire ou l’angle.</p></div>
+    <div class="relation">\[ \varepsilon = -N\,\frac{\dd\Phi}{\dd t} \]
+      <p>Loi de Faraday. La tension dépend de la vitesse de variation du flux, pas de sa valeur. Le signe moins est la loi de Lenz : le courant induit crée un flux qui s’oppose à la variation.</p></div>
+    <div class="relation">\[ \varepsilon = B\ell v, \qquad F v = \varepsilon I = R I^2 \]
+      <p>Une tige de longueur \(\ell\) qui glisse à \(v\) dans un champ perpendiculaire. Le travail fourni pour la tirer devient exactement l’énergie électrique produite : c’est pourquoi l’induction freine.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Une génératrice : une bobine de 200 spires, d’aire 100 cm², tourne à 50 tours par seconde dans un champ uniforme de 0,2 T.</p>
+      <ol>
+        <li>Aire et pulsation : \(A = 0{,}01\) m², \(\omega = 2\pi f = 314\) rad/s.</li>
+        <li>Flux maximal par spire, quand la bobine fait face au champ : \(\Phi_{\max} = BA = 0{,}2 \times 0{,}01 = 2\) mWb.</li>
+        <li>Flux en fonction du temps : \(\Phi = BA\cos\omega t\), donc \(\varepsilon = NBA\omega\sin\omega t\).</li>
+        <li>Tension crête : \(\varepsilon_{\max} = 200 \times 0{,}2 \times 0{,}01 \times 314 \approx 126\) V, et valeur efficace \(126/\sqrt2 \approx 89\) V.</li>
+        <li>Contrôle : en une demi-période (10 ms), le flux par spire passe de +2 à −2 mWb. La f.é.m. moyenne vaut \(200 \times 4\) mWb / 10 ms = 80 V, soit bien \(2/\pi\) fois la crête.</li>
+      </ol>
+      <p>Une lampe branchée dessus tire du courant, et ce courant, dans le champ, crée un couple qui freine la rotation : le moteur qui fait tourner la génératrice doit fournir l’énergie.</p>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Croire qu’un pôle nord est une charge magnétique qu’on pourrait isoler. Couper un aimant donne deux aimants complets : les lignes de B n’ont ni début ni fin.</li>
+      <li>Attendre une force magnétique sur une charge immobile. Sans vitesse, \(\vec v \times \vec B\) est nul ; seul un champ électrique agit.</li>
+      <li>Penser qu’un champ magnétique peut accélérer ou ralentir une particule. Il change la direction de sa vitesse, jamais sa grandeur ; un cyclotron accélère ses particules avec un champ électrique.</li>
+      <li>Confondre flux et variation de flux. Un aimant immobile au cœur d’une bobine donne un flux maximal et une tension nulle.</li>
+      <li>Résumer Lenz par « le courant induit s’oppose au champ ». Il s’oppose à la variation : quand on retire l’aimant, le courant induit renforce au contraire le champ qui s’en va.</li>
+      <li>Oublier le signe de la charge dans la règle de la main droite : un électron tourne dans l’autre sens qu’un proton.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>22</b><span>Une bobine traversée par son propre champ s’oppose aux variations de son courant : c’est l’inductance, \(\varepsilon = -L\,\dd I/\dd t\) (<a href="../06-courant-circuits/explication.html">planche Courant et circuits</a>).</span></li>
+      <li><b>24</b><span>Un champ magnétique qui varie crée un champ électrique, et l’inverse : ensemble, ils se propagent en onde électromagnétique.</span></li>
+      <li><b>46</b><span>Champ électrique et champ magnétique se transforment l’un en l’autre quand on change de référentiel (<a href="../fondations-relativite-restreinte/explication.html">planche Relativité restreinte</a>).</span></li>
+      <li><b>50</b><span>Le champ d’un aimant permanent vient du spin des électrons ; l’expérience de Stern et Gerlach trie des atomes avec un champ non uniforme.</span></li>
+      <li><b>44</b><span>Étoiles et magnétars portent des champs magnétiques immenses, jusqu’à 10¹¹ T.</span></li>
+      <li><b>11</b><span>Le bilan \(Fv = \varepsilon I\) est une conservation de l’énergie (<a href="../fondations-forces-energie/explication.html">planche Forces, énergie et conservation</a>).</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un électron va à 10 000 km/s dans un champ uniforme de 1 mT, perpendiculaire à sa vitesse. Quel est le rayon de sa trajectoire, et combien de temps met-il à faire un tour ?</summary>
+      <p>\(r = mv/|q|B = 9{,}11 \times 10^{-31} \times 10^{7} / (1{,}60 \times 10^{-19} \times 10^{-3}) \approx 5{,}7\) cm. Période : \(T = 2\pi m/|q|B \approx 36\) ns, et elle serait la même à n’importe quelle vitesse (non relativiste).</p></details>
+    <details><summary>Sur les rails de l’acte IV, on double le champ B sans rien changer d’autre. Que deviennent la vitesse limite et le temps caractéristique ?</summary>
+      <p>La force de freinage vaut \(B^2\ell^2 v/R\) : elle est multipliée par 4. La vitesse limite \(FR/B^2\ell^2\) passe de 2 à 0,5 m/s, et le temps caractéristique \(mR/B^2\ell^2\) de 0,5 à 0,125 s. Plus de champ, plus de freinage.</p></details>
+    <details><summary>Un aimant est posé, immobile, au centre d’une bobine reliée à un galvanomètre. Le flux est maximal. Que montre l’aiguille ?</summary>
+      <p>Zéro. La tension induite dépend de \(\dd\Phi/\dd t\), pas de \(\Phi\). L’aiguille ne dévie que pendant que l’aimant entre ou sort, dans un sens puis dans l’autre.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li>Les champs sont exacts en trois dimensions pour des sources à symétrie axiale (spires, bobines, aimants cylindriques) et pour un fil infini, mais on n’en dessine qu’une coupe. L’aimant est uniformément aimanté, remplacé par le courant de surface équivalent : c’est exact pour un aimant idéal.</li>
+    <li>Aucun matériau magnétique : pas de fer, pas de noyau, pas d’hystérésis. Les vraies bobines ont souvent un noyau qui multiplie leur champ par des centaines.</li>
+    <li>Les boussoles et les galvanomètres sont amortis, avec une réponse plafonnée dans les champs forts.</li>
+    <li>Les particules de l’acte II sont non relativistes (au plus 1 % de la vitesse de la lumière) et ne rayonnent pas ; leur mouvement est ralenti environ cinq millions de fois.</li>
+    <li>L’inductance propre de la bobine réceptrice et des anneaux du tube est négligée : c’est valable pour des mouvements lents. Le primaire des deux bobines suit un vrai circuit RL, affiché au ralenti ×200.</li>
+    <li>Les rails sont sans frottement mécanique. Le tube est supposé très long par rapport à l’aimant ; un vrai tube fendu freine encore un peu, par des courants locaux.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>≈ 50 µT</b><span>le champ terrestre (53 µT vers Montréal, dont 18 µT à l’horizontale, ce que voit une boussole).</span></div>
+    <div><b>40 µT</b><span>le champ d’un fil de 10 A à 5 cm : autant que la Terre. C’est ce qu’a vu Œrsted en 1820.</span></div>
+    <div><b>1,2 T</b><span>l’aimantation rémanente d’un aimant au néodyme ; quelques dixièmes de tesla au contact. Une IRM : 1,5 à 3 T.</span></div>
+    <div><b>10 cm · 0,66 µs</b><span>le rayon et la période d’un proton à 1 000 km/s dans 0,1 T.</span></div>
+    <div><b>≈ 6 cm/s</b><span>la vitesse limite d’un aimant de néodyme de 12 mm dans un tube de cuivre : 17 s pour un mètre, contre 0,45 s en chute libre.</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>L’<b>auto-induction</b> (une bobine qui réagit à son propre courant) est le sujet de l’acte IV de la planche Courant et circuits ; le <b>transformateur</b> est l’expérience des deux bobines avec un noyau de fer et un courant alternatif ; le <b>moteur électrique</b> est la force de Laplace sur une bobine qui tourne, l’inverse de la génératrice ; les <b>freins à courants de Foucault</b> des trains et des montagnes russes sont l’aimant dans le tube, à grande échelle. Le <b>magnétisme de la matière</b> (pourquoi le fer s’aimante, et pas le cuivre) demande la mécanique quantique et le spin : modules 48 à 50.</p>
+  <p>La question qui reste ouverte mène au module 24 : si un champ magnétique qui varie crée un champ électrique, un champ électrique qui varie crée-t-il un champ magnétique ? Maxwell a répondu oui, et en a déduit que la lumière est une onde électromagnétique.</p>
+
+  <a class="cta" href="index.html"><span>Retour au laboratoire</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

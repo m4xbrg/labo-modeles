@@ -29,19 +29,19 @@ Les fondations ne remplacent pas les grands modèles : elles les rendent possibl
 
 ## État du projet
 
-Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-04 :
+Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-06 :
 
-**Construit : 18 modèles.**
+**Construit : 19 modèles.**
 
 - Planches numérotées 01-09 : La mitose · La respiration cellulaire · Le neurone qui apprend · Le champ électrique · Ondes et interférences · Courant et circuits · Matière, chaleur et transport · La réplication de l'ADN · Supernova par effondrement du cœur. Cinq d'entre elles (mitose, respiration, neurone, réplication, supernova) forment la collection *L'invisible en mouvement*.
-- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32).
+- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32) · Magnétisme et induction (23).
 - Les huit productions de fondations définies au départ sont construites ; les planches 06 et 07 en sont issues, et la 04 a été prolongée par l'une d'elles.
 
 **Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 34, 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
 
-**Prévu, rien de construit.** Les fondations 23 (magnétisme et induction) à 37 (signalisation), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
+**Prévu, rien de construit.** Les fondations 24 (onde électromagnétique) à 37 (signalisation), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
 
-**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 14 partielles, 36 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 197 restent des idées.
+**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 15 partielles, 44 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 188 restent des idées.
 
 ## Où est la source de vérité
 
@@ -63,7 +63,7 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 - `index.html` : redirection vers l'accueil, `labo/index.html`.
 - `labo/` : l'accueil de LABO (lu dans `corpus/`), la feuille de style commune et le gabarit de planche documenté dans `labo/GABARIT.md`.
 - `opus-sonnet/` : toutes les planches. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `prealables.html` est la théorie préalable, chaque sous-dossier un modèle (`index.html` + `explication.html`) ; `index.html`, l'ancien accueil, redirige vers `labo/`.
-- `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs des pages construites sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe. Pour la suite : [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md) (les 23 pages de fondations qui restent, en sept vagues), [`prompts/SESSION-FONDATION.md`](prompts/SESSION-FONDATION.md) (le prompt de session et les règles communes) et les briefs des modules 23 à 37.
+- `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs des pages construites sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe. Pour la suite : [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md) (les pages de fondations qui restent, en sept vagues), [`prompts/SESSION-FONDATION.md`](prompts/SESSION-FONDATION.md) (le prompt de session et les règles communes) et les briefs des modules 23 à 37. `prompts/moteurs/` garde les moteurs physiques verrouillés d'une planche et leurs tests, à copier tels quels dans la page.
 - `corpus/` : la source de vérité.
 
 Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, servir la racine du dépôt (`python -m http.server`) et ouvrir `/labo/` : l'accueil lit `corpus/*.json`, ce qu'un fichier ouvert directement ne peut pas faire.
