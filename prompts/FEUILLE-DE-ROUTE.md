@@ -18,7 +18,7 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 
 | Vague | Page (slug `fondations-…`) | Modules | Étapes | ADN | Brief | Préalables principaux |
 |---|---|---|---|---|---|---|
-| 1 · D | [ ] `magnetisme-induction` | 23 | 4 | 0,8 | [écrit](fondations-magnetisme-induction.md) | 21, 22 |
+| 1 · D | [x] `magnetisme-induction` | 23 | 4 | 0,8 | [écrit](fondations-magnetisme-induction.md), construite le 2026-10-06 | 21, 22 |
 | 1 · D | [ ] `onde-electromagnetique` | 24 | 4 | 0,8 | [écrit](fondations-onde-electromagnetique.md) | 15, 21, 23 |
 | 1 · D | [ ] `optique` | 25 | 4 | 0,8 | [écrit](fondations-optique.md) | 15, 24 |
 | 2 · E | [ ] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md) | 21, 24, 46 |
@@ -98,4 +98,4 @@ Les fondations ne sont pas une fin : elles rendent les showcases moins lourds. A
 | | |
 |---|---|
 | Briefs écrits | 23 (toutes les vagues et la piste A) |
-| Construites depuis cette feuille de route | 0 |
+| Construites depuis cette feuille de route | 1 (23 · magnétisme et induction) |
