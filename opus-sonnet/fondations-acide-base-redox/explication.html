@@ -55,6 +55,7 @@ details[open] summary::before{content:"\2713"}
 details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 .cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
 .cta:hover{background:var(--accent);color:var(--fond)}
+.resert li{grid-template-columns:4.4em 1fr}
 @media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
 </style>
 <link rel="stylesheet" href="../../labo/theorie.css">
@@ -70,7 +71,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
   <h2><span>1</span>Ce que tu vois</h2>
   <dl>
     <dt><span class="acc">La règle des pH</span></dt>
-    <dd>Une échelle verticale de 0 à 14. Chaque graduation est un facteur dix sur la concentration en <span class="pos">H₃O⁺</span>, de 10⁻⁰ mol/L en haut à 10⁻¹⁴ mol/L en bas. Des repères du quotidien y sont posés : citron, café, eau pure, sang, eau de mer, eau de Javel. Le dégradé reste neutre : le pH n’a pas de couleur.</dd>
+    <dd>Une échelle verticale de 0 à 14. Chaque graduation est un facteur dix sur la concentration en <span class="pos">H₃O⁺</span>, de 1 mol/L en haut à 10<sup>−14</sup> mol/L en bas. Des repères du quotidien y sont posés : citron, café, eau pure, sang, eau de mer, eau de Javel. Le dégradé reste neutre : le pH n’a pas de couleur.</dd>
     <dt>Le bécher et la loupe de 1 µm³</dt>
     <dd>Un tout petit volume d’eau est agrandi. Les <span class="pos">H₃O⁺ (orange, « + »)</span> et les <span class="neg">OH⁻ (bleu, « − »)</span> y sont dessinés en nombre réduit, et la règle « 1 point = 10<sup>k</sup> ions » dit combien d’ions vaut chaque point. À pH 7, il y en a une soixantaine de chaque sorte, un point par ion.</dd>
     <dt>La barre pH + pOH = 14</dt>
@@ -102,7 +103,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     </header>
 
     <h4 data-n="1">Intuition</h4>
-    <p>Deux sortes de particules changent de mains. Dans une réaction acide-base, c’est un proton : un acide en cède un, une base le reçoit. Dans une réaction redox, c’est un électron : un réducteur en cède un, un oxydant le reçoit. Chaque échange s’arrête à un équilibre qu’un compteur mesure. Le pH compte les protons libres sur une échelle logarithmique : une unité, c’est un facteur dix. La tension d’une pile compte l’écart entre deux couples d’électrons et baisse quand les concentrations changent. Un tampon amortit le premier compteur ; un fil, par où les électrons doivent passer, rend le second utilisable.</p>
+    <p>Deux sortes de particules changent de mains. Dans une réaction acide-base, c’est un proton : un acide en cède un, une base le reçoit. Dans une réaction redox, c’est un électron : un réducteur en cède un, un oxydant le reçoit. Chaque échange s’arrête à un équilibre qu’un compteur mesure. Le pH compte les protons libres sur une échelle logarithmique : une unité, c’est un facteur dix. La tension d’une pile compte l’écart entre deux couples d’électrons et baisse quand les concentrations changent. Un tampon amortit le premier compteur ; un fil force les électrons à passer hors de la solution.</p>
 
     <h4 data-n="2">Définitions</h4>
     <dl class="defs">
@@ -112,84 +113,85 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <div><dt>Concentration \([\text{X}]\)<span class="u">mol/L</span></dt><dd>Quantité de X par litre.</dd></div>
       <div><dt>pH, pOH<span class="u">sans unité</span></dt><dd>\(-\log[\text{H}_3\text{O}^+]\) et \(-\log[\text{OH}^-]\) (logarithme en base 10) ; à 25 °C, pH + pOH = 14.</dd></div>
       <div><dt>Produit ionique \(K_w\)</dt><dd>\([\text{H}_3\text{O}^+][\text{OH}^-]\) : \(10^{-14}\) à 25 °C.</dd></div>
-      <div><dt>Constante d’acidité \(K_a\), \(\text{p}K_a\)</dt><dd>Constante d’équilibre de la perte du proton par HA ; \(\text{p}K_a = -\log K_a\).</dd></div>
-      <div><dt>Acide fort, faible</dt><dd>Un acide fort est entièrement ionisé dans l’eau ; un acide faible l’est en partie.</dd></div>
-      <div><dt>Tampon</dt><dd>Acide faible et sa base conjuguée en quantités comparables : le pH varie peu quand on ajoute un peu d’acide ou de base.</dd></div>
-      <div><dt>Équivalence</dt><dd>Moment d’un titrage où la base ajoutée a réagi avec tout l’acide de départ.</dd></div>
+      <div><dt>Constante d’acidité \(K_a\), \(\text{p}K_a\)</dt><dd>Constante d’équilibre de la perte du proton ; \(\text{p}K_a = -\log K_a\).</dd></div>
+      <div><dt>Acide fort, faible</dt><dd>Fort : entièrement ionisé dans l’eau ; faible : en partie.</dd></div>
+      <div><dt>Tampon</dt><dd>Acide faible et sa base conjuguée en quantités comparables : le pH varie peu quand on ajoute de l’acide ou de la base.</dd></div>
+      <div><dt>Équivalence</dt><dd>Moment du titrage où la base ajoutée a réagi avec tout l’acide.</dd></div>
       <div><dt>Oxydation, réduction</dt><dd>Perte d’électrons, gain d’électrons. L’une ne va pas sans l’autre.</dd></div>
       <div><dt>Oxydant, réducteur</dt><dd>L’oxydant capte des électrons ; le réducteur en cède.</dd></div>
       <div><dt>Couple redox</dt><dd>Un oxydant et son réducteur : \(\text{Cu}^{2+}/\text{Cu}\).</dd></div>
-      <div><dt>Potentiel standard \(E^\circ\)<span class="u">V</span></dt><dd>Tension d’un couple par rapport à \(\text{H}^+/\text{H}_2\) (zéro), à 1 mol/L et 25 °C. Plus elle est haute, plus l’oxydant capte facilement les électrons.</dd></div>
+      <div><dt>Potentiel standard \(E^\circ\)<span class="u">V</span></dt><dd>Tension d’un couple par rapport à \(\text{H}^+/\text{H}_2\) (zéro), à 1 mol/L et 25 °C. Plus elle est haute, plus l’oxydant capte les électrons facilement.</dd></div>
       <div><dt>F.é.m. \(E\)<span class="u">V</span></dt><dd>Tension d’une pile qui ne débite pas ; \(\Delta E^\circ\) est sa valeur à 1 mol/L.</dd></div>
       <div><dt>Anode, cathode</dt><dd>Électrode où se produit l’oxydation, électrode où se produit la réduction.</dd></div>
-      <div><dt>Pont salin</dt><dd>Tube de solution ionique entre deux béchers : ses ions gardent chaque bécher neutre.</dd></div>
+      <div><dt>Pont salin</dt><dd>Tube d’ions entre deux béchers : il garde chacun neutre.</dd></div>
       <div><dt>Électrons échangés \(n\)</dt><dd>Par atome ou ion dans la demi-réaction : 2 pour \(\text{Cu}^{2+}/\text{Cu}\), 1 pour \(\text{Ag}^+/\text{Ag}\).</dd></div>
       <div><dt>Faraday \(F\)<span class="u">C/mol</span></dt><dd>Charge d’une mole d’électrons : 96 485 C/mol.</dd></div>
-      <div><dt>Charge \(Q\)<span class="u">C</span></dt><dd>Électricité qui a traversé le fil : \(Q = It\), \(I\) en A, \(t\) en s.</dd></div>
-      <div><dt>Quotient de réaction \(Q_r\)</dt><dd>Concentrations des produits sur celles des réactifs, à un instant donné ; pour la Daniell, \([\text{Zn}^{2+}]/[\text{Cu}^{2+}]\). Ce n’est pas la charge \(Q\).</dd></div>
+      <div><dt>Charge \(Q\)<span class="u">C</span></dt><dd>Électricité passée dans le fil : \(Q = It\), \(I\) en A, \(t\) en s.</dd></div>
+      <div><dt>Quotient de réaction \(Q_r\)</dt><dd>Produits sur réactifs à un instant donné ; pour la Daniell, \([\text{Zn}^{2+}]/[\text{Cu}^{2+}]\). Pas la charge \(Q\).</dd></div>
       <div><dt>Masse molaire \(M\)<span class="u">g/mol</span></dt><dd>Masse d’une mole de métal ; \(m\) est la masse déposée ou dissoute.</dd></div>
       <div><dt>Électrolyse</dt><dd>Réaction forcée en sens inverse par une source de tension supérieure à la f.é.m.</dd></div>
     </dl>
 
     <h4 data-n="3">Relations clés</h4>
-    <div class="relation">\[ \text{pH} = -\log[\text{H}_3\text{O}^+], \qquad [\text{H}_3\text{O}^+][\text{OH}^-] = K_w \]
+    <div class="relation">\[ \begin{gathered} \text{pH} = -\log[\text{H}_3\text{O}^+] \\ [\text{H}_3\text{O}^+][\text{OH}^-] = K_w \end{gathered} \]
       <p>Une unité de pH, c’est un facteur dix sur \([\text{H}_3\text{O}^+]\). Dans l’eau neutre, les deux concentrations valent \(10^{-7}\) mol/L : pH 7.</p></div>
     <div class="relation">\[ K_a = \frac{[\text{H}_3\text{O}^+][\text{A}^-]}{[\text{HA}]} \]
       <p>À l’équilibre, le rapport est fixe pour un acide donné, à température donnée.</p></div>
     <div class="relation">\[ \text{pH} = \text{p}K_a + \log\frac{[\text{A}^-]}{[\text{HA}]} \]
-      <p>La relation précédente en logarithmes. À égalité entre HA et A⁻, pH = p\(K_a\). Un ajout ne change que le rapport, donc peu le logarithme.</p></div>
+      <p>La relation précédente en logarithmes. À égalité entre HA et A⁻, pH = p\(K_a\). Un ajout change le rapport, donc peu son logarithme.</p></div>
     <div class="relation">\[ \Delta E^\circ = E^\circ_{\text{cathode}} - E^\circ_{\text{anode}} \]
       <p>La tension standard d’une pile est l’écart entre ses deux couples. La réaction va dans le sens où cette valeur est positive.</p></div>
-    <div class="relation">\[ E = \Delta E^\circ - \frac{0{,}0592}{n}\log Q_r \qquad (25\ ^\circ\text{C}) \]
-      <p>Quand les produits s’accumulent, \(Q_r\) grandit et \(E\) baisse. La pile s’use ainsi, jusqu’à \(E = 0\) à l’équilibre.</p></div>
+    <div class="relation">\[ E = \Delta E^\circ - \frac{0{,}0592}{n}\log Q_r \]
+      <p>À 25 °C. Quand les produits s’accumulent, \(Q_r\) grandit et \(E\) baisse, jusqu’à 0 à l’équilibre : la pile s’use.</p></div>
     <div class="relation">\[ m = \frac{Q\,M}{nF} \]
       <p>Loi de Faraday : \(Q/(nF)\) est le nombre de moles de métal déposées ou dissoutes, et \(M\) les convertit en grammes.</p></div>
 
     <h4 data-n="4">Exemple chiffré</h4>
     <div class="exemple">
-      <p><b>a. Un tampon contre l’eau pure.</b> On verse 0,010 mol de HCl dans 1 L de tampon acétique à 0,10 mol/L de HA et 0,10 mol/L de A⁻, puis dans 1 L d’eau pure.</p>
+      <p><b>a. Un tampon contre l’eau pure.</b> On verse 0,010 mol de HCl dans 1 L de tampon acétique (0,10 mol/L de HA, 0,10 mol/L de A⁻), puis dans 1 L d’eau pure.</p>
       <ol>
-        <li>Avant l’ajout : \(\text{pH} = 4{,}76 + \log(0{,}10/0{,}10) = 4{,}76\).</li>
-        <li>Les 0,010 mol de H₃O⁺ réagissent avec A⁻ pour former HA : il reste 0,09 mol/L de A⁻ et 0,11 mol/L de HA (le volume ne change presque pas).</li>
-        <li>Après : \(\text{pH} = 4{,}76 + \log(0{,}09/0{,}11) = 4{,}76 - 0{,}09 = 4{,}67\).</li>
+        <li>Avant l’ajout : \(\text{pH} = 4{,}76 + \log 1 = 4{,}76\).</li>
+        <li>Les 0,010 mol de H₃O⁺ réagissent avec A⁻ pour former HA : il reste 0,09 mol/L de A⁻ et 0,11 mol/L de HA.</li>
+        <li>Après :\[ \begin{aligned} \text{pH} &= 4{,}76 + \log\frac{0{,}09}{0{,}11} \\ &= 4{,}76 - 0{,}09 = 4{,}67 \end{aligned} \]</li>
         <li>Dans l’eau pure, rien ne capte les protons : \([\text{H}_3\text{O}^+] = 0{,}010\) mol/L, pH 2,00.</li>
-        <li>Bilan : le pH recule de 0,09 unité dans le tampon et de 5 unités dans l’eau, soit environ soixante fois moins.</li>
+        <li>Bilan : le pH recule de 0,09 unité dans le tampon, de 5 dans l’eau.</li>
       </ol>
-      <p><b>b. Une pile Daniell qui débite.</b> Elle fournit 0,50 A pendant 2,0 h.</p>
+      <p style="margin-top:14px"><b>b. Une pile Daniell qui débite.</b> Elle fournit 0,50 A pendant 2,0 h.</p>
       <ol>
-        <li>Charge : \(Q = It = 0{,}50 \times 7\,200 = 3\,600\) C, soit \(3\,600/96\,485 = 0{,}0373\) mol d’électrons.</li>
-        <li>Cuivre déposé (\(n = 2\), \(M = 63{,}5\) g/mol) : \(m = 3\,600 \times 63{,}5 / (2 \times 96\,485) = 1{,}19\) g.</li>
-        <li>Zinc dissous (\(M = 65{,}4\) g/mol) : \(m = 3\,600 \times 65{,}4 / (2 \times 96\,485) = 1{,}22\) g, pour la même charge.</li>
-        <li>Plus loin dans la décharge, si \([\text{Cu}^{2+}]\) est tombée à 0,010 mol/L avec \([\text{Zn}^{2+}] = 1\) mol/L : \(Q_r = 100\), \(E = 1{,}10 - \tfrac{0{,}0592}{2}\log 100 = 1{,}04\) V.</li>
+        <li>Charge : \(Q = It = 0{,}50 \times 7\,200 = 3\,600\) C, soit 0,0373 mol d’électrons.</li>
+        <li>Cuivre déposé (\(n = 2\), \(M = 63{,}5\) g/mol) :\[ m = \frac{3\,600 \times 63{,}5}{2 \times 96\,485} = 1{,}19\ \text{g} \]</li>
+        <li>Zinc dissous (\(M = 65{,}4\) g/mol) :\[ m = \frac{3\,600 \times 65{,}4}{2 \times 96\,485} = 1{,}22\ \text{g} \]</li>
+        <li>Plus loin dans la décharge, si \([\text{Cu}^{2+}]\) est tombée à 0,010 mol/L avec \([\text{Zn}^{2+}] = 1\) mol/L, \(Q_r = 100\) et\[ \begin{aligned} E &= 1{,}10 - \frac{0{,}0592}{2}\log 100 \\ &= 1{,}04\ \text{V} \end{aligned} \]</li>
       </ol>
-      <p>Ordre de grandeur : dans 100 mL à 1 mol/L, ces 3 600 C consomment 0,019 mol sur 0,100 mol de Cu²⁺, soit moins du cinquième.</p>
+      <p>Ordre de grandeur : dans 100 mL à 1 mol/L, cela consomme 0,019 mol sur 0,100 mol de Cu²⁺.</p>
     </div>
 
     <h4 data-n="5">Pièges fréquents</h4>
     <ul class="pieges">
-      <li>Croire que pH 4 est deux fois plus acide que pH 2. Deux unités font un facteur 100, et pH 4 contient cent fois moins de H₃O⁺.</li>
-      <li>Confondre acide faible et acide dilué. La force est la fraction ionisée ; la dilution, la quantité par litre. L’acide acétique à 0,10 mol/L est ionisé à 1,3 % (pH 2,88) ; HCl au même titre, entièrement (pH 1,00).</li>
-      <li>Penser qu’un tampon a un pH de 7. Son pH est proche de son p\(K_a\) (4,76 pour l’acétique) et il tamponne de p\(K_a - 1\) à p\(K_a + 1\).</li>
-      <li>Croire que les électrons traversent la solution. Ils circulent dans le fil ; dans la solution et le pont salin, ce sont les ions qui portent le courant.</li>
-      <li>Inverser anode et cathode. L’anode est toujours le siège de l’oxydation, que la cellule débite ou soit en électrolyse : dans la Daniell forcée en sens inverse, le zinc devient la cathode.</li>
-      <li>Dire que la pile contient de l’électricité. Elle contient des réactifs ; la charge circule dans le fil et l’énergie chimique est convertie.</li>
+      <li>Croire que pH 4 est deux fois plus acide que pH 2. Deux unités font un facteur 100 : pH 4 contient cent fois moins de H₃O⁺.</li>
+      <li>Confondre acide faible et acide dilué. La force est la fraction ionisée ; la dilution, la quantité par litre. À 0,10 mol/L, l’acide acétique est ionisé à 1,3 % (pH 2,88), HCl entièrement (pH 1,00).</li>
+      <li>Penser qu’un tampon a un pH de 7. Son pH est proche de son p\(K_a\) (4,76 pour l’acétique) et il tamponne à p\(K_a \pm 1\).</li>
+      <li>Croire que les électrons traversent la solution. Ils circulent dans le fil ; dans la solution et le pont, les ions portent le courant.</li>
+      <li>Inverser anode et cathode. L’anode est toujours le siège de l’oxydation, que la cellule débite ou soit en électrolyse : dans la Daniell inversée, le zinc devient la cathode.</li>
+      <li>Dire que la pile contient de l’électricité. Elle contient des réactifs ; la charge circule, l’énergie chimique est convertie.</li>
     </ul>
 
     <h4 data-n="6">Où ça resservira</h4>
     <ul class="resert">
-      <li><b>32 · 33</b><span>Une membrane qui sépare des ions de concentrations différentes suit le même logarithme : le potentiel d’équilibre de Nernst (<a href="../fondations-cellule-membrane/index.html">planche Cellule, membrane et transport</a>).</span></li>
+      <li><b>32 · 33</b><span>Une membrane entre deux concentrations d’ions suit le même logarithme : potentiel d’équilibre de Nernst (<a href="../fondations-cellule-membrane/index.html">planche Cellule, membrane et transport</a>).</span></li>
       <li><b>34</b><span>Chaîne respiratoire et photosynthèse : des redox en cascade ; la planche <a href="../02-respiration/index.html">Respiration</a> montre le gradient de protons.</span></li>
-      <li><b>37</b><span>Le pH du sang, tenu entre 7,35 et 7,45 par des tampons : l’homéostasie.</span></li>
+      <li><b>37</b><span>Le pH du sang, tenu entre 7,35 et 7,45 par des tampons : homéostasie.</span></li>
       <li><b>29 · 30</b><span>En amont : mole et concentration (29), équilibre et quotient de réaction (30). Pages à venir.</span></li>
     </ul>
 
     <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Une solution de HCl à \(10^{-8}\) mol/L a-t-elle un pH de 8 ?</summary>
-      <p>Non : un acide ne rend jamais une solution basique. L’eau fournit déjà \(10^{-7}\) mol/L de H₃O⁺, plus que l’acide. Le bilan de charge, \([\text{H}_3\text{O}^+] = C + [\text{OH}^-]\), devient \(h^2 - Ch - K_w = 0\), d’où \(h = 1{,}05 \times 10^{-7}\) mol/L et pH 6,98.</p></details>
-    <details><summary>Quelle masse d’argent se dépose avec 0,20 A pendant 30 min ?</summary>
-      <p>\(Q = 0{,}20 \times 1\,800 = 360\) C. Avec \(n = 1\) et \(M = 107{,}9\) g/mol : \(m = 360 \times 107{,}9 / 96\,485 = 0{,}40\) g.</p></details>
-    <details><summary>Quelle lame se couvre de métal : cuivre dans Ag⁺, ou argent dans Cu²⁺ ?</summary>
-      <p>Le cuivre dans Ag⁺. \(E^\circ(\text{Ag}^+/\text{Ag}) = 0{,}80\) V dépasse \(E^\circ(\text{Cu}^{2+}/\text{Cu}) = 0{,}34\) V : Ag⁺ capte les électrons du cuivre, avec \(\Delta E^\circ = 0{,}46\) V. L’argent dans Cu²⁺ ne réagit pas.</p></details>
+    <details><summary><span>Une solution de HCl à \(10^{-8}\) mol/L a-t-elle un pH de 8 ?</span></summary>
+      <p>Non : un acide ne rend jamais une solution basique. L’eau fournit déjà \(10^{-7}\) mol/L de H₃O⁺, plus que l’acide. Le bilan de charge donne \(h^2 - Ch - K_w = 0\), d’où \(h = 1{,}05 \times 10^{-7}\) mol/L et pH 6,98.</p></details>
+    <details><summary><span>Quelle masse d’argent se dépose avec 0,20 A pendant 30 min ?</span></summary>
+      <p>\(Q = 0{,}20 \times 1\,800 = 360\) C. Avec \(n = 1\) et \(M = 107{,}9\) g/mol :</p>
+      <p>\[ m = \frac{360 \times 107{,}9}{96\,485} = 0{,}40\ \text{g} \]</p></details>
+    <details><summary><span>Quelle lame se couvre de métal : cuivre dans Ag⁺, ou argent dans Cu²⁺ ?</span></summary>
+      <p>Le cuivre dans Ag⁺. Le couple Ag⁺/Ag (0,80 V) est au-dessus du couple Cu²⁺/Cu (0,34 V) : Ag⁺ capte les électrons du cuivre, avec \(\Delta E^\circ = 0{,}46\) V. L’argent dans Cu²⁺ ne réagit pas.</p></details>
   </section>
 
   <h2><span>3</span>Ce que la simulation simplifie</h2>
@@ -207,7 +209,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
 
   <h2><span>4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
-    <div><b>10⁻¹⁴</b><span>le produit ionique \(K_w\) de l’eau à 25 °C : \([\text{H}_3\text{O}^+][\text{OH}^-]\), en mol²/L².</span></div>
+    <div><b>10<sup>−14</sup></b><span>le produit ionique \(K_w\) de l’eau à 25 °C : \([\text{H}_3\text{O}^+][\text{OH}^-]\), en mol²/L².</span></div>
     <div><b>≈ 60</b><span>ions H₃O⁺ dans 1 µm³ d’eau pure, parmi environ 3 × 10¹⁰ molécules d’eau : un ion pour 5,5 × 10⁸ molécules.</span></div>
     <div><b>7,35 à 7,45</b><span>le pH du sang, soit \([\text{H}_3\text{O}^+]\) de 3,5 à 4,5 × 10⁻⁸ mol/L.</span></div>
     <div><b>1,10 V</b><span>la f.é.m. de la pile Daniell à 1 mol/L, soit \(0{,}34 - (-0{,}76)\).</span></div>
