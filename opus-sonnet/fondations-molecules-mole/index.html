@@ -50,7 +50,7 @@ h1 em{color:var(--accent);font-style:italic}
 .tip.on{opacity:1;transform:none}
 .tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
 
-.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}
 .panel>section{flex:none}
 .eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
 .eyebrow b{color:var(--accent);font-weight:500}
@@ -174,17 +174,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="cle" id="cle"></p>
     </section>
 
+    <section id="measSec">
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mExtra"></p>
+      <p class="note" id="mNote"></p>
+    </section>
+
     <section id="recSec">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeur de l'étape en fonction du temps."></canvas></div>
       <p class="leg" id="leg"></p>
       <p class="leg" id="leg2"></p>
-    </section>
-
-    <section id="measSec">
-      <div class="meas" id="meas"></div>
-      <p class="note" id="mExtra"></p>
-      <p class="note" id="mNote"></p>
     </section>
 
     <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
@@ -201,6 +201,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
         <li><kbd>R</kbd> réinitialiser l'étape</li>
         <li><kbd>L</kbd> lâcher · <kbd>C</kbd> casser la liaison (étape 1)</li>
         <li><kbd>S</kbd> secouer (étape 3) · <kbd>F</kbd> refroidir lentement (étape 4)</li>
+        <li><kbd>Z</kbd> zoomer (étape 5) · <kbd>D</kbd> diluer (étape 6) · <kbd>G</kbd> réagir (étape 7)</li>
       </ul>
     </section>
 
@@ -248,8 +249,23 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <!-- 4 · Entre les molécules -->
       <div class="grp" data-acts="3"><span class="gl">Température</span><input type="range" id="rT" min="0.10" max="1.20" step="0.01" value="0.30" aria-label="Température réduite T* du thermostat commun"><span class="rv wide" id="vT"></span></div>
       <div class="grp" data-acts="3"><button class="btn go" id="bCool" title="Rampe vers T* = 0,15 en une quarantaine de secondes (F)">Refroidir lentement</button></div>
-      <!-- 5 à 7 : prévues dans le second lot -->
-      <div class="grp" data-acts="4 5 6"><span class="build">Cette étape est en construction.</span></div>
+      <!-- 5 · La mole -->
+      <div class="grp" data-acts="4"><span class="gl">Substance</span><button class="btn sm" data-sub="eau">Eau</button><button class="btn sm" data-sub="sel">Sel</button><button class="btn sm" data-sub="sucre">Sucre</button><button class="btn sm" data-sub="fer">Fer</button><button class="btn sm" data-sub="helium">Hélium</button></div>
+      <div class="grp" data-acts="4"><span class="gl">m</span><input type="range" id="rMass" min="-1" max="3" step="0.001" value="1.2556" aria-label="Masse de la substance, de 0,1 g à 1000 g, échelle logarithmique"><span class="rv wide" id="vMass"></span><button class="btn sm" id="bMole" title="Poser exactement une mole de la substance choisie">1 mole</button></div>
+      <div class="grp" data-acts="4"><span class="gl">Échelle</span><input type="range" id="rScale" min="-10" max="-1.3" step="0.01" value="-1.3" aria-label="Côté du champ de vision, de 5 cm à 0,1 nm, échelle logarithmique"><span class="rv wide" id="vScale"></span><button class="btn go" id="bZoom" title="Parcourir toutes les échelles en 8 s (Z)">Zoomer</button></div>
+      <div class="grp" data-acts="4"><span class="gl">Composer</span><button class="btn sm" data-atom="H">H</button><button class="btn sm" data-atom="C">C</button><button class="btn sm" data-atom="N">N</button><button class="btn sm" data-atom="O">O</button><button class="btn sm" data-atom="Na">Na</button><button class="btn sm" data-atom="Cl">Cl</button><button class="btn sm" data-atom="Ca">Ca</button><button class="btn sm" data-atom="Fe">Fe</button><button class="btn sm" id="bClear">Vider</button></div>
+      <!-- 6 · Concentration et dilution -->
+      <div class="grp" data-acts="5"><span class="gl">Soluté</span><button class="btn" data-sol="sel">Sel (NaCl)</button><button class="btn" data-sol="sucre">Sucre (glucose)</button></div>
+      <div class="grp" data-acts="5"><span class="gl">m</span><input type="range" id="rM6" min="0" max="30" step="0.1" value="4.5" aria-label="Masse de soluté, en grammes"><span class="rv" id="vM6"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">V</span><input type="range" id="rVol6" min="50" max="500" step="10" value="500" aria-label="Volume de la solution, en millilitres"><span class="rv" id="vVol6"></span></div>
+      <div class="grp" data-acts="5"><span class="gl">V après</span><input type="range" id="rV26" min="50" max="1000" step="10" value="500" aria-label="Volume final après dilution, en millilitres"><span class="rv" id="vV26"></span><button class="btn go" id="bDil" title="Verser de l'eau jusqu'au volume final (D)">Diluer</button></div>
+      <div class="grp" data-acts="5"><span class="gl">Préréglages</span><button class="btn sm" data-pre6="serum" title="Sérum physiologique 9 g/L (0,154 mol/L)">Sérum 9 g/L</button><button class="btn sm" data-pre6="mer" title="Eau de mer ≈ 35 g/L de sels, traitée comme du NaCl">Eau de mer 35 g/L</button><button class="btn sm" data-pre6="sang" title="Sang : glucose ≈ 5 mmol/L (0,90 g/L)">Sang : glucose 5 mmol/L</button></div>
+      <!-- 7 · Stœchiométrie -->
+      <div class="grp" data-acts="6"><span class="gl">Réaction</span><button class="btn sm" data-rx="methane" title="Combustion du méthane">Méthane</button><button class="btn sm" data-rx="eau" title="Synthèse de l'eau">Eau</button><button class="btn sm" data-rx="propane" title="Combustion du propane">Propane</button><button class="btn sm" data-rx="nacl" title="Formation du chlorure de sodium">NaCl</button></div>
+      <div class="grp" data-acts="6"><span class="gl">Quantités</span><button class="btn sm" data-unit="mol">en moles</button><button class="btn sm" data-unit="g">en grammes</button></div>
+      <div class="grp" data-acts="6"><span class="gl" id="gQ1"></span><input type="range" id="rQ1" min="0" max="24" step="1" value="8" aria-label="Quantité du premier réactif, par pas de 0,25 mol"><span class="rv" id="vQ1"></span></div>
+      <div class="grp" data-acts="6"><span class="gl" id="gQ2"></span><input type="range" id="rQ2" min="0" max="24" step="1" value="12" aria-label="Quantité du second réactif, par pas de 0,25 mol"><span class="rv" id="vQ2"></span></div>
+      <div class="grp" data-acts="6"><button class="btn go" id="bReact" title="Faire réagir (G)">Réagir</button></div>
     </div>
   </div>
 </div>
@@ -712,12 +728,21 @@ const STEPS = [
     cle: `Les paires d'électrons autour d'un atome se repoussent et s'écartent le plus possible. La forme qui en résulte décide si la molécule est polaire.`,
     note: `VSEPR : une règle qui marche bien pour les petites molécules, pas une théorie complète (orbitales au module 48). Rayons, ballons de doublets et fond d'atome conventionnels.`, eye: `Enregistreur · répulsion` },
   { mod: 28, built: true, name: `Entre les molécules`,
-    x: `Trois boîtes à la même température. Quand il fait assez froid, les molécules se rassemblent en amas ; plus elles se collent, plus la température nécessaire pour les disperser est haute. Monte la température, ou refroidis lentement, et regarde qui se disperse en premier.`,
+    x: `Trois boîtes à la même température. Quand il fait assez froid, les molécules se rassemblent en amas ; plus elles se collent, plus il faut chauffer pour les disperser. Monte la température ou refroidis lentement.`,
     cle: `Les molécules polaires se collent entre elles ; l'eau, avec ses liaisons hydrogène, se colle beaucoup. C'est ce qui décide si une substance est gazeuse ou liquide à température ambiante.`,
     note: `Modèle 2D à sites collants, qualitatif ; les températures du modèle ne se comparent pas directement aux températures réelles (correspondance indicative).`, eye: `Enregistreur · fraction en amas` },
-  { mod: 29, built: false, name: `La mole : changer d'échelle`, cle: `La mole est un nombre : 6,022 × 10²³. Elle relie la masse qu'on pèse au nombre de particules qu'on ne peut pas compter.` },
-  { mod: 29, built: false, name: `Concentration et dilution`, cle: `La concentration dit combien de particules il y a par litre. Diluer ajoute du solvant : la concentration baisse, la quantité de soluté reste la même. C₁V₁ = C₂V₂.` },
-  { mod: 29, built: false, name: `Stœchiométrie : le réactif limitant`, cle: `Une équation équilibrée dit dans quelles proportions les particules réagissent. Le réactif qui manque le premier limite tout ; la masse totale se conserve.` }
+  { mod: 29, built: true, name: `La mole : changer d'échelle`,
+    x: `Une cuillère d'eau (18 mL) contient une mole de molécules. Zoome par puissances de 10 jusqu'à les voir, puis pose une mole de différentes substances sur la balance : même nombre de particules, masses différentes.`,
+    cle: `La mole est un nombre : 6,022 × 10²³. Elle relie la masse qu'on pèse au nombre de particules qu'on ne peut pas compter.`,
+    note: `Valeurs exactes de N_A (définition SI depuis 2019) et masses atomiques standard. Molécules dessinées avec des rayons et des couleurs conventionnels ; au-dessus de ≈ 5 nm, une texture remplace les molécules. Dans le monde réel, une mole d'objets macroscopiques n'existe pas : une mole de grains de riz recouvrirait toutes les terres émergées sur une centaine de mètres d'épaisseur (ordre de grandeur).` },
+  { mod: 29, built: true, name: `Concentration et dilution`,
+    x: `Dissous du soluté dans un bécher : la loupe montre combien de particules se trouvent dans un petit volume. Verse de l'eau : le niveau monte, la loupe se vide, mais le nombre total de particules du bécher ne change pas.`,
+    cle: `La concentration dit combien de particules il y a par litre. Diluer ajoute du solvant : la concentration baisse, la quantité de soluté reste la même. C₁V₁ = C₂V₂.`,
+    note: `Volume du soluté négligé ; chaque NaCl donne deux ions, on compte ici le sel dissous (C en NaCl). Loupe à échelle fixe : une particule dessinée pour 0,05 mol/L. Eau de mer traitée comme du NaCl ; glucose pour le sucre.` },
+  { mod: 29, built: true, name: `Stœchiométrie : le réactif limitant`,
+    x: `Deux réservoirs de molécules et un établi. Chaque combinaison consomme exactement les proportions de l'équation ; quand l'un des réactifs est épuisé, tout s'arrête et le reste demeure. La balance compare la masse avant et après.`,
+    cle: `Une équation équilibrée dit dans quelles proportions les particules réagissent. Le réactif qui manque le premier limite tout ; la masse totale se conserve.`,
+    note: `Réaction supposée totale ; une molécule dessinée représente 0,25 mol ; formes simplifiées, rayons et couleurs conventionnels ; l'avancement ξ fait varier toutes les quantités à la fois.` }
 ];
 const NA = 7;
 
@@ -730,6 +755,9 @@ function resetPrm(n) {
   if (n === 1) Object.assign(prm, { A: 'H', B: 'Cl' });
   if (n === 2) Object.assign(prm, { nb: 2, nl: 2 });
   if (n === 3) Object.assign(prm, { T: 0.30 });
+  if (n === 4) { k5.sub = 'eau'; k5.m = 18.015; k5.tray = []; k5.formula = ''; }
+  if (n === 5) { k6.solute = 'sel'; k6.m = 4.5; k6.V = 500; k6.V2 = 500; }
+  if (n === 6) { k7.rx = 'methane'; k7.n0 = Object.assign({}, DEF7.methane); k7.grams = false; }
 }
 for (let i = 0; i < 4; i++) resetPrm(i);
 
@@ -1106,7 +1134,7 @@ function lighten(rgbc, t) { return `rgb(${Math.round(rgbc[0] + (255 - rgbc[0]) *
 function draw3() {
   const c = ctx, g = geo3(), inf = info3(), mol = k3.mol, sys = k3.sys; k3.g = g;
   const cEl = mol ? EL[mol.center] : EL.A, lEl = mol ? EL[mol.ligand] : EL.X, rw = el => Math.max(0.2, el.r / 150);
-  const items = [], O = proj3(g, 0, 0, 0);
+  const items = [], labels = [], O = proj3(g, 0, 0, 0);
   const pts = sys.pts, kinds = sys.kinds; let bi = 0;
   for (let i = 0; i < pts.length; i++) {
     const p = pts[i];
@@ -1134,8 +1162,7 @@ function draw3() {
       const gr = c.createRadialGradient(P.x - R * 0.35, P.y - R * 0.35, R * 0.1, P.x, P.y, R);
       gr.addColorStop(0, lighten(el.rgb, 0.35)); gr.addColorStop(1, rgba(el.rgb, 0.92));
       c.fillStyle = gr; c.beginPath(); c.arc(P.x, P.y, R, 0, TAU); c.fill(); c.strokeStyle = rgba(el.rgb, 0.4); c.lineWidth = 1; c.stroke();
-      c.font = mono(Math.max(10, Math.min(15, R * 0.8))); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = (el.rgb[0] * 0.299 + el.rgb[1] * 0.587 + el.rgb[2] * 0.114) > 135 ? C.fond : C.texte;
-      const sym = mol ? (it.t === 'ctr' ? mol.center : mol.ligand) : (it.t === 'ctr' ? 'A' : 'X'); if (R > 7) c.fillText(sym, P.x, P.y + 0.5);
+      const sym = mol ? (it.t === 'ctr' ? mol.center : mol.ligand) : (it.t === 'ctr' ? 'A' : 'X'); if (R > 7) labels.push([sym, P.x, P.y, R]);
       if (it.t === 'ctr') zcirc(P.x, P.y, R, 'ctr3', mol ? `Atome central ${DE_[mol.center]} (${mol.center})` : 'Atome central (A)', 'Autour de lui, les domaines d’électrons (liaisons et doublets libres) se repoussent. Rayon dessiné ∝ rayon covalent.');
       else zcirc(P.x, P.y, R, 'lig3', mol ? `Atome ${DE_[mol.ligand]} (${mol.ligand})` : 'Atome lié (X), type SO₂', mol ? 'Lié à l’atome central par une liaison. Plus il est électronégatif par rapport au centre, plus la liaison est polaire.' : 'Ligand générique, neutre : sans valeur chiffrée pour le moment dipolaire.');
     }
@@ -1157,6 +1184,8 @@ function draw3() {
       c.font = mono(12); tagText(c, 'μ = ' + fmt(dp.mag, 2) + ' D', b.x + ux * 16 + (ux >= 0 ? 4 : -4), b.y + uy * 16, ux >= 0 ? 'left' : 'right', 'middle', C.accent);
     } else { c.font = mono(12); tagText(c, 'μ = 0 : les flèches s’annulent', O.x, O.y + g.s * 1.75, 'center', 'middle', C.accent); }
   }
+  // étiquettes d'atomes en dernier, sur fond sombre
+  for (const L of labels) { c.font = mono(Math.max(11, Math.min(15, L[3] * 0.7))); tagText(c, L[0], L[1], L[2], 'center', 'middle', C.texte); }
   // pied de scène
   c.font = mono(11.5);
   const nm = mol ? mol.name : 'AX₂E (type SO₂)';
@@ -1184,7 +1213,7 @@ function status3() {
 function readouts3() {
   const inf = info3(), M = k3.mol;
   setM('nb', String(prm.nb)); setM('nl', String(prm.nl)); setM('geo', inf.geometry);
-  let ang; if (inf.relaxed) ang = inf.groups.map(g => fmt(g.v, 1) + (g.n > 1 ? ' (×' + g.n + ')' : '')).join(' · '); else { const a = inf.angs; ang = a.length ? fmt(Math.min(...a), 0) + ' à ' + fmt(Math.max(...a), 0) + ' (en cours)' : '—'; }
+  let ang; if (inf.relaxed) ang = inf.groups.map(g => fmt(g.v, 1) + (g.n > 1 ? ' (×' + g.n + ')' : '')).join(' · '); else { const a = inf.angs; const lo = Math.min(...a), hi = Math.max(...a); ang = !a.length ? '—' : hi - lo < 1 ? fmt(lo, 0) + ' (en cours)' : fmt(lo, 0) + ' à ' + fmt(hi, 0) + ' (en cours)'; }
   setM('ang', ang); setM('aref', M ? (M.angleRef == null ? '—' : fmt(M.angleRef, 1)) : '< 120');
   setM('mu', inf.dip ? fmt(inf.dip.mag, 2) : '—'); setM('mur', M ? fmt(M.dipoleRef, 2) : '—');
   setM('rel', inf.relaxed ? 'stable' : 'en cours');
@@ -1198,8 +1227,16 @@ const k4 = { sys: [], ema: [0, 0, 0], emaInit: false, steps: 0, rec: [], cool: n
 function init4(fresh) {
   const seeds = fresh ? [newSeed(), newSeed(), newSeed()] : [11, 12, 13];
   k4.sys = SUBS4.map((s, i) => Mol.liquidInit(s, prm.T, seeds[i]));
-  Object.assign(k4, { ema: [0, 0, 0], emaInit: false, steps: 0, rec: [], cool: null, acc: 0, hb: [0, 0, 0] });
+  Object.assign(k4, { ema: [0, 0, 0], emaInit: false, steps: 0, rec: [], cool: null, acc: 0, hb: [0, 0, 0], warm: WARM4 });
   syncTools();
+}
+// Pré-équilibre : 4500 pas (18 unités de temps) à la température courante avant de compter le temps affiché, étalés sur les images (150 pas par boîte et par image, ≈ 0,5 s).
+const WARM4 = 4500;
+function warm4(n) {
+  n = Math.min(n, k4.warm);
+  for (let s = 0; s < n; s++) for (let i = 0; i < 3; i++) Mol.liquidStep(k4.sys[i], prm.T);
+  k4.warm -= n;
+  if (k4.warm <= 0) { k4.emaInit = false; sample4(); }
 }
 function setT(T) { prm.T = clamp(+T, 0.10, 1.20); k4.cool = null; syncTools(); }
 function cool() { if (prm.T > COOL.to + 1e-9) k4.cool = { T0: prm.T, t0: k4.steps * Mol.LIQ.dt }; }
@@ -1261,23 +1298,24 @@ function drawScale4(c, g) {
   c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, sy + 0.5); c.lineTo(x1, sy + 0.5); c.stroke();
   c.beginPath(); for (let v = SC4.lo; v <= SC4.hi; v += 50) { c.moveTo(X(v) + 0.5, sy - 2); c.lineTo(X(v) + 0.5, sy + 3); } c.stroke();
   c.font = mono(10); c.textBaseline = 'middle'; c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText('−200', x0 - 6, sy); c.textAlign = 'left'; c.fillText('320 °C', x1 + 6, sy);
-  // repère de la température indicative courante
-  const Tc = toC(prm.T), xc = X(clamp(Tc, SC4.lo, SC4.hi));
-  c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); c.moveTo(xc, sy - 14); c.lineTo(xc, sy + 7); c.stroke();
-  c.fillStyle = C.accent; c.beginPath(); c.moveTo(xc, sy - 8); c.lineTo(xc - 5, sy - 17); c.lineTo(xc + 5, sy - 17); c.closePath(); c.fill();
-  zone(xc - 8, sy - 20, xc + 8, sy + 8, 'tc4', 'Température indicative courante · ' + fmt(Tc, 0) + ' °C', 'T* = ' + fmt(prm.T, 2) + ' du modèle, convertie à raison de ' + Mol.LIQ.Kscale + ' K par unité : une correspondance indicative, pas une prédiction.');
   // repères d'ébullition réels : étiquettes sur trois rangées pour éviter les chevauchements
-  const rowsEnd = [-1e9, -1e9, -1e9], rowY = [sy - 9, sy + 15, sy + 29];
+  const Tc = toC(prm.T), xc = X(clamp(Tc, SC4.lo, SC4.hi));
+  const rowsIv = [[[xc - 8, xc + 8]], [], []], rowY = [sy - 9, sy + 15, sy + 29];
   c.textBaseline = 'alphabetic';
   BP.forEach(([nm, T]) => {
     const x = X(T), txt = nm + ' ' + (Number.isInteger(T) ? fmt(T, 0) : fmt(T, 1)) + ' °C', w = c.measureText(txt).width; let r = 0;
-    while (r < 2 && x - w / 2 < rowsEnd[r] + 6) r++;
-    rowsEnd[r] = x + w / 2;
+    const lo = clamp(x, x0 - 20 + w / 2, x1 + 30 - w / 2) - w / 2 - 5, hi = lo + w + 10;
+    while (r < 2 && rowsIv[r].some(v => lo < v[1] && hi > v[0])) r++;
+    rowsIv[r].push([lo, hi]);
     c.strokeStyle = C.texte; c.lineWidth = 1.4; c.beginPath(); c.moveTo(x, sy - 5); c.lineTo(x, sy + 5); c.stroke();
     c.beginPath(); c.arc(x, sy, 3, 0, TAU); c.fillStyle = C.texte; c.fill();
     tagText(c, txt, clamp(x, x0 - 20 + w / 2, x1 + 30 - w / 2), rowY[r], 'center', r === 0 ? 'alphabetic' : 'middle', C.texte);
     zone(x - w / 2 - 4, (r === 0 ? sy - 22 : rowY[r] - 8), x + w / 2 + 4, (r === 0 ? sy + 6 : rowY[r] + 8), 'bp' + nm, `Ébullition de ${nm} : ${txt.slice(nm.length + 1)}`, 'Température d’ébullition réelle sous 1 atm. Plus les molécules se collent, plus il faut chauffer pour les disperser : l’eau (liaisons hydrogène) bout bien plus haut que le méthane.');
   });
+  // repère de la température indicative courante
+  c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); c.moveTo(xc, sy - 14); c.lineTo(xc, sy + 7); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.moveTo(xc, sy - 8); c.lineTo(xc - 5, sy - 17); c.lineTo(xc + 5, sy - 17); c.closePath(); c.fill();
+  zone(xc - 8, sy - 20, xc + 8, sy + 8, 'tc4', 'Température indicative courante · ' + fmt(Tc, 0) + ' °C', 'T* = ' + fmt(prm.T, 2) + ' du modèle, convertie à raison de ' + Mol.LIQ.Kscale + ' K par unité : une correspondance indicative, pas une prédiction.');
 }
 function drawBox4(c, i, bx, g) {
   const sys = k4.sys[i], key = SUBS4[i], S = Mol.SUBSTANCES[key], sc = bx.side / sys.L, cl = Mol.clusters(sys); k4.cl[i] = cl;
@@ -1348,14 +1386,28 @@ function scope4() {
   scopePlot({ t0: Math.max(0, t1 - 90), t1: Math.max(t1, 90), lo: 0, hi: 1, d: 1, xl0: '−15 s', xl1: 'maintenant', name: 'fraction en amas', hlines: [{ v: 0.5, col: C.trait, dash: [2, 4] }],
     series: [{ rec: r, f: q => q.m, col: C.texte2, dash: [5, 4], lw: 1.8 }, { rec: r, f: q => q.h, col: C.texte, lw: 1.8 }, { rec: r, f: q => q.e, col: C.accent, lw: 2.4 }] });
 }
+// Variation de la fraction en amas (lissée) sur ≈ 12 unités de temps (≈ 2 s) ; null si l'historique est trop court.
+function trend4() {
+  const r = k4.rec; if (r.length < 2) return null;
+  const last = r[r.length - 1]; let i = r.length - 1; while (i > 0 && last.t - r[i].t < 12) i--;
+  const ref = r[i]; if (last.t - ref.t < 6) return null;
+  return [last.m - ref.m, last.h - ref.h, last.e - ref.e];
+}
 function status4() {
   const f = k4.ema, base = `Les forces entre molécules sont 10 à 100 fois plus faibles qu'une liaison : on les rompt en chauffant un peu, sans casser les molécules`;
-  if (k4.steps < 400) return `Les molécules partent d'une grille et s'agitent : attends quelques secondes que les amas se forment. ` + base;
+  if (k4.warm > 0) return `Les boîtes s'équilibrent à la température choisie… ` + base;
+  const tr = trend4();
+  if (!tr) return `Les fractions en amas se mesurent sur quelques secondes… ` + base;
+  const names = ['le méthane', 'HCl', `l'eau`], keys = ['methane', 'hcl', 'eau'], moving = [], T = prm.T;
+  tr.forEach((d, i) => { const Tb = Mol.LIQ.Tb[keys[i]]; if (d > 0.12 && T < Tb) moving.push(names[i] + ' se condense'); else if (d < -0.12 && T > Tb) moving.push(names[i] + ` s'évapore`); });
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  if (moving.length) return cap(moving.join(' ; ')) + '. ' + base;
+  // équilibre : au-dessus de la transition du modèle (Mol.LIQ.Tb), la substance est gazeuse ; en dessous, en amas
+  const gas = names.filter((_, i) => T > Mol.LIQ.Tb[keys[i]]), amas = names.filter((_, i) => T <= Mol.LIQ.Tb[keys[i]]);
   let t;
-  if (f[0] > 0.7 && f[1] > 0.7 && f[2] > 0.7) t = `À cette température, les trois substances sont surtout en amas.`;
-  else if (f[0] < 0.3 && f[1] < 0.3 && f[2] < 0.3) t = `À cette température, les trois sont dispersées : les amas sont rompus, les molécules restent intactes.`;
-  else if (f[2] > f[1] && f[1] >= f[0]) t = `Le méthane est le plus dispersé, l'eau le plus en amas.`;
-  else t = `Les fractions en amas diffèrent d'une boîte à l'autre : la plus collante garde ses amas le plus longtemps.`;
+  if (!amas.length) t = `Les trois sont gazeux : les amas sont rompus, les molécules restent intactes.`;
+  else if (!gas.length) t = `Les trois restent en amas.`;
+  else t = `${cap(gas.join(' et '))} ${gas.length > 1 ? 'sont gazeux' : 'est gazeux'} ; ${amas.join(' et ')} ${amas.length > 1 ? 'restent' : 'reste'} en amas.`;
   return t + ' ' + base;
 }
 function readouts4() {
@@ -1364,12 +1416,496 @@ function readouts4() {
   setM('fm', fmt(k4.ema[0] * 100, 0)); setM('fh', fmt(k4.ema[1] * 100, 0)); setM('fe', fmt(k4.ema[2] * 100, 0)); setM('hb', String(Mol.hbonds(k4.sys[2])));
 }
 
-/* ================= Étapes 5 à 7 : en construction ================= */
-function drawStub() {
-  const c = ctx; c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.font = mono(13); c.fillStyle = C.texte2; c.fillText('Étape ' + (act + 1) + ' · en construction', W / 2, H / 2 - 10);
-  c.font = mono(11.5); c.fillText(STEPS[act].name, W / 2, H / 2 + 14);
+
+/* ================= Module 29 : outils communs ================= */
+EL.Ca = { c: '#c9b38a', r: 176 }; EL.Fe = { c: '#c47c5a', r: 132 };
+for (const k of ['Ca', 'Fe']) EL[k].rgb = rgb(EL[k].c);
+const fmtSciD = (v, d) => { if (!isFinite(v) || v === 0) return '0'; const e = Math.floor(Math.log10(Math.abs(v))); return fmt(v / Math.pow(10, e), d) + ' × 10' + sup(e); };
+const fmtG = g => fmt(g, g < 1 ? 3 : g < 10 ? 2 : g < 100 ? 2 : 1) + ' g';
+const fmtVol = mL => mL >= 1000 ? fmt(mL / 1000, 1) + ' L' : fmt(mL, mL < 10 ? 2 : 1) + ' mL';
+const LENU = [[1, 'm'], [1e-2, 'cm'], [1e-3, 'mm'], [1e-6, 'µm'], [1e-9, 'nm'], [1e-12, 'pm']];
+function fmtLen(v, dec) {
+  let u = LENU[LENU.length - 1]; for (const x of LENU) if (v >= x[0] * 0.999) { u = x; break; }
+  const q = v / u[0]; return fmt(q, dec == null ? (q < 10 ? 1 : 0) : dec) + ' ' + u[1];
 }
+const roundRect = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+
+/* ================= Étape 5 · La mole : changer d'échelle ================= */
+const SUB5 = ['eau', 'sel', 'sucre', 'fer', 'helium'];
+const M5 = k => Mol.molarMass(Mol.SUBSTANCES_MOLE[k].formula);
+const A5 = Math.cbrt(18e-6 / Mol.NA);                  // espacement moyen des molécules d'eau : (18 mL / N_A)^(1/3) ≈ 0,31 nm
+const E5 = { max: -1.3, min: -10 };                      // exposant de ℓ (côté du champ, en m) : de 5 cm à 0,1 nm
+const k5 = { sub: 'eau', m: 18.015, e: E5.max, zoom: false, tray: [], formula: '', hits: [] };
+const ell5 = () => Math.pow(10, k5.e);
+const Nview5 = () => Math.min(Mol.NA, Math.pow(ell5() / A5, 3));
+const molA5 = () => clamp((-8.2 - k5.e) / 0.3, 0, 1);    // fondu texture → molécules individuelles, sous ≈ 5 nm
+const nMol5 = () => k5.m / M5(k5.sub);
+const REF5 = [[3e-3, 'goutte ≈ 3 mm'], [5e-4, 'grain de sel ≈ 0,5 mm'], [7e-5, 'cheveu ≈ 70 µm'], [7e-6, 'globule rouge ≈ 7 µm'], [2e-6, 'bactérie ≈ 2 µm'], [1e-7, 'virus ≈ 100 nm'], [2e-9, 'ADN, largeur ≈ 2 nm'], [3.1e-10, 'molécule d’eau ≈ 0,3 nm']];
+function init5() { k5.e = E5.max; k5.zoom = false; syncTools(); }
+function setSub5(s) { s = String(s).toLowerCase().replace('é', 'e'); if (!Mol.SUBSTANCES_MOLE[s]) return; k5.sub = s; k5.m = M5(s); syncTools(); }
+function setMass5(g) { k5.m = clamp(+g, 0.1, 1000); syncTools(); }
+function zoom5() { if (k5.e <= E5.min + 0.01) k5.e = E5.max; k5.zoom = true; }
+function adv5(dt) {
+  if (!k5.zoom) return;
+  k5.e -= dt * ((E5.max - E5.min) / 8) * (reduce ? 0.4 : 1);
+  if (k5.e <= E5.min) { k5.e = E5.min; k5.zoom = false; }
+  syncScale5();
+}
+const trayFormula = () => k5.tray.map(([s, n]) => s + (n > 1 ? n : '')).join('');
+function trayAdd(sym) { const t = k5.tray.find(x => x[0] === sym); if (t) t[1]++; else k5.tray.push([sym, 1]); k5.formula = trayFormula(); }
+function trayRemove(sym) { const i = k5.tray.findIndex(x => x[0] === sym); if (i < 0) return; if (--k5.tray[i][1] <= 0) k5.tray.splice(i, 1); k5.formula = trayFormula(); }
+function compose5(f) { let c; try { c = Mol.atomCounts(f); } catch (e) { return false; } k5.tray = Object.entries(c); k5.formula = String(f); return true; }
+const trayM = () => k5.tray.reduce((s, [a, n]) => s + n * Mol.ATOMIC_MASS[a], 0);
+function trayDetail() {
+  if (!k5.tray.length) return '';
+  return k5.tray.map(([a, n]) => (n > 1 ? n + ' × ' : '') + fmt(Mol.ATOMIC_MASS[a], 3)).join(' + ') + ' = ' + fmt(trayM(), 3) + ' g/mol';
+}
+function syncScale5() { const el = $('#rScale'); if (document.activeElement !== el) el.value = k5.e.toFixed(2); $('#vScale').textContent = 'ℓ = ' + fmtLen(ell5()); }
+function syncTools5() {
+  document.querySelectorAll('[data-sub]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sub === k5.sub ? 'true' : 'false'));
+  const el = $('#rMass'); if (document.activeElement !== el) el.value = Math.log10(k5.m).toFixed(3);
+  $('#vMass').textContent = fmtG(k5.m); syncScale5();
+}
+function geo5() {
+  const top = 104, wide = W >= 700;
+  if (wide) {
+    const aH = H - top - 16, zs = Math.floor(Math.max(200, Math.min(W * 0.5, aH - 70))), zx = 20, zy = top + 4, RH = zs + 66, rx = zx + zs + 24, rw = W - rx - 18;
+    const trH = 128, brH = 112, balH = Math.max(150, RH - trH - brH - 24);
+    return { wide, zx, zy, zs, bal: { x: rx, y: zy, w: rw, h: balH }, bars: { x: rx, y: zy + balH + 12, w: rw, h: brH }, tray: { x: rx, y: zy + balH + brH + 24, w: rw, h: trH }, cnt: { x: zx, y: zy + zs + 6, w: zs, h: 54 }, needH: 0 };
+  }
+  const zs = W - 32, zx = 16, zy = top + 4, balH = 200, brH = 112, trH = 132, y1 = zy + zs + 62;
+  return { wide, zx, zy, zs, cnt: { x: zx, y: zy + zs + 6, w: zs, h: 54 }, bal: { x: 16, y: y1, w: W - 32, h: balH }, bars: { x: 16, y: y1 + balH + 10, w: W - 32, h: brH }, tray: { x: 16, y: y1 + balH + brH + 20, w: W - 32, h: trH }, needH: y1 + balH + brH + trH + 36 };
+}
+function molecule5(c, x, y, ppm, th, alpha, P) {
+  // eau : O au centre, deux H à 0,096 nm, angle de 104,5° ; rayons conventionnels
+  const a1 = th + 52.25 * PI / 180, a2 = th - 52.25 * PI / 180, bl = 0.096e-9 * ppm;
+  P.o.push([x, y, 0.075e-9 * ppm]); P.h.push([x + bl * Math.cos(a1), y + bl * Math.sin(a1), 0.04e-9 * ppm], [x + bl * Math.cos(a2), y + bl * Math.sin(a2), 0.04e-9 * ppm]);
+}
+function drawZoom5(c, g) {
+  const { zx, zy, zs } = g, l = ell5(), ppm = zs / l, cx = zx + zs / 2, cy = zy + zs / 2, mA = molA5(), tA = 1 - mA;
+  c.save(); c.beginPath(); c.rect(zx, zy, zs, zs); c.clip();
+  c.fillStyle = '#0c1118'; c.fillRect(zx, zy, zs, zs);
+  // cuillère (4 cm) : cuilleron elliptique rempli d'eau et manche
+  const sa = 0.02 * ppm, sb = 0.0135 * ppm;
+  if (l < 0.035) { c.fillStyle = rgba(RN, 0.12); c.fillRect(zx, zy, zs, zs); }
+  else {
+    c.fillStyle = rgba(RT2, 0.06); c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1.4;
+    c.beginPath(); c.roundRect(cx + sa * 0.9, cy - 0.003 * ppm, 0.075 * ppm, 0.006 * ppm, 3); c.fill(); c.stroke();
+    c.beginPath(); c.ellipse(cx, cy, sa, sb, 0, 0, TAU); c.fillStyle = rgba(RN, 0.2); c.fill(); c.stroke();
+  }
+  zoneF((x, y) => l >= 0.035 && ((x - cx) / sa) ** 2 + ((y - cy) / sb) ** 2 <= 1, 'cuillere', 'Cuillère d’eau · 18 mL', 'Une cuillère à soupe : 18 mL d’eau, soit 18 g et exactement une mole de molécules H₂O (6,022 × 10²³). Zoome pour les voir.');
+  // texture (milieu continu) puis molécules individuelles sous ≈ 5 nm
+  if (tA > 0.02 && l < 0.035) {
+    const rg = Mol.mulberry32(5); c.fillStyle = rgba(RN, 0.2 * tA); c.beginPath();
+    for (let i = 0; i < 140; i++) { const X = zx + rg() * zs, Y = zy + rg() * zs, r = 0.6 + rg() * 1.1; c.moveTo(X + r, Y); c.arc(X, Y, r, 0, TAU); }
+    c.fill();
+  }
+  if (mA > 0.02) {
+    const P = { o: [], h: [] }, a = 0.31e-9, hi = Math.ceil(l / 2 / a) + 1;
+    if ((2 * hi + 1) < 60) for (let i = -hi; i <= hi; i++) for (let j = -hi; j <= hi; j++) {
+      const rg = Mol.mulberry32((((i + 1000) * 73856093) ^ ((j + 1000) * 19349663)) >>> 0), jx = (rg() - 0.5) * 0.22, jy = (rg() - 0.5) * 0.22, th = rg() * TAU;
+      const X = cx + (i + jx) * a * ppm, Y = cy + (j + jy) * a * ppm; if (X < zx - 40 || X > zx + zs + 40 || Y < zy - 40 || Y > zy + zs + 40) continue;
+      molecule5(c, X, Y, ppm, th, 1, P);
+    }
+    c.globalAlpha = mA;
+    c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = Math.max(1, 0.012e-9 * ppm); c.beginPath();
+    for (let q = 0; q < P.o.length; q++) { c.moveTo(P.o[q][0], P.o[q][1]); c.lineTo(P.h[2 * q][0], P.h[2 * q][1]); c.moveTo(P.o[q][0], P.o[q][1]); c.lineTo(P.h[2 * q + 1][0], P.h[2 * q + 1][1]); }
+    c.stroke();
+    c.fillStyle = rgba(EL.O.rgb, 0.78); c.beginPath(); for (const p of P.o) { c.moveTo(p[0] + p[2], p[1]); c.arc(p[0], p[1], p[2], 0, TAU); } c.fill();
+    c.fillStyle = rgba(RT, 0.85); c.beginPath(); for (const p of P.h) { c.moveTo(p[0] + p[2], p[1]); c.arc(p[0], p[1], p[2], 0, TAU); } c.fill();
+    c.globalAlpha = 1;
+  }
+  // objets repères (cercles concentriques à l'échelle)
+  c.font = mono(10.5);
+  if (l >= 0.035) tagText(c, 'cuillère ≈ 4 cm', cx, cy - sb - 6, 'center', 'bottom', C.texte2);
+  for (const [s, name] of REF5) {
+    const d = s * ppm; if (d < zs * 0.05 || d > zs * 0.95) continue;
+    c.setLineDash([4, 4]); c.strokeStyle = rgba(RA, 0.7); c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy, d / 2, 0, TAU); c.stroke(); c.setLineDash([]);
+    tagText(c, name, cx, cy + d / 2 + 4, 'center', 'top', C.accent);
+    zoneF((x, y) => Math.abs(Math.hypot(x - cx, y - cy) - d / 2) < 7, 'ref5' + name, 'Repère : ' + name, 'Un objet de taille connue, dessiné à l’échelle du champ pour sentir de quoi on parle.');
+  }
+  // règle graduée
+  const nice = niceStep(l * 0.25), bw = nice / l * zs, rx0 = zx + 16, ry = zy + zs - 22;
+  c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.moveTo(rx0, ry); c.lineTo(rx0 + bw, ry);
+  for (let k = 0; k <= 10; k++) { const X = rx0 + bw * k / 10; c.moveTo(X, ry); c.lineTo(X, ry - (k % 5 === 0 ? 8 : 4)); }
+  c.stroke(); c.font = mono(11); tagText(c, fmtLen(nice, 0), rx0 + bw / 2, ry + 4, 'center', 'top', C.texte);
+  zone(rx0 - 4, ry - 12, rx0 + bw + 4, ry + 20, 'regle5', 'Règle graduée', 'Une longueur réelle à l’échelle du champ. À chaque cran de zoom, la même règle représente une longueur dix fois plus petite.');
+  tagText(c, 'champ : ℓ = ' + fmtLen(l), zx + 8, zy + 8, 'left', 'top', C.texte2);
+  c.restore();
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(zx + 0.5, zy + 0.5, zs - 1, zs - 1);
+  zone(zx, zy, zx + zs, zy + zs, 'champ5', mA > 0.5 ? 'Molécules d’eau' : 'Champ de vision', mA > 0.5 ? 'Un O et deux H (104,5°), espacées d’environ 0,31 nm : (18 mL / N_A)^(1/3). Rayons et couleurs conventionnels.' : 'Un carré de côté ℓ, centré sur la cuillère. Sous ≈ 5 nm, la texture de l’eau cède la place aux molécules individuelles. Molette ou curseur pour zoomer.');
+  // compteur
+  let N = Nview5(); const cn = g.cnt; let t1 = N >= Mol.NA * 0.9999 ? '≈ ' + fmtSciD(Mol.NA, 3) + ' molécules (toute la cuillère : une mole)' : N < 1 ? 'moins d’une molécule dans le champ' : '≈ ' + fmtSciD(N, 1) + ' molécules dans le champ';
+  c.font = mono(g.wide ? 14 : 12.5); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte;
+  if (c.measureText(t1).width > cn.w) t1 = N >= Mol.NA * 0.9999 ? '≈ ' + fmtSciD(Mol.NA, 3) + ' molécules · une mole' : t1.replace(' dans le champ', '');
+  c.fillText(t1, cn.x, cn.y + 12);
+  c.font = mono(11); c.fillStyle = C.texte2; const t2 = 'N ≈ (ℓ / 0,31 nm)³ sous la taille de la cuillère'; c.fillText(c.measureText(t2).width > cn.w ? 'N ≈ (ℓ / 0,31 nm)³' : t2, cn.x, cn.y + 34);
+  zone(cn.x, cn.y, cn.x + cn.w, cn.y + cn.h, 'cnt5', 'Compteur de molécules', 'Nombre de molécules d’eau dans un cube de côté ℓ : N ≈ (ℓ / 0,31 nm)³. On ne dessine jamais 10²³ points : on le compte.');
+}
+function icon5(c, key, cx, yb, s) {
+  const rg = Mol.mulberry32(3);
+  if (key === 'eau') {
+    const w = s * 0.95, h = s * 1.1;
+    c.beginPath(); c.moveTo(cx - w * 0.46, yb - h * 0.8); c.lineTo(cx - w * 0.36, yb); c.lineTo(cx + w * 0.36, yb); c.lineTo(cx + w * 0.46, yb - h * 0.8); c.closePath(); c.fillStyle = rgba(RN, 0.35); c.fill();
+    c.beginPath(); c.moveTo(cx - w / 2, yb - h); c.lineTo(cx - w * 0.4, yb); c.lineTo(cx + w * 0.4, yb); c.lineTo(cx + w / 2, yb - h); c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.5; c.stroke();
+  } else if (key === 'sel' || key === 'sucre') {
+    const rows = 5 + Math.round(s / 18), cs = Math.max(2.4, s * 0.06);
+    for (let r = 0; r < rows; r++) for (let k = 0; k <= rows - r - 1; k++) {
+      const X = cx + (k - (rows - r - 1) / 2) * cs * 2.1 + (rg() - 0.5) * cs * 0.6, Y = yb - cs - r * cs * 1.8 + (rg() - 0.5) * cs * 0.4;
+      if (key === 'sel') { c.fillStyle = rgba(RT, 0.92); c.fillRect(X - cs / 2, Y - cs / 2, cs, cs); }
+      else { c.fillStyle = rgba(RT, 0.2); c.strokeStyle = rgba(RT, 0.9); c.lineWidth = 1; c.beginPath(); for (let q = 0; q < 6; q++) { const a = q * PI / 3 + rg(); const px = X + cs * 0.95 * Math.cos(a), py = Y + cs * 0.95 * Math.sin(a); q ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath(); c.fill(); c.stroke(); }
+    }
+  } else if (key === 'fer') {
+    const w = s * 1.1, h = s * 0.55, gr = c.createLinearGradient(cx - w / 2, yb - h, cx + w / 2, yb);
+    gr.addColorStop(0, '#9aa3ad'); gr.addColorStop(1, '#4a525c'); c.fillStyle = gr; c.fillRect(cx - w / 2, yb - h, w, h);
+    c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1; c.strokeRect(cx - w / 2 + 0.5, yb - h + 0.5, w - 1, h - 1); c.beginPath(); c.moveTo(cx - w / 2 + 3, yb - h + 4); c.lineTo(cx + w / 2 - 3, yb - h + 4); c.stroke();
+  } else {
+    const r = s * 0.55, by = yb - s * 1.35;
+    c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(cx, by + r); c.lineTo(cx, yb); c.stroke();
+    c.beginPath(); c.arc(cx, by, r, 0, TAU); c.fillStyle = rgba(RN, 0.22); c.fill(); c.strokeStyle = rgba(RN, 0.8); c.lineWidth = 1.4; c.stroke();
+    c.font = mono(Math.max(9, r * 0.7)); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('He', cx, by);
+  }
+}
+function drawBalance5(c, g) {
+  const b = g.bal, n = nMol5(), key = k5.sub, S = Mol.SUBSTANCES_MOLE[key], bw = Math.min(b.w - 8, 320), bx = b.x + (b.w - bw) / 2;
+  const bodyH = Math.min(86, b.h * 0.42), by = b.y + Math.min(b.h - bodyH - 4, b.h * 0.42 + 40), plateY = by - 8;
+  // plateau et objet posé
+  const sz = 22 + 14 * clamp(Math.log10(Math.max(n, 1e-3)) + 2, 0, 4);
+  icon5(c, key, bx + bw / 2, plateY, Math.min(sz, b.h * 0.55));
+  c.fillStyle = rgba(RT2, 0.35); c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1.4; c.beginPath(); c.ellipse(bx + bw / 2, plateY + 3, bw * 0.34, 7, 0, 0, TAU); c.fill(); c.stroke();
+  // corps de la balance et afficheur
+  roundRect(c, bx, by, bw, bodyH, 8); c.fillStyle = C.fond2; c.fill(); c.strokeStyle = C.texte2; c.lineWidth = 1.2; c.stroke();
+  const dx = bx + bw * 0.14, dw = bw * 0.72, dh = bodyH * 0.52, dy = by + bodyH * 0.2;
+  c.fillStyle = '#080b10'; c.fillRect(dx, dy, dw, dh); c.strokeStyle = C.trait; c.strokeRect(dx + 0.5, dy + 0.5, dw, dh);
+  c.font = mono(Math.min(24, dh * 0.7)); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText(fmtG(k5.m), dx + dw / 2, dy + dh / 2 + 1);
+  c.font = mono(11); c.fillStyle = C.texte2; c.fillText(`n = ${fmt(n, 3)} mol · ${S.name}`, bx + bw / 2, by + bodyH - 10);
+  zone(bx, by, bx + bw, by + bodyH, 'bal5', 'Balance', 'Elle donne la masse m. Une mole de chaque substance contient le même nombre de particules, mais pèse une masse différente : sa masse molaire M, en g/mol.');
+  c.font = mono(11.5); c.fillStyle = C.accent; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('Balance', b.x + 2, b.y);
+  const V = k5.m / S.rho;
+  c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText(`volume indicatif : ${fmtVol(V)}${key === 'helium' ? ' (gaz, 0 °C)' : ''}`, b.x + b.w - 2, b.y);
+}
+function drawBars5(c, g) {
+  const b = g.bars, nbar = SUB5.length, bw = Math.min(54, (b.w - 20) / nbar - 8), gap = (b.w - nbar * bw) / (nbar + 1), base = b.y + b.h - 18, maxH = b.h - 50, Mmax = M5('sucre');
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = C.accent; c.fillText('1 mole de chacune', b.x + 2, b.y);
+  c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText('N = ' + fmtSciD(Mol.NA, 3), b.x + b.w - 2, b.y);
+  SUB5.forEach((k, i) => {
+    const M = M5(k), h = Math.max(3, M / Mmax * maxH), x = b.x + gap + i * (bw + gap), sel = k === k5.sub;
+    c.fillStyle = rgba(RT, sel ? 0.8 : 0.4); c.fillRect(x, base - h, bw, h);
+    if (sel) { c.strokeStyle = C.accent; c.lineWidth = 1.6; c.strokeRect(x + 0.5, base - h + 0.5, bw - 1, h - 1); }
+    c.font = mono(10.5); c.textAlign = 'center'; c.textBaseline = 'bottom'; c.fillStyle = C.texte; c.fillText(fmt(M, 1) + ' g', x + bw / 2, base - h - 2);
+    c.textBaseline = 'top'; c.fillStyle = sel ? C.accent : C.texte2; c.fillText(k === 'helium' ? 'hélium' : k, x + bw / 2, base + 3);
+    zone(x, base - maxH, x + bw, base + 16, 'bar5' + k, `1 mole de ${k === 'helium' ? 'hélium' : k} : ${fmt(M, 1)} g`, 'Même nombre de particules (6,022 × 10²³), masse différente : la masse molaire M est la masse d’une particule en unités atomiques, exprimée en grammes.');
+  });
+}
+function drawTray5(c, g) {
+  const t = g.tray; k5.hits = [];
+  roundRect(c, t.x, t.y, t.w, t.h, 6); c.strokeStyle = C.trait; c.lineWidth = 1; c.stroke();
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = C.accent; c.fillText('Plateau d’atomes', t.x + 8, t.y + 6);
+  zone(t.x, t.y, t.x + t.w, t.y + t.h, 'tray5', 'Plateau d’atomes', 'On y compose une molécule atome par atome avec les boutons « Composer » ; sa masse molaire s’additionne. Clique un atome du plateau pour en retirer un.');
+  if (!k5.tray.length) { c.fillStyle = C.texte2; c.fillText('Ajoute des atomes avec les boutons « Composer ».', t.x + 8, t.y + 30); return; }
+  let x = t.x + 12, y = t.y + 40; const rowH = 24;
+  for (const [sym, n] of k5.tray) {
+    const el = EL[sym] || EL.A, r = clamp(el.r * 0.1, 7, 15);
+    for (let i = 0; i < n; i++) {
+      if (x + r > t.x + t.w - 8) { x = t.x + 12; y += rowH; }
+      if (y + r > t.y + t.h - 40) break;
+      c.beginPath(); c.arc(x + r, y, r, 0, TAU); c.fillStyle = rgba(el.rgb, 0.35); c.fill(); c.strokeStyle = rgba(el.rgb, 0.9); c.lineWidth = 1.2; c.stroke();
+      if (r >= 9) { c.font = mono(9.5); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = el.c; c.fillText(sym, x + r, y + 0.5); }
+      k5.hits.push({ x: x + r, y, r: r + 2, sym });
+      zcirc(x + r, y, r, 'tr5' + sym, 'Atome ' + (DE_[sym] ? DE_[sym] : '') + ' (' + sym + ')', 'M = ' + fmt(Mol.ATOMIC_MASS[sym], 3) + ' g/mol. Clique pour retirer un atome de ce type du plateau.');
+      x += r * 2 + 4;
+    }
+    x += 6;
+  }
+  c.font = mono(14); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte;
+  c.fillText(sub(k5.formula) + ' · M = ' + fmt(trayM(), 3) + ' g/mol', t.x + 8, t.y + t.h - 22);
+  c.font = mono(10.5); c.fillStyle = C.texte2; c.fillText(trayDetail(), t.x + 8, t.y + t.h - 7);
+}
+function draw5() { const g = geo5(); drawZoom5(ctx, g); drawBalance5(ctx, g); drawBars5(ctx, g); drawTray5(ctx, g); }
+function status5() {
+  const n = nMol5(), N = n * Mol.NA, S = Mol.SUBSTANCES_MOLE[k5.sub], nm = k5.sub === 'helium' ? 'hélium' : S.name;
+  const base = `Une mole de n'importe quoi contient 6,022 × 10²³ particules. Sa masse en grammes est la masse d'une particule en unités atomiques`;
+  const pre = Math.abs(n - 1) < 0.005 ? `${fmt(k5.m, 1)} g de ${nm} : 1,000 mol, soit ${fmtSciD(Mol.NA, 3)} particules.` : `${fmt(k5.m, k5.m < 10 ? 2 : 1)} g de ${nm} : ${fmt(n, n < 1 ? 3 : 2)} mol, soit ${fmtSciD(N, 3)} particules.`;
+  const zm = molA5() > 0.5 ? `Dans ce champ de ${fmtLen(ell5())}, on compte les molécules une à une (≈ ${fmtSciD(Nview5(), 1)}). ` : '';
+  return (zm || pre) + ' ' + base;
+}
+function readouts5() {
+  const n = nMol5(), S = Mol.SUBSTANCES_MOLE[k5.sub];
+  setM('m', fmt(k5.m, k5.m < 10 ? 3 : 2)); setM('M', fmt(M5(k5.sub), 3)); setM('n', fmt(n, 4)); setM('N', fmtSciD(n * Mol.NA, 3));
+  setM('vol', fmtVol(k5.m / S.rho) + (k5.sub === 'helium' ? ' (gaz, 0 °C)' : ''));
+  setM('form', k5.formula ? sub(k5.formula) : '—'); setM('Mf', k5.tray.length ? fmt(trayM(), 3) : '—');
+  $('#mExtra').textContent = `On ne compte pas les grains de riz, on les pèse : si un grain pèse 25 mg, 1 kg en contient 40 000.` + (k5.tray.length ? ' Plateau : ' + trayDetail() + '.' : '');
+}
+
+/* ================= Étape 6 · Concentration et dilution ================= */
+const k6 = { solute: 'sel', m: 4.5, V: 500, V2: 500, Vcur: 500, pour: false, diluted: false, t: 0, pts: null };
+const LK = 20;                                          // loupe : une particule dessinée pour 0,05 mol/L
+const M6 = () => Mol.molarMass(k6.solute === 'sel' ? 'NaCl' : 'C6H12O6');
+const n6 = () => k6.m / M6();
+const C6 = () => Mol.conc(n6(), k6.V / 1000);
+function init6() {
+  Object.assign(k6, { Vcur: k6.V, V2: Math.max(k6.V2, k6.V), pour: false, diluted: false, t: 0 });
+  if (!k6.pts) { const rg = Mol.mulberry32(31); k6.pts = []; for (let i = 0; i < 420; i++) { const r = Math.sqrt(rg()) * 0.92, a = rg() * TAU; k6.pts.push([r * Math.cos(a), r * Math.sin(a), rg() * TAU, 0.5 + rg()]); } k6.bx = []; for (let i = 0; i < 400; i++) k6.bx.push([rg(), rg()]); }
+  syncTools();
+}
+function dissolve6(m, V) { k6.m = clamp(+m, 0, 100); k6.V = clamp(+V, 50, 1000); k6.V2 = k6.V; k6.Vcur = k6.V; k6.pour = false; k6.diluted = false; syncTools(); }
+function dilute6(V2) { V2 = clamp(+V2, k6.V, 1000); if (V2 < k6.V + 1) V2 = Math.min(1000, k6.V * 2); k6.V2 = V2; k6.pour = true; k6.diluted = true; syncTools(); }
+function adv6(dt) {
+  k6.t += dt * (reduce ? 0.4 : 1);
+  if (k6.pour) {
+    const rate = Math.max(40, (k6.V2 - k6.V) / 2.5) * (reduce ? 0.5 : 1);
+    k6.Vcur = Math.min(k6.V2, k6.Vcur + rate * dt); if (k6.Vcur >= k6.V2 - 1e-9) { k6.Vcur = k6.V2; k6.pour = false; }
+  }
+}
+function syncTools6() {
+  document.querySelectorAll('[data-sol]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sol === k6.solute ? 'true' : 'false'));
+  const set = (id, vid, v, txt) => { const el = $(id); if (document.activeElement !== el) el.value = v; $(vid).textContent = txt; };
+  set('#rM6', '#vM6', k6.m, fmt(k6.m, 2) + ' g'); set('#rVol6', '#vVol6', k6.V, fmt(k6.V, 0) + ' mL');
+  const r2 = $('#rV26'); r2.min = k6.V; set('#rV26', '#vV26', k6.V2, fmt(k6.V2, 0) + ' mL');
+}
+function geo6() {
+  const top = 104, aH = H - top - 14, wide = W >= 640;
+  const bw = wide ? Math.min(220, W * 0.26) : Math.max(110, W * 0.33), bh = Math.min(aH - 96, 340), bx = wide ? Math.max(36, W * 0.07) : 16, by = top + 20;
+  const lr = wide ? Math.min(150, (W - bx - bw) * 0.28, aH * 0.3) : Math.max(55, (W - bx - bw - 62) / 2);
+  const lx = wide ? bx + bw + (W - bx - bw) * 0.5 : bx + bw + 40 + lr, ly = by + lr + 10;
+  return { wide, bx, by, bw, bh, lx, ly, lr };
+}
+function drawBeaker6(c, g) {
+  const { bx, by, bw, bh } = g, inner = bh - 14, yOf = v => by + bh - 7 - v / 1000 * inner, hl = k6.Vcur / 1000 * inner, ys = by + bh - 7 - hl;
+  // liquide
+  c.fillStyle = rgba(RN, 0.14); c.fillRect(bx + 2, ys, bw - 4, hl + 5); c.strokeStyle = rgba(RN, 0.7); c.lineWidth = 1.5; c.beginPath(); c.moveTo(bx + 2, ys); c.lineTo(bx + bw - 2, ys); c.stroke();
+  // particules du bécher : mêmes particules, réparties dans un volume qui grandit
+  const nd = Math.min(400, Math.round(n6() * 200));
+  c.beginPath(); c.fillStyle = k6.solute === 'sel' ? rgba(RP, 0.85) : rgba(RT, 0.85);
+  for (let i = 0; i < nd; i += 1) { if (k6.solute === 'sel' && i % 2) continue; const p = k6.bx[i], X = bx + 8 + p[0] * (bw - 16), Y = ys + 4 + p[1] * Math.max(0, hl - 8); c.moveTo(X + 1.8, Y); c.arc(X, Y, 1.8, 0, TAU); }
+  c.fill();
+  if (k6.solute === 'sel') { c.beginPath(); c.fillStyle = rgba(RN, 0.85); for (let i = 1; i < nd; i += 2) { const p = k6.bx[i], X = bx + 8 + p[0] * (bw - 16), Y = ys + 4 + p[1] * Math.max(0, hl - 8); c.moveTo(X + 1.8, Y); c.arc(X, Y, 1.8, 0, TAU); } c.fill(); }
+  // verre gradué
+  c.strokeStyle = C.texte; c.lineWidth = 2; c.beginPath(); c.moveTo(bx, by - 6); c.lineTo(bx, by + bh); c.lineTo(bx + bw, by + bh); c.lineTo(bx + bw, by - 6); c.stroke();
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'middle'; c.lineWidth = 1; c.strokeStyle = rgba(RT, 0.6);
+  for (let v = 100; v <= 1000; v += 100) { c.beginPath(); c.moveTo(bx + bw - 14, yOf(v)); c.lineTo(bx + bw, yOf(v)); c.stroke(); c.fillText(String(v), bx + bw + 4, yOf(v)); }
+  c.strokeStyle = rgba(RT, 0.35); for (let v = 50; v < 1000; v += 100) { c.beginPath(); c.moveTo(bx + bw - 7, yOf(v)); c.lineTo(bx + bw, yOf(v)); c.stroke(); }
+  c.textAlign = 'left'; c.fillText('mL', bx + bw + 4, by - 8);
+  c.font = mono(11.5); tagText(c, 'V = ' + fmt(k6.Vcur, 0) + ' mL', bx + bw / 2, ys - 4, 'center', 'bottom', C.texte);
+  zone(bx, by - 6, bx + bw, by + bh, 'becher', 'Bécher gradué', 'Il contient une quantité fixe de soluté dissous. Diluer ajoute de l’eau : le volume monte, la quantité de soluté ne change pas, la concentration baisse.');
+  // eau versée
+  if (k6.pour) {
+    const px = bx + bw + 24, py = by - 26;
+    c.save(); c.translate(px, py); c.rotate(-0.6); c.beginPath(); c.moveTo(-26, -16); c.lineTo(26, -16); c.lineTo(20, 30); c.lineTo(-20, 30); c.closePath(); c.fillStyle = rgba(RN, 0.2); c.fill(); c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.5; c.stroke(); c.restore();
+    c.strokeStyle = rgba(RN, 0.7); c.lineWidth = 3; c.beginPath(); c.moveTo(bx + bw - 6, by - 4); c.lineTo(bx + bw - 12, ys); c.stroke();
+    zone(px - 34, py - 30, px + 34, py + 36, 'pichet', 'Pichet d’eau', 'On verse de l’eau pure : le solvant augmente, le soluté ne bouge pas.');
+  }
+  // compteur du total
+  const nn = n6(), tx = bx, ty = by + bh + 18;
+  c.font = mono(12); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte; c.fillText(`n = ${fmt(nn * 1000, 2)} mmol de ${k6.solute === 'sel' ? 'NaCl' : 'glucose'}`, tx, ty);
+  c.font = mono(11); c.fillStyle = C.texte2; c.fillText(`≈ ${fmtSciD(nn * Mol.NA, 2)} ${k6.solute === 'sel' ? 'unités NaCl' : 'molécules'} : ne change pas`, tx, ty + 16);
+  zone(tx, ty - 14, tx + Math.max(bw, 200), ty + 22, 'cnt6', 'Compteur du bécher', 'Quantité de soluté dans le bécher : n = m/M. Elle est la même avant et après la dilution : diluer ne détruit ni ne crée de particules.');
+}
+function drawLoupe6(c, g) {
+  const { lx, ly, lr, bx, bw, by, bh } = g, Cc = k6.m > 0 ? n6() / (k6.Vcur / 1000) : 0, x = Cc * LK, nfull = Math.min(Math.floor(x), 200), frac = x - Math.floor(x);
+  // lien bécher → loupe
+  const mx = bx + bw * 0.5, my = by + bh - 7 - k6.Vcur / 1000 * (bh - 14) * 0.4;
+  c.strokeStyle = rgba(RT2, 0.5); c.setLineDash([3, 4]); c.lineWidth = 1; c.beginPath(); c.arc(mx, my, 9, 0, TAU); c.stroke();
+  const ang = Math.atan2(ly - my, lx - mx); c.beginPath(); c.moveTo(mx + 9 * Math.cos(ang), my + 9 * Math.sin(ang)); c.lineTo(lx - lr * Math.cos(ang), ly - lr * Math.sin(ang)); c.stroke(); c.setLineDash([]);
+  // loupe
+  c.save(); c.beginPath(); c.arc(lx, ly, lr, 0, TAU); c.clip(); c.fillStyle = rgba(RN, 0.14); c.fillRect(lx - lr, ly - lr, lr * 2, lr * 2);
+  const t = k6.t, pts = k6.pts, wig = i => [Math.sin(t * 1.7 + pts[i][2]) * 2.5 * pts[i][3], Math.cos(t * 1.3 + pts[i][2] * 1.7) * 2.5 * pts[i][3]];
+  const idxs = []; for (let i = 0; i < nfull; i++) idxs.push([i, 1]); if (frac > 0.02 && nfull < 200) idxs.push([nfull, frac]);
+  if (k6.solute === 'sel') {
+    for (const [i, a] of idxs) { const w = wig(i), p = pts[i], X = lx + p[0] * lr + w[0], Y = ly + p[1] * lr + w[1]; c.globalAlpha = a; c.beginPath(); c.arc(X, Y, 5.5, 0, TAU); c.fillStyle = rgba(RP, 0.6); c.fill(); c.strokeStyle = C.pos; c.lineWidth = 1.2; c.stroke(); c.font = mono(9); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('+', X, Y + 0.5); }
+    for (const [i, a] of idxs) { const j = (i + 200) % 420, w = wig(j), p = pts[j], X = lx + p[0] * lr + w[0], Y = ly + p[1] * lr + w[1]; c.globalAlpha = a; c.beginPath(); c.arc(X, Y, 7.5, 0, TAU); c.fillStyle = rgba(RN, 0.45); c.fill(); c.strokeStyle = C.neg; c.lineWidth = 1.2; c.stroke(); c.font = mono(10); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('−', X, Y + 0.5); }
+  } else {
+    for (const [i, a] of idxs) { const w = wig(i), p = pts[i], X = lx + p[0] * lr + w[0], Y = ly + p[1] * lr + w[1]; c.globalAlpha = a; c.beginPath(); for (let q = 0; q < 6; q++) { const aa = q * PI / 3 + p[2]; const px = X + 8 * Math.cos(aa), py = Y + 8 * Math.sin(aa); q ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath(); c.fillStyle = rgba(RT, 0.12); c.fill(); c.strokeStyle = rgba(RT, 0.9); c.lineWidth = 1.2; c.stroke(); c.beginPath(); c.arc(X + 8 * Math.cos(p[2]), Y + 8 * Math.sin(p[2]), 2.2, 0, TAU); c.fillStyle = EL.O.c; c.fill(); }
+  }
+  c.globalAlpha = 1; c.restore();
+  c.beginPath(); c.arc(lx, ly, lr, 0, TAU); c.strokeStyle = C.texte; c.lineWidth = 3; c.stroke();
+  c.strokeStyle = C.texte; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(lx + lr * 0.72, ly + lr * 0.72); c.lineTo(lx + lr * 1.05, ly + lr * 1.05); c.stroke(); c.lineCap = 'butt';
+  zcirc(lx, ly, lr, 'loupe', 'Loupe sur un petit volume', 'Le nombre de particules dessinées est proportionnel à la concentration C : une particule dessinée pour 0,05 mol/L, échelle fixe. Moins de particules par volume, c’est une concentration plus basse.');
+  const tt = ly + lr + 20; c.font = mono(11.5); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte;
+  c.fillText(`C = ${fmt(Cc, 3)} mol/L`, lx, tt); c.font = mono(10.5); c.fillStyle = C.texte2;
+  c.fillText(`≈ ${fmt(x, x < 10 ? 1 : 0)} ${k6.solute === 'sel' ? 'paires d’ions' : 'molécules'} dessinées`, lx, tt + 15); c.fillText('1 particule dessinée = 0,05 mol/L', lx, tt + 30);
+  if (k6.solute === 'sel') {
+    zoneF((x2, y2) => { for (const [i] of idxs) { const p = pts[i]; if (Math.hypot(x2 - (lx + p[0] * lr), y2 - (ly + p[1] * lr)) < 10) return true; } return false; }, 'ion6', 'Ion sodium Na⁺ (--positif)', 'Dans l’eau, chaque NaCl dissous donne un ion Na⁺ (petit, charge +) et un ion Cl⁻ (plus gros, charge −), dispersés parmi les molécules d’eau. La dissociation est seulement mentionnée ici.');
+    zoneF((x2, y2) => { for (const [i] of idxs) { const p = pts[(i + 200) % 420]; if (Math.hypot(x2 - (lx + p[0] * lr), y2 - (ly + p[1] * lr)) < 10) return true; } return false; }, 'ion6b', 'Ion chlorure Cl⁻ (--negatif)', 'Charge négative entière : l’atome de chlore a gardé un électron de l’atome de sodium. Les ions sont entourés de molécules d’eau (module 31).');
+  }
+}
+function draw6() {
+  const g = geo6(), c = ctx; drawBeaker6(c, g); drawLoupe6(c, g);
+}
+function status6() {
+  const C1 = C6(), n = n6(), base = `Diluer ajoute du solvant : la concentration baisse, la quantité de soluté reste la même`;
+  if (k6.pour) return `L'eau versée fait monter le niveau : la loupe se vide (${fmt(n / (k6.Vcur / 1000), 3)} mol/L), mais le nombre de particules du bécher ne change pas.`;
+  if (k6.diluted) return `C₁V₁ = C₂V₂ : ${fmt(C1, 3)} mol/L × ${fmt(k6.V, 0)} mL = ${fmt(Mol.dilute(C1, k6.V, k6.V2), 3)} mol/L × ${fmt(k6.V2, 0)} mL. La quantité de soluté n'a pas changé.`;
+  if (k6.m <= 0) return `Aucun soluté : ajoute de la masse avec le curseur m.`;
+  return `${fmt(k6.m, 2)} g de ${k6.solute === 'sel' ? 'sel' : 'sucre'} dans ${fmt(k6.V, 0)} mL : ${fmt(n * 1000, 1)} mmol, soit ${fmt(C1, 3)} mol/L (${fmt(Mol.massConc(C1, M6()), 1)} g/L). Pour diluer, appuie sur « Diluer ».`;
+}
+function readouts6() {
+  const n = n6(), C1 = C6(), M = M6(), C2 = Mol.dilute(C1, k6.V, k6.V2);
+  setM('n', fmt(n * 1000, 2)); setM('V', fmt(k6.V, 0)); setM('C', fmt(C1, 3)); setM('Cm', fmt(Mol.massConc(C1, M), 2));
+  setM('C1', fmt(C1, 3)); setM('V1', fmt(k6.V, 0)); setM('C2', fmt(C2, 3)); setM('V2', fmt(k6.V2, 0)); setM('p1', fmt(C1 * k6.V, 2)); setM('p2', fmt(C2 * k6.V2, 2));
+  $('#mExtra').textContent = `Préréglages : sérum physiologique 9 g/L (0,154 mol/L) ; eau de mer ≈ 35 g/L de sels, traitée ici comme du NaCl ; sang : glucose ≈ 5 mmol/L (0,90 g/L).`;
+}
+const PRE6 = { serum: ['sel', 4.5, 500], mer: ['sel', 17.5, 500], sang: ['sucre', 0.45, 500] };
+function preset6(k) { const p = PRE6[k]; if (!p) return; k6.solute = p[0]; dissolve6(p[1], p[2]); }
+
+/* ================= Étape 7 · Stœchiométrie : le réactif limitant ================= */
+const Q7 = 0.25;                                        // une molécule dessinée = 0,25 mol
+const RX7 = ['methane', 'eau', 'propane', 'nacl'];
+const DEF7 = { methane: { CH4: 2, O2: 3 }, eau: { H2: 3, O2: 1 }, propane: { C3H8: 1, O2: 4 }, nacl: { Na: 3, Cl2: 1 } };
+const k7 = { rx: 'methane', n0: Object.assign({}, DEF7.methane), grams: false, run: false, started: false, ev: 0, p: 0, xi: 0, done: false, flash: 0 };
+const rx7 = () => Mol.REACTIONS[k7.rx];
+const reactants7 = () => Object.keys(rx7().reactants);
+const products7 = () => Object.keys(rx7().products);
+const full7 = () => Mol.react(rx7(), k7.n0);
+const xiMax7 = () => full7().extentMax;
+const nEv7 = () => Math.ceil(xiMax7() / Q7 - 1e-9);
+const evDur7 = k => Math.max(0.3, 2 * Math.pow(0.6, k)) * (reduce ? 2.5 : 1);
+const ss = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+function xiNow7() {
+  const xm = xiMax7(); if (k7.done) return xm; if (!k7.started) return 0;
+  const base = k7.ev * Q7, d = Math.max(0, Math.min(Q7, xm - base)); return Math.min(xm, base + d * ss(k7.p));
+}
+function init7() { Object.assign(k7, { run: false, started: false, ev: 0, p: 0, xi: 0, done: false, flash: 0 }); syncTools(); buildMeas(6); }
+function setReaction7(r) { if (!Mol.REACTIONS[r]) return; k7.rx = r; k7.n0 = Object.assign({}, DEF7[r]); init7(); }
+function setReactants7(o) { for (const f of reactants7()) if (f in o) k7.n0[f] = clamp(+o[f], 0, 100); Object.assign(k7, { run: false, started: false, ev: 0, p: 0, xi: 0, done: false }); syncTools(); }
+function react7() {
+  Object.assign(k7, { started: true, run: true, ev: 0, p: 0, xi: 0, done: false });
+  if (xiMax7() < 1e-12) { k7.run = false; k7.done = true; }
+}
+function adv7(dt) {
+  k7.flash = Math.max(0, k7.flash - dt / 0.4);
+  if (!k7.run) { k7.xi = xiNow7(); return; }
+  let left = dt, guard = 0;
+  while (left > 0 && guard++ < 60) {
+    const dur = evDur7(k7.ev), need = (1 - k7.p) * dur;
+    if (left >= need) { left -= need; k7.ev++; k7.p = 0; k7.flash = 1; if (k7.ev >= nEv7()) { k7.run = false; k7.done = true; break; } }
+    else { k7.p += left / dur; left = 0; }
+  }
+  k7.xi = xiNow7();
+}
+const MOLDEF = {
+  CH4: [['C', 0, 0], ['H', .5, .5], ['H', -.5, .5], ['H', .5, -.5], ['H', -.5, -.5]],
+  O2: [['O', -.3, 0], ['O', .3, 0]], H2: [['H', -.2, 0], ['H', .2, 0]], Cl2: [['Cl', -.38, 0], ['Cl', .38, 0]],
+  C3H8: [['C', -.62, .12], ['C', 0, -.12], ['C', .62, .12], ['H', -1.02, .02], ['H', -.84, .6], ['H', -.42, .52], ['H', -.2, -.62], ['H', .2, -.62], ['H', .42, .52], ['H', .84, .6], ['H', 1.02, .02]],
+  CO2: [['O', -.62, 0], ['C', 0, 0], ['O', .62, 0]], H2O: [['O', 0, 0], ['H', -.45, .4], ['H', .45, .4]],
+  Na: [['Na', 0, 0]], NaCl: [['Na', -.42, 0], ['Cl', .42, 0]]
+};
+const RAD7 = { H: 0.2, C: 0.38, O: 0.33, Cl: 0.45, Na: 0.4 };
+function drawMol7(c, f, x, y, s, alpha) {
+  const def = MOLDEF[f] || [['C', 0, 0]]; c.globalAlpha = alpha;
+  for (const [el, dx, dy] of def) { const e = EL[el] || EL.A, r = (RAD7[el] || 0.35) * s; c.beginPath(); c.arc(x + dx * s, y + dy * s, r, 0, TAU); c.fillStyle = rgba(e.rgb, 0.85); c.fill(); c.strokeStyle = rgba(e.rgb, 1); c.lineWidth = 0.8; c.stroke(); }
+  c.globalAlpha = 1;
+}
+function slots7(rect, count, s) {
+  const cs = s * 2.2, cols = Math.max(1, Math.floor(rect.w / cs)), out = [];
+  for (let i = 0; i < count; i++) out.push([rect.x + cs * (0.5 + i % cols) + (rect.w - cols * cs) / 2, rect.y + rect.h - cs * 0.5 - s * 1.7 * Math.floor(i / cols)]);
+  return out;
+}
+function geo7() {
+  const top = 112, wide = W >= 640;
+  if (wide) {
+    const bY = top + 36, balH = 78, y0 = bY + balH + 16, h = Math.max(150, H - y0 - 14), rw = Math.floor(Math.min(W * 0.27, 300)), pad = 18;
+    return { wide, eqY: top + 4, bal: { x: W / 2 - 190, y: bY, w: 380, h: balH }, A: { x: pad, y: y0, w: rw, h }, B: { x: W - pad - rw, y: y0, w: rw, h }, bench: { x: pad + rw + 14, y: y0, w: W - 2 * (pad + rw) - 28, h }, s: clamp(Math.min(rw / 7, h / 8), 12, 26), needH: 0 };
+  }
+  const bY = top + 34, balH = 74, y0 = bY + balH + 12, rh = 150, rw = (W - 44) / 2, benchY = y0 + rh + 12, benchH = 170;
+  return { wide, eqY: top + 4, bal: { x: 16, y: bY, w: W - 32, h: balH }, A: { x: 16, y: y0, w: rw, h: rh }, B: { x: 28 + rw, y: y0, w: rw, h: rh }, bench: { x: 16, y: benchY, w: W - 32, h: benchH }, s: clamp(rw / 7.5, 11, 17), needH: benchY + benchH + 16 };
+}
+const eqText7 = () => { const r = rx7(), t = o => Object.keys(o).map(f => (o[f] > 1 ? o[f] + ' ' : '') + sub(f)).join(' + '); return t(r.reactants) + ' → ' + t(r.products); };
+function drawBalance7(c, g, res) {
+  const b = g.bal, cx = b.x + b.w / 2, y = b.y + 22, hw = b.w / 2 - 44;
+  c.strokeStyle = C.texte; c.lineWidth = 2; c.beginPath(); c.moveTo(cx - hw, y); c.lineTo(cx + hw, y); c.stroke();
+  c.beginPath(); c.moveTo(cx, y); c.lineTo(cx - 10, y + 26); c.lineTo(cx + 10, y + 26); c.closePath(); c.fillStyle = rgba(RT2, 0.5); c.fill(); c.stroke();
+  for (const sx of [-1, 1]) { const px = cx + sx * hw; c.beginPath(); c.moveTo(px - 26, y + 14); c.lineTo(px + 26, y + 14); c.quadraticCurveTo(px, y + 22, px - 26, y + 14); c.strokeStyle = rgba(RT, 0.8); c.lineWidth = 1.5; c.stroke(); c.beginPath(); c.moveTo(px - 26, y + 14); c.lineTo(px, y); c.lineTo(px + 26, y + 14); c.lineWidth = 1; c.stroke(); }
+  c.font = mono(12); c.textBaseline = 'alphabetic'; c.textAlign = 'center'; c.fillStyle = C.accent; c.fillText('avant', cx - hw, b.y + 10); c.fillText('après', cx + hw, b.y + 10);
+  c.fillStyle = C.texte; c.font = mono(13); c.fillText(fmt(res.massBefore, 1) + ' g', cx - hw, b.y + b.h - 4); c.fillText(fmt(res.massAfter, 1) + ' g', cx + hw, b.y + b.h - 4);
+  const eq = Math.abs(res.massAfter - res.massBefore) < 1e-9 * Math.max(1, res.massBefore); c.font = mono(11); c.fillStyle = C.texte2; c.fillText(eq ? 'égales' : '≠', cx, b.y + b.h - 4);
+  zone(b.x, b.y, b.x + b.w, b.y + b.h, 'bal7', 'Balance : masse avant et après', 'La masse totale des réactifs et des produits (avec le reste) est la même avant et après : les atomes sont réarrangés, pas créés.');
+}
+function drawReservoir7(c, g, R, f, label, unitsShown, flyN, limiting, lblX) {
+  roundRect(c, R.x, R.y, R.w, R.h, 6); c.fillStyle = 'rgba(17,22,30,0.7)'; c.fill(); c.strokeStyle = C.trait; c.lineWidth = 1; c.stroke();
+  const sl = slots7({ x: R.x + 4, y: R.y + 26, w: R.w - 8, h: R.h - 30 }, unitsShown + flyN, g.s);
+  for (let i = 0; i < unitsShown; i++) drawMol7(c, f, sl[i][0], sl[i][1], g.s, 0.95);
+  c.font = mono(12); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte; c.fillText(label, R.x + 8, R.y + 17);
+  if (limiting) { const w = c.measureText(label).width; c.strokeStyle = C.accent; c.lineWidth = 2; c.beginPath(); c.moveTo(R.x + 8, R.y + 21); c.lineTo(R.x + 8 + w, R.y + 21); c.stroke(); c.font = mono(10.5); c.fillStyle = C.accent; c.textAlign = 'left'; c.fillText('réactif limitant', R.x + 8, R.y + 37); }
+  zone(R.x, R.y, R.x + R.w, R.y + R.h, 'res7' + f, 'Réservoir de ' + sub(f), 'Chaque molécule dessinée représente 0,25 mol. Ce qui reste au fond est le réactif en excès.');
+  if (limiting) zone(R.x, R.y + 4, R.x + R.w, R.y + 24, 'lim7', 'Réactif limitant', 'Le réactif épuisé en premier : quand il n’y en a plus, la réaction s’arrête, même s’il reste de l’autre.');
+  return sl;
+}
+function draw7() {
+  const c = ctx, g = geo7(), rx = rx7(), rs = reactants7(), ps = products7(), xm = xiMax7(), running = k7.run;
+  const delta = Math.max(0, Math.min(Q7, xm - k7.ev * Q7)), xiC = Math.min(k7.ev * Q7, xm), xiEnd = running ? Math.min((k7.ev + 1) * Q7, xm) : xiC, p = k7.p;
+  const resEnd = Mol.react(rx, k7.n0, k7.started ? xiEnd : 0), resC = Mol.react(rx, k7.n0, k7.started ? xiC : 0), live = Mol.react(rx, k7.n0, k7.xi);
+  const full = full7(), lims = Array.isArray(full.limiting) ? full.limiting : [full.limiting];
+  c.font = mono(g.wide ? 20 : 15); c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = C.texte; c.fillText(eqText7(), W / 2, g.eqY);
+  zone(W / 2 - 200, g.eqY - 2, W / 2 + 200, g.eqY + 26, 'eq7', 'Équation équilibrée', 'Les coefficients disent dans quelles proportions les particules réagissent : ici, ' + Object.keys(rx.reactants).map(f => rx.reactants[f] + ' ' + f).join(' pour ') + '.');
+  drawBalance7(c, g, live);
+  // réservoirs
+  const Rr = [g.A, g.B], slotsR = [], q = f => Math.round(resEnd.leftover[f] / Q7);
+  rs.forEach((f, i) => {
+    const exhausted = k7.started && resEnd.leftover[f] <= 1e-12 && lims.includes(f);
+    const label = `${sub(f)} · ${fmt(resEnd.leftover[f], 2)} mol` + (g.wide ? ` · ${fmt(resEnd.leftover[f] * Mol.molarMass(f), 1)} g` : '');
+    const fly = running ? Math.round(rx.reactants[f] * delta / Q7) : 0;
+    slotsR.push(drawReservoir7(c, g, Rr[i], f, label, q(f), fly, exhausted));
+  });
+  // établi
+  const B = g.bench; roundRect(c, B.x, B.y, B.w, B.h, 6); c.fillStyle = 'rgba(17,22,30,0.4)'; c.fill(); c.strokeStyle = C.trait; c.stroke();
+  c.font = mono(12); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.accent; c.fillText('Établi', B.x + 8, B.y + 17);
+  zone(B.x, B.y, B.x + B.w, B.y + B.h, 'bench7', 'Établi', 'C’est ici que les molécules se combinent : chaque événement consomme exactement les proportions de l’équation et fabrique les produits.');
+  const surfY = B.y + B.h - 22; c.strokeStyle = C.texte2; c.lineWidth = 2; c.beginPath(); c.moveTo(B.x + 10, surfY); c.lineTo(B.x + B.w - 10, surfY); c.stroke();
+  // produits : colonnes par espèce
+  const nP = ps.length, colW = (B.w - 20) / nP, prodSlots = [];
+  ps.forEach((f, j) => {
+    const shown = Math.round(resC.products[f] / Q7), rect = { x: B.x + 10 + j * colW, y: B.y + 28, w: colW - 4, h: B.h - 56 }, sl = slots7(rect, shown + Math.round(rx.products[f] * delta / Q7) + 1, g.s * 0.9);
+    prodSlots.push(sl); for (let i = 0; i < shown; i++) drawMol7(c, f, sl[i][0], sl[i][1], g.s * 0.9, 0.95);
+    c.font = mono(11.5); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte; c.fillText(`${sub(f)} · ${fmt(live.products[f], 2)} mol`, rect.x + colW / 2 - 2, B.y + B.h - 6);
+  });
+  // événement en cours : vol des réactifs vers le centre, éclair, vol des produits vers leur colonne
+  if (running && delta > 0) {
+    const cxB = B.x + B.w / 2, cyB = B.y + B.h * 0.42;
+    if (p < 0.5) {
+      const t = ss(p / 0.45);
+      rs.forEach((f, i) => { const n = Math.round(rx.reactants[f] * delta / Q7), sl = slotsR[i]; for (let k = 0; k < n; k++) { const a = sl[Math.min(sl.length - 1, q(f) + k)], tx = cxB + (i ? 1 : -1) * 18 + (k - n / 2) * 6, ty = cyB + (i ? -1 : 1) * 10 + (k % 2) * 14; drawMol7(c, f, lerp(a[0], tx, t), lerp(a[1], ty, t), g.s, 1); } });
+    }
+    if (p >= 0.4 && p < 0.6) { const a = 1 - Math.abs(p - 0.5) * 10; const gr = c.createRadialGradient(cxB, cyB, 0, cxB, cyB, 46); gr.addColorStop(0, rgba(RE, 0.65 * clamp(a, 0, 1))); gr.addColorStop(1, rgba(RE, 0)); c.fillStyle = gr; c.beginPath(); c.arc(cxB, cyB, 46, 0, TAU); c.fill(); }
+    if (p >= 0.5) {
+      const t = ss((p - 0.5) / 0.5);
+      ps.forEach((f, j) => { const n = Math.round(rx.products[f] * delta / Q7), sl = prodSlots[j], base = Math.round(resC.products[f] / Q7); for (let k = 0; k < n; k++) { const a = sl[Math.min(sl.length - 1, base + k)]; drawMol7(c, f, lerp(cxB + (k - n / 2) * 8, a[0], t), lerp(cyB, a[1], t), g.s * 0.9, 1); } });
+    }
+  }
+}
+function status7() {
+  const full = full7(), xm = full.extentMax, rx = rx7(), lim = full.limiting, base = `Rien ne se perd : les atomes sont réarrangés, pas créés`;
+  if (!k7.started) return xm < 1e-12 ? `Il manque un réactif : rien ne peut se produire.` : `Choisis les quantités puis appuie sur « Réagir » : chaque combinaison consomme exactement les proportions de l'équation. ${base}`;
+  if (k7.run) return `Combinaison ${Math.min(k7.ev + 1, nEv7())} sur ${nEv7()} : ${eqText7()}, pour 0,25 mol de réaction. ${base}`;
+  if (xm < 1e-12) return `Il manque un réactif : rien ne s'est produit.`;
+  const res = Mol.react(rx, k7.n0), left = Object.keys(res.leftover).filter(f => res.leftover[f] > 1e-12).map(f => `${fmt(res.leftover[f], 2)} mol de ${sub(f)}`);
+  const lt = Array.isArray(lim) ? `les deux réactifs s'épuisent ensemble` : `${sub(lim)} est épuisé en premier`;
+  return `${lt.charAt(0).toUpperCase() + lt.slice(1)} : tout s'arrête${left.length ? `, il reste ${left.join(' et ')}` : ''}. ${base}`;
+}
+function meas7() {
+  const rs = reactants7(), ps = products7();
+  return [['quantités initiales', rs.map((f, i) => ['a' + i, sub(f)]).concat([])], ['avancement ξ (max)', [['xi', 'mol'], ['xim', 'mol']]], ['réactif limitant', [['lim', '']]],
+    ['restes', rs.map((f, i) => ['l' + i, sub(f)])], ['produits', ps.map((f, i) => ['p' + i, sub(f)])], ['masse avant · après', [['mb', 'g'], ['ma', 'g']]]];
+}
+function readouts7() {
+  const rs = reactants7(), ps = products7(), full = full7(), live = Mol.react(rx7(), k7.n0, k7.xi);
+  rs.forEach((f, i) => { setM('a' + i, fmt(k7.n0[f], 2)); setM('l' + i, fmt(live.leftover[f], 2)); });
+  ps.forEach((f, i) => setM('p' + i, fmt(live.products[f], 2)));
+  setM('xi', fmt(k7.xi, 2)); setM('xim', fmt(full.extentMax, 2)); setM('lim', Array.isArray(full.limiting) ? 'les deux' : sub(full.limiting));
+  setM('mb', fmt(live.massBefore, 2)); setM('ma', fmt(live.massAfter, 2));
+  $('#mExtra').textContent = '';
+}
+function syncTools7() {
+  document.querySelectorAll('[data-rx]').forEach(b => b.setAttribute('aria-pressed', b.dataset.rx === k7.rx ? 'true' : 'false'));
+  document.querySelectorAll('[data-unit]').forEach(b => b.setAttribute('aria-pressed', (b.dataset.unit === 'g') === k7.grams ? 'true' : 'false'));
+  const rs = reactants7();
+  [['#rQ1', '#vQ1', '#gQ1', 0], ['#rQ2', '#vQ2', '#gQ2', 1]].forEach(([id, vid, gid, i]) => {
+    const f = rs[i], n = k7.n0[f], el = $(id); if (document.activeElement !== el) el.value = Math.round(n / Q7);
+    $(gid).textContent = sub(f); $(vid).textContent = k7.grams ? fmt(n * Mol.molarMass(f), 1) + ' g' : fmt(n, 2) + ' mol';
+  });
+  $('#bReact').disabled = k7.run;
+}
+
 
 /* ---------------- Mises en page ---------------- */
 function sizeCanvas(c, cssH) {
@@ -1378,9 +1914,10 @@ function sizeCanvas(c, cssH) {
   c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
 }
 const hasScope = n => n === 0 || n === 2 || n === 3;
-function sizePanelCanvases() { $('#scopeBox').hidden = !hasScope(act); if (hasScope(act)) sizeCanvas(scopeC, 130); }
+function sizePanelCanvases() { $('#scopeBox').hidden = !hasScope(act); if (hasScope(act)) sizeCanvas(scopeC, innerHeight < 950 ? 110 : 130); }
 function applySceneHeight() {
-  const need = act === 3 && W < 480 && matchMedia('(max-width:860px)').matches ? geo4().needH : 0;
+  const mob = matchMedia('(max-width:860px)').matches;
+  const need = !mob ? 0 : act === 3 && W < 480 ? geo4().needH : act === 4 && W < 700 ? geo5().needH : act === 6 && W < 640 ? geo7().needH : 0;
   if (need) sceneEl.style.setProperty('--sh', Math.round(need) + 'px'); else sceneEl.style.removeProperty('--sh');
 }
 function resize() {
@@ -1407,12 +1944,15 @@ const MEAS = [
   [['r', [['r', 'pm']]], ['re', [['re', 'pm']]], ['E(r)', [['E', 'eV']]], ['énergie cinétique', [['K', 'eV']]], ['F = −dE/dr', [['F', 'eV/pm']]], ['De (profondeur du creux)', [['De', 'eV']]], ['énergie de liaison usuelle', [['Dev', 'eV'], ['D298', 'kJ/mol']]]],
   [['χ de A', [['cA', '']]], ['χ de B', [['cB', '']]], ['Δχ', [['dchi', '']]], ['type', [['type', '']]], ['δ de A', [['dA', 'e']]], ['δ de B', [['dB', 'e']]]],
   [['liaisons · doublets', [['nb', ''], ['nl', '']]], ['géométrie', [['geo', '']]], ['angles mesurés', [['ang', '°']]], ['angle de référence (réel)', [['aref', '°']]], ['moment calculé', [['mu', 'D']]], ['moment mesuré', [['mur', 'D']]], ['répulsion', [['rel', '']]]],
-  [['T* (réduite)', [['T', '']]], ['T indicative', [['K', 'K'], ['C', '°C']]], ['amas · méthane', [['fm', '%']]], ['amas · HCl', [['fh', '%']]], ['amas · eau', [['fe', '%']]], ['liaisons H · eau', [['hb', '']]]]
+  [['amas · méthane', [['fm', '%']]], ['amas · HCl', [['fh', '%']]], ['amas · eau', [['fe', '%']]], ['liaisons H · eau', [['hb', '']]], ['T* (réduite)', [['T', '']]], ['T indicative', [['K', 'K'], ['C', '°C']]]],
+  [['m', [['m', 'g']]], ['M', [['M', 'g/mol']]], ['n = m/M', [['n', 'mol']]], ['N = n·N_A', [['N', '']]], ['volume indicatif', [['vol', '']]], ['formule composée', [['form', '']]], ['M de la formule', [['Mf', 'g/mol']]]],
+  [['n = m/M', [['n', 'mmol']]], ['V', [['V', 'mL']]], ['C = n/V', [['C', 'mol/L']]], ['concentration massique', [['Cm', 'g/L']]], ['C₁ · V₁', [['C1', 'mol/L'], ['V1', 'mL']]], ['C₂ · V₂', [['C2', 'mol/L'], ['V2', 'mL']]], ['C₁V₁ · C₂V₂', [['p1', ''], ['p2', 'mmol']]]],
+  () => meas7()
 ];
 const mEls = {}, mLabs = {};
 function buildMeas(n) {
   const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k]; for (const k in mLabs) delete mLabs[k];
-  const spec = MEAS[n] || [];
+  const spec = typeof MEAS[n] === 'function' ? MEAS[n]() : MEAS[n] || [];
   for (const [lab, vals] of spec) {
     const r = document.createElement('div'); r.className = 'row';
     r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
@@ -1425,10 +1965,10 @@ function buildMeas(n) {
 }
 function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
 function readouts() {
-  if (act === 0) readouts1(); else if (act === 1) readouts2(); else if (act === 2) readouts3(); else if (act === 3) readouts4();
+  if (act === 0) readouts1(); else if (act === 1) readouts2(); else if (act === 2) readouts3(); else if (act === 3) readouts4(); else if (act === 4) readouts5(); else if (act === 5) readouts6(); else readouts7();
   status();
 }
-function statusText() { return act === 0 ? status1() : act === 1 ? status2() : act === 2 ? status3() : act === 3 ? status4() : ''; }
+function statusText() { return act === 0 ? status1() : act === 1 ? status2() : act === 2 ? status3() : act === 3 ? status4() : act === 4 ? status5() : act === 5 ? status6() : status7(); }
 function status() { const t = statusText(), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
 
 /* ---------------- Étapes : navigation ---------------- */
@@ -1443,11 +1983,11 @@ function syncTools() {
   document.querySelectorAll('[data-nb]').forEach(b => { const v = +b.dataset.nb, bad = v + prm.nl > 4; b.setAttribute('aria-pressed', v === prm.nb ? 'true' : 'false'); b.disabled = bad; b.title = bad ? tipBad : ''; });
   document.querySelectorAll('[data-nl]').forEach(b => { const v = +b.dataset.nl, bad = v + prm.nb > 4; b.setAttribute('aria-pressed', v === prm.nl ? 'true' : 'false'); b.disabled = bad; b.title = bad ? tipBad : ''; });
   const cur = molFor(prm.nb, prm.nl); document.querySelectorAll('[data-pre]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pre === cur ? 'true' : 'false'));
-  syncTemp();
+  syncTemp(); syncTools5(); syncTools6(); syncTools7();
 }
 function enterAct(n, restart) {
   act = n; if (restart) resetPrm(n);
-  if (n === 0) init1(); else if (n === 1) init2(); else if (n === 2) init3(); else if (n === 3) init4(!!restart);
+  if (n === 0) init1(); else if (n === 1) init2(); else if (n === 2) init3(); else if (n === 3) init4(!!restart); else if (n === 4) init5(); else if (n === 5) init6(); else init7();
   hideTip(); syncTools(); buildMeas(n); sizePanelCanvases(); applySceneHeight();
   if (restart) setPlay(true);
 }
@@ -1459,10 +1999,9 @@ function updateUI(n) {
   const cle = $('#cle'); cle.hidden = !st.built; cle.textContent = st.built ? st.cle : '';
   for (const id of ['#stepTitle', '#stepText', '#cle']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
-  $('#recSec').hidden = !st.built; $('#measSec').hidden = !st.built; $('#cards').hidden = n !== 6;
+  $('#recSec').hidden = !st.built || n >= 4; $('#measSec').hidden = !st.built; $('#cards').hidden = n !== 6;
   $('#leg').hidden = n === 1; $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
   cv.style.touchAction = n === 0 || n === 2 ? 'none' : 'pan-y';
-  if (!st.built) $('#status').textContent = '';
 }
 function goAct(n, restart) {
   n = clamp(n, 0, NA - 1);
@@ -1508,6 +2047,24 @@ $('#bShake').addEventListener('click', e => { shake(); e.currentTarget.blur(); }
 $('#rT').addEventListener('input', e => setT(+e.target.value));
 $('#bCool').addEventListener('click', e => { cool(); e.currentTarget.blur(); });
 
+document.querySelectorAll('[data-sub]').forEach(b => b.addEventListener('click', e => { setSub5(b.dataset.sub); e.currentTarget.blur(); }));
+$('#rMass').addEventListener('input', e => { k5.m = Math.round(Math.pow(10, +e.target.value) * 1000) / 1000; k5.m = clamp(k5.m, 0.1, 1000); $('#vMass').textContent = fmtG(k5.m); });
+$('#bMole').addEventListener('click', e => { k5.m = M5(k5.sub); syncTools5(); e.currentTarget.blur(); });
+$('#rScale').addEventListener('input', e => { k5.e = +e.target.value; k5.zoom = false; $('#vScale').textContent = 'ℓ = ' + fmtLen(ell5()); });
+$('#bZoom').addEventListener('click', e => { zoom5(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-atom]').forEach(b => b.addEventListener('click', e => { trayAdd(b.dataset.atom); e.currentTarget.blur(); }));
+$('#bClear').addEventListener('click', e => { k5.tray = []; k5.formula = ''; e.currentTarget.blur(); });
+document.querySelectorAll('[data-sol]').forEach(b => b.addEventListener('click', e => { k6.solute = b.dataset.sol; dissolve6(k6.m, k6.V); e.currentTarget.blur(); }));
+$('#rM6').addEventListener('input', e => dissolve6(+e.target.value, k6.V));
+$('#rVol6').addEventListener('input', e => dissolve6(k6.m, +e.target.value));
+$('#rV26').addEventListener('input', e => { k6.V2 = Math.max(k6.V, +e.target.value); k6.pour = false; k6.diluted = false; k6.Vcur = k6.V; syncTools6(); });
+$('#bDil').addEventListener('click', e => { dilute6(k6.V2); e.currentTarget.blur(); });
+document.querySelectorAll('[data-pre6]').forEach(b => b.addEventListener('click', e => { preset6(b.dataset.pre6); e.currentTarget.blur(); }));
+document.querySelectorAll('[data-rx]').forEach(b => b.addEventListener('click', e => { setReaction7(b.dataset.rx); e.currentTarget.blur(); }));
+document.querySelectorAll('[data-unit]').forEach(b => b.addEventListener('click', e => { k7.grams = b.dataset.unit === 'g'; syncTools7(); e.currentTarget.blur(); }));
+for (const [id, i] of [['#rQ1', 0], ['#rQ2', 1]]) $(id).addEventListener('input', e => { const o = {}; o[reactants7()[i]] = +e.target.value * Q7; setReactants7(o); });
+$('#bReact').addEventListener('click', e => { react7(); syncTools7(); e.currentTarget.blur(); });
+
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
@@ -1521,7 +2078,7 @@ addEventListener('keydown', e => {
   if (e.key === 'r' || e.key === 'R') { resetStep(); return; }
   if (/^[1-7]$/.test(e.key)) { goAct(+e.key - 1); return; }
   const k = e.key.toLowerCase();
-  if (k === 'l' && act === 0) release(); else if (k === 'c' && act === 0) breakBond(); else if (k === 's' && act === 2) shake(); else if (k === 'f' && act === 3) cool();
+  if (k === 'l' && act === 0) release(); else if (k === 'c' && act === 0) breakBond(); else if (k === 's' && act === 2) shake(); else if (k === 'f' && act === 3) cool(); else if (k === 'z' && act === 4) zoom5(); else if (k === 'd' && act === 5) dilute6(k6.V2); else if (k === 'g' && act === 6) react7();
 });
 addEventListener('blur', () => { k1.drag = null; k3.drag = null; });
 document.addEventListener('visibilitychange', () => { last = 0; });
@@ -1541,8 +2098,10 @@ function down1(p, e) {
   cv.className = 'grabbing'; hideTip(); e.preventDefault(); setDist(k1.s.r);
 }
 function down3(p, e) { k3.drag = { x: p.x, y: p.y, yaw: k3.yaw, pitch: k3.pitch }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); }
+cv.addEventListener('wheel', e => { if (act !== 4) return; e.preventDefault(); k5.e = clamp(k5.e + e.deltaY * 0.002, E5.min, E5.max); k5.zoom = false; syncScale5(); }, { passive: false });
 cv.addEventListener('pointerdown', e => {
   const p = ptr(e); down = { x: p.x, y: p.y, moved: false, touch: e.pointerType === 'touch', t: performance.now() };
+  if (act === 4) for (const h of k5.hits) if (Math.hypot(p.x - h.x, p.y - h.y) <= h.r) { trayRemove(h.sym); break; }
   if (act === 0) down1(p, e); else if (act === 2) down3(p, e);
 });
 cv.addEventListener('pointermove', e => {
@@ -1571,9 +2130,9 @@ addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
 function advance(dt) {
-  if (act === 0) adv1(dt); else if (act === 1) adv2(dt); else if (act === 2) adv3(dt); else if (act === 3) adv4(dt);
+  if (act === 0) adv1(dt); else if (act === 1) adv2(dt); else if (act === 2) adv3(dt); else if (act === 3) adv4(dt); else if (act === 4) adv5(dt); else if (act === 5) adv6(dt); else adv7(dt);
 }
-const SCENES = [draw1, draw2, draw3, draw4, drawStub, drawStub, drawStub], SCOPES = [scope1, null, scope3, scope4, null, null, null];
+const SCENES = [draw1, draw2, draw3, draw4, draw5, draw6, draw7], SCOPES = [scope1, null, scope3, scope4, null, null, null];
 let last = 0, lastRead = 0;
 function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
 function tick(now) {
@@ -1582,7 +2141,8 @@ function tick(now) {
     if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
     else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
   }
-  if (playing && fade <= 0) advance(dt);
+  if (act === 3 && k4.warm > 0) warm4(150);
+  if (playing && fade <= 0 && !(act === 3 && k4.warm > 0)) advance(dt);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
   zones = [];
@@ -1598,8 +2158,10 @@ function stateNow() {
   if (act === 0) { const b = k1.b, s = k1.s; return { step, pair: prm.pair, r: s.r, re: b.re, E: Mol.morse(s.r, b), F: Mol.morseForce(s.r, b), De: b.De, D298: b.D298, mode: k1.mode, v: s.v, K: Mol.kinetic(s, b), Etot: Mol.bondEnergy(s, b), t: s.t }; }
   if (act === 1) { const ch = Mol.bondCharacter(prm.A, prm.B); return { step, A: prm.A, B: prm.B, dchi: ch.dchi, type: ch.type, delta: ch.delta, plus: ch.plus, minus: ch.minus, caveat: ch.caveat, off: k2.off, ion: k2.ion }; }
   if (act === 2) { const inf = info3(); return { step, nb: prm.nb, nl: prm.nl, preset: k3.key, angles: inf.groups.map(g => g.v), anglesAll: inf.angs, geometry: inf.geometry, dipole: inf.dip ? inf.dip.mag : null, dipoleRef: k3.mol ? k3.mol.dipoleRef : null, fmax: k3.fmax, relaxed: inf.relaxed, steps: k3.steps, E: k3.E }; }
-  if (act === 3) return { step, T: prm.T, Tk: Mol.toKelvin(prm.T), frac: { methane: k4.ema[0], hcl: k4.ema[1], eau: k4.ema[2] }, hb: Mol.hbonds(k4.sys[2]), cooling: !!k4.cool, steps: k4.steps };
-  return { step };
+  if (act === 3) { if (k4.warm > 0) warm4(k4.warm); } if (act === 3) return { step, T: prm.T, Tk: Mol.toKelvin(prm.T), frac: { methane: k4.ema[0], hcl: k4.ema[1], eau: k4.ema[2] }, hb: Mol.hbonds(k4.sys[2]), cooling: !!k4.cool, steps: k4.steps };
+  if (act === 4) { const n = nMol5(); return { step, substance: k5.sub, m: k5.m, M: M5(k5.sub), n, N: n * Mol.NA, scale: ell5(), exp: k5.e, Nview: Nview5(), formula: k5.formula, Mformula: trayM(), vol: k5.m / Mol.SUBSTANCES_MOLE[k5.sub].rho }; }
+  if (act === 5) { const n = n6(), C1 = C6(); return { step, solute: k6.solute, m: k6.m, V: k6.V, n, C: C1, Cmass: Mol.massConc(C1, M6()), V2: k6.V2, C2: Mol.dilute(C1, k6.V, k6.V2), nTotal: n, Vcur: k6.Vcur, pouring: k6.pour, diluted: k6.diluted }; }
+  { const full = full7(), xi = k7.xi = xiNow7(), r = Mol.react(rx7(), k7.n0, xi); return { step, reaction: k7.rx, n0: Object.assign({}, k7.n0), xi, extentMax: full.extentMax, limiting: full.limiting, leftover: r.leftover, products: r.products, massBefore: r.massBefore, massAfter: r.massAfter, done: k7.done, running: k7.run }; }
 }
 const ensure = n => { if (act !== n) { goAct(n); if (pendingAct >= 0) { enterAct(pendingAct, false); pendingAct = -1; fade = 0; sceneA = 1; } } };
 window.__labo = {
@@ -1613,7 +2175,10 @@ window.__labo = {
     if (act === 0) for (let i = 0; i < n; i++) step1();
     else if (act === 1) for (let i = 0; i < n; i++) step2(1 / 120);
     else if (act === 2) for (let i = 0; i < n && k3.fmax > 1e-12; i++) step3();
-    else if (act === 3) for (let i = 0; i < n; i++) step4();
+    else if (act === 3) { if (k4.warm > 0) warm4(k4.warm); for (let i = 0; i < n; i++) step4(); }
+    else if (act === 4) for (let i = 0; i < n; i++) adv5(1 / 60);
+    else if (act === 5) for (let i = 0; i < n; i++) adv6(1 / 60);
+    else for (let i = 0; i < n; i++) adv7(1 / 60);
     return stateNow();
   },
   setPlay,
@@ -1630,12 +2195,23 @@ window.__labo = {
   shake() { ensure(2); shake(); return stateNow(); },
   // étape 4
   setT(T) { ensure(3); setT(T); return stateNow(); },
-  cool() { ensure(3); cool(); return stateNow(); }
+  cool() { ensure(3); cool(); return stateNow(); },
+  // étape 5
+  setSubstance(s) { ensure(4); setSub5(s); return stateNow(); },
+  setMass(g) { ensure(4); setMass5(g); return stateNow(); },
+  compose(f) { ensure(4); compose5(f); return stateNow(); },
+  // étape 6
+  dissolve(g, V) { ensure(5); dissolve6(g, V); return stateNow(); },
+  dilute(V2) { ensure(5); dilute6(V2); return stateNow(); },
+  // étape 7
+  setReaction(r) { ensure(6); setReaction7(r); return stateNow(); },
+  setReactants(o) { ensure(6); setReactants7(o); return stateNow(); },
+  react() { ensure(6); react7(); return stateNow(); }
 };
 
 /* ---------------- Démarrage ---------------- */
 resize();
-for (let i = 0; i < 4; i++) resetPrm(i);
+for (let i = 0; i < 7; i++) resetPrm(i);
 enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
