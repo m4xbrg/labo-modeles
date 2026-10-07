@@ -36,7 +36,7 @@ a{color:inherit}
 .app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
 .scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
-#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.ew{cursor:ew-resize}
 
 .head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
 .serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
@@ -67,6 +67,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
 .lab{font:400 12px var(--mono);color:var(--texte-2)}
 .val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val.txt b{font-size:12.5px}
 .val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
 .scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
 #scope{display:block;width:100%}
@@ -233,7 +234,14 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-acts="1"><button class="btn" id="bFreeze" aria-pressed="false" title="Arrêter le temps (F)"><span class="dot"></span>Arrêter le temps</button></div>
       <div class="grp" data-acts="1"><span class="gl">Préréglages</span><button class="btn sm" data-pre="sol">Soleil au sol</button><button class="btn sm" data-pre="tel">Téléphone à 1 m</button><button class="btn sm" data-pre="laser">Laser 1 mW sur 1 mm²</button></div>
       <!-- Étapes 3 et 4 -->
-      <div class="grp" data-acts="2 3"><span class="gl">À venir : les commandes de cette étape arrivent dans un second lot.</span></div>
+      <!-- Étape 3 -->
+      <div class="grp" data-acts="2"><span class="gl" id="gl3">λ</span><input type="range" id="rL3" min="-4" max="12" step="0.01" value="-0.48" aria-label="Longueur d'onde, échelle logarithmique"><span class="rv" id="vL3" style="min-width:82px"></span><button class="btn sm" id="bMode3" title="Régler le curseur en longueur d'onde ou en fréquence">Curseur : λ</button></div>
+      <div class="grp" data-acts="2" id="pre3"><span class="gl">Préréglages</span></div>
+      <!-- Étape 4 -->
+      <div class="grp" data-acts="3"><span class="gl">P</span><input type="range" id="rP4" min="0" max="27" step="0.01" value="2" aria-label="Puissance émise, échelle logarithmique de 1 watt à 10 puissance 27 watts"><span class="rv" id="vP4" style="min-width:92px"></span></div>
+      <div class="grp" data-acts="3"><span class="gl">r</span><input type="range" id="rR4" min="0" max="11.175" step="0.005" value="0" aria-label="Distance à la source, échelle logarithmique de 1 mètre à 1 unité astronomique"><span class="rv" id="vR4" style="min-width:82px"></span></div>
+      <div class="grp" data-acts="3"><button class="btn" id="bSail" aria-pressed="false" title="Voile parfaitement réfléchissante de 100 m sur 100 m"><span class="dot"></span>Voile réfléchissante</button></div>
+      <div class="grp" data-acts="3"><span class="gl">Préréglages</span><button class="btn sm" data-pre4="ampoule">Ampoule 100 W</button><button class="btn sm" data-pre4="soleil">Soleil à la Terre</button></div>
     </div>
   </div>
 </div>
@@ -530,7 +538,7 @@ const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
 const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
 const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
 const sig = (v, s) => { if (!isFinite(v)) return '—'; if (v === 0) return '0'; const d = clamp((s || 3) - 1 - Math.floor(Math.log10(Math.abs(v))), 0, 6); return fmt(v, d); };
-const PFX = [[1e-15, 'f'], [1e-12, 'p'], [1e-9, 'n'], [1e-6, 'µ'], [1e-3, 'm'], [1, ''], [1e3, 'k'], [1e6, 'M'], [1e9, 'G'], [1e12, 'T'], [1e15, 'P']];
+const PFX = [[1e-15, 'f'], [1e-12, 'p'], [1e-9, 'n'], [1e-6, 'µ'], [1e-3, 'm'], [1, ''], [1e3, 'k'], [1e6, 'M'], [1e9, 'G'], [1e12, 'T'], [1e15, 'P'], [1e18, 'E'], [1e21, 'Z']];
 function si(v, unit, s) {   // [texte, unité] avec préfixe SI
   if (!isFinite(v)) return ['—', unit]; if (v === 0) return ['0', unit];
   const a = Math.abs(v); let p = PFX[0]; for (const q of PFX) if (a >= q[0] * 0.9995) p = q;
@@ -549,6 +557,7 @@ const niceMax = v => { if (!(v > 0)) return 1; const e = Math.pow(10, Math.floor
 function tagText(c, text, x, y, align, base, color) {
   c.textAlign = align; c.textBaseline = base;
   const w = c.measureText(text).width, hgt = 14;
+  x = align === 'center' ? clamp(x, w / 2 + 6, W - w / 2 - 6) : align === 'left' ? Math.min(x, W - w - 6) : Math.max(x, w + 6);
   const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
   const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
   c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
@@ -750,43 +759,57 @@ function drawRings1() {
     'coude', 'Coude', 'La ride : à l’intérieur, la ligne part de la nouvelle position ; à l’extérieur, elle pointe encore vers l’ancienne.');
 }
 function drawRadOnly() {
-  const c = ctx, v = S1.view, s = v.s, h = S1.h, t = S1.t, sp = 38, Lmax = Math.max(14, 0.85 * sp * s);
-  const items = []; let mmax = 0;
-  const pushPt = (x, y) => {
-    const sx = v.cx + x * s, sy = v.cy - y * s; if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
-    const f = EMW.fieldAt(h, x, y, t), m = Math.hypot(f.Erad[0], f.Erad[1]); if (m > mmax) mmax = m;
-    items.push(sx, sy, f.Erad[0], f.Erad[1], m);
+  const c = ctx, v = S1.view, s = v.s, h = S1.h, t = S1.t, O = S1.osc, quiet = t >= S1.activeUntil && !S1.rings.length;
+  const osc = O.on || O.a > 0.5, lam = osc ? C0 * TAU / Math.max(O.w, 0.3) : 0, rmax = farCorner();
+  // deux secteurs pâles autour de l'axe de l'oscillation (±12°)
+  const a12 = 12 * PI / 180, R = rmax * s;
+  c.fillStyle = rgba(RT, 0.045);
+  c.beginPath(); c.moveTo(v.cx, v.cy); c.arc(v.cx, v.cy, R, -a12, a12); c.closePath(); c.moveTo(v.cx, v.cy); c.arc(v.cx, v.cy, R, PI - a12, PI + a12); c.closePath(); c.fill();
+  const dr = Math.max(lam ? lam / 8 : 12, 7 / s), nRay = 36, r1 = 24;
+  const dots = new Path2D(), sh = [], hd = [], NB = 5;
+  for (let i = 0; i < NB; i++) { sh.push(new Path2D()); hd.push(new Path2D()); }
+  const ringArrows = (pts, arc) => {   // pts : [sx, sy, ex, ey, m, ...] ; normalisation par anneau
+    let mm = 0; for (let i = 4; i < pts.length; i += 5) if (pts[i] > mm) mm = pts[i];
+    const Lr = clamp(0.8 * arc, 4, 24);
+    for (let i = 0; i < pts.length; i += 5) {
+      dots.moveTo(pts[i] + 1, pts[i + 1]); dots.arc(pts[i], pts[i + 1], 1, 0, TAU);
+      if (mm < 1e-8) continue;
+      const m = pts[i + 4], q = m / mm; if (q < 0.04) continue;
+      const L = Lr * Math.sqrt(q), b = Math.min(NB - 1, Math.floor(q * NB));
+      addArrow(sh[b], hd[b], pts[i], pts[i + 1], pts[i] + pts[i + 2] / m * L, pts[i + 1] - pts[i + 3] / m * L, Math.min(6, 2 + L * 0.3));
+    }
   };
-  const rmax = farCorner();
-  for (let k = 1; k * 40 <= rmax; k++) {
-    const r = 40 * k, n = Math.max(8, Math.round(TAU * r / sp)), off = (k % 2) * 0.5;
-    for (let j = 0; j < n; j++) { const th = (j + off) * TAU / n; pushPt(r * Math.cos(th), r * Math.sin(th)); }
-  }
+  const ptsOf = (cx, cy, r, n) => {
+    const out = [];
+    for (let j = 0; j < n; j++) {
+      const th = j * TAU / n, x = cx + r * Math.cos(th), y = cy + r * Math.sin(th), sx = v.cx + x * s, sy = v.cy - y * s;
+      if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) continue;
+      if (quiet) { out.push(sx, sy, 0, 0, 0); continue; }
+      const f = EMW.fieldAt(h, x, y, t); out.push(sx, sy, f.Erad[0], f.Erad[1], Math.hypot(f.Erad[0], f.Erad[1]));
+    }
+    return out;
+  };
+  for (let r = r1; r <= rmax; r += dr) ringArrows(ptsOf(0, 0, r, nRay), TAU * r * s / nRay);
   for (const rg of S1.rings) {   // sur le front de chaque ride, pour qu'une impulsion brève reste visible
     const rr = C0 * (t - rg.t0 - rg.tau / 2); if (rr < 12) continue;
-    for (let j = 0; j < 24; j++) { const th = j * TAU / 24; pushPt(rg.cx + rr * Math.cos(th), rg.cy + rr * Math.sin(th)); }
+    ringArrows(ptsOf(rg.cx, rg.cy, rr, 24), TAU * rr * s / 24);
   }
-  S1.eref = Math.max(4e-5, S1.eref * Math.exp(-frameDt / 4), mmax);
-  const sh = new Path2D(), hd = new Path2D(), dots = new Path2D();
-  for (let i = 0; i < items.length; i += 5) {
-    const m = items[i + 4], L = Lmax * Math.sqrt(m / S1.eref); if (L < 1.4) continue;
-    const ux = items[i + 2] / m, uy = -items[i + 3] / m;
-    addArrow(sh, hd, items[i], items[i + 1], items[i] + ux * L, items[i + 1] + uy * L, Math.min(6, 2 + L * 0.3));
-    dots.moveTo(items[i] + 1.2, items[i + 1]); dots.arc(items[i], items[i + 1], 1.2, 0, TAU);
-  }
-  c.strokeStyle = rgba(RE, 0.85); c.lineWidth = 1.3; c.stroke(sh); c.fillStyle = rgba(RE, 0.85); c.fill(hd); c.fillStyle = rgba(RE, 0.5); c.fill(dots);
-  c.font = mono(11); tagText(c, 'champ de rayonnement seul · longueur ∝ √|E|', W / 2, H - 42, 'center', 'bottom', CL.e);
+  c.fillStyle = rgba(RE, 0.2); c.fill(dots);
+  c.lineWidth = 1.3;
+  for (let b = 0; b < NB; b++) { const a = 0.18 + 0.82 * (b + 0.5) / NB; c.strokeStyle = rgba(RE, a); c.stroke(sh[b]); c.fillStyle = rgba(RE, a); c.fill(hd[b]); }
+  c.font = mono(11); tagText(c, W < 700 ? 'rayonnement seul · √|E|, opacité ∝ |E|' : 'champ de rayonnement seul · longueur ∝ √|E|, opacité ∝ |E| (par anneau)', W / 2, H - 42, 'center', 'bottom', CL.e);
+  c.font = mono(10); tagText(c, 'axe de l’oscillation', v.cx + Math.min(R, W - v.cx - 8) * 0.92, v.cy - 12, 'right', 'bottom', rgba(RT, 0.7));
 }
 function lambdaMarker() {
   const O = S1.osc, v = S1.view, s = v.s, c = ctx;
   if (O.a < 0.6 || O.w < 0.3) return;
-  const lam = C0 * TAU / O.w, ymin = 60;
+  const lam = C0 * TAU / O.w, ymin = 25;
   const u = (((O.ph + PI / 2) % TAU) + TAU) % TAU;
   let y1 = C0 / O.w * u; while (y1 < ymin) y1 += lam;
   const y2 = y1 + lam, x0 = X1(S1.cur.x);
   const up = v.cy / s - S1.cur.y - 10, down = (H - v.cy) / s + S1.cur.y - 36;       // place visible au-dessus et au-dessous de la charge
   const side = y2 <= up ? 1 : y2 <= down ? -1 : 0;
-  if (!side) { c.font = mono(11); tagText(c, `λ = c/f = ${fmt(lam, 0)} u : plus grand que le cadre`, x0 + 16, Y1(S1.cur.y + Math.min(up - 10, 150)), 'left', 'middle', CL.texte); return; }
+  if (!side) { c.font = mono(11); tagText(c, `λ = c/f = ${fmt(lam, 0)} u`, x0 + 16, Y1(S1.cur.y + Math.min(up - 10, 150)), 'left', 'middle', CL.texte); return; }
   if (S1.t - O.tOn < (y2 + 20) / C0) return;
   const ya = Y1(S1.cur.y + side * y1), yb = Y1(S1.cur.y + side * y2), xa = x0 + 6, xb = x0 + 40, xm = x0 + 30;
   c.save(); c.strokeStyle = rgba(RT, 0.85); c.fillStyle = rgba(RT, 0.9); c.lineWidth = 1; c.setLineDash([4, 3]);
@@ -1003,13 +1026,277 @@ function status2() {
   return 'Quand les flèches de la boucle s’éteignent, celles de la plaque s’allument : chaque champ qui varie fait naître l’autre.';
 }
 
-/* ================= Étapes 3 et 4 : emplacements ================= */
-const SOON = ['Un seul phénomène, tout le spectre', 'Ce que l’onde transporte'];
-function drawSoon() {
-  const c = ctx; zones = [];
-  c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.fillStyle = CL.texte; c.font = `400 ${clamp(W / 22, 22, 36)}px ${tok('--serif')}`; c.fillText(`Étape ${act + 1} · à venir`, W / 2, H / 2 - 12);
-  c.fillStyle = CL.texte2; c.font = mono(12); c.fillText('Cette scène arrive dans un second lot.', W / 2, H / 2 + 22);
+/* ================= Étape 3 : un seul phénomène, tout le spectre ================= */
+const T_VIS3 = 3.2;
+const S3 = { lam: 0, mode: 'lam', tv: 0, preset: null, touched: false, seenVis: false, visFirst: false, drag: false, g: null, modeApplied: '' };
+const FMP = EMW.presets.find(p => p.id === 'fm');
+const PSHORT = { fm: 'FM', wifi: 'Wi-Fi', four: 'Four', corps: 'IR du corps', vert: 'Vert', uvc: 'UV-C', radio: 'Radiographie', co60: 'Gamma ⁶⁰Co' };
+const RA = rgb(CL.accent);
+function resetS3() { S3.lam = FMP.lambda; S3.mode = 'lam'; S3.tv = 0; S3.preset = 'fm'; S3.touched = false; S3.seenVis = false; S3.visFirst = false; S3.drag = false; }
+function checkVis() { if (EMW.bandOf(S3.lam).id === 'visible') { if (!S3.seenVis) { S3.seenVis = true; S3.visFirst = true; } } else S3.visFirst = false; }
+function setLam(l) { S3.lam = clamp(l, EMW.LMIN, EMW.LMAX); S3.touched = true; S3.preset = null; checkVis(); }
+function applyPre3(id) { const p = EMW.presets.find(q => q.id === id); if (!p) return false; S3.lam = p.lambda; S3.touched = true; S3.preset = id; checkVis(); return true; }
+function geo3() {
+  const nar = W < 700, mx = nar ? 14 : 34, x0 = mx, x1 = W - mx;
+  const rulerY = Math.round(H * (nar ? 0.47 : 0.52)), barH = clamp(Math.round(H * 0.05), 20, 34);
+  const lamY = rulerY + barH + 5, frY = lamY + 13, winY = frY + 21, winH = 8, ionY = winY + winH + 17, repY = ionY + 22;
+  return { nar, x0, x1, rulerY, barH, lamY, frY, winY, winH, ionY, repY, wTop: nar ? 100 : 112, wBot: rulerY - 34,
+    xOf: l => x0 + (4 - Math.log10(l)) / 16 * (x1 - x0), lOf: x => Math.pow(10, 4 - 16 * clamp((x - x0) / (x1 - x0), 0, 1)) };
+}
+const lumA = l => 0.16 + 0.64 * clamp((4 - Math.log10(l)) / 16, 0, 1);
+function colOfLam(l, a) { const vc = EMW.visibleColor(l); return vc.visible ? `rgba(${vc.r},${vc.g},${vc.b},${a == null ? 1 : a})` : rgba(RA, a == null ? 0.45 + 0.5 * (lumA(l) - 0.16) / 0.64 : a * 0.8); }
+function wrapText(c, text, maxW) {
+  const words = text.split(' '), lines = []; let cur = '';
+  for (const w of words) { const t = cur ? cur + ' ' + w : w; if (cur && c.measureText(t).width > maxW) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+// silhouettes d'objets, au trait ; h = demi-taille en pixels
+const OBJ_DRAW = {
+  'une ville': (c, x, y, h) => { const hs = [.5, .9, .65, 1.1, .7, .45], w = 2 * h / 6; c.beginPath(); hs.forEach((k, i) => c.rect(x - h + i * w, y + h * .75 - k * h * 1.3, w * .85, k * h * 1.3)); c.moveTo(x - h - 4, y + h * .75); c.lineTo(x + h + 4, y + h * .75); c.stroke(); },
+  'un bâtiment': (c, x, y, h) => { const w = h * .9; c.strokeRect(x - w / 2, y - h, w, 2 * h); c.beginPath(); for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) c.rect(x - w / 2 + w * .13 + j * w * .29, y - h + h * .2 + i * h * .45, w * .16, h * .22); c.stroke(); },
+  'un humain': (c, x, y, h) => { c.beginPath(); c.arc(x, y - h * .75, h * .2, 0, TAU); c.moveTo(x, y - h * .55); c.lineTo(x, y + h * .15); c.moveTo(x - h * .4, y - h * .3); c.lineTo(x, y - h * .45); c.lineTo(x + h * .4, y - h * .3); c.moveTo(x, y + h * .15); c.lineTo(x - h * .25, y + h * .95); c.moveTo(x, y + h * .15); c.lineTo(x + h * .25, y + h * .95); c.stroke(); },
+  'un ballon': (c, x, y, h) => { c.beginPath(); c.arc(x, y, h * .85, 0, TAU); c.moveTo(x - h * .85, y); c.bezierCurveTo(x - h * .3, y - h * .4, x + h * .3, y - h * .4, x + h * .85, y); c.moveTo(x, y - h * .85); c.bezierCurveTo(x - h * .35, y - h * .3, x - h * .35, y + h * .3, x, y + h * .85); c.stroke(); },
+  'une abeille': (c, x, y, h) => { c.beginPath(); c.ellipse(x + h * .1, y + h * .1, h * .6, h * .34, 0, 0, TAU); c.moveTo(x - h * .5 + h * .2, y - h * .2); c.arc(x - h * .62, y + h * .08, h * .2, 0, TAU); c.moveTo(x, y - h * .22); c.lineTo(x, y + h * .42); c.moveTo(x + h * .28, y - h * .22); c.lineTo(x + h * .28, y + h * .42); c.stroke(); c.beginPath(); c.ellipse(x - h * .05, y - h * .52, h * .38, h * .2, -0.5, 0, TAU); c.ellipse(x + h * .3, y - h * .5, h * .34, h * .17, 0.5, 0, TAU); c.stroke(); },
+  'un grain de sable': (c, x, y, h) => { const P = [[-.8, .1], [-.5, -.5], [.1, -.7], [.7, -.3], [.8, .3], [.2, .65], [-.5, .5]]; c.beginPath(); P.forEach((p, i) => i ? c.lineTo(x + p[0] * h, y + p[1] * h) : c.moveTo(x + p[0] * h, y + p[1] * h)); c.closePath(); c.stroke(); },
+  'l’épaisseur d’un cheveu': (c, x, y, h) => { c.beginPath(); c.moveTo(x - h, y - h * .18); c.bezierCurveTo(x - h * .4, y - h * .35, x + h * .4, y + h * .0, x + h, y - h * .18); c.moveTo(x - h, y + h * .18); c.bezierCurveTo(x - h * .4, y + h * .01, x + h * .4, y + h * .36, x + h, y + h * .18); c.stroke(); c.beginPath(); c.moveTo(x, y - h * .5); c.lineTo(x, y + h * .5); c.moveTo(x - 3, y - h * .5 + 4); c.lineTo(x, y - h * .5); c.lineTo(x + 3, y - h * .5 + 4); c.moveTo(x - 3, y + h * .5 - 4); c.lineTo(x, y + h * .5); c.lineTo(x + 3, y + h * .5 - 4); c.stroke(); },
+  'une cellule': (c, x, y, h) => { c.beginPath(); c.arc(x, y, h * .85, 0, TAU); c.moveTo(x + h * .1 + h * .3, y - h * .1); c.arc(x + h * .1, y - h * .1, h * .3, 0, TAU); c.moveTo(x - h * .45 + 2, y + h * .35); c.arc(x - h * .45, y + h * .35, 2, 0, TAU); c.moveTo(x + h * .4 + 2, y + h * .45); c.arc(x + h * .4, y + h * .45, 2, 0, TAU); c.stroke(); },
+  'une bactérie': (c, x, y, h) => { c.beginPath(); c.ellipse(x - h * .1, y, h * .7, h * .3, 0, 0, TAU); c.moveTo(x + h * .6, y); c.bezierCurveTo(x + h * .8, y - h * .3, x + h * .9, y + h * .3, x + h * 1.1, y); c.stroke(); },
+  'un virus': (c, x, y, h) => { c.beginPath(); for (let i = 0; i < 6; i++) { const a = i * PI / 3 + PI / 6, px = x + Math.cos(a) * h * .5, py = y + Math.sin(a) * h * .5; i ? c.lineTo(px, py) : c.moveTo(px, py); } c.closePath(); for (let i = 0; i < 6; i++) { const a = i * PI / 3 + PI / 6; c.moveTo(x + Math.cos(a) * h * .5, y + Math.sin(a) * h * .5); c.lineTo(x + Math.cos(a) * h * .8, y + Math.sin(a) * h * .8); c.moveTo(x + Math.cos(a) * h * .88 + 3, y + Math.sin(a) * h * .88); c.arc(x + Math.cos(a) * h * .88, y + Math.sin(a) * h * .88, 3, 0, TAU); } c.stroke(); },
+  'une protéine': (c, x, y, h) => { c.beginPath(); c.moveTo(x - h * .8, y + h * .3); c.bezierCurveTo(x - h * .9, y - h * .8, x - h * .1, y - h * .8, x - h * .2, y - h * .1); c.bezierCurveTo(x - h * .3, y + h * .6, x + h * .4, y + h * .7, x + h * .4, y); c.bezierCurveTo(x + h * .4, y - h * .6, x + h * .9, y - h * .5, x + h * .8, y + h * .2); c.stroke(); },
+  'une petite molécule': (c, x, y, h) => { c.beginPath(); c.arc(x, y - h * .15, h * .3, 0, TAU); c.moveTo(x - h * .55 + h * .2, y + h * .5); c.arc(x - h * .55, y + h * .5, h * .2, 0, TAU); c.moveTo(x + h * .55 + h * .2, y + h * .5); c.arc(x + h * .55, y + h * .5, h * .2, 0, TAU); c.moveTo(x - h * .22, y + h * .05); c.lineTo(x - h * .43, y + h * .36); c.moveTo(x + h * .22, y + h * .05); c.lineTo(x + h * .43, y + h * .36); c.stroke(); },
+  'un atome': (c, x, y, h) => { c.beginPath(); for (let k = 0; k < 3; k++) { c.moveTo(x + Math.cos(k * PI / 3) * h * .9, y + Math.sin(k * PI / 3) * h * .9); c.ellipse(x, y, h * .9, h * .33, k * PI / 3, 0, TAU); } c.stroke(); c.fillStyle = CL.texte; c.beginPath(); c.arc(x, y, h * .11, 0, TAU); c.fill(); },
+  'un noyau': (c, x, y, h) => { const r = h * .22; c.beginPath(); [[0, 0], [1, 0], [-1, 0], [.5, .87], [-.5, .87], [.5, -.87], [-.5, -.87]].forEach(p => { c.moveTo(x + p[0] * r * 1.8 + r, y + p[1] * r * 1.8); c.arc(x + p[0] * r * 1.8, y + p[1] * r * 1.8, r, 0, TAU); }); c.stroke(); }
+};
+function draw3() {
+  const c = ctx, g = S3.g = geo3(), lam = S3.lam, band = EMW.bandOf(lam), xM = g.xOf(lam), phase = S3.tv / T_VIS3;
+  zones = [];
+  const lab = (px, t, y, al, col) => { c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = col; c.fillText(t, px, y); };
+  // fenêtres de l'atmosphère
+  c.fillStyle = rgba(RT, 0.06); c.fillRect(g.x0, g.winY, g.x1 - g.x0, g.winH);
+  for (const w of EMW.windows) {
+    const xa = g.xOf(w.lmax), xb = g.xOf(w.lmin), on = EMW.inWindow(lam) && lam >= w.lmin && lam <= w.lmax;
+    c.fillStyle = rgba(RT, on ? 0.75 : 0.42); c.fillRect(xa, g.winY, xb - xa, g.winH);
+    if (!g.nar) { c.font = mono(9); lab((xa + xb) / 2, w.nom.replace('fenêtre ', ''), g.winY + g.winH + 2, 1, on ? CL.texte : CL.texte2); }
+    zoneF((x, y) => x >= xa && x <= xb && y >= g.winY - 3 && y <= g.winY + g.winH + 3, 'win' + w.nom, 'Fenêtre de l’atmosphère : ' + w.nom.replace('fenêtre ', ''), `De ${siS(w.lmin, 'm', 3)} à ${siS(w.lmax, 'm', 3)} : ce qui traverse l’atmosphère et arrive au sol. Le reste est absorbé en route.`);
+  }
+  c.font = mono(9); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = CL.texte2; c.fillText(g.x1 - g.x0 < 1150 ? 'fenêtres de l’atmosphère (arrive au sol)' : 'fenêtres de l’atmosphère (ce qui arrive au sol)', g.x0, g.winY + g.winH + 2 + (g.nar ? 0 : 0) + (g.nar ? 0 : 0));
+  // bandes du spectre
+  c.font = mono(10);
+  for (const b of EMW.bands) {
+    const xa = g.xOf(b.lmax), xb = g.xOf(b.lmin), w = xb - xa;
+    if (b.id === 'visible') { for (let x = Math.floor(xa); x < Math.ceil(xb); x++) { const vc = EMW.visibleColor(g.lOf(x + 0.5)); c.fillStyle = `rgb(${vc.r},${vc.g},${vc.b})`; c.fillRect(x, g.rulerY, 1.2, g.barH); } }
+    else { const gr = c.createLinearGradient(xa, 0, xb, 0); gr.addColorStop(0, rgba(RA, lumA(b.lmax))); gr.addColorStop(1, rgba(RA, lumA(b.lmin))); c.fillStyle = gr; c.fillRect(xa, g.rulerY, w, g.barH); }
+    c.fillStyle = CL.fond; c.fillRect(xa - 0.5, g.rulerY, 1, g.barH);
+    const short = { gamma: 'γ', x: 'X', uv: 'UV', visible: '', ir: 'IR', micro: 'micro-ondes', radio: 'radio' }[b.id];
+    const nm = c.measureText(b.nom).width + 8 <= w ? b.nom : c.measureText(short).width + 6 <= w ? short : '';
+    if (nm) { c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineWidth = 3; c.strokeStyle = 'rgba(10,13,18,0.55)'; c.strokeText(nm, (xa + xb) / 2, g.rulerY + g.barH / 2 + 0.5); c.fillStyle = CL.texte; c.fillText(nm, (xa + xb) / 2, g.rulerY + g.barH / 2 + 0.5); }
+    if (b.id === band.id) { c.strokeStyle = CL.texte; c.lineWidth = 1.5; c.strokeRect(xa + 0.5, g.rulerY - 0.5, w - 1, g.barH + 1); }
+    zoneF((x, y) => x >= xa && x <= xb && y >= g.rulerY && y <= g.rulerY + g.barH, 'band' + b.id, b.nom.charAt(0).toUpperCase() + b.nom.slice(1), `${siS(b.lmin, 'm', 3)} à ${siS(b.lmax, 'm', 3)} · répond : ${b.repond} · sources : ${b.source}.`);
+  }
+  const vx0 = g.xOf(380e-9), vx1 = g.xOf(750e-9);
+  if (vx1 - vx0 < 70) { c.strokeStyle = rgba(RT, 0.6); c.lineWidth = 1; c.beginPath(); c.moveTo(vx1 + 1, g.rulerY + 2); c.lineTo(vx1 + 7, g.rulerY - 5); c.stroke(); c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = CL.texte2; c.fillText('visible', vx1 + 9, g.rulerY - 15); }
+  zoneF((x, y) => x >= vx0 - 1 && x <= vx1 + 1 && y >= g.rulerY - 24 && y <= g.rulerY + g.barH, 'fente', 'La fente du visible', 'De 380 à 750 nm : moins d’un facteur 2 en longueur d’onde, sur plus de quinze ordres de grandeur de spectre.');
+  // graduations : λ par décade, f par décade
+  const pxDec = (g.x1 - g.x0) / 16, fMode = S3.mode === 'f';
+  c.font = mono(10); c.lineWidth = 1;
+  for (let e = 4; e >= -12; e--) {
+    const x = g.xOf(Math.pow(10, e)); c.strokeStyle = rgba(RT, fMode ? 0.25 : 0.55); c.beginPath(); c.moveTo(x, g.rulerY + g.barH); c.lineTo(x, g.rulerY + g.barH + 3); c.stroke();
+    if (pxDec >= 46 || e % 3 === 0) { const t = siS(Math.pow(10, e), 'm', 1); lab(Math.max(g.x0 + 8, Math.min(g.x1 - 8, x)), t, g.lamY, 1, fMode ? rgba(RT2, 0.7) : CL.texte); }
+  }
+  for (let fe = 5; fe <= 20; fe++) {
+    const x = g.xOf(EMW.C / Math.pow(10, fe)); if (x < g.x0 - 1 || x > g.x1 + 1) continue;
+    if (pxDec >= 46 || fe % 3 === 0) lab(Math.max(g.x0 + 10, Math.min(g.x1 - 10, x)), siS(Math.pow(10, fe), 'Hz', 1), g.frY, 1, fMode ? CL.texte : rgba(RT2, 0.8));
+  }
+  // seuil d'ionisation
+  const xi = g.xOf(EMW.LAMBDA_ION), ionOn = EMW.ionizing(lam);
+  c.save(); c.strokeStyle = rgba(RE_ENER(), 0.85); c.setLineDash([4, 3]); c.lineWidth = 1.2; c.beginPath(); c.moveTo(xi, g.rulerY - 4); c.lineTo(xi, g.ionY + 14); c.stroke(); c.restore();
+  c.font = mono(10); c.textBaseline = 'top';
+  c.textAlign = 'right'; c.fillStyle = ionOn ? CL.texte2 : CL.texte; c.fillText(g.nar ? 'n’ionise pas' : 'chauffe ou excite, n’ionise pas', xi - 6, g.ionY);
+  c.textAlign = 'left'; c.fillStyle = ionOn ? CL.ener : rgba(RE_ENER(), 0.7); c.fillText(g.nar ? 'ionise' : 'peut arracher des électrons aux molécules', xi + 6, g.ionY);
+  zoneF((x, y) => Math.abs(x - xi) < 6 && y >= g.rulerY - 4 && y <= g.ionY + 14, 'ion', 'Seuil d’ionisation', `λ ≈ ${siS(EMW.LAMBDA_ION, 'm', 3)} (${EMW.ION_EV} eV par photon) : au-delà, l’onde peut arracher des électrons aux molécules ; en deçà, elle chauffe ou excite sans ioniser.`);
+  // ce qui répond
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = CL.texte;
+  const cur = wrapText(c, `Ici l’onde agit sur : ${band.repond}.`, g.x1 - g.x0); let yy = g.repY; cur.forEach(t => { c.fillText(t, g.x0, yy); yy += 15; });
+  if (!g.nar) {
+    const order = EMW.bands.slice().reverse(), cw = (g.x1 - g.x0) / order.length; c.font = mono(9); yy += 8;
+    order.forEach((b, i) => { const on = b.id === band.id, x = g.x0 + i * cw; c.fillStyle = on ? rgba(RA, 0.9) : rgba(RT2, 0.35); c.fillRect(x, yy, cw - 8, 2); c.fillStyle = on ? CL.texte : CL.texte2; wrapText(c, b.repond, cw - 12).slice(0, 4).forEach((t, k) => c.fillText(t, x, yy + 6 + k * 12)); });
+  }
+  // repère : ligne et poignée
+  c.strokeStyle = CL.texte; c.lineWidth = 1.5; c.beginPath(); c.moveTo(xM, g.rulerY - 4); c.lineTo(xM, g.winY + g.winH); c.stroke();
+  c.fillStyle = CL.texte; c.beginPath(); c.moveTo(xM - 6, g.rulerY - 14); c.lineTo(xM + 6, g.rulerY - 14); c.lineTo(xM, g.rulerY - 3); c.closePath(); c.fill();
+  c.font = mono(11); const lt = fMode ? `f = ${siS(EMW.C / lam, 'Hz', 3)}` : `λ = ${siS(lam, 'm', 3)}`; tagText(c, lt, Math.max(g.x0 + 50, Math.min(g.x1 - 50, xM)), g.rulerY - 19, 'center', 'bottom', EMW.visibleColor(lam).visible ? colOfLam(lam, 1) : CL.accent);
+  zoneF((x, y) => Math.abs(x - xM) < 8 && y >= g.rulerY - 16 && y <= g.winY + g.winH, 'rep', 'Repère de longueur d’onde', 'Glisse-le sur la règle : on règle λ là où elle s’affiche.');
+  // objet de comparaison et onde à son échelle
+  const ob = EMW.scaleObject(lam), wh = g.wBot - g.wTop, S = clamp(Math.min(wh * 0.62, g.nar ? 60 : 90), 44, 90), cyw = g.wTop + 22 + (wh - 22 - 24) / 2, ox = g.x0 + S / 2 + 6, xw0 = ox + S / 2 + 20;
+  c.strokeStyle = rgba(RT, 0.85); c.lineWidth = 1.4; c.lineJoin = 'round'; (OBJ_DRAW[ob.nom] || (() => {}))(c, ox, cyw, S / 2 * 0.9);
+  c.font = mono(10); tagText(c, `${ob.nom.replace(/^l’épaisseur d’un cheveu$/, 'épaisseur d’un cheveu')} · ${siS(ob.taille, 'm', 2)}`, ox, cyw + S / 2 + 4, 'center', 'top', CL.texte2);
+  zcirc(ox, cyw, S / 2 + 6, 'objet', 'Objet de comparaison : ' + ob.nom, `Objet de taille la plus proche de λ (${siS(ob.taille, 'm', 2)}), dessiné à taille fixe. L’onde à droite est dessinée à la même échelle.`);
+  const lamPx = ob.rapport * S, A = Math.min(S * 0.32, (wh - 40) / 2), col = colOfLam(lam, 1), ww = g.x1 - xw0;
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath();
+  if (lamPx < 5) { c.fillStyle = colOfLam(lam, 0.35); c.fillRect(xw0, cyw - A, ww, 2 * A); c.beginPath(); c.moveTo(xw0, cyw - A); c.lineTo(g.x1, cyw - A); c.moveTo(xw0, cyw + A); c.lineTo(g.x1, cyw + A); }
+  else for (let x = 0; x <= ww; x += 2) { const y = cyw - A * Math.cos(TAU * (x / lamPx - phase)); x ? c.lineTo(xw0 + x, y) : c.moveTo(xw0 + x, y); }
+  c.stroke();
+  c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; c.beginPath(); c.moveTo(xw0, cyw); c.lineTo(g.x1, cyw); c.stroke();
+  if (lamPx >= 14 && lamPx < ww * 0.9) {
+    const k0 = ((phase % 1) + 1) % 1, xa = xw0 + k0 * lamPx, xb = xa + lamPx, yb = cyw + A + 14;
+    if (xb <= g.x1) {
+      c.save(); c.strokeStyle = rgba(RT, 0.8); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(xa, cyw - A); c.lineTo(xa, yb + 4); c.moveTo(xb, cyw - A); c.lineTo(xb, yb + 4); c.stroke(); c.setLineDash([]);
+      const sh = new Path2D(), hd = new Path2D(); addArrow(sh, hd, (xa + xb) / 2, yb, xa, yb, 6); addArrow(sh, hd, (xa + xb) / 2, yb, xb, yb, 6); c.stroke(sh); c.fillStyle = rgba(RT, 0.9); c.fill(hd); c.restore();
+      if (lamPx > 40) { c.font = mono(10); tagText(c, 'λ', (xa + xb) / 2, yb - 3, 'center', 'bottom', CL.texte); }
+    }
+  }
+  c.font = mono(12); tagText(c, `λ ≈ ${sig(ob.rapport, 2)} × ${ob.nom}`, xw0, g.wTop + 4, 'left', 'top', CL.texte);
+  zoneF((x, y) => x >= xw0 && x <= g.x1 && Math.abs(y - cyw) <= A + 6, 'onde', 'L’onde à l’échelle de l’objet', 'Sa longueur d’onde est dessinée dans la même échelle que l’objet à gauche. Seule cette longueur change d’un bout à l’autre du spectre.');
+}
+function RE_ENER() { return rgb(CL.ener); }
+function scope3() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 50, padR = 8, padT = 8, padB = 20, pw = w - padL - padR, ph = h - padT - padB, lam = S3.lam;
+  const xL = l => padL + (4 - Math.log10(l)) / 16 * pw, yE = e => padT + ph * (1 - (Math.log10(e) + 11) / 18);   // E de 1e-11 eV à 1e7 eV
+  c.strokeStyle = CL.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph); c.font = mono(10);
+  c.fillStyle = CL.texte2; c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (const [e, t] of [[1e-6, '1 µeV'], [1, '1 eV'], [1e3, '1 keV'], [1e6, '1 MeV']]) { c.fillText(t, padL - 4, yE(e)); c.strokeStyle = CL.trait; c.beginPath(); c.moveTo(padL, yE(e)); c.lineTo(padL + pw, yE(e)); c.stroke(); }
+  c.textAlign = 'center'; c.textBaseline = 'top';
+  for (const [l, t] of [[1e3, '1 km'], [1, '1 m'], [1e-3, '1 mm'], [1e-6, '1 µm'], [1e-9, '1 nm'], [1e-12, '1 pm']]) c.fillText(t, Math.max(padL + 10, Math.min(padL + pw - 10, xL(l))), padT + ph + 4);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  c.strokeStyle = rgba(RA, 0.85); c.lineWidth = 1.8; c.beginPath(); c.moveTo(xL(1e4), yE(EMW.photonEnergy(1e4).eV)); c.lineTo(xL(1e-12), yE(EMW.photonEnergy(1e-12).eV)); c.stroke();
+  const x0 = xL(750e-9), x1 = xL(380e-9), lOf = x => Math.pow(10, 4 - 16 * (x - padL) / pw), eOf = x => EMW.photonEnergy(lOf(x)).eV; c.lineWidth = 3.5;
+  for (let x = x0; x < x1; x += 1) { const vc = EMW.visibleColor(lOf(x + 0.5)); c.strokeStyle = `rgb(${vc.r},${vc.g},${vc.b})`; c.beginPath(); c.moveTo(x, yE(eOf(x))); c.lineTo(x + 1.2, yE(eOf(x + 1.2))); c.stroke(); }
+  c.strokeStyle = rgba(RE_ENER(), 0.85); c.lineWidth = 1; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(padL, yE(EMW.ION_EV)); c.lineTo(padL + pw, yE(EMW.ION_EV)); c.moveTo(xL(EMW.LAMBDA_ION), padT); c.lineTo(xL(EMW.LAMBDA_ION), padT + ph); c.stroke(); c.setLineDash([]);
+  const ev = EMW.photonEnergy(lam).eV; c.fillStyle = CL.texte; c.beginPath(); c.arc(xL(lam), yE(ev), 4, 0, TAU); c.fill();
+  c.restore();
+  c.fillStyle = CL.ener; c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillText('10 eV', padL + 4, yE(EMW.ION_EV) - 2);
+}
+function status3() {
+  const l = S3.lam, b = EMW.bandOf(l), ph = EMW.photonEnergy(l), ion = EMW.ionizing(l);
+  if (!S3.touched) return 'Glisse le repère sur la règle, ou choisis un préréglage : à chaque fois c’est la même onde ; seule λ change.';
+  if (b.id === 'visible') return S3.visFirst ? 'Toute la lumière que tu vois tient entre 380 et 750 nm : moins d’un facteur 2 sur plus de quinze ordres de grandeur.' : `Visible : λ = ${siS(l, 'm', 3)}, soit ${sig(ph.eV, 3)} eV par photon. Le reste du spectre est invisible, mais c’est la même onde.`;
+  if (ion) return `Ionisant : ${fmtEV(ph.eV)} eV par photon, au-dessus des ${EMW.ION_EV} eV qui arrachent des électrons aux molécules.`;
+  if (b.id === 'micro') return 'Fait tourner les molécules d’eau : c’est ce qui chauffe dans un four ; rien de radioactif.';
+  if (b.id === 'radio') return 'Les électrons libres d’une antenne suivent le champ E de l’onde : c’est ce qui capte la radio.';
+  if (b.id === 'ir') return 'Fait vibrer les liaisons entre atomes : c’est la chaleur rayonnée par un corps tiède.';
+  return `Les électrons externes répondent. Le photon porte ${sig(ph.eV, 3)} eV : encore sous le seuil d’ionisation (${EMW.ION_EV} eV).`;
+}
+const fmtEV = v => (v < 1e-3 || v >= 1e5) ? sci(v, 2) : sig(v, 3);
+
+/* ================= Étape 4 : ce que l'onde transporte ================= */
+const NR = 40000, VOILE = 1e4;          // rayons isotropes tirés une fois ; surface de la voile, m²
+const S4 = { P: 100, r: 1, sail: false, rBase: 1, lastSet: 0, touched: 'init', preset: 'ampoule', drag: false, dirs: null, plane: [], cacheK: -1, hits: 0, hitPts: [], hitPlane: [], tgt: null };
+(function initRays() {
+  const rng = EMW.mulberry32(240601), d = new Float32Array(NR * 3);
+  for (let i = 0; i < NR; i++) { const v = EMW.isoDir(rng); d[3 * i] = v[0]; d[3 * i + 1] = v[1]; d[3 * i + 2] = v[2]; }
+  S4.dirs = d; for (let i = 0; i < NR; i++) if (Math.abs(d[3 * i + 2]) < 0.015) S4.plane.push(i);
+})();
+const decOf = r => { let e = Math.floor(Math.log10(r) + 1e-12), d = Math.pow(10, e); if (r / d >= 10 - 1e-9) d *= 10; return d; };
+const R_MAX = EMW.UA * 1.001;
+const PRE4 = { ampoule: { nom: 'Ampoule 100 W', P: 100, r: 1 }, soleil: { nom: 'Soleil à la Terre', P: EMW.P_SOLEIL, r: EMW.UA } };
+function setP(P) { S4.P = clamp(P, 1, 1e27); S4.touched = 'P'; S4.preset = null; }
+function setR(r) { const now = performance.now(); if (now - S4.lastSet > 1500) S4.rBase = S4.r; S4.lastSet = now; S4.r = clamp(r, 1, R_MAX); S4.touched = 'r'; S4.preset = null; }
+function resetS4() { applyPre4('ampoule'); S4.sail = false; S4.drag = false; S4.touched = 'init'; }
+function applyPre4(id) { const p = PRE4[id]; S4.P = p.P; S4.r = p.r; S4.rBase = p.r; S4.lastSet = performance.now(); S4.preset = id; S4.touched = 'preset'; }
+function geo4() {
+  const nar = W < 700, sx = nar ? W * 0.08 : W * 0.09, L = (W - sx) * (nar ? 0.88 : 0.84), D1 = L / 10, cy = H * (nar ? 0.5 : 0.5);
+  const rdec = decOf(S4.r), k = S4.r / rdec, d = D1 * k, Z = clamp(Math.min(W, H) * 0.24, 84, 140);
+  return { nar, sx, L, D1, cy, rdec, k, d, xd: sx + d, sVis: D1 * 0.5, Z, ix: W - Z - 16, iy: H - Z - 44 };
+}
+function updateHits(k) {   // impacts exacts en 3D : carré de côté a = 0,5/k vu à la distance 1, centré sur l'axe x
+  if (S4.cacheK === k) return; S4.cacheK = k;
+  const a = 0.5 / k, hf = a / 2, D = S4.dirs; let n = 0; const pts = [], pl = [];
+  for (let i = 0; i < NR; i++) {
+    const dx = D[3 * i]; if (dx <= 0) continue;
+    const u = D[3 * i + 1] / dx, v = D[3 * i + 2] / dx;
+    if (Math.abs(u) <= hf && Math.abs(v) <= hf) { n++; pts.push(u / hf, v / hf); if (Math.abs(D[3 * i + 2]) < 0.015) pl.push(i); }
+  }
+  S4.hits = n; S4.hitPts = pts; S4.hitPlane = pl;
+}
+const hitsExpected = k => NR * EMW.hitFraction(0.5 / k, 1);
+function vals4() {
+  const I = EMW.inverseSquare(S4.P, S4.r), E0 = EMW.E0from(I), pa = EMW.radPressure(I, false), pr = EMW.radPressure(I, true);
+  return { P: S4.P, r: S4.r, I, E0, B0: EMW.B0from(E0), pAbs: pa, pRefl: pr, sail: S4.sail, force: S4.sail ? pr * VOILE : 0 };
+}
+const pairP = P => P < 1e15 ? si(P, 'W', 3) : [sci(P, 1), 'W'];
+const pairR = r => r >= 1e10 ? [fmt(r / EMW.UA, 2), 'UA'] : si(r, 'm', 3);
+const pairI = I => (I < 1e-3 || I >= 1e6) ? [sci(I, 2), 'W/m²'] : [I >= 1000 ? fmtI(I) : sig(I, 3), 'W/m²'];
+function draw4() {
+  const c = ctx, g = geo4(), V = vals4(), cy = g.cy; zones = [];
+  updateHits(g.k);
+  const sx = g.sx;
+  // sphères concentriques (coupe) : r, 2r, 3r… en unités de la décade courante
+  c.lineWidth = 1;
+  for (let j = 1; j <= 10; j++) {
+    const R = g.D1 * j, on = Math.abs(R - g.d) < 1; c.strokeStyle = on ? rgba(RT, 0.5) : rgba(RT, 0.16); c.beginPath(); c.arc(sx, cy, R, 0, TAU); c.stroke();
+    if (j <= 9 || !g.nar) { c.font = mono(9); c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = rgba(RT2, 0.8); if (!g.nar || j % 2 === 1) c.fillText(j + '×', sx + R, cy + 6); }
+  }
+  c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = CL.texte2; c.fillText(`1× = ${pairR(g.rdec).join(' ')}`, sx + g.D1 * 0.1, cy + 20);
+  zoneF((x, y) => { const R = Math.hypot(x - sx, y - cy); for (let j = 1; j <= 10; j++) if (Math.abs(R - g.D1 * j) < 5) return true; return false; }, 'sphere', 'Sphère de rayon r, 2r, 3r…', 'En coupe : toute l’énergie émise traverse chaque sphère. La surface croît comme r², donc l’intensité baisse comme 1/r².');
+  // rayons en coupe (rayons 3D presque dans le plan)
+  const D = S4.dirs, rays = new Path2D(), hitR = new Path2D(), Lr = g.L * 1.15, hs = new Set(S4.hitPlane);
+  const hitSegs = [];
+  for (const i of S4.plane) {
+    const dx = D[3 * i], dy = D[3 * i + 1], n = Math.hypot(dx, dy) || 1;
+    if (hs.has(i)) { const y2 = cy - dy / dx * g.d; hitR.moveTo(sx, cy); hitR.lineTo(g.xd, y2); hitR.moveTo(g.xd + 2, y2); hitR.arc(g.xd, y2, 2, 0, TAU); hitSegs.push([g.xd, y2]); }
+    else { rays.moveTo(sx, cy); rays.lineTo(sx + dx / n * Lr, cy - dy / n * Lr); }
+  }
+  const e = rgb(CL.ener); c.lineWidth = 0.8; c.strokeStyle = rgba(e, 0.1); c.stroke(rays); c.lineWidth = 1; c.strokeStyle = rgba(e, 0.55); c.stroke(hitR); c.fillStyle = rgba(e, 0.9); c.fill(hitR);
+  zoneF((x, y) => { if (x < sx + 6) return false; const dxp = x - sx, tn = (cy - y) / dxp; if (Math.abs(tn) < 0.5 / g.k / 2 + 0.01 && x <= g.xd + 4) return true; return false; }, 'rayon', 'Rayon', 'Une direction d’émission parmi 40 000 tirées au hasard dans l’espace. Ceux qui traversent le carré du détecteur sont tracés en clair ; leur nombre baisse comme 1/d².');
+  // source
+  const gl = c.createRadialGradient(sx, cy, 2, sx, cy, 70); gl.addColorStop(0, rgba(e, 0.22)); gl.addColorStop(1, rgba(e, 0)); c.fillStyle = gl; c.beginPath(); c.arc(sx, cy, 70, 0, TAU); c.fill();
+  c.strokeStyle = CL.ener; c.lineWidth = 1.5; c.fillStyle = CL.fond; c.beginPath(); c.arc(sx, cy, 8, 0, TAU); c.fill(); c.stroke();
+  c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * PI / 4; c.moveTo(sx + Math.cos(a) * 12, cy + Math.sin(a) * 12); c.lineTo(sx + Math.cos(a) * 18, cy + Math.sin(a) * 18); } c.stroke();
+  c.font = mono(11); tagText(c, `source · ${pairP(V.P).join(' ')}`, sx, cy - 28, 'center', 'bottom', CL.ener);
+  zcirc(sx, cy, 20, 'source', 'Source ponctuelle', 'Elle émet la même puissance P dans toutes les directions (ampoule ou étoile, dans le vide, sans absorption).');
+  // détecteur 1 m²
+  const hh = g.sVis / 2; c.save(); c.setLineDash([3, 4]); c.strokeStyle = rgba(RT, 0.35); c.lineWidth = 1; c.beginPath(); c.moveTo(sx, cy); c.lineTo(g.xd, cy - hh); c.moveTo(sx, cy); c.lineTo(g.xd, cy + hh); c.stroke(); c.restore();
+  c.strokeStyle = CL.texte; c.lineWidth = 3; c.beginPath(); c.moveTo(g.xd, cy - hh); c.lineTo(g.xd, cy + hh); c.stroke(); c.lineWidth = 1.2; c.beginPath(); c.moveTo(g.xd - 4, cy - hh); c.lineTo(g.xd + 4, cy - hh); c.moveTo(g.xd - 4, cy + hh); c.lineTo(g.xd + 4, cy + hh); c.stroke();
+  c.font = mono(11); tagText(c, `détecteur 1 m² · r = ${pairR(S4.r).join(' ')}`, g.xd + 8, cy + Math.max(hh, 10) + 30, 'right', 'top', CL.texte);
+  zoneF((x, y) => Math.abs(x - g.xd) < 14 && Math.abs(y - cy) < hh + 12, 'det', 'Détecteur de 1 m²', 'Vu de profil, glisse-le le long de l’axe : la distance change, et le nombre de rayons qui le traversent aussi.');
+  // voile
+  if (S4.sail) {
+    const sxv = g.xd + 22, Hs = clamp(H * 0.3, 60, 200), ex = rgb(CL.ener);
+    c.strokeStyle = CL.texte; c.lineWidth = 3; c.beginPath(); c.moveTo(sxv, cy - Hs / 2); c.lineTo(sxv, cy + Hs / 2); c.stroke();
+    c.strokeStyle = rgba(RT, 0.35); c.lineWidth = 1; c.beginPath(); for (let y = -Hs / 2; y <= Hs / 2; y += 7) { c.moveTo(sxv, cy + y); c.lineTo(sxv - 7, cy + y + 7); } c.stroke();
+    const sh = new Path2D(), hd = new Path2D(); addArrow(sh, hd, sxv + 3, cy, sxv + 52, cy, 11); c.strokeStyle = CL.ener; c.lineWidth = 3; c.stroke(sh); c.fillStyle = CL.ener; c.fill(hd);
+    const s2 = new Path2D(), h2 = new Path2D(); addArrow(s2, h2, sxv - 4, cy - Hs * 0.22, sxv - 30, cy - Hs * 0.3, 7); addArrow(s2, h2, sxv - 4, cy + Hs * 0.22, sxv - 30, cy + Hs * 0.3, 7); c.strokeStyle = rgba(ex, 0.6); c.lineWidth = 1.4; c.stroke(s2); c.fillStyle = rgba(ex, 0.6); c.fill(h2);
+    c.font = mono(11); tagText(c, `voile 100 m × 100 m · F = ${V.force >= 0.01 ? fmt(V.force, 2) + ' N' : siS(V.force, 'N', 2)}`, sxv, cy - Hs / 2 - 6, 'center', 'bottom', CL.ener);
+    zoneF((x, y) => Math.abs(x - sxv) < 14 && Math.abs(y - cy) < Hs / 2 + 4, 'voile', 'Voile réfléchissante', 'Elle renvoie l’onde : la quantité de mouvement change de signe, la poussée vaut 2I/c par m². La flèche donne le sens de la poussée.');
+  }
+  // encart : face du détecteur
+  const Z = g.Z, ix = g.ix, iy = g.iy; c.fillStyle = CL.fond2; c.fillRect(ix - 6, iy - 18, Z + 12, Z + 52); c.strokeStyle = CL.trait; c.strokeRect(ix - 5.5, iy - 17.5, Z + 11, Z + 51);
+  c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillStyle = CL.texte2; c.fillText('face du détecteur', ix, iy - 4);
+  c.strokeStyle = CL.texte2; c.strokeRect(ix + 0.5, iy + 0.5, Z, Z); c.fillStyle = rgba(e, 0.9); c.beginPath();
+  const P = S4.hitPts; for (let i = 0; i < P.length; i += 2) { const px = ix + Z / 2 + P[i] * Z / 2 * 0.98, py = iy + Z / 2 - P[i + 1] * Z / 2 * 0.98; c.moveTo(px + 1.3, py); c.arc(px, py, 1.3, 0, TAU); } c.fill();
+  c.textBaseline = 'top'; c.fillStyle = CL.ener; c.fillText(`impacts : ${S4.hits}`, ix, iy + Z + 5); c.fillStyle = CL.texte2; c.fillText(`attendus : ${fmt(hitsExpected(g.k), 0)}`, ix, iy + Z + 19);
+  zoneF((x, y) => x > ix - 6 && x < ix + Z + 6 && y > iy - 18 && y < iy + Z + 34, 'encart', 'Face du détecteur', 'Chaque point est un rayon 3D qui traverse le carré. Double la distance : environ quatre fois moins de points.');
+  c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'bottom'; c.fillStyle = CL.texte2; c.fillText('distances à l’écran schématiques', 16, H - 12);
+}
+function scope4() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 54, padR = 8, padT = 8, padB = 20, pw = w - padL - padR, ph = h - padT - padB, V = vals4();
+  const pxd = pw / 11.2, nd = ph / pxd, xR = r => padL + Math.log10(r) * pxd, lc = Math.log10(V.I);
+  const yI = I => padT + ph / 2 - (Math.log10(I) - lc) * pxd;     // même nombre de pixels par décade sur les deux axes : la pente −2 se lit
+  c.strokeStyle = CL.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph); c.font = mono(10);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  const e0 = Math.ceil(lc - nd / 2), e1 = Math.floor(lc + nd / 2); c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (let e = e0; e <= e1; e++) { c.strokeStyle = CL.trait; c.beginPath(); c.moveTo(padL, yI(Math.pow(10, e))); c.lineTo(padL + pw, yI(Math.pow(10, e))); c.stroke(); }
+  for (const r of [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10]) { c.strokeStyle = CL.trait; c.beginPath(); c.moveTo(xR(r), padT); c.lineTo(xR(r), padT + ph); c.stroke(); }
+  c.strokeStyle = CL.ener; c.lineWidth = 1.8; c.beginPath(); c.moveTo(xR(1), yI(V.P / (4 * PI))); c.lineTo(xR(EMW.UA), yI(V.P / (4 * PI * EMW.UA * EMW.UA))); c.stroke();
+  c.fillStyle = CL.texte; c.beginPath(); c.arc(xR(V.r), yI(V.I), 4, 0, TAU); c.fill();
+  c.restore();
+  c.fillStyle = CL.texte2; for (let e = e0; e <= e1; e++) { const y = yI(Math.pow(10, e)); if (y > padT + 6 && y < padT + ph - 6) c.fillText('10' + String(e).split('').map(ch => SUP[ch] || ch).join(''), padL - 4, y); }
+  c.textAlign = 'center'; c.textBaseline = 'top';
+  for (const [r, t] of [[1, '1 m'], [1e3, '1 km'], [1e6, '10³ km'], [1e9, '10⁶ km'], [EMW.UA, '1 UA']]) c.fillText(t, clamp(xR(r), padL + 12, padL + pw - 12), padT + ph + 4);
+  c.textAlign = 'right'; c.textBaseline = 'top'; c.fillStyle = CL.ener; c.fillText('pente −2', padL + pw - 4, padT + 3);
+}
+function status4() {
+  const V = vals4(), q = S4.r / S4.rBase;
+  if (S4.sail) { const F = V.force; return `${F >= 0.01 ? fmt(F, 2) + ' N' : siS(F, 'N', 2)} : le poids d’environ ${siS(F / 9.80665 * 1e3, 'g', 2)}, sur une voile de 10 000 m².`; }
+  if (S4.touched === 'r') {
+    if (q >= 1.9 && q <= 2.1) return 'À distance double, quatre fois moins : la même énergie s’étale sur une sphère quatre fois plus grande.';
+    if (q > 1.1) return `r × ${fmt(q, 1)} : I ÷ ${fmt(q * q, 1)}. La même énergie s’étale sur une sphère ${fmt(q * q, 1)} fois plus grande.`;
+    if (q < 0.9) return `r ÷ ${fmt(1 / q, 1)} : I × ${fmt(1 / (q * q), 1)}. La sphère est plus petite, la même énergie y est plus concentrée.`;
+  }
+  if (S4.touched === 'P') return `P × 10 : I × 10 à toute distance. L’intensité est proportionnelle à la puissance émise (ici ${pairP(V.P).join(' ')}).`;
+  if (S4.preset === 'soleil') return `Soleil à la Terre : I ≈ ${fmtI(V.I)} W/m², et une pression de ${siS(V.pAbs, 'Pa', 2)} si l’onde est absorbée, le double si elle est réfléchie.`;
+  if (S4.preset === 'ampoule' && S4.touched === 'preset') return `Ampoule de 100 W à 1 m : I ≈ ${fmt(V.I, 2)} W/m². Glisse le détecteur : plus loin, la même énergie s’étale sur plus de surface.`;
+  return 'Glisse le détecteur le long de l’axe : de moins en moins de rayons le traversent. Double r, et regarde les impacts.';
 }
 
 /* ---------------- Enregistreur : outils ---------------- */
@@ -1021,33 +1308,38 @@ const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}"
 function measSpec() {
   if (act === 0) return [['c de scène', [['c', 'u/s']]], ['f réglée', [['f', 'Hz']]], ['T = 1/f', [['T', 's']]], ['λ = c/f', [['lam', 'u']]], ['amplitude effective', [['Aeff', 'u']]], ['sonde : distance r', [['r', 'u']]], ['retard attendu r/c', [['ret', 's']]]];
   if (act === 1) return [['E₀', [['E0', 'V/m']]], ['B₀ = E₀/c', [['B0', 'T']]], ['f', [['f', 'Hz']]], ['λ = c/f', [['lam', 'm']]], ['T = 1/f', [['T', 's']]], ['I = ½cε₀E₀²', [['I', 'W/m²']]], ['u_E · u_B (moyennes)', [['uE', 'J/m³'], ['uB', '']]]];
-  return [];
+  if (act === 2) return [['λ', [['lam', 'm']]], ['f = c/λ', [['f', 'Hz']]], ['énergie d’un photon', [['eV', 'eV']]], ['en joules', [['J', 'J']]], ['même taille que', [['t_obj', '']]], ['λ / taille de l’objet', [['rap', '']]], ['domaine', [['t_band', '']]], ['ionisant', [['t_ion', '']]], ['atteint le sol', [['t_gnd', '']]]];
+  return [['P émise', [['P', 'W']]], ['r du détecteur', [['r', 'm']]], ['I = P/4πr²', [['I', 'W/m²']]], ['E₀', [['E0', 'V/m']]], ['B₀', [['B0', 'T']]], ['pression absorbée I/c', [['pa', 'Pa']]], ['pression réfléchie 2I/c', [['pr', 'Pa']]], ['force, voile 100 m × 100 m', [['F', 'N']]], ['impacts · attendus', [['h', ''], ['he', '']]]];
 }
 const NOTE1 = 'c ralentie d’un facteur énorme (100 u/s au lieu de 3 × 10⁸ m/s) ; forme non relativiste du champ de rayonnement (vitesses ≤ 0,35 c).';
 const NOTE2 = 'Onde plane idéale, polarisée verticalement (la polarisation est au module 25). B est dessiné multiplié par c ; la longueur des flèches suit log E₀, pas E₀.';
-const NOTES = () => [NOTE1 + (prm1.rad ? ' Flèches : longueur ∝ √|E|, normalisée au maximum récent.' : ''), NOTE2, 'À venir.', 'À venir.'];
+const NOTE3 = 'Bornes des domaines conventionnelles (ils se chevauchent en pratique) ; couleurs du visible approximatives (sRGB) ; le photon est seulement nommé ici (modules 27 et 48).';
+const NOTE4 = 'Coupe 2D d’un phénomène 3D (les impacts sont comptés en 3D) ; source ponctuelle dans le vide, sans absorption ; distances à l’écran schématiques : la scène se recadre à chaque décade de r. Voile parfaitement réfléchissante, vue de face.';
+const NOTES = () => [NOTE1 + (prm1.rad ? ' Flèches : longueur ∝ √|E| et opacité ∝ |E|, normalisées au maximum de chaque anneau.' : ''), NOTE2, NOTE3, NOTE4];
 const LEGS = () => act === 0
   ? lg(ln(CL.pos, 1.8), 'x de la charge') + lg(ln(CL.e, 1.8), 'E rayonné à la sonde') + lg(ln(CL.texte, 1.2, 1), 'secousse, puis réponse après r/c')
-  : lg(ln(CL.e, 2.6), 'E') + lg(ln(CL.b, 1.6, 1), 'c·B') + lg(ln(CL.texte2, 1, 1), 'mêmes zéros');
-const EYE = () => act === 0 ? 'Enregistreur · charge et sonde' : 'Enregistreur · E et c·B au même point';
+  : act === 1 ? lg(ln(CL.e, 2.6), 'E') + lg(ln(CL.b, 1.6, 1), 'c·B') + lg(ln(CL.texte2, 1, 1), 'mêmes zéros')
+  : act === 2 ? lg(ln(CL.accent, 1.8), 'énergie d’un photon, E = hc/λ') + lg(ln(CL.ener, 1.2, 1), 'seuil d’ionisation')
+  : lg(ln(CL.ener, 1.8), 'I = P/4πr²') + lg(ln(CL.texte2, 1.2), 'mêmes pixels par décade en x et en y');
+const EYE = () => ['Enregistreur · charge et sonde', 'Enregistreur · E et c·B au même point', 'Enregistreur · énergie d’un photon selon λ', 'Enregistreur · I selon r (log-log)'][act];
 const mEls = {};
 function buildMeas() {
   const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
   for (const [lab, vals] of measSpec()) {
     const r = document.createElement('div'); r.className = 'row';
-    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val${v[0].startsWith('t_') ? ' txt' : ''}"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
     m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = { b: r.querySelectorAll('b')[i], i: r.querySelectorAll('i')[i] }; });
   }
   $('#mNote').textContent = NOTES()[act];
-  $('#mReal').hidden = act !== 0; $('#mReal').textContent = 'Dans la réalité, la ride parcourt 300 000 km en une seconde. Ici, elle en parcourt 100 u.';
+  const real = $('#mReal'); real.hidden = !(act === 0 || act === 2);
+  real.textContent = act === 2 ? 'Passerelle : l’onde cède son énergie à la matière par paquets, les photons, d’énergie hf (modules 27 et 48).' : 'Dans la réalité, la ride parcourt 300 000 km en une seconde. Ici, elle en parcourt 100 u.';
   $('#rEye').textContent = EYE(); $('#leg').innerHTML = LEGS();
-  const soon = act >= 2;
-  $('#recSec').hidden = soon; $('#measSec').hidden = soon; $('#cards').hidden = act !== 3;
-  $('#mReal').hidden = act !== 0; $('#meas').hidden = soon;
+  $('#cards').hidden = act !== 3;
   sizePanelCanvases();
 }
 function setM(k, s, unit) { const e = mEls[k]; if (!e) return; if (e.b.textContent !== s) e.b.textContent = s; if (unit !== undefined && e.i.textContent !== unit) e.i.textContent = unit; }
 function setSI(k, v, unit, s) { const r = si(v, unit, s); setM(k, r[0], r[1]); }
+const setP2 = (k, pr) => setM(k, pr[0], pr[1]);
 function readouts() {
   if (act === 0) {
     const P = S1.probe, R = Math.hypot(P.x - S1.cur.x, P.y - S1.cur.y);
@@ -1056,10 +1348,19 @@ function readouts() {
     const V = values2();
     setSI('E0', V.E0, 'V/m'); setSI('B0', V.B0, 'T', 2); setSI('f', V.f, 'Hz', 3); setSI('lam', V.lambda, 'm', 3); setSI('T', V.T, 's', 3); setSI('I', V.I, 'W/m²', 3);
     setM('uE', sci(V.uE, 2), 'J/m³'); setM('uB', sci(V.uB, 2), '');
+  } else if (act === 2) {
+    const l = S3.lam, ph = EMW.photonEnergy(l), ob = EMW.scaleObject(l), b = EMW.bandOf(l);
+    setSI('lam', l, 'm', 3); setSI('f', EMW.C / l, 'Hz', 3); setM('eV', fmtEV(ph.eV), 'eV'); setM('J', sci(ph.J, 2), 'J');
+    setM('t_obj', ob.nom, ''); setM('rap', sig(ob.rapport, 2), ''); setM('t_band', b.nom, ''); setM('t_ion', EMW.ionizing(l) ? 'oui' : 'non', ''); setM('t_gnd', EMW.inWindow(l) ? 'oui' : 'non', '');
+  } else {
+    const V = vals4(), g = geo4();
+    setP2('P', pairP(V.P)); setP2('r', pairR(V.r)); setP2('I', pairI(V.I)); setSI('E0', V.E0, 'V/m', 3); setSI('B0', V.B0, 'T', 3); setSI('pa', V.pAbs, 'Pa', 3); setSI('pr', V.pRefl, 'Pa', 3);
+    if (V.sail) setP2('F', V.force >= 0.01 ? [fmt(V.force, 3), 'N'] : si(V.force, 'N', 3)); else setM('F', '—', '');
+    updateHits(g.k); setM('h', fmtI(S4.hits), ''); setM('he', fmt(hitsExpected(g.k), 0), '');
   }
   status();
 }
-function statusText() { return act === 0 ? status1() : act === 1 ? status2() : ''; }
+function statusText() { return [status1, status2, status3, status4][act](); }
 function status() { const t = statusText(), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
 
 /* ---------------- Étapes ---------------- */
@@ -1068,9 +1369,12 @@ const ACTS = [
     k: 'Une charge qui accélère rayonne. Le changement de son champ se propage à la vitesse c : c’est une onde électromagnétique.' },
   { t: 'E et B, ensemble', x: 'Une onde plane avance le long de x : E (vertical) et B (dans la profondeur) varient en phase, avec E = cB. La boucle et la plaque montrent comment chacun fait naître l’autre.',
     k: 'Un champ électrique qui varie crée un champ magnétique, et un champ magnétique qui varie crée un champ électrique. Ils se relaient et avancent ensemble, à c = 1/√(μ₀ε₀).' },
-  { t: 'Un seul phénomène, tout le spectre', x: 'Cette étape arrive dans un second lot.', k: '' },
-  { t: 'Ce que l’onde transporte', x: 'Cette étape arrive dans un second lot.', k: '' }
+  { t: 'Un seul phénomène, tout le spectre', x: 'De la radio aux rayons gamma, c’est la même onde : seule la longueur d’onde change. Glisse le repère sur la règle et regarde ce qu’elle devient.',
+    k: 'Radio, lumière et rayons X sont la même onde. Seule la longueur d’onde change, et avec elle ce qu’elle fait à la matière.' },
+  { t: 'Ce que l’onde transporte', x: 'Une source ponctuelle émet dans toutes les directions. Éloigne le détecteur : de moins en moins de rayons le traversent. Active la voile : elle reçoit une poussée.',
+    k: 'Une onde électromagnétique transporte de l’énergie et de la quantité de mouvement. Loin d’une source, son intensité baisse comme 1/r².' }
 ];
+const fmtPV = v => { const p = pairP(Math.pow(10, v)); return p[0] + ' ' + p[1]; };
 function syncTools() {
   $('#rF1').value = prm1.f; $('#vF1').textContent = fmt(prm1.f, 2) + ' Hz';
   $('#rA1').value = prm1.A; $('#vA1').textContent = fmtI(prm1.A) + ' u';
@@ -1079,12 +1383,29 @@ function syncTools() {
   $('#rF2').value = Math.log10(S2.f); $('#vF2').textContent = siS(S2.f, 'Hz', 3);
   $('#bFreeze').setAttribute('aria-pressed', S2.frozen ? 'true' : 'false');
   document.querySelectorAll('[data-pre]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pre === S2.preset ? 'true' : 'false'));
+  // étape 3 : un seul curseur, en λ ou en f
+  const sl = $('#rL3');
+  if (S3.modeApplied !== S3.mode) {
+    S3.modeApplied = S3.mode;
+    if (S3.mode === 'lam') { sl.step = 0.01; sl.min = -4; sl.max = 12; sl.setAttribute('aria-label', 'Longueur d’onde, échelle logarithmique de 10 kilomètres à 1 picomètre'); $('#gl3').textContent = 'λ'; $('#bMode3').textContent = 'Curseur : λ'; }
+    else { sl.step = 'any'; sl.min = Math.log10(EMW.C / EMW.LMAX); sl.max = Math.log10(EMW.C / EMW.LMIN); sl.setAttribute('aria-label', 'Fréquence, échelle logarithmique'); $('#gl3').textContent = 'f'; $('#bMode3').textContent = 'Curseur : f'; }
+  }
+  sl.value = S3.mode === 'lam' ? -Math.log10(S3.lam) : Math.log10(EMW.C / S3.lam);
+  $('#vL3').textContent = S3.mode === 'lam' ? siS(S3.lam, 'm', 3) : siS(EMW.C / S3.lam, 'Hz', 3);
+  document.querySelectorAll('[data-pre3]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pre3 === S3.preset ? 'true' : 'false'));
+  // étape 4
+  $('#rP4').value = Math.log10(S4.P); $('#vP4').textContent = fmtPV(Math.log10(S4.P));
+  $('#rR4').value = Math.log10(S4.r); $('#vR4').textContent = pairR(S4.r).join(' ');
+  $('#bSail').setAttribute('aria-pressed', S4.sail ? 'true' : 'false');
+  document.querySelectorAll('[data-pre4]').forEach(b => b.setAttribute('aria-pressed', b.dataset.pre4 === S4.preset ? 'true' : 'false'));
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(act)); });
 }
 function enterAct(n, restart) {
   act = n;
   if (n === 0) { if (restart) resetPrm1(); resetS1(); acc = 0; }
   else if (n === 1) { if (restart) resetS2(); }
+  else if (n === 2) { if (restart) resetS3(); }
+  else if (n === 3) { if (restart) resetS4(); }
   hideTip(); syncTools(); buildMeas();
   if (restart) setPlay(true);
 }
@@ -1125,6 +1446,13 @@ click('#bOsc', () => { oscSet(!prm1.osc); syncTools(); });
 click('#bRad', () => { prm1.rad = !prm1.rad; syncTools(); buildMeas(); });
 click('#bFreeze', () => { S2.frozen = !S2.frozen; syncTools(); });
 click('[data-pre]', el => { applyPre(el.dataset.pre); syncTools(); });
+$('#rL3').addEventListener('input', () => { const v = +$('#rL3').value; setLam(S3.mode === 'lam' ? Math.pow(10, -v) : EMW.C / Math.pow(10, v)); syncTools(); });
+click('#bMode3', () => { S3.mode = S3.mode === 'lam' ? 'f' : 'lam'; syncTools(); });
+for (const p of EMW.presets) { const b = document.createElement('button'); b.className = 'btn sm'; b.dataset.pre3 = p.id; b.title = p.nom; b.textContent = PSHORT[p.id] || p.nom; $('#pre3').appendChild(b); }
+click('[data-pre3]', el => { applyPre3(el.dataset.pre3); syncTools(); });
+bindRange('rP4', v => setP(Math.pow(10, v))); bindRange('rR4', v => setR(Math.pow(10, v)));
+click('#bSail', () => { S4.sail = !S4.sail; syncTools(); });
+click('[data-pre4]', el => { applyPre4(el.dataset.pre4); syncTools(); });
 
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1142,9 +1470,11 @@ addEventListener('keydown', e => {
 });
 document.addEventListener('visibilitychange', () => { last = 0; });
 
-/* ---------------- Pointeur : saisie de la charge, sonde, survol ---------------- */
+/* ---------------- Pointeur : saisie de la charge, sonde, repère, détecteur, survol ---------------- */
 function ptr(e) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
 function setTarget(x, y) { const B = S1.base, v = S1.view; B.tx = clamp((x - v.cx) / v.s + B.ox, -XLIM, XLIM); B.ty = clamp((v.cy - y) / v.s + B.oy, -XLIM, XLIM); }
+const inRuler = (g, x, y) => y > g.rulerY - 30 && y < g.winY + g.winH + 6 && x > g.x0 - 12 && x < g.x1 + 12;
+function dragR(x) { const g = geo4(); setR(g.rdec * clamp(x - g.sx, g.D1, g.L * 0.9999) / g.D1); }
 cv.addEventListener('pointerdown', e => {
   const [x, y] = ptr(e), touch = e.pointerType === 'touch';
   let grabbed = false;
@@ -1154,6 +1484,10 @@ cv.addEventListener('pointerdown', e => {
     else if (Math.hypot(x - X1(cur.x), y - Y1(cur.y)) < Math.max(touch ? 36 : 22, R0 * v.s + 8)) {
       const B = S1.base; B.drag = true; B.ox = B.x - (x - v.cx) / v.s; B.oy = B.y - (v.cy - y) / v.s; B.tx = B.x; B.ty = B.y; grabbed = true; cv.className = 'grabbing';
     }
+  } else if (act === 2) {
+    const g = geo3(); if (inRuler(g, x, y)) { S3.drag = true; setLam(g.lOf(x)); syncTools(); grabbed = true; cv.className = 'ew'; }
+  } else if (act === 3) {
+    const g = geo4(); if (Math.abs(x - g.xd) < (touch ? 26 : 16) && Math.abs(y - g.cy) < g.sVis / 2 + (touch ? 26 : 14)) { S4.drag = true; grabbed = true; cv.className = 'grabbing'; }
   }
   if (grabbed) { try { cv.setPointerCapture(e.pointerId); } catch (_) {} hideTip(); e.preventDefault(); }
   else if (touch) {
@@ -1165,18 +1499,24 @@ cv.addEventListener('pointermove', e => {
   const [x, y] = ptr(e);
   if (act === 0 && S1.base.drag) { setTarget(x, y); return; }
   if (act === 0 && S1.probe.drag) { const v = S1.view; S1.probe.x = clamp((x - v.cx) / v.s, -(v.cx / v.s - 10), W / v.s - v.cx / v.s - 10); S1.probe.y = clamp((v.cy - y) / v.s, -(H - v.cy) / v.s + 10, v.cy / v.s - 10); return; }
+  if (act === 2 && S3.drag) { setLam(geo3().lOf(x)); syncTools(); return; }
+  if (act === 3 && S4.drag) { dragR(x); syncTools(); return; }
   if (e.pointerType === 'touch') return;
   const z = hitZone(zones, x, y);
-  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.className = z.key === 'sonde' || z.key === 'charge' ? 'grab' : ''; }
-  else { hideTip(); cv.className = ''; }
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+  let cls = '';
+  if (act === 0 && z && (z.key === 'sonde' || z.key === 'charge')) cls = 'grab';
+  else if (act === 2 && inRuler(geo3(), x, y)) cls = 'ew';
+  else if (act === 3 && z && z.key === 'det') cls = 'grab';
+  cv.className = cls;
 });
-const endPtr = e => { if (S1.base) S1.base.drag = false; if (S1.probe) S1.probe.drag = false; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
+const endPtr = e => { if (S1.base) S1.base.drag = false; if (S1.probe) S1.probe.drag = false; S3.drag = false; S4.drag = false; cv.className = ''; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} };
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
-cv.addEventListener('pointerleave', () => { if (!(S1.base && S1.base.drag) && !(S1.probe && S1.probe.drag)) { hideTip(); cv.className = ''; } });
+cv.addEventListener('pointerleave', () => { if (!(S1.base && S1.base.drag) && !(S1.probe && S1.probe.drag) && !S3.drag && !S4.drag) { hideTip(); cv.className = ''; } });
 
 /* ---------------- Tailles ---------------- */
 function sizeCanvas(c, cssH) { c.style.height = cssH + 'px'; const r = c.getBoundingClientRect(); c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr)); }
-function sizePanelCanvases() { if (act < 2) sizeCanvas(scopeC, 150); }
+function sizePanelCanvases() { sizeCanvas(scopeC, 150); }
 function resize() {
   const r = sceneEl.getBoundingClientRect();
   const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height)), dp = Math.min(window.devicePixelRatio || 1, 2);
@@ -1192,10 +1532,12 @@ addEventListener('resize', resize);
 function simAdvance(n) {   // n pas fixes, sans dessin
   if (act === 0) for (let i = 0; i < n; i++) stepSim();
   else if (act === 1 && !S2.frozen) S2.tv += n * DT * TS;
+  else if (act === 2) S3.tv += n * DT * TS;
 }
 function advance(dt) {
   if (act === 0) { acc += dt * TS; let n = 0; while (acc >= DT && n < 24) { stepSim(); acc -= DT; n++; } if (n >= 24) acc = 0; }
   else if (act === 1 && !S2.frozen) S2.tv += dt * TS;
+  else if (act === 2) S3.tv += dt * TS;
 }
 let last = 0, lastRead = 0;
 function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } loop(now); }
@@ -1209,9 +1551,9 @@ function loop(now) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = CL.fond; ctx.fillRect(0, 0, W, H);
   ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-  if (act === 0) draw1(); else if (act === 1) draw2(); else drawSoon();
+  [draw1, draw2, draw3, draw4][act]();
   ctx.restore();
-  if (act === 0) scope1(); else if (act === 1) scope2();
+  [scope1, scope2, scope3, scope4][act]();
   if (now - lastRead > 100) { readouts(); lastRead = now; }
 }
 
@@ -1223,7 +1565,12 @@ function stateNow() {
       nRides: S1.nRides, nRings: S1.rings.length, x: cur.x, y: cur.y, vx: cur.vx, ax: cur.ax, probe: { x: P.x, y: P.y, r: R, retard: R / C0 }, Erad: [f.Erad[0], f.Erad[1]], Et: f.Erad[0] * (-P.y / nx) + f.Erad[1] * (P.x / nx) };
   }
   if (act === 1) { const V = values2(); return { step: 1, etape: 2, E0: V.E0, B0: V.B0, f: V.f, lambda: V.lambda, T: V.T, I: V.I, uE: V.uE, uB: V.uB, frozen: S2.frozen, preset: S2.preset, phase: S2.tv / T_VIS }; }
-  return { step: act, etape: act + 1, aVenir: true };
+  if (act === 2) {
+    const l = S3.lam, ph = EMW.photonEnergy(l), ob = EMW.scaleObject(l), b = EMW.bandOf(l);
+    return { step: 2, etape: 3, lambda: l, f: EMW.C / l, eV: ph.eV, J: ph.J, band: b.id, bandNom: b.nom, objet: ob.nom, rapport: ob.rapport, ionizing: EMW.ionizing(l), window: EMW.inWindow(l), mode: S3.mode, preset: S3.preset, seenVisible: S3.seenVis };
+  }
+  const V = vals4(), g = geo4(); updateHits(g.k);
+  return { step: 3, etape: 4, P: V.P, r: V.r, I: V.I, E0: V.E0, B0: V.B0, pAbs: V.pAbs, pRefl: V.pRefl, sail: V.sail, force: V.force, hits: S4.hits, hitsExpected: hitsExpected(g.k), k: g.k, rDec: g.rdec, preset: S4.preset };
 }
 const ensure = n => { if (act !== n) { goAct(n); if (pendingAct >= 0) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; } } };
 window.__labo = {
@@ -1233,18 +1580,27 @@ window.__labo = {
   goAct(i, r) { goAct(i, r); if (pendingAct >= 0) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; } },
   state: stateNow, setPlay,
   tick(n) { simAdvance(n || 1); return stateNow(); },
-  kick(dv) { ensure(0); const ok = startKick(dv); return ok; },
+  kick(dv) { ensure(0); return startKick(dv); },
   oscillate(on, f) { ensure(0); oscSet(!!on, f); syncTools(); buildMeas(); },
   radOnly(on) { ensure(0); prm1.rad = !!on; syncTools(); buildMeas(); },
   setE0(E) { ensure(1); setE0(E); syncTools(); },
   setF(f) { ensure(1); setF(f); syncTools(); },
-  freeze(on) { ensure(1); S2.frozen = !!on; syncTools(); }
+  freeze(on) { ensure(1); S2.frozen = !!on; syncTools(); },
+  setLambda(l) { ensure(2); setLam(l); syncTools(); },
+  preset(name) {
+    if (PRE4[name]) { ensure(3); applyPre4(name); syncTools(); return true; }
+    if (EMW.presets.some(p => p.id === name)) { ensure(2); applyPre3(name); syncTools(); return true; }
+    return false;
+  },
+  setP(P) { ensure(3); setP(P); syncTools(); },
+  setR(r) { ensure(3); setR(r); syncTools(); },
+  sail(on) { ensure(3); S4.sail = !!on; syncTools(); }
 };
 
 /* ---------------- Démarrage ---------------- */
 if (reduce) { const m = 'Préférence « réduire les animations » : la scène est ralentie de moitié, jamais figée.'; cv.title = m; $('#bPlay').title += ' · ' + m; }
 resize();
-resetPrm1(); resetS2();
+resetPrm1(); resetS2(); resetS3(); resetS4();
 enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
