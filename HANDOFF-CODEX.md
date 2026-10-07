@@ -16,7 +16,7 @@ Rédigé le 2026-10-06 par Claude Opus 5.5, qui s'arrête à la limite de sessio
 |---|---|
 | `5733e06` | Pilote : `opus-sonnet/fondations-oscillations-ondes/index.html` migrée ; `labo/planche-etapes.css` ; `planche.js` (touches de couches configurables, hauteur d'écran ajustée) ; recette dans `labo/GABARIT.md`. |
 | `c8e40a2` | **Vague 1 faite** : les 12 pages de fondations migrées et vérifiées (Langage, Systèmes, Oscillations, Forces, Rotation, Flux, Matière 07, Champ 04, Courant 06, Cellule, Évolution, Relativité). |
-| (non committé au moment du handoff, voir §5) | `outils/qa/` (scripts de vérification), `.gitignore`, ce fichier. |
+| `25ddbe0` | `outils/qa/` (scripts de vérification), `.gitignore`, ce fichier. Les commits suivants de la branche, s'il y en a, sont la vague 2 en cours : lis `git log` avant d'agir. |
 
 Aucune PR n'est encore ouverte pour cette branche. `main` contient tout le reste (corpus, accueil, coque, théorie) : PR #15, #19, #20 fusionnées.
 
