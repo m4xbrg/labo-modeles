@@ -239,7 +239,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-acts="2" id="pre3"><span class="gl">Préréglages</span></div>
       <!-- Étape 4 -->
       <div class="grp" data-acts="3"><span class="gl">P</span><input type="range" id="rP4" min="0" max="27" step="0.01" value="2" aria-label="Puissance émise, échelle logarithmique de 1 watt à 10 puissance 27 watts"><span class="rv" id="vP4" style="min-width:92px"></span></div>
-      <div class="grp" data-acts="3"><span class="gl">r</span><input type="range" id="rR4" min="0" max="11.175" step="0.005" value="0" aria-label="Distance à la source, échelle logarithmique de 1 mètre à 1 unité astronomique"><span class="rv" id="vR4" style="min-width:82px"></span></div>
+      <div class="grp" data-acts="3"><span class="gl">r</span><input type="range" id="rR4" min="0" max="12.175" step="0.005" value="0" aria-label="Distance à la source, échelle logarithmique de 1 mètre à 1 unité astronomique"><span class="rv" id="vR4" style="min-width:82px"></span></div>
       <div class="grp" data-acts="3"><button class="btn" id="bSail" aria-pressed="false" title="Voile parfaitement réfléchissante de 100 m sur 100 m"><span class="dot"></span>Voile réfléchissante</button></div>
       <div class="grp" data-acts="3"><span class="gl">Préréglages</span><button class="btn sm" data-pre4="ampoule">Ampoule 100 W</button><button class="btn sm" data-pre4="soleil">Soleil à la Terre</button></div>
     </div>
@@ -1180,22 +1180,23 @@ const fmtEV = v => (v < 1e-3 || v >= 1e5) ? sci(v, 2) : sig(v, 3);
 
 /* ================= Étape 4 : ce que l'onde transporte ================= */
 const NR = 40000, VOILE = 1e4;          // rayons isotropes tirés une fois ; surface de la voile, m²
-const S4 = { P: 100, r: 1, sail: false, rBase: 1, lastSet: 0, touched: 'init', preset: 'ampoule', drag: false, dirs: null, plane: [], cacheK: -1, hits: 0, hitPts: [], hitPlane: [], tgt: null };
+const S4 = { P: 100, r: 1, rRef: 1, jumpT: -1e9, jumpTxt: '', sail: false, rBase: 1, lastSet: 0, touched: 'init', preset: 'ampoule', drag: false, dirs: null, plane: [], cacheK: -1, hits: 0, hitPts: [], hitPlane: [], tgt: null };
 (function initRays() {
   const rng = EMW.mulberry32(240601), d = new Float32Array(NR * 3);
   for (let i = 0; i < NR; i++) { const v = EMW.isoDir(rng); d[3 * i] = v[0]; d[3 * i + 1] = v[1]; d[3 * i + 2] = v[2]; }
   S4.dirs = d; for (let i = 0; i < NR; i++) if (Math.abs(d[3 * i + 2]) < 0.015) S4.plane.push(i);
 })();
-const decOf = r => { let e = Math.floor(Math.log10(r) + 1e-12), d = Math.pow(10, e); if (r / d >= 10 - 1e-9) d *= 10; return d; };
-const R_MAX = EMW.UA * 1.001;
+const R_MAX = EMW.UA * 10;
 const PRE4 = { ampoule: { nom: 'Ampoule 100 W', P: 100, r: 1 }, soleil: { nom: 'Soleil à la Terre', P: EMW.P_SOLEIL, r: EMW.UA } };
 function setP(P) { S4.P = clamp(P, 1, 1e27); S4.touched = 'P'; S4.preset = null; }
-function setR(r) { const now = performance.now(); if (now - S4.lastSet > 1500) S4.rBase = S4.r; S4.lastSet = now; S4.r = clamp(r, 1, R_MAX); S4.touched = 'r'; S4.preset = null; }
+function setR(r) { const now = performance.now(); if (now - S4.lastSet > 1500) S4.rBase = S4.r; S4.lastSet = now; S4.r = clamp(r, 1, R_MAX); S4.touched = 'r'; S4.preset = null;
+  const old = S4.rRef; while (S4.r < S4.rRef * (1 - 1e-12)) S4.rRef /= 10; while (S4.r >= S4.rRef * 10 * (1 - 1e-12)) S4.rRef *= 10;
+  if (S4.rRef !== old) { S4.jumpT = now; S4.jumpTxt = `Le repère 1× passe à ${pairR(S4.rRef).join(' ')} (échelle de l’écran × ${S4.rRef > old ? '10' : '1/10'}) : le détecteur revient ${S4.rRef > old ? 'à gauche' : 'à droite'}.`; } }
 function resetS4() { applyPre4('ampoule'); S4.sail = false; S4.drag = false; S4.touched = 'init'; }
-function applyPre4(id) { const p = PRE4[id]; S4.P = p.P; S4.r = p.r; S4.rBase = p.r; S4.lastSet = performance.now(); S4.preset = id; S4.touched = 'preset'; }
+function applyPre4(id) { const p = PRE4[id]; S4.P = p.P; S4.r = p.r; S4.rBase = p.r; S4.rRef = p.r; S4.jumpT = -1e9; S4.lastSet = performance.now(); S4.preset = id; S4.touched = 'preset'; }
 function geo4() {
   const nar = W < 700, sx = nar ? W * 0.08 : W * 0.09, L = (W - sx) * (nar ? 0.88 : 0.84), D1 = L / 10, cy = H * (nar ? 0.5 : 0.5);
-  const rdec = decOf(S4.r), k = S4.r / rdec, d = D1 * k, Z = clamp(Math.min(W, H) * 0.24, 84, 140);
+  const rdec = S4.rRef, k = S4.r / rdec, d = D1 * k, Z = clamp(Math.min(W, H) * 0.24, 84, 140);
   return { nar, sx, L, D1, cy, rdec, k, d, xd: sx + d, sVis: D1 * 0.5, Z, ix: W - Z - 16, iy: H - Z - 44 };
 }
 function updateHits(k) {   // impacts exacts en 3D : carré de côté a = 0,5/k vu à la distance 1, centré sur l'axe x
@@ -1270,7 +1271,7 @@ function draw4() {
 }
 function scope4() {
   const { w, h } = scopeSetup(), c = sctx, padL = 54, padR = 8, padT = 8, padB = 20, pw = w - padL - padR, ph = h - padT - padB, V = vals4();
-  const pxd = pw / 11.2, nd = ph / pxd, xR = r => padL + Math.log10(r) * pxd, lc = Math.log10(V.I);
+  const pxd = pw / 12.2, nd = ph / pxd, xR = r => padL + Math.log10(r) * pxd, lc = Math.log10(V.I);
   const yI = I => padT + ph / 2 - (Math.log10(I) - lc) * pxd;     // même nombre de pixels par décade sur les deux axes : la pente −2 se lit
   c.strokeStyle = CL.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph); c.font = mono(10);
   c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
@@ -1287,6 +1288,7 @@ function scope4() {
 }
 function status4() {
   const V = vals4(), q = S4.r / S4.rBase;
+  if (performance.now() - S4.jumpT < 4500) return S4.jumpTxt;
   if (S4.sail) { const F = V.force; return `${F >= 0.01 ? fmt(F, 2) + ' N' : siS(F, 'N', 2)} : le poids d’environ ${siS(F / 9.80665 * 1e3, 'g', 2)}, sur une voile de 10 000 m².`; }
   if (S4.touched === 'r') {
     if (q >= 1.9 && q <= 2.1) return 'À distance double, quatre fois moins : la même énergie s’étale sur une sphère quatre fois plus grande.';
@@ -1314,7 +1316,7 @@ function measSpec() {
 const NOTE1 = 'c ralentie d’un facteur énorme (100 u/s au lieu de 3 × 10⁸ m/s) ; forme non relativiste du champ de rayonnement (vitesses ≤ 0,35 c).';
 const NOTE2 = 'Onde plane idéale, polarisée verticalement (la polarisation est au module 25). B est dessiné multiplié par c ; la longueur des flèches suit log E₀, pas E₀.';
 const NOTE3 = 'Bornes des domaines conventionnelles (ils se chevauchent en pratique) ; couleurs du visible approximatives (sRGB) ; le photon est seulement nommé ici (modules 27 et 48).';
-const NOTE4 = 'Coupe 2D d’un phénomène 3D (les impacts sont comptés en 3D) ; source ponctuelle dans le vide, sans absorption ; distances à l’écran schématiques : la scène se recadre à chaque décade de r. Voile parfaitement réfléchissante, vue de face.';
+const NOTE4 = 'Coupe 2D d’un phénomène 3D (les impacts sont comptés en 3D) ; source ponctuelle dans le vide, sans absorption ; distances à l’écran schématiques : « 1× » est la distance de référence du préréglage ; quand r sort de [1×, 10×[, la référence saute d’une décade. Voile parfaitement réfléchissante, vue de face.';
 const NOTES = () => [NOTE1 + (prm1.rad ? ' Flèches : longueur ∝ √|E| et opacité ∝ |E|, normalisées au maximum de chaque anneau.' : ''), NOTE2, NOTE3, NOTE4];
 const LEGS = () => act === 0
   ? lg(ln(CL.pos, 1.8), 'x de la charge') + lg(ln(CL.e, 1.8), 'E rayonné à la sonde') + lg(ln(CL.texte, 1.2, 1), 'secousse, puis réponse après r/c')
@@ -1570,7 +1572,7 @@ function stateNow() {
     return { step: 2, etape: 3, lambda: l, f: EMW.C / l, eV: ph.eV, J: ph.J, band: b.id, bandNom: b.nom, objet: ob.nom, rapport: ob.rapport, ionizing: EMW.ionizing(l), window: EMW.inWindow(l), mode: S3.mode, preset: S3.preset, seenVisible: S3.seenVis };
   }
   const V = vals4(), g = geo4(); updateHits(g.k);
-  return { step: 3, etape: 4, P: V.P, r: V.r, I: V.I, E0: V.E0, B0: V.B0, pAbs: V.pAbs, pRefl: V.pRefl, sail: V.sail, force: V.force, hits: S4.hits, hitsExpected: hitsExpected(g.k), k: g.k, rDec: g.rdec, preset: S4.preset };
+  return { step: 3, etape: 4, P: V.P, r: V.r, I: V.I, E0: V.E0, B0: V.B0, pAbs: V.pAbs, pRefl: V.pRefl, sail: V.sail, force: V.force, hits: S4.hits, hitsExpected: hitsExpected(g.k), k: g.k, rDec: g.rdec, rRef: g.rdec, preset: S4.preset };
 }
 const ensure = n => { if (act !== n) { goAct(n); if (pendingAct >= 0) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; } } };
 window.__labo = {
