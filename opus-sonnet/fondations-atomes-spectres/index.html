@@ -13,54 +13,80 @@
 <title>Atomes, noyaux et lumière — LABO</title>
 <meta name="description" content="Du noyau à la lumière : feuille d’or de Rutherford, isotopes et carte des nucléides, énergie de liaison, radioactivité, puis niveaux d’énergie, spectres de raies et photons.">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#e9b6ff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;--ease:cubic-bezier(0.22,1,0.36,1);}*{box-sizing:border-box}html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit;color:inherit}a{color:inherit}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom;cursor:default}#cv.hand{cursor:pointer}.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}h1{font:400 clamp(28px,3.6vw,42px)/1 var(--serif);margin:0;letter-spacing:-.005em}h1 em{color:var(--accent);font-style:italic}.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}.back:hover{color:var(--texte)}.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}.tip.on{opacity:1;transform:none}.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}.panel>*{flex:none}.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}.eyebrow b{color:var(--accent);font-weight:500}h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}.status a{color:inherit;text-decoration:underline;text-underline-offset:2px}.swap{animation:swap .55s var(--ease)}@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.meas{display:grid;gap:0;border-top:1px solid var(--trait)}.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}.lab{font:400 12px var(--mono);color:var(--texte-2)}.leg .blk{display:block;flex:1 0 100%}.val{font:500 14px var(--mono);display:flex;align-items:baseline;gap:6px;text-align:right;justify-content:flex-end;white-space:nowrap}.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal}.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}#recSec[hidden]{display:none}#scope{display:block;width:100%}.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}.leg span{display:inline-flex;align-items:center;gap:6px}.leg svg{width:20px;height:8px;overflow:visible}.leg a{color:var(--texte-2)}.cle{margin:0;border-left:2px solid var(--accent);padding:1px 0 1px 12px;font:400 18px/1.3 var(--serif)}.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:0}.cards{display:grid;gap:8px}.cards[hidden]{display:none}.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}.comprendre:hover{background:var(--accent);color:var(--fond)}.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grp[hidden],.sub[hidden]{display:none}.sub{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}.btn:hover{border-color:var(--texte-2)}.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}.btn:disabled{opacity:.35;cursor:default}.btn.go{border-color:var(--accent);color:var(--accent)}.btn.go:hover{background:var(--accent);color:var(--fond)}.btn svg{width:14px;height:14px;display:block;fill:currentColor}.btn.sm{padding:7px 9px}.ico{padding:7px 9px}.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}.btn[aria-pressed="true"] .dot{background:currentColor}select{background:var(--fond);color:var(--texte);border:1px solid var(--trait);font:400 12px var(--mono);padding:6px 8px;min-height:34px;border-radius:2px;cursor:pointer;max-width:100%}select:hover{border-color:var(--texte-2)}.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}.sg{display:flex;flex-direction:column;min-width:0}.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sgl .short{display:none}.sgs{display:flex;gap:4px;min-width:0}.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}.seg b{font-weight:500;margin-right:6px}.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}.seg[aria-current="step"] b{color:var(--accent)}.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}.rv{font:500 12px var(--mono);min-width:64px}
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>:root, :root[data-theme], :root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#e9b6ff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;--ease:cubic-bezier(0.22,1,0.36,1);}*{box-sizing:border-box}html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit;color:inherit}a{color:inherit}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom;cursor:default}#cv.hand{cursor:pointer}.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}h1{font:400 clamp(28px,3.6vw,42px)/1 var(--serif);margin:0;letter-spacing:-.005em}h1 em{color:var(--accent);font-style:italic}.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}.back:hover{color:var(--texte)}.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}.tip.on{opacity:1;transform:none}.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}.panel>*{flex:none}.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}.eyebrow b{color:var(--accent);font-weight:500}h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}.status a{color:inherit;text-decoration:underline;text-underline-offset:2px}.swap{animation:swap .55s var(--ease)}@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.meas{display:grid;gap:0;border-top:1px solid var(--trait)}.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}.lab{font:400 12px var(--mono);color:var(--texte-2)}.leg .blk{display:block;flex:1 0 100%}.val{font:500 14px var(--mono);display:flex;align-items:baseline;gap:6px;text-align:right;justify-content:flex-end;white-space:nowrap}.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal}.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}#recSec[hidden]{display:none}#scope{display:block;width:100%}.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}.leg span{display:inline-flex;align-items:center;gap:6px}.leg svg{width:20px;height:8px;overflow:visible}.leg a{color:var(--texte-2)}.cle{margin:0;border-left:2px solid var(--accent);padding:1px 0 1px 12px;font:400 18px/1.3 var(--serif)}.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:0}.cards{display:grid;gap:8px}.cards[hidden]{display:none}.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}.comprendre:hover{background:var(--accent);color:var(--fond)}.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grp[hidden],.sub[hidden]{display:none}.sub{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}.btn:hover{border-color:var(--texte-2)}.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}.btn:disabled{opacity:.35;cursor:default}.btn.go{border-color:var(--accent);color:var(--accent)}.btn.go:hover{background:var(--accent);color:var(--fond)}.btn svg{width:14px;height:14px;display:block;fill:currentColor}.btn.sm{padding:7px 9px}.ico{padding:7px 9px}.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}.btn[aria-pressed="true"] .dot{background:currentColor}select{background:var(--fond);color:var(--texte);border:1px solid var(--trait);font:400 12px var(--mono);padding:6px 8px;min-height:34px;border-radius:2px;cursor:pointer;max-width:100%}select:hover{border-color:var(--texte-2)}.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}.sg{display:flex;flex-direction:column;min-width:0}.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sgl .short{display:none}.sgs{display:flex;gap:4px;min-width:0}.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}.seg b{font-weight:500;margin-right:6px}.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}.seg[aria-current="step"] b{color:var(--accent)}.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}.rv{font:500 12px var(--mono);min-width:64px}
 /* CH2-CSS-BEGIN */
 /* CH2-CSS-END */
 @media (max-width:860px){.app{display:flex;flex-direction:column;height:auto}.scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}.controls{order:2;padding:10px 16px}.panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}.head{left:16px;top:14px}.liens{margin-top:0;position:static;padding:0;margin-bottom:0}.stepper{flex:1 0 100%;order:5}input[type=range]{width:104px}}
 @media (max-width:640px){.seg span{display:none}.seg b{margin:0;font-size:13px}.sgl .long{display:none}.sgl .short{display:inline}.stepper{gap:10px}.rv{min-width:50px}.head{max-width:78%}}
 @media (hover:none) and (pointer:coarse){.kbd{display:none}}
 @media (prefers-reduced-motion:reduce){.swap{animation:none}.tip,.btn,.comprendre,.seg{transition:none}}</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* Coque LABO ; l’écran conserve sa palette d’origine. */
+body.labo-etapes[data-mode=observer] .controls{display:none!important}
+.labo-etapes .status,.labo-etapes .cle,.labo-etapes .real{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes select{background:var(--papier);color:var(--encre);border-color:var(--filet)}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="oac">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 26 · 27</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Atomes, noyaux et lumière</h1><p class="lead">Sonder l’atome, parcourir les isotopes, mesurer l’énergie de liaison et suivre la radioactivité. Photons et spectres : à venir.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~1 fm à ~1 Å</dd><dt>Temps</dt><dd>tir et demi-vie</dd><dt>Modèle</dt><dd>diffusion et noyaux</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>A</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
  <main class="scene" id="scene">
   <canvas id="cv" role="img" aria-label="Scène de la planche Atomes, noyaux et lumière : feuille d’or bombardée de particules α, carte des nucléides, courbe de l’énergie de liaison, échantillon radioactif, puis niveaux d’énergie et spectres."></canvas>
-  <header class="head">
-   <p class="serie">LABO · Fondations 26 · 27</p>
-   <h1>Atomes, noyaux et <em>lumière</em></h1>
-   <a class="back" href="../../labo/index.html">&larr; LABO</a>
-  </header>
  </main>
  <div class="tip" id="tip" role="tooltip"></div>
  <aside class="panel" aria-label="Panneau de lecture">
   <section>
    <p class="eyebrow" id="eyebrow"></p>
    <h2 id="stepTitle"></h2>
-   <p id="stepText"></p>
-   <p class="status" id="status" aria-live="polite"></p>
+   <p id="stepText" class="couche-comp"></p>
+   <p class="status couche-lire" id="status" aria-live="polite"></p>
   </section>
-  <section id="recSec">
+  <section id="recSec" class="couche-lire">
    <p class="eyebrow" id="rEye">Enregistreur</p>
    <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur de l’étape : histogramme ou courbe des grandeurs mesurées."></canvas></div>
    <p class="leg" id="leg"></p>
   </section>
-  <section><div class="meas" id="meas"></div></section>
-  <p class="cle" id="cle"></p>
-  <p class="note" id="note"></p>
-  <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
-   <div class="card"><b>Molécules</b>Que se passe-t-il quand deux atomes partagent leurs électrons ?<small>Module 28 · liaisons (à venir)</small></div>
+  <section><div class="meas couche-lire" id="meas"></div></section>
+  <p class="cle couche-comp" id="cle"></p>
+  <p class="note couche-comp" id="note"></p>
+  <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+   <div class="card"><b>Molécules</b>Que se passe-t-il quand deux atomes partagent leurs électrons ?<small><a href="../fondations-molecules-mole/index.html">Module 28 · liaisons</a></small></div>
    <div class="card"><b>Étoiles</b>D’où vient la lumière continue d’une étoile, et comment lit-on sa composition dans ses raies sombres ?<small>Modules 43 et 44 · corps noir et fusion stellaire (à venir)</small></div>
    <div class="card"><b>Quantique</b>Pourquoi l’énergie d’un électron lié est-elle quantifiée ?<small>Modules 48 et 49 · physique quantique (à venir)</small></div>
   </section>
-  <section class="kbd">
+  <section class="kbd couche-lire">
    <p class="eyebrow">Clavier</p>
    <ul class="hints">
     <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>7</kbd> aller à l’étape</li>
     <li><kbd>R</kbd> réinitialiser · <kbd>T</kbd> 10 000 α (étape 1) · <kbd>M</kbd> changer de modèle (1) · <kbd>S</kbd> suivre un noyau (4)</li>
    </ul>
   </section>
-  <nav class="liens">
-   <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+  <nav class="liens couche-comp">
+   <a class="comprendre" id="lienTheorie" href="explication.html#m26"><span>Lire la théorie · module <b id="numTheorie">26</b></span><span aria-hidden="true">&rarr;</span></a>
   </nav>
  </aside>
  <div class="controls" role="toolbar" aria-label="Contrôles">
@@ -70,7 +96,7 @@
    <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
    <button class="btn" id="bReset" title="Réinitialiser l’étape (R)">Réinitialiser</button>
   </div>
-  <div class="stepper" id="stepper" role="group" aria-label="Les sept étapes"></div>
+
   <div class="tools" id="tools">
    <!-- 1 · feuille d’or -->
    <div class="grp" data-steps="0"><span class="gl">Modèle</span><button class="btn" id="bTh" aria-pressed="false" title="Thomson : charge positive étalée dans tout l’atome (M)">Thomson (charge positive étalée)</button><button class="btn" id="bRu" aria-pressed="true" title="Rutherford : charge positive concentrée dans un noyau (M)">Rutherford (noyau concentré)</button></div>
@@ -709,10 +735,10 @@ function burst1(n) {
 }
 function geo1(W, H) {
  const nw = W < 640, L = clamp(Math.min(W, H) * 0.33, 118, 230), cx = W * (nw ? 0.5 : 0.46);
- let R = Math.min((H - (nw ? 118 : 100)) / 2, cx - 56);
+ let R = Math.min((H - 64) / 2, cx - 56);
  if (!nw) R = Math.min(R, W - cx - L - 24);
  R = Math.max(80, R);
- return { cx, cy: H / 2 + (nw ? 34 : 20), R, L, lx: W - L - 12, ly: H - L - 12, nw, hF: Math.min(R * 0.92, 300) };
+ return { cx, cy: H / 2, R, L, lx: W - L - 12, ly: H - L - 12, nw, hF: Math.min(R * 0.92, 300) };
 }
 function loupeTraj() {
  const k = k1; if (k.tr && k.trE === k.E) return k.tr;
@@ -925,7 +951,7 @@ function sync2() {
 }
 function geo2(W, H) {
  const stack = W < 700 || W < H;
- const nuc = stack ? { x: 0, y: 92, w: W, h: Math.max(124, H * 0.46 - 92) } : { x: 0, y: 0, w: Math.min(W * 0.32, 400), h: H };
+ const nuc = stack ? { x: 0, y: 24, w: W, h: Math.max(124, H * 0.46 - 24) } : { x: 0, y: 0, w: Math.min(W * 0.32, 400), h: H };
  const ax = stack ? 0 : nuc.w, ay = stack ? nuc.y + nuc.h : 0, aw = W - ax, ah = H - ay, ml = 30, mb = 24, mt = stack ? 6 : 36, mr = 12;
  const cs = Math.min((aw - ml - mr) / 41, (ah - mb - mt) / 26);
  return { stack, nuc, cs, x0: ax + ml + (aw - ml - mr - cs * 41) / 2, y0: ay + mt + (ah - mt - mb - cs * 26) / 2 };
@@ -1040,7 +1066,7 @@ function sync3() {
 }
 const xA3 = (g, A) => g.pl + g.pw * Math.sqrt(A / 240), yB3 = (g, v) => g.pb - g.ph * v / 9;
 function geo3(W, H) {
- const nw = W < 640, top = nw ? 94 : 26, zb = Math.round(H * (nw ? 0.5 : 0.44)), pl = nw ? 34 : 46, pt = zb + 26, pb = H - 28;
+ const nw = W < 640, top = 26, zb = Math.round(H * (nw ? 0.5 : 0.44)), pl = nw ? 34 : 46, pt = zb + 26, pb = H - 28;
  return { nw, top, zb, pl, pw: W - pl - 14, pt, pb, ph: pb - pt, px: nw ? W / 2 : W * 0.655, Lb: clamp(W * (nw ? 0.26 : 0.15), 70, 160) };
 }
 const groups3 = l => { const m = new Map(); l.forEach(([Z, N]) => { const kk = Z + ':' + N; m.set(kk, (m.get(kk) || 0) + 1); }); return [...m].map(([kk, n]) => { const [Z, N] = kk.split(':').map(Number); return { Z, N, n, A: Math.max(1, Z + N) }; }); };
@@ -1157,7 +1183,7 @@ function follow4() {
 }
 function geo4(W, H) {
  const nw = W < 640, gs = nw ? 8 : clamp(Math.floor((H * 0.6 - 150) / 20), 8, 16), cm = nw ? Math.floor((W - 46 - 20 * gs) / 5) : clamp(gs * 3.4, 34, 50), gap = nw ? 16 : 80;
- const gx = nw ? 14 : Math.max(32, (W - 20 * gs - gap - 5 * cm) / 2), gy = nw ? 118 : 140, sy0 = gy + 20 * gs + 30, sh = H - sy0 - 6;
+ const gx = nw ? 14 : Math.max(32, (W - 20 * gs - gap - 5 * cm) / 2), gy = 36, sy0 = gy + 20 * gs + 30, sh = H - sy0 - 6;
  return { nw, gs, cm, gx, gy, mx: gx + 20 * gs + gap, my: gy + (20 * gs - 5 * cm) / 2 + (nw ? 0 : 6), sy0, sh, bx0: nw ? 10 : 36, xs0: (nw ? 10 : 36) + 38, xs1: W - (nw ? 12 : 44), by: [0.28, 0.54, 0.8].map(f => sy0 + sh * f) };
 }
 const dot4 = (g, i) => [g.gx + (i % 20 + 0.5) * g.gs, g.gy + (Math.floor(i / 20) + 0.5) * g.gs];
@@ -1303,7 +1329,7 @@ on('#bNew', 'click', () => setNuc4(k4.id)); on('#bFollow', 'click', follow4);
 /* CH2-BEGIN */
 function stubStep(key, title, word, last) {
  STEPS.push({
-  key, ch: 1, title, word, text: 'Cette étape est en construction.', cle: 'À venir.', note: 'Bouchon : le contenu du chapitre 27 arrive.',
+  key, ch: 1, title, word, text: 'Cette étape est en construction.', cle: 'À venir.', note: 'Le chapitre 27 est à venir ; sa théorie est disponible.',
   rec: null, cards: !!last,
   enter() {}, step() {}, meas() { return []; }, status() { return ''; }, state() { return { stub: true }; }, api: {},
   draw(c, W, H) { c.font = serif(28, true); c.fillStyle = C.texte2; c.textAlign = 'center'; c.fillText('Étape en construction', W / 2, H / 2); }
@@ -1324,7 +1350,7 @@ if (reduce) cv.title = 'Mouvement réduit demandé : les mouvements décoratifs 
  const host = $('#stepper');
  [['Module 26 · Atome et noyau', '26'], ['Module 27 · Photons et spectres', '27']].forEach((g, gi) => {
   const idx = STEPS.map((s, i) => i).filter(i => STEPS[i].ch === gi);
-  host.insertAdjacentHTML('beforeend', `<div class="sg" style="flex:${idx.length} 1 0"><span class="sgl"><span class="long">${g[0]}</span><span class="short">${g[1]}</span></span><div class="sgs">${idx.map(i => `<button class="seg" data-a="${i}" title="Étape ${i + 1} — ${STEPS[i].title}"><b>${i + 1}</b><span>${STEPS[i].word}</span></button>`).join('')}</div></div>`);
+  host.insertAdjacentHTML('beforeend', `<div class="chap"><p class="chap-t"><b>${26 + gi}</b>${gi ? 'À venir · Quantification, photons et spectres atomiques' : 'Architecture atomique et nucléaire'}</p><div class="segs">${idx.map((i, j) => `<button class="seg" data-a="${i}" title="Étape ${i + 1} — ${STEPS[i].title}"><b>${26 + gi}.${j + 1}</b><span>${STEPS[i].word}${gi ? ' · à venir' : ''}</span></button>`).join('')}</div></div>`);
  });
 }
 function sizeScope() {
@@ -1341,14 +1367,15 @@ function resize() {
 function swap(el) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
 function updateUI(n) {
  const S = STEPS[n];
+ $('#lienTheorie').href = 'explication.html#m' + (26 + S.ch); $('#numTheorie').textContent = 26 + S.ch;
  $$('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
- $('#eyebrow').innerHTML = `Module ${26 + S.ch} · étape <b>${n + 1}</b> sur ${NS}`;
+ $('#eyebrow').innerHTML = `Module ${26 + S.ch} · étape <b>${26 + S.ch}.${S.ch ? n - 3 : n + 1}</b>${S.ch ? " · à venir" : ""}`;
  $('#stepTitle').textContent = S.title; $('#stepText').innerHTML = S.text; $('#cle').innerHTML = S.cle || ''; $('#note').innerHTML = S.note || '';
  $('#recSec').hidden = !S.rec; $('#rEye').textContent = S.rec || ''; $('#leg').innerHTML = S.legend || ''; $('#cards').hidden = !S.cards;
  $$('#tools .grp[data-steps]').forEach(g => { g.hidden = !g.dataset.steps.split(' ').includes(String(n)); });
  swap($('#stepTitle')); swap($('#stepText'));
  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NS - 1;
- statusHTML = null; measKey = '';
+ statusHTML = null; measKey = null;
 }
 function renderMeas(rows) {
  const m = $('#meas'), key = rows.map(r => r[0]).join('|');
@@ -1466,5 +1493,6 @@ addEventListener('resize', resize);
 resize(); goNow(0, true); requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
