@@ -14,7 +14,9 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-02 → 04 | Ce dossier `corpus/` devient la source de vérité ; le README est réécrit autour de LABO ; la collection *L'invisible en mouvement* est resserrée à cinq showcases. |
 | 2026-10-04 | Le prototype devient l'accueil : `prototype/` est renommé `labo/`, la racine et l'ancien accueil (`opus-sonnet/index.html`) redirigent vers lui. |
 | 2026-10-06 | **Fondations 23 · Magnétisme et induction.** Première page de fondations construite au standard d'une page à un module (quatre étapes), à partir d'un brief et d'un moteur verrouillé versionnés dans `prompts/` (`prompts/moteurs/magnetisme.js`). |
-| 2026-10-07 | **Fondations 26 · 27 · Atomes, noyaux et lumière.** Ouvre la branche E ; première page à deux chapitres numérotés par module. Livrée en deux fois : le chapitre 26 et l'explication d'abord, le chapitre 27 ensuite. Moteur verrouillé `prompts/moteurs/atomes.js`, avec une table des nucléides recopiée de NUBASE2020 et AME2020. |
+| 2026-10-06 | **Fondations 28 · 29 · Molécules et mole.** Ouvre la branche E (atomes et chimie) : sept étapes en deux chapitres, moteur testé avant la page et versionné dans `prompts/moteurs/molecules-mole.js`. |
+| 2026-10-07 | **Fondations 24 · L'onde électromagnétique.** Un chapitre de quatre étapes ; moteur écrit et testé dans la session de construction (`prompts/moteurs/onde-electromagnetique.js`), page et explication déléguées à des sous-agents, selon `prompts/SESSION-FONDATION.md`. |
+| 2026-10-07 | **Fondations 26 · 27 · Atomes, noyaux et lumière (première moitié).** Chapitre 26 (quatre étapes) et explication des deux modules ; le chapitre 27 suivra. Moteur verrouillé `prompts/moteurs/atomes.js`, avec une table des nucléides recopiée de NUBASE2020 et AME2020. |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 
@@ -59,7 +61,7 @@ Le 2026-10-04, l'accueil a été branché sur `corpus/*.json` (plus aucune liste
 | `corpus/` | **actuel**, source de vérité | |
 | `prompts/00-direction-artistique.md` | actuel pour le style, historique pour le reste | Charte visuelle toujours appliquée (palette, typographie, motion). Son introduction parle encore de « cinq pages » de la série « L'invisible en mouvement ». |
 | `prompts/01-…` à `09-…`, `prompts/fondations-*.md` des pages construites | **historiques** | Briefs de construction : ils disent ce qui a été demandé, pas forcément ce qui existe. Les écarts relevés sont mineurs (titres d'actes raccourcis dans 07 et 09 ; planche 04 plus riche que son brief). Les chemins locaux qui restaient dans `fondations-rotation-gravitation.md` et `fondations-relativite-restreinte.md` ont été retirés le 2026-10-04 (l'historique git les contient encore). |
-| `prompts/FEUILLE-DE-ROUTE.md`, `prompts/SESSION-FONDATION.md` et les briefs `fondations-*.md` des modules 23 à 37 (écrits le 2026-10-06) | **actuels**, prévisionnels | Plan des pages qui restent et briefs à exécuter. Ils deviennent historiques, comme les autres briefs, une fois la page construite. |
+| `prompts/FEUILLE-DE-ROUTE.md`, `prompts/SESSION-FONDATION.md` et les briefs `fondations-*.md` des 23 pages qui restent (écrits le 2026-10-06) | **actuels**, prévisionnels | Plan des pages qui restent et briefs à exécuter. Ils deviennent historiques, comme les autres briefs, une fois la page construite. |
 | `prompts/PROMPT-SESSION.md`, `PROMPTS-OPUS-ORCHESTRE.md` | **historiques** | Prompts du banc d'essai (« série de quatre », dossier `opus-orchestre/` jamais créé). |
 | `prompts/astra-neurone.md` | **historique, figé** | Texte donné à Astra, garde l'ancien nom. |
 | `opus-sonnet/index.html` | redirection | Ancien accueil sombre de la série (titré LABO le 2026-10-04), remplacé le même jour par `labo/index.html`. |
