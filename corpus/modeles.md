@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**21 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 12 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**22 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 13 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -31,6 +31,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
 | [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-07 |
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
+| [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -255,6 +256,17 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** (un chapitre, Module 24) : 1 Secouer une charge · 2 E et B, ensemble · 3 Un seul phénomène, tout le spectre · 4 Ce que l’onde transporte
 - **Interaction** : Charge qu’on saisit et secoue (ou coup sec, ou oscillation) dont les lignes de champ font un coude sur un cercle qui grandit à c, sonde et enregistreur qui montrent le retard r/c, partie rayonnée seule (nulle dans l’axe) ; onde plane en perspective avec E et B en phase, boucle-sonde et plaque qui se relaient, préréglages Soleil, téléphone, laser ; règle du spectre de 10⁴ m à 10⁻¹² m avec onde à l’échelle d’un objet de comparaison, ce qui répond dans la matière, énergie du photon, seuil d’ionisation et fenêtres de l’atmosphère ; source ponctuelle, détecteur qu’on éloigne (1/r²), pression de radiation et voile réfléchissante.
 - **Notes** : Construite au standard d’une page à un module (quatre étapes). Moteur EMW écrit et testé avant la page, versionné dans `prompts/moteurs/onde-electromagnetique.js` (55 tests, aussi lancés sur la page livrée). Vitesse de la lumière ralentie et champ de rayonnement non relativiste à l’étape 1 ; onde plane idéale ; domaines du spectre conventionnels. Photon seulement nommé. Se termine sur trois questions vers les modules 25, 27 et 43.
+
+
+### Atomes, noyaux et lumière
+
+- **Identifiant** : `fondations-atomes-spectres` · **chemin** : [`opus-sonnet/fondations-atomes-spectres/index.html`](../opus-sonnet/fondations-atomes-spectres/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-atomes-spectres/explication.html)
+- **Type** : foundation · **statut** : `partial` · **production** : Fondations · Atomes, noyaux, photons et spectres
+- **Collection** : aucune
+- **Modules** : 26 Architecture atomique et nucléaire (`full`), 27 Quantification, photons et spectres atomiques (`partial` : théorie dans l’explication, étapes à venir), 05 Exponentielles et logarithmes (`supporting`), 07 Hasard, probabilité et distributions (`supporting`), 11 Énergie et quantité de mouvement (`supporting`), 21 Électrostatique (`supporting`), 46 Relativité restreinte (`supporting`)
+- **Étapes** : chapitre 26 : 1 Tirer sur une feuille d’or · 2 Protons, neutrons, isotopes · 3 Énergie de liaison · 4 Radioactivité ; chapitre 27 (à venir, emplacements réservés) : 5 Une échelle d’énergies · 6 Des raies comme des empreintes · 7 Des paquets de lumière
+- **Interaction** : Tirs α de Geiger et Marsden avec bascule Thomson / Rutherford, histogramme comparé à 1/sin⁴(θ/2), loupe à l’échelle du femtomètre et zoom atome → noyau ; noyau construit nucléon par nucléon sur la carte des nucléides ; courbe B/A et balance des masses pour la fusion et la fission ; échantillon de 400 noyaux qui se désintègrent au hasard, noyau suivi, écrans papier, aluminium et plomb (chapitre 26). Prévu au chapitre 27 : échelle des niveaux de l’hydrogène, raies au prisme, effet photoélectrique.
+- **Notes** : Moteur verrouillé versionné dans `prompts/moteurs/atomes.js` (195 tests, aussi lancés sur la page) ; table des nucléides recopiée de NUBASE2020 (Z = 1 à 26, demi-vies > 1 ms) et masses AME2020. Formule semi-empirique pour la courbe continue ; fils supposés stables. Première moitié livrée le 2026-10-07 ; le chapitre 27 viendra dans une PR suivante.
 
 ## Pages d'appui
 

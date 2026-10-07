@@ -9,9 +9,9 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
 | Liste historique (18 groupes) | 192 | 6 | 11 | 37 | 0 | 138 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 11 | 1 | 46 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 13 | 1 | 43 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **48** | **2** | **184** |
+| **Total** | **265** | **16** | **16** | **50** | **2** | **181** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -443,11 +443,11 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Désintégration radioactive | `partial` | 26 | 05, 07 | Systèmes, croissance et hasard | Version statistique (étape D3 des fondations Systèmes, croissance et hasard) ; la physique nucléaire n’est pas traitée. |
+| Désintégration radioactive | `absorbed` | 26 | 05, 07 | Atomes, noyaux et lumière | Étape 4 des fondations Atomes, noyaux et lumière (transmutation α, β, écrans, absence de mémoire) ; la version statistique reste l’étape D3 des fondations Systèmes, croissance et hasard. |
 | Chaîne de désintégration | `idea` | 26 | 05 | — |  |
-| Fission | `idea` | 26 | 11 | — |  |
-| Fusion | `idea` | 26 | 11 | — |  |
-| Énergie de liaison nucléaire | `idea` | 26 | 11 | — |  |
+| Fission | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilan énergétique de ²³⁵U + n dans l’étape 3 des fondations Atomes, noyaux et lumière ; la réaction en chaîne et le réacteur ne sont pas construits. |
+| Fusion | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilans de ²H + ³H et de 3 ⁴He dans l’étape 3 des fondations Atomes, noyaux et lumière ; le confinement et les conditions de la fusion ne sont pas construits. |
+| Énergie de liaison nucléaire | `absorbed` | 26 | 11 | Atomes, noyaux et lumière | Étape 3 des fondations Atomes, noyaux et lumière (courbe B/A mesurée et semi-empirique, défaut de masse, bilans de réaction). |
 
 ### Quantique
 
