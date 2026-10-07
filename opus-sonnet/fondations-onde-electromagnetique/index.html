@@ -15,8 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#ff9fb2;
@@ -150,16 +151,47 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* Coque LABO ; l’écran conserve sa palette d’origine. */
+body.labo-etapes[data-mode=observer] .controls{display:none!important}
+.labo-etapes .status,.labo-etapes .cle,.labo-etapes .real{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes select{background:var(--papier);color:var(--encre);border-color:var(--filet)}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="vmc">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 24</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>L’onde électromagnétique</h1><p class="lead">Secouer une charge, suivre les champs électrique et magnétique, explorer le spectre et l’énergie transportée.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>λ : 10⁻¹² à 10⁴ m</dd><dt>Temps</dt><dd>cycle et propagation</dd><dt>Modèle</dt><dd>onde électromagnétique</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+  <div class="chap" data-g="24"><p class="chap-t"><b>24</b>Onde électromagnétique</p><div class="segs">
+    <button class="seg" data-a="0" title="Étape 1 — Secouer une charge"><b>24.1</b><span>Secouer</span></button>
+    <button class="seg" data-a="1" title="Étape 2 — E et B, ensemble"><b>24.2</b><span>E et B</span></button>
+    <button class="seg" data-a="2" title="Étape 3 — Un seul phénomène, tout le spectre"><b>24.3</b><span>Spectre</span></button>
+    <button class="seg" data-a="3" title="Étape 4 — Ce que l'onde transporte"><b>24.4</b><span>Énergie</span></button>
+  </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>V</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène de l'onde électromagnétique : une charge dont on voit le champ se coder en cercles qui grandissent à la vitesse c lorsqu'on la secoue, puis une onde plane où le champ électrique et le champ magnétique avancent ensemble."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 24</p>
-      <h1>L'onde <em>électromagnétique</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
@@ -167,31 +199,31 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
       <h2 id="stepTitle">Secouer une charge</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="cle" id="cle"></p>
-      <p class="status" id="status" aria-live="off"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
+      <p class="cle couche-comp" id="cle"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
     </section>
 
-    <section id="recSec">
+    <section id="recSec" class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : position de la charge et champ de rayonnement à la sonde en fonction du temps, ou champ électrique et champ magnétique au même point."></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
 
     <section id="measSec">
-      <div class="meas" id="meas"></div>
-      <p class="real" id="mReal" hidden></p>
-      <p class="note" id="mNote"></p>
+      <div class="meas couche-lire" id="meas"></div>
+      <p class="real couche-comp" id="mReal" hidden></p>
+      <p class="note couche-comp" id="mNote"></p>
     </section>
 
-    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
       <div class="card"><b>Matière</b>Pourquoi la lumière ralentit-elle dans le verre, et pourquoi tourne-t-elle à l'entrée ?<small>Module 25 · optique (à venir)</small></div>
       <div class="card"><b>Atomes</b>Pourquoi un gaz chaud n'émet-il que certaines couleurs ?<small>Module 27 · photons et spectres (à venir)</small></div>
       <div class="card"><b>Étoiles</b>Quelle couleur a un objet seulement parce qu'il est chaud ?<small>Module 43 · corps noir (à venir)</small></div>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser l'étape</li>
@@ -199,8 +231,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </ul>
     </section>
 
-    <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    <nav class="liens couche-comp">
+      <a class="comprendre" id="lienTheorie" href="explication.html#m24"><span>Lire la théorie · module <b id="numTheorie">24</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -212,14 +244,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les quatre étapes">
-      <div class="sg"><span class="sgl"><span class="long">Module 24 · Onde électromagnétique</span><span class="short">24</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Étape 1 — Secouer une charge"><b>1</b><span>Secouer</span></button>
-        <button class="seg" data-a="1" title="Étape 2 — E et B, ensemble"><b>2</b><span>E et B</span></button>
-        <button class="seg" data-a="2" title="Étape 3 — Un seul phénomène, tout le spectre"><b>3</b><span>Spectre</span></button>
-        <button class="seg" data-a="3" title="Étape 4 — Ce que l'onde transporte"><b>4</b><span>Énergie</span></button>
-      </div></div>
-    </div>
+
 
     <div class="tools" id="tools">
       <!-- Étape 1 -->
@@ -1040,7 +1065,7 @@ function geo3() {
   const nar = W < 700, mx = nar ? 14 : 34, x0 = mx, x1 = W - mx;
   const rulerY = Math.round(H * (nar ? 0.47 : 0.52)), barH = clamp(Math.round(H * 0.05), 20, 34);
   const lamY = rulerY + barH + 5, frY = lamY + 13, winY = frY + 21, winH = 8, ionY = winY + winH + 17, repY = ionY + 22;
-  return { nar, x0, x1, rulerY, barH, lamY, frY, winY, winH, ionY, repY, wTop: nar ? 100 : 112, wBot: rulerY - 34,
+  return { nar, x0, x1, rulerY, barH, lamY, frY, winY, winH, ionY, repY, wTop: 24, wBot: rulerY - 34,
     xOf: l => x0 + (4 - Math.log10(l)) / 16 * (x1 - x0), lOf: x => Math.pow(10, 4 - 16 * clamp((x - x0) / (x1 - x0), 0, 1)) };
 }
 const lumA = l => 0.16 + 0.64 * clamp((4 - Math.log10(l)) / 16, 0, 1);
@@ -1413,7 +1438,7 @@ function enterAct(n, restart) {
 }
 function updateUI(n) {
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Étape <b>${n + 1}</b> sur 4`;
+  $('#eyebrow').innerHTML = `Module 24 · étape <b>24.${n + 1}</b>`;
   $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
   const cle = $('#cle'); cle.textContent = ACTS[n].k; cle.hidden = !ACTS[n].k;
   for (const id of ['#stepTitle', '#stepText', '#cle']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
@@ -1528,6 +1553,7 @@ function resize() {
   sizePanelCanvases();
 }
 new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizePanelCanvases()).observe(scopeC.parentElement);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -1607,5 +1633,6 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
