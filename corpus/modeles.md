@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**22 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 13 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**23 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 14 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -32,6 +32,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-07 |
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
+| [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -267,6 +268,17 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : chapitre 26 : 1 Tirer sur une feuille d’or · 2 Protons, neutrons, isotopes · 3 Énergie de liaison · 4 Radioactivité ; chapitre 27 (à venir, emplacements réservés) : 5 Une échelle d’énergies · 6 Des raies comme des empreintes · 7 Des paquets de lumière
 - **Interaction** : Tirs α de Geiger et Marsden avec bascule Thomson / Rutherford, histogramme comparé à 1/sin⁴(θ/2), loupe à l’échelle du femtomètre et zoom atome → noyau ; noyau construit nucléon par nucléon sur la carte des nucléides ; courbe B/A et balance des masses pour la fusion et la fission ; échantillon de 400 noyaux qui se désintègrent au hasard, noyau suivi, écrans papier, aluminium et plomb (chapitre 26). Prévu au chapitre 27 : échelle des niveaux de l’hydrogène, raies au prisme, effet photoélectrique.
 - **Notes** : Moteur verrouillé versionné dans `prompts/moteurs/atomes.js` (195 tests, aussi lancés sur la page) ; table des nucléides recopiée de NUBASE2020 (Z = 1 à 26, demi-vies > 1 ms) et masses AME2020. Formule semi-empirique pour la courbe continue ; fils supposés stables. Première moitié livrée le 2026-10-07 ; le chapitre 27 viendra dans une PR suivante.
+
+### Signaux et équilibres du vivant
+
+- **Identifiant** : `fondations-signalisation-homeostasie` · **chemin** : [`opus-sonnet/fondations-signalisation-homeostasie/index.html`](../opus-sonnet/fondations-signalisation-homeostasie/index.html) · **explication** : [explication.html](../opus-sonnet/fondations-signalisation-homeostasie/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Signalisation et homéostasie
+- **Modules** : 37 Signalisation et homéostasie (`full`)
+- **Étapes** : 1 Ligand et récepteur · 2 Cascade et amplification · 3 Rétroaction négative : la glycémie · 4 Quand la boucle déraille
+- **Interaction** : Concentration, affinité et antagoniste ; étages, gain, extinction et impulsion ; repas, profils et course ; délai, gain, fièvre et commutateur.
+- **Limites** : Bain bien mélangé et diffusion représentative ; cascade à gains constants, amplification potentielle distincte des populations instantanées ; glycémie à deux variables inspirée de Bergman avec apport net pédagogique (15 %), glucagon indicateur, aucune valeur médicale ; thermostat linéaire à retard et commutateur abstrait. Les exemples biologiques de rétroaction positive ne sont pas tous bistables.
+- **Moteur** : `Sig`, 27 tests passés avant délégation puis sur le bloc identique extrait de la page ; moteur et tests gardés dans le scratchpad conformément aux règles communes.
+
 
 ## Pages d'appui
 

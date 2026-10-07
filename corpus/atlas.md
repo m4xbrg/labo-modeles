@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 37 | 0 | 138 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 13 | 1 | 43 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 38 | 0 | 137 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 14 | 1 | 42 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **16** | **50** | **2** | **181** |
+| **Total** | **265** | **16** | **16** | **52** | **2** | **179** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -190,7 +190,7 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Mutation ADN | `idea` | 36 | 35 | — |  |
 | Réparation de l’ADN | `idea` | 36 | 35 | — |  |
 | Expression génique | `idea` | 35 | 37 | — |  |
-| Signalisation cellulaire | `idea` | 37 | 32 | — |  |
+| Signalisation cellulaire | `absorbed` | 37 | 32 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Étapes 1 et 2 : spécificité, liaison réversible, antagoniste, saturation et cascade amplificatrice ; seconds messagers détaillés hors champ. |
 | Apoptose | `idea` | 37 | 36 | — |  |
 
 ### 8 · Évolution, écologie et systèmes complexes
@@ -395,7 +395,7 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 | Ventilation pulmonaire | `idea` | 38 | 20 | — |  |
 | Relation pression-volume du poumon | `idea` | 38 | 17, 20 | — |  |
 | Boucle pression-volume cardiaque | `idea` | 38 | 20, 11 | — |  |
-| Régulation de la glycémie | `idea` | 37 | 04 | — |  |
+| Régulation de la glycémie | `absorbed` | 37 | 04 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Étape 3 : repas, insuline, retour à la base, résistance et production réduite ; modèle pédagogique sans valeur médicale. |
 | Potentiel de membrane | `partial` | 33 | 21, 19 | Le neurone qui apprend | Potentiel de repos et dépolarisation dans la planche Neurone. |
 
 ### Chimie
