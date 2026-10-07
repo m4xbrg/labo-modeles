@@ -79,14 +79,14 @@ Les planches de `opus-sonnet/` ont leur propre simulation (canvas ou SVG), souve
 
 **Recette.**
 
-1. `<head>` : après le `<style>` de la page, ajouter `../../labo/labo.css`, `../../labo/planche-etapes.css` et `../../labo/theme.js`. Le style de la page reste : il porte les jetons de l'écran (`--fond`, `--texte`, `--accent`…) que lit le JavaScript.
+1. `<head>` : charger `../../labo/labo.css` **avant** le `<style>` de la page, puis `../../labo/planche-etapes.css` et `../../labo/theme.js` **après**. Le style de la page reste : il porte les jetons de l'écran (`--fond`, `--texte`, `--accent`…) que lit le JavaScript.
 2. `<body class="labo-etapes" data-mode="observer" data-touches="omc">` (les chiffres servent aux étapes, donc les couches passent sur O, M, C).
 3. Avant le conteneur principal, insérer la coque : `header.barre` (LABO, ← Fondations ou ← Phénomènes, `p.pos`, bouton de thème), `div.titre` (h1, `p.lead` d'une phrase, `dl.sig` Échelle · Temps · Modèle), `nav.chapitres#stepper`, `div.modes` (trois onglets avec `data-indice`, `p.indice#indice`).
 4. **Chapitres.** Page de fondations : un `div.chap` par module canonique (`p.chap-t` avec `<b>NN</b>` et le titre canonique), contenant 2 à 4 boutons d'étape. Les codes d'étape sont `NN.k` (`14.2`). Showcase : un seul chapitre, le phénomène, et ses actes.
 5. Chaque bouton d'étape garde la classe et l'attribut d'origine (`.seg`, `data-a`, ou ce que le JavaScript lit) pour que la navigation existante continue de marcher. Pour regrouper deux scènes en une étape sans toucher à la physique : un bouton avec deux index (`data-a` et `data-b`), et une bascule « Scène : … | … » dans les contrôles.
 6. Sortir le titre superposé de la scène, et réduire la réserve que le dessin lui laissait (`headH()` ou équivalent).
 7. **Couches** dans le panneau : classe `couche-lire` sur les mesures et graphes (visibles en Manipuler et Comprendre), `couche-comp` sur le texte explicatif et le lien de théorie (Comprendre seulement). Les réglages (`#tools` ou équivalent) disparaissent en Observer.
-8. Le lien « Comprendre ce qui se passe » devient « Théorie du module NN » vers `explication.html#mNN`, mis à jour à chaque étape.
+8. Pour les fondations, le lien « Comprendre ce qui se passe » devient « Théorie du module NN » vers `explication.html#mNN`, mis à jour à chaque étape. Pour un showcase, garder « Comprendre ce qui se passe » vers `explication.html` et le retour « ← Phénomènes » vers `../../labo/index.html#phenomenes`.
 9. En fin de page, charger `../../labo/planche.js` (couches, hauteur de l'écran ajustée à la fenêtre).
 
 **Vérifier** : console propre ; aucune requête en échec ; pas de défilement horizontal à 375 px ; l'écran et ses contrôles tiennent dans 1366 × 768 ; chaque étape s'ouvre et le bon module est marqué ; clair et sombre.
