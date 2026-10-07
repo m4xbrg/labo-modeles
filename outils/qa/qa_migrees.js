@@ -29,9 +29,10 @@ const captures = process.argv[3] !== 'sans-captures';
       });
       res[nom] = base;
       if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-observer.png` });
-      await p.keyboard.press('m'); await p.waitForTimeout(250);
+      await p.keyboard.press(base.touches[1]); await p.waitForTimeout(250);
       const segs = await p.$$('.chap .seg');
       res[nom].etapes = [];
+      res[nom].mesuresEtapes = [];
       for (let i = 0; i < segs.length; i++){
         await segs[i].click();
         // Attendre la fin du trajet vers l’étape avant de mesurer son marquage.
@@ -45,10 +46,16 @@ const captures = process.argv[3] !== 'sans-captures';
         }
         const r = await p.evaluate(() => ({ cur: [...document.querySelectorAll('.chap .seg[aria-current]')].map(x => x.querySelector('b')?.textContent).join(','),
           eye: (document.querySelector('#eyebrow, .eyebrow, .etape, .step.mono, #kick')?.textContent || '').trim().slice(0, 40), lien: document.querySelector('a[href^="explication.html"]')?.getAttribute('href') || '' }));
+        res[nom].mesuresEtapes.push(await p.evaluate(() => ({
+          debord: document.documentElement.scrollWidth - innerWidth,
+          controlesBas: Math.round(document.querySelector('.controls').getBoundingClientRect().bottom),
+          sceneHauteur: Math.round(document.querySelector('.scene').getBoundingClientRect().height),
+          mode: document.body.dataset.mode
+        })));
         res[nom].etapes.push(`${i}→${r.cur}|${r.eye}|${r.lien}`);
         if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-e${i}.png` });
       }
-      await p.keyboard.press('c'); await p.waitForTimeout(250);
+      await p.keyboard.press(base.touches[2]); await p.waitForTimeout(250);
       res[nom].comprendre = await p.evaluate(() => document.body.dataset.mode);
       res[nom].interactif = await p.evaluate(() => {
         const ctr = document.querySelector('.controls'), app = document.querySelector('.app');
