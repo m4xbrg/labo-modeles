@@ -16,8 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#9ad0f5;
@@ -152,16 +153,52 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* Coque LABO ; l’écran conserve sa palette d’origine. */
+body.labo-etapes[data-mode=observer] .controls{display:none!important}
+.labo-etapes .status,.labo-etapes .cle,.labo-etapes .real{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes select{background:var(--papier);color:var(--encre);border-color:var(--filet)}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omk">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 28 · 29</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Molécules et mole</h1><p class="lead">Relier les atomes, comprendre leur forme, puis compter la matière et faire réagir les quantités.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~100 pm à ~1 L</dd><dt>Temps</dt><dd>vibration à réaction</dd><dt>Modèle</dt><dd>liaisons et quantités</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+  <div class="chap" data-g="28"><p class="chap-t"><b>28</b>Liaisons et structure moléculaire</p><div class="segs">
+    <button class="seg" data-a="0" title="Étape 1 — Un creux d'énergie"><b>28.1</b><span>Creux</span></button>
+    <button class="seg" data-a="1" title="Étape 2 — Partager ou céder : l'électronégativité"><b>28.2</b><span>Partage</span></button>
+    <button class="seg" data-a="2" title="Étape 3 — La forme des molécules"><b>28.3</b><span>Forme</span></button>
+    <button class="seg" data-a="3" title="Étape 4 — Entre les molécules"><b>28.4</b><span>Forces</span></button>
+  </div></div>
+  <div class="chap" data-g="29"><p class="chap-t"><b>29</b>Compter la matière</p><div class="segs">
+    <button class="seg" data-a="4" title="Étape 5 — La mole : changer d'échelle"><b>29.1</b><span>Mole</span></button>
+    <button class="seg" data-a="5" title="Étape 6 — Concentration et dilution"><b>29.2</b><span>Dilution</span></button>
+    <button class="seg" data-a="6" title="Étape 7 — Stœchiométrie : le réactif limitant"><b>29.3</b><span>Limitant</span></button>
+  </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>K</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app" id="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Paillasse de chimie : deux atomes et leur courbe d'énergie, un nuage de liaison et une règle d'électronégativité, une molécule en trois dimensions avec ses doublets libres et son moment dipolaire, trois boîtes de molécules en agitation thermique."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 28 · 29</p>
-      <h1>Molécules et <em>mole</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
@@ -169,32 +206,32 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Module 28 · étape <b>1</b> sur 7</p>
       <h2 id="stepTitle">Un creux d'énergie</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
-      <p class="cle" id="cle"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p class="cle couche-comp" id="cle"></p>
     </section>
 
     <section id="measSec">
-      <div class="meas" id="meas"></div>
-      <p class="note" id="mExtra"></p>
-      <p class="note" id="mNote"></p>
+      <div class="meas couche-lire" id="meas"></div>
+      <p class="note couche-comp" id="mExtra"></p>
+      <p class="note couche-comp" id="mNote"></p>
     </section>
 
-    <section id="recSec">
+    <section id="recSec" class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeur de l'étape en fonction du temps."></canvas></div>
       <p class="leg" id="leg"></p>
       <p class="leg" id="leg2"></p>
     </section>
 
-    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
       <div class="card"><b>Vitesse</b>Pourquoi certaines réactions sont-elles explosives et d'autres prennent-elles des années ?<small>Module 30 · vitesse de réaction (à venir)</small></div>
       <div class="card"><b>Équilibre</b>Une réaction va-t-elle toujours jusqu'au bout ?<small>Module 30 · équilibre chimique (à venir)</small></div>
       <div class="card"><b>Eau</b>Pourquoi l'eau dissout-elle si bien le sel, et que deviennent les ions ?<small>Module 31 · acides, bases, ions en solution (à venir)</small></div>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints" id="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>7</kbd> aller à l'étape</li>
@@ -205,8 +242,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </ul>
     </section>
 
-    <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    <nav class="liens couche-comp">
+      <a class="comprendre" id="lienTheorie" href="explication.html#m28"><span>Lire la théorie · module <b id="numTheorie">28</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -218,19 +255,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les sept étapes">
-      <div class="sg" data-g="28"><span class="sgl"><span class="long">Module 28 · Liaisons</span><span class="short">28</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Étape 1 — Un creux d'énergie"><b>1</b><span>Creux</span></button>
-        <button class="seg" data-a="1" title="Étape 2 — Partager ou céder : l'électronégativité"><b>2</b><span>Partage</span></button>
-        <button class="seg" data-a="2" title="Étape 3 — La forme des molécules"><b>3</b><span>Forme</span></button>
-        <button class="seg" data-a="3" title="Étape 4 — Entre les molécules"><b>4</b><span>Forces</span></button>
-      </div></div>
-      <div class="sg" data-g="29"><span class="sgl"><span class="long">Module 29 · Compter la matière</span><span class="short">29</span></span><div class="sgs">
-        <button class="seg" data-a="4" title="Étape 5 — La mole : changer d'échelle"><b>5</b><span>Mole</span></button>
-        <button class="seg" data-a="5" title="Étape 6 — Concentration et dilution"><b>6</b><span>Dilution</span></button>
-        <button class="seg" data-a="6" title="Étape 7 — Stœchiométrie : le réactif limitant"><b>7</b><span>Limitant</span></button>
-      </div></div>
-    </div>
+
 
     <div class="tools" id="tools">
       <!-- 1 · Un creux d'énergie -->
@@ -858,7 +883,7 @@ function syncDist() {
   $('#vDist').textContent = fmt(k1.s.r, 1) + ' pm';
 }
 function geo1() {
-  const b = k1.b, top = 104, bot = 22, aH = H - top - bot;
+  const b = k1.b, top = 24, bot = 22, aH = H - top - bot;
   const rA = EL[b.A].r, rB = EL[b.B].r, rmax = Math.max(rA, rB);
   let pxpm = (W - 34) / (4.12 * b.re + EXT * (rA + rB));
   pxpm = Math.min(pxpm, (0.5 * aH - 56) / (2 * EXT * rmax), 3.2);
@@ -999,7 +1024,7 @@ function step2(h) {
 }
 function adv2(dt) { const n = Math.min(12, Math.max(1, Math.round(dt * 120))); for (let i = 0; i < n; i++) step2(dt / n); }
 function geo2() {
-  const top = 104, bot = 14, fx = 14, fw = W - 28, fy = top, fh = H - top - bot;
+  const top = 24, bot = 14, fx = 14, fw = W - 28, fy = top, fh = H - top - bot;
   const rulerH = 112, regH = fh - rulerH;
   const rA = EL[prm.A].r, rB = EL[prm.B].r;
   const pxpm = Math.min(2.2, 0.44 * fw / (rA + rB), 0.30 * regH / Math.max(rA, rB));
@@ -1120,7 +1145,7 @@ function info3() {
   return { dirs, angs, relaxed, groups: groupAngles(angs, 0.15), dip, geometry: Mol.geometryName(prm.nb, prm.nl) };
 }
 function geo3() {
-  const top = 104, bot = 30, aH = H - top - bot;
+  const top = 24, bot = 30, aH = H - top - bot;
   const s = Math.max(40, Math.min(W * 0.5 - 24, aH * 0.5 - 10) / 1.7);
   return { top, s, cx: W / 2, cy: top + aH * 0.48 };
 }
@@ -1281,7 +1306,7 @@ const BP = [['CH₄', Mol.BOILING.CH4], ['H₂S', Mol.BOILING.H2S], ['NH₃', Mo
 const SC4 = { lo: -200, hi: 320 };
 const toC = T => Mol.toKelvin(T) - 273.15;
 function geo4() {
-  const top = 104, y0 = top + 72, rows = W < 480;
+  const top = 24, y0 = top + 72, rows = W < 480;
   if (rows) {
     const side = clamp(Math.floor((W - 32) * 0.44), 96, 168), boxes = [0, 1, 2].map(i => ({ x: 16, y: y0 + i * (side + 14), side }));
     const ty = y0 + 3 * (side + 14) + 6;
@@ -1467,7 +1492,7 @@ function syncTools5() {
   $('#vMass').textContent = fmtG(k5.m); syncScale5();
 }
 function geo5() {
-  const top = 104, wide = W >= 700;
+  const top = 24, wide = W >= 700;
   if (wide) {
     const aH = H - top - 16, zs = Math.floor(Math.max(200, Math.min(W * 0.5, aH - 70))), zx = 20, zy = top + 4, RH = zs + 66, rx = zx + zs + 24, rw = W - rx - 18;
     const trH = 128, brH = 112, balH = Math.max(150, RH - trH - brH - 24);
@@ -1664,7 +1689,7 @@ function syncTools6() {
   const r2 = $('#rV26'); r2.min = k6.V; set('#rV26', '#vV26', k6.V2, fmt(k6.V2, 0) + ' mL');
 }
 function geo6() {
-  const top = 104, aH = H - top - 14, wide = W >= 640;
+  const top = 24, aH = H - top - 14, wide = W >= 640;
   const bw = wide ? Math.min(220, W * 0.26) : Math.max(110, W * 0.33), bh = Math.min(aH - 96, 340), bx = wide ? Math.max(36, W * 0.07) : 16, by = top + 20;
   const lr = wide ? Math.min(150, (W - bx - bw) * 0.28, aH * 0.3) : Math.max(55, (W - bx - bw - 62) / 2);
   const lx = wide ? bx + bw + (W - bx - bw) * 0.5 : bx + bw + 40 + lr, ly = by + lr + 10;
@@ -1802,7 +1827,7 @@ function slots7(rect, count, s) {
   return out;
 }
 function geo7() {
-  const top = 112, wide = W >= 640;
+  const top = 24, wide = W >= 640;
   if (wide) {
     const bY = top + 36, balH = 78, y0 = bY + balH + 16, h = Math.max(150, H - y0 - 14), rw = Math.floor(Math.min(W * 0.27, 300)), pad = 18;
     return { wide, eqY: top + 4, bal: { x: W / 2 - 190, y: bY, w: 380, h: balH }, A: { x: pad, y: y0, w: rw, h }, B: { x: W - pad - rw, y: y0, w: rw, h }, bench: { x: pad + rw + 14, y: y0, w: W - 2 * (pad + rw) - 28, h }, s: clamp(Math.min(rw / 7, h / 8), 12, 26), needH: 0 };
@@ -1993,8 +2018,9 @@ function enterAct(n, restart) {
 }
 function updateUI(n) {
   uiAct = n; const st = STEPS[n];
+  $('#lienTheorie').href = 'explication.html#m' + st.mod; $('#numTheorie').textContent = st.mod;
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Module ${st.mod} · étape <b>${n + 1}</b> sur 7`;
+  $('#eyebrow').innerHTML = `Module ${st.mod} · étape <b>${st.mod}.${n < 4 ? n + 1 : n - 3}</b>`;
   $('#stepTitle').textContent = st.name; $('#stepText').textContent = st.built ? st.x : `Cette étape est en construction.`;
   const cle = $('#cle'); cle.hidden = !st.built; cle.textContent = st.built ? st.cle : '';
   for (const id of ['#stepTitle', '#stepText', '#cle']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
@@ -2126,6 +2152,7 @@ cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', e
 cv.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch' && !k1.drag && !k3.drag) { hideTip(); cv.className = ''; } });
 
 new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizePanelCanvases()).observe(scopeC.parentElement);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -2216,5 +2243,6 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
