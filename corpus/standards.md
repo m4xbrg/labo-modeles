@@ -36,25 +36,38 @@ Les showcases ne suivent pas ce plan : leur explication porte sur leur phénomè
 
 La navigation d'une page de fondations est organisée en **chapitres = modules canoniques**, avec **2 à 4 étapes par chapitre**. Une page à trois modules a donc 6 à 12 étapes ; une page à un module, 2 à 4. Une même barre d'étapes partout, sans onglets imbriqués.
 
-Ce standard s'applique au fil de la migration des planches vers le gabarit LABO ; il n'a pas été imposé page par page en réécrivant les simulations. État au 2026-10-04 :
+État de la branche de migration au 2026-10-06, après les vagues 1 et 2 et réconciliation avec `main` : les 12 pages de la vague 1 respectent toutes la règle de 2 à 4 étapes par chapitre. Les scènes regroupées restent accessibles depuis leurs commandes.
 
-| Page | Modules | Étapes aujourd'hui | Navigation | Écart au standard |
+| Page | Chapitres (modules canoniques) | Étapes par chapitre | Total | État |
 |---|---|---|---|---|
-| Langage scientifique | 01 · 02 · 03 | 4 onglets × 2 à 4 modes (≈ 14 vues) | onglets imbriqués | Aplatir : chapitres 01 (échelles, graphiques), 02 (vecteurs), 03 (mouvement). |
-| Systèmes, croissance et hasard | 04 · 05 · 07 (+ 08 partiel) | 9 | étapes à plat, chapitres A-D | Chapitre B (rétroaction) relève du 04 : regrouper A+B sous 04 (4 étapes). |
-| Oscillations et ondes | 06 · 14 · 15 | 10 | étapes à plat, chapitres A-D | Le module 15 a 5 étapes (C1-D3) : en garder 4. |
-| Forces, énergie et conservation | 10 · 11 | 6 | actes en paillasses | Conforme en nombre ; nommer les chapitres par module. |
-| Rotation, gravitation et orbites | 12 · 13 | 7 | actes en paillasses | Conforme (4 + 3). |
-| Flux, gradients, champs et fluides | 16 · 20 | 4 onglets × 4 modes (16 vues) | onglets imbriqués | Aplatir : 16 (cartes, champs, flux) et 20 (conduit). |
-| Matière, chaleur et transport | 17 · 18 · 19 | 9 | actes | Conforme (3 par module). |
-| Le champ électrique | 21 | bac à sable | sans étapes | À structurer en 2 à 4 étapes. |
-| Courant et circuits | 22 | 4 | actes | Conforme. |
-| Cellule, membrane et transport | 32 | 7 | actes en paillasses | Trop long pour un module : 4 étapes. |
-| Évolution et génétique des populations | 40 | 11 | étapes à plat | Trop long pour un module : 4 étapes, ou scinder si une partie relève de 41. |
-| Relativité restreinte | 46 | 8 | actes en paillasses | Trop long pour un module : 4 étapes. |
-| Magnétisme et induction | 23 | 4 | actes en paillasses, scènes au choix dans chaque acte | Conforme (construite au standard le 2026-10-06). |
-| Molécules et mole | 28 · 29 | 7 | étapes à plat, chapitres 28 (4) et 29 (3) | Conforme (construite au standard le 2026-10-06). |
-| L’onde électromagnétique | 24 | 4 | étapes à plat, un chapitre « Module 24 » | Conforme (construite au standard le 2026-10-07). |
-| Atomes, noyaux et lumière | 26 · 27 | 4 (+ 3 à venir) | étapes numérotées, chapitres par module | Chapitre 26 conforme (2026-10-07) ; chapitre 27 à venir. |
+| Langage scientifique | 01 · 02 · 03 | 4 + 2 + 2 | 8 | Conforme, gabarit LABO. |
+| Systèmes, croissance et hasard | 04 · 05 · 07 (+ 08 partiel) | 4 + 2 + 3 | 9 | Conforme ; la rétroaction est dans 04. |
+| Oscillations et ondes | 06 · 14 · 15 | 2 + 3 + 4 | 9 | Conforme ; impulsion et onde périodique regroupées dans 15.1. |
+| Forces, énergie et conservation | 10 · 11 | 3 + 3 | 6 | Conforme, gabarit LABO. |
+| Rotation, gravitation et orbites | 12 · 13 | 4 + 3 | 7 | Conforme, gabarit LABO. |
+| Flux, gradients, champs et fluides | 16 · 20 | 3 + 2 | 5 | Conforme ; scènes au choix dans les étapes. |
+| Matière, chaleur et transport | 17 · 18 · 19 | 2 + 3 + 4 | 9 | Conforme, gabarit LABO. |
+| Le champ électrique | 21 | 4 | 4 | Conforme, gabarit LABO. |
+| Courant et circuits | 22 | 4 | 4 | Conforme, gabarit LABO. |
+| Cellule, membrane et transport | 32 | 4 | 4 | Conforme ; scènes regroupées. |
+| Évolution et génétique des populations | 40 | 4 | 4 | Conforme ; scènes regroupées. |
+| Relativité restreinte | 46 | 4 | 4 | Conforme ; scènes regroupées. |
+| Magnétisme et induction | 23 | 4 | 4 | Conforme en nombre ; ajoutée sur main le 2026-10-06, hors vague 1. |
+| Molécules et mole | 28 · 29 | 4 + 3 | 7 | Conforme en nombre ; ajoutée sur main le 2026-10-06, hors vague 1. |
+| L’onde électromagnétique | 24 | 4 | 4 | Conforme en nombre ; ajoutée sur main (historique daté du 2026-10-07), hors vague 1. |
+| Atomes, noyaux et lumière | 26 · 27 | 4 + 0 (3 prévues) | 4 accessibles | Chapitre 26 conforme ; simulation du chapitre 27 à venir, théorie disponible. Hors vague 1. |
 
-« Trop long pour un module » ne veut pas dire qu'il faut jeter du contenu : une étape peut regrouper deux scènes voisines, et ce qui dépasse le module (ouverture vers 41 ou 47) peut devenir le premier chapitre d'une page future.
+Les quatre ajouts de `main` gardent leur habillage actuel ; la migration des vagues 1 et 2 ne les modifie pas. La conformité du nombre d’étapes ne signifie pas que toute la couverture conceptuelle est complète : les statuts restent ceux du corpus.
+
+### Showcases : un chapitre par phénomène
+
+Les six showcases suivent le gabarit LABO : un chapitre, leurs actes conservés, trois couches Observer / Manipuler / Comprendre, signature Échelle · Temps · Modèle, retour « ← Phénomènes » et lien « Comprendre ce qui se passe » vers `explication.html`. La règle des 2 à 4 étapes concerne les fondations uniquement.
+
+| Page | Chapitre | Étapes | Particularité conservée |
+|---|---|---|---|
+| La mitose | Mitose | 7 | Frise continue réversible, curseur `rng`, touches 1–7. |
+| La respiration cellulaire | Respiration cellulaire | 4 + vue « Tout le trajet » | Frise `scrub`, oxygène `o2`. |
+| Le neurone qui apprend | Neurone | 2 actes | Impulsion et Synapse ; sous-étapes automatiques et oscilloscope dans la scène. |
+| Ondes et interférences | Ondes et interférences | 6 | Hors collection ; sources, sondes et oscilloscope. |
+| La réplication de l’ADN | Réplication de l’ADN | 5 | Graphe de la distance à la fourche. |
+| Supernova par effondrement du cœur | Supernova | 8 | Frise logarithmique `tlBox`, sans curseur physique. |
