@@ -57,6 +57,8 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | L’onde électromagnétique | 24 | 4 | 4 | Conforme en nombre ; ajoutée sur main (historique daté du 2026-10-07), hors vague 1. |
 | Atomes, noyaux et lumière | 26 · 27 | 4 + 0 (3 prévues) | 4 accessibles | Chapitre 26 conforme ; simulation du chapitre 27 à venir, théorie disponible. Hors vague 1. |
 
+| Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
+
 Les quatre ajouts de `main` gardent leur habillage actuel ; la migration des vagues 1 et 2 ne les modifie pas. La conformité du nombre d’étapes ne signifie pas que toute la couverture conceptuelle est complète : les statuts restent ceux du corpus.
 
 ### Showcases : un chapitre par phénomène
