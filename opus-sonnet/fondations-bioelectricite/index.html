@@ -15,7 +15,7 @@ Les trajectoires échantillonnées illustrent les réservoirs ; seuls les calcul
 @media(prefers-reduced-motion:reduce){.swap{animation:none}*{scroll-behavior:auto!important}}
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css"><script src="../../labo/theme.js"></script>
-<style>.labo-etapes .app{--chrome:275px;min-height:440px}.labo-etapes .titre h1{font:400 clamp(32px,4.8vh,51px)/1 var(--serif);letter-spacing:-.015em}.labo-etapes .titre h1 em{font-style:italic}.labo-etapes .panel{gap:13px}.labo-etapes .titre{padding-top:12px}.labo-etapes .barre{padding-top:12px}.labo-etapes .modes{padding-top:8px}.labo-etapes .sig{gap:4px 18px}.labo-etapes .cle{color:var(--encre-2)}@media(max-width:860px){.labo-etapes .app{min-height:0}.labo-etapes .titre{gap:14px}.labo-etapes .modes{gap:8px}.labo-etapes .sig dd{font-size:11px}}
+<style>.labo-etapes .app{min-height:440px}.labo-etapes .titre h1{font:400 clamp(32px,4.8vh,51px)/1 var(--serif);letter-spacing:-.015em}.labo-etapes .titre h1 em{font-style:italic}.labo-etapes .panel{gap:13px}.labo-etapes .titre{padding-top:12px}.labo-etapes .barre{padding-top:12px}.labo-etapes .modes{padding-top:8px}.labo-etapes .sig{gap:4px 18px}.labo-etapes .cle{color:var(--encre-2)}@media(max-width:860px){.labo-etapes .app{min-height:0}.labo-etapes .titre{gap:14px}.labo-etapes .modes{gap:8px}.labo-etapes .sig dd{font-size:11px}}
 </style>
 </head>
 <body class="labo-etapes" data-mode="observer" data-touches="omc">
@@ -236,4 +236,5 @@ window.__labo={moteur:BioE,get step(){return step;},goStep,state,tick,setPlay,se
 let lastUI=0;function frame(t){const delta=Math.min(.06,(t-last)/1000||0);last=t;if(playing){acc+=delta*speed[step]*(reduced?.3:1);let n=0;while(acc>=dt[step]&&n<1000){fixed();acc-=dt[step];n++;}}draw();if(t-lastUI>100){update();lastUI=t;}requestAnimationFrame(frame);}
 new ResizeObserver(()=>draw()).observe($('#scene'));goStep(0);setPlay(true);const param=new URLSearchParams(location.search).get('mode');if(['observer','manipuler','comprendre'].includes(param))layer(param);requestAnimationFrame(frame);
 </script>
+<script src="../../labo/planche.js"></script>
 </body></html>
