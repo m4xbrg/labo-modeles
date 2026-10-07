@@ -15,6 +15,7 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-04 | Le prototype devient l'accueil : `prototype/` est renommé `labo/`, la racine et l'ancien accueil (`opus-sonnet/index.html`) redirigent vers lui. |
 | 2026-10-06 | **Fondations 23 · Magnétisme et induction.** Première page de fondations construite au standard d'une page à un module (quatre étapes), à partir d'un brief et d'un moteur verrouillé versionnés dans `prompts/` (`prompts/moteurs/magnetisme.js`). |
 | 2026-10-06 | **Fondations 28 · 29 · Molécules et mole.** Ouvre la branche E (atomes et chimie) : sept étapes en deux chapitres, moteur testé avant la page et versionné dans `prompts/moteurs/molecules-mole.js`. |
+| 2026-10-07 | **Fondations 24 · L'onde électromagnétique.** Un chapitre de quatre étapes ; moteur écrit et testé dans la session de construction (`prompts/moteurs/onde-electromagnetique.js`), page et explication déléguées à des sous-agents, selon `prompts/SESSION-FONDATION.md`. |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 

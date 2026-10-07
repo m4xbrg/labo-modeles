@@ -54,5 +54,6 @@ Ce standard s'applique au fil de la migration des planches vers le gabarit LABO 
 | Relativité restreinte | 46 | 8 | actes en paillasses | Trop long pour un module : 4 étapes. |
 | Magnétisme et induction | 23 | 4 | actes en paillasses, scènes au choix dans chaque acte | Conforme (construite au standard le 2026-10-06). |
 | Molécules et mole | 28 · 29 | 7 | étapes à plat, chapitres 28 (4) et 29 (3) | Conforme (construite au standard le 2026-10-06). |
+| L’onde électromagnétique | 24 | 4 | étapes à plat, un chapitre « Module 24 » | Conforme (construite au standard le 2026-10-07). |
 
 « Trop long pour un module » ne veut pas dire qu'il faut jeter du contenu : une étape peut regrouper deux scènes voisines, et ce qui dépasse le module (ouverture vers 41 ou 47) peut devenir le premier chapitre d'une page future.

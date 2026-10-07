@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre l’onde électromagnétique — LABO</title>
+<meta name="description" content="Ce que montre la planche L’onde électromagnétique, la théorie du module 24 (champs E et B qui s’entretiennent, c, spectre, intensité et pression de radiation), ce que la simulation simplifie et les chiffres à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#ff9fb2;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --champ-b:#8a97f2; --champ-e:#9fe870;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.chb{color:var(--champ-b)}.che{color:var(--champ-e)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}}
+@media (prefers-reduced-motion:reduce){.top a,.cta{transition:none}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la planche</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 24</p>
+  <h1>Comprendre l’onde <em>électromagnétique</em></h1>
+  <p class="lede">La lumière, la radio, les micro-ondes et les rayons X sont une seule chose : des champs électrique et magnétique qui s’entretiennent l’un l’autre et voyagent à la vitesse c, émis par des charges qui accélèrent. La planche part d’une charge qu’on secoue et arrive au spectre entier, en passant par ce que l’onde transporte.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <p>Trois couleurs portent la planche. Le champ électrique <b class="che">E</b> est vert, comme dans la planche du <a href="../04-champ-electrique/explication.html">champ électrique</a>. Le champ magnétique <b class="chb">B</b> est bleu-lavande, comme dans celle du <a href="../fondations-magnetisme-induction/explication.html">magnétisme et de l’induction</a>. La charge qu’on secoue est <span class="pos">orange</span>, comme toute charge positive de la série, et ce qui mesure l’énergie est <span class="ener">jaune</span>. Le corail de l’interface (<span class="acc">accent</span>) sert à l’invisible : hors du visible, les domaines du spectre n’ont pas de fausse couleur.</p>
+  <dl>
+    <dt>1 · Secouer une charge</dt>
+    <dd>Une charge entourée de lignes de champ vertes. Tu la saisis et tu la secoues, ou tu lances un coup sec, ou tu la fais osciller (l’amplitude est plafonnée pour que la charge reste lente devant c). Un cercle de rayon \(r = c\,(t - t_0)\) grandit depuis la secousse : sur le cercle, les lignes font un coude ; au-delà, elles montrent encore l’ancienne position. Une bascule garde seulement la partie du champ qui rayonne : des flèches sur une grille polaire, de longueur \(\propto \sqrt{|E|}\) et d’opacité \(\propto |E|\) par anneau. On y voit des anneaux qui alternent de sens tous les \(\lambda/2\) et, autour de l’axe de l’oscillation, un cône vide marqué par deux secteurs pâles. Une sonde et un enregistreur montrent le retard \(r/c\). La vitesse de la lumière de la scène vaut 100 unités par seconde.</dd>
+    <dt>2 · E et B, ensemble</dt>
+    <dd>Une onde plane en perspective : E vertical (vert), B horizontal (lavande, dessiné \(c\) fois plus grand qu’en unités SI), les deux en phase. Une boucle-sonde montre un B qui varie et induit un E ; une plaque montre un E qui varie et crée un B. Deux curseurs, \(E_0\) et \(f\), trois préréglages (Soleil au sol, téléphone à 1 m, laser de 1 mW sur 1 mm²) et un bouton pour arrêter le temps.</dd>
+    <dt>3 · Un seul phénomène, tout le spectre</dt>
+    <dd>Une règle logarithmique de 10⁴ m à 10⁻¹² m, découpée en domaines ; le visible est une fente colorée. Un repère se glisse sur la règle, et une bascule règle en fréquence plutôt qu’en longueur d’onde. L’onde est dessinée à l’échelle d’un objet de comparaison, avec ce qui lui répond dans la matière, l’énergie d’un photon en eV, le seuil d’ionisation de 10 eV et les fenêtres de l’atmosphère. L’enregistreur trace l’énergie du photon selon \(\lambda\) : une droite en log-log, coupée par le seuil. Huit préréglages, de la radio FM au gamma du cobalt 60.</dd>
+    <dt>4 · Ce que l’onde transporte</dt>
+    <dd>Une source ponctuelle, des sphères en coupe, un détecteur de 1 m² qu’on éloigne. 40 000 directions sont tirées au hasard une fois pour toutes (graine fixe) ; un encart « face du détecteur » compte les impacts en trois dimensions, avec le nombre attendu : quand la distance double, les impacts sont divisés par quatre. L’enregistreur trace \(I\) selon \(r\) en log-log, de pente \(-2\). Les distances à l’écran sont relatives à une distance de référence (« 1× = 1 m » pour l’ampoule, « 1× = 1 UA » pour le Soleil) et le curseur de puissance va de 1 W à 10²⁷ W. Une voile réfléchissante de 100 m × 100 m montre la pression de radiation ; le préréglage « Soleil à la Terre » donne 1 361 W/m², 4,5 µPa et 0,09 N. La planche se termine sur trois questions ouvertes, vers les modules 25, 27 et 43.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m24"><b>24</b>Onde électromagnétique</a></li>
+  </ul>
+
+  <!-- ===================== Module 24 ===================== -->
+  <section class="module" id="m24">
+    <header>
+      <p class="num">Module 24</p>
+      <h3>Onde électromagnétique</h3>
+      <p class="etapes">Sur la planche : étapes 1 Secouer · 2 E et B · 3 Spectre · 4 Énergie</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Une charge immobile est entourée d’un champ électrique qui pointe droit vers l’extérieur. Secoue la charge : le champ change, mais pas partout d’un coup. Le changement part de la charge et avance à la vitesse c ; plus loin, le champ montre encore l’ancienne position, et sur le front les lignes font un coude. Cette ride existe parce que la charge a accéléré : à vitesse constante, elle ne rayonne pas.</p>
+    <p>Une fois partie, la ride s’entretient sans la charge. Un champ magnétique qui varie crée un champ électrique (module 23) ; un champ électrique qui varie crée un champ magnétique. Chacun relaie l’autre, et le duo avance à c dans le vide, sans milieu, E et B perpendiculaires entre eux et à la propagation. Sur la matière, l’onde agit par la force \(q\vec E\) sur les charges. D’un domaine à l’autre, seule la longueur d’onde change, donc ce qui répond : les électrons libres d’une antenne (radio), la rotation des molécules d’eau (micro-ondes), la vibration des liaisons (infrarouge), les électrons des atomes (visible, ultraviolet), les électrons profonds (X), les noyaux (gamma). L’onde transporte de l’énergie et de la quantité de mouvement ; loin d’une source, l’intensité baisse comme \(1/r^2\).</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Champ électrique \(\vec E\)<span class="u">V/m</span></dt><dd>Force par unité de charge (module 21).</dd></div>
+      <div><dt>Champ magnétique \(\vec B\)<span class="u">T</span></dt><dd>Champ qui agit sur les charges en mouvement (module 23).</dd></div>
+      <div><dt>Onde électromagnétique</dt><dd>Perturbation de \(\vec E\) et \(\vec B\) qui se propage d’elle-même ; une charge qui accélère en émet.</dd></div>
+      <div><dt>Vitesse de la lumière \(c\)<span class="u">m/s</span></dt><dd>Vitesse des ondes électromagnétiques dans le vide : 299 792 458 m/s, exacte par définition du mètre.</dd></div>
+      <div><dt>Permittivité du vide \(\varepsilon_0\)<span class="u">F/m</span></dt><dd>Relie une charge à son champ E : \(8{,}854 \times 10^{-12}\) F/m.</dd></div>
+      <div><dt>Perméabilité du vide \(\mu_0\)<span class="u">T·m/A</span></dt><dd>Relie un courant à son champ B : \(1{,}257 \times 10^{-6}\) T·m/A.</dd></div>
+      <div><dt>Fréquence \(f\)<span class="u">Hz</span></dt><dd>Oscillations par seconde.</dd></div>
+      <div><dt>Longueur d’onde \(\lambda\)<span class="u">m</span></dt><dd>Distance entre deux crêtes, à un instant donné.</dd></div>
+      <div><dt>Amplitude \(E_0\)<span class="u">V/m</span></dt><dd>Valeur maximale de E ; celle de B est \(B_0 = E_0/c\).</dd></div>
+      <div><dt>Intensité \(I\)<span class="u">W/m²</span></dt><dd>Puissance moyenne reçue par mètre carré, face à l’onde.</dd></div>
+      <div><dt>Puissance \(P\)<span class="u">W</span></dt><dd>Énergie émise par seconde par une source.</dd></div>
+      <div><dt>Densité d’énergie \(u\)<span class="u">J/m³</span></dt><dd>Énergie des champs par mètre cube : \(u_E = \tfrac12\varepsilon_0E^2\) et \(u_B = B^2/2\mu_0\).</dd></div>
+      <div><dt>Pression de radiation \(p\)<span class="u">Pa</span></dt><dd>Force par mètre carré qu’une onde exerce sur une surface.</dd></div>
+      <div><dt>Énergie d’un photon \(E_\gamma\)<span class="u">J ou eV</span></dt><dd>Paquet d’énergie cédé à la matière (introduit). \(h = 6{,}626 \times 10^{-34}\) J·s ; 1 eV = \(1{,}602 \times 10^{-19}\) J.</dd></div>
+      <div><dt>Seuil d’ionisation</dt><dd>Énergie qui suffit à arracher un électron à une molécule : environ 10 eV, soit 124 nm.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ c = \frac{1}{\sqrt{\mu_0\,\varepsilon_0}} \approx 3{,}00 \times 10^{8}\ \text{m/s} \]
+      <p>Deux constantes mesurées avec des condensateurs et des bobines, sans lumière, fixent la vitesse de l’onde. Maxwell a reconnu ce nombre : la lumière en est une.</p></div>
+    <div class="relation">\[ c = \lambda f \]
+      <p>Même vitesse pour toutes les ondes dans le vide : 100 MHz donne 3 m, 550 nm donne 545 THz.</p></div>
+    <div class="relation">\[ E = c\,B \qquad (\text{même point, même instant}) \]
+      <p>E et B sont en phase : mêmes zéros, mêmes maxima. Le sens de \(\vec E \times \vec B\) est celui de la propagation.</p></div>
+    <div class="relation">\[ I = \tfrac12\, c\,\varepsilon_0\, E_0^{\,2}, \qquad u_E = u_B, \qquad I = c\,u \]
+      <p>\(E_0\) doublé, quatre fois plus d’énergie par seconde. En tout point et à tout instant, l’énergie se partage à parts égales entre E et B.</p></div>
+    <div class="relation">\[ \begin{gathered} I = \frac{P}{4\pi r^2} \\ p_{\text{abs}} = \frac{I}{c}, \qquad p_{\text{réfl}} = \frac{2I}{c} \end{gathered} \]
+      <p>La puissance d’une source ponctuelle s’étale sur une sphère d’aire \(4\pi r^2\). L’onde porte de la quantité de mouvement : elle pousse deux fois plus sur une surface qui la réfléchit, car elle repart en sens inverse.</p></div>
+    <div class="relation">\[ E_\gamma = h f = \frac{h c}{\lambda} \]
+      <p>Seulement introduit (module 27). Cette énergie, pas l’intensité, décide si l’onde peut ioniser. En pratique : \(E_\gamma\) en eV vaut environ 1 240 divisé par \(\lambda\) en nm.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Lumière du Soleil au sol, ciel dégagé : \(I \approx 1\,000\) W/m² (valeur ronde). Quels champs, quelle poussée, quelle puissance sur une main à plat de 0,02 m² ?</p>
+      <ol>
+        <li>Amplitude de E : \(E_0 = \sqrt{2I/(c\,\varepsilon_0)} = \sqrt{2\,000 / (3{,}00 \times 10^{8} \times 8{,}85 \times 10^{-12})} \approx 868\) V/m.</li>
+        <li>Amplitude de B : \(B_0 = E_0/c \approx 2{,}9\) µT, soit 6 % du champ terrestre : minuscule en teslas.</li>
+        <li>Énergie : \(u = I/c \approx 3{,}3\) µJ/m³, dont \(u_E = u_B \approx 1{,}7\) µJ/m³.</li>
+        <li>Pression si la lumière est absorbée : \(p = I/c \approx 3{,}3\) µPa, environ \(3 \times 10^{10}\) fois moins que l’atmosphère. Réfléchie : 6,7 µPa.</li>
+        <li>Sur la main : puissance \(IA = 20\) W, qui la réchauffent ; force \(pA \approx 6{,}7 \times 10^{-8}\) N, le poids de 7 µg de poussière.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« E et B sont décalés d’un quart de période. » Dans une onde progressive, ils sont en phase.</li>
+      <li>« Les ondes radio ne sont pas de la lumière. » Même phénomène, même c. Une onde FM mesure 3 m, la lumière verte 550 nm.</li>
+      <li>« Les micro-ondes sont radioactives. » La radioactivité vient de noyaux instables. À 2,45 GHz, l’énergie d’un photon est un million de fois sous le seuil d’ionisation : l’onde fait tourner les molécules d’eau, qui chauffent.</li>
+      <li>Confondre intensité et énergie d’un photon. L’intensité dit combien d’énergie arrive par seconde ; \(E_\gamma\) ne dépend que de la fréquence. Une lampe infrarouge de 1 000 W chauffe sans ioniser ; un faisceau X, même faible, ionise.</li>
+      <li>« L’onde a besoin d’un milieu. » Le son, oui ; la lumière du Soleil traverse le vide. Les champs s’entretiennent eux-mêmes. Il n’y a pas d’éther.</li>
+      <li>« B est négligeable devant E. » Il est \(c\) fois plus petit en unités SI, mais porte exactement autant d’énergie.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>25</b><span>Optique : l’onde ralentit dans le verre (indice) ; réfraction et polarisation.</span></li>
+      <li><b>27</b><span>Quantification : \(E_\gamma = hf\) explique les raies d’un gaz chaud.</span></li>
+      <li><b>43</b><span>Un corps chaud émet un spectre fixé par sa température (<a href="../07-matiere-chaleur/explication.html">planche Matière et chaleur</a>, acte IX).</span></li>
+      <li><b>46</b><span>Tous les observateurs mesurent le même c (<a href="../fondations-relativite-restreinte/explication.html">planche Relativité restreinte</a>).</span></li>
+      <li><b>48</b><span>Fondations quantiques : l’amplitude de l’onde décide où le photon arrive.</span></li>
+      <li><b>09</b><span>Signaux et Fourier : un signal se décompose en sinusoïdes (<a href="../fondations-oscillations-ondes/explication.html">planche Oscillations et ondes</a>).</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Un émetteur FM de 50 kW rayonne également dans toutes les directions (hypothèse commode). Quelles sont l’intensité et l’amplitude de E à 10 km ?</summary>
+      <p>\(I = P/4\pi r^2 = 50\,000 / (4\pi \times 10^{8}) \approx 4{,}0 \times 10^{-5}\) W/m². Puis \(E_0 = \sqrt{2I/c\varepsilon_0} \approx 0{,}17\) V/m et \(B_0 = E_0/c \approx 0{,}58\) nT.</p></details>
+    <details><summary>Sur une photo instantanée d’une onde plane, E est nul en un point. Que vaut B au même point ? Et un quart de longueur d’onde plus loin ?</summary>
+      <p>B est nul aussi, puisque \(E = cB\) partout : les deux sont en phase. Un quart de longueur d’onde plus loin, E et B sont tous les deux à leur maximum en valeur absolue.</p></details>
+    <details><summary>Un four à micro-ondes émet à 2,45 GHz. Quelle longueur d’onde et quelle énergie d’un photon ? Ionise-t-il ? Comment chauffe-t-il ?</summary>
+      <p>\(\lambda = c/f \approx 12\) cm et \(E_\gamma = hf \approx 1{,}0 \times 10^{-5}\) eV, un million de fois sous les 10 eV du seuil : aucune ionisation. Le champ E fait tourner les molécules d’eau, qui cèdent leur énergie à leurs voisines : l’aliment chauffe sans devenir radioactif.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Vitesse de la lumière ralentie (étape 1) :</strong> c de scène vaut 100 unités par seconde, pour qu’on voie la ride avancer. La scène ne fixe pas d’échelle : si on lit une unité comme un mètre, c est ralentie d’environ 3 millions de fois ; dans la réalité, la ride parcourt 300 000 km en une seconde.</li>
+    <li><strong>Champ de rayonnement non relativiste :</strong> valable pour une charge dont la vitesse reste très inférieure à c. Un mouvement proche de c, qui concentre le rayonnement vers l’avant, n’est pas représenté. La charge est dessinée en deux dimensions, avec des unités de scène (pas des volts par mètre).</li>
+    <li><strong>Onde plane idéale (étape 2) :</strong> infinie, de fréquence unique, polarisée verticalement, d’amplitude uniforme. B est dessiné \(c\) fois plus grand que sa valeur SI pour que les deux flèches se comparent. La boucle-sonde et la plaque illustrent le relais entre E et B ; elles ne résolvent pas les équations de Maxwell. Le préréglage « téléphone » suppose 1 W émis également dans toutes les directions, à 1 m (environ 0,08 W/m²).</li>
+    <li><strong>Spectre (étape 3) :</strong> les frontières des domaines sont conventionnelles et se chevauchent en pratique ; le seuil d’ionisation retenu (10 eV) est un ordre de grandeur, car selon l’atome il va de 4 à 25 eV environ. Les couleurs du visible sont approximatives (sRGB ne reproduit pas les couleurs spectrales pures), et les fenêtres de l’atmosphère sont tracées à gros traits.</li>
+    <li><strong>Énergie (étape 4) :</strong> une coupe en deux dimensions d’un phénomène en trois dimensions ; source ponctuelle dans le vide, sans absorption ; voile parfaitement réfléchissante, vue de face. Les distances à l’écran sont schématiques (relatives à une distance de référence), et les impacts de l’encart sont un tirage : ils fluctuent de quelques pour cent autour de la valeur attendue.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>299 792 458 m/s</b><span>la vitesse de la lumière dans le vide, exacte ; environ 300 000 km en une seconde.</span></div>
+    <div><b>380 à 750 nm</b><span>tout le visible : moins d’un facteur 2, sur seize ordres de grandeur de longueur d’onde (de 10⁴ m à 10⁻¹² m).</span></div>
+    <div><b>3 m · 12 cm</b><span>les longueurs d’onde de la radio FM à 100 MHz et du four ou du Wi-Fi à 2,4 et 2,45 GHz.</span></div>
+    <div><b>1 240 eV·nm</b><span>\(hc\) : divise par la longueur d’onde en nm pour obtenir l’énergie du photon en eV (550 nm donne 2,25 eV).</span></div>
+    <div><b>≈ 10 eV</b><span>le seuil d’ionisation, vers 124 nm : en dessous de cette longueur d’onde, l’onde peut arracher des électrons aux molécules.</span></div>
+    <div><b>1 361 W/m²</b><span>l’intensité du Soleil à la Terre : \(E_0 \approx 1\,013\) V/m, \(B_0 \approx 3{,}4\) µT, pression de radiation 4,5 µPa, soit 0,09 N sur une voile réfléchissante de 100 m × 100 m.</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Les <b>équations de Maxwell complètes</b> ne sont pas écrites : la planche montre leur contenu qualitatif, le relais entre un B qui varie et un E qui varie. Le <b>courant de déplacement</b>, le terme qui fait qu’un E qui varie crée un B même sans courant de charges, reste un nom. Le <b>photon</b> est seulement nommé, comme passerelle vers les modules 27 et 48. La <b>polarisation circulaire</b> demande de composer deux ondes polarisées (module 25) : ici, une seule polarisation, verticale. Le <b>rayonnement synchrotron</b>, émis par des charges rapides qui tournent dans un champ magnétique, sort du cadre non relativiste de l’étape 1.</p>
+  <p>Les trois questions ouvertes en fin de planche ouvrent la suite : pourquoi la lumière ralentit-elle dans le verre et tourne-t-elle à l’entrée (module 25) ; pourquoi un gaz chaud n’émet-il que certaines couleurs (module 27) ; quelle couleur a un objet seulement parce qu’il est chaud (module 43).</p>
+
+  <a class="cta" href="index.html"><span>Retour à la planche</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

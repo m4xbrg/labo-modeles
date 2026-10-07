@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**20 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 11 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
+**21 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 12 pages de fondations. Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -29,6 +29,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | foundation | Évolution et génétique des populations | — | 40 | 2026-10-04 |
 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | foundation | Cellule, membrane et transport | — | 32 | 2026-10-04 |
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
+| [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-07 |
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
@@ -244,6 +245,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : chapitre 28 : 1 Un creux d’énergie · 2 Partager ou céder · 3 La forme des molécules · 4 Entre les molécules ; chapitre 29 : 5 La mole : changer d’échelle · 6 Concentration et dilution · 7 Le réactif limitant
 - **Interaction** : Deux atomes qu’on rapproche sur une courbe de Morse (H–H, Cl–Cl, H–Cl), qu’on lâche pour les voir vibrer ou dont on casse la liaison ; nuage de liaison qui glisse vers l’atome le plus électronégatif, jusqu’aux ions, sur une règle Δχ ; molécules en 3D dont les domaines d’électrons se repoussent sous les yeux, avec moments de liaison et moment total (CO₂, BF₃, CH₄, NH₃, H₂O) ; trois boîtes de molécules 2D (type méthane, HCl, eau) sous un thermostat commun, liaisons hydrogène en pointillé, échelle des ébullitions réelles ; zoom par puissances de 10 sur une cuillère d’eau, balance d’une mole, molécule à composer ; bécher, loupe et dilution ; réactifs qui se combinent sur un établi jusqu’au réactif limitant, balance qui ne bouge pas.
 - **Notes** : Moteur testé avant la page et versionné dans `prompts/moteurs/molecules-mole.js` (104 tests, aussi lancés sur la page). VSEPR simulé par des domaines qui se repoussent sur une sphère, limité à quatre domaines (octet étendu hors champ) ; étape 4 qualitative (2D, unités réduites, correspondance en kelvins seulement indicative) ; réactions totales, sans vitesse ni équilibre. Se termine sur trois questions vers les modules 30 et 31.
+
+### L’onde électromagnétique
+
+- **Identifiant** : `fondations-onde-electromagnetique` · **chemin** : [`opus-sonnet/fondations-onde-electromagnetique/index.html`](../opus-sonnet/fondations-onde-electromagnetique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-onde-electromagnetique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Onde électromagnétique et spectre
+- **Collection** : aucune
+- **Modules** : 24 Onde électromagnétique (`full`), 15 Ondes (`supporting`), 21 Électrostatique (`supporting`), 23 Magnétisme et induction (`supporting`), 27 Quantification, photons et spectres atomiques (`supporting`)
+- **Étapes** (un chapitre, Module 24) : 1 Secouer une charge · 2 E et B, ensemble · 3 Un seul phénomène, tout le spectre · 4 Ce que l’onde transporte
+- **Interaction** : Charge qu’on saisit et secoue (ou coup sec, ou oscillation) dont les lignes de champ font un coude sur un cercle qui grandit à c, sonde et enregistreur qui montrent le retard r/c, partie rayonnée seule (nulle dans l’axe) ; onde plane en perspective avec E et B en phase, boucle-sonde et plaque qui se relaient, préréglages Soleil, téléphone, laser ; règle du spectre de 10⁴ m à 10⁻¹² m avec onde à l’échelle d’un objet de comparaison, ce qui répond dans la matière, énergie du photon, seuil d’ionisation et fenêtres de l’atmosphère ; source ponctuelle, détecteur qu’on éloigne (1/r²), pression de radiation et voile réfléchissante.
+- **Notes** : Construite au standard d’une page à un module (quatre étapes). Moteur EMW écrit et testé avant la page, versionné dans `prompts/moteurs/onde-electromagnetique.js` (55 tests, aussi lancés sur la page livrée). Vitesse de la lumière ralentie et champ de rayonnement non relativiste à l’étape 1 ; onde plane idéale ; domaines du spectre conventionnels. Photon seulement nommé. Se termine sur trois questions vers les modules 25, 27 et 43.
 
 ## Pages d'appui
 
