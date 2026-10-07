@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la bioélectricité et les synapses — LABO</title>
+<meta name="description" content="Module 33 : Nernst, potentiel de repos, membrane capacitive, câble, myéline et intégration synaptique.">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#ff9ad5;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;color:var(--texte);background:var(--fond);font:16px/1.7 var(--sans)}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.wrap{max-width:760px;margin:auto;padding:36px 22px 80px}.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;margin-bottom:56px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.serie{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}h1{font:400 clamp(38px,7vw,62px)/1.1 var(--serif);margin:14px 0 22px}h1 em{color:var(--accent)}.lede{font-size:18px}h2{font:400 32px/1.15 var(--serif);margin:60px 0 18px;padding-top:22px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:8px}p{margin:0 0 16px}ul,ol{padding-left:22px}li{margin-bottom:9px}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(140px,220px) 1fr;gap:16px;border-bottom:1px solid var(--trait);padding:14px 0}.chiffres b{font:500 16px var(--mono);color:var(--energie)}details{margin:12px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{cursor:pointer;padding:14px 16px;font-weight:500}details p{margin:0 0 14px}.cta{display:inline-block;border:1px solid var(--accent);padding:12px 18px;margin-top:36px;text-decoration:none}.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}@media(max-width:560px){.wrap{padding-inline:18px}.chiffres>div{grid-template-columns:1fr;gap:4px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">&larr; Retour à la simulation</a><a class="back" href="../../labo/index.html">&larr; LABO</a></nav>
+<p class="serie">LABO · Fondations 33</p>
+<h1>Comprendre la bioélectricité et les <em>synapses</em></h1>
+<p class="lede">Un gradient fournit l'énergie, une membrane sépare les charges, des canaux rendent le signal régénératif. Puis plusieurs entrées se combinent : voici ce que suppose le neurone avant même d'apprendre.</p>
+<h2><span>1</span>Ce que tu vois</h2>
+<p><strong>La boîte.</strong> L'intérieur est à gauche de la bicouche. Les points <span class="neg">bleus K⁺</span>, <span class="pos">orange Na⁺</span> et les losanges A⁻ représentent des espèces, pas leur charge nette. K⁺ est positif malgré sa couleur bleue. Les losanges sont imperméants. Le mince liseré contre la membrane indique la séparation de charges ; le voltmètre <span class="acc">rose</span> mesure l'intérieur par rapport à l'extérieur.</p>
+<p><strong>Le repos.</strong> Les repères tiretés indiquent les potentiels d'équilibre des ions. Modifier les perméabilités déplace le compromis. Arrêter la pompe efface progressivement les gradients, avec un temps accéléré.</p>
+<p><strong>L'axone et le soma.</strong> Deux électrodes comparent l'arrivée du signal. Les manchons représentent la myéline ; leurs interruptions sont les nœuds de Ranvier. Les courbes montrent une tension dans le temps ou dans l'espace. Les synapses excitatrices et inhibitrices produisent de petites variations qui se combinent au corps cellulaire ; la ligne de seuil annonce une décharge.</p>
+<h2><span>2</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m33"><b>33</b>Bioélectricité et synapses</a></li></ul>
+<section class="module" id="m33">
+<header><p class="num">Module 33</p><h3>Du gradient au signal</h3><p class="etapes">Sur la planche : 1 Gradient et tension · 2 Repos · 3 Axone · 4 Intégration</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Une membrane ressemble à un condensateur percé de passages sélectifs. Si le potassium est plus concentré dedans, des ions sortent par les canaux ouverts. Une infime séparation de charges rend l'intérieur négatif et freine cette sortie. L'équilibre arrive bien avant l'égalisation des concentrations. Sur un axone, une variation locale entraîne la région voisine : sans régénération elle s'atténue ; avec des canaux actifs elle déclenche une nouvelle impulsion. Au soma, les entrées proches dans le temps s'additionnent avant de disparaître. Une inhibition peut empêcher le franchissement du seuil.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Tensions \(V_m,E_X\)<span class="u">V</span></dt><dd>Potentiel intérieur moins extérieur ; tension d'équilibre de l'ion X.</dd></div>
+<div><dt>Concentrations \([X]_i,[X]_e\)<span class="u">mol/m³</span></dt><dd>Quantités d'ions par volume intérieur et extérieur ; 1 mol/m³ vaut 1 mmol/L.</dd></div>
+<div><dt>Valence \(z\)<span class="u">sans unité</span></dt><dd>Charge signée en unités élémentaires : +1 pour K⁺ et Na⁺, −1 pour Cl⁻.</dd></div>
+<div><dt>Température \(T\)<span class="u">K</span></dt><dd>Température absolue ; 310 K correspond approximativement à 37 °C.</dd></div>
+<div><dt>Constantes \(R,F\)</dt><dd>Constante des gaz, 8,314 J/(mol·K), et constante de Faraday, 96 485 C/mol.</dd></div>
+<div><dt>Perméabilités \(p_K,p_{Na},p_{Cl}\)<span class="u">relatives</span></dt><dd>Aptitudes comparées des trois espèces à traverser la membrane.</dd></div>
+<div><dt>Charge \(Q\), capacité \(C\)<span class="u">C, F</span></dt><dd>Charge séparée sur la face intérieure ; capacité électrique totale de la membrane.</dd></div>
+<div><dt>Capacité surfacique \(C_s\)<span class="u">F/cm²</span></dt><dd>Capacité par aire : ici 1 µF/cm².</dd></div>
+<div><dt>Diamètre \(d\), aire \(A\), volume \(\mathcal V\)<span class="u">m, cm², m³</span></dt><dd>Dimensions de la cellule sphérique utilisée dans l'exemple.</dd></div>
+<div><dt>Charge élémentaire \(e\)<span class="u">C</span></dt><dd>Charge positive unitaire : 1,602 176 634 × 10⁻¹⁹ C.</dd></div>
+<div><dt>Avogadro \(N_A\)<span class="u">mol⁻¹</span></dt><dd>Nombre d'entités par mole : 6,022 140 76 × 10²³.</dd></div>
+<div><dt>Comptages \(n,N_K\)<span class="u">ions</span></dt><dd>Nombre net déplacé et nombre initial de potassium intérieur.</dd></div>
+<div><dt>Câble \(r_m,r_i,c_m\)<span class="u">Ω·m, Ω/m, F/m</span></dt><dd>Résistance membranaire linéique, résistance axiale par longueur et capacité par longueur.</dd></div>
+<div><dt>Profil \(x,\lambda,v,v_0\)<span class="u">m, m, V, V</span></dt><dd>Distance, longueur d'atténuation, écart au repos et écart imposé à l'origine.</dd></div>
+<div><dt>Durée \(\tau\)<span class="u">s</span></dt><dd>Temps caractéristique de relaxation passive de la tension.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[ E_X=\frac{RT}{zF}\ln\frac{[X]_e}{[X]_i} \]
+<p>Nernst donne la tension annulant le flux net d'une seule espèce. À 310 K, le moteur prend RT/F = 26,7 mV. Pour Cl⁻, la valence négative inverse le signe.</p></div>
+<div class="relation">\[ V_m=\frac{RT}{F}\ln\frac{p_K[K^+]_e+p_{Na}[Na^+]_e+p_{Cl}[Cl^-]_i}{p_K[K^+]_i+p_{Na}[Na^+]_i+p_{Cl}[Cl^-]_e} \]
+<p>Goldman-Hodgkin-Katz décrit un courant total nul avec plusieurs ions monovalents, sous l'hypothèse d'un champ constant dans la membrane. Ce compromis logarithmique dépend des perméabilités ; les concentrations du chlorure sont inversées.</p></div>
+<div class="relation">\[ Q=CV_m,\qquad C=C_sA,\qquad n=\frac{|Q|}{e} \]
+<p>La membrane stocke une charge proportionnelle à sa tension. Le dernier quotient compte les ions monovalents nécessaires à cette séparation nette, sans compter toutes leurs traversées.</p></div>
+<div class="relation">\[ \lambda=\sqrt{\frac{r_m}{r_i}},\qquad v(x)=v_0\exp(-x/\lambda) \]
+<p>Ce profil stationnaire concerne un câble passif uniforme, semi-infini. À une longueur d'atténuation, il reste environ 37 % de l'écart initial ; une impulsion transitoire s'étale aussi.</p></div>
+<div class="relation">\[ \tau=r_mc_m \]
+<p>La membrane passive garde brièvement une variation de tension. Des entrées rapprochées peuvent donc se sommer ; leur influence spatiale diminue avec la distance au soma.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple">
+<p>Prenons une cellule sphérique de diamètre 10 µm, contenant 140 mmol/L de K⁺, chargée à −90 mV. Le calcul porte sur la séparation nette, pas sur le nombre total d'ions échangés.</p>
+<ol>
+<li>Aire : \(A=\pi d^2\), soit 3,14159 × 10⁻⁶ cm². Volume : \(\mathcal V=\pi d^3/6\), soit 5,23599 × 10⁻¹⁶ m³.</li>
+<li>Capacité : \(C=C_sA\), soit 3,14159 × 10⁻¹² F. Charge intérieure : −2,82743 × 10⁻¹³ C.</li>
+<li>Diviser la charge absolue par la charge élémentaire donne 1,76475 × 10⁶ ions monovalents déplacés.</li>
+<li>Stock initial : \(N_K=[K^+]_i\mathcal V N_A\), soit 4,41446 × 10¹⁰ ions. La fraction déplacée vaut 3,99765 × 10⁻⁵ : environ quatre sur cent mille, ou 0,004 %.</li>
+</ol>
+<p>Le stock reste donc presque inchangé. Avec K⁺ intérieur/extérieur à 140/5, Na⁺ à 12/145 et Cl⁻ à 7/110 mmol/L, Nernst donne respectivement −89, +67 et −74 mV. Les perméabilités relatives 1 : 0,04 : 0,45 donnent un repos GHK de −69,7 mV.</p>
+</div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« La pompe crée tout le repos. »</strong> Elle entretient les gradients ; les fuites sélectives établissent l'essentiel de la tension. Sa contribution électrique directe est omise ici.</li>
+<li><strong>« Au repos, rien ne traverse. »</strong> À l'équilibre d'un ion, deux flux opposés persistent et se compensent. Au repos multi-ionique, le courant total peut s'annuler sans annuler chaque courant ionique.</li>
+<li><strong>« Les mêmes ions parcourent tout l'axone. »</strong> Des courants locaux chargent la membrane voisine ; les canaux y régénèrent le signal.</li>
+<li><strong>« Stimuler davantage agrandit chaque impulsion. »</strong> Le potentiel d'action obéit approximativement au tout ou rien ; l'intensité peut changer le nombre ou la fréquence des décharges.</li>
+<li><strong>« Isoler ralentit forcément. »</strong> La myéline réduit les fuites et la capacité ; les nœuds régénèrent une propagation saltatoire plus rapide.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>32</b><span><a href="../fondations-cellule-membrane/index.html">Cellule et membrane</a> : sélectivité des canaux et entretien des gradients.</span></li>
+<li><b>33</b><span><a href="../03-neurone/index.html">Le neurone qui apprend</a> : Hodgkin-Huxley et plasticité synaptique.</span></li>
+<li><b>34</b><span><a href="../../labo/index.html#fondations">Métabolisme</a> : coût énergétique du maintien des gradients.</span></li>
+<li><b>37</b><span><a href="../fondations-signalisation-homeostasie/index.html">Signalisation</a> : spécificité des récepteurs et amplification des signaux.</span></li>
+<li><b>38</b><span><a href="../../labo/index.html#fondations">Muscle et cœur</a> : couplage entre excitation et contraction.</span></li>
+<li><b>31</b><span><a href="../../labo/index.html#fondations">Acide-base et redox</a> : Nernst pour les équilibres électrochimiques.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Combien d'ions monovalents faut-il déplacer pour 100 mV sur une membrane de 1 cm² ?</summary><p>La capacité vaut 1 µF. La charge absolue vaut 10⁻⁷ C ; divisée par la charge élémentaire, elle donne environ 6,24 × 10¹¹ ions. Il s'agit toujours d'une séparation nette.</p></details>
+<details><summary>Pourquoi la tension ne tombe-t-elle pas immédiatement à zéro quand on arrête la pompe ?</summary><p>Les gradients existent encore : les fuites continuent donc à produire une tension. Elle dérive progressivement quand ces gradients s'effacent. La vitesse réelle dépend des réservoirs et des flux.</p></details>
+<details><summary>Pourquoi deux entrées excitatrices espacées de 1 ms peuvent-elles déclencher une décharge, mais pas à 30 ms ?</summary><p>Dans ce modèle, la relaxation somatique dure 10 ms. Après 1 ms, l'essentiel de la première entrée subsiste ; après 30 ms, presque tout a disparu. Une entrée inhibitrice simultanée peut ramener la somme sous le seuil.</p></details>
+</section>
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Traversées agrégées.</strong> La boîte emploie une marche stochastique entre des réservoirs bien mélangés : chaque saut numérique correspond à cinq ions réels. Les points visibles échantillonnent les réservoirs ; ce ne sont pas des trajectoires moléculaires bidimensionnelles. La charge dessinée est amplifiée ; les mesures donnent la fraction physique.</li>
+<li><strong>Repos.</strong> GHK est recalculé à partir des concentrations courantes. Sans pompe, elles relaxent vers leur moyenne ; avec pompe, elles reviennent progressivement aux valeurs de référence. Ce retour agrégé impose un temps caractéristique de 20 s, sans cycles moléculaires ni consommation explicite d'ATP.</li>
+<li><strong>Câble.</strong> La diffusion électrique est résolue par un schéma implicite ; une dynamique réduite de FitzHugh-Nagumo fournit activation et récupération, sans canaux sodium/potassium détaillés. La récupération explique l'annulation de deux fronts opposés après collision.</li>
+<li><strong>Myéline effective.</strong> La résistance membranaire est multipliée par 400 et la capacité divisée par 400 ; leur produit reste inchangé. L'activité régénérative est concentrée aux seuls nœuds, un point sur cinq, et multipliée par cinq. Cette approximation illustre une accélération ; elle ne prédit pas une vitesse clinique.</li>
+<li><strong>Soma.</strong> Le modèle intègre-et-tire à fuite (LIF) additionne des variations de tension pondérées par la distance, puis remet la tension au repos après le seuil. Les synapses n'ont ni chimie ni conductances détaillées. Les tracés sont échantillonnés et le temps visible est ralenti.</li>
+</ul>
+<h2><span>4</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>26,7 mV</b><span>RT/F utilisé à 310 K : échelle thermique de Nernst.</span></div>
+<div><b>≈ −70 mV</b><span>Repos pour les concentrations et perméabilités choisies ; valeur variable selon la cellule.</span></div>
+<div><b>4 sur 100 000</b><span>Fraction de K⁺ séparée dans l'exemple sphérique à −90 mV.</span></div>
+<div><b>≈ 0,28 → 5,6 m/s</b><span>Vitesses mesurées dans ce modèle au même diamètre de 1 µm, axone nu puis myélinisé ; chiffres illustratifs, pas constantes biologiques.</span></div>
+<div><b>≈ 0,5 à 120 m/s</b><span>Ordre de grandeur des vitesses nerveuses biologiques : diamètre, myéline, température et type de fibre comptent.</span></div>
+</div>
+<h2><span>5</span>Seulement introduit ici</h2>
+<p>Le détail des canaux de Hodgkin-Huxley et la plasticité sont développés dans <a href="../03-neurone/index.html">Le neurone qui apprend</a>. Les canaux calciques, la libération de neurotransmetteurs, les synapses électriques et le codage par fréquence demandent d'autres modèles. Cette page ne représente ni réseaux neuronaux ni rythmes cérébraux.</p>
+<a class="cta" href="index.html">Retour à la simulation &rarr;</a>
+</main>
+</body>
+</html>

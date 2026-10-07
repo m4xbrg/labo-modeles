@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**23 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 14 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**24 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 15 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -33,6 +33,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
+| [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -279,6 +280,15 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Limites** : Bain bien mélangé et diffusion représentative ; cascade à gains constants, amplification potentielle distincte des populations instantanées ; glycémie à deux variables inspirée de Bergman avec apport net pédagogique (15 %), glucagon indicateur, aucune valeur médicale ; thermostat linéaire à retard et commutateur abstrait. Les exemples biologiques de rétroaction positive ne sont pas tous bistables.
 - **Moteur** : `Sig`, 27 tests passés avant délégation puis sur le bloc identique extrait de la page ; moteur et tests gardés dans le scratchpad conformément aux règles communes.
 
+
+### D’un gradient à une tension
+
+- **Identifiant** : `fondations-bioelectricite` · **chemin** : [`index.html`](../opus-sonnet/fondations-bioelectricite/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-bioelectricite/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Bioélectricité et synapses
+- **Modules** : 33 (`partial`), 21, 22 et 32 (`supporting`). Le module 33 reste `full` grâce au showcase *Le neurone qui apprend*.
+- **Étapes** : Un gradient devient une tension · Le potentiel de repos · Le long de l’axone · Additionner pour décider.
+- **Interaction** : Concentrations, sélection K⁺/Na⁺/Cl⁻, perméabilités, arrêt de pompe ; câble passif, nu ou myélinisé, diamètre, stimulation, électrodes ; synapses, rafales et inhibition.
+- **Limites** : Électrodiffusion agrégée, réservoirs bien mélangés et charge visible amplifiée ; FHN réduit, myéline effective et vitesses du modèle ; soma à fuite, sans chimie synaptique. Hodgkin-Huxley et plasticité renvoyés au showcase 03. Moteur et tests conservés au scratchpad selon les règles communes ; résultat et vérifications cités dans la PR.
 
 ## Pages d'appui
 

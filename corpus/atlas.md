@@ -9,9 +9,9 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
 | Liste historique (18 groupes) | 192 | 6 | 11 | 38 | 0 | 137 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 14 | 1 | 42 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 15 | 1 | 42 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **16** | **52** | **2** | **179** |
+| **Total** | **265** | **16** | **15** | **53** | **2** | **179** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -396,7 +396,7 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 | Relation pression-volume du poumon | `idea` | 38 | 17, 20 | — |  |
 | Boucle pression-volume cardiaque | `idea` | 38 | 20, 11 | — |  |
 | Régulation de la glycémie | `absorbed` | 37 | 04 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Étape 3 : repas, insuline, retour à la base, résistance et production réduite ; modèle pédagogique sans valeur médicale. |
-| Potentiel de membrane | `partial` | 33 | 21, 19 | Le neurone qui apprend | Potentiel de repos et dépolarisation dans la planche Neurone. |
+| Potentiel de membrane | `absorbed` | 33 | 21, 19 | D’un gradient à une tension | Nernst, séparation de charge et potentiel de repos GHK manipulables ; renvoi au neurone pour le potentiel d’action et la plasticité. |
 
 ### Chimie
 
