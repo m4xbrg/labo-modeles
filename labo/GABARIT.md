@@ -90,3 +90,9 @@ Les planches de `opus-sonnet/` ont leur propre simulation (canvas ou SVG), souve
 9. En fin de page, charger `../../labo/planche.js` (couches, hauteur de l'écran ajustée à la fenêtre).
 
 **Vérifier** : console propre ; aucune requête en échec ; pas de défilement horizontal à 375 px ; l'écran et ses contrôles tiennent dans 1366 × 768 ; chaque étape s'ouvre et le bon module est marqué ; clair et sombre.
+
+### Forme plein écran (décision du 2026-10-07)
+
+Max préfère les planches en plein écran. `planche.js` replie donc la coque d'une planche à étapes en **une seule barre** (LABO, retour, titre court, codes d'étape avec le titre en infobulle, couches O · M · C, Infos, thème). Le titre complet, la signature et l'indice des couches vont dans un **tiroir** qu'ouvre le bouton « Infos » ou la touche **I** (Échap le referme). L'écran est bord à bord et prend toute la hauteur restante. Rien à changer dans les pages : le HTML de la coque reste celui de la recette, `planche.js` le réarrange au chargement en déplaçant les éléments, sans les recréer.
+
+**Observer** : la lecture, la pause, la frise du temps, la vitesse et les gestes centraux (Stimuler, Lâcher) **restent visibles** ; seuls les réglages se masquent (`#tools`, `.couche-lire`). Ne pas cacher toute la barre `.controls` en Observer.
