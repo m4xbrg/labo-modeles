@@ -2,7 +2,7 @@
 
 Ce dossier décrit **ce qu'est le corpus de LABO** : la carte conceptuelle des fondations, les productions, les modèles réellement construits, les collections et l'Atlas des phénomènes qu'on pourrait un jour construire. C'est la référence actuelle. En cas de désaccord entre ce dossier et un autre document du dépôt (brief dans `prompts/`, ancien README, accueil du site, prototype d'interface), **ce dossier l'emporte**, sauf pour l'état du code lui-même : si une page existe ou n'existe pas, c'est le dépôt qui a raison, et ce dossier doit être corrigé.
 
-État décrit : `main` au commit `f7086eb` (jusqu'aux fondations 32 et 40), mis à jour le 2026-10-04. Module 40 (*Évolution et génétique des populations*) ajouté le 2026-10-04 (PR n° 16).
+État décrit : `main` au commit `f7086eb` (jusqu'aux fondations 32 et 40), mis à jour le 2026-10-04. Module 40 (*Évolution et génétique des populations*) ajouté le 2026-10-04 (PR n° 16). Module 23 (*Magnétisme et induction*) ajouté le 2026-10-06. Modules 28 et 29 (*Molécules et mole*) ajoutés le 2026-10-06 (20 modèles). Module 24 (*L'onde électromagnétique*) ajouté le 2026-10-07 (21 modèles). Page *Atomes, noyaux et lumière* ajoutée le 2026-10-07 en `partial` (module 26 couvert, module 27 en théorie seulement ; 22 modèles).
 
 ## Les fichiers
 

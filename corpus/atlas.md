@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 10 | 31 | 0 | 145 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 5 | 1 | 52 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 37 | 0 | 138 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 13 | 1 | 43 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **14** | **36** | **2** | **197** |
+| **Total** | **265** | **16** | **16** | **50** | **2** | **181** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -35,7 +35,7 @@ Cas particulier : la respiration cellulaire, la chaîne de transport d'électron
 
 ## Absorbée n'est pas effacée
 
-Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46) ; la sélection naturelle, la dérive génétique, l'effet fondateur et le goulot d'étranglement dans *Évolution et génétique des populations* (40).
+Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46) ; la sélection naturelle, la dérive génétique, l'effet fondateur et le goulot d'étranglement dans *Évolution et génétique des populations* (40) ; le champ magnétique, la force de Lorentz, l'induction, la génératrice et les courants de Foucault dans *Magnétisme et induction* (23).
 
 Ces entrées restent dans l'Atlas avec le statut `absorbed` et un lien vers le modèle. Rien n'empêche qu'un de ces sujets reçoive un jour son propre toy. Une idée dont la fondation d'accueil n'est pas encore construite (la catalyse, module 30) reste `idea`.
 
@@ -158,19 +158,19 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Champ magnétique | `idea` | 23 | 21, 02 | — |  |
-| Force de Lorentz | `idea` | 23 | 21, 02, 10 | — |  |
-| Cyclotron | `idea` | 23 | 12, 21 | — |  |
-| Induction électromagnétique | `idea` | 23 | 21, 22 | — |  |
+| Champ magnétique | `absorbed` | 23 | 21, 02 | Magnétisme et induction | Acte I des fondations Magnétisme et induction (aimant, fil, spire, bobine ; lignes et boussoles). |
+| Force de Lorentz | `absorbed` | 23 | 21, 02, 10 | Magnétisme et induction | Acte II des fondations Magnétisme et induction (charge, sélecteur de vitesse, balançoire de Laplace). |
+| Cyclotron | `partial` | 23 | 12, 21 | Magnétisme et induction | Acte II : période indépendante de la vitesse (deux protons) ; pas d’accélération entre les dés. |
+| Induction électromagnétique | `absorbed` | 23 | 21, 22 | Magnétisme et induction | Acte III des fondations Magnétisme et induction (aimant et bobine, deux bobines de Faraday). |
 | Transformateur | `idea` | 23 | 22 | — |  |
-| Onde électromagnétique | `idea` | 24 | 15, 21, 23 | — |  |
+| Onde électromagnétique | `absorbed` | 24 | 15, 21, 23 | L’onde électromagnétique | Étapes 1 et 2 des fondations L’onde électromagnétique (charge secouée dont la ride part à c ; E et B en phase, E = cB). |
 | Circuit RC | `absorbed` | 22 | 05, 21 | Courant et circuits |  |
 | Circuit RLC | `absorbed` | 22 | 14, 21 | Courant et circuits |  |
 | Résonance RLC | `idea` | 22 | 14 | — |  |
 | Condensateur | `absorbed` | 22 | 21 | Courant et circuits |  |
-| Solénoïde | `idea` | 23 | 22 | — |  |
+| Solénoïde | `absorbed` | 23 | 22 | Magnétisme et induction | Acte I (bobine, champ μ₀nI, équivalence avec l’aimant). |
 | Moteur électrique | `idea` | 23 | 12, 22 | — |  |
-| Génératrice | `idea` | 23 | 12, 22 | — |  |
+| Génératrice | `absorbed` | 23 | 12, 22 | Magnétisme et induction | Acte III (spire qui tourne, lampe). |
 | Propagation dans une ligne de transmission | `idea` | 24 | 15, 22 | — |  |
 
 ### 7 · Neurobiologie, signalisation et régulation cellulaire
@@ -402,8 +402,8 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Liaison chimique et géométrie moléculaire | `idea` | 28 | 21 | — |  |
-| Forces intermoléculaires | `idea` | 28 | 21 | — |  |
+| Liaison chimique et géométrie moléculaire | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étapes 1 à 3 (creux d’énergie, électronégativité, VSEPR et moment dipolaire). |
+| Forces intermoléculaires | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étape 4 (modèle 2D qualitatif, liaisons hydrogène). |
 | Dissolution / solvatation | `idea` | 28 | 19 | — |  |
 | Diffusion réactionnelle | `idea` | 30 | 19 | — |  |
 | Le Chatelier interactif | `idea` | 30 | — | — |  |
@@ -424,10 +424,10 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 |---|---|---|---|---|---|
 | Champ électrique + potentiel comme deux représentations | `built` | 21 | 16 | Le champ électrique |  |
 | Dipôle électrique | `built` | 21 | — | Le champ électrique | Configuration de la planche Champ électrique. |
-| Dipôle magnétique | `idea` | 23 | — | — |  |
-| Courants de Foucault | `idea` | 23 | — | — |  |
-| Induction motrice | `idea` | 23 | — | — |  |
-| Propagation EM depuis une source oscillante | `idea` | 24 | 15 | — |  |
+| Dipôle magnétique | `absorbed` | 23 | — | Magnétisme et induction | Acte I (spire et aimant vus de loin). |
+| Courants de Foucault | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (aimant qui tombe dans un tube de cuivre). |
+| Induction motrice | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (tige sur des rails, ε = Bℓv). |
+| Propagation EM depuis une source oscillante | `absorbed` | 24 | 15 | L’onde électromagnétique | Étape 1 des fondations L’onde électromagnétique (charge qui oscille : onde sortante, λ = c/f, rien dans l’axe). |
 
 ### Optique
 
@@ -443,11 +443,11 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Désintégration radioactive | `partial` | 26 | 05, 07 | Systèmes, croissance et hasard | Version statistique (étape D3 des fondations Systèmes, croissance et hasard) ; la physique nucléaire n’est pas traitée. |
+| Désintégration radioactive | `absorbed` | 26 | 05, 07 | Atomes, noyaux et lumière | Étape 4 des fondations Atomes, noyaux et lumière (transmutation α, β, écrans, absence de mémoire) ; la version statistique reste l’étape D3 des fondations Systèmes, croissance et hasard. |
 | Chaîne de désintégration | `idea` | 26 | 05 | — |  |
-| Fission | `idea` | 26 | 11 | — |  |
-| Fusion | `idea` | 26 | 11 | — |  |
-| Énergie de liaison nucléaire | `idea` | 26 | 11 | — |  |
+| Fission | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilan énergétique de ²³⁵U + n dans l’étape 3 des fondations Atomes, noyaux et lumière ; la réaction en chaîne et le réacteur ne sont pas construits. |
+| Fusion | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilans de ²H + ³H et de 3 ⁴He dans l’étape 3 des fondations Atomes, noyaux et lumière ; le confinement et les conditions de la fusion ne sont pas construits. |
+| Énergie de liaison nucléaire | `absorbed` | 26 | 11 | Atomes, noyaux et lumière | Étape 3 des fondations Atomes, noyaux et lumière (courbe B/A mesurée et semi-empirique, défaut de masse, bilans de réaction). |
 
 ### Quantique
 
