@@ -9,9 +9,9 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
 | Liste historique (18 groupes) | 192 | 6 | 11 | 37 | 0 | 138 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 9 | 1 | 48 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 11 | 1 | 46 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **46** | **2** | **186** |
+| **Total** | **265** | **16** | **15** | **48** | **2** | **184** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -402,8 +402,8 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Liaison chimique et géométrie moléculaire | `idea` | 28 | 21 | — |  |
-| Forces intermoléculaires | `idea` | 28 | 21 | — |  |
+| Liaison chimique et géométrie moléculaire | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étapes 1 à 3 (creux d’énergie, électronégativité, VSEPR et moment dipolaire). |
+| Forces intermoléculaires | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étape 4 (modèle 2D qualitatif, liaisons hydrogène). |
 | Dissolution / solvatation | `idea` | 28 | 19 | — |  |
 | Diffusion réactionnelle | `idea` | 30 | 19 | — |  |
 | Le Chatelier interactif | `idea` | 30 | — | — |  |
