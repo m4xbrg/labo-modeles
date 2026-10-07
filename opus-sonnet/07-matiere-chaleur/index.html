@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -120,43 +121,90 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 17 · 18 · 19</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Matière, chaleur et transport</h1>
+    <p class="lead">Une boîte de molécules en mouvement : de leur agitation naissent la température, la pression, la diffusion et le sens du temps.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>molécules, en unités réduites</dd>
+    <dt>Temps</dt><dd>unités réduites (τ)</dd>
+    <dt>Modèle</dt><dd>dynamique moléculaire 2D</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
+  <div class="chap"><p class="chap-t"><b>17</b>Monde microscopique des gaz</p><div class="segs">
+    <button class="seg" data-a="0" title="17.1 — Température"><b>17.1</b><span>Température</span></button>
+    <button class="seg" data-a="1" title="17.2 — Pression et volume"><b>17.2</b><span>Pression</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>18</b>Chaleur, phases et entropie</p><div class="segs">
+    <button class="seg" data-a="4" title="18.1 — Pourquoi ça ne revient pas (entropie)"><b>18.1</b><span>Entropie</span></button>
+    <button class="seg" data-a="6" title="18.2 — Chaleur et conduction"><b>18.2</b><span>Conduction</span></button>
+    <button class="seg" data-a="7" title="18.3 — Changement de phase"><b>18.3</b><span>Phases</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>19</b>Transport thermique et moléculaire</p><div class="segs">
+    <button class="seg" data-a="2" title="19.1 — Mouvement brownien"><b>19.1</b><span>Brownien</span></button>
+    <button class="seg" data-a="3" title="19.2 — Diffusion, gradient, flux"><b>19.2</b><span>Diffusion</span></button>
+    <button class="seg" data-a="5" title="19.3 — Osmose"><b>19.3</b><span>Osmose</span></button>
+    <button class="seg" data-a="8" title="19.4 — Convection et rayonnement"><b>19.4</b><span>Conv. · rayon.</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change l’énergie, pousse le piston, retire la cloison."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Boîte de molécules vues de dessus : chaque point est une molécule qui se déplace et rebondit ; sa couleur indique sa vitesse."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 17 · 18 · 19</p>
-      <h1>Matière, <em>chaleur</em> et transport</h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur IX</p>
+      <p class="eyebrow" id="eyebrow">Module <b>17</b> · étape 1 sur 2</p>
       <h2 id="stepTitle"></h2>
-      <p id="stepText" aria-live="polite"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
     </section>
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow" id="chartEye">Mesures</p>
       <div class="chartBox"><canvas id="chart" role="img" aria-label="Graphique de mesure de l'acte en cours"></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="note"></p>
     </section>
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>9</kbd> aller à l'acte</li>
-        <li><kbd>R</kbd> recommencer l'acte · survole une molécule pour la mesurer</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>9</kbd> aller à l'acte (ordre de la simulation)</li>
+        <li><kbd>R</kbd> recommencer l'acte · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches · survole une molécule pour la mesurer</li>
       </ul>
     </section>
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m17"><span>Théorie du module <b id="numTheorie">17</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -168,7 +216,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Recommencer l'acte (R)">Recommencer</button>
       <button class="btn" id="bFast" aria-pressed="false" title="Accélérer le temps de la simulation">Temps ×4</button>
     </div>
-    <div class="stepper" id="stepper" role="group" aria-label="Les neuf actes"></div>
     <div class="tools" id="tools"></div>
   </div>
 </div>
@@ -1018,7 +1065,7 @@ function chartT4(c, w, h) {
 }
 
 /* ---------------- Mise en page de la scène ---------------- */
-function headBottom() { const r = document.querySelector('.head').getBoundingClientRect(), s = sceneEl.getBoundingClientRect(); return r.bottom - s.top; }
+const headBottom = () => 0;   // le titre est sorti de la scène (coque LABO)
 function layout() {
   const A = ACTS[act];
   if (A.schematic) return;
@@ -1336,21 +1383,20 @@ cv.addEventListener('pointerup', () => { drag = false; });
 cv.addEventListener('pointercancel', () => { drag = false; });
 
 /* ---------------- Navigation ---------------- */
-const stepper = $('#stepper'), tools = $('#tools');
-ACTS.forEach((A, k) => {
-  const b = document.createElement('button'); b.className = 'seg'; b.title = `Acte ${A.num} — ${A.title}`;
-  b.innerHTML = `<b>${A.num}</b><span>${A.short}</span>`; b.addEventListener('click', () => goAct(k));
-  stepper.append(b);
-});
+const tools = $('#tools');
+const MOD = [[17,1,2],[17,2,2],[19,1,4],[19,2,4],[18,1,3],[19,3,4],[18,2,3],[18,3,3],[19,4,4]];   // par acte : module, rang, nombre d'étapes du module
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goAct(+b.dataset.a); e.currentTarget.blur(); }));
 function buildPanel() {
   const A = ACTS[act];
-  $('#eyebrow').innerHTML = `Acte <b>${A.num}</b> sur IX`;
+  const [mm, rg, nb] = MOD[act];
+  $('#eyebrow').innerHTML = `Module <b>${mm}</b> · étape ${rg} sur ${nb}`;
+  $('#lienTheorie').href = `explication.html#m${mm}`; $('#numTheorie').textContent = mm;
   $('#stepTitle').textContent = A.title;
   const t = $('#stepText'); t.innerHTML = A.text; t.classList.remove('swap'); void t.offsetWidth; if (!reduce) t.classList.add('swap');
   $('#leg').innerHTML = A.legend; $('#note').textContent = A.note;
   $('#chartEye').textContent = A.schematic ? 'Schéma · puissance rayonnée' : 'Mesures sur les molécules';
   $('#meas').innerHTML = A.meas.map(([id, l, u]) => `<div class="row"><span class="lab">${l}</span><span class="val"><b id="m_${id}">—</b>${u ? `<i>${u}</i>` : ''}</span></div>`).join('');
-  [...stepper.children].forEach((b, k) => { if (k === act) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === act) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
 }
 function restart() {
   const A = ACTS[act];
@@ -1433,5 +1479,6 @@ goAct(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

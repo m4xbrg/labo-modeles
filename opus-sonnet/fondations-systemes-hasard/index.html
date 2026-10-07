@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -135,50 +136,97 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg,.lien2{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 04 · 05 · 07</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Systèmes, croissance et hasard</h1>
+    <p class="lead">Un état et sa règle de changement, la rétroaction, l’exponentielle et le logarithme, puis le hasard qui devient loi.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>unités génériques</dd>
+    <dt>Temps</dt><dd>secondes de simulation</dd>
+    <dt>Modèle</dt><dd>Euler, RK4, exponentielle exacte, hasard semé</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
+  <div class="chap"><p class="chap-t"><b>04</b>Systèmes qui évoluent dans le temps</p><div class="segs">
+    <button class="seg" data-a="0" title="04.1 — L’état et son taux"><b>04.1</b><span>Taux</span></button>
+    <button class="seg" data-a="1" title="04.2 — Même règle, autres départs"><b>04.2</b><span>Départs</span></button>
+    <button class="seg" data-a="2" title="04.3 — Négatif ou positif ?"><b>04.3</b><span>Boucle</span></button>
+    <button class="seg" data-a="3" title="04.4 — La croissance logistique"><b>04.4</b><span>Logistique</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>05</b>Exponentielles et logarithmes</p><div class="segs">
+    <button class="seg" data-a="4" title="05.1 — Pourquoi ça explose"><b>05.1</b><span>Explose</span></button>
+    <button class="seg" data-a="5" title="05.2 — L’échelle logarithmique"><b>05.2</b><span>Log</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>07</b>Hasard, probabilité et distributions</p><div class="segs">
+    <button class="seg" data-a="6" title="07.1 — Un lancer, beaucoup de lancers"><b>07.1</b><span>Dé</span></button>
+    <button class="seg" data-a="7" title="07.2 — Marche aléatoire et distribution"><b>07.2</b><span>Marche</span></button>
+    <button class="seg" data-a="8" title="07.3 — La désintégration"><b>07.3</b><span>Atomes</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change la règle, un départ, le nombre de lancers ou d’atomes."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène en cours : graphes de l'état en fonction du temps, flèches de taux, lignes de phase, paysages, histogrammes ou grille d'atomes, selon l'étape."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 04 · 05 · 07</p>
-      <h1>Systèmes, croissance et <em>hasard</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 9</p>
+      <p class="eyebrow" id="eyebrow">Module <b>04</b> · étape 1 sur 4</p>
       <h2 id="stepTitle"></h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="cle" id="stepKey"></p>
-      <p class="eq" id="eq"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p class="cle couche-comp" id="stepKey"></p>
+      <p class="eq couche-comp" id="eq"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section id="secBox" hidden>
+    <section id="secBox" class="couche-lire" hidden>
       <p class="eyebrow" id="secEye"></p>
       <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe du taux en fonction de l'état."></canvas></div>
       <p class="leg" id="secLeg"></p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
       <a class="lien2" id="lien07" href="../07-matiere-chaleur/index.html" hidden><span>La même chose avec des molécules</span><span aria-hidden="true">&rarr;</span></a>
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m04"><span>Théorie du module <b id="numTheorie">04</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -188,18 +236,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
       <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
       <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
-    </div>
-
-    <div class="stepper" id="stepper" role="group" aria-label="Les neuf étapes, en quatre chapitres">
-      <button class="seg ch0" data-a="0" title="A1 — L'état et son taux"><b>A1</b><span>Taux</span></button>
-      <button class="seg" data-a="1" title="A2 — Même règle, autres départs"><b>A2</b><span>Départs</span></button>
-      <button class="seg ch0" data-a="2" title="B1 — Négatif ou positif ?"><b>B1</b><span>Boucle</span></button>
-      <button class="seg" data-a="3" title="B2 — La croissance logistique"><b>B2</b><span>Logistique</span></button>
-      <button class="seg ch0" data-a="4" title="C1 — Pourquoi ça explose"><b>C1</b><span>Explose</span></button>
-      <button class="seg" data-a="5" title="C2 — L'échelle logarithmique"><b>C2</b><span>Log</span></button>
-      <button class="seg ch0" data-a="6" title="D1 — Un lancer, beaucoup de lancers"><b>D1</b><span>Dé</span></button>
-      <button class="seg" data-a="7" title="D2 — Marche aléatoire et distribution"><b>D2</b><span>Marche</span></button>
-      <button class="seg" data-a="8" title="D3 — La désintégration"><b>D3</b><span>Atomes</span></button>
     </div>
 
     <div class="tools" id="tools">
@@ -483,8 +519,8 @@ const NOTES = [
   'Cases de largeur 2 (les positions ont la parité de n). Courbe : M·2·φ(x ; 0, √n). Variance de la position = n.',
   'T½ = 2 s, λ = ln 2/T½ ≈ 0,35 s⁻¹, p = 1 − 2^(−Δt/T½) ≈ 1,72 % par pas de 0,05 s. Bande : ±√(N₀·q(1−q)), q = e^(−λt).'
 ];
-const RN = ['A', 'B', 'C', 'D'];
-const headH = () => W <= 860 ? 104 : 134;
+const MOD = [[4,1,4],[4,2,4],[4,3,4],[4,4,4],[5,1,2],[5,2,2],[7,1,3],[7,2,3],[7,3,3]];   // module, rang, nombre d'étapes du module
+const headH = () => 16;   // le titre est sorti de la scène (coque LABO)
 const padX = () => W < 600 ? 14 : 26;
 const stackMode = () => innerWidth <= 860;
 
@@ -976,8 +1012,10 @@ function sizeSec() {
 function updateUI(n) {
   const ae = document.activeElement; if (ae && ae.closest && ae.closest('#tools .grp[hidden]')) ae.blur();
   const s = STEPS[n];
-  document.querySelectorAll('.seg').forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Chapitre <b>${s.c}</b> · étape ${n + 1} sur 9`;
+  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === n || +b.dataset.b === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  const [mm, rg, nb] = MOD[n], m2 = String(mm).padStart(2, '0');
+  $('#eyebrow').innerHTML = `Module <b>${m2}</b> · étape ${rg} sur ${nb}`;
+  $('#lienTheorie').href = `explication.html#m${m2}`; $('#numTheorie').textContent = m2;
   $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#stepKey').textContent = '« ' + s.k + ' »';
   for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === 8; $('#lien07').hidden = n !== 7; eqLast = ''; noteLast = '';
@@ -1169,5 +1207,6 @@ initStep(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -37,13 +38,6 @@ a{color:inherit}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
 #cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
 
-.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
-h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
-h1 em{color:var(--accent);font-style:italic}
-.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
-.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
-.back:hover{color:var(--texte)}
 
 .tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
 .tip.on{opacity:1;transform:none}
@@ -117,7 +111,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
   .controls{order:2;padding:10px 16px}
   .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
-  .head{left:16px;top:14px}
   .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
   .stepper{flex:1 0 100%;order:5}
   input[type=range]{width:104px}
@@ -135,28 +128,70 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 10 · 11</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Forces, énergie et conservation</h1>
+    <p class="lead">Seule une résultante change la vitesse ; l’énergie se transforme sans disparaître ; dans une collision, la quantité de mouvement totale se conserve.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>~1 à 10 m</dd>
+    <dt>Temps</dt><dd>~1 à 10 s</dd>
+    <dt>Modèle</dt><dd>points matériels, 1 dimension</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
+  <div class="chap"><p class="chap-t"><b>10</b>Forces, inertie et lois de Newton</p><div class="segs">
+    <button class="seg" data-a="0" title="10.1 — Inertie"><b>10.1</b><span>Inertie</span></button>
+    <button class="seg" data-a="1" title="10.2 — Force résultante et masse"><b>10.2</b><span>Résultante</span></button>
+    <button class="seg" data-a="2" title="10.3 — Action-réaction"><b>10.3</b><span>Action-réaction</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>11</b>Énergie et quantité de mouvement</p><div class="segs">
+    <button class="seg" data-a="3" title="11.1 — Travail et énergie"><b>11.1</b><span>Énergie</span></button>
+    <button class="seg" data-a="4" title="11.2 — Collision"><b>11.2</b><span>Collision</span></button>
+    <button class="seg" data-a="5" title="11.3 — À toi : collision libre"><b>11.3</b><span>À toi</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : pousse le bloc, change une masse, lance une collision."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Paillasse de mécanique : un bloc ou des chariots avec leurs forces, vitesses, quantités de mouvement et énergies dessinés en flèches et en barres."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 10 · 11</p>
-      <h1>Forces, énergie et <em>conservation</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VI</p>
+      <p class="eyebrow" id="eyebrow">Module <b>10</b> · étape 1 sur 3</p>
       <h2 id="stepTitle">Inertie</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de la paillasse en fonction du temps."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -164,45 +199,30 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="leg" id="leg2"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>6</kbd> aller à l'acte</li>
-        <li><kbd>R</kbd> réinitialiser l'acte · <kbd>A</kbd> / <kbd>D</kbd> pousser (actes I et IV)</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>6</kbd> aller à l'étape</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>A</kbd> / <kbd>D</kbd> pousser (étapes 10.1 et 11.1) · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m10"><span>Théorie du module <b id="numTheorie">10</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
   <div class="controls" role="toolbar" aria-label="Contrôles">
     <div class="grp">
-      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
       <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
-      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
-      <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
-    </div>
-
-    <div class="stepper" id="stepper" role="group" aria-label="Les six actes">
-      <div class="sg" data-g="A"><span class="sgl"><span class="long">Paillasse A · rail</span><span class="short">A</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Acte I — Inertie"><b>I</b><span>Inertie</span></button>
-        <button class="seg" data-a="1" title="Acte II — Force résultante et masse"><b>II</b><span>Résultante</span></button>
-        <button class="seg" data-a="2" title="Acte III — Action-réaction"><b>III</b><span>Action-réaction</span></button>
-      </div></div>
-      <div class="sg" data-g="B"><span class="sgl"><span class="long">Paillasse B · piste</span><span class="short">B</span></span><div class="sgs">
-        <button class="seg" data-a="3" title="Acte IV — Travail et énergie"><b>IV</b><span>Énergie</span></button>
-      </div></div>
-      <div class="sg" data-g="C"><span class="sgl"><span class="long">Paillasse C · collision</span><span class="short">C</span></span><div class="sgs">
-        <button class="seg" data-a="4" title="Acte V — Collision"><b>V</b><span>Collision</span></button>
-        <button class="seg" data-a="5" title="Acte VI — À toi"><b>VI</b><span>À toi</span></button>
-      </div></div>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
     </div>
 
     <div class="tools" id="tools">
@@ -1050,7 +1070,7 @@ const MEAS = [
   [['t', 't', 's'], ['F', 'F de contact', 'N'], ['J', 'J = ∫F dt', 'N·s'], ['p1', 'p₁', 'N·s'], ['p2', 'p₂', 'N·s'], ['pt', 'Σp', 'N·s'], ['K', 'K₁ + K₂', 'J'], ['Eel', 'E_el', 'J'], ['Eth', 'E_th', 'J'], ['Et', 'total', 'J'], ['e', 'e mesuré', '']]
 ];
 const MNOTE = [
-  'Échelles des flèches fixes dans l’acte : 1 N = 12 px, 1 m/s = 14 px, 1 m/s² = 14 px. Les flèches représentent des grandeurs : ce ne sont pas des objets.',
+  'Échelles des flèches fixes dans l’étape : 1 N = 12 px, 1 m/s = 14 px, 1 m/s² = 14 px. Les flèches représentent des grandeurs : ce ne sont pas des objets.',
   'Échelles fixes : 1 N = 12 px, 1 m/s = 12 px, 1 m/s² = 4 px. a mesurée : pente de v sur les 0,3 dernières secondes.',
   'Ralenti ×10 pendant la poussée du ressort ; le temps affiché reste le temps physique. Échelles : 1 N = 1,5 px, 1 m/s² = 1 px.',
   'Poussée tenue : ±6 N le long de la piste. Frottement µ = 0,05 (le terme centripète de la normale est négligé). Les barres sont des comptes d’énergie, pas une substance.',
@@ -1122,7 +1142,7 @@ function status() {
 }
 
 /* ---------------- Actes ---------------- */
-const ROM = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+const MOD = [[10, 1, 3], [10, 2, 3], [10, 3, 3], [11, 1, 3], [11, 2, 3], [11, 3, 3]];   // module, rang, nombre d'étapes du module
 const ACTS = [
   { t: 'Inertie', x: 'Un bloc au repos sur un rail sans frottement. Pousse-le : tant que tu pousses, la résultante ΣF n’est pas nulle et la vitesse grandit. Lâche : ΣF = 0, et pourtant il continue, à vitesse constante. Regarde les graduations : elles défilent toujours.' },
   { t: 'Force résultante et masse', x: 'Ce n’est pas une force qui fait bouger : c’est la résultante qui change la vitesse, selon a = ΣF/m. Essaie F₁ = F₂ avec le bloc lancé, puis la même ΣF avec une masse double. Avec le frottement, pousse juste assez pour l’égaler.' },
@@ -1154,7 +1174,9 @@ function enterAct(n, restart) {
 function updateUI(n) {
   uiAct = n;
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VI`;
+  const [mm, rg, nb] = MOD[n], m2 = String(mm).padStart(2, '0');
+  $('#eyebrow').innerHTML = `Module <b>${m2}</b> · étape ${rg} sur ${nb}`;
+  $('#lienTheorie').href = `explication.html#m${m2}`; $('#numTheorie').textContent = m2;
   $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
   for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   document.querySelectorAll('#tools .grp').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
@@ -1267,6 +1289,9 @@ barsC.addEventListener('pointermove', e => {
 barsC.addEventListener('pointerleave', hideTip);
 
 new ResizeObserver(() => resize()).observe(sceneEl);
+/* Les graphes du panneau sont masqués en Observer : on les redimensionne quand leur largeur change (couche affichée). */
+new ResizeObserver(() => { for (const c of [scopeC, barsC]) { const w = c.getBoundingClientRect().width; if (w && Math.abs(w * dpr - c.width) > 1) { sizePanelCanvases(); break; } } }).observe(scopeC);
+new ResizeObserver(() => { const w = barsC.getBoundingClientRect().width; if (w && Math.abs(w * dpr - barsC.width) > 1) sizePanelCanvases(); }).observe(barsC);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -1314,5 +1339,6 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

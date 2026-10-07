@@ -3,7 +3,8 @@
    tout ce qui l'entoure (barre, titre, chapitres, couches, panneau de lecture, contrôles) suit le
    thème LABO clair ou sombre. À charger APRÈS le <style> de la page : ces règles reprennent la main
    sur l'ancienne coque. Les jetons de la page (--fond, --texte, --accent…) restent ceux de l'écran ;
-   ceux de LABO (--papier, --encre…) habillent la page. Mode d'emploi : labo/GABARIT.md. */
+   ceux de LABO (--papier, --encre, --filet…) habillent la page. labo.css se charge AVANT le <style>
+   de la page : en thème clair, les jetons partagés (--positif, --trait…) gardent les valeurs de l'écran. Mode d'emploi : labo/GABARIT.md. */
 
 body.labo-etapes{background:var(--papier);color:var(--encre);font:15px/1.55 var(--sans);margin:0}
 .labo-etapes a{color:inherit}
@@ -30,7 +31,7 @@ body.labo-etapes{background:var(--papier);color:var(--encre);font:15px/1.55 var(
 .labo-etapes .chap-t{font:400 11px var(--mono);letter-spacing:.06em;color:var(--encre-3);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .labo-etapes .chap-t b{color:var(--encre);font-weight:500;margin-right:6px}
 .labo-etapes .chap .segs{display:flex;gap:3px}
-.labo-etapes .seg{flex:1 1 0;min-width:0;min-height:38px;background:transparent;border:0;border-top:2px solid var(--trait);padding:7px 6px 2px 0;text-align:left;cursor:pointer;font:400 12px/1.25 var(--mono);color:var(--encre-3);margin:0;transition:border-color .35s var(--ease),color .35s var(--ease)}
+.labo-etapes .seg{flex:1 1 0;min-width:0;min-height:38px;background:transparent;border:0;border-top:2px solid var(--filet);padding:7px 6px 2px 0;text-align:left;cursor:pointer;font:400 12px/1.25 var(--mono);color:var(--encre-3);margin:0;transition:border-color .35s var(--ease),color .35s var(--ease)}
 .labo-etapes .seg b{font-weight:500;margin-right:6px;color:inherit}
 .labo-etapes .seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 38px);vertical-align:bottom;font-family:var(--sans);font-size:13px}
 .labo-etapes .seg:hover{color:var(--encre);border-top-color:var(--encre-3)}
@@ -47,29 +48,29 @@ body.labo-etapes{background:var(--papier);color:var(--encre);font:15px/1.55 var(
 .labo-etapes .modes .indice{font-family:var(--mono);font-size:12px;color:var(--encre-3);margin:0}
 
 /* ---------- Écran + panneau + contrôles ---------- */
-.labo-etapes .app{margin:0 var(--gouttiere);height:max(460px,calc(100vh - var(--chrome,262px)));height:max(460px,calc(100svh - var(--chrome,262px)));min-height:0;border-top:1px solid var(--encre);grid-template-columns:minmax(0,1fr) 330px}
+.labo-etapes .app{margin:0 var(--gouttiere);height:max(400px,calc(100vh - var(--chrome,262px)));height:max(400px,calc(100svh - var(--chrome,262px)));min-height:0;border-top:1px solid var(--encre);grid-template-columns:minmax(0,1fr) 330px}
 .labo-etapes .scene{background:var(--fond)}            /* l'écran d'instrument garde son fond */
-.labo-etapes .panel{background:var(--papier);border-left:1px solid var(--trait);color:var(--encre);padding:18px 0 18px 22px}
+.labo-etapes .panel{background:var(--papier);border-left:1px solid var(--filet);color:var(--encre);padding:18px 0 18px 22px}
 .labo-etapes .panel .eyebrow{color:var(--encre-3)}
 .labo-etapes .panel .eyebrow b{color:var(--encre)}
 .labo-etapes .panel h2{font:500 24px/1.15 var(--sans);letter-spacing:-.02em;color:var(--encre)}
 .labo-etapes #stepText{color:var(--encre-2);opacity:1}
-.labo-etapes .meas{border-top-color:var(--trait)}
-.labo-etapes .row{border-bottom-color:var(--trait)}
+.labo-etapes .meas{border-top-color:var(--filet)}
+.labo-etapes .row{border-bottom-color:var(--filet)}
 .labo-etapes .lab,.labo-etapes .val i,.labo-etapes .note,.labo-etapes .leg{color:var(--encre-3)}
 .labo-etapes .val{color:var(--encre)}
-.labo-etapes .scopeBox{border-color:var(--trait);background:var(--fond)}
+.labo-etapes .scopeBox{border-color:var(--filet);background:var(--fond)}
 .labo-etapes .comprendre{border-color:var(--encre);color:var(--encre)}
 .labo-etapes .comprendre:hover{background:var(--encre);color:var(--papier)}
-.labo-etapes .lien2{border-color:var(--trait);color:var(--encre-2)}
+.labo-etapes .lien2{border-color:var(--filet);color:var(--encre-2)}
 .labo-etapes .lien2:hover{color:var(--encre);border-color:var(--encre)}
 .labo-etapes .liens{background:transparent}
-.labo-etapes .controls{background:var(--papier);border-top:1px solid var(--trait);padding:10px 0}
-.labo-etapes .btn{border-color:var(--trait);color:var(--encre);background:var(--papier)}
+.labo-etapes .controls{background:var(--papier);border-top:1px solid var(--filet);padding:10px 0}
+.labo-etapes .btn{border-color:var(--filet);color:var(--encre);background:var(--papier)}
 .labo-etapes .btn:hover{border-color:var(--encre)}
 .labo-etapes .btn[aria-pressed="true"],.labo-etapes .btn.on{border-color:var(--encre);color:var(--encre);background:var(--papier-2)}
 .labo-etapes .gl,.labo-etapes .rv{color:var(--encre-2)}
-.labo-etapes .tools{border-top-color:var(--trait)}
+.labo-etapes .tools{border-top-color:var(--filet)}
 .labo-etapes input[type=range]::-webkit-slider-runnable-track{background:var(--encre-3)}
 .labo-etapes input[type=range]::-moz-range-track{background:var(--encre-3)}
 .labo-etapes input[type=range]::-webkit-slider-thumb{background:var(--papier);border-color:var(--encre)}
@@ -98,3 +99,4 @@ body.labo-etapes[data-mode=manipuler] .couche-comp{display:none!important}
   .labo-etapes .sig dd{white-space:normal}
 }
 @media (max-width:640px){ .labo-etapes .barre .pos{display:none} }
+html:has(body.labo-etapes){background:var(--papier)}
