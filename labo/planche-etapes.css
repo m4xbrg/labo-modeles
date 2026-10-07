@@ -100,3 +100,49 @@ body.labo-etapes[data-mode=manipuler] .couche-comp{display:none!important}
 }
 @media (max-width:640px){ .labo-etapes .barre .pos{display:none} }
 html:has(body.labo-etapes){background:var(--papier)}
+
+/* ---------- Plein écran, coque repliée (défaut) ----------
+   planche.js range barre, titre court, étapes et couches sur une seule ligne ; le titre complet,
+   la signature et l'indice vont dans un tiroir (.tiroir) qu'ouvre « Infos » ou la touche I.
+   L'écran est bord à bord et prend toute la hauteur restante. */
+.labo-etapes .barre.compacte{display:flex;align-items:center;gap:clamp(12px,1.6vw,22px);padding:7px clamp(12px,1.6vw,22px);border-bottom:1px solid var(--filet);flex-wrap:nowrap;min-height:46px}
+.labo-etapes .barre.compacte .ou{display:flex;align-items:center;gap:14px;min-width:0;flex:0 1 auto}
+.labo-etapes .barre.compacte .retour{font-size:13px;white-space:nowrap}
+.labo-etapes .titre-court{font:500 15px/1.2 var(--sans);letter-spacing:-.01em;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:24vw}
+.labo-etapes .barre.compacte .centre{display:flex;align-items:center;gap:clamp(12px,2vw,26px);flex:1 1 auto;min-width:0;justify-content:center}
+.labo-etapes .barre.compacte .chapitres{padding:0;gap:0;flex-wrap:nowrap;flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.labo-etapes .barre.compacte .chap{flex:0 0 auto;flex-direction:row;align-items:center;gap:0}
+.labo-etapes .barre.compacte .chap + .chap{border-left:1px solid var(--filet);margin-left:8px;padding-left:8px}
+.labo-etapes .barre.compacte .chap-t{display:none}
+.labo-etapes .barre.compacte .chap .segs{gap:1px}
+.labo-etapes .barre.compacte .seg{flex:0 0 auto;min-height:28px;padding:4px 7px;border-top:0;border-bottom:1.5px solid transparent}
+.labo-etapes .barre.compacte .seg b{margin:0}
+.labo-etapes .barre.compacte .seg span{display:none}
+.labo-etapes .barre.compacte .seg[aria-current="step"]{border-bottom-color:var(--encre);color:var(--encre)}
+.labo-etapes .barre.compacte [role=tablist]{display:flex;gap:12px;flex:0 0 auto}
+.labo-etapes .barre.compacte [role=tablist] button{font-size:13px;color:var(--encre-3);padding:4px 0;background:none;border:0;cursor:pointer;position:relative}
+.labo-etapes .barre.compacte [role=tablist] button span{font-family:var(--mono);font-size:9.5px;margin-right:4px}
+.labo-etapes .barre.compacte [role=tablist] button[aria-selected=true]{color:var(--encre);box-shadow:inset 0 -1.5px 0 var(--encre)}
+.labo-etapes .barre.compacte .droite{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.labo-etapes .barre.compacte .pos{display:none}
+.labo-etapes .infos[aria-expanded="true"]{color:var(--encre);border-color:var(--encre)}
+/* tiroir */
+.labo-etapes .tiroir{display:none;border-bottom:1px solid var(--filet)}
+body.labo-etapes.coque-ouverte .tiroir{display:block}
+.labo-etapes .tiroir .titre{padding:14px clamp(12px,1.6vw,22px) 6px}
+.labo-etapes .tiroir .modes{padding:4px clamp(12px,1.6vw,22px) 10px}
+.labo-etapes .tiroir .modes [role=tablist]{display:none}
+/* écran bord à bord */
+.labo-etapes .app{margin:0;border-top:0}
+.labo-etapes .panel{padding-right:18px}
+.labo-etapes .controls{padding:8px clamp(12px,1.6vw,22px)}
+
+@media (max-width:860px){
+  .labo-etapes .barre.compacte{flex-wrap:wrap;row-gap:6px}
+  .labo-etapes .barre.compacte .centre{order:3;flex:1 1 100%;justify-content:space-between}
+  .labo-etapes .titre-court{max-width:40vw}
+}
+@media (max-width:520px){
+  .labo-etapes .barre.compacte .retour{display:none}
+  .labo-etapes .barre.compacte .centre{flex-direction:column;align-items:stretch;gap:6px}
+}

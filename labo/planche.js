@@ -57,10 +57,40 @@ if (num && window.LaboCorpus) window.LaboCorpus.charge().then(C => {
   if (suite) suite.innerHTML = carte(avant, -1) + carte(apres, 1);
 }).catch(err => console.warn('LABO : corpus illisible, position et voisins laissés tels quels', err));
 
-// Planches à étapes : l'écran occupe la hauteur restante de la fenêtre, contrôles compris.
+// Planches à étapes : plein écran, coque repliée en une barre. Le titre complet, la signature et
+// l'indice des couches se déplient avec le bouton « Infos » (touche I). Les éléments sont déplacés,
+// pas recréés : identifiants et écouteurs de la page restent valables.
 const app = document.body.classList.contains('labo-etapes') && $('.app');
+const ajuste = () => { if (!app || innerWidth <= 860) return; document.body.style.setProperty('--chrome', Math.round(app.getBoundingClientRect().top + scrollY) + 'px'); };
 if (app){
-  const ajuste = () => { if (innerWidth <= 860) return; document.body.style.setProperty('--chrome', Math.round(app.getBoundingClientRect().top + scrollY + 10) + 'px'); };
+  const barre = $('.barre'), titre = $('.titre'), chap = $('.chapitres'), modes = $('.modes'), liste = modes && modes.querySelector('[role=tablist]');
+  if (barre && titre && chap && liste){
+    barre.classList.add('compacte');
+    const court = document.createElement('p'); court.className = 'titre-court';
+    court.textContent = (titre.querySelector('h1') || {}).textContent || '';
+    (barre.querySelector('.ou') || barre).append(court);
+    const centre = document.createElement('div'); centre.className = 'centre';
+    centre.append(chap, liste);
+    barre.insertBefore(centre, barre.querySelector('.droite'));
+    // le titre de chaque étape passe en infobulle (le texte du bouton est masqué dans la barre)
+    chap.querySelectorAll('.seg').forEach(s => { if (!s.title) s.title = s.textContent.trim(); });
+    const infos = document.createElement('button'); infos.type = 'button'; infos.className = 'bascule-theme infos';
+    infos.setAttribute('aria-expanded', 'false'); infos.title = 'Titre, signature et aide (I)'; infos.textContent = 'Infos';
+    const tiroir = document.createElement('div'); tiroir.className = 'tiroir'; tiroir.id = 'tiroir';
+    tiroir.append(titre, modes); barre.after(tiroir); infos.setAttribute('aria-controls', 'tiroir');
+    const droite = barre.querySelector('.droite') || barre; droite.prepend(infos);
+    const bascule = ouvrir => {
+      const o = ouvrir === undefined ? !document.body.classList.contains('coque-ouverte') : ouvrir;
+      document.body.classList.toggle('coque-ouverte', o); infos.setAttribute('aria-expanded', o);
+      requestAnimationFrame(() => { ajuste(); dispatchEvent(new Event('resize')); });
+    };
+    infos.addEventListener('click', () => bascule());
+    addEventListener('keydown', e => {
+      if (e.target.closest('input,textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'i' || e.key === 'I') bascule();
+    });
+    echap.push(() => bascule(false));
+  }
   addEventListener('resize', ajuste); abonnes.push(() => requestAnimationFrame(ajuste)); ajuste();
   if (document.fonts) document.fonts.ready.then(ajuste);
 }
