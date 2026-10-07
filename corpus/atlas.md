@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 39 | 0 | 136 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 36 | 0 | 139 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 5 | 10 | 1 | 46 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **16** | **49** | **2** | **182** |
+| **Total** | **265** | **16** | **16** | **46** | **2** | **185** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -257,9 +257,9 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
 | Corps noir | `idea` | 43 | 24, 17 | — |  |
-| Effet photoélectrique | `absorbed` | 27 | 24 | Atomes, noyaux et lumière | Étape 7 des fondations Atomes, noyaux et lumière (seuil, tension d’arrêt, droites V(f) de pente h/e pour quatre métaux). |
-| Spectres atomiques | `absorbed` | 27 | 26 | Atomes, noyaux et lumière | Étape 6 des fondations Atomes, noyaux et lumière (tube à décharge, prisme, émission et absorption pour H, He, Na, Hg, Ne, gaz mystère). |
-| Modèle de Bohr | `absorbed` | 27 | 26 | Atomes, noyaux et lumière | Étape 5 des fondations Atomes, noyaux et lumière, comme échelle d’énergies de l’hydrogène (pas d’orbites) ; les orbitales relèvent du module 48. |
+| Effet photoélectrique | `idea` | 27 | 24 | — |  |
+| Spectres atomiques | `idea` | 27 | 26 | — |  |
+| Modèle de Bohr | `idea` | 27 | 26 | — |  |
 | Orbitales atomiques | `idea` | 48 | 27 | — |  |
 | Hybridation | `idea` | 28 | 48 | — |  |
 | Orbitales moléculaires | `idea` | 28 | 48 | — |  |

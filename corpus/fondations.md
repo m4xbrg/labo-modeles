@@ -20,12 +20,12 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-23, 26, 27, 32, 33, 40, 46 (26 modules) |
-| Couverture **partial** | 07, 08, 34, 36, 44 |
+| Couverture **full** par au moins un modèle | 01-06, 10-23, 26, 32, 33, 40, 46 (25 modules) |
+| Couverture **partial** | 07, 08, 27, 34, 36, 44 |
 | Seulement **supporting** | 09, 30, 31, 35 |
 | Rien | 24, 25, 28, 29, 37-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Atomes, noyaux, photons et spectres* (modules 26 et 27), ouvre la branche E · Atomes, chimie et noyaux le 2026-10-07, au même standard (deux chapitres de 4 et 3 étapes). Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Atomes, noyaux, photons et spectres* (modules 26 et 27), ouvre la branche E · Atomes, chimie et noyaux le 2026-10-07, au même standard ; seule la première moitié est livrée (chapitre 26 et explication des deux modules), le chapitre 27 suivra. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -38,7 +38,8 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 - **46** : une seule dimension d’espace ; accélération propre, quadrivecteurs, aberration et Doppler relativistes hors champ. Le module 47 est annoncé en fin de planche, pas couvert.
 - **40** : générations non chevauchantes, un seul gène, reproduction à un parent pour le trait continu, mutations neutres ; ni recombinaison, ni coalescence, ni spéciation. Les modules 41 et 42 sont annoncés en fin de planche (grille mélangée ou par voisinage), pas couverts.
 - **23** : sources à symétrie axiale et fils infinis seulement, sans matériaux magnétiques (ni fer, ni hystérésis) ; particules non relativistes ; inductance propre de la bobine réceptrice et des anneaux du tube négligée. Auto-induction, transformateur et moteur seulement introduits ; le module 24 est annoncé en fin de planche.
-- **26 · 27** : nucléons en billes, sans modèle en couches ; table des nucléides limitée à Z ≤ 26 (plus quelques repères) ; fils supposés stables, pas de chaînes ; Bohr pour les énergies de l'hydrogène seulement, nuages schématiques ; intensités des raies approximatives ; métal sans structure de bandes. Force forte, interaction faible, orbitales et spin seulement introduits.
+- **27** `partial` : la théorie est dans l'explication, les trois étapes de la planche (niveaux, raies, effet photoélectrique) sont à venir.
+- **26** : nucléons en billes, sans modèle en couches ; table des nucléides limitée à Z ≤ 26 (plus quelques repères) ; fils supposés stables, pas de chaînes ; Bohr pour les énergies de l'hydrogène seulement, nuages schématiques ; intensités des raies approximatives ; métal sans structure de bandes. Force forte, interaction faible, orbitales et spin seulement introduits.
 - **16** est enseigné par *Flux, gradients, champs et fluides*. Le gradient et le flux qui apparaissent dans *Matière, chaleur et transport* restent `supporting`.
 
 ## Les 50 modules
@@ -92,8 +93,8 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`built`) | **full** | Supernova par effondrement du cœur (supporting), Atomes, noyaux et lumière (full) |
-| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`built`) | **full** | Atomes, noyaux et lumière (full) |
+| 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`partial`) | **full** | Supernova par effondrement du cœur (supporting), Atomes, noyaux et lumière (full) |
+| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`partial`) | partial | Atomes, noyaux et lumière (partial) |
 | 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
 | 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
 | 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting) |
@@ -166,7 +167,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
-| Atomes, noyaux, photons et spectres | 26 · 27 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | Deux chapitres (4 + 3 étapes). Ouvre la branche E. Moteur verrouillé : `prompts/moteurs/atomes.js`. Reprend à la planche *Supernova* l'énergie de liaison par nucléon. |
+| Atomes, noyaux, photons et spectres (`partial`) | 26 · 27 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | Chapitre 26 (4 étapes) construit, chapitre 27 (3 étapes) à venir. Ouvre la branche E. Moteur verrouillé : `prompts/moteurs/atomes.js`. Reprend à la planche *Supernova* l'énergie de liaison par nucléon. |
 
 ### Prévues (rien de construit)
 
