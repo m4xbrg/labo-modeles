@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -37,13 +38,6 @@ a{color:inherit}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
 #cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
 
-.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
-h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
-h1 em{color:var(--accent);font-style:italic}
-.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
-.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
-.back:hover{color:var(--texte)}
 
 .tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
 .tip.on{opacity:1;transform:none}
@@ -128,7 +122,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
   .controls{order:2;padding:10px 16px}
   .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
-  .head{left:16px;top:14px}
   .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
   .stepper{flex:1 0 100%;order:5}
   input[type=range]{width:104px}
@@ -146,35 +139,73 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 32</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Cellule, membrane et transport</h1>
+    <p class="lead">Une membrane trie ce qui passe, l’eau et les solutés cherchent l’équilibre, et la cellule vivante paie pour garder ses différences.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>~5 nm à ~100 µm</dd>
+    <dt>Temps</dt><dd>illustratif (secondes d’écran)</dd>
+    <dt>Modèle</dt><dd>particules agitées, probabilités illustratives</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du module 32">
+  <div class="chap"><p class="chap-t"><b>32</b>Cellule, membrane et transport</p><div class="segs">
+    <button class="seg" data-a="0" data-b="1" title="32.1 — La frontière, puis qui traverse (deux scènes)"><b>32.1</b><span>Frontière</span></button>
+    <button class="seg" data-a="2" data-b="3" title="32.2 — Gradient et diffusion, puis osmose et volume (deux scènes)"><b>32.2</b><span>Diffusion, osmose</span></button>
+    <button class="seg" data-a="4" title="32.3 — Maintenir un gradient"><b>32.3</b><span>Pompes</span></button>
+    <button class="seg" data-a="5" data-b="6" title="32.4 — Surface et volume, puis compartiments (deux scènes)"><b>32.4</b><span>Taille, compartiments</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer de scène."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : retire la membrane, injecte une espèce, change la concentration du bain."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 32."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene" title="Mouvement réduit : si ton système le demande, l’agitation est divisée par 2 à l’affichage. Elle ne s’arrête jamais, elle est le sujet.">
     <canvas id="cv" role="img" aria-label="Scène de la membrane : boîte à particules séparée par une membrane, cellule dans un bain, deux cellules de tailles différentes, cellule eucaryote avec ses compartiments."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 32</p>
-      <h1>Cellule, membrane et <em>transport</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VII</p>
+      <p class="eyebrow" id="eyebrow">Module <b>32</b> · étape 1 sur 4</p>
       <h2 id="stepTitle">La frontière</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="key" id="key"></p>
-      <p class="status" id="status" aria-live="off"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p class="key couche-comp" id="key"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
     </section>
 
-    <section id="tblSec" hidden>
+    <section id="tblSec" class="couche-lire" hidden>
       <p class="eyebrow">Tableau mesuré</p>
       <div id="tbl"></div>
       <p class="note" style="margin-top:6px">/s/mol. : traversées par seconde, par molécule restée dehors (moyenne glissante de 8 s).</p>
     </section>
 
-    <section id="recSec">
+    <section id="recSec" class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -182,13 +213,13 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="leg" id="leg3"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="leg" id="leg2"></p>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section id="cards" hidden>
+    <section id="cards" class="couche-comp" hidden>
       <p class="eyebrow">Trois questions ouvertes</p>
       <div class="cards">
         <div class="card"><b>Énergie</b><p>Si une cellule dépense sans arrêt de l’énergie pour maintenir son organisation, d’où vient cette énergie ?</p><span>Module 34 (à venir). En attendant : planche 02, la respiration.</span></div>
@@ -197,16 +228,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </div>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>7</kbd> aller à l'acte</li>
-        <li><kbd>R</kbd> recommencer l'acte · <kbd>M</kbd> membrane (acte I) · <kbd>S</kbd> suivre une particule (acte III) · <kbd>P</kbd> pompes (acte V)</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> scène · <kbd>1</kbd>–<kbd>7</kbd> aller à la scène</li>
+        <li><kbd>R</kbd> recommencer la scène · <kbd>M</kbd> membrane (scène 1) · <kbd>S</kbd> suivre une particule (scène 3) · <kbd>P</kbd> pompes (scène 5)</li>
+        <li><kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches (M agit aussi sur la membrane à la scène 1)</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m32"><span>Théorie du module <b id="numTheorie">32</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -219,28 +251,16 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Recommencer l'acte (R)">Recommencer</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les sept actes">
-      <div class="sg" data-g="M"><span class="sgl"><span class="long">Paillasse M · membrane</span><span class="short">M</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Acte I — La frontière"><b>I</b><span>Frontière</span></button>
-        <button class="seg" data-a="1" title="Acte II — Qui traverse ?"><b>II</b><span>Qui traverse</span></button>
-        <button class="seg" data-a="2" title="Acte III — Gradient et diffusion"><b>III</b><span>Diffusion</span></button>
-        <button class="seg" data-a="3" title="Acte IV — Osmose et volume"><b>IV</b><span>Osmose</span></button>
-      </div></div>
-      <div class="sg" data-g="C"><span class="sgl"><span class="long">Paillasse C · cellule vivante</span><span class="short">C</span></span><div class="sgs">
-        <button class="seg" data-a="4" title="Acte V — Maintenir un gradient"><b>V</b><span>Gradient</span></button>
-        <button class="seg" data-a="5" title="Acte VI — Surface et volume"><b>VI</b><span>Surface</span></button>
-        <button class="seg" data-a="6" title="Acte VII — Compartiments"><b>VII</b><span>Compartiments</span></button>
-      </div></div>
-    </div>
-
     <div class="tools" id="tools">
       <!-- I -->
+      <div class="grp" data-acts="0 1"><span class="gl">Scène</span><button class="btn scn" data-go="0" aria-pressed="false">La frontière</button><button class="btn scn" data-go="1" aria-pressed="false">Qui traverse</button></div>
       <div class="grp" data-acts="0"><button class="btn go" id="bMem" title="Membrane (touche M)">Retirer la membrane</button><button class="btn" id="bLoupe" aria-pressed="true"><span class="dot"></span>Loupe sur la membrane</button></div>
       <!-- II -->
       <div class="grp" data-acts="1"><span class="gl">Injecter 30 dehors</span><button class="btn sm" data-inj="o2">O₂</button><button class="btn sm" data-inj="ster">stéroïde</button><button class="btn sm" data-inj="eau">H₂O</button><button class="btn sm" data-inj="glu">glucose</button><button class="btn sm" data-inj="na">Na⁺</button><button class="btn sm" id="bVid">Vider</button></div>
       <div class="grp" data-acts="1"><span class="gl">Membrane</span><button class="btn" id="bBil" aria-pressed="true">Bicouche lipidique</button><button class="btn" id="bTam" aria-pressed="false">Tamis hypothétique</button></div>
       <div class="grp" data-acts="1"><span class="gl">Protéines</span><button class="btn" id="bAq" aria-pressed="false"><span class="dot"></span>Aquaporines</button><button class="btn" id="bNav" aria-pressed="false"><span class="dot"></span>Canaux Na⁺</button><button class="btn" id="bGlut" aria-pressed="false"><span class="dot"></span>Transporteurs du glucose</button></div>
       <!-- III -->
+      <div class="grp" data-acts="2 3"><span class="gl">Scène</span><button class="btn scn" data-go="2" aria-pressed="false">Diffusion</button><button class="btn scn" data-go="3" aria-pressed="false">Osmose</button></div>
       <div class="grp" data-acts="2"><span class="gl">intérieur au départ</span><input type="range" id="rIn" min="0" max="120" step="1" value="10" aria-label="Nombre de particules A à l'intérieur au départ"><span class="rv" id="vIn"></span></div>
       <div class="grp" data-acts="2"><span class="gl">extérieur au départ</span><input type="range" id="rOut" min="0" max="120" step="1" value="110" aria-label="Nombre de particules A à l'extérieur au départ"><span class="rv" id="vOut"></span></div>
       <div class="grp" data-acts="2"><span class="gl">canaux ouverts</span><input type="range" id="rCh" min="1" max="6" step="1" value="4" aria-label="Nombre de canaux ouverts, la perméabilité"><span class="rv" id="vCh"></span></div>
@@ -254,6 +274,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-acts="4"><button class="btn go" id="bPump" aria-pressed="false" title="Pompes (touche P)"><span class="dot"></span>Pompes en marche</button><button class="btn" id="bSup" aria-pressed="false"><span class="dot"></span>Apport d’énergie (ATP)</button><button class="btn" id="bSym" aria-pressed="false"><span class="dot"></span>Symport Na⁺–glucose</button></div>
       <div class="grp" data-acts="4"><span class="gl">fuite</span><input type="range" id="rLeak" min="1" max="3" step="1" value="2" aria-label="Nombre de canaux de fuite de chaque ion"><span class="rv" id="vLeak"></span></div>
       <!-- VI -->
+      <div class="grp" data-acts="5 6"><span class="gl">Scène</span><button class="btn scn" data-go="5" aria-pressed="false">Surface et volume</button><button class="btn scn" data-go="6" aria-pressed="false">Compartiments</button></div>
       <div class="grp" data-acts="5"><span class="gl">diamètre d de B</span><input type="range" id="rD" min="5" max="100" step="1" value="30" aria-label="Diamètre de la cellule B en micromètres"><span class="rv" id="vD"></span></div>
       <div class="grp" data-acts="5"><button class="btn" id="bFold" aria-pressed="false"><span class="dot"></span>Replis de la membrane (×3)</button></div>
       <!-- VII -->
@@ -557,6 +578,9 @@ function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y
 let W = 800, H = 560, dpr = 1;
 let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0, spd = 1, animT = 0;
 const NA = 7, ROM = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+const ETAPE = [0, 0, 1, 1, 2, 3, 3];   // étape de la navigation (32.1 à 32.4) qui porte chaque scène
+const NB_ETAPES = 4;
+const headH = () => 28;   // le titre est sorti de la scène (coque LABO)
 const SPDS = [1, 2, 4];
 const simK = () => spd * (reduce ? 0.5 : 1);
 const prm = {};
@@ -617,7 +641,7 @@ const trails = [], sidesM = new Map(), flash = new Map();
 const fol = { on: false, p: null, side: '', n: 0, tl: 0, pts: [] };
 const inj = {};
 function layout() {
-  const T = W < 620 ? 126 : 112, bot = 36, top = T + 38;
+  const T = headH(), bot = 36, top = T + 38;
   const bw = Math.max(200, Math.min(W - 28, 2 * (H - top - bot))), bh = bw / 2, bx = (W - bw) / 2, by = top + Math.max(0, (H - top - bot - bh) / 2);
   G = { bx, by, bw, bh, sc: bw / 2, X: x => bx + (x + 1) / 2 * bw, Y: y => by + y * bh };
 }
@@ -989,7 +1013,7 @@ function status3() {
 /* ================= Acte IV : osmose et volume ================= */
 const k4 = { s: null, acc: 0, t: 0, rec: [], recT: 0, since: 0, rev: false, water: [], inP: [], bath: [], ur: [], lyseT: -1, spill: [], r: Cell.rng(5), wacc: [0, 0] };
 function cellGeo() {
-  const T = W < 620 ? 126 : 112, cx = W / 2, cy = T + (H - T - 30) / 2, R0 = Math.min(W * 0.26, (H - T - 70) * 0.3);
+  const T = headH(), cx = W / 2, cy = T + (H - T - 30) / 2, R0 = Math.min(W * 0.26, (H - T - 70) * 0.3);
   return { T, cx, cy, R0, r: R0 * Math.cbrt(k4.s.V) };
 }
 function init4() {
@@ -1149,7 +1173,7 @@ function status5() {
 const k6 = { kS: 0, pool: [], t: 0 };
 function init6() { const r = Cell.rng(61); k6.pool = Array.from({ length: 420 }, () => { let u, v; do { u = r() * 2 - 1; v = r() * 2 - 1; } while (u * u + v * v > 0.74); return { u, v, ph: r() * TAU, f: 0.6 + r() * 0.9 }; }); k6.t = 0; k6.kS = 0; }
 function geo6() {
-  const T = W < 620 ? 126 : 112, d = prm.d, gap = 46, kW = (W - 36 - gap) / (10 + d * 1.0), kH = (H - T - 150) / Math.max(10, d), k = Math.min(kW, kH, 14);
+  const T = headH(), d = prm.d, gap = 46, kW = (W - 36 - gap) / (10 + d * 1.0), kH = (H - T - 150) / Math.max(10, d), k = Math.min(kW, kH, 14);
   const kk = k6.kS || k, wA = 10 * kk, wB = d * kk, x0 = (W - (wA + wB + gap)) / 2, cyl = T + (H - T - 60) / 2 + 6;
   return { k: kk, target: k, xa: x0 + wA / 2, xb: x0 + wA + gap + wB / 2, cy: cyl, ra: wA / 2, rb: wB / 2 };
 }
@@ -1229,7 +1253,7 @@ function step7(n) {
   }
 }
 function adv7(dt) { const d = dt * simK(); k7.acc += d; let n = 0; while (k7.acc >= 1 / 60 && n < 8) { step7(1); k7.acc -= 1 / 60; n++; } if (k7.acc > 0.2) k7.acc = 0; k7.ma += ((prm.dis ? 0 : 1) - k7.ma) * Math.min(1, dt * 3); }
-function geo7() { const T = W < 620 ? 128 : 112, s = Math.min((W - 24) / 2.04, (H - T - 40) / 1.4); return { s, cx: W / 2, cy: T + (H - T - 22) / 2 + 4 }; }
+function geo7() { const T = headH(), s = Math.min((W - 24) / 2.04, (H - T - 40) / 1.4); return { s, cx: W / 2, cy: T + (H - T - 22) / 2 + 4 }; }
 function count7() {
   const o = { cyt: 0, lys: 0, ims: 0, oth: 0, dIn: 0 };
   for (const p of k7.parts) {
@@ -1409,8 +1433,9 @@ function enterAct(n, restart) {
 }
 function updateUI(n) {
   uiAct = n;
-  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VII`;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n || +s.dataset.b === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  document.querySelectorAll('.scn').forEach(b => b.setAttribute('aria-pressed', +b.dataset.go === n ? 'true' : 'false'));
+  $('#eyebrow').innerHTML = `Module <b>32</b> · étape ${ETAPE[n] + 1} sur ${NB_ETAPES}`;
   $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x; $('#key').textContent = ACTS[n].k;
   for (const id of ['#stepTitle', '#stepText', '#key']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
@@ -1431,7 +1456,8 @@ $('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blu
 $('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
 $('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
 $('#bSpeed').addEventListener('click', e => { spd = SPDS[(SPDS.indexOf(spd) + 1) % SPDS.length]; syncTools(); e.currentTarget.blur(); });
-document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { if (!(s.dataset.b !== undefined && uiAct === +s.dataset.b)) goAct(+s.dataset.a); e.currentTarget.blur(); }));
+document.querySelectorAll('.scn').forEach(b => b.addEventListener('click', e => { goAct(+b.dataset.go); e.currentTarget.blur(); }));
 
 const bindRange = (id, fn, ev) => $('#' + id).addEventListener(ev || 'input', e => { fn(+e.currentTarget.value); syncTools(); });
 $('#bMem').addEventListener('click', e => { setMem1(!prm.mem); e.currentTarget.blur(); });
@@ -1497,6 +1523,7 @@ const endPtr = e => { loupDrag = false; cv.className = ''; try { cv.releasePoint
 cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 cv.addEventListener('pointerleave', () => { if (!loupDrag) { hideTip(); cv.className = ''; } });
 new ResizeObserver(() => resize()).observe(sceneEl);
+new MutationObserver(() => requestAnimationFrame(sizePanelCanvases)).observe(document.body, { attributes: true, attributeFilter: ['data-mode'] });   // les graphes du panneau se redimensionnent quand leur couche apparaît
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -1551,5 +1578,6 @@ enterAct(0, true); updateUI(0); syncTools();
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

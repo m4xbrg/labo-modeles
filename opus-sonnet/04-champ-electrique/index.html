@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -38,12 +39,6 @@ a{color:inherit}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
 #cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.armed{cursor:cell}
 
-.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
-h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
-h1 em{color:var(--accent);font-style:italic}
-.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
-.back:hover{color:var(--texte)}
 
 .tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:250px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
 .tip.on{opacity:1;transform:none}
@@ -101,7 +96,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
   .controls{order:2;padding:12px 16px}
   .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
-  .head{left:16px;top:14px}
   .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
   input[type=range]{width:96px}
 }
@@ -110,27 +104,65 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   #needleG,.tip,.btn,.comprendre{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 21</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Le champ électrique</h1>
+    <p class="lead">Des charges créent un champ et un potentiel ; une charge test en subit la force, et la tension se lit entre deux points.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>1 px = 1 mm</dd>
+    <dt>Temps</dt><dd>charge test : ~0,1 à 10 s</dd>
+    <dt>Modèle</dt><dd>charges ponctuelles, électrostatique</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes : le module 21">
+  <div class="chap"><p class="chap-t"><b>21</b>Électrostatique</p><div class="segs">
+    <button class="seg" data-a="0" title="21.1 — Charges et champ"><b>21.1</b><span>Charges et champ</span></button>
+    <button class="seg" data-a="1" title="21.2 — Potentiel et équipotentielles"><b>21.2</b><span>Potentiel</span></button>
+    <button class="seg" data-a="2" title="21.3 — Charge test et force"><b>21.3</b><span>Charge test</span></button>
+    <button class="seg" data-a="3" title="21.4 — Tension entre deux points"><b>21.4</b><span>Tension</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène est déjà réglée pour l’étape. 1 à 4 pour changer d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les mesures et les réglages apparaissent : déplace les charges, ajoute-en, sonde le champ, ou repars du bac à sable libre."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 21."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène interactive : charges électriques, lignes de champ, équipotentielles et charge test. Clique pour ajouter une charge, glisse pour la déplacer."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 21</p>
-      <h1>Le champ <em>électrique</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow">Lecture</p>
+      <p class="eyebrow" id="eyebrow">Module <b>21</b> · étape 1 sur 4</p>
       <h2 id="stepTitle">Le dipôle</h2>
-      <p id="stepText" aria-live="polite"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Au point sondé</p>
       <div class="meas">
         <div class="row"><span class="lab">|E|</span><span class="val"><b id="mE">—</b><i>N/C</i></span></div>
@@ -144,7 +176,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note">E existe en chaque point, qu'il y ait une charge ou non. Une force n'apparaît que si une charge q est là pour la subir : F = qE. Échelle : 1 px = 1 mm ; la barre en bas à gauche mesure 10 cm.</p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Tension entre A et la sonde</p>
       <div class="meas" id="uMeas">
         <div class="row small"><span class="lab">V au point A</span><span class="val"><b id="uA">—</b><i>V</i></span></div>
@@ -155,7 +187,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note" id="uNote">Bouton « Point A » (touche U), puis clic : la tension se lit entre A et la sonde.</p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Sources</p>
       <div class="meas">
         <div class="row small"><span class="lab">Charges</span><span class="val"><b id="sN">0</b><i></i></span></div>
@@ -164,7 +196,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </div>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Charge test</p>
       <div class="meas" id="testMeas">
         <div class="row small"><span class="lab">Vitesse</span><span class="val"><b id="tV">—</b><i>m/s</i></span></div>
@@ -175,7 +207,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note" id="testNote">q = 1 nC, m = 10 mg. Aucune charge test pour l'instant.</p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Gestes</p>
       <ul class="hints">
         <li>Clic : ajouter · Maj+clic : signe opposé</li>
@@ -183,11 +215,12 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
         <li>Molette sur une charge : sa valeur</li>
         <li><kbd>T</kbd> charge test · <kbd>U</kbd> point A (tension)</li>
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps · <kbd>R</kbd> réinitialiser</li>
+        <li><kbd>1</kbd>–<kbd>4</kbd> étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m21"><span>Théorie du module <b>21</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -199,6 +232,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser (R)">Réinitialiser</button>
     </div>
 
+    <div id="tools" style="display:contents">
     <div class="grp" id="presets">
       <span class="gl">Préréglages</span>
       <button class="btn" data-p="dipole">Dipôle</button>
@@ -237,6 +271,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <span class="gl">Temps</span>
       <input type="range" id="ts" min="0.1" max="2" step="0.05" value="1" aria-label="Vitesse du temps">
       <span class="rv" id="tsV">×1,00</span>
+    </div>
     </div>
   </div>
 </div>
@@ -1074,7 +1109,7 @@ $('#ts').addEventListener('input', e => { timeScale = +e.target.value; $('#tsV')
 $('#bPlay').addEventListener('click', () => { playing = !playing; syncPlay(); });
 $('#bBack').addEventListener('click', () => stepTime(-1));
 $('#bFwd').addEventListener('click', () => stepTime(1));
-$('#bReset').addEventListener('click', () => applyPreset(lastPreset));
+$('#bReset').addEventListener('click', resetScene);
 $('#bDel').addEventListener('click', () => { if (selected) removeCharge(selected); });
 $('#bA').addEventListener('click', () => {
   if (ptA && !armA) { ptA = null; pathA = new Path2D(); syncArmA(); return; }
@@ -1087,6 +1122,7 @@ $('#bTest').addEventListener('click', () => {
   if (armTest) setStep('arm', 'Prêt à lâcher', 'Clique dans la scène : la charge test (1 nC, 10 mg) part du repos à cet endroit. Choisis son signe avec les boutons + et − à côté.');
 });
 document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('click', () => {
+  stage = -1; syncStages();            // le bac à sable libre reprend la main
   if (b.dataset.p === 'vide') { applyPreset('vide'); lastPreset = 'dipole'; } else applyPreset(b.dataset.p);
 }));
 document.querySelectorAll('#views .btn').forEach(b => b.addEventListener('click', () => {
@@ -1095,6 +1131,42 @@ document.querySelectorAll('#views .btn').forEach(b => b.addEventListener('click'
   if (views[k] && READ[k]) { step.key = ''; setStep('lecture-' + k, ...READ[k]); }
   dirty = true; fast = false;
 }));
+/* ---------------- Étapes du module 21 ----------------
+   Chaque étape règle la scène existante (préréglage, affichages, charge test, point A) ;
+   le bac à sable libre reste accessible en Manipuler (préréglages, affichages, charges). */
+const VIEWS0 = { lines: false, eq: false, map: false, vec: false, forces: false };
+const STAGES = [
+  { t: 'Charges et champ', v: { lines: true, vec: true },
+    x: 'Deux charges opposées de 3 nC. E existe en chaque point : les lignes de champ en donnent la direction (de + vers −) et, par leur densité, l’intensité ; chaque flèche est E à son endroit. Passe la sonde sur la scène et compare |E| au serrement des lignes.' },
+  { t: 'Potentiel et équipotentielles', v: { lines: true, eq: true, map: true },
+    x: 'Un seul nombre par point : V, l’énergie par coulomb. Orange = potentiel haut, bleu = bas ; les courbes vertes relient les points de même V, tous les 40 V, et coupent les lignes à angle droit. Le champ est la pente de ce relief.' },
+  { t: 'Charge test et force', v: { lines: true, forces: true }, test: true },
+  { t: 'Tension entre deux points', v: { lines: true, eq: true }, tension: true }
+];
+let stage = 0;
+function setViews(v) {
+  Object.assign(views, VIEWS0, v);
+  document.querySelectorAll('#views .btn').forEach(b => b.setAttribute('aria-pressed', String(!!views[b.dataset.v])));
+}
+function syncStages() {
+  document.querySelectorAll('#stepper .seg').forEach(b => { if (+b.dataset.a === stage) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = stage >= 0 ? `Module <b>21</b> · étape ${stage + 1} sur ${STAGES.length}` : 'Module <b>21</b> · bac à sable libre';
+  $('#lienTheorie').href = 'explication.html#m21';
+}
+function goStage(k) {
+  const g = STAGES[k]; if (!g) return;
+  stage = k;
+  applyPreset('dipole'); setViews(g.v);
+  const s = Math.min(240, Math.max(110, W * 0.27)), mx = W / 2, my = H / 2;
+  if (g.test) { testSign = 1; document.querySelectorAll('.tsgn').forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.s === 1))); launch(mx - s / 2 + 8, my - 62); }
+  else if (g.tension) { syncArrays(); placeA(mx - s * 0.25, my - 46); setProbe({ x: mx + s * 0.25, y: my + 46 }); }
+  else { step.key = ''; setStep('etape' + k, g.t, g.x); }
+  dirty = true; fast = false;
+  syncStages();
+}
+function resetScene() { if (stage >= 0) goStage(stage); else applyPreset(lastPreset); }
+document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => { goStage(+b.dataset.a); e.currentTarget.blur(); }));
+
 document.addEventListener('keydown', e => {
   const t = e.target, tag = t.tagName;
   if (tag === 'INPUT' && t.type === 'range') { if (e.key === ' ') return; if (e.key.startsWith('Arrow')) return; }
@@ -1102,7 +1174,8 @@ document.addEventListener('keydown', e => {
   if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); playing = !playing; syncPlay(); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); stepTime(-1); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepTime(1); }
-  else if (e.key === 'r' || e.key === 'R') applyPreset(lastPreset);
+  else if (e.key === 'r' || e.key === 'R') resetScene();
+  else if (e.key >= '1' && e.key <= '4' && tag !== 'INPUT') goStage(+e.key - 1);
   else if (e.key === 't' || e.key === 'T') $('#bTest').click();
   else if (e.key === 'u' || e.key === 'U') $('#bA').click();
   else if ((e.key === 'Delete' || e.key === 'Backspace') && selected && tag !== 'INPUT') { e.preventDefault(); removeCharge(selected); }
@@ -1135,7 +1208,7 @@ function frame(now) {
 }
 
 resize();
-applyPreset('dipole');
+goStage(0);
 syncPlay();
 requestAnimationFrame(frame);
 
@@ -1143,5 +1216,6 @@ requestAnimationFrame(frame);
 window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, parts: () => parts, size: () => [W, H], preset: applyPreset, setA: (x, y) => placeA(x, y), probe: (x, y) => setProbe({ x, y }), views: () => views };
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

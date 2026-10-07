@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -150,16 +151,63 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 @media (prefers-reduced-motion:reduce){.lien2{transition:none}}
 
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 06 · 14 · 15</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Oscillations et ondes</h1>
+    <p class="lead">Un cercle devient un sinus, un ressort échange son énergie, une corde résonne, deux ondes s’annulent.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>~10 cm à ~1 m</dd>
+    <dt>Temps</dt><dd>~0,1 à 10 s</dd>
+    <dt>Modèle</dt><dd>linéaire, petits mouvements</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
+  <div class="chap"><p class="chap-t"><b>06</b>Sinusoïdes, cycles et phase</p><div class="segs">
+    <button class="seg" data-a="0" title="06.1 — Un cycle"><b>06.1</b><span>Un cycle</span></button>
+    <button class="seg" data-a="1" title="06.2 — Deux oscillations, un déphasage"><b>06.2</b><span>Déphasage</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>14</b>Oscillateurs et résonance</p><div class="segs">
+    <button class="seg" data-a="2" title="14.1 — Échange d’énergie"><b>14.1</b><span>Échange</span></button>
+    <button class="seg" data-a="3" title="14.2 — Amortissement"><b>14.2</b><span>Pertes</span></button>
+    <button class="seg" data-a="4" title="14.3 — Forçage et résonance"><b>14.3</b><span>Résonance</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>15</b>Ondes</p><div class="segs">
+    <button class="seg" data-a="5" data-b="6" title="15.1 — Une onde qui voyage (impulsion ou onde périodique)"><b>15.1</b><span>Voyage</span></button>
+    <button class="seg" data-a="7" title="15.2 — Deux ondes, une même corde"><b>15.2</b><span>Somme</span></button>
+    <button class="seg" data-a="8" title="15.3 — Ondes stationnaires et modes propres"><b>15.3</b><span>Modes</span></button>
+    <button class="seg" data-a="9" title="15.4 — Doppler"><b>15.4</b><span>Doppler</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change une valeur, glisse la masse ou la perle témoin."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène de la paillasse en cours : cadran de phase, oscilloscope, ressort et masse, ou corde tendue, selon l'étape."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 06 · 14 · 15</p>
-      <h1>Oscillations et <em>ondes</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
@@ -167,31 +215,31 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 10</p>
       <h2 id="stepTitle">Un cycle</h2>
-      <p id="stepText" aria-live="polite"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section id="secBox" hidden>
+    <section id="secBox" class="couche-lire" hidden>
       <p class="eyebrow" id="secEye"></p>
       <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe secondaire de l'étape."></canvas></div>
       <p class="leg" id="secLeg"></p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
       <a class="lien2" id="lien05" href="../05-ondes-interferences/index.html" hidden><span>La même chose en deux dimensions</span><span aria-hidden="true">&rarr;</span></a>
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m06"><span>Théorie du module <b id="numTheorie">06</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -203,18 +251,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les dix étapes, en quatre chapitres">
-      <button class="seg ch0" data-a="0" title="A1 — Un cycle"><b>A1</b><span>Cycle</span></button>
-      <button class="seg" data-a="1" title="A2 — Deux oscillations, un déphasage"><b>A2</b><span>Déphasage</span></button>
-      <button class="seg ch0" data-a="2" title="B1 — Échange d'énergie"><b>B1</b><span>Échange</span></button>
-      <button class="seg" data-a="3" title="B2 — Amortissement"><b>B2</b><span>Pertes</span></button>
-      <button class="seg" data-a="4" title="B3 — Forçage et résonance"><b>B3</b><span>Résonance</span></button>
-      <button class="seg ch0" data-a="5" title="C1 — Une perturbation qui voyage"><b>C1</b><span>Impulsion</span></button>
-      <button class="seg" data-a="6" title="C2 — Onde périodique"><b>C2</b><span>Onde</span></button>
-      <button class="seg ch0" data-a="7" title="D1 — Deux ondes, une même corde"><b>D1</b><span>Somme</span></button>
-      <button class="seg" data-a="8" title="D2 — Ondes stationnaires et modes propres"><b>D2</b><span>Modes</span></button>
-      <button class="seg" data-a="9" title="D3 — Doppler"><b>D3</b><span>Doppler</span></button>
-    </div>
 
     <div class="tools" id="tools">
       <div class="grp" data-s="0 1">
@@ -253,8 +289,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
         <input type="range" id="rB3" min="0.15" max="1.5" step="0.05" value="0.25" aria-label="Coefficient d'amortissement bêta">
         <span class="rv" id="vB3">0,25 s⁻¹</span>
       </div>
+      <div class="grp" data-s="5 6">
+        <span class="gl">Scène</span><button class="btn" id="bVoyI" aria-pressed="true">Impulsion</button><button class="btn" id="bVoyP" aria-pressed="false">Onde périodique</button>
+      </div>
       <div class="grp" data-s="5">
-        <button class="btn" id="bPulse">Impulsion</button>
+        <button class="btn" id="bPulse">Envoyer une impulsion</button>
         <button class="btn" id="bTwo">Deux impulsions</button>
         <button class="btn" id="bOpp" aria-pressed="false">Sens opposés</button>
         <button class="btn" id="bEnd" aria-pressed="false">Bout libre</button>
@@ -310,7 +349,7 @@ const TS = reduce ? 0.25 : 1;
 const $ = s => document.querySelector(s);
 const cv = $('#cv'), ctx = cv.getContext('2d');
 const secC = $('#sec'), sx = secC.getContext('2d');
-const sceneEl = $('#scene'), tipEl = $('#tip'), headEl = document.querySelector('.head');
+const sceneEl = $('#scene'), tipEl = $('#tip');
 
 const rootCS = getComputedStyle(document.documentElement);
 const tok = n => rootCS.getPropertyValue(n).trim();
@@ -489,7 +528,9 @@ const STEPS = [
   { c: 'D', t: 'Doppler', x: 'La source ne change pas de fréquence ; les fronts se tassent devant elle et s’étirent derrière. Chaque observateur compte les fronts reçus : f′ = f / (1 ∓ v/c).' }
 ];
 const RN = ['A', 'B', 'C', 'D'];
-const headH = () => W <= 860 ? 100 : 118;
+const MOD = [[6,1,2],[6,2,2],[14,1,3],[14,2,3],[14,3,3],[15,1,4],[15,1,4],[15,2,4],[15,3,4],[15,4,4]];   // module, rang, nombre d'étapes du module
+
+const headH = () => 16;   // le titre est sorti de la scène (coque LABO)
 const padX = () => W < 600 ? 14 : 26;
 
 /* tailles de dessin partagées */
@@ -1121,8 +1162,11 @@ function sizeSec() {
 function updateUI(n) {
   const ae = document.activeElement; if (ae && ae.closest && ae.closest('#tools .grp[hidden]')) ae.blur();
   const s = STEPS[n], ch = RN.indexOf(s.c);
-  document.querySelectorAll('.seg').forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Chapitre <b>${s.c}</b> · étape ${n + 1} sur 10`;
+  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === n || +b.dataset.b === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  const [mm, rg, nb] = MOD[n], m2 = String(mm).padStart(2, '0');
+  $('#eyebrow').innerHTML = `Module <b>${m2}</b> · étape ${rg} sur ${nb}`;
+  $('#lienTheorie').href = `explication.html#m${m2}`; $('#numTheorie').textContent = m2;
+  $('#bVoyI').setAttribute('aria-pressed', n === 5); $('#bVoyP').setAttribute('aria-pressed', n === 6);
   $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#mNote').textContent = NOTES[n];
   for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === 9; $('#lien05').hidden = n !== 7;
@@ -1189,6 +1233,8 @@ $('#bPrev').addEventListener('click', e => { goStep(idx - 1); e.currentTarget.bl
 $('#bNext').addEventListener('click', e => { goStep(idx + 1); e.currentTarget.blur(); });
 $('#bReset').addEventListener('click', e => { resetStep(); e.currentTarget.blur(); });
 document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goStep(+b.dataset.a); e.currentTarget.blur(); }));
+$('#bVoyI').addEventListener('click', () => { if (idx !== 5) goStep(5); });
+$('#bVoyP').addEventListener('click', () => { if (idx !== 6) goStep(6); });
 
 function setParam(name, v) {
   v = +v;
@@ -1300,5 +1346,6 @@ initStep(0, false);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
