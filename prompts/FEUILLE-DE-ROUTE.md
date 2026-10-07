@@ -29,7 +29,7 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 | 3 · F | [ ] `energie-biologique` | 34 | 4 | 0,8 | [écrit](fondations-energie-biologique.md) | 30, 31, 32 |
 | 3 · F | [ ] `information-genetique` | 35 | 4 | 0,8 | [écrit](fondations-information-genetique.md) | 28, 32, 34 |
 | 3 · F | [ ] `genome-variation` | 36 | 4 | 0,8 | [écrit](fondations-genome-variation.md) | 35, 07 |
-| 3 · F | [ ] `signalisation-homeostasie` | 37 | 4 | 0,8 | [écrit](fondations-signalisation-homeostasie.md) | 04, 30, 34, 35 |
+| 3 · F | [x] `signalisation-homeostasie` | 37 | 4 | 0,8 | [écrit](fondations-signalisation-homeostasie.md), construite le 2026-10-07 | 04, 30, 34, 35 |
 | 4 · G | [ ] `physiologie-circulation` | 38 | 4 | 0,9 | [écrit](fondations-physiologie-circulation.md) | 20, 33, 34 |
 | 4 · G | [ ] `immunite-coagulation` | 39 | 4 | 0,8 | [écrit](fondations-immunite-coagulation.md) | 36, 37 |
 | 5 · I-J | [ ] `rayonnement-etoiles` | 43 · 44 | 3 + 4 | 1,2 | [écrit](fondations-rayonnement-etoiles.md) | 13, 17, 26, 27 |

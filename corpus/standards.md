@@ -36,7 +36,7 @@ Les showcases ne suivent pas ce plan : leur explication porte sur leur phénomè
 
 La navigation d'une page de fondations est organisée en **chapitres = modules canoniques**, avec **2 à 4 étapes par chapitre**. Une page à trois modules a donc 6 à 12 étapes ; une page à un module, 2 à 4. Une même barre d'étapes partout, sans onglets imbriqués.
 
-État de la branche de migration au 2026-10-06, après la migration des 16 fondations et des 6 showcases : les chapitres réalisés respectent tous la règle de 2 à 4 étapes par chapitre. Les scènes regroupées restent accessibles depuis leurs commandes.
+État de la branche de migration au 2026-10-07, après la migration des 16 fondations et des 6 showcases et l’ajout de la fondation 37 : les chapitres réalisés respectent tous la règle de 2 à 4 étapes par chapitre. Les scènes regroupées restent accessibles depuis leurs commandes.
 
 | Page | Chapitres (modules canoniques) | Étapes par chapitre | Total | État |
 |---|---|---|---|---|
@@ -56,6 +56,7 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | Molécules et mole | 28 · 29 | 4 + 3 | 7 | Conforme, gabarit LABO. |
 | L’onde électromagnétique | 24 | 4 | 4 | Conforme, gabarit LABO. |
 | Atomes, noyaux et lumière | 26 · 27 | 4 + 3 emplacements à venir | 4 réalisées + 3 emplacements | Gabarit LABO ; chapitre 26 réalisé, chapitre 27 explicitement à venir ; théorie disponible. |
+| Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
 
 Les quatre fondations récentes suivent aussi le gabarit. Les commandes de scène sont conservées : couches O/M/K pour Magnétisme et Molécules, V/M/C pour Onde électromagnétique, O/A/C pour Atomes, afin de garder C (couper ou casser), O (osciller) et M (changer de modèle). La conformité du nombre d’étapes ne signifie pas que toute la couverture conceptuelle est complète : les statuts restent ceux du corpus.
 

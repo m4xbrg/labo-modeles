@@ -31,17 +31,17 @@ Les fondations ne remplacent pas les grands modèles : elles les rendent possibl
 
 Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-07 :
 
-**Construit : 21 modèles, plus un en cours.**
+**Construit : 22 modèles, plus un en cours (23 modèles au total).**
 
 - Planches numérotées 01-09 : La mitose · La respiration cellulaire · Le neurone qui apprend · Le champ électrique · Ondes et interférences · Courant et circuits · Matière, chaleur et transport · La réplication de l'ADN · Supernova par effondrement du cœur. Cinq d'entre elles (mitose, respiration, neurone, réplication, supernova) forment la collection *L'invisible en mouvement*.
-- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32) · Magnétisme et induction (23) · L'onde électromagnétique (24) · Molécules et mole (28·29). *Atomes, noyaux et lumière* (26·27) est `partial` : chapitre 26 et explication construits, chapitre 27 à venir.
+- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32) · Magnétisme et induction (23) · L'onde électromagnétique (24) · Molécules et mole (28·29) · Signaux et équilibres du vivant (37). *Atomes, noyaux et lumière* (26·27) est `partial` : chapitre 26 et explication construits, chapitre 27 à venir.
 - Les huit productions de fondations définies au départ sont construites ; les planches 06 et 07 en sont issues, et la 04 a été prolongée par l'une d'elles.
 
 **Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 34, 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
 
-**Prévu, rien de construit.** Les fondations 25 (optique) à 37 (signalisation), sauf 26, 28 et 29 (le 27 a sa théorie, pas encore sa planche), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
+**Prévu, rien de construit.** Les fondations 25 (optique) à 36 (génome), sauf 26, 28 et 29 (le 27 a sa théorie, pas encore sa planche), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
 
-**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 16 partielles, 50 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 181 restent des idées.
+**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 16 partielles, 52 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 179 restent des idées.
 
 ## Où est la source de vérité
 
@@ -66,7 +66,7 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 - `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs des pages construites sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe. Pour la suite : [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md) (les pages de fondations qui restent, en sept vagues), [`prompts/SESSION-FONDATION.md`](prompts/SESSION-FONDATION.md) (le prompt de session et les règles communes) et un brief pour chacune de ces pages. `prompts/moteurs/` garde les moteurs physiques verrouillés d'une planche et leurs tests, à copier tels quels dans la page.
 - `corpus/` : la source de vérité.
 
-Les 16 planches de fondations et les 6 showcases suivent le [gabarit LABO](labo/GABARIT.md) : coque claire ou sombre, signature Échelle · Temps · Modèle, chapitres et couches Observer / Manipuler / Comprendre autour des simulations d’origine. Le chapitre 27 d’Atomes reste à venir, avec trois emplacements explicitement annoncés et sa théorie disponible. Voir [les standards](corpus/standards.md) pour les chapitres et les étapes. Les quatre fondations récentes sont proposées sur la branche `claude/labo-migration` ; les 12 autres fondations et les six showcases sont publiés depuis la PR nº 27.
+Les 17 planches de fondations et les 6 showcases suivent le [gabarit LABO](labo/GABARIT.md) : coque claire ou sombre, signature Échelle · Temps · Modèle, chapitres et couches Observer / Manipuler / Comprendre autour des simulations d’origine. Le chapitre 27 d’Atomes reste à venir, avec trois emplacements explicitement annoncés et sa théorie disponible. Voir [les standards](corpus/standards.md) pour les chapitres et les étapes. Les 16 fondations existantes ont été migrées en deux PR (nº 27 et nº 28) ; Signaux et équilibres du vivant a été construit directement avec cette coque.
 
 Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Pour les voir en local, servir la racine du dépôt (`python -m http.server`) et ouvrir `/labo/` : l'accueil lit `corpus/*.json`, ce qu'un fichier ouvert directement ne peut pas faire.
 
