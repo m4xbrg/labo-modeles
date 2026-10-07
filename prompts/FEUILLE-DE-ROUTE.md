@@ -21,7 +21,7 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 | 1 · D | [x] `magnetisme-induction` | 23 | 4 | 0,8 | [écrit](fondations-magnetisme-induction.md), construite le 2026-10-06 | 21, 22 |
 | 1 · D | [ ] `onde-electromagnetique` | 24 | 4 | 0,8 | [écrit](fondations-onde-electromagnetique.md) | 15, 21, 23 |
 | 1 · D | [ ] `optique` | 25 | 4 | 0,8 | [écrit](fondations-optique.md) | 15, 24 |
-| 2 · E | [ ] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md) | 21, 24, 46 |
+| 2 · E | [x] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md), construite le 2026-10-07 | 21, 24, 46 |
 | 2 · E | [ ] `molecules-mole` | 28 · 29 | 4 + 3 | 1,1 | [écrit](fondations-molecules-mole.md) | 21, 27 |
 | 2 · E | [ ] `reactions-chimiques` | 30 | 4 | 0,8 | [écrit](fondations-reactions-chimiques.md) | 17, 28, 29 |
 | 2 · E | [ ] `acide-base-redox` | 31 | 4 | 0,8 | [écrit](fondations-acide-base-redox.md) | 22, 29, 30 |
