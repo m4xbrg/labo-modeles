@@ -29,19 +29,19 @@ Les fondations ne remplacent pas les grands modèles : elles les rendent possibl
 
 ## État du projet
 
-Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-10 (état préparé après fusion des modules 31 et 25) :
+Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 2026-10-10 (état préparé après fusion des modules 31, 25 et 34) :
 
-**27 modèles : 26 construits et un partiel.**
+**28 modèles : 27 construits et un partiel.**
 
 - Planches numérotées 01-09 : La mitose · La respiration cellulaire · Le neurone qui apprend · Le champ électrique · Ondes et interférences · Courant et circuits · Matière, chaleur et transport · La réplication de l'ADN · Supernova par effondrement du cœur. Cinq d'entre elles (mitose, respiration, neurone, réplication, supernova) forment la collection *L'invisible en mouvement*.
-- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32) · Magnétisme et induction (23) · Optique : la lumière qui tourne (25) · L'onde électromagnétique (24) · Molécules et mole (28·29) · Réactions : vitesse et équilibre (30) · Signaux et équilibres du vivant (37) · Protons et électrons qui passent (31, acide-base, redox et électrochimie) · D’un gradient à une tension (33, couverture partielle). *Atomes, noyaux et lumière* (26·27) est `partial` : chapitre 26 et explication construits, chapitre 27 à venir.
+- Pages de fondations : Langage scientifique (01·02·03) · Systèmes, croissance et hasard (04·05·07) · Oscillations et ondes (06·14·15) · Forces, énergie et conservation (10·11) · Rotation, gravitation et orbites (12·13) · Flux, gradients, champs et fluides (16·20) · Relativité restreinte (46) · Évolution et génétique des populations (40) · Cellule, membrane et transport (32) · Magnétisme et induction (23) · Optique : la lumière qui tourne (25) · L'onde électromagnétique (24) · Molécules et mole (28·29) · Réactions : vitesse et équilibre (30) · Signaux et équilibres du vivant (37) · Protons et électrons qui passent (31, acide-base, redox et électrochimie) · D’un gradient à une tension (33, couverture partielle) · L’énergie du vivant (34). *Atomes, noyaux et lumière* (26·27) est `partial` : chapitre 26 et explication construits, chapitre 27 à venir.
 - Les huit productions de fondations définies au départ sont construites ; les planches 06 et 07 en sont issues, et la 04 a été prolongée par l'une d'elles.
 
-**Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 34, 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
+**Partiel.** Les modules 07 (hasard) et 08 (non-linéarité) ne sont couverts qu'en partie ; 36 et 44 le sont en partie, grâce à des showcases. La page de préalables n'a rien pour la supernova ni pour les fondations.
 
-**Prévu, rien de construit.** Les fondations 27 (spectres) à 36 (génome), sauf 28, 29, 30, 31, 32 et 33 (le 27 a sa théorie, pas encore sa planche), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
+**Prévu, rien de construit.** Les fondations 27 (spectres) à 36 (génome), sauf 28, 29, 30, 31, 32, 33 et 34 (le 27 a sa théorie, pas encore sa planche), dans l'ordre de la feuille de route, puis la physiologie, les populations et l'émergence, l'astrophysique, le reste de la relativité et la quantique.
 
-**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 15 partielles, 66 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 166 restent des idées.
+**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 16 partielles, 67 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 164 restent des idées.
 
 ## Où est la source de vérité
 
