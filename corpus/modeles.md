@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**25 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 16 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**26 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 17 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -35,6 +35,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
 | [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | foundation | Acide-base, redox et électrochimie | — | 31 | 2026-10-06 |
+| [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | foundation | Optique fondamentale | — | 25 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -300,6 +301,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : 1 Le pH, un compteur de protons · 2 Acides faibles et tampons · 3 Passer des électrons : le redox · 4 La pile et l’électrolyse
 - **Interaction** : Un chapitre de quatre étapes ; règle des pH logarithmique avec repères du quotidien et loupe de 1 µm³ où l’on compte les H₃O⁺ et les OH⁻ (dilution par dix, eau pure, HCl 10⁻⁸) ; eau pure et tampon (acétique, ammonium, phosphate) qui reçoivent la même goutte, courbe en direct avec la bande pKa ± 1, titrage complet par NaOH ; lame de métal plongée dans une solution d’ions avec prédiction, dépôt qui grandit, solution qui pâlit, échelle des couples ; pile Daniell (ou Fe/Cu, Zn/Ag) avec pont salin qu’on retire, électrons dans le fil, ions dans le pont, enregistreur U(t) en temps accéléré, générateur qui inverse la réaction (électrolyse).
 - **Notes** : Construite le 2026-10-06 au standard d’une page à un module (un chapitre « Module 31 », quatre étapes). Moteur ELC écrit et testé avant la page, versionné dans prompts/moteurs/acide-base-redox.js (145 tests, aussi lancés sur la page) : pH par résolution exacte du bilan de charge, Nernst, décharge par Euler implicite, Faraday. Construite avant les modules 29 et 30 qu’elle suppose (renvois par numéro, sans lien). Se termine sur trois questions vers les modules 32-33, 34 (et la planche Respiration) et l’électrochimie réversible. Limites : 25 °C, activités = concentrations, acides traités comme monoacides, cinétique du dépôt illustrative, résistance interne constante, surtensions ignorées.
+
+### Optique : la lumière qui tourne
+
+- **Identifiant** : `fondations-optique` · **chemin** : [`opus-sonnet/fondations-optique/index.html`](../opus-sonnet/fondations-optique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-optique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Optique fondamentale
+- **Collection** : aucune
+- **Modules** : 25 Optique fondamentale (`full`), 15 Ondes (`supporting`), 24 Onde électromagnétique (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`)
+- **Étapes** : 1 Réfraction et réflexion totale · 2 Lentilles et images · 3 Couleurs et dispersion · 4 Polarisation
+- **Interaction** : Un chapitre de quatre étapes sur une table d’optique vue de dessus ; laser qu’on tire autour d’une interface (eau, verre, diamant), rayons réfléchi et réfracté d’opacité R et T, impulsions plus lentes dans le milieu dense, fronts d’onde qui se resserrent et pivotent, sens inverse jusqu’à la réflexion totale, tige courbée (deux rayons de courbure) jusqu’à ce qu’elle fuie ; lentille mince avec objet et écran glissés, trois rayons, tache sur l’écran, préréglages appareil photo, projecteur et loupe, lentille épaisse tracée exactement (aberration sphérique) ; prisme à l’échelle avec loupe sur l’écran, une seule couleur, deuxième prisme qui recompose le blanc, goutte d’eau et angles de l’arc-en-ciel ; polariseurs qu’on tourne, troisième polariseur glissé entre deux polariseurs croisés (I₀/8), reflet sur une vitre éteint à l’angle de Brewster.
+- **Notes** : Construite avant le module 24 : la vibration transverse de E n’y est qu’utilisée. Moteur versionné dans `prompts/moteurs/optique.js` (objet `Opt`, 61 tests dans `optique.test.js`, aussi lancés sur la page). Optique géométrique seulement (ni diffraction ni couches minces) ; lentille mince idéale par défaut ; loi de Cauchy approchée ; polariseurs idéaux. Se termine sur trois questions vers les modules 15, 47, 48 et 50.
 
 ## Pages d'appui
 
