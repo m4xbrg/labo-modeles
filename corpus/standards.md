@@ -58,6 +58,7 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | Atomes, noyaux et lumière | 26 · 27 | 4 + 3 emplacements à venir | 4 réalisées + 3 emplacements | Gabarit LABO ; chapitre 26 réalisé, chapitre 27 explicitement à venir ; théorie disponible. |
 | Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
 | D’un gradient à une tension | 33 | 4 | 4 | Conforme, gabarit LABO ; couverture partielle complémentaire au showcase Neurone. Ajoutée le 2026-10-07. |
+| Réactions : vitesse et équilibre | 30 | 4 | 4 | Conforme, gabarit LABO et coque repliée ; couches V/M/K, O orientation, C catalyseur, N injection, I Infos. Migrée le 2026-10-10. |
 | Protons et électrons qui passent | 31 | 4 | 4 | Conforme ; pH, tampons et titrage, redox, pile et électrolyse. |
 | Optique : la lumière qui tourne | 25 | 4 | 4 | Conforme en nombre ; un chapitre et des sous-scènes en bascule, table d’optique autonome. |
 | L’énergie du vivant | 34 | 4 | 4 | Conforme ; couplage, enzymes, bilan de la respiration et photosynthèse. |

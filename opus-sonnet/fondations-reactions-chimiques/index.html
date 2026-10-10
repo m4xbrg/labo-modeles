@@ -1,0 +1,1949 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Une boîte de disques durs où chaque choc A-B est pesé : lilas et sable pour les réactifs (les solutés de la série), accent orangé pour les produits ; le jaune d'énergie est réservé à l'éclat d'une collision réussie et au sommet de la barrière. Une collision manquée ne fait rien, comme dans la matière.
+  2. Le mouvement ne sert qu'à signifier : un point monte la pente d'énergie à chaque choc et retombe s'il en manque ; les produits pâlissent vers la couleur des réactifs quand ils sont renouvelés ; ce que T change n'est pas la moyenne mais la queue de la distribution, d'où la loupe ×10.
+  3. Le moteur Rxn (disques durs à pas fixes, Gillespie exact, solutions analytiques) est séparé du dessin et copié à l'identique ; tout nombre affiché vient de lui ou d'une mesure sur la simulation.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Réactions : vitesse et équilibre — LABO</title>
+<meta name="description" content="Une réaction a lieu quand des molécules se heurtent avec assez d'énergie : quatre étapes pour voir les collisions, la vitesse, la catalyse et l'équilibre dynamique.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root, :root[data-theme], :root:not([data-theme]){
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#ffb36b;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+sup{font-size:.72em;line-height:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.panel>section{flex:none}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:72px}
+.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 17px/1.35 var(--serif);color:var(--texte)}
+.cle[hidden]{display:none}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+#scope,#scope2{display:block;width:100%}
+section[hidden]{display:none}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.cards{display:grid;gap:8px}
+.cards[hidden]{display:none}
+.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}
+.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}
+.card a{color:var(--texte-2)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0;flex:1 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+.tools.empty{display:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:76px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:var(--sh,62svh);min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:70px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* La coque suit le thème LABO ; l’écran garde ses couleurs scientifiques. */
+.labo-etapes .status,.labo-etapes .cle{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
+</head>
+<body class="labo-etapes" data-mode="observer" data-module="30" data-touches="vmk">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 30</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Réactions : vitesse et équilibre</h1><p class="lead">Des collisions franchissent une barrière ; à l’équilibre, deux réactions continuent à la même vitesse.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>boîtes 2D · gaz idéal</dd><dt>Temps</dt><dd>unités réduites · secondes du modèle</dd><dt>Modèle</dt><dd>collisions · cinétique · Gillespie</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+  <div class="chap" data-g="30"><p class="chap-t"><b>30</b>Réactions chimiques</p><div class="segs">
+    <button class="seg" data-a="0" title="Étape 1 — Collisions et énergie d’activation"><b>30.1</b><span>Collisions</span></button>
+    <button class="seg" data-a="1" title="Étape 2 — Ce qui règle la vitesse"><b>30.2</b><span>Vitesse</span></button>
+    <button class="seg" data-a="2" title="Étape 3 — La catalyse"><b>30.3</b><span>Catalyse</span></button>
+    <button class="seg" data-a="3" title="Étape 4 — L’équilibre dynamique et Le Chatelier"><b>30.4</b><span>Équilibre</span></button>
+  </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder les collisions, choisir une étape et mettre en pause."><span>V</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Régler température, concentration et catalyse ; comparer les mesures."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Relier les mesures aux explications et ouvrir la théorie du module 30."><span>K</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène de l'étape : boîte de molécules A et B qui se heurtent, profil d'énergie et histogramme des énergies de collision (étape 1) ; trois boîtes miniatures, graphe de la concentration de A en fonction du temps (étape 2) ; profils d'énergie et boîtes avec et sans catalyseur (étape 3) ; piston, loupe moléculaire et compteurs de dissociation et de recombinaison (étape 4)."></canvas>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
+      <h2 id="stepTitle">Quels chocs réagissent ?</h2>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p class="cle couche-comp" id="stepKey"></p>
+    </section>
+
+    <section id="scopeSec" class="couche-lire">
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : fraction de chocs réactifs au fil du temps (étape 1) ; ln k en fonction de 1/T, un point par essai (étape 2)."></canvas></div>
+      <p class="leg" id="leg"></p>
+      <div class="scopeBox" id="scope2Box" hidden style="margin-top:12px"><canvas id="scope2" role="img" aria-label="Enregistreur : vitesses directe et inverse au fil du temps (étape 4)."></canvas></div>
+      <p class="leg" id="leg2"></p>
+    </section>
+
+    <section id="measSec">
+      <div class="meas couche-lire" id="meas"></div>
+      <p class="note couche-comp" id="mNote"></p>
+    </section>
+
+    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+      <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
+      <div class="card"><b>Ions</b>Que se passe-t-il quand la particule échangée est un proton, ou un électron ?<small><a href="../fondations-acide-base-redox/index.html">Module 31 · Protons et électrons qui passent</a></small></div>
+      <div class="card"><b>Vivant</b>Comment une cellule fait-elle tourner des milliers de réactions à 37 °C ?<small><a href="../fondations-energie-biologique/index.html">Module 34 · L’énergie du vivant</a> · <a href="../08-replication-adn/index.html">planche 08, la polymérase</a></small></div>
+      <div class="card"><b>Énergie</b>Qu’est-ce qui décide de quel côté penche K ?<small>Module 18 · <a href="../07-matiere-chaleur/index.html">Matière et chaleur</a> · <a href="explication.html">explication : énergie libre, seulement introduite</a></small></div>
+    </section>
+
+    <section class="kbd couche-lire">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd> orientation exigée (étape 1) · <kbd>E</kbd> essai (étape 2)</li>
+        <li><kbd>C</kbd> catalyseur (étapes 3 et 4) · <kbd>N</kbd> injecter du NO₂ (étape 4)</li>
+        <li><kbd>V</kbd> observer · <kbd>M</kbd> manipuler · <kbd>K</kbd> comprendre · <kbd>I</kbd> infos · <kbd>Échap</kbd> fermer</li>
+      </ul>
+    </section>
+
+    <nav class="liens couche-comp">
+      <a class="comprendre" href="explication.html#m30"><span>Théorie du module 30</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
+    </div>
+
+
+    <div class="tools" id="tools">
+      <!-- 1 -->
+      <div class="grp" data-acts="0"><span class="gl">T</span><input type="range" id="rT1" min="0.5" max="2.5" step="0.05" value="1" aria-label="Température de la boîte, en unités réduites"><span class="rv" id="vT1"></span></div>
+      <div class="grp" data-acts="0"><span class="gl">Ea</span><input type="range" id="rEa1" min="1" max="6" step="0.1" value="3" aria-label="Énergie d'activation, en unités réduites"><span class="rv" id="vEa1"></span></div>
+      <div class="grp" data-acts="0"><button class="btn" id="bSteric" aria-pressed="true" title="Orientation exigée (touche O)"><span class="dot"></span>Orientation exigée</button></div>
+      <!-- 2 -->
+      <div class="grp" data-acts="1"><span class="gl">[A]₀</span><input type="range" id="rA2" min="0.2" max="2" step="0.1" value="1" aria-label="Concentration initiale de A en moles par litre"><span class="rv" id="vA2"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">[B]₀</span><input type="range" id="rB2" min="0.2" max="2" step="0.1" value="1" aria-label="Concentration initiale de B en moles par litre"><span class="rv" id="vB2"></span></div>
+      <div class="grp" data-acts="1"><span class="gl">T</span><input type="range" id="rT2" min="280" max="340" step="1" value="298" aria-label="Température en kelvins"><span class="rv" id="vT2"></span></div>
+      <!-- 3 -->
+      <div class="grp" data-acts="2"><button class="btn" id="bCat3" aria-pressed="false" title="Catalyseur présent ou absent (touche C)"><span class="dot"></span>Catalyseur</button></div>
+      <div class="grp" data-acts="2"><span class="gl">quantité</span><input type="range" id="rQ3" min="1" max="3" step="1" value="3" aria-label="Nombre de grains de catalyseur"><span class="rv" id="vQ3"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">abaissement de Ea</span><input type="range" id="rD3" min="0" max="67" step="1" value="25" aria-label="Abaissement de l'énergie d'activation en kilojoules par mole"><span class="rv" id="vD3"></span></div>
+      <div class="grp" data-acts="2"><span class="gl">T</span><input type="range" id="rT3" min="280" max="340" step="1" value="298" aria-label="Température en kelvins"><span class="rv" id="vT3"></span></div>
+      <div class="grp" data-acts="2"><button class="btn sm" id="bP0">Eau oxygénée : sans catalyseur</button><button class="btn sm" id="bP1">+ MnO₂</button><button class="btn sm" id="bP2">+ catalase (module 34)</button></div>
+      <!-- 4 -->
+      <div class="grp" data-acts="3"><span class="gl">T du bain</span><input type="range" id="rTe" min="260" max="360" step="1" value="298" aria-label="Température du bain en kelvins"><span class="rv" id="vTe"></span></div>
+      <div class="grp" data-acts="3"><span class="gl">volume V</span><input type="range" id="rV4" min="0.4" max="2" step="0.05" value="1" aria-label="Volume du piston en litres"><span class="rv" id="vV4"></span></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bInj" title="Ajouter 80 molécules de NO₂ (touche N)">Injecter du NO₂</button><button class="btn" id="bCat4" aria-pressed="false" title="Catalyseur (touche C)"><span class="dot"></span>Catalyseur</button></div>
+      <!-- 2 -->
+      <div class="grp" data-acts="1"><button class="btn go" id="bTrial" title="Mesurer k à la température du curseur (touche E)">Essai</button><button class="btn" id="bRelance" title="Relancer les trois boîtes">Relancer</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* RXN-BEGIN */
+/* Moteur Rxn : réactions chimiques (module 30). Fonctions pures autant que possible, aucune dépendance au dessin.
+   Unités : SI (J/mol, K, s, Pa, m³) sauf la boîte 2D, en unités réduites (diamètre σ = 1, masse m = 1, k_B = 1 :
+   énergies et températures dans la même unité ε, temps en τ = σ√(m/ε)).
+   Tout le hasard passe par mulberry32 (graine) ; Box-Muller pour les normales.
+
+   Boîte réactive 2D (étapes 1 à 3)
+   - Disques durs de même diamètre et de même masse, collisions élastiques, pas fixe dt avec retour à l'instant exact
+     du contact (géométrie de collision exacte pour une collision binaire), grille de cellules.
+   - Espèces : 0 = A, 1 = B, 2 = C, 3 = D (produits). Réaction A + B → C + D si
+       E_lc = ½ μ g_n² > Ea   (énergie cinétique relative le long de la ligne des centres, μ = m/2)
+     et, si l'orientation est exigée, si le site réactif de A (demi-cône α autour de son axe) pointe vers B.
+     Les orientations tournent librement (sans échange d'énergie) : au contact, elles sont uniformes,
+     donc le facteur stérique vaut P = 2α/2π = α/π (α = 45° → P = 1/4).
+   - ΔH : la composante normale de la vitesse relative sort avec |g_n'| = √(g_n² − 2ΔH/μ) : l'énergie cinétique
+     de la paire change de −ΔH exactement (exothermique ΔH < 0 : elle gagne), la quantité de mouvement est conservée.
+     On impose Ea ≥ ΔH (une réaction endothermique ne peut pas avoir une barrière plus basse que son ΔH).
+   - Thermostat : parois à température T (réémission thermique avec un coefficient d'accommodation acc ;
+     acc = 0 : parois spéculaires, énergie conservée).
+   - Catalyseur : grains fixes (disques) à T. Un A qui touche un grain s'y fixe (immobile) pendant un temps
+     exponentiel de moyenne tAds, puis repart avec une vitesse thermique. Un B qui heurte un A fixé réagit si
+     ½ m v_n² > EaCat (mécanisme d'Eley-Rideal) : C repart du grain, D rebondit avec la même règle ΔH.
+     Le grain ressort intact. Pour un obstacle fixe, la fraction des chocs avec ½ m v_n² > E vaut aussi e^(−E/T).
+   - renew > 0 : un produit redevient réactif (C → A, D → B) après renew τ, sans toucher à sa vitesse ;
+     artifice d'affichage pour garder la boîte en régime permanent (l'énergie cinétique n'est pas modifiée).
+     Effet réel à connaître : les collisions réactives retirent des réactifs rapides ; quand la fraction réactive
+     est grande (Ea/kT ≲ 3) et renew long, la queue des réactifs s'appauvrit et la fraction mesurée passe sous
+     e^(−Ea/kT) de quelques % (effet Prigogine-Xhrouet). Les tests mesurent la fraction avec renew = 0,02 τ.
+   - Réglages conseillés pour la page : 4 τ par seconde affichée, renew = 8 τ, Ea = 4, T = 1 (CAT pour l'étape 3).
+
+   Théorie
+   - fracAbove(Ea, T, dim, crit) : fraction des collisions (pondérées par le flux) dont l'énergie dépasse Ea.
+     Distribution des vitesses relatives à 2D : f(g) ∝ g e^(−μg²/2T) ; taux de collision ∝ g ; paramètre d'impact
+     b uniforme sur [−σ, σ] ; g_n = g √(1 − b²/σ²). Avec ε = μg²/2T (densité pondérée ∝ ε^(1/2) e^(−ε) à 2D) :
+       F = ∫_a^∞ (2/√π) ε^(1/2) e^(−ε) √(1 − a/ε) dε = (2/√π) e^(−a) ∫_0^∞ u^(1/2) e^(−u) du = e^(−a),  a = Ea/T.
+     Même résultat à 3D (b² uniforme). Critère « énergie relative totale » (crit = 'tot') :
+       2D : Γ(3/2, a)/Γ(3/2) = erfc(√a) + 2√(a/π) e^(−a) ;  3D : (1 + a) e^(−a).
+     La densité des énergies E_lc des collisions est donc exponentielle : elcPdf(E, T) = e^(−E/T)/T.
+   - kBox : théorie des collisions à 2D. Taux de chocs A-B par unité d'aire = n_A n_B · 2σ · ⟨g⟩ · χ,
+     ⟨g⟩ = √(πT/2μ), χ = (1 − 7η/16)/(1 − η)² (contact des disques durs, η = fraction surfacique) ;
+     k = 2σ⟨g⟩ χ P e^(−Ea/T). Le préfacteur dépend de T (∝ √T) : la pente de ln k en 1/T vaut −(Ea + T/2).
+   - arrhenius(A, Ea, T) = A e^(−Ea/RT) ; ratioT(Ea, T1, T2) = k(T2)/k(T1).
+
+   Cinétique moyenne : odeRate({order, k}, c0, t) ordres 0, 1, 2 (2 : A + A, ou A + B à concentrations égales) ;
+   odeAB(k, a0, b0, t) pour A + B quelconques ; halfLife(order, k, c0).
+   Simulation stochastique (étape 2) : ssaAB (Gillespie, propension k nA nB / Ω, Ω = molécules par mol/L),
+   fitK (ajustement de la loi intégrée), measureK.
+
+   Équilibre N₂O₄ ⇌ 2 NO₂ (étape 4) : ΔH° = +57,2 kJ/mol, ΔS° = 176 J/(mol·K) (réel ≈ 175,8), d'où Kp(298 K) = 0,147.
+   Kp(T) = exp(−ΔH°/RT + ΔS°/R) (van 't Hoff, ΔH° et ΔS° constants), P° = 1 bar.
+   Gaz parfaits. Une « molécule » du tirage représente q mol ; Ω = V/q (molécules par mol/m³).
+   Propensions : dissociation kf·N ; recombinaison kr·M(M − 1)/Ω. kr(T) = Ar e^(−Ear/RT) (recombinaison
+   presque sans barrière, Ear = 3 kJ/mol illustratif), kf = Kc·kr avec Kc = Kp P°/RT (équilibre détaillé exact).
+   Catalyseur : kf et kr multipliés par le même facteur e^(dEa/RT) : même K, approche plus rapide.
+*/
+const Rxn = (() => {
+  const R = 8.314, P0 = 1e5, LN2 = Math.LN2, PI = Math.PI;
+
+  function mulberry32(a) {
+    a = a >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0; let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(rng) { let u = 0; while (u === 0) u = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * PI * rng()); }
+  function erfc(x) { // Numerical Recipes (erfcc), erreur relative < 1,2e-7
+    const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+    const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+  }
+
+  /* ---------------- Théorie ---------------- */
+  function fracAbove(Ea, T, dim, crit) {
+    const a = Math.max(0, Ea / T); dim = dim || 2;
+    if (crit === 'tot') return dim === 3 ? (1 + a) * Math.exp(-a) : erfc(Math.sqrt(a)) + 2 * Math.sqrt(a / PI) * Math.exp(-a);
+    return Math.exp(-a);
+  }
+  const elcPdf = (E, T) => E < 0 ? 0 : Math.exp(-E / T) / T;
+  const mb2dPdf = (v, T, m) => { m = m || 1; return v < 0 ? 0 : (m * v / T) * Math.exp(-m * v * v / (2 * T)); };
+  const mb2dCdf = (v, T, m) => { m = m || 1; return v <= 0 ? 0 : 1 - Math.exp(-m * v * v / (2 * T)); };
+  const arrhenius = (A, Ea, T) => A * Math.exp(-Ea / (R * T));
+  const ratioT = (Ea, T1, T2) => Math.exp(Ea / R * (1 / T1 - 1 / T2));
+  const chi2d = eta => (1 - 7 * eta / 16) / Math.pow(1 - eta, 2);
+  function kBox(o) { // o : {T, Ea, sig, mu, eta, P}
+    const sig = o.sig || 1, mu = o.mu || 0.5, P = o.P == null ? 1 : o.P, g = Math.sqrt(PI * o.T / (2 * mu));
+    return 2 * sig * g * chi2d(o.eta || 0) * P * Math.exp(-o.Ea / o.T);
+  }
+
+  /* ---------------- Cinétique moyenne ---------------- */
+  function odeRate(p, c0, t) {
+    const k = p.k;
+    if (p.order === 0) return Math.max(0, c0 - k * t);
+    if (p.order === 1) return c0 * Math.exp(-k * t);
+    if (p.order === 2) return c0 / (1 + k * c0 * t);
+    throw new Error('ordre non pris en charge');
+  }
+  function odeAB(k, a0, b0, t) { // A + B → P, v = k[A][B] ; renvoie [A](t)
+    const d = b0 - a0;
+    if (Math.abs(d) < 1e-12 * Math.max(a0, b0)) return a0 / (1 + k * a0 * t);
+    const e = Math.exp(d * k * t);
+    return a0 * d / (b0 * e - a0);
+  }
+  function halfLife(order, k, c0) {
+    if (order === 0) return c0 / (2 * k);
+    if (order === 1) return LN2 / k;
+    if (order === 2) return 1 / (k * c0);
+    throw new Error('ordre non pris en charge');
+  }
+  // Étape 2 : A + B → P en solution, k(T) = A e^(−Ea/RT) ; k(298 K) ≈ 0,125 L/(mol·s)
+  const SOL = { A: 7.3e7, Ea: 50e3 };
+  const kSol = T => arrhenius(SOL.A, SOL.Ea, T);
+  // Gillespie A + B → P : s = {nA, nB, nP, t} ; avance jusqu'à tEnd (exact : propension constante entre deux événements)
+  function ssaAB(s, p, rng, tEnd) {
+    let n = 0;
+    for (;;) {
+      const a = p.k * s.nA * s.nB / p.Om;
+      if (a <= 0) { s.t = tEnd; return n; }
+      const dt = -Math.log(1 - rng()) / a;
+      if (s.t + dt > tEnd) { s.t = tEnd; return n; }
+      s.t += dt; s.nA--; s.nB--; s.nP++; n++;
+      if (s.ev) s.ev.push(s.t);
+    }
+  }
+  // Ajuste k sur une série [{t, a, b}] (concentrations) par la loi intégrée, droite passant par l'origine
+  function fitK(series, a0, b0) {
+    let sxy = 0, sxx = 0; const d = b0 - a0;
+    for (const r of series) {
+      if (r.a <= 0) continue;
+      const y = Math.abs(d) < 1e-9 * a0 ? (1 / r.a - 1 / a0) : Math.log((r.b * a0) / (r.a * b0)) / d;
+      sxy += r.t * y; sxx += r.t * r.t;
+    }
+    return sxx > 0 ? sxy / sxx : NaN;
+  }
+  // Essai : tirage stochastique jusqu'à la consommation de frac de A, puis ajustement de k
+  function measureK(o) { // {k, a0, b0, Om, seed, frac, nPts}
+    const rng = mulberry32(o.seed), Om = o.Om, s = { nA: Math.round(o.a0 * Om), nB: Math.round(o.b0 * Om), nP: 0, t: 0 };
+    const a0 = s.nA / Om, b0 = s.nB / Om, frac = o.frac || 0.6, nPts = o.nPts || 40;
+    const tTot = (() => { // durée moyenne pour consommer frac de A
+      let lo = 0, hi = 1 / (o.k * Math.max(a0, b0)); while (odeAB(o.k, a0, b0, hi) > a0 * (1 - frac)) hi *= 2;
+      for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (odeAB(o.k, a0, b0, m) > a0 * (1 - frac)) lo = m; else hi = m; }
+      return hi;
+    })();
+    const ser = [];
+    for (let i = 1; i <= nPts; i++) { ssaAB(s, { k: o.k, Om }, rng, tTot * i / nPts); ser.push({ t: s.t, a: s.nA / Om, b: s.nB / Om }); }
+    return { k: fitK(ser, a0, b0), series: ser, a0, b0, tTot };
+  }
+  function linfit(xs, ys) {
+    const n = xs.length; let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+    for (let i = 0; i < n; i++) { sx += xs[i]; sy += ys[i]; sxx += xs[i] * xs[i]; sxy += xs[i] * ys[i]; syy += ys[i] * ys[i]; }
+    const vx = sxx - sx * sx / n, vy = syy - sy * sy / n, cxy = sxy - sx * sy / n, slope = cxy / vx;
+    return { slope, icpt: (sy - slope * sx) / n, r2: vy > 0 ? cxy * cxy / (vx * vy) : 1 };
+  }
+
+  /* ---------------- Profil énergétique ---------------- */
+  // Coordonnée de réaction s ∈ [0, 1] ; réactifs à 0, sommet (état de transition) à s = 0,5, produits à ΔH.
+  function profile(o) {
+    const dH = o.dH, Ea = Math.max(o.Ea, dH, 0), n = o.n || 120;
+    const hasCat = o.EaCat != null, EaC = hasCat ? Math.min(Ea, Math.max(o.EaCat, dH, 0)) : NaN;
+    const curve = h => s => s <= 0.5 ? h * (1 - Math.cos(2 * PI * s)) / 2 : dH + (h - dH) * (1 - Math.cos(2 * PI * s)) / 2;
+    const f = curve(Ea), g = hasCat ? curve(EaC) : null, pts = [], cat = [];
+    for (let i = 0; i <= n; i++) { const s = i / n; pts.push({ s, E: f(s) }); if (g) cat.push({ s, E: g(s) }); }
+    return { pts, cat: g ? cat : null, Ea, EaCat: EaC, dH, EaRev: Ea - dH, EaCatRev: hasCat ? EaC - dH : NaN, ts: { s: 0.5, E: Ea } };
+  }
+
+  /* ---------------- Boîte réactive 2D ---------------- */
+  const SP = { A: 0, B: 1, C: 2, D: 3 };
+  function boxInit(o) {
+    const rng = mulberry32(o.seed == null ? 1 : o.seed);
+    const Lx = o.Lx || 40, Ly = o.Ly || 28, sig = o.sig || 1, nA = o.nA | 0, nB = o.nB | 0, N = nA + nB;
+    const b = {
+      rng, Lx, Ly, sig, N, T: o.T == null ? 1 : o.T, Ea: o.Ea == null ? 4 : o.Ea, dH: o.dH || 0,
+      steric: !!o.steric, alpha: o.alpha == null ? PI / 4 : o.alpha, acc: o.acc == null ? 1 : o.acc,
+      dt: o.dt || 0.0025, t: 0, renew: o.renew || 0, tAds: o.tAds == null ? 2 : o.tAds,
+      cat: (o.cat || []).map(g => ({ x: g.x, y: g.y, R: g.R })), EaCat: o.EaCat == null ? Infinity : o.EaCat,
+      x: new Float64Array(N), y: new Float64Array(N), vx: new Float64Array(N), vy: new Float64Array(N),
+      th: new Float64Array(N), w: new Float64Array(N), sp: new Uint8Array(N), born: new Float64Array(N),
+      ads: new Int16Array(N).fill(-1), rel: new Float64Array(N),
+      cnt: { coll: 0, react: 0, reactCat: 0, hitAds: 0, collAll: 0 },
+      hist: new Float64Array(o.nBins || 40), histMax: o.histMax || 12,
+      ev: [], evMax: o.evMax || 400, nHead: null, nNext: null
+    };
+    b.Ea = Math.max(b.Ea, b.dH);
+    // placement sans recouvrement
+    for (let i = 0; i < N; i++) {
+      let ok = false, tries = 0;
+      while (!ok && tries++ < 5000) {
+        const x = sig / 2 + rng() * (Lx - sig), y = sig / 2 + rng() * (Ly - sig);
+        ok = true;
+        for (const g of b.cat) if (Math.hypot(x - g.x, y - g.y) < g.R + sig) { ok = false; break; }
+        for (let j = 0; ok && j < i; j++) if ((x - b.x[j]) ** 2 + (y - b.y[j]) ** 2 < sig * sig * 1.0001) ok = false;
+        if (ok) { b.x[i] = x; b.y[i] = y; }
+      }
+      if (!ok) throw new Error('boîte trop pleine');
+      b.sp[i] = i < nA ? 0 : 1;
+      b.th[i] = rng() * 2 * PI; b.w[i] = gauss(rng) * 1.5;
+      if (o.init === 'mono') { const a = rng() * 2 * PI, v = Math.sqrt(2 * b.T); b.vx[i] = v * Math.cos(a); b.vy[i] = v * Math.sin(a); }
+      else { const s = Math.sqrt(b.T); b.vx[i] = gauss(rng) * s; b.vy[i] = gauss(rng) * s; }
+    }
+    return b;
+  }
+  const boxKE = b => { let e = 0; for (let i = 0; i < b.N; i++) e += 0.5 * (b.vx[i] * b.vx[i] + b.vy[i] * b.vy[i]); return e; };
+  function boxTemp(b) { let e = 0, n = 0; for (let i = 0; i < b.N; i++) if (b.ads[i] < 0) { e += 0.5 * (b.vx[i] * b.vx[i] + b.vy[i] * b.vy[i]); n++; } return n ? e / n : 0; } // 2D : ⟨KE⟩ = kT
+  function boxSetT(b, T, rescale) {
+    if (rescale !== false) { const Tc = boxTemp(b), f = Tc > 0 ? Math.sqrt(T / Tc) : 1; for (let i = 0; i < b.N; i++) { b.vx[i] *= f; b.vy[i] *= f; } }
+    b.T = T;
+  }
+  function boxCount(b) { const c = [0, 0, 0, 0]; for (let i = 0; i < b.N; i++) c[b.sp[i]]++; return { A: c[0], B: c[1], C: c[2], D: c[3] }; }
+  const boxEta = b => b.N * PI * b.sig * b.sig / 4 / (b.Lx * b.Ly - b.cat.reduce((s, g) => s + PI * g.R * g.R, 0));
+  // vitesse thermique réémise par une surface de normale (nx, ny) à la température T
+  function emit(b, i, nx, ny) {
+    const T = b.T, vn = Math.sqrt(-2 * T * Math.log(1 - b.rng())), vt = gauss(b.rng) * Math.sqrt(T);
+    b.vx[i] = vn * nx - vt * ny; b.vy[i] = vn * ny + vt * nx;
+  }
+  function wall(b, i, nx, ny, to) { // to : temps écoulé depuis le contact
+    to = Math.min(Math.max(to, 0), b.dt);
+    b.x[i] -= b.vx[i] * to; b.y[i] -= b.vy[i] * to;
+    if (b.acc > 0 && b.rng() < b.acc) emit(b, i, nx, ny);
+    else { const vn = b.vx[i] * nx + b.vy[i] * ny; b.vx[i] -= 2 * vn * nx; b.vy[i] -= 2 * vn * ny; }
+    b.x[i] += b.vx[i] * to; b.y[i] += b.vy[i] * to;
+  }
+  function pushEv(b, e) { b.ev.push(e); if (b.ev.length > b.evMax) b.ev.splice(0, b.ev.length - b.evMax); }
+  // collision entre i (libre) et j (libre ou fixé) au contact
+  function collide(b, i, j) {
+    const s = b.sig;
+    if (b.ads[i] >= 0 && b.ads[j] >= 0) return;
+    if (b.ads[i] >= 0) { const t = i; i = j; j = t; } // i libre ; j éventuellement fixé
+    const fixed = b.ads[j] >= 0;
+    const vix = b.vx[i], viy = b.vy[i], vjx = fixed ? 0 : b.vx[j], vjy = fixed ? 0 : b.vy[j];
+    let rx = b.x[i] - b.x[j], ry = b.y[i] - b.y[j];
+    const gx = vix - vjx, gy = viy - vjy, rv = rx * gx + ry * gy;
+    if (rv >= 0) return; // s'éloignent
+    const g2 = gx * gx + gy * gy, D = rv * rv - g2 * (rx * rx + ry * ry - s * s);
+    let back = D > 0 ? (rv + Math.sqrt(D)) / g2 : 0; // temps écoulé depuis le contact
+    if (!(back >= 0 && back <= 3 * b.dt)) back = 0;
+    // positions au contact
+    b.x[i] -= vix * back; b.y[i] -= viy * back;
+    if (!fixed) { b.x[j] -= vjx * back; b.y[j] -= vjy * back; }
+    rx = b.x[i] - b.x[j]; ry = b.y[i] - b.y[j];
+    const d = Math.hypot(rx, ry) || 1, nx = rx / d, ny = ry / d;
+    const gn = gx * nx + gy * ny; // < 0
+    const mu = fixed ? 1 : 0.5, Elc = 0.5 * mu * gn * gn;
+    const si = b.sp[i], sj = b.sp[j];
+    b.cnt.collAll++;
+    let gnNew = -gn, reacted = false, viaCat = false;
+    if (fixed) {
+      // obstacle fixe : A fixé sur un grain (j) heurté par i
+      if (sj === 0 && si === 1) {
+        b.cnt.hitAds++;
+        if (Elc > b.EaCat) { gnNew = Math.sqrt(gn * gn - 2 * b.dH / mu); reacted = true; viaCat = true; }
+      }
+    } else if ((si === 0 && sj === 1) || (si === 1 && sj === 0)) {
+      b.cnt.coll++;
+      const hb = Math.min(b.hist.length - 1, Math.floor(Elc / b.histMax * b.hist.length)); b.hist[hb]++;
+      let orient = true;
+      if (b.steric) { const a = si === 0 ? i : j, sg = a === i ? -1 : 1; orient = Math.cos(b.th[a]) * nx * sg + Math.sin(b.th[a]) * ny * sg > Math.cos(b.alpha); }
+      if (Elc > b.Ea && orient) { gnNew = Math.sqrt(gn * gn - 2 * b.dH / mu); reacted = true; }
+    }
+    const dv = gnNew - gn; // gnNew > 0
+    if (fixed) { b.vx[i] += dv * nx; b.vy[i] += dv * ny; }
+    else { b.vx[i] += dv / 2 * nx; b.vy[i] += dv / 2 * ny; b.vx[j] -= dv / 2 * nx; b.vy[j] -= dv / 2 * ny; }
+    // repartir depuis le contact
+    b.x[i] += b.vx[i] * back; b.y[i] += b.vy[i] * back;
+    if (!fixed) { b.x[j] += b.vx[j] * back; b.y[j] += b.vy[j] * back; }
+    if (reacted) {
+      const a = si === 0 ? i : j, bb = a === i ? j : i;
+      b.sp[a] = 2; b.sp[bb] = 3; b.born[a] = b.born[bb] = b.t;
+      if (viaCat) { b.cnt.reactCat++; const g = b.cat[b.ads[a]]; b.ads[a] = -1; const ux = (b.x[a] - g.x), uy = (b.y[a] - g.y), u = Math.hypot(ux, uy) || 1; emit(b, a, ux / u, uy / u); }
+      else b.cnt.react++;
+    }
+    if (fixed ? (sj === 0 && si === 1) : ((si === 0 && sj === 1) || (si === 1 && sj === 0)))
+      pushEv(b, { t: b.t, x: (b.x[i] + b.x[j]) / 2, y: (b.y[i] + b.y[j]) / 2, E: Elc, r: reacted, cat: fixed });
+  }
+  function boxStep(b, dt) {
+    const h = b.dt; let n = Math.max(1, Math.round((dt == null ? h : dt) / h));
+    while (n-- > 0) step1(b, h);
+    return b;
+  }
+  function step1(b, h) {
+    const N = b.N, s = b.sig, r = s / 2, Lx = b.Lx, Ly = b.Ly, x = b.x, y = b.y, vx = b.vx, vy = b.vy;
+    b.t += h;
+    for (let i = 0; i < N; i++) {
+      if (b.ads[i] >= 0) {
+        if (b.t >= b.rel[i]) { const g = b.cat[b.ads[i]], ux = x[i] - g.x, uy = y[i] - g.y, u = Math.hypot(ux, uy) || 1; b.ads[i] = -1; emit(b, i, ux / u, uy / u); }
+        else continue;
+      }
+      x[i] += vx[i] * h; y[i] += vy[i] * h; b.th[i] += b.w[i] * h;
+      // parois : retour à l'instant du contact, réémission (thermique ou spéculaire), puis fin du pas
+      if (x[i] < r && vx[i] < 0) wall(b, i, 1, 0, (r - x[i]) / -vx[i]);
+      else if (x[i] > Lx - r && vx[i] > 0) wall(b, i, -1, 0, (x[i] - Lx + r) / vx[i]);
+      if (y[i] < r && vy[i] < 0) wall(b, i, 0, 1, (r - y[i]) / -vy[i]);
+      else if (y[i] > Ly - r && vy[i] > 0) wall(b, i, 0, -1, (y[i] - Ly + r) / vy[i]);
+      // grains de catalyseur
+      for (let k = 0; k < b.cat.length; k++) {
+        const g = b.cat[k], dx = x[i] - g.x, dy = y[i] - g.y, d = Math.hypot(dx, dy), Rc = g.R + r;
+        if (d < Rc) {
+          const nx = dx / (d || 1), ny = dy / (d || 1), vn = vx[i] * nx + vy[i] * ny;
+          if (vn < 0) {
+            if (b.sp[i] === 0 && isFinite(b.EaCat)) { x[i] = g.x + nx * Rc; y[i] = g.y + ny * Rc; vx[i] = 0; vy[i] = 0; b.ads[i] = k; b.rel[i] = b.t - b.tAds * Math.log(1 - b.rng()); }
+            else { vx[i] -= 2 * vn * nx; vy[i] -= 2 * vn * ny; x[i] = g.x + nx * (2 * Rc - d); y[i] = g.y + ny * (2 * Rc - d); }
+          }
+        }
+      }
+    }
+    // grille de cellules (taille ≥ σ)
+    const cs = Math.max(s, 1e-9), nx = Math.max(1, Math.floor(Lx / cs)), ny = Math.max(1, Math.floor(Ly / cs)), nc = nx * ny;
+    if (!b.nHead || b.nHead.length !== nc) { b.nHead = new Int32Array(nc); b.nNext = new Int32Array(N); }
+    const head = b.nHead, next = b.nNext; head.fill(-1);
+    const cx = i => Math.min(nx - 1, Math.max(0, Math.floor(x[i] / Lx * nx))), cy = i => Math.min(ny - 1, Math.max(0, Math.floor(y[i] / Ly * ny)));
+    for (let i = 0; i < N; i++) { const c = cy(i) * nx + cx(i); next[i] = head[c]; head[c] = i; }
+    const s2 = s * s;
+    for (let gy = 0; gy < ny; gy++) for (let gx = 0; gx < nx; gx++) {
+      for (let i = head[gy * nx + gx]; i >= 0; i = next[i]) {
+        for (let oy = 0; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+          if (oy === 0 && ox < 0) continue;
+          const hx = gx + ox, hy = gy + oy; if (hx < 0 || hx >= nx || hy >= ny) continue;
+          for (let j = (oy === 0 && ox === 0) ? next[i] : head[hy * nx + hx]; j >= 0; j = next[j]) {
+            const dx = x[i] - x[j], dy = y[i] - y[j];
+            if (dx * dx + dy * dy < s2) collide(b, i, j);
+          }
+        }
+      }
+    }
+    if (b.renew > 0) for (let i = 0; i < N; i++) if (b.sp[i] >= 2 && b.t - b.born[i] > b.renew) { b.sp[i] -= 2; if (b.sp[i] === 0) b.th[i] = b.rng() * 2 * PI; }
+  }
+  function boxDrain(b) { const e = b.ev; b.ev = []; return e; }
+  function boxResetCounts(b) { b.cnt = { coll: 0, react: 0, reactCat: 0, hitAds: 0, collAll: 0 }; b.hist.fill(0); }
+
+  /* ---------------- Équilibre N₂O₄ ⇌ 2 NO₂ ---------------- */
+  const EQ = { dH: 57.2e3, dS: 176, Ear: 3e3, Ar: 0.033 * Math.exp(3e3 / (R * 298)), q: 1e-4, n0: 0.04, V0: 1e-3 };
+  const Kp = T => Math.exp(-EQ.dH / (R * T) + EQ.dS / R);
+  const Kc = T => Kp(T) * P0 / (R * T); // mol/m³
+  // composition d'équilibre à T et P totale (bar), n0 mol de N₂O₄ au départ (ou équivalent)
+  function eqSolve(T, P, n0) {
+    const K = Kp(T), a = Math.sqrt(K / (K + 4 * P)), n = n0 == null ? 1 : n0;
+    return { alpha: a, nN2O4: n * (1 - a), nNO2: 2 * n * a, xNO2: 2 * a / (1 + a), P, K };
+  }
+  // à T et V (m³) fixés, n0 mol équivalents N₂O₄
+  function eqSolveV(T, V, n0) {
+    const K = Kc(T), c0 = n0 / V; // 4ξ² + Kξ − K c0 = 0
+    const xi = (-K + Math.sqrt(K * K + 16 * K * c0)) / 8, a = xi / c0;
+    const nN = n0 * (1 - a), nM = 2 * n0 * a;
+    return { alpha: a, nN2O4: nN, nNO2: nM, xNO2: nM / (nN + nM), P: (nN + nM) * R * T / V / P0, K: Kp(T) };
+  }
+  function eqRates(T, V, cat) { // constantes du tirage : kf (s⁻¹), kr (m³/(mol·s)), Om (molécules par mol/m³)
+    const f = cat ? (cat === true ? 5 : cat) : 1, kr = EQ.Ar * Math.exp(-EQ.Ear / (R * T)) * f;
+    return { kf: Kc(T) * kr, kr, Om: V / EQ.q };
+  }
+  function eqInit(o) { // {T, V, nEq (molécules équivalentes N₂O₄), seed, start: 'N2O4'|'eq', cat}
+    const T = o.T || 298, V = o.V || EQ.V0, nEq = o.nEq || Math.round(EQ.n0 / EQ.q);
+    const s = { N: nEq, M: 0, T, Tbath: T, V, t: 0, nf: 0, nr: 0, cat: !!o.cat, rng: mulberry32(o.seed == null ? 7 : o.seed), log: null };
+    if (o.start === 'eq') { const e = eqSolveV(T, V, nEq * EQ.q); s.M = 2 * Math.round(e.nNO2 / EQ.q / 2); s.N = nEq - s.M / 2; }
+    return s;
+  }
+  // Un événement de Gillespie : renvoie {dt, type: 'f'|'r'} sans l'appliquer si dry, sinon l'applique
+  function gillespie(s, p, rng) {
+    const af = p.kf * s.N, ar = p.kr * s.M * (s.M - 1) / p.Om, a = af + ar;
+    if (a <= 0) return { dt: Infinity, type: null };
+    const dt = -Math.log(1 - rng()) / a, type = rng() * a < af ? 'f' : 'r';
+    return { dt, type };
+  }
+  // Avance le piston de dt : relaxation thermique vers le bain (constante tauT), puis tirages exacts à taux constants
+  function eqStep(s, dt, o) {
+    o = o || {}; const tauT = o.tauT == null ? 0.8 : o.tauT;
+    if (tauT > 0) s.T += (s.Tbath - s.T) * (1 - Math.exp(-dt / tauT)); else s.T = s.Tbath;
+    const p = eqRates(s.T, s.V, s.cat), tEnd = s.t + dt;
+    for (;;) {
+      const e = gillespie(s, p, s.rng);
+      if (s.t + e.dt > tEnd) { s.t = tEnd; break; }
+      s.t += e.dt;
+      if (e.type === 'f') { s.N--; s.M += 2; s.nf++; } else { s.N++; s.M -= 2; s.nr++; }
+      if (s.log) s.log.push({ t: s.t, type: e.type });
+    }
+    return s;
+  }
+  const Q = s => (s.N > 0 ? (s.M * EQ.q * R * s.T / s.V / P0) ** 2 / (s.N * EQ.q * R * s.T / s.V / P0) : Infinity);
+  const eqP = s => (s.N + s.M) * EQ.q * R * s.T / s.V / P0; // bar
+  const eqAlpha = s => s.M / 2 / (s.N + s.M / 2);
+  const eqKnow = s => Kp(s.T);
+
+  /* ---------------- Préréglages ---------------- */
+  // Décomposition de l'eau oxygénée, 2 H₂O₂ → 2 H₂O + O₂ : ordres de grandeur de manuel ; même facteur A supposé (illustratif)
+  const H2O2 = { none: { Ea: 75e3, nom: 'sans catalyseur' }, MnO2: { Ea: 55e3, nom: 'dioxyde de manganèse' }, catalase: { Ea: 8e3, nom: 'catalase' }, dH: -98e3 };
+  const h2o2Ratio = (kind, T) => Math.exp((H2O2.none.Ea - H2O2[kind].Ea) / (R * T));
+
+  // Étape 3 : trois grains, A fixé 6 τ en moyenne, barrière catalysée 1 (contre 5) : la voie catalysée domine (≈ × 5)
+  const CAT = { grains: [{ x: 12, y: 14, R: 3 }, { x: 28, y: 9, R: 3 }, { x: 28, y: 20, R: 3 }], tAds: 6, Ea: 5, EaCat: 1 };
+
+  return {
+    R, P0, LN2, SP, CAT, mulberry32, gauss, erfc,
+    fracAbove, elcPdf, mb2dPdf, mb2dCdf, arrhenius, ratioT, chi2d, kBox,
+    odeRate, odeAB, halfLife, SOL, kSol, ssaAB, fitK, measureK, linfit,
+    profile,
+    boxInit, boxStep, boxKE, boxTemp, boxSetT, boxCount, boxEta, boxDrain, boxResetCounts,
+    EQ, Kp, Kc, eqSolve, eqSolveV, eqRates, eqInit, gillespie, eqStep, Q, eqP, eqAlpha, eqKnow,
+    H2O2, h2o2Ratio
+  };
+})();
+/* RXN-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SLOW = reduce ? 0.4 : 1;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+if (reduce) cv.title = 'Mouvement ralenti (× 0,4) : votre système demande moins d’animation. Rien n’est figé, tout va plus lentement.';
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono'),
+            lil: '#b9a3ff', sable: '#dcc29a' };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const mixc = (a, b, t) => [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
+const RE = rgb(C.ener), RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RF2 = rgb(C.fond2), RL = rgb(C.lil), RS = rgb(C.sable), RFD = rgb(C.fond), RP = rgb(C.pos), RN = rgb(C.neg);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, PI = Math.PI;
+const fmt = (n, d) => { if (n == null || !isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const pc = (f, d) => fmt(100 * f, d == null ? (f < 0.1 ? 1 : 0) : d) + ' %';
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ease = u => { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); };
+const newSeed = () => (Math.random() * 2147483647) | 0;
+const stacked = () => matchMedia('(max-width:860px)').matches;
+function niceMax(v) { const e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * e; }
+function niceCeil(v) { const e = Math.pow(10, Math.floor(Math.log10(v))), m = v / e; for (const s of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m <= s + 1e-9) return s * e; return 10 * e; }
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [], zonesS = [];
+function zone(x0, y0, x1, y1, key, name, role, list) { (list || zones).push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role, list) { (list || zones).push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role, list) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role, list); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- État ---------------- */
+let W = 800, H = 560, dpr = 1;
+let act = 0, pendingAct = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiAct = 0;
+const NA = 4;
+const prm = {};
+function resetPrm(n) {
+  if (n === 0) Object.assign(prm, { T1: 1, Ea1: 3, st1: true });
+  if (n === 1) Object.assign(prm, { a2: 1, b2: 1, T2: 298 });
+  if (n === 2) Object.assign(prm, { T3: 298, cat3: false, q3: 3, dEa3: 25, pre3: 'none' });
+  if (n === 3) Object.assign(prm, { Te: 298, V4: 1, cat4: false });
+}
+for (let i = 0; i < NA; i++) resetPrm(i);
+
+/* ---------------- Enregistreur générique (panneau) ---------------- */
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+
+/* ================= Étape 1 : collisions et énergie d'activation ================= */
+const NB1 = 50, BW1 = 0.2, EMAX1 = NB1 * BW1, DH1 = -1;
+const k1 = { box: null, L: null };
+const decay = (s, dt, tau, dC, dR) => { const f = Math.exp(-dt / tau); s.c = s.c * f + dC; s.r = s.r * f + dR; s.t = s.t * f + dt; };
+function reset1() {
+  const seed = newSeed();
+  const b = Rxn.boxInit({ nA: 90, nB: 90, T: prm.T1, Ea: prm.Ea1, dH: DH1, steric: prm.st1, renew: 8, seed });
+  Object.assign(k1, { box: b, seed, acc: 0, clock: 0, flashes: [], climb: [], hist: new Float64Array(NB1), hN: 0, histS: new Float64Array(NB1), hNS: 0, pC: 0, pR: 0,
+    sc: { c: 0, r: 0, t: 0 }, sf: { c: 0, r: 0, t: 0 }, rec: [], recT: 0, change: null, cls: new Uint8Array(b.N), nOri: 0 });
+}
+// Avant tout changement d'un réglage : garde l'état de départ du geste pour le statut
+function note1(kind) {
+  if (!k1.box) return;
+  if (!k1.change || k1.clock - k1.change.t > 6) k1.change = { t: k1.clock, T0: k1.box.T, Ea0: k1.box.Ea, st0: k1.box.steric, rate0: rate1(), fm0: fracMeas1() };
+  k1.change.t = k1.clock; k1.change.kind = kind;
+}
+const rate1 = () => k1.sc.t > 0 ? k1.sc.r / k1.sc.t : NaN;
+const fracMeas1 = () => k1.sf.c >= 30 ? k1.sf.r / k1.sf.c : NaN;
+const P1 = b => b.steric ? b.alpha / PI : 1;
+const fracTheo1 = b => P1(b) * Rxn.fracAbove(b.Ea, b.T, 2);
+function adv1(dt) {
+  const b = k1.box, h = 0.0025;
+  k1.acc += 6 * dt;
+  const n = Math.min(400, Math.floor(k1.acc / h + 1e-9));
+  if (n > 0) { Rxn.boxStep(b, n * h); k1.acc -= n * h; }
+  if (k1.acc > 0.3) k1.acc = 0;
+  k1.clock += dt;
+  const dC = b.cnt.coll - k1.pC, dR = b.cnt.react - k1.pR; k1.pC = b.cnt.coll; k1.pR = b.cnt.react;
+  decay(k1.sc, dt, 4, dC, dR); decay(k1.sf, dt, 15, dC, dR);
+  const f6 = Math.exp(-dt / 6), f15 = Math.exp(-dt / 15); for (let i = 0; i < NB1; i++) { k1.hist[i] *= f6; k1.histS[i] *= f15; } k1.hN *= f6; k1.hNS *= f15;
+  for (const e of Rxn.boxDrain(b)) {
+    const k = Math.floor(e.E / BW1); if (k < NB1) { k1.hist[k]++; k1.histS[k]++; } k1.hN++; k1.hNS++;
+    const oriFail = !e.r && e.E > b.Ea;
+    if (e.r) {
+      k1.flashes.push({ x: e.x, y: e.y, t: k1.clock });
+      if (k1.climb.length >= 6) { const i = k1.climb.findIndex(c => !c.r); if (i >= 0) k1.climb.splice(i, 1); else k1.climb.shift(); }
+      k1.climb.push({ E: e.E, r: true, t: k1.clock, fail: false });
+    } else if (k1.climb.length < 6) k1.climb.push({ E: e.E, r: false, t: k1.clock, fail: oriFail });
+  }
+  while (k1.flashes.length && k1.clock - k1.flashes[0].t > 0.7) k1.flashes.shift();
+  k1.climb = k1.climb.filter(c => k1.clock - c.t < (c.r ? 1.5 : 1.0));
+  k1.recT += dt;
+  if (k1.recT >= 0.5) { k1.recT = 0; k1.rec.push({ t: k1.clock, fm: fracMeas1(), ft: fracTheo1(b) }); while (k1.rec.length && k1.rec[0].t < k1.clock - 61) k1.rec.shift(); }
+}
+function layout1() {
+  const st = stacked();
+  if (!st && W >= 760) {
+    const colW = clamp(Math.round(W * 0.30), 250, 360), cx0 = W - colW - 16;
+    const ph = clamp(Math.round(H * 0.19), 114, 170), rw = cx0 - 32, rh = H - 28 - 18, s = Math.min(rw / 40, rh / 28), bw = 40 * s, bh = 28 * s;
+    return { s, bx: 16 + (rw - bw) / 2, by: 28 + (rh - bh) / 2, prof: { x: cx0, y: 36, w: colW, h: ph }, hist: { x: cx0, y: 36 + ph + 56, w: colW, h: clamp(H - (36 + ph + 56) - 30, 190, 360) }, wide: true };
+  }
+  const pw = Math.min(W - 32, 520), px = (W - pw) / 2, histH = 176, top = 34;
+  let s = pw / 40;
+  if (!st) s = Math.max(5, Math.min(s, (H - top - 100 - 34 - histH - 18) / 28));
+  const bw = 40 * s, bh = 28 * s, by = top + 100, bx = (W - bw) / 2;
+  return { s, bx, by, prof: { x: px, y: top, w: pw, h: 84 }, hist: { x: px, y: by + bh + 36, w: pw, h: histH }, total: by + bh + 36 + histH + 18, wide: false };
+}
+
+function curveAt(pr, s) { const n = pr.pts.length - 1, f = clamp(s, 0, 1) * n, i = Math.min(n - 1, Math.floor(f)); return pr.pts[i].E + (pr.pts[i + 1].E - pr.pts[i].E) * (f - i); }
+function sOfE(pr, E) { // montée : abscisse de réaction où la courbe atteint E (côté réactifs)
+  if (E >= pr.Ea) return 0.5;
+  const pts = pr.pts, half = Math.floor(pts.length / 2);
+  for (let i = 1; i <= half; i++) if (pts[i].E >= E) { const a = pts[i - 1], b = pts[i]; return a.s + (b.s - a.s) * (E - a.E) / (b.E - a.E || 1); }
+  return 0.5;
+}
+
+/* ---------------- Dessin partagé d'une boîte réactive (étapes 1 et 3) ---------------- */
+// cls : Uint8Array de classes ; sites : dessine l'arc réactif des A
+function drawBoxParts(c, b, bx0, by0, s, cls, sites) {
+  const r = 0.46 * s, X = x => bx0 + x * s, Y = y => by0 + y * s, N = b.N;
+  // grains de catalyseur : surfaces minérales sombres
+  b.cat.forEach((g, gi) => {
+    const x = X(g.x), y = Y(g.y), R = g.R * s;
+    c.fillStyle = '#151b24'; c.beginPath(); c.arc(x, y, R, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(138,147,160,0.16)'; c.beginPath();
+    for (let k = 0; k < 7; k++) { const a = gi * 1.7 + k * 2.4, d = R * (0.2 + 0.55 * ((k * 37 + gi * 11) % 10) / 10); c.moveTo(x + Math.cos(a) * d + R * 0.07, y + Math.sin(a) * d); c.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, R * 0.07, 0, TAU); }
+    c.fill();
+    c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, R, 0, TAU); c.stroke();
+  });
+  for (let i = 0; i < N; i++) {
+    const sp = b.sp[i];
+    if (sp < 2) cls[i] = sp;
+    else { const lv = Math.min(3, Math.floor((b.t - b.born[i]) / b.renew * 4)); cls[i] = 2 + (sp - 2) * 4 + lv; }
+  }
+  const colCls = [rgba(RL, 0.95), rgba(RS, 0.95)];
+  for (let lv = 0; lv < 4; lv++) colCls.push(rgba(mixc(RA, RL, (lv + 0.5) / 4 * 0.85), 0.97));
+  for (let lv = 0; lv < 4; lv++) colCls.push(rgba(mixc(RA, RS, (lv + 0.5) / 4 * 0.85), 0.97));
+  // halo des A fixés sur un grain
+  if (b.cat.length) {
+    c.beginPath();
+    for (let i = 0; i < N; i++) if (b.ads[i] >= 0) { const x = X(b.x[i]), y = Y(b.y[i]); c.moveTo(x + r * 1.7, y); c.arc(x, y, r * 1.7, 0, TAU); }
+    c.fillStyle = rgba(RL, 0.2); c.fill();
+  }
+  for (let k = 0; k < 10; k++) {
+    c.beginPath();
+    for (let i = 0; i < N; i++) if (cls[i] === k) { const x = X(b.x[i]), y = Y(b.y[i]); c.moveTo(x + r, y); c.arc(x, y, r, 0, TAU); }
+    c.fillStyle = colCls[k]; c.fill();
+  }
+  if (sites) {
+    c.beginPath();
+    for (let i = 0; i < N; i++) if (b.sp[i] === 0 && b.ads[i] < 0) { const x = X(b.x[i]), y = Y(b.y[i]), th = b.th[i]; c.moveTo(x + r * Math.cos(th - b.alpha), y + r * Math.sin(th - b.alpha)); c.arc(x, y, r, th - b.alpha, th + b.alpha); }
+    c.strokeStyle = b.steric ? 'rgba(244,240,255,0.95)' : 'rgba(244,240,255,0.3)'; c.lineWidth = Math.max(1.6, 0.2 * r); c.stroke();
+  }
+}
+// éclat bref de --energie ; renvoie {x, y, rr} ou null s'il est fini
+function drawFlash(c, f, clock, x, y, s, life) {
+  const u = (clock - f.t) / life; if (u >= 1) return null;
+  const rr = (0.6 + 2.4 * ease(u)) * s, al = Math.pow(1 - u, 1.3);
+  const g = c.createRadialGradient(x, y, 0, x, y, rr); g.addColorStop(0, rgba(RE, 0.95 * al)); g.addColorStop(0.45, rgba(RE, 0.4 * al)); g.addColorStop(1, rgba(RE, 0));
+  c.fillStyle = g; c.beginPath(); c.arc(x, y, rr, 0, TAU); c.fill();
+  c.strokeStyle = rgba(RE, 0.8 * al); c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, rr * 0.8, 0, TAU); c.stroke();
+  return { x, y, rr };
+}
+function draw1() {
+  const c = ctx, b = k1.box, L = layout1(); k1.L = L;
+  const s = L.s, r = 0.46 * s, N = b.N, X = x => L.bx + x * s, Y = y => L.by + y * s, bw = b.Lx * s, bh = b.Ly * s;
+  // boîte
+  c.fillStyle = rgba(RF2, 0.55); c.fillRect(L.bx, L.by, bw, bh);
+  c.strokeStyle = C.trait; c.lineWidth = 1.5; c.strokeRect(L.bx - 0.5, L.by - 0.5, bw + 1, bh + 1);
+  drawBoxParts(c, b, L.bx, L.by, s, k1.cls, true);
+  // éclats des chocs réactifs
+  for (const f of k1.flashes) {
+    const g = drawFlash(c, f, k1.clock, X(f.x), Y(f.y), s, 0.5); if (!g) continue;
+    zcirc(g.x, g.y, Math.max(g.rr, 12), 'eclat', 'Collision réactive', 'Choc A-B dont l’énergie le long de la ligne des centres dépassait Ea, avec la bonne orientation : A + B devient C + D.');
+  }
+  c.font = mono(10.5);
+  if (L.by + bh + 18 < H) tagText(c, bw < 420 ? `A + B → C + D · ΔH = ${fmt(b.dH, 1)} ε` : `A + B → C + D · ΔH = ${fmt(b.dH, 1)} ε · ${b.N} molécules · boîte de ${fmt(b.Lx, 0)} σ × ${fmt(b.Ly, 0)} σ`, L.bx, L.by + bh + 16, 'left', 'bottom', C.texte2);
+  // survol des molécules (priorité haute : ajoutées après les zones de fond)
+  zone(L.bx, L.by, L.bx + bw, L.by + bh, 'boite', 'Boîte à deux dimensions', 'Disques durs qui se heurtent : A (lilas) et B (sable). Les produits (orangé) redeviennent réactifs après un moment.');
+  const molAt = (x, y) => { let best = -1, bd = (r + 4) * (r + 4); for (let i = 0; i < N; i++) { const dx = X(b.x[i]) - x, dy = Y(b.y[i]) - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } } return best; };
+  zoneF((x, y) => { const i = molAt(x, y); return i >= 0 && b.sp[i] === 0; }, 'A', 'Molécule A', 'Réactif lilas. L’arc clair marque son site réactif : avec l’orientation exigée, un choc ne réussit que s’il arrive de ce côté.');
+  zoneF((x, y) => { const i = molAt(x, y); return i >= 0 && b.sp[i] === 1; }, 'B', 'Molécule B', 'Réactif sable, sans site propre : il réagit s’il heurte A du bon côté avec assez d’énergie.');
+  zoneF((x, y) => { const i = molAt(x, y); return i >= 0 && b.sp[i] >= 2; }, 'P', 'Produit (C ou D)', `Né d’un choc réactif. Il pâlit, puis redevient réactif après ${fmt(b.renew, 0)} τ : un artifice pour garder la boîte en marche.`);
+  drawProfile1(c, L.prof, b);
+  drawHist1(c, L.hist, b);
+}
+function drawProfile1(c, P, b) {
+  const pr = Rxn.profile({ Ea: b.Ea, dH: b.dH }), yMin = -2.7, yMax = 7.6, x0 = P.x + 10, pw = P.w - 20;
+  const X = s => x0 + s * pw, Y = e => P.y + P.h - (e - yMin) / (yMax - yMin) * P.h;
+  c.font = mono(10); c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = C.texte2; c.fillText('profil d’énergie de la réaction', P.x, P.y - 12);
+  zone(P.x, P.y - 4, P.x + P.w, P.y + P.h, 'profil', 'Profil d’énergie', `Réactifs à gauche, produits à droite (ΔH = ${fmt(b.dH, 1)} ε : plus bas). Chaque point est un choc A-B : il monte jusqu’à son énergie, et retombe s’il n’atteint pas le sommet.`);
+  // niveaux
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.setLineDash([2, 4]); c.beginPath(); c.moveTo(P.x, Y(0) + 0.5); c.lineTo(P.x + P.w, Y(0) + 0.5); c.stroke(); c.setLineDash([]);
+  // courbe
+  c.beginPath(); pr.pts.forEach((p, i) => { const x = X(p.s), y = Y(p.E); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+  c.strokeStyle = C.texte; c.lineWidth = 1.8; c.stroke();
+  // sommet = état de transition
+  const sx = X(0.5), sy = Y(pr.Ea);
+  c.fillStyle = C.ener; c.beginPath(); c.arc(sx, sy, 4.5, 0, TAU); c.fill();
+  c.strokeStyle = rgba(RE, 0.8); c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(0.02), sy + 0.5); c.lineTo(sx, sy + 0.5); c.stroke(); c.setLineDash([]);
+  c.strokeStyle = C.ener; c.lineWidth = 1.2; c.beginPath(); c.moveTo(X(0.06), Y(0)); c.lineTo(X(0.06), sy); c.stroke();
+  arrowHead(c, X(0.06), sy, -1, C.ener); arrowHead(c, X(0.06), Y(0), 1, C.ener);
+  c.font = mono(10.5); tagText(c, 'Ea = ' + fmt(pr.Ea, 1) + ' ε', sx + 9, sy - 9, 'left', 'middle', C.ener);
+  zcirc(sx, sy, 12, 'ts', 'État de transition', 'Sommet du profil, à la hauteur Ea : la configuration la plus haute en énergie entre les réactifs et les produits. Un choc qui y parvient peut franchir la barrière.');
+  tagText(c, 'A + B', X(0.0), Y(0) + 12, 'left', 'top', C.texte2);
+  const yp = Y(pr.dH);
+  tagText(c, 'C + D', X(1.0), yp + 12, 'right', 'top', C.texte2);
+  tagText(c, 'ΔH = ' + fmt(pr.dH, 1) + ' ε', X(1.0) - 46, yp + 12, 'right', 'top', C.texte2);
+  // ΔH
+  c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(X(0.88), Y(0)); c.lineTo(X(0.88), yp); c.stroke();
+  arrowHead(c, X(0.88), yp, 1, C.texte2);
+  // chocs : un point monte la pente
+  for (const k of k1.climb) {
+    const age = k1.clock - k.t, L1 = 0.45, L2 = 0.5, sE = sOfE(pr, k.E);
+    let s, al = 1, col;
+    if (!k.r) {
+      if (age < L1) s = sE * ease(age / L1); else { const u = (age - L1) / L2; s = sE * (1 - ease(u)); al = 1 - 0.7 * ease(u); }
+      col = k.fail ? C.texte : C.texte2;
+    } else {
+      if (age < L1) { s = 0.5 * ease(age / L1); col = C.ener; }
+      else if (age < L1 + L2) { s = 0.5 + 0.5 * ease((age - L1) / L2); col = C.ener; }
+      else { s = 1; al = 1 - ease((age - L1 - L2) / 0.5); col = C.accent; }
+    }
+    const x = X(s), y = Y(curveAt(pr, s));
+    c.globalAlpha = clamp(al, 0, 1);
+    c.beginPath(); c.arc(x, y, k.r ? 4 : 3, 0, TAU);
+    if (k.fail) { c.strokeStyle = col; c.lineWidth = 1.4; c.stroke(); } else { c.fillStyle = col; c.fill(); }
+    c.globalAlpha = 1;
+  }
+}
+function arrowHead(c, x, y, dir, col) { c.fillStyle = col; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 3.5, y + dir * 7); c.lineTo(x + 3.5, y + dir * 7); c.closePath(); c.fill(); }
+function histTail1(b) { // part mesurée au-delà de Ea (classe partielle interpolée), mémoire de 15 s
+  if (k1.hNS < 100) return NaN;
+  const e = b.Ea / BW1, k0 = Math.floor(e); let s = 0;
+  for (let k = k0 + 1; k < NB1; k++) s += k1.histS[k];
+  if (k0 < NB1) s += k1.histS[k0] * (1 - (e - k0));
+  return s / k1.hNS;
+}
+function drawHist1(c, Hh, b) {
+  const T = b.T, padL = 6, padR = 8, padT = 30, padB = 24, px0 = Hh.x + padL, pw = Hh.w - padL - padR, y1 = Hh.y + Hh.h - padB, ph = Hh.h - padT - padB, y0 = y1 - ph;
+  const xE = E => px0 + E / EMAX1 * pw, hN = k1.hN;
+  c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText('énergie des chocs A-B (ε)', Hh.x, Hh.y + 8);
+  zone(px0, y0 - 4, px0 + pw, y1 + 18, 'hist', 'Histogramme des énergies de collision', 'Énergie de chaque choc A-B le long de la ligne des centres, sur les dernières secondes. Tireté : la courbe attendue e^(−E/kT)/kT.');
+  let mx = 0; const dens = new Float64Array(NB1);
+  if (hN > 5) for (let k = 0; k < NB1; k++) { dens[k] = k1.hist[k] / (hN * BW1); mx = Math.max(mx, dens[k]); }
+  const ymax = Math.max(1 / T, mx) * 1.08, yD = d => y1 - d / ymax * ph, bwPx = pw / NB1;
+  const xEa = xE(b.Ea);
+  // queue (zone de survol, sous les barres)
+  zone(xEa, y0 - 4, px0 + pw, y1, 'queue', 'Queue au-delà de Ea', 'La petite fraction des chocs assez énergiques pour réagir (avec la bonne orientation). Barres pâles : la même queue grossie dix fois (loupe).');
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.beginPath(); c.moveTo(px0, y1 + 0.5); c.lineTo(px0 + pw, y1 + 0.5); c.stroke();
+  // loupe ×10
+  for (let k = 0; k < NB1; k++) {
+    const mid = (k + 0.5) * BW1; if (mid < b.Ea || !dens[k]) continue;
+    const hh = Math.min(ph, dens[k] * 10 / ymax * ph); c.fillStyle = rgba(RE, 0.2); c.fillRect(px0 + k * bwPx + 0.5, y1 - hh, bwPx - 1, hh);
+  }
+  for (let k = 0; k < NB1; k++) {
+    const mid = (k + 0.5) * BW1, hh = dens[k] / ymax * ph; if (hh <= 0) continue;
+    c.fillStyle = mid >= b.Ea ? rgba(RE, 0.95) : rgba(RT2, 0.6); c.fillRect(px0 + k * bwPx + 0.5, y1 - hh, bwPx - 1, hh);
+  }
+  // courbe attendue
+  c.strokeStyle = C.texte; c.lineWidth = 1.3; c.setLineDash([4, 3]); c.beginPath();
+  for (let i = 0; i <= 80; i++) { const E = i / 80 * EMAX1, x = xE(E), y = yD(Rxn.elcPdf(E, T)); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+  c.stroke(); c.setLineDash([]);
+  // ligne Ea
+  c.strokeStyle = C.ener; c.lineWidth = 1.6; c.beginPath(); c.moveTo(xEa, y0 - 6); c.lineTo(xEa, y1); c.stroke();
+  zone(xEa - 5, y0 - 8, xEa + 5, y1, 'ea', 'Ea · énergie d’activation', 'Énergie minimale d’un choc, le long de la ligne des centres, pour que la réaction ait lieu. Elle se règle avec le curseur Ea.');
+  c.font = mono(10.5); tagText(c, 'Ea', xEa, y0 - 8, 'center', 'bottom', C.ener);
+  // axe
+  c.fillStyle = C.texte2; c.font = mono(9.5); c.textAlign = 'center'; c.textBaseline = 'top';
+  for (let E = 0; E <= EMAX1; E += 2) c.fillText(E, xE(E), y1 + 4);
+  // part de la queue
+  const ft = Rxn.fracAbove(b.Ea, T, 2), fm = histTail1(b);
+  c.font = mono(10.5);
+  const rx = px0 + pw - 2, ty = y0 + 8;
+  tagText(c, 'queue × 10 (barres pâles)', rx, ty + 2, 'right', 'middle', rgba(RE, 0.75));
+  tagText(c, 'au-delà de Ea : théorie ' + pc(ft), rx, ty + 20, 'right', 'middle', C.ener);
+  tagText(c, 'mesure ' + pc(fm), rx, ty + 38, 'right', 'middle', C.ener);
+}
+function scope1() {
+  const { w, h } = scopeSetup(), c = sctx, padL = 36, padR = 10, padT = 16, padB = 18, pw = w - padL - padR, ph = h - padT - padB;
+  const rec = k1.rec, t1 = k1.clock, t0 = t1 - 60;
+  let mx = 2; for (const r of rec) { mx = Math.max(mx, r.ft * 100, isFinite(r.fm) ? r.fm * 100 : 0); }
+  const hi = niceMax(mx * 1.15), xT = t => padL + (t - t0) / 60 * pw, yV = v => padT + ph * (1 - v / hi);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = C.texte2; c.fillText(fmt(hi, hi < 10 ? 1 : 0), padL - 4, padT + 3); c.fillText('0', padL - 4, padT + ph - 3);
+  c.textAlign = 'left'; c.fillText('% des chocs A-B qui réagissent', padL + 2, 7);
+  c.textBaseline = 'alphabetic'; c.fillText('−60 s', padL, h - 4); c.textAlign = 'right'; c.fillText('maintenant', padL + pw, h - 4);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  const line = (f, col, lw, dash) => { c.beginPath(); let first = true; for (const r of rec) { const v = f(r); if (!isFinite(v)) { first = true; continue; } const x = xT(r.t), y = yV(v * 100); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; } c.strokeStyle = col; c.lineWidth = lw; c.setLineDash(dash || []); c.stroke(); c.setLineDash([]); };
+  line(r => r.ft, C.ener, 1.5, [5, 4]); line(r => r.fm, C.texte, 2);
+  c.restore();
+  zonesS = []; zone(padL, padT, padL + pw, padT + ph, 'rec1', 'Enregistreur : fraction réactive', 'Plein : fraction mesurée sur la boîte (moyenne glissante de 15 s). Tireté : la valeur attendue P · e^(−Ea/kT). Elles se suivent quand on change T ou Ea.', zonesS);
+}
+function status1() {
+  const b = k1.box, T = b.T, Ea = b.Ea, st = b.steric, P = P1(b), f = Rxn.fracAbove(Ea, T, 2), ft = P * f, ch = k1.change;
+  const fm = fracMeas1(), rNow = rate1();
+  if (ch && k1.clock - ch.t < 25) {
+    const settled = k1.clock - ch.t >= 12;
+    if (ch.kind === 'T') {
+      const f0 = Rxn.fracAbove(Ea, ch.T0, 2), ratio = f / f0, dT = (T / ch.T0 - 1) * 100;
+      if (Math.abs(dT) >= 0.5) {
+        let s = `T passe de ${fmt(ch.T0, 2)} à ${fmt(T, 2)} (${dT > 0 ? '+' : '−'}${fmt(Math.abs(dT), 0)} %) ; l’énergie moyenne des chocs suit. Mais la queue au-delà de Ea passe de ${pc(f0)} à ${pc(f)} des chocs (× ${fmt(ratio, 2)})`;
+        if (settled && ch.rate0 > 0 && isFinite(rNow)) { const m = rNow / ch.rate0; s += ` ; chocs réactifs mesurés : × ${fmt(m, 2)}` + (Math.abs(Math.log(m / ratio)) < 0.4 ? ', la vitesse a suivi la queue.' : '.'); } else s += '.';
+        return s;
+      }
+    } else if (ch.kind === 'Ea') {
+      const f0 = Rxn.fracAbove(ch.Ea0, T, 2), ratio = f / f0;
+      if (Math.abs(Ea - ch.Ea0) >= 0.05) {
+        let s = `Ea passe de ${fmt(ch.Ea0, 1)} à ${fmt(Ea, 1)} ε (${fmt(ch.Ea0 / T, 1)} → ${fmt(Ea / T, 1)} kT) : ${pc(f0)} → ${pc(f)} des chocs ont assez d’énergie (× ${fmt(ratio, 2)})`;
+        if (settled && ch.rate0 > 0 && isFinite(rNow)) s += ` ; chocs réactifs mesurés : × ${fmt(rNow / ch.rate0, 2)}.`; else s += '.';
+        return s;
+      }
+    } else if (ch.kind === 'st') {
+      const Pon = b.alpha / PI;
+      if (st !== ch.st0) {
+        let s = st ? `Avec l’orientation exigée, un choc assez énergique sur ${fmt(1 / Pon, 0)} réussit : ${pc(f)} → ${pc(Pon * f)} des chocs.`
+                   : `Sans exigence d’orientation, ${fmt(1 / Pon, 0)} fois plus de chocs assez énergiques réussissent : ${pc(Pon * f)} → ${pc(f)} des chocs.`;
+        if (settled && isFinite(ch.fm0) && isFinite(fm)) s += ` Mesuré : ${pc(ch.fm0)} → ${pc(fm)}.`;
+        return s;
+      }
+    }
+  }
+  const eaReal = Rxn.SOL.Ea / (Rxn.R * 298);
+  if (Ea / T <= 1.5) return `Ea n’est que de ${fmt(Ea / T, 1)} kT : ${pc(f)} des chocs ont assez d’énergie` + (st ? `, et l’orientation exigée n’en laisse passer que le quart : ${pc(ft)} réagissent.` : ' : sans orientation exigée, ils réagissent tous.');
+  if (Ea / T >= 5) return `Ea = ${fmt(Ea / T, 1)} kT : presque aucun choc ne passe (${pc(ft)}). Une vraie réaction a Ea ≈ ${fmt(eaReal, 0)} kT : sa queue est bien plus mince, donc bien plus sensible à T (étape 2).`;
+  if (k1.sf.c < 100 || k1.sf.r < 8) return `Boîte en marche : sur cent collisions, ${fmt(100 * ft, ft < 0.1 ? 1 : 0)} devraient réagir (valeur attendue) ; la mesure se précise à mesure que les chocs s’accumulent.`;
+  const n = fm;
+  return `Sur cent collisions, ${fmt(100 * n, n < 0.1 ? 1 : 0)} ${n < 0.1 ? 'seulement ' : ''}réagissent : celles de la queue de la distribution. Ici Ea = ${fmt(Ea / T, 1)} kT ; pour une vraie réaction, Ea ≈ ${fmt(eaReal, 0)} kT.`;
+}
+function readouts1() {
+  const b = k1.box, T = b.T, cnt = Rxn.boxCount(b), fm = fracMeas1();
+  setM('T', fmt(T, 2)); setM('EaT', fmt(b.Ea / T, 1));
+  setM('cps', fmt(k1.sc.t > 0 ? k1.sc.c / k1.sc.t : NaN, 0)); setM('rps', fmt(rate1(), 2));
+  setM('fm', fmt(100 * fm, 2)); setM('ft', fmt(100 * fracTheo1(b), 2));
+  setM('nA', String(cnt.A)); setM('nB', String(cnt.B)); setM('nP', String(cnt.C + cnt.D));
+}
+function state1() {
+  const b = k1.box, cnt = Rxn.boxCount(b);
+  return { step: 0, T: b.T, Ea: b.Ea, steric: b.steric, collPerS: k1.sc.t > 0 ? k1.sc.c / k1.sc.t : NaN, reactPerS: rate1(), fracMeas: fracMeas1(), fracTheo: fracTheo1(b), tailMeas: histTail1(b), tailTheo: Rxn.fracAbove(b.Ea, b.T, 2), nA: cnt.A, nB: cnt.B, nP: cnt.C + cnt.D, t: k1.clock };
+}
+
+/* ================= Étape 2 : ce qui règle la vitesse ================= */
+const OM2 = 30, OM_TRIAL = 400, SV2 = 0.1;
+const k2 = { boxes: [], trials: [], clock: 0, speed: 1, tWin: 20, tHalf: NaN, flashes: [], ghosts: [], pop: [], seed: 1, trialSeed: 1, nTrial: 0, tLim: 1, L: null };
+const BOXCOL2 = [RT, RL, RE];
+// instant où [A] vaut frac · [A]₀ (bissection sur la solution analytique)
+function timeToA(k, a0, b0, frac) {
+  const tgt = a0 * frac; let lo = 0, hi = 1 / (k * Math.max(a0, b0)), n = 0;
+  while (Rxn.odeAB(k, a0, b0, hi) > tgt && n++ < 80) hi *= 2;
+  for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (Rxn.odeAB(k, a0, b0, m) > tgt) lo = m; else hi = m; }
+  return hi;
+}
+// instant où la moitié du réactif limitant est consommée
+function timeHalfLim(k, a0, b0) {
+  const x = Math.min(a0, b0) / 2, tgt = a0 - x; let lo = 0, hi = 1 / (k * Math.max(a0, b0)), n = 0;
+  while (Rxn.odeAB(k, a0, b0, hi) > tgt && n++ < 80) hi *= 2;
+  for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (Rxn.odeAB(k, a0, b0, m) > tgt) lo = m; else hi = m; }
+  return hi;
+}
+// t½ de la référence : { t, pseudo } ; t = null si [A] ne peut pas diminuer de moitié
+function tHalfRef(k, a0, b0) {
+  if (b0 >= 10 * a0 - 1e-9) return { t: Rxn.halfLife(1, k * b0, a0), pseudo: true };
+  if (Math.abs(a0 - b0) < 1e-9) return { t: Rxn.halfLife(2, k, a0), pseudo: false };
+  if (b0 < a0 / 2) return { t: null, pseudo: false };
+  return { t: timeToA(k, a0, b0, 0.5), pseudo: false };
+}
+function newBox2(i, lab, labShort, col, a0, b0, T, seed) {
+  const nA = Math.round(a0 * OM2), nB = Math.round(b0 * OM2), rngM = Rxn.mulberry32(seed * 7 + 13 + i);
+  const mk = sp => ({ x: 0.04 + 0.92 * rngM(), y: 0.04 + 0.92 * rngM(), vx: Rxn.gauss(rngM) * SV2, vy: Rxn.gauss(rngM) * SV2, sp });
+  const A = [], B = [];
+  for (let j = 0; j < nA; j++) A.push(mk(0));
+  for (let j = 0; j < nB; j++) B.push(mk(1));
+  return { lab, labShort, col, T, k: Rxn.kSol(T), a0: nA / OM2, b0: nB / OM2, nA0: nA, nB0: nB, st: { nA, nB, nP: 0, t: 0, ev: [] },
+    rng: Rxn.mulberry32(seed + i * 101), rngM, A, B, P: [], rec: [{ t: 0, A: nA / OM2 }], lastRec: 0, evT: [] };
+}
+function restart2() {
+  const seed = newSeed(), a0 = prm.a2, b0 = prm.b2, T = prm.T2;
+  k2.seed = seed;
+  k2.boxes = [newBox2(0, 'Référence', 'Référence', 0, a0, b0, T, seed), newBox2(1, '[A]₀ doublée', '2 × [A]₀', 1, 2 * a0, b0, T, seed), newBox2(2, 'T + 10 °C', 'T + 10 °C', 2, a0, b0, T + 10, seed)];
+  const ref = k2.boxes[0], th = tHalfRef(ref.k, ref.a0, ref.b0);
+  k2.tHalf = th.t == null ? NaN : th.t; k2.pseudo = th.pseudo;
+  k2.tLim = timeHalfLim(ref.k, ref.a0, ref.b0);
+  k2.tWin = niceCeil(2.6 * k2.tLim);
+  k2.speed = 1; for (const sp of [1, 2, 5, 10, 20, 50, 100, 200]) { k2.speed = sp; if (k2.tWin / sp <= 32) break; }
+  k2.clock = 0; k2.flashes = []; k2.ghosts = []; k2.pop = [];
+}
+function reset2() { restart2(); }
+function reactEvent2(bx, exact) {
+  const A = bx.A, B = bx.B; if (!A.length || !B.length) return;
+  let ia = 0, ib = 0, bd = Infinity;
+  if (exact) { for (let i = 0; i < A.length; i++) for (let j = 0; j < B.length; j++) { const dx = A[i].x - B[j].x, dy = A[i].y - B[j].y, d = dx * dx + dy * dy; if (d < bd) { bd = d; ia = i; ib = j; } } }
+  else { ia = Math.floor(bx.rngM() * A.length); for (let j = 0; j < B.length; j++) { const dx = A[ia].x - B[j].x, dy = A[ia].y - B[j].y, d = dx * dx + dy * dy; if (d < bd) { bd = d; ib = j; } } }
+  const a = A[ia], b = B[ib], x = (a.x + b.x) / 2, y = (a.y + b.y) / 2;
+  A[ia] = A[A.length - 1]; A.pop(); B[ib] = B[B.length - 1]; B.pop();
+  bx.P.push({ x, y, vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2, sp: 2 });
+  if (exact) { k2.flashes.push({ bi: bx.idx, x, y, t: k2.clock }); k2.ghosts.push({ bi: bx.idx, x1: a.x, y1: a.y, x2: b.x, y2: b.y, x, y, t: k2.clock }); if (k2.flashes.length > 90) k2.flashes.shift(); if (k2.ghosts.length > 90) k2.ghosts.shift(); }
+}
+function moveMol(m, dt, rng) {
+  const f = Math.exp(-dt / 0.5), s = SV2 * Math.sqrt(1 - f * f);
+  m.vx = m.vx * f + s * Rxn.gauss(rng); m.vy = m.vy * f + s * Rxn.gauss(rng);
+  m.x += m.vx * dt; m.y += m.vy * dt;
+  if (m.x < 0.03) { m.x = 0.06 - m.x; m.vx = Math.abs(m.vx); } else if (m.x > 0.97) { m.x = 1.94 - m.x; m.vx = -Math.abs(m.vx); }
+  if (m.y < 0.03) { m.y = 0.06 - m.y; m.vy = Math.abs(m.vy); } else if (m.y > 0.97) { m.y = 1.94 - m.y; m.vy = -Math.abs(m.vy); }
+}
+function adv2(dt) {
+  k2.clock += dt;
+  const dtM = dt * k2.speed;
+  k2.boxes.forEach((bx, i) => {
+    bx.idx = i;
+    const st = bx.st; st.ev.length = 0;
+    Rxn.ssaAB(st, { k: bx.k, Om: OM2 }, bx.rng, st.t + dtM);
+    st.ev.forEach((t, j) => { bx.evT.push(t); reactEvent2(bx, j < 24); });
+    for (const m of bx.A) moveMol(m, dt, bx.rngM); for (const m of bx.B) moveMol(m, dt, bx.rngM); for (const m of bx.P) moveMol(m, dt, bx.rngM);
+    if (st.t - bx.lastRec >= k2.tWin / 600 && st.t <= k2.tWin * 1.02) { bx.rec.push({ t: st.t, A: st.nA / OM2 }); bx.lastRec = st.t; }
+  });
+  while (k2.flashes.length && k2.clock - k2.flashes[0].t > 0.6) k2.flashes.shift();
+  while (k2.ghosts.length && k2.clock - k2.ghosts[0].t > 0.4) k2.ghosts.shift();
+  while (k2.pop.length && k2.clock - k2.pop[0].t > 0.8) k2.pop.shift();
+}
+function arrFit() {
+  const tr = k2.trials; if (tr.length < 2) return null;
+  const distinct = new Set(tr.map(t => Math.round(t.T * 2))).size; if (distinct < 2) return null;
+  const f = Rxn.linfit(tr.map(t => 1 / t.T), tr.map(t => Math.log(t.k)));
+  return { slope: f.slope, icpt: f.icpt, r2: f.r2, Ea: -f.slope * Rxn.R / 1000 };
+}
+function trial2() {
+  const T = prm.T2, k = Rxn.kSol(T), seed = (k2.trialSeed + 7919 * (k2.nTrial + 1)) >>> 0;
+  const r = Rxn.measureK({ k, a0: prm.a2, b0: prm.b2, Om: OM_TRIAL, seed });
+  if (!(r.k > 0) || !isFinite(r.k)) return;
+  k2.nTrial++; k2.trials.push({ T, k: r.k, kTrue: k }); if (k2.trials.length > 60) k2.trials.shift();
+  k2.pop.push({ T, k: r.k, t: k2.clock });
+  status(); readouts();
+}
+function layout2() {
+  const st = stacked();
+  if (!st) {
+    const m = 16, gap = 14, bw = (W - 2 * m - 2 * gap) / 3, top = 40, gh = clamp(H * 0.30, 130, 230), bh = Math.max(110, H - top - gh - 74);
+    return { boxes: [0, 1, 2].map(i => ({ x: m + i * (bw + gap), y: top, w: bw, h: bh })), graph: { x: m, y: top + bh + 48, w: W - 2 * m, h: gh }, short: bw < 200 };
+  }
+  const m = 12, gap = 8, bw = (W - 2 * m - 2 * gap) / 3, top = 48, bh = Math.round(bw * 1.12), gy = top + bh + 50, gh = 200;
+  return { boxes: [0, 1, 2].map(i => ({ x: m + i * (bw + gap), y: top, w: bw, h: bh })), graph: { x: 12, y: gy, w: W - 24, h: gh }, short: bw < 200, total: gy + gh + 18 };
+}
+function draw2() {
+  const c = ctx, L = layout2(); k2.L = L;
+  const rad = clamp(Math.min(L.boxes[0].w, L.boxes[0].h) / 52, 2.3, 5.4);
+  c.font = mono(10.5);
+  L.boxes.forEach((R, i) => {
+    const bx = k2.boxes[i], col = BOXCOL2[i], X = x => R.x + x * R.w, Y = y => R.y + y * R.h;
+    c.fillStyle = rgba(RF2, 0.55); c.fillRect(R.x, R.y, R.w, R.h);
+    c.strokeStyle = rgba(col, 0.55); c.lineWidth = 1.5; c.strokeRect(R.x - 0.5, R.y - 0.5, R.w + 1, R.h + 1);
+    // traits d'appariement
+    for (const g of k2.ghosts) if (g.bi === i) { const u = (k2.clock - g.t) / 0.4; c.strokeStyle = rgba(RE, 0.6 * (1 - u)); c.lineWidth = 1; c.beginPath(); c.moveTo(X(g.x1), Y(g.y1)); c.lineTo(X(g.x), Y(g.y)); c.moveTo(X(g.x2), Y(g.y2)); c.lineTo(X(g.x), Y(g.y)); c.stroke(); }
+    const dots = (arr, colr) => { c.beginPath(); for (const m of arr) { const x = X(m.x), y = Y(m.y); c.moveTo(x + rad, y); c.arc(x, y, rad, 0, TAU); } c.fillStyle = colr; c.fill(); };
+    dots(bx.A, rgba(RL, 0.95)); dots(bx.B, rgba(RS, 0.95)); dots(bx.P, rgba(RA, 0.97));
+    for (const f of k2.flashes) if (f.bi === i) {
+      const u = (k2.clock - f.t) / 0.5; if (u >= 1) continue;
+      const rr = (rad * 1.5 + 3.2 * rad * ease(u)), al = Math.pow(1 - u, 1.2), x = X(f.x), y = Y(f.y);
+      const g = c.createRadialGradient(x, y, 0, x, y, rr); g.addColorStop(0, rgba(RE, 0.95 * al)); g.addColorStop(0.5, rgba(RE, 0.4 * al)); g.addColorStop(1, rgba(RE, 0));
+      c.fillStyle = g; c.beginPath(); c.arc(x, y, rr, 0, TAU); c.fill();
+      zcirc(x, y, Math.max(rr, 10), 'eclat2', 'Rencontre réussie', 'Événement du tirage stochastique : le couple A-B le plus proche devient une molécule P (traits fins : les deux molécules qui se rejoignent).');
+    }
+    // étiquettes
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = col === RT ? C.texte : rgba(col, 1); c.fillText(L.short ? bx.labShort : bx.lab, R.x, R.y - 22);
+    c.fillStyle = C.texte2; c.font = mono(L.short ? 9.5 : 10.5);
+    c.fillText(`A ${bx.st.nA} · B ${bx.st.nB} · P ${bx.st.nP}`, R.x, R.y - 8); c.font = mono(10.5);
+    if (!L.short) { c.textAlign = 'left'; c.fillText(`[A]₀ = ${fmt(bx.a0, 1)} · [B]₀ = ${fmt(bx.b0, 1)} mol/L · ${fmt(bx.T, 0)} K`, R.x, R.y + R.h + 16); }
+    else { c.font = mono(9.5); c.fillText(`${fmt(bx.T, 0)} K`, R.x, R.y + R.h + 14); c.fillText(`[A]₀ ${fmt(bx.a0, 1)}`, R.x + R.w / 2, R.y + R.h + 14); c.font = mono(10.5); }
+    zone(R.x, R.y, R.x + R.w, R.y + R.h, 'box' + i, i === 0 ? 'Boîte de référence' : i === 1 ? 'Boîte à [A]₀ doublée' : 'Boîte à T + 10 °C',
+      `[A]₀ = ${fmt(bx.a0, 1)} mol/L, [B]₀ = ${fmt(bx.b0, 1)} mol/L, T = ${fmt(bx.T, 0)} K, k = ${fmt(bx.k, 3)} L/(mol·s). Les molécules dérivent au hasard ; 30 molécules dessinées par mol/L.`);
+  });
+  const molAt = (x, y) => { for (let i = 0; i < 3; i++) { const R = L.boxes[i], bx = k2.boxes[i]; if (x < R.x || x > R.x + R.w || y < R.y || y > R.y + R.h) continue;
+    let best = null, bd = (rad + 4) * (rad + 4);
+    for (const arr of [bx.A, bx.B, bx.P]) for (const m of arr) { const dx = R.x + m.x * R.w - x, dy = R.y + m.y * R.h - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = m; } }
+    return best; } return null; };
+  zoneF((x, y) => { const m = molAt(x, y); return m && m.sp === 0; }, 'A2', 'Molécule A', 'Réactif lilas : elle dérive au hasard jusqu’à ce qu’une rencontre réussie la transforme.');
+  zoneF((x, y) => { const m = molAt(x, y); return m && m.sp === 1; }, 'B2', 'Molécule B', 'Réactif sable : même dérive au hasard ; une rencontre réussie avec A donne P.');
+  zoneF((x, y) => { const m = molAt(x, y); return m && m.sp === 2; }, 'P2', 'Produit P', 'Né de la rencontre d’un A et d’un B. Il ne réagit plus : il s’accumule, pendant que [A] baisse.');
+  drawGraph2(c, L.graph);
+}
+function drawGraph2(c, G) {
+  const padL = 46, padR = 14, padT = 22, padB = 30, pw = G.w - padL - padR, ph = G.h - padT - padB, x0 = G.x + padL, y1 = G.y + G.h - padB, tW = k2.tWin;
+  const a0m = Math.max(...k2.boxes.map(b => b.a0)), stp = a0m > 1.2 ? 0.5 : 0.25, aMax = Math.ceil(a0m * 1.04 / stp) * stp, xT = t => x0 + t / tW * pw, yA = a => y1 - a / aMax * ph;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x0 + 0.5, y1 - ph + 0.5, pw, ph);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (let v = 0; v <= aMax + 1e-9; v += stp) { c.fillText(fmt(v, stp < 0.5 ? 2 : 1), x0 - 5, yA(v)); if (v > 0 && v < aMax - 1e-9) { c.strokeStyle = 'rgba(31,40,51,0.7)'; c.beginPath(); c.moveTo(x0, yA(v) + 0.5); c.lineTo(x0 + pw, yA(v) + 0.5); c.stroke(); } }
+  c.textBaseline = 'top'; c.textAlign = 'center';
+  const nT = 5; for (let i = 0; i <= nT; i++) { const t = tW * i / nT; c.fillText(fmt(t, tW < 10 ? 1 : 0), xT(t), y1 + 5); }
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('[A] (mol/L)', G.x, G.y + 6);
+  c.textAlign = 'right'; c.fillText('temps du modèle (s)' + (k2.speed > 1 ? ' · temps accéléré × ' + k2.speed : ''), x0 + pw, G.y + G.h - 2);
+  c.save(); c.beginPath(); c.rect(x0, y1 - ph - 1, pw, ph + 2); c.clip();
+  k2.boxes.forEach((bx, i) => {
+    const col = BOXCOL2[i];
+    c.strokeStyle = rgba(col, 0.85); c.lineWidth = 1.4; c.setLineDash([5, 4]); c.beginPath();
+    for (let j = 0; j <= 100; j++) { const t = tW * j / 100, y = yA(Rxn.odeAB(bx.k, bx.a0, bx.b0, t)); j ? c.lineTo(xT(t), y) : c.moveTo(xT(t), y); }
+    c.stroke(); c.setLineDash([]);
+  });
+  k2.boxes.forEach((bx, i) => {
+    c.strokeStyle = rgba(BOXCOL2[i], 1); c.lineWidth = 2; c.beginPath();
+    bx.rec.forEach((r, j) => { const x = xT(r.t), y = yA(r.A); j ? c.lineTo(x, y) : c.moveTo(x, y); });
+    c.stroke();
+  });
+  c.restore();
+  // légende
+  c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'left'; let lx = x0 + 90; const ly = G.y + 6;
+  c.fillStyle = C.texte2; const seg = (dash, t) => { c.strokeStyle = C.texte2; c.lineWidth = 1.6; c.setLineDash(dash); c.beginPath(); c.moveTo(lx, ly); c.lineTo(lx + 18, ly); c.stroke(); c.setLineDash([]); c.fillText(t, lx + 23, ly); lx += 23 + c.measureText(t).width + 14; };
+  if (pw > 400) { seg([], 'tirage'); seg([5, 4], 'moyenne (loi de vitesse intégrée)'); } else { lx = x0 + 70; seg([], 'tirage'); seg([5, 4], 'moyenne'); }
+  // survol
+  const hov = (x, y, mean) => { if (x < x0 || x > x0 + pw || y < y1 - ph || y > y1) return null; const t = (x - x0) / pw * tW;
+    for (let i = 0; i < 3; i++) { const bx = k2.boxes[i]; if (mean) { if (Math.abs(yA(Rxn.odeAB(bx.k, bx.a0, bx.b0, t)) - y) < 7) return i; }
+      else { let rr = null; for (const r of bx.rec) { if (r.t >= t) { rr = r; break; } } if (rr && Math.abs(yA(rr.A) - y) < 7) return i; } } return null; };
+  zoneF((x, y) => hov(x, y, false) != null, 'tirage', 'Tirage stochastique', '[A](t) compté sur les molécules dessinées : en marches, avec le hasard d’un petit nombre de molécules. Un autre tirage donnerait une autre marche.');
+  zoneF((x, y) => hov(x, y, true) != null, 'moy', 'Courbe moyenne', 'Solution de v = k[A][B] pour un très grand nombre de molécules : ce que les tirages suivent en moyenne.');
+}
+function scopeArrh() {
+  const { w, h } = scopeSetup(), c = sctx; zonesS = [];
+  const padL = 40, padR = 12, padT = 26, padB = 34, pw = w - padL - padR, ph = h - padT - padB, xa = 2.85, xb = 3.65, ya = -3.8, yb = 0.8;
+  const X = v => padL + (v - xa) / (xb - xa) * pw, Y = v => padT + ph * (1 - (v - ya) / (yb - ya));
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'top';
+  for (const v of [3.0, 3.2, 3.4, 3.6]) { c.fillText(fmt(v, 1), X(v), padT + ph + 5); c.strokeStyle = 'rgba(31,40,51,0.7)'; c.beginPath(); c.moveTo(X(v) + 0.5, padT); c.lineTo(X(v) + 0.5, padT + ph); c.stroke(); }
+  c.textBaseline = 'bottom'; for (const T of [340, 320, 300, 280]) c.fillText(String(T), X(1000 / T), padT - 3);
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('T (K)', padL + 2, 9);
+  c.textAlign = 'center'; c.fillText('1000 / T (K⁻¹)', padL + pw / 2, h - 3);
+  c.textAlign = 'right'; c.textBaseline = 'middle'; for (const v of [-3, -2, -1, 0]) { c.fillText(String(v).replace('-', '−'), padL - 5, Y(v)); c.strokeStyle = 'rgba(31,40,51,0.7)'; c.beginPath(); c.moveTo(padL, Y(v) + 0.5); c.lineTo(padL + pw, Y(v) + 0.5); c.stroke(); }
+  c.save(); c.translate(10, padT + ph / 2); c.rotate(-Math.PI / 2); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('ln k', 0, 0); c.restore();
+  const fit = arrFit(); const tr = k2.trials;
+  if (fit) {
+    const xs = [xa, xb].map(v => v / 1000), ys = xs.map(x => fit.icpt + fit.slope * x);
+    c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+    c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X(xa), Y(ys[0])); c.lineTo(X(xb), Y(ys[1])); c.stroke(); c.restore();
+    zoneF((x, y) => { if (x < padL || x > padL + pw) return false; const v = x2v(x); return Math.abs(Y(fit.icpt + fit.slope * v / 1000) - y) < 6; }, 'fit', 'Droite d’Arrhenius ajustée', `ln k = ln A − Ea/RT : la pente vaut −Ea/R. Ici Ea = ${fmt(fit.Ea, 1)} kJ/mol (R² = ${fmt(fit.r2, 3)}).`, zonesS);
+    c.font = mono(10.5); tagText(c, `Ea = ${fmt(fit.Ea, 0)} kJ/mol`, padL + 8, padT + ph - 10, 'left', 'middle', C.texte);
+  }
+  function x2v(x) { return xa + (x - padL) / pw * (xb - xa); }
+  tr.forEach((t, i) => {
+    const x = X(1000 / t.T), y = Y(Math.log(t.k)), pp = k2.pop.find(p => p.k === t.k && p.T === t.T);
+    c.fillStyle = C.accent; c.beginPath(); c.arc(x, y, 3.8, 0, TAU); c.fill();
+    if (pp) { const u = (k2.clock - pp.t) / 0.8; c.strokeStyle = rgba(RA, 1 - u); c.lineWidth = 1.5; c.beginPath(); c.arc(x, y, 4 + 10 * ease(u), 0, TAU); c.stroke(); }
+    zcirc(x, y, 9, 'pt' + i, 'Essai n° ' + (i + 1), `T = ${fmt(t.T, 0)} K : k mesuré = ${fmt(t.k, 3)} L/(mol·s), ajusté sur un tirage stochastique à ${OM_TRIAL} molécules par mol/L (k exact : ${fmt(t.kTrue, 3)}).`, zonesS);
+  });
+  if (!tr.length) { c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('« Essai » ajoute un point', padL + pw / 2, padT + ph / 2 - 8); c.fillText('à la température du curseur T', padL + pw / 2, padT + ph / 2 + 10); }
+}
+function status2() {
+  const tr = k2.trials, fit = arrFit(), R = k2.boxes; if (!R.length) return '';
+  if (fit && tr.length >= 3 && fit.r2 > 0.97) return `Les points s’alignent : ln k = ln A − Ea/RT. La pente donne Ea ≈ ${fmt(fit.Ea, 0)} kJ/mol (R² = ${fmt(fit.r2, 3)}).`;
+  if (tr.length) {
+    const t = tr[tr.length - 1];
+    let s = `Essai ${tr.length} : T = ${fmt(t.T, 0)} K, k mesuré = ${fmt(t.k, 3)} L/(mol·s).`;
+    if (!fit) s += ' Change T et lance un autre essai : il faut deux températures pour tracer une droite.';
+    else s += ` La droite des ${tr.length} points donne Ea ≈ ${fmt(fit.Ea, 0)} kJ/mol ; d’autres essais la préciseront.`;
+    return s;
+  }
+  const ref = R[0], early = bx => { const m = clamp(Math.floor(0.3 * Math.min(ref.nA0, ref.nB0)), 3, 12); if (ref.evT.length < m) return null; const tc = ref.evT[m - 1]; return bx.evT.filter(t => t <= tc).length / m; };
+  const r2 = early(R[1]), r3 = early(R[2]);
+  const th2 = (R[1].k * R[1].a0 * R[1].b0) / (ref.k * ref.a0 * ref.b0), th3 = (R[2].k * R[2].a0 * R[2].b0) / (ref.k * ref.a0 * ref.b0);
+  if (r2 == null || r3 == null) return `Les trois boîtes partent ensemble : référence, [A]₀ doublée, T + ${fmt(R[2].T - ref.T, 0)} °C. Compare les trois courbes de [A](t).`;
+  const ok2 = Math.abs(Math.log(r2 / th2)) < 0.5, ok3 = Math.abs(Math.log(r3 / th3)) < 0.5;
+  const s2 = ok2 ? `Deux fois plus de A : deux fois plus de rencontres avec B, deux fois plus vite (× ${fmt(r2, 1)} mesuré, × ${fmt(th2, 1)} attendu).` : `Doubler [A]₀ : × ${fmt(r2, 1)} mesuré pour × ${fmt(th2, 1)} attendu ; peu de molécules, donc du hasard : relance.`;
+  const kr = Rxn.ratioT(Rxn.SOL.Ea, ref.T, R[2].T);
+  const s3 = ok3 ? `Dix degrés de plus : k ${kr > 1.7 && kr < 2.2 ? 'presque doublé ' : ''}(× ${fmt(kr, 2)}) ; boîtes : × ${fmt(r3, 1)}.` : `Dix degrés de plus : k × ${fmt(kr, 2)} attendu, × ${fmt(r3, 1)} mesuré ; le hasard pèse : relance.`;
+  return s2 + ' ' + s3;
+}
+function readouts2() {
+  const R = k2.boxes, ref = R[0]; if (!ref) return;
+  const k = ref.k, v0 = k * ref.a0 * ref.b0, fit = arrFit();
+  setM('k', fmt(k, 3)); setM('v0', fmt(v0, v0 < 0.01 ? 4 : 3));
+  setL('th', k2.pseudo ? 't½ (pseudo-premier ordre)' : 't½ de la référence');
+  setM('th', k2.tHalf == null || !isFinite(k2.tHalf) ? '—' : fmt(k2.tHalf, k2.tHalf < 10 ? 2 : 1));
+  setM('r2', fmt((R[1].k * R[1].a0 * R[1].b0) / v0, 2)); setM('r3', fmt((R[2].k * R[2].a0 * R[2].b0) / v0, 2));
+  setM('ea', fit ? fmt(fit.Ea, 1) : '—'); setM('t', fmt(ref.st.t, 1));
+  const nm = k2.tHalf == null || !isFinite(k2.tHalf) ? ' [A] ne peut pas diminuer de moitié : [B]₀ < [A]₀/2.' : '';
+  $('#mNote').textContent = MNOTE(1) + (k2.speed > 1 ? ` Temps du modèle accéléré × ${k2.speed} pour que la référence se déroule en une trentaine de secondes.` : '') + nm;
+}
+function state2() {
+  const R = k2.boxes, ref = R[0], fit = arrFit();
+  return { step: 1, T: prm.T2, a0: prm.a2, b0: prm.b2, k: ref.k, v0: ref.k * ref.a0 * ref.b0, tHalf: k2.tHalf == null || !isFinite(k2.tHalf) ? null : k2.tHalf, pseudo: !!k2.pseudo,
+    boxes: R.map(b => ({ label: b.lab, a: b.st.nA / OM2, nA: b.st.nA, nB: b.st.nB, nP: b.st.nP, k: b.k, T: b.T })), trials: k2.trials.map(t => ({ T: t.T, k: t.k })), EaFit: fit ? fit.Ea : null, speed: k2.speed, tWin: k2.tWin, t: ref.st.t };
+}
+
+/* ================= Outils communs aux étapes 3 et 4 ================= */
+const SUPD = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+function fmtX(v) {
+  if (!isFinite(v)) return '—';
+  if (v < 1000) return fmt(v, v < 10 ? 2 : v < 100 ? 1 : 0);
+  const e = Math.floor(Math.log10(v)), m = v / Math.pow(10, e);
+  return fmt(m, 1) + ' × 10' + String(e).split('').map(d => SUPD[+d]).join('');
+}
+function arrowH(c, x0, y0, x1, y1, col, lw, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy); if (L < 2) return;
+  const hd = Math.min(head || 7, L * 0.6), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw || 1.4;
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke();
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill(); c.restore();
+}
+// Courbes d'un enregistreur : cfg {t0, t1, lo, hi, d, label, xl0, xl1, series:[{f, col, lw, dash}], rec}
+function lineChart(c, w, h, cfg) {
+  const padL = 40, padR = 10, padT = 16, padB = 18, pw = w - padL - padR, ph = h - padT - padB;
+  const xT = t => padL + (t - cfg.t0) / (cfg.t1 - cfg.t0) * pw, yV = v => padT + ph * (1 - (v - cfg.lo) / (cfg.hi - cfg.lo));
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+  c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = C.texte2;
+  c.fillText(fmt(cfg.hi, cfg.d), padL - 4, padT + 3); c.fillText(fmt(cfg.lo, cfg.d), padL - 4, padT + ph - 3);
+  c.textAlign = 'left'; c.fillText(cfg.label, padL + 2, 7);
+  c.textBaseline = 'alphabetic'; c.fillText(cfg.xl0, padL, h - 4); c.textAlign = 'right'; c.fillText(cfg.xl1, padL + pw, h - 4);
+  c.save(); c.beginPath(); c.rect(padL, padT, pw, ph); c.clip();
+  for (const s of cfg.series) {
+    c.beginPath(); let first = true;
+    for (const r of cfg.rec) { if (r.t < cfg.t0 - 0.5) continue; const x = xT(r.t), y = yV(s.f(r)); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; }
+    c.strokeStyle = s.col; c.lineWidth = s.lw || 1.8; c.setLineDash(s.dash || []); c.stroke(); c.setLineDash([]);
+  }
+  c.restore();
+}
+const scope2C = $('#scope2'), s2ctx = scope2C.getContext('2d');
+function scope2Setup() { const w = scope2C.width / dpr, h = scope2C.height / dpr; s2ctx.setTransform(dpr, 0, 0, dpr, 0, 0); s2ctx.clearRect(0, 0, w, h); return { w, h }; }
+
+/* ================= Étape 3 : la catalyse ================= */
+const EA0 = Rxn.H2O2.none.Ea / 1000, DH3 = Rxn.H2O2.dH / 1000, DEA_MAX = EA0 - Rxn.H2O2.catalase.Ea / 1000;
+const KINDS3 = ['none', 'MnO2', 'catalase'];
+const k3 = { sans: null, avec: null, L: null };
+const eaCat3 = () => prm.cat3 ? EA0 - prm.dEa3 : EA0;
+const boxEaCat3 = () => Rxn.CAT.Ea * (eaCat3() / EA0);
+const ratio3 = T => prm.cat3 ? (prm.pre3 === 'MnO2' || prm.pre3 === 'catalase' ? Rxn.h2o2Ratio(prm.pre3, T) : Math.exp(prm.dEa3 * 1000 / (Rxn.R * T))) : 1;
+const dEaOf = kind => EA0 - Rxn.H2O2[kind].Ea / 1000;
+function bubRate3() { const r = ratio3(prm.T3); return 0.25 + 9 * Math.min(1, Math.log10(r) / 12); }
+function newBox3(cat, seed) {
+  return Rxn.boxInit({ nA: 60, nB: 60, T: prm.T3 / 298, Ea: Rxn.CAT.Ea, dH: -1, renew: 8, seed, cat: cat ? Rxn.CAT.grains.slice(0, prm.q3) : [], EaCat: cat ? boxEaCat3() : undefined, tAds: Rxn.CAT.tAds });
+}
+function resetAcc3(w) {
+  const z = () => ({ c: 0, r: 0, t: 0 });
+  if (w !== 'avec') { k3.sN = z(); k3.pN = 0; }
+  if (w !== 'sans') { k3.sA = z(); k3.pA = 0; }
+}
+function buildAvec3() {
+  k3.avec = newBox3(prm.cat3, prm.cat3 ? k3.seed : k3.seed + 1);
+  k3.flA = []; k3.nGr0 = k3.avec.cat.length; k3.clsA = new Uint8Array(k3.avec.N); resetAcc3('avec');
+}
+function reset3() {
+  k3.seed = newSeed(); k3.clock = 0; k3.acc = 0; k3.bub = []; k3.bubAcc = 0; k3.rngB = Rxn.mulberry32(k3.seed + 5);
+  k3.sans = newBox3(false, k3.seed); k3.flN = []; k3.clsN = new Uint8Array(k3.sans.N);
+  buildAvec3(); resetAcc3(); k3.catDraw = prm.cat3 ? 1 : 0;
+}
+const rate3 = s => s.t > 3 ? s.r / s.t : NaN;
+function adv3(dt) {
+  const h = 0.0025; k3.clock += dt; k3.acc += 4 * dt;
+  const n = Math.min(400, Math.floor(k3.acc / h + 1e-9));
+  if (n > 0) { Rxn.boxStep(k3.sans, n * h); Rxn.boxStep(k3.avec, n * h); k3.acc -= n * h; }
+  if (k3.acc > 0.3) k3.acc = 0;
+  for (const [b, fl, s, key] of [[k3.sans, k3.flN, k3.sN, 'pN'], [k3.avec, k3.flA, k3.sA, 'pA']]) {
+    const tot = b.cnt.react + b.cnt.reactCat, dR = tot - k3[key]; k3[key] = tot;
+    decay(s, dt, 40, 0, dR);
+    for (const e of Rxn.boxDrain(b)) if (e.r) fl.push({ x: e.x, y: e.y, t: k3.clock, cat: e.cat });
+    while (fl.length && k3.clock - fl[0].t > 0.7) fl.shift();
+  }
+  const tgt = prm.cat3 ? 1 : 0; k3.catDraw += clamp(tgt - k3.catDraw, -dt / 0.5, dt / 0.9);
+  // bulles d'O₂
+  k3.bubAcc += bubRate3() * dt;
+  while (k3.bubAcc >= 1) { k3.bubAcc -= 1; const u = k3.rngB(), v = k3.rngB(); k3.bub.push({ x: 0.14 + 0.72 * u, y: 0, v: 0.3 + 0.25 * v, ph: v * 6.28, r: 1.6 + 2.4 * k3.rngB() }); }
+  for (const b of k3.bub) { b.y += b.v * dt; }
+  k3.bub = k3.bub.filter(b => b.y < 1);
+  if (k3.bub.length > 90) k3.bub.splice(0, k3.bub.length - 90);
+}
+function layout3() {
+  const st = stacked();
+  if (!st && W >= 900) {
+    let bh = clamp(H * 0.46, 200, 340), bw = bh * 40 / 28; if (2 * bw + 56 > W) { bw = (W - 56) / 2; bh = bw * 0.7; }
+    const gap = 24, x1 = (W - 2 * bw - gap) / 2, by = H - 40 - bh, px = Math.max(600, W - 16 - 560);
+    return { prof: { x: px, y: 34, w: W - 16 - px, h: Math.max(120, by - 44 - 34 - 6) }, beaker: { x: 16, y: 34, w: 150, h: Math.max(90, by - 44 - 34 - 6) },
+      boxes: [{ x: x1, y: by, w: bw }, { x: x1 + bw + gap, y: by, w: bw }], wide: true };
+  }
+  const top = 34, pw = Math.min(W - 32, 560), px = (W - pw) / 2, profH = st ? 130 : 110, bkY = top + profH + 36, bkH = 100, by1 = bkY + bkH + 40, side = W >= 560;
+  let bw = side ? Math.min((W - 32 - 16) / 2, 400) : Math.min(W - 32, 420);
+  if (!st && side) bw = Math.max(150, Math.min(bw, (H - by1 - 34) / 0.7));
+  const bh = bw * 0.7;
+  const prof = { x: px, y: top, w: pw, h: profH }, beaker = { x: px, y: bkY, w: 120, h: bkH };
+  if (side) { const x1 = (W - 2 * bw - 16) / 2; return { prof, beaker, boxes: [{ x: x1, y: by1, w: bw }, { x: x1 + bw + 16, y: by1, w: bw }], total: by1 + bh + 34 }; }
+  const x1 = (W - bw) / 2, by2 = by1 + bh + 58;
+  return { prof, beaker, boxes: [{ x: x1, y: by1, w: bw }, { x: x1, y: by2, w: bw }], total: by2 + bh + 34 };
+}
+function drawProfile3(c, P) {
+  const cat = prm.cat3, eac = eaCat3(), pr = Rxn.profile({ Ea: EA0, dH: DH3, EaCat: EA0 - Math.max(prm.dEa3, 0.01) });
+  const yMin = DH3 - 34, yMax = EA0 + 14, x0 = P.x + 8, pw = P.w - 16, py1 = P.y + P.h - 22, ph = P.h - 22 - 6;
+  const X = s => x0 + s * pw, Y = e => py1 - (e - yMin) / (yMax - yMin) * ph;
+  c.font = mono(10); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText('profil d’énergie · 2 H₂O₂ → 2 H₂O + O₂ (kJ/mol)', P.x, P.y - 12);
+  zone(P.x, P.y - 4, P.x + P.w, P.y + P.h, 'profil3', 'Profil d’énergie de la décomposition', `Réactifs à gauche, produits à droite (ΔH = ${fmt(DH3, 0)} kJ/mol, par mole de H₂O₂ : inchangé). Le col à franchir est Ea = ${fmt(EA0, 0)} kJ/mol sans catalyseur.`);
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.setLineDash([2, 4]); for (const e of [0, DH3]) { c.beginPath(); c.moveTo(P.x, Y(e) + 0.5); c.lineTo(P.x + P.w, Y(e) + 0.5); c.stroke(); } c.setLineDash([]);
+  // chemin sans catalyseur
+  c.beginPath(); pr.pts.forEach((p, i) => { const x = X(p.s), y = Y(p.E); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+  c.strokeStyle = C.texte; c.lineWidth = 1.8; c.stroke();
+  // chemin catalysé : se dessine de gauche à droite
+  const cd = k3.catDraw;
+  if (cd > 0.01 && pr.cat) {
+    const n = Math.floor(cd * (pr.cat.length - 1));
+    c.beginPath(); for (let i = 0; i <= n; i++) { const p = pr.cat[i], x = X(p.s), y = Y(p.E); i ? c.lineTo(x, y) : c.moveTo(x, y); }
+    c.strokeStyle = C.accent; c.lineWidth = 2.2; c.setLineDash([6, 4]); c.stroke(); c.setLineDash([]);
+    zoneF((x, y) => { for (let i = 0; i <= n; i += 3) { const p = pr.cat[i]; if (Math.abs(X(p.s) - x) < 6 && Math.abs(Y(p.E) - y) < 7) return true; } return false; }, 'chemincat', 'Chemin catalysé', `Un autre chemin, au col plus bas (Ea = ${fmt(eac, 0)} kJ/mol). Même départ, même arrivée : le catalyseur ne change pas ΔH, il change la hauteur du col, dans les deux sens.`, zones);
+  }
+  // sommets et flèches
+  const sx = X(0.5), sy = Y(EA0);
+  c.fillStyle = C.ener; c.beginPath(); c.arc(sx, sy, 4.5, 0, TAU); c.fill();
+  zcirc(sx, sy, 11, 'ts3', 'État de transition', 'Sommet du profil : la configuration la plus haute entre réactifs et produits. Un catalyseur en offre un autre, plus bas.');
+  c.strokeStyle = rgba(RE, 0.8); c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(0.22), sy + 0.5); c.lineTo(sx, sy + 0.5); c.stroke(); c.setLineDash([]);
+  c.strokeStyle = C.ener; c.lineWidth = 1.3; c.beginPath(); c.moveTo(X(0.22), Y(0)); c.lineTo(X(0.22), sy); c.stroke(); arrowHead(c, X(0.22), sy, -1, C.ener);
+  c.font = mono(10.5); tagText(c, 'Ea = ' + fmt(EA0, 0), X(0.22) - 5, (sy + Y(0)) / 2, 'right', 'middle', C.ener);
+  if (cd > 0.6 && cat) {
+    const cy = Y(eac), ca = clamp((cd - 0.6) / 0.4, 0, 1);
+    c.globalAlpha = ca; c.fillStyle = C.accent; c.beginPath(); c.arc(sx, cy, 4, 0, TAU); c.fill();
+    c.strokeStyle = C.accent; c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(sx, cy + 0.5); c.lineTo(X(0.7), cy + 0.5); c.stroke(); c.setLineDash([]);
+    c.lineWidth = 1.3; c.beginPath(); c.moveTo(X(0.7), Y(0)); c.lineTo(X(0.7), cy); c.stroke(); arrowHead(c, X(0.7), cy, -1, C.accent);
+    tagText(c, 'Ea cat. = ' + fmt(eac, 0), sx + 6, cy - 10, 'left', 'middle', C.accent);
+    c.globalAlpha = 1;
+    // barrière inverse : Ea − ΔH baisse d'autant
+    c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(X(0.93), Y(DH3)); c.lineTo(X(0.93), sy); c.stroke(); arrowHead(c, X(0.93), sy, -1, C.texte2);
+    c.strokeStyle = C.accent; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(X(0.97), Y(DH3)); c.lineTo(X(0.97), cy); c.stroke(); c.setLineDash([]); arrowHead(c, X(0.97), cy, -1, C.accent);
+  } else {
+    c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(X(0.95), Y(DH3)); c.lineTo(X(0.95), sy); c.stroke(); arrowHead(c, X(0.95), sy, -1, C.texte2);
+  }
+  zone(X(0.9), sy, X(1), Y(DH3), 'inv3', 'Barrière inverse', `Pour revenir des produits vers les réactifs, il faut franchir Ea − ΔH = ${fmt(EA0 - DH3, 0)} kJ/mol${cat ? ` sans catalyseur, ${fmt(eac - DH3, 0)} avec : elle baisse d’autant que Ea` : ''}. Le catalyseur accélère donc aussi la réaction inverse.`);
+  c.font = mono(10.5);
+  tagText(c, '2 H₂O₂', X(0.0), Y(0) + 12, 'left', 'top', C.texte2);
+  tagText(c, '2 H₂O + O₂', X(0.86), Y(DH3) + 12, 'right', 'top', C.texte2);
+  tagText(c, 'même départ, même arrivée : ΔH = ' + fmt(DH3, 0) + ' kJ/mol inchangé', P.x + P.w / 2, P.y + P.h - 2, 'center', 'bottom', C.texte);
+}
+function drawBeaker3(c, B) {
+  const x0 = B.x + B.w * 0.12, x1 = B.x + B.w * 0.88, yT = B.y + 6, yB = B.y + B.h - 22, liq = yT + (yB - yT) * 0.22, w = x1 - x0;
+  c.fillStyle = 'rgba(232,228,220,0.07)'; c.beginPath(); c.moveTo(x0, liq); c.lineTo(x1, liq); c.lineTo(x1, yB - 8); c.quadraticCurveTo(x1, yB, x1 - 8, yB); c.lineTo(x0 + 8, yB); c.quadraticCurveTo(x0, yB, x0, yB - 8); c.closePath(); c.fill();
+  c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0 - 4, yT); c.lineTo(x0, yT + 4); c.lineTo(x0, yB - 8); c.quadraticCurveTo(x0, yB, x0 + 8, yB); c.lineTo(x1 - 8, yB); c.quadraticCurveTo(x1, yB, x1, yB - 8); c.lineTo(x1, yT + 4); c.lineTo(x1 + 4, yT); c.stroke();
+  c.strokeStyle = 'rgba(232,228,220,0.35)'; c.beginPath(); c.moveTo(x0, liq + 0.5); c.lineTo(x1, liq + 0.5); c.stroke();
+  zone(x0 - 4, yT, x1 + 4, yB, 'becher', 'Bécher d’eau oxygénée', 'H₂O₂ en solution : 2 H₂O₂ → 2 H₂O + O₂, très lente seule à 298 K. Les bulles d’O₂ sortent à un débit qui suit log₁₀ du facteur d’accélération (échelle logarithmique, plafonnée).');
+  c.beginPath();
+  for (const b of k3.bub) { const x = x0 + b.x * w + Math.sin(b.ph + b.y * 14) * 3, y = yB - 6 - b.y * (yB - 6 - liq); c.moveTo(x + b.r, y); c.arc(x, y, b.r, 0, TAU); }
+  c.strokeStyle = 'rgba(232,228,220,0.85)'; c.lineWidth = 1.1; c.stroke(); c.fillStyle = 'rgba(232,228,220,0.1)'; c.fill();
+  zoneF((x, y) => { for (const b of k3.bub) { const bx = x0 + b.x * w + Math.sin(b.ph + b.y * 14) * 3, by = yB - 6 - b.y * (yB - 6 - liq); if (Math.hypot(bx - x, by - y) < b.r + 4) return true; } return false; }, 'bulle', 'Bulle d’O₂', 'Dioxygène libéré par la décomposition. Débit ∝ log₁₀ du facteur calculé e^(ΔEa/RT) : sans catalyseur, presque rien ; avec la catalase, un jet continu.');
+  c.font = mono(10); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText('H₂O₂', (x0 + x1) / 2, yB + 14);
+}
+function drawBox3(c, b, R, fl, cls, titre, col, rate) {
+  const s = R.w / 40, bh = 28 * s, X = x => R.x + x * s, Y = y => R.y + y * s, r = 0.46 * s, N = b.N;
+  c.fillStyle = rgba(RF2, 0.55); c.fillRect(R.x, R.y, R.w, bh); c.strokeStyle = rgba(col, 0.6); c.lineWidth = 1.5; c.strokeRect(R.x - 0.5, R.y - 0.5, R.w + 1, bh + 1);
+  drawBoxParts(c, b, R.x, R.y, s, cls, false);
+  for (const f of fl) { const g = drawFlash(c, f, k3.clock, X(f.x), Y(f.y), s, 0.5); if (g) zcirc(g.x, g.y, Math.max(g.rr, 12), 'eclat3', 'Collision réactive', f.cat ? 'Un B a heurté un A fixé sur un grain avec assez d’énergie (Ea catalysée) : A + B devient C + D, et le grain ressort intact.' : 'Choc A-B en phase libre, avec assez d’énergie pour franchir le col sans aide.'); }
+  zone(R.x, R.y, R.x + R.w, R.y + bh, 'box3', titre, 'Même température, mêmes réactifs. Unités réduites : Ea = 5 kT sans catalyseur ; avec lui, le col catalysé est plus bas.');
+  b.cat.forEach((g, gi) => zcirc(X(g.x), Y(g.y), g.R * s, 'grain', 'Grain de catalyseur', 'Surface minérale schématique, fixe. Un A qui la touche s’y fixe un instant ; un B qui heurte ce A réagit s’il a l’énergie de la voie catalysée. Le grain ressort intact.'));
+  const molAt = (x, y, wantAds) => { let best = -1, bd = (r + 5) * (r + 5); for (let i = 0; i < N; i++) { if (wantAds && b.ads[i] < 0) continue; const dx = X(b.x[i]) - x, dy = Y(b.y[i]) - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } } return best; };
+  zoneF((x, y) => molAt(x, y, true) >= 0, 'Afixe', 'A fixé sur un grain', 'Il reste immobile un temps au hasard (moyenne 6 τ), puis repart. Pendant ce temps, un B qui le heurte peut réagir par la voie catalysée.');
+  zoneF((x, y) => { const i = molAt(x, y, false); return i >= 0 && b.sp[i] === 0 && b.ads[i] < 0; }, 'A3', 'Molécule A', 'Réactif lilas.');
+  zoneF((x, y) => { const i = molAt(x, y, false); return i >= 0 && b.sp[i] === 1; }, 'B3', 'Molécule B', 'Réactif sable.');
+  zoneF((x, y) => { const i = molAt(x, y, false); return i >= 0 && b.sp[i] >= 2; }, 'P3', 'Produit (C ou D)', 'Il pâlit puis redevient réactif, pour garder la boîte en marche.');
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = col === RT ? C.texte : rgba(col, 1); c.fillText(titre, R.x, R.y - 8);
+  c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'right'; c.fillText('réactions/s : ' + fmt(rate, 2), R.x + R.w, R.y - 8);
+  return bh;
+}
+function draw3() {
+  const c = ctx, L = layout3(); k3.L = L;
+  drawProfile3(c, L.prof); drawBeaker3(c, L.beaker);
+  const rN = rate3(k3.sN), rA = rate3(k3.sA);
+  drawBox3(c, k3.sans, L.boxes[0], k3.flN, k3.clsN, 'sans catalyseur', RT, rN);
+  drawBox3(c, k3.avec, L.boxes[1], k3.flA, k3.clsA, prm.cat3 ? `avec catalyseur (${prm.q3} grain${prm.q3 > 1 ? 's' : ''})` : 'sans catalyseur (second tirage)', prm.cat3 ? RA : RT, rA);
+  const m = ratio3meas();
+  if (prm.cat3 && isFinite(m)) { c.font = mono(11); const mx = (L.boxes[0].x + L.boxes[1].x + L.boxes[1].w) / 2 + (L.boxes.length && L.boxes[0].y === L.boxes[1].y ? 0 : 0); if (L.boxes[0].y === L.boxes[1].y) tagText(c, 'rapport mesuré × ' + fmt(m, 1), mx, L.boxes[0].y + 28 * L.boxes[0].w / 40 + 18, 'center', 'top', C.accent); }
+}
+function ratio3meas() { const a = rate3(k3.sA), n = rate3(k3.sN); return k3.sN.r >= 3 && k3.sA.r >= 3 && n > 0 ? a / n : NaN; }
+function status3() {
+  const T = prm.T3, cat = prm.cat3, eac = eaCat3(), r = ratio3(T), m = ratio3meas();
+  if (!cat) return `Eau oxygénée seule : Ea = ${fmt(EA0, 0)} kJ/mol, très peu de chocs franchissent le col à ${fmt(T, 0)} K. Ajoute un catalyseur : le départ et l’arrivée ne bougeront pas, seulement le col.`;
+  let s = `Le catalyseur ressort intact ; le départ et l’arrivée n’ont pas bougé (ΔH = ${fmt(DH3, 0)} kJ/mol), seulement le col à franchir : Ea passe de ${fmt(EA0, 0)} à ${fmt(eac, 0)} kJ/mol, vitesse × ${fmtX(r)}.`;
+  if (isFinite(m)) s += ` Boîtes : × ${fmt(m, 1)} mesuré.`;
+  if (prm.pre3 === 'catalase') s += ' La catalase est une enzyme : voir la <a href="../08-replication-adn/index.html">planche 08</a> (polymérase) et le module 34.';
+  return s;
+}
+function readouts3() {
+  const T = prm.T3, eac = eaCat3(), rN = rate3(k3.sN), rA = rate3(k3.sA), m = ratio3meas();
+  setM('ea', fmt(EA0, 0)); setM('eac', fmt(eac, 0)); setM('fac', fmtX(ratio3(T))); setM('dh', fmt(DH3, 0));
+  setM('bi', fmt(EA0 - DH3, 0)); setM('bic', fmt(eac - DH3, 0)); setM('rn', fmt(rN, 2)); setM('rc', fmt(rA, 2)); setM('rm', fmt(m, 1)); setM('cons', String(k3.nGr0 - k3.avec.cat.length));
+}
+function state3() {
+  const T = prm.T3, eac = eaCat3();
+  return { step: 2, T, Ea: EA0, EaCat: eac, cat: prm.cat3, dEa: prm.cat3 ? prm.dEa3 : 0, ratioTheo: ratio3(T), reactNo: rate3(k3.sN), reactCat: rate3(k3.sA), ratioMeas: ratio3meas(), nReactNo: k3.sans.cnt.react + k3.sans.cnt.reactCat, nReactCat: k3.avec.cnt.react + k3.avec.cnt.reactCat, dH: DH3, consumed: k3.nGr0 - k3.avec.cat.length, preset: prm.pre3, grains: prm.cat3 ? prm.q3 : 0, t: k3.clock };
+}
+function setCat3(on, dEa, pre) {
+  on = !!on; const was = prm.cat3;
+  if (dEa != null) prm.dEa3 = clamp(+dEa, 0, DEA_MAX);
+  prm.cat3 = on; prm.pre3 = pre || (on ? 'custom' : 'none');
+  if (on !== was) buildAvec3(); else { if (k3.avec) { k3.avec.EaCat = on ? boxEaCat3() : Infinity; resetAcc3('avec'); } }
+}
+function setPreset3(kind) {
+  if (kind === 'none') setCat3(false, null, 'none');
+  else setCat3(true, dEaOf(kind), kind);
+}
+function setT3(T) { prm.T3 = clamp(+T, 280, 340); if (k3.sans) { Rxn.boxSetT(k3.sans, prm.T3 / 298); Rxn.boxSetT(k3.avec, prm.T3 / 298); resetAcc3(); } }
+function setQ3(q) { q = clamp(Math.round(+q), 1, 3); if (q === prm.q3) return; prm.q3 = q; if (prm.cat3) buildAvec3(); }
+
+/* ================= Étape 4 : l'équilibre dynamique ================= */
+const TFACT4 = 0.3, NS4 = 60, C_NO2 = '#c8763a', RNO2 = rgb(C_NO2);
+const k4 = { s: null, L: null };
+function reset4() {
+  const seed = newSeed();
+  const s = Rxn.eqInit({ T: prm.Te, V: prm.V4 * 1e-3, start: 'N2O4', seed, cat: prm.cat4 }); s.log = [];
+  Object.assign(k4, { s, seed, clock: 0, tm: 0, Vt: prm.V4 * 1e-3, sf: { c: 0, r: 0, t: 0 }, Ns: s.N, Ms: s.M, rec: [], recT: 0, ev: null, flash: [], sample: [], rngS: Rxn.mulberry32(seed + 9), drag: false });
+  s.Tbath = prm.Te;
+  const nM = Math.round(NS4 * s.M / (s.N + s.M));
+  for (let i = 0; i < NS4; i++) k4.sample.push(newSlot4(i < nM ? 1 : 0));
+}
+function newSlot4(kind) {
+  const r = k4.rngS, a = r() * TAU, d = Math.sqrt(r()) * 0.82;
+  return { kind, x: Math.cos(a) * d, y: Math.sin(a) * d, vx: Rxn.gauss(r) * 0.12, vy: Rxn.gauss(r) * 0.12, th: r() * TAU, w: Rxn.gauss(r) * 1.5 };
+}
+function setVol4(v) { v = clamp(+v, 0.4, 2); const old = prm.V4; prm.V4 = v; if (k4.s) { k4.Vt = v * 1e-3; if (Math.abs(v - old) > 0.004) k4.ev = { kind: v < old ? 'comp' : 'dil', c: k4.clock, P0: Rxn.eqP(k4.s) }; } }
+function setTe4(T) { T = clamp(+T, 260, 360); const old = prm.Te; prm.Te = T; if (k4.s) { k4.s.Tbath = T; if (Math.abs(T - old) >= 0.5) k4.ev = { kind: T > old ? 'heat' : 'cool', c: k4.clock, K0: Rxn.Kp(k4.s.T), a0: Rxn.eqAlpha(k4.s) }; } }
+function inject4(n) { n = n == null ? 80 : Math.round(n); if (!k4.s || n <= 0) return; k4.ev = { kind: 'inj', c: k4.clock, n, M0: k4.s.M }; k4.s.M += n; }
+function setCat4(on) { on = !!on; if (on === prm.cat4) return; prm.cat4 = on; if (k4.s) { k4.s.cat = on; k4.ev = { kind: 'cat', c: k4.clock }; } }
+const Qs4 = () => Rxn.Q({ N: k4.Ns, M: k4.Ms, T: k4.s.T, V: k4.s.V });
+function adv4(dt) {
+  const s = k4.s, dtM = dt * TFACT4;
+  k4.clock += dt; k4.tm += dtM;
+  s.V += (k4.Vt - s.V) * (1 - Math.exp(-dt / 0.25));
+  s.log.length = 0; Rxn.eqStep(s, dtM);
+  let nf = 0, nr = 0; for (const e of s.log) if (e.type === 'f') nf++; else nr++;
+  decay(k4.sf, dtM, 1, nf, nr);
+  // éclats dans la loupe (au plus 6 par image)
+  const evs = s.log.length > 6 ? s.log.filter((_, i) => i % Math.ceil(s.log.length / 6) === 0) : s.log;
+  for (const e of evs) {
+    const want = e.type === 'f' ? 0 : 1, pool = k4.sample.filter(m => m.kind === want);
+    if (pool.length) { const m = pool[Math.floor(k4.rngS() * pool.length)]; k4.flash.push({ x: m.x, y: m.y, t: k4.clock, type: e.type }); }
+  }
+  while (k4.flash.length && k4.clock - k4.flash[0].t > 0.5) k4.flash.shift();
+  if (k4.flash.length > 40) k4.flash.splice(0, k4.flash.length - 40);
+  const a = 1 - Math.exp(-dtM / 0.7); k4.Ns += (s.N - k4.Ns) * a; k4.Ms += (s.M - k4.Ms) * a;
+  // échantillon de la loupe : suit la vraie composition, une conversion à la fois
+  const tgt = Math.round(NS4 * s.M / Math.max(1, s.N + s.M)), cnt = k4.sample.reduce((n, m) => n + m.kind, 0);
+  if (cnt < tgt) { const p = k4.sample.filter(m => m.kind === 0); if (p.length) p[Math.floor(k4.rngS() * p.length)].kind = 1; }
+  else if (cnt > tgt) { const p = k4.sample.filter(m => m.kind === 1); if (p.length) p[Math.floor(k4.rngS() * p.length)].kind = 0; }
+  const f = Math.exp(-dt / 0.5), sg = 0.12 * Math.sqrt(1 - f * f);
+  for (const m of k4.sample) {
+    m.vx = m.vx * f + sg * Rxn.gauss(k4.rngS); m.vy = m.vy * f + sg * Rxn.gauss(k4.rngS); m.x += m.vx * dt; m.y += m.vy * dt; m.th += m.w * dt;
+    const d = Math.hypot(m.x, m.y); if (d > 0.84) { const nx = m.x / d, ny = m.y / d, vn = m.vx * nx + m.vy * ny; if (vn > 0) { m.vx -= 2 * vn * nx; m.vy -= 2 * vn * ny; } m.x = nx * 0.84; m.y = ny * 0.84; }
+  }
+  for (let i = 0; i < k4.sample.length; i++) for (let j = i + 1; j < k4.sample.length; j++) { const A = k4.sample[i], B = k4.sample[j], dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), mn = 0.15; if (d < mn && d > 1e-6) { const p = (mn - d) / 2 / d; A.x -= dx * p; A.y -= dy * p; B.x += dx * p; B.y += dy * p; } }
+  k4.recT += dtM;
+  if (k4.recT >= 0.05) { k4.recT = 0; const q = Rxn.EQ.q; k4.rec.push({ t: k4.tm, nn: s.M * q / s.V, n2: s.N * q / s.V, f: fPerS4(), r: rPerS4() }); while (k4.rec.length && k4.rec[0].t < k4.tm - 9) k4.rec.shift(); }
+}
+const fPerS4 = () => k4.sf.t > 0 ? k4.sf.c / k4.sf.t : 0, rPerS4 = () => k4.sf.t > 0 ? k4.sf.r / k4.sf.t : 0;
+function dir4() { const q = Qs4(), K = Rxn.Kp(k4.s.T), l = Math.log(q / K); return !isFinite(l) || l < -0.15 ? 1 : l > 0.15 ? -1 : 0; }
+function layout4() {
+  const st = stacked();
+  if (!st && W >= 900) {
+    const VR = { x: 24, y: 24, w: 230, h: H - 48 }, cw = 230, cx = W - 16 - cw, left = VR.x + VR.w + 30, avail = cx - 20 - left, R = Math.max(80, Math.min(170, avail / 2, (H - 48) / 2));
+    return { VR, loupe: { cx: left + avail / 2, cy: H / 2, R }, cnt: [{ x: cx, y: 46, w: cw, h: 130 }, { x: cx, y: 192, w: cw, h: 130 }], wide: true };
+  }
+  const top = 34, vh = st ? 270 : Math.max(180, Math.min(270, H - top - 150)), VR = { x: 16, y: top, w: 150, h: vh }, left = VR.x + VR.w + 16, avail = W - 16 - left, R = Math.max(60, Math.min(150, avail / 2, vh / 2)), cwid = (W - 32 - 12) / 2;
+  return { VR, loupe: { cx: left + avail / 2, cy: top + vh / 2, R }, cnt: [{ x: 16, y: top + vh + 18, w: cwid, h: 100 }, { x: 16 + cwid + 12, y: top + vh + 18, w: cwid, h: 100 }], total: top + vh + 18 + 100 + 58, wide: false };
+}
+function drawSample4(c, Lp) {
+  const s = k4.s, u = Lp.R / 44, cx = Lp.cx, cy = Lp.cy, R = Lp.R;
+  const alpha = clamp((s.M * Rxn.EQ.q / s.V / 1000) / 0.1, 0, 1) * 0.5;
+  c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+  c.fillStyle = rgba(RF2, 0.9); c.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+  c.fillStyle = rgba(RNO2, 0.06 + alpha * 0.5); c.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+  const no2 = k4.sample.filter(m => m.kind === 1), n2o4 = k4.sample.filter(m => m.kind === 0);
+  // NO₂ : petite molécule coudée brune
+  c.fillStyle = rgba(RNO2, 0.95); c.strokeStyle = rgba(RNO2, 0.8); c.lineWidth = Math.max(1, u * 0.45);
+  c.beginPath(); for (const m of no2) { const x = cx + m.x * R, y = cy + m.y * R; for (const a of [m.th + 0.82, m.th - 0.82]) { c.moveTo(x, y); c.lineTo(x + Math.cos(a) * 2.5 * u, y + Math.sin(a) * 2.5 * u); } } c.stroke();
+  c.beginPath(); for (const m of no2) { const x = cx + m.x * R, y = cy + m.y * R; c.moveTo(x + 1.5 * u, y); c.arc(x, y, 1.5 * u, 0, TAU); for (const a of [m.th + 0.82, m.th - 0.82]) { const ox = x + Math.cos(a) * 2.5 * u, oy = y + Math.sin(a) * 2.5 * u; c.moveTo(ox + 1.1 * u, oy); c.arc(ox, oy, 1.1 * u, 0, TAU); } } c.fill();
+  // N₂O₄ : paire contourée (incolore)
+  c.strokeStyle = C.texte2; c.lineWidth = Math.max(1, u * 0.4);
+  c.beginPath(); for (const m of n2o4) { const x = cx + m.x * R, y = cy + m.y * R, ca = Math.cos(m.th), sa = Math.sin(m.th), hl = 3.4 * u, hw = 2.2 * u;
+    const P = (a, b) => [x + ca * a - sa * b, y + sa * a + ca * b]; const q = [P(-hl, -hw), P(hl, -hw), P(hl, hw), P(-hl, hw)];
+    c.moveTo(q[0][0], q[0][1]); for (let k = 1; k < 4; k++) c.lineTo(q[k][0], q[k][1]); c.closePath(); } c.stroke();
+  c.fillStyle = rgba(RT2, 0.55);
+  c.beginPath(); for (const m of n2o4) { const x = cx + m.x * R, y = cy + m.y * R, ca = Math.cos(m.th), sa = Math.sin(m.th);
+    for (const [a, b, rr] of [[-1.4, 0, 1.1], [1.4, 0, 1.1], [-1.4, -1.5, 0.8], [-1.4, 1.5, 0.8], [1.4, -1.5, 0.8], [1.4, 1.5, 0.8]]) { const px = x + (ca * a - sa * b) * u, py = y + (sa * a + ca * b) * u; c.moveTo(px + rr * u, py); c.arc(px, py, rr * u, 0, TAU); } } c.fill();
+  // éclats : dissociation (→ --positif), recombinaison (← --negatif)
+  for (const f of k4.flash) {
+    const t = (k4.clock - f.t) / 0.5; if (t >= 1) continue; const col = f.type === 'f' ? RP : RN, x = cx + f.x * R, y = cy + f.y * R, rr = (3 + 6 * ease(t)) * u, al = 1 - t;
+    c.strokeStyle = rgba(col, 0.9 * al); c.lineWidth = 1.6; c.beginPath(); c.arc(x, y, rr, 0, TAU); c.stroke();
+    c.save(); c.globalAlpha = al; if (f.type === 'f') arrowH(c, x - rr * 0.9, y - rr - 3, x + rr * 0.9, y - rr - 3, rgba(col, 1), 1.4, 5); else arrowH(c, x + rr * 0.9, y - rr - 3, x - rr * 0.9, y - rr - 3, rgba(col, 1), 1.4, 5); c.restore();
+  }
+  c.restore();
+  c.strokeStyle = C.texte2; c.lineWidth = 1.5; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
+  zoneF((x, y) => { if (Math.hypot(x - cx, y - cy) > R) return false; for (const m of k4.sample) if (m.kind === 1 && Math.hypot(cx + m.x * R - x, cy + m.y * R - y) < 4.5 * u) return true; return false; }, 'no2', 'NO₂ (brun)', 'Dioxyde d’azote, molécule coudée : réellement brun. Deux NO₂ peuvent s’unir en N₂O₄ ; un N₂O₄ peut se séparer en deux NO₂.');
+  zoneF((x, y) => { if (Math.hypot(x - cx, y - cy) > R) return false; for (const m of k4.sample) if (m.kind === 0 && Math.hypot(cx + m.x * R - x, cy + m.y * R - y) < 4.5 * u) return true; return false; }, 'n2o4', 'N₂O₄ (incolore)', 'Tétroxyde de diazote : deux NO₂ liés, sans couleur. Il se sépare ou se reforme sans cesse, même quand la composition ne change plus.');
+  zcirc(cx, cy, R, 'loupe', 'Loupe sur le gaz', `Un échantillon de ${NS4} molécules, dans les proportions de la vraie composition. Chaque éclat est un événement tiré : dissociation (flèche →) ou recombinaison (flèche ←).`);
+  c.font = mono(10.5); tagText(c, `loupe : ${NS4} molécules`, cx, cy - R - 6, 'center', 'bottom', C.texte2);
+}
+function drawVessel4(c, VR, gx, gy) {
+  const s = k4.s, V = s.V * 1000, tw = Math.min(110, VR.w * (VR.w < 200 ? 0.4 : 0.5)), tcx = VR.x + VR.w / 2, yb = VR.y + VR.h - 26, hMax = VR.h - 26 - 76, hGas = hMax * V / 2, plateY = yb - hGas, yTop = VR.y + 66;
+  const u = clamp((s.Tbath - 260) / 100, 0, 1), bathTop = yb - hMax * 0.8;
+  // bain
+  c.fillStyle = rgba(mixc(RT2, RT, u), 0.1 + 0.14 * u); c.fillRect(tcx - tw / 2 - 34, bathTop, tw + 68, yb + 16 - bathTop);
+  c.strokeStyle = rgba(mixc(RT2, RT, u), 0.55); c.lineWidth = 1.2; c.beginPath(); c.moveTo(tcx - tw / 2 - 34, bathTop + 0.5); c.lineTo(tcx + tw / 2 + 34, bathTop + 0.5); c.moveTo(tcx - tw / 2 - 34, bathTop); c.lineTo(tcx - tw / 2 - 34, yb + 16); c.lineTo(tcx + tw / 2 + 34, yb + 16); c.lineTo(tcx + tw / 2 + 34, bathTop); c.stroke();
+  zone(tcx - tw / 2 - 34, bathTop, tcx + tw / 2 + 34, yb + 16, 'bain', 'Bain thermostaté', `Il impose la température du gaz (${fmt(s.Tbath, 0)} K) ; le gaz s’y met en équilibre thermique en une fraction de seconde. La teinte du bain ne code rien d’autre que sa température.`);
+  // gaz
+  const cNO2 = s.M * Rxn.EQ.q / s.V / 1000, al = clamp(cNO2 / 0.1, 0, 1) * 0.85;
+  c.fillStyle = rgba(RNO2, 0.04 + al); c.fillRect(tcx - tw / 2 + 2, plateY + 6, tw - 4, yb - plateY - 6);
+  zone(tcx - tw / 2, plateY + 6, tcx + tw / 2, yb, 'gaz', 'Gaz du piston', `Mélange de N₂O₄ (incolore) et de NO₂ (brun) : la teinte suit la concentration de NO₂ (${fmt(cNO2 * 1000, 1)} mmol/L).`);
+  // tube de verre
+  c.strokeStyle = 'rgba(232,228,220,0.55)'; c.lineWidth = 2; c.beginPath(); c.moveTo(tcx - tw / 2, yTop); c.lineTo(tcx - tw / 2, yb); c.lineTo(tcx + tw / 2, yb); c.lineTo(tcx + tw / 2, yTop); c.stroke();
+  c.strokeStyle = 'rgba(232,228,220,0.18)'; c.lineWidth = 1; c.beginPath(); c.moveTo(tcx - tw / 2 + 5, yTop + 6); c.lineTo(tcx - tw / 2 + 5, yb - 6); c.stroke();
+  // piston : plateau, tige, poignée
+  const hy = Math.max(VR.y + 14, plateY - 56);
+  c.fillStyle = 'rgba(232,228,220,0.2)'; c.fillRect(tcx - tw / 2 + 1, plateY - 4, tw - 2, 10); c.strokeStyle = C.texte; c.lineWidth = 1.5; c.strokeRect(tcx - tw / 2 + 1.5, plateY - 3.5, tw - 3, 9);
+  c.beginPath(); c.moveTo(tcx, plateY - 4); c.lineTo(tcx, hy + 6); c.stroke();
+  c.fillStyle = C.fond2; c.fillRect(tcx - 26, hy - 6, 52, 12); c.strokeStyle = k4.drag ? C.accent : C.texte; c.strokeRect(tcx - 26.5, hy - 6.5, 53, 13);
+  c.strokeStyle = C.texte2; c.beginPath(); for (let k = -3; k <= 3; k++) { c.moveTo(tcx + k * 6, hy - 3); c.lineTo(tcx + k * 6, hy + 3); } c.stroke();
+  zone(tcx - tw / 2, plateY - 6, tcx + tw / 2, plateY + 8, 'piston', 'Piston', 'Glisse-le (souris ou doigt) : pousser réduit le volume, tirer l’augmente. Le gaz est comprimé ou détendu d’un coup, puis l’équilibre se déplace.');
+  zone(tcx - 26, hy - 8, tcx + 26, hy + 8, 'piston', 'Piston', 'Glisse-le (souris ou doigt) : pousser réduit le volume, tirer l’augmente. Le gaz est comprimé ou détendu d’un coup, puis l’équilibre se déplace.');
+  zone(tcx - 6, hy, tcx + 6, plateY, 'piston', 'Piston', 'Glisse-le (souris ou doigt) : pousser réduit le volume, tirer l’augmente. Le gaz est comprimé ou détendu d’un coup, puis l’équilibre se déplace.');
+  c.font = mono(10.5); c.textBaseline = 'alphabetic';
+  const cpt = VR.w < 200;
+  tagText(c, cpt ? `${fmt(V, 2)} L` : `V = ${fmt(V, 2)} L`, tcx + tw / 2 + 8, plateY + 4, 'left', 'middle', C.texte);
+  tagText(c, cpt ? `${fmt(Rxn.eqP(s), 2)} bar` : `P = ${fmt(Rxn.eqP(s), 3)} bar`, tcx + tw / 2 + 8, plateY + 22, 'left', 'middle', C.texte2);
+  tagText(c, `bain ${fmt(s.Tbath, 0)} K`, tcx, yb + 30, 'center', 'top', C.texte2);
+  k4.geo = { yb, hMax, tcx };
+  // lien vers la loupe
+  const g = { x: tcx, y: (plateY + yb) / 2 }; gx.g = g;
+  c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; c.beginPath(); c.arc(g.x, g.y, 11, 0, TAU); c.stroke();
+}
+function drawCounter4(c, R, type) {
+  const f = type === 'f', col = f ? C.pos : C.neg, rc = f ? RP : RN, v = f ? fPerS4() : rPerS4();
+  c.fillStyle = rgba(rc, 0.07); c.fillRect(R.x, R.y, R.w, R.h); c.strokeStyle = rgba(rc, 0.7); c.lineWidth = 1.5; c.strokeRect(R.x + 0.5, R.y + 0.5, R.w - 1, R.h - 1);
+  c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.font = mono(R.w < 200 ? 10 : 11); c.fillStyle = col;
+  c.fillText(R.w < 200 ? (f ? 'dissociations/s' : 'recombinaisons/s') : (f ? 'dissociations / s' : 'recombinaisons / s'), R.x + 46, R.y + 22);
+  arrowH(c, f ? R.x + 12 : R.x + 38, R.y + 17, f ? R.x + 38 : R.x + 12, R.y + 17, col, 2, 8);
+  c.font = mono(R.w < 200 ? 30 : 40); c.fillText(fmt(v, 0), R.x + 12, R.y + R.h - 38 + (R.h < 110 ? -6 : 0));
+  c.font = mono(10); c.fillStyle = C.texte2; c.fillText(R.w < 200 ? (f ? 'N₂O₄ → 2 NO₂' : '2 NO₂ → N₂O₄') : (f ? 'N₂O₄ → 2 NO₂ · par s du modèle' : '2 NO₂ → N₂O₄ · par s du modèle'), R.x + 12, R.y + R.h - 12);
+  zone(R.x, R.y, R.x + R.w, R.y + R.h, f ? 'cf' : 'cr', f ? 'Compteur des dissociations' : 'Compteur des recombinaisons', f ? 'Nombre de N₂O₄ qui se séparent par seconde du modèle, lissé sur 1 s. Il ne tombe jamais à zéro.' : 'Nombre de paires de NO₂ qui s’unissent par seconde du modèle, lissé sur 1 s. À l’équilibre, il rejoint celui des dissociations sans jamais s’arrêter.');
+}
+function draw4() {
+  const c = ctx, L = layout4(); k4.L = L; const gx = {};
+  drawVessel4(c, L.VR, gx);
+  const lp = L.loupe, g = gx.g;
+  // cône de la loupe
+  c.strokeStyle = rgba(RT2, 0.35); c.lineWidth = 1; c.beginPath();
+  for (const sgn of [-1, 1]) { const a = Math.PI + sgn * 0.9; c.moveTo(g.x + 9, g.y + sgn * 8); c.lineTo(lp.cx + lp.R * Math.cos(a), lp.cy + lp.R * Math.sin(a)); } c.stroke();
+  drawSample4(c, lp);
+  drawCounter4(c, L.cnt[0], 'f'); drawCounter4(c, L.cnt[1], 'r');
+  const s = k4.s, K = Rxn.Kp(s.T), Q = Qs4(), d = dir4();
+  c.font = mono(11); c.textAlign = 'left';
+  const yy = L.wide ? L.cnt[1].y + L.cnt[1].h + 22 : L.cnt[0].y + L.cnt[0].h + 18, xx = L.cnt[0].x;
+  if (yy < H - 10 || !L.wide) {
+    tagText(c, `Q = ${fmt(Q, 3)}   K = ${fmt(K, 3)}`, xx, yy, 'left', 'middle', C.texte);
+    tagText(c, d === 0 ? 'Q ≈ K : équilibre' : d > 0 ? 'Q < K : vers NO₂' : 'Q > K : vers N₂O₄', xx, yy + 20, 'left', 'middle', d === 0 ? C.texte2 : C.ener);
+  }
+  zone(xx, yy - 8, xx + 200, yy + 28, 'qk', 'Q et K', 'Q : le rapport p(NO₂)² / (p(N₂O₄) · P°) de l’instant ; K = Kp(T) : sa valeur quand les deux vitesses sont égales. Q < K : les dissociations l’emportent ; Q > K : les recombinaisons.');
+}
+function scope4() {
+  const { w, h } = scopeSetup(), r = k4.rec, t1 = k4.tm;
+  let mx = 1; for (const q of r) mx = Math.max(mx, q.nn, q.n2);
+  lineChart(sctx, w, h, { t0: t1 - 8, t1, lo: 0, hi: niceMax(mx * 1.1), d: 0, label: 'mmol/L', xl0: '−8 s', xl1: 'maintenant', rec: r,
+    series: [{ f: q => q.n2, col: C.texte2, lw: 2 }, { f: q => q.nn, col: C_NO2, lw: 2.2 }] });
+  zonesS = []; zone(0, 0, w, h, 'rec4', 'Enregistreur : concentrations', '[NO₂] en brun, [N₂O₄] en gris, en mmol/L, sur les 8 dernières secondes du modèle. Elles se stabilisent à l’équilibre, avec de petites fluctuations.', zonesS);
+  const o = scope2Setup(); let m2 = 10; for (const q of r) m2 = Math.max(m2, q.f, q.r);
+  lineChart(s2ctx, o.w, o.h, { t0: t1 - 8, t1, lo: 0, hi: niceMax(m2 * 1.15), d: 0, label: 'événements par s du modèle', xl0: '−8 s', xl1: 'maintenant', rec: r,
+    series: [{ f: q => q.f, col: C.pos, lw: 2 }, { f: q => q.r, col: C.neg, lw: 2 }] });
+}
+function status4() {
+  const s = k4.s, K = Rxn.Kp(s.T), q = Qs4(), d = dir4(), f = fPerS4(), r = rPerS4(), ev = k4.ev, since = ev ? k4.clock - ev.c : 99;
+  const eq = d === 0 && k4.tm > 1.5;
+  if (ev && (since < 6 || (!eq && since < 25))) {
+    if (ev.kind === 'heat') return Rxn.eqAlpha(s) > ev.a0 + 0.01 ? `La couleur fonce : chauffer favorise la dissociation, qui absorbe de la chaleur (K : ${fmt(ev.K0, 3)} → ${fmt(K, 3)}).` : `Le bain chauffe : K passe de ${fmt(ev.K0, 3)} à ${fmt(K, 3)} ; le gaz se réchauffe, puis l’équilibre se déplace vers NO₂ (la dissociation absorbe de la chaleur).`;
+    if (ev.kind === 'cool') return Rxn.eqAlpha(s) < ev.a0 - 0.01 ? `La couleur pâlit : refroidir favorise la recombinaison, qui libère de la chaleur (K : ${fmt(ev.K0, 3)} → ${fmt(K, 3)}).` : `Le bain refroidit : K passe de ${fmt(ev.K0, 3)} à ${fmt(K, 3)} ; l’équilibre se déplace vers N₂O₄ (la recombinaison libère de la chaleur).`;
+    if (ev.kind === 'comp') return `Moins de molécules prennent moins de place : l’équilibre se déplace vers N₂O₄ (K ne change pas : ${fmt(K, 3)}).`;
+    if (ev.kind === 'dil') return `Plus de place : l’équilibre se déplace vers NO₂, qui compte plus de molécules (K ne change pas).`;
+    if (ev.kind === 'inj') {
+      if (d < 0 || !eq) return `Q > K : les recombinaisons l’emportent jusqu’au retour à Q = K ; une partie seulement du NO₂ ajouté disparaît.`;
+      return `Q = K de nouveau : sur les ${ev.n} NO₂ ajoutés, ${Math.max(0, Math.round(ev.M0 + ev.n - s.M))} sont repartis en N₂O₄ ; une partie seulement.`;
+    }
+    if (ev.kind === 'cat') return s.cat ? `Même équilibre, atteint plus vite : le catalyseur multiplie les deux vitesses par ${fmt(Rxn.eqRates(s.T, s.V, true).kf / Rxn.eqRates(s.T, s.V, false).kf, 0)}, K reste ${fmt(K, 3)}.` : `Sans catalyseur : mêmes équilibre et mêmes K (${fmt(K, 3)}), approche plus lente.`;
+  }
+  if (eq) return `Q = K : autant de dissociations que de recombinaisons (≈ ${fmt((f + r) / 2, 0)} par seconde du modèle), et pourtant ça ne s’arrête jamais.`;
+  if (d > 0) return `Q < K : les dissociations l’emportent (${fmt(f, 0)}/s contre ${fmt(r, 0)}/s) ; le gaz fonce tant que Q n’a pas rejoint K.`;
+  return `Q > K : les recombinaisons l’emportent (${fmt(r, 0)}/s contre ${fmt(f, 0)}/s) ; Q redescend vers K.`;
+}
+function readouts4() {
+  const s = k4.s, q = Rxn.EQ.q, K = Rxn.Kp(s.T), d = dir4();
+  setM('N', String(s.N)); setM('nN', fmt(s.N * q * 1000, 1)); setM('M', String(s.M)); setM('nM', fmt(s.M * q * 1000, 1));
+  setM('P', fmt(Rxn.eqP(s), 3)); setM('Q', fmt(Rxn.Q(s), 3)); setM('K', fmt(K, 3));
+  setM('dir', d === 0 ? 'Q ≈ K' : d > 0 ? 'vers NO₂' : 'vers N₂O₄'); setM('vf', fmt(fPerS4(), 0)); setM('vr', fmt(rPerS4(), 0));
+}
+function state4() {
+  const s = k4.s;
+  return { step: 3, T: s.T, Tbath: s.Tbath, V: s.V * 1000, P: Rxn.eqP(s), N: s.N, M: s.M, Q: Rxn.Q(s), K: Rxn.Kp(s.T), dir: dir4(), fPerS: fPerS4(), rPerS: rPerS4(), cat: !!s.cat, alpha: Rxn.eqAlpha(s), t: k4.tm };
+}
+
+/* ---------------- Mises en page ---------------- */
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+const hasScope = () => act === 0 || act === 1 || act === 3;
+function sizePanelCanvases() {
+  $('#scopeSec').hidden = !hasScope(); $('#scope2Box').hidden = act !== 3; $('#leg2').style.display = act === 3 ? '' : 'none';
+  if (hasScope()) { sizeCanvas(scopeC, act === 0 ? 150 : act === 1 ? 210 : 130); if (act === 3) sizeCanvas(scope2C, 120); }
+}
+function applySceneH() {
+  let h = null;
+  if (stacked()) { if (act === 0) h = layout1().total; else if (act === 1) h = layout2().total; else if (act === 2) h = layout3().total; else h = layout4().total; }
+  const v = h ? Math.round(Math.max(h, 380)) + 'px' : '';
+  if (sceneEl.style.getPropertyValue('--sh') !== v) { if (v) sceneEl.style.setProperty('--sh', v); else sceneEl.style.removeProperty('--sh'); }
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases(); applySceneH();
+}
+
+/* ---------------- Légendes et mesures ---------------- */
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const dotl = col => `<circle cx="10" cy="4" r="3.5" fill="${col}"/>`;
+const LEG = [
+  lg(ln(C.texte, 2), 'fraction mesurée') + lg(ln(C.ener, 1.6, 1), 'attendue P·e<sup>−Ea/kT</sup>'),
+  lg(dotl(C.accent), 'essai (k mesuré)') + lg(ln(C.texte, 1.6), 'droite ajustée'),
+  '',
+  lg(ln(C.texte2, 2), '[N₂O₄]') + lg(ln('#c8763a', 2.2), '[NO₂]')
+];
+const LEG2 = lg(ln(C.pos, 2), '→ dissociations') + lg(ln(C.neg, 2), '← recombinaisons');
+const MEAS = [
+  [['T', [['T', 'ε/k']]], ['Ea / kT', [['EaT', '']]], ['chocs A-B par s', [['cps', '/s']]], ['chocs réactifs par s (vitesse)', [['rps', '/s']]],
+   ['fraction réactive mesurée', [['fm', '%']]], ['attendue P·e<sup>−Ea/kT</sup>', [['ft', '%']]], ['A · B · produits', [['nA', ''], ['nB', ''], ['nP', '']]]],
+  [['k(T)', [['k', 'L/(mol·s)']]], ['v₀ = k[A]₀[B]₀', [['v0', 'mol/(L·s)']]], ['t½ de la référence', [['th', 's']]], ['v₀ · [A]₀ doublée / réf.', [['r2', '×']]],
+   ['v₀ · T + 10 °C / réf.', [['r3', '×']]], ['Ea ajustée (essais)', [['ea', 'kJ/mol']]], ['temps du modèle', [['t', 's']]]],
+  [['Ea · Ea catalysée', [['ea', ''], ['eac', 'kJ/mol']]], ['facteur e<sup>ΔEa/RT</sup> à T', [['fac', '×']]], ['ΔH (inchangé)', [['dh', 'kJ/mol']]], ['barrière inverse', [['bi', ''], ['bic', 'kJ/mol']]],
+   ['réact./s sans · avec', [['rn', ''], ['rc', '/s']]], ['rapport mesuré', [['rm', '×']]], ['catalyseur consommé', [['cons', '']]]],
+  [['N₂O₄ (molécules · mmol)', [['N', ''], ['nN', 'mmol']]], ['NO₂ (molécules · mmol)', [['M', ''], ['nM', 'mmol']]], ['P (gaz parfait)', [['P', 'bar']]],
+   ['Q', [['Q', '']], 'Q = p(NO₂)² / (p(N₂O₄) · P°) : le rapport de l’instant.'], ['K = Kp(T)', [['K', '']], 'Sa valeur quand les vitesses directe et inverse sont égales.'], ['sens d’évolution', [['dir', '']]], ['vitesses → · ←', [['vf', ''], ['vr', '/s']]]]
+];
+const MNOTE = n => n === 2 ? 'Abaissements de Ea illustratifs (ordres de grandeur réels dans l’explication) ; même facteur A supposé ; grains et mécanisme schématiques (A se fixe, B le heurte). Changer le nombre de grains ou activer/désactiver le catalyseur recrée la boîte de droite. Profil en kJ/mol, boîtes en unités réduites : Ea = 5 kT, T = T/298 K ; bulles : débit ∝ log₁₀ du facteur.'
+  : n === 3 ? 'Équilibre dynamique, comme celui de <a href="../fondations-cellule-membrane/index.html">Cellule, membrane et transport</a> (acte III) ; gaz parfaits ; 400 molécules équivalentes N₂O₄, tirages au hasard ; temps ralenti : 0,3 s du modèle par seconde d’animation.'
+  : n === 0 ? `Boîte à deux dimensions, unités réduites, une seule réaction A + B → C + D ; site réactif de ${fmt(2 * (k1.box ? k1.box.alpha : PI / 4) * 180 / PI, 0)}° sur A (P = ${fmt(P1({ steric: true, alpha: k1.box ? k1.box.alpha : PI / 4 }), 2)}) ; les produits pâlissent et redeviennent réactifs après ${k1.box ? fmt(k1.box.renew, 0) : 8} τ pour garder la boîte en marche.`
+  : n === 1 ? 'La loi de vitesse se mesure : elle ne se lit pas toujours dans l’équation (réactions en plusieurs étapes, seulement mentionnées). Molécules dessinées : 30 par mol/L ; tirages stochastiques.'
+  : '';
+const MEYE = ['Enregistreur · fraction de chocs réactifs', 'ln k en fonction de 1/T · un point par essai', '', 'Enregistreur · concentrations et vitesses'];
+const mEls = {}, lEls = {};
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k]; for (const k in lEls) delete lEls[k];
+  for (const [lab, vals, ttl] of MEAS[n]) {
+    const r = document.createElement('div'); r.className = 'row'; if (ttl) r.title = ttl;
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; }); lEls[vals[0][0]] = r.querySelector('.lab');
+  }
+  $('#measSec').hidden = !MEAS[n].length;
+  $('#mNote').innerHTML = MNOTE(n);
+  if (n <= 1 || n === 3) { $('#rEye').textContent = MEYE[n]; $('#leg').innerHTML = LEG[n]; $('#leg2').innerHTML = n === 3 ? LEG2 : ''; }
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function setL(k, s) { const e = lEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+let lastNote = '';
+function readouts() {
+  if (act === 0) { readouts1(); const nn = MNOTE(0); if (nn !== lastNote) { $('#mNote').textContent = nn; lastNote = nn; } }
+  else if (act === 2) readouts3();
+  else if (act === 3) readouts4();
+  else if (act === 1) readouts2();
+  status();
+}
+function statusText() { return act === 0 ? status1() : act === 1 ? status2() : act === 2 ? status3() : status4(); }
+let lastStatus = '';
+function status() { const t = statusText(), el = $('#status'); if (t !== lastStatus) { el.innerHTML = t; lastStatus = t; } }
+
+/* ---------------- Étapes ---------------- */
+const ACTS = [
+  { t: 'Quels chocs réagissent ?', x: 'A et B se heurtent sans cesse, mais presque aucun choc ne donne un produit. Un éclat marque chaque choc qui réussit ; à droite, l’énergie de chacun : seule la queue colorée, au-delà de la ligne Ea, peut réagir.',
+    k: 'Une réaction a lieu quand des molécules se heurtent avec assez d’énergie pour franchir la barrière d’activation. Chauffer augmente surtout la petite fraction de collisions assez énergiques.' },
+  { t: 'Ce qui règle la vitesse', x: 'Trois boîtes partent ensemble : une référence, une avec deux fois plus de A, une dix degrés plus chaude. Chaque rencontre réussie transforme A et B en une molécule P. Compare les courbes, puis lance des essais à plusieurs températures.',
+    k: 'La vitesse augmente avec les concentrations (plus de rencontres) et, très fortement, avec la température (plus de rencontres assez énergiques) : k = A·e<sup>−Ea/RT</sup>.' },
+  { t: 'La catalyse', x: 'Du peroxyde d’hydrogène se décompose lentement, avec ou sans aide. Ajoute un catalyseur : un deuxième chemin se dessine, au col plus bas, et les bulles d’O₂ sortent plus vite. Dans les boîtes, A se fixe un instant sur un grain, où un B peut le heurter.',
+    k: 'Un catalyseur offre un chemin de plus basse énergie d’activation. Il accélère la réaction dans les deux sens, sans changer l’énergie libérée ni l’équilibre.' },
+  { t: 'L’équilibre dynamique', x: 'Le gaz brun NO₂ et son dimère incolore N₂O₄ se transforment l’un en l’autre sans arrêt. On part de N₂O₄ pur : la couleur fonce, puis se stabilise, alors que la loupe montre des événements dans les deux sens. Chauffe, comprime, injecte du NO₂.',
+    k: 'À l’équilibre, la réaction directe et la réaction inverse vont à la même vitesse : Q = K. Perturbé, l’équilibre se déplace dans le sens qui absorbe en partie la perturbation.' }
+];
+const SYNC = [
+  ['rT1', 'vT1', () => prm.T1, v => fmt(v, 2) + ' ε/k'], ['rEa1', 'vEa1', () => prm.Ea1, v => fmt(v, 1) + ' ε'],
+  ['rQ3', 'vQ3', () => prm.q3, v => fmt(v, 0) + (v > 1 ? ' grains' : ' grain')], ['rD3', 'vD3', () => prm.dEa3, v => fmt(v, 0) + ' kJ/mol'], ['rT3', 'vT3', () => prm.T3, v => fmt(v, 0) + ' K'],
+  ['rTe', 'vTe', () => prm.Te, v => fmt(v, 0) + ' K'], ['rV4', 'vV4', () => prm.V4, v => fmt(v, 2) + ' L'],
+  ['rA2', 'vA2', () => prm.a2, v => fmt(v, 1) + ' mol/L'], ['rB2', 'vB2', () => prm.b2, v => fmt(v, 1) + ' mol/L'], ['rT2', 'vT2', () => prm.T2, v => fmt(v, 0) + ' K']
+];
+const PRESS = [['bSteric', () => prm.st1], ['bCat3', () => prm.cat3], ['bCat4', () => prm.cat4]];
+function syncTools() {
+  for (const [id, vid, get, f] of SYNC) { const v = get(); $('#' + id).value = v; $('#' + vid).textContent = f(v); }
+  for (const [id, get] of PRESS) $('#' + id).setAttribute('aria-pressed', get() ? 'true' : 'false');
+}
+function enterAct(n, restart) {
+  act = n; if (restart) resetPrm(n);
+  if (n === 0) reset1(); else if (n === 1) reset2(); else if (n === 2) reset3(); else reset4();
+  lastStatus = '';
+  hideTip(); syncTools(); buildMeas(n); sizePanelCanvases(); applySceneH(); lastNote = '';
+  if (restart) setPlay(true);
+  readouts();
+}
+function updateUI(n) {
+  uiAct = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Étape <b>${n + 1}</b> sur ${NA}`;
+  $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
+  const key = $('#stepKey'); key.innerHTML = ACTS[n].k; key.hidden = !ACTS[n].k;
+  for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  let any = false;
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { const on = gp.dataset.acts.split(' ').includes(String(n)); gp.hidden = !on; any = any || on; });
+  $('#tools').classList.toggle('empty', !any);
+  $('#cards').hidden = n !== 3;
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
+}
+function goAct(n, restart) {
+  n = clamp(n, 0, NA - 1);
+  if (n === act && !restart && pendingAct < 0) return;
+  pendingAct = n; pendingRestart = !!restart;
+  updateUI(n);
+  if (reduce) { enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 0; sceneA = 1; }
+  else fade = -1;
+}
+function goStep(n) { n = clamp(n, 0, NA - 1); pendingAct = -1; fade = 0; sceneA = 1; updateUI(n); enterAct(n, false); return n; }
+const ensure = n => { if (act !== n || pendingAct >= 0) goStep(n); };
+
+/* ---------------- Commandes ---------------- */
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+
+function setT1(v) { v = clamp(+v, 0.5, 2.5); note1('T'); prm.T1 = v; if (k1.box) Rxn.boxSetT(k1.box, v); }
+function setEa1(v) { v = clamp(+v, 1, 6); note1('Ea'); prm.Ea1 = v; if (k1.box) k1.box.Ea = v; }
+function setSt1(on) { on = !!on; if (on === prm.st1) return; note1('st'); prm.st1 = on; if (k1.box) k1.box.steric = on; }
+function setConc2(a, b) { prm.a2 = clamp(+a, 0.2, 2); prm.b2 = clamp(+b, 0.2, 2); restart2(); }
+function bindRange(id, vid, set, f) { const el = $('#' + id); el.addEventListener('input', () => { const v = +el.value; set(v); $('#' + vid).textContent = f(v); }); }
+bindRange('rT1', 'vT1', setT1, v => fmt(v, 2) + ' ε/k');
+bindRange('rEa1', 'vEa1', setEa1, v => fmt(v, 1) + ' ε');
+bindRange('rA2', 'vA2', v => { prm.a2 = v; restart2(); }, v => fmt(v, 1) + ' mol/L');
+bindRange('rB2', 'vB2', v => { prm.b2 = v; restart2(); }, v => fmt(v, 1) + ' mol/L');
+bindRange('rT2', 'vT2', v => { prm.T2 = v; restart2(); }, v => fmt(v, 0) + ' K');
+bindRange('rQ3', 'vQ3', setQ3, v => fmt(v, 0) + (v > 1 ? ' grains' : ' grain'));
+bindRange('rD3', 'vD3', v => { prm.dEa3 = v; setCat3(prm.cat3, v); }, v => fmt(v, 0) + ' kJ/mol');
+bindRange('rT3', 'vT3', setT3, v => fmt(v, 0) + ' K');
+bindRange('rTe', 'vTe', setTe4, v => fmt(v, 0) + ' K');
+bindRange('rV4', 'vV4', setVol4, v => fmt(v, 2) + ' L');
+$('#bCat3').addEventListener('click', e => { setCat3(!prm.cat3); syncTools(); e.currentTarget.blur(); });
+$('#bCat4').addEventListener('click', e => { setCat4(!prm.cat4); syncTools(); e.currentTarget.blur(); });
+$('#bInj').addEventListener('click', e => { inject4(); e.currentTarget.blur(); });
+['none', 'MnO2', 'catalase'].forEach((k, i) => $('#bP' + i).addEventListener('click', e => { setPreset3(k); syncTools(); e.currentTarget.blur(); }));
+$('#bSteric').addEventListener('click', e => { setSt1(!prm.st1); syncTools(); e.currentTarget.blur(); });
+$('#bTrial').addEventListener('click', e => { trial2(); e.currentTarget.blur(); });
+$('#bRelance').addEventListener('click', e => { restart2(); e.currentTarget.blur(); });
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange && !e.target.closest('[role="tab"]')) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
+  if (/^[1-4]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
+  if (!isRange && !e.repeat && (e.key === 'o' || e.key === 'O') && act === 0) { setSt1(!prm.st1); syncTools(); return; }
+  if (!isRange && !e.repeat && (e.key === 'e' || e.key === 'E') && act === 1) { trial2(); return; }
+  if (!isRange && !e.repeat && (e.key === 'c' || e.key === 'C')) { if (act === 2) { setCat3(!prm.cat3); syncTools(); } else if (act === 3) { setCat4(!prm.cat4); syncTools(); } return; }
+  if (!isRange && !e.repeat && (e.key === 'n' || e.key === 'N') && act === 3) { inject4(); return; }
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol ---------------- */
+function hover(list, e, el) {
+  const r = el.getBoundingClientRect(), z = hitZone(list, e.clientX - r.left, e.clientY - r.top);
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+}
+function dragPiston(e) {
+  const r = cv.getBoundingClientRect(), y = e.clientY - r.top - k4.grab, g = k4.geo; if (!g) return;
+  const v = clamp(Math.round((g.yb - y) / g.hMax * 2 / 0.05) * 0.05, 0.4, 2); setVol4(v); syncTools();
+}
+cv.addEventListener('pointermove', e => { if (k4.drag) { dragPiston(e); return; } if (e.pointerType === 'touch') return; hover(zones, e, cv); cv.style.cursor = act === 3 && tipKey === 'piston' ? 'grab' : 'default'; });
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(), z = act === 3 ? hitZone(zones, e.clientX - r.left, e.clientY - r.top) : null;
+  if (z && z.key === 'piston' && k4.geo) {
+    const V = k4.s.V * 1000, plateY = k4.geo.yb - k4.geo.hMax * V / 2; k4.drag = true; k4.grab = e.clientY - r.top - plateY;
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.style.cursor = 'grabbing'; hideTip(); e.preventDefault(); return;
+  }
+  if (e.pointerType === 'touch') hover(zones, e, cv);
+});
+const endDrag = e => { if (k4.drag) { k4.drag = false; cv.style.cursor = 'default'; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} } };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+cv.addEventListener('pointerleave', () => { if (!k4.drag) hideTip(); });
+scopeC.addEventListener('pointermove', e => hover(zonesS, e, scopeC));
+scopeC.addEventListener('pointerdown', e => hover(zonesS, e, scopeC));
+scopeC.addEventListener('pointerleave', hideTip);
+
+new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizePanelCanvases()).observe(scopeC.parentElement);
+new ResizeObserver(() => sizePanelCanvases()).observe(scope2C.parentElement);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+function advance(dt) {
+  dt *= SLOW;
+  if (act === 0) adv1(dt); else if (act === 1) adv2(dt); else if (act === 2) adv3(dt); else adv4(dt);
+}
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } tick(now); }
+function tick(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterAct(pendingAct, pendingRestart); pendingAct = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) advance(dt);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  if (act === 0) draw1(); else if (act === 1) draw2(); else if (act === 2) draw3(); else draw4();
+  ctx.restore();
+  if (act === 0) scope1(); else if (act === 1) scopeArrh(); else if (act === 3) scope4();
+  if (now - lastRead > 100) { readouts(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function stateNow() { return act === 0 ? state1() : act === 1 ? state2() : act === 2 ? state3() : state4(); }
+window.__labo = {
+  moteur: Rxn,
+  get step() { return act; },
+  goStep,
+  state: stateNow,
+  tick(n) { for (let i = 0; i < n; i++) advance(1 / 60); return stateNow(); },
+  setPlay,
+  // étape 1
+  setT(T) { ensure(0); setT1(T); syncTools(); },
+  setEa(E) { ensure(0); setEa1(E); syncTools(); },
+  orientation(on) { ensure(0); setSt1(on); syncTools(); },
+  // étape 2
+  setConc(a, b) { ensure(1); setConc2(a, b); syncTools(); },
+  trial() { ensure(1); trial2(); return stateNow(); },
+  // étape 3
+  catalyst(on, dEa) { ensure(2); setCat3(on, dEa); syncTools(); },
+  presetH2O2(kind) { ensure(2); setPreset3(kind); syncTools(); },
+  // étape 4
+  setTeq(T) { ensure(3); setTe4(T); syncTools(); },
+  setVolume(V) { ensure(3); setVol4(V); syncTools(); },
+  injectNO2(n) { ensure(3); inject4(n); },
+  eqCatalyst(on) { ensure(3); setCat4(on); syncTools(); }
+};
+
+resize();
+for (let i = 0; i < NA; i++) resetPrm(i);
+enterAct(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+<script src="../../labo/corpus.js"></script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>
