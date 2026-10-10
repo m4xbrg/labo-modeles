@@ -172,6 +172,9 @@ near(B.respirationBudget().yield, 0.32, 0.005, '6. rendement ≈ 32 %');
 // ---------- 9. lightResponse : linéaire puis plateau ----------
 {
   const o = { Pmax: 20, alpha: 0.06 };
+  ok(B.photoRate({ I: 0, CO2: 0 }).P === 0 &&
+    [[0, 20], [-1, 20], [100, 0], [100, -1]].every(([I, Pmax]) => B.lightResponse(I, { Pmax }) === 0),
+    '9. lumière ou Pmax non positifs : vitesse nulle, y compris I = CO₂ = 0');
   rel(B.lightResponse(1, o), 0.06, 0.002, '9. faible lumière : P ≈ αI');
   rel(B.lightResponse(2, o) / B.lightResponse(1, o), 2, 0.002, '9. faible lumière : linéaire');
   rel(B.lightResponse(1e5, o), 20, 1e-6, '9. forte lumière : plateau à Pmax');

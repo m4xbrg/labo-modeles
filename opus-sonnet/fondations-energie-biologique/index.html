@@ -516,6 +516,7 @@ const BioEn = (function () {
   // Courbe de réponse à la lumière (Webb 1974) : P = Pmax (1 − e^(−αI/Pmax)). I en µmol photons/(m²·s).
   function lightResponse(I, o) {
     const q = Object.assign({ Pmax: PHOTO.Pmax0, alpha: PHOTO.alpha }, o || {});
+    if (I <= 0 || q.Pmax <= 0) return 0;
     return q.Pmax * (1 - Math.exp(-q.alpha * I / q.Pmax));
   }
   // Plafond imposé par le CO₂ (fixation par la rubisco, saturable) : Pmax = Pmax0·C/(Kc + C). C en ppm.
