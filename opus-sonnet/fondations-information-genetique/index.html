@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- Les lettres colorées sont des objets de laboratoire : l'ordre, pas la forme, porte l'information. -->
+<!-- Les quatre étapes déplacent le regard du texte matériel vers sa copie, sa lecture et son activation. -->
+<!-- Chaque progression animée mesure un événement (nucléotide ou codon ajouté), sans mouvement gratuit. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>De l’ADN à la protéine — LABO</title>
+<meta name="description" content="Module 35 : écris l’ADN, suis la transcription, décale un codon et règle l’expression d’un gène.">
+<link rel="icon" href="data:,"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#b3a3ff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 var(--sans)}a{color:inherit}button,input{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 336px;grid-template-rows:minmax(0,1fr) auto}
+.scene{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:var(--fond);color:var(--texte)}
+#cv{display:block;width:100%;height:100%;min-height:0;touch-action:pan-y;outline-offset:-4px}
+.scene-meta{position:absolute;top:15px;left:20px;right:20px;display:flex;justify-content:space-between;gap:10px;pointer-events:none;font:10px var(--mono);letter-spacing:.08em;color:var(--texte-2)}.scene-meta b{font-weight:400;color:var(--accent)}
+.scene-bottom{position:absolute;bottom:10px;left:16px;right:16px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
+.objects{display:flex;max-width:100%;gap:4px;flex-wrap:wrap;pointer-events:auto}.object{font:10px var(--mono);color:var(--texte-2);border:1px solid #27303c;background:#0d1219;padding:4px 7px;min-height:24px}.object:hover,.object:focus-visible{border-color:var(--accent);color:var(--texte)}
+.guide{font:10px/1.45 var(--mono);color:var(--texte-2);background:#0a0d12b8;padding:2px 5px;max-width:100%}
+.panel{overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0}.panel p{margin:0}.eyebrow{font:10px var(--mono);letter-spacing:.1em;color:var(--encre-3);text-transform:uppercase}.panel h2{font:500 23px/1.18 var(--sans);margin:6px 0}.stepText{color:var(--encre-2);font-size:14px}.status{font:12px/1.55 var(--mono);min-height:56px;color:var(--encre-2);border-left:2px solid var(--accent);padding-left:10px}.meas{border-top:1px solid var(--filet)}.row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-bottom:1px solid var(--filet);padding:7px 0}.lab{font:11px var(--mono);color:var(--encre-3)}.val{font:500 12px var(--mono);white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}.val small{font:10px var(--mono);color:var(--encre-3)}
+.cle{font:13px/1.5 var(--sans);border-left:2px solid var(--encre);padding-left:11px}.note{font:11px/1.5 var(--mono);color:var(--encre-3)}.liens{margin-top:auto;display:grid;gap:6px}.comprendre{display:block;text-decoration:none;border:1px solid var(--encre);padding:9px 10px;font-size:13px}.hint{font:10px/1.5 var(--mono);color:var(--encre-3)}
+.questions{display:grid;gap:8px}.questions a{display:block;text-decoration:none;border-top:1px solid var(--filet);padding-top:7px;font:12px/1.4 var(--sans)}.questions a b{font:500 11px var(--mono);display:block;margin-bottom:3px}
+.controls{grid-column:1/-1;display:flex;gap:7px 14px;flex-wrap:wrap;align-items:center}.grp{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}.btn{border:1px solid var(--filet);padding:7px 10px;min-height:34px;font:11px var(--mono);color:var(--encre);background:var(--papier)}.btn:hover,.btn:focus-visible{border-color:var(--encre)}.btn[aria-pressed=true],.btn.on{background:var(--papier-2);border-color:var(--encre)}.btn:disabled{opacity:.35;cursor:not-allowed}.tools{width:100%;border-top:1px solid var(--filet);display:flex;flex-direction:column;gap:9px;padding-top:9px}.tools .grp{padding-bottom:0}.range{display:flex;gap:8px;align-items:center;min-width:0;flex-wrap:wrap;font:11px var(--mono)}.range input{width:126px;accent-color:var(--encre)}.rv{min-width:30px;font:11px var(--mono);color:var(--encre-2)}.text-field{border:1px solid var(--filet);background:var(--papier);color:var(--encre);padding:7px 9px;min-height:34px;font:12px var(--mono);width:min(270px,55vw);text-transform:uppercase;letter-spacing:.06em}.text-field:focus{border-color:var(--encre)}.small-label{font:11px var(--mono);color:var(--encre-2)}
+.sequence-editor{display:flex;gap:2px;max-width:100%;overflow-x:auto;overflow-y:hidden;padding:4px 0 7px;scrollbar-width:thin;border-top:1px solid var(--filet);white-space:nowrap}.sequence-editor .base{flex:0 0 auto;min-width:25px;height:32px;background:var(--papier);color:var(--encre);border:1px solid var(--filet);font:500 12px var(--mono);position:relative}.sequence-editor .base:nth-child(3n){margin-right:6px}.sequence-editor .base.sel{border-color:var(--encre);background:var(--papier-2);box-shadow:inset 0 -2px var(--accent)}.sequence-editor .base.changed{color:#a276ed}.sequence-editor .base::after{content:attr(data-n);position:absolute;font:8px var(--mono);color:var(--encre-3);left:2px;top:-1px;transform:translateY(-80%)}
+.tip{position:fixed;z-index:90;max-width:290px;pointer-events:none;background:var(--fond-2);color:var(--texte);border:1px solid #384353;padding:10px 12px;font:11px/1.5 var(--mono);box-shadow:0 10px 30px #0007}.tip b{color:var(--accent);display:block;margin-bottom:2px}.tip span{color:var(--texte-2)}
+#chart{height:105px;width:100%;display:block}.scopeBox{border:1px solid var(--filet);background:var(--fond);padding:4px}.scope-caption{font:10px var(--mono);color:var(--encre-3)}
+.labo-etapes .titre h1{font:400 clamp(34px,4.8vh,56px)/1 var(--serif);letter-spacing:-.01em}.labo-etapes .titre h1 em{font-style:italic;color:var(--accent)}
+.labo-etapes .panel{gap:12px}.labo-etapes .titre{padding-top:12px}.labo-etapes .barre{padding-top:12px}.labo-etapes .sig{gap:4px 18px}.labo-etapes .panel h2{font:500 23px/1.18 var(--sans)}
+@media(max-width:860px){.app{display:flex;flex-direction:column}.scene{height:430px;order:1;flex:none}.controls{order:2;padding:10px 14px!important}.panel{order:3;max-height:none;border-top:1px solid var(--filet)}.scene-meta{left:14px}.scene-bottom{left:12px;right:12px}.objects{max-height:62px;overflow-y:auto}.panel h2{font-size:20px}}
+@media(max-width:480px){.scene{height:388px}.btn{padding:6px 8px}.text-field{width:185px}.object{font-size:9px;padding:3px 5px}.hint{display:none}.labo-etapes .barre.compacte .droite{gap:4px}.labo-etapes .barre.compacte .titre-court{font-size:13px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>.labo-etapes .app{min-height:0}.labo-etapes .scene{background:var(--fond)}.labo-etapes .panel{padding-top:16px}.labo-etapes .controls{padding:9px 18px}.labo-etapes .cle{color:var(--encre-2)}@media(max-width:860px){.labo-etapes .app{min-height:0}.labo-etapes .panel{padding:16px}.labo-etapes .scene{height:430px}}@media(max-width:480px){.labo-etapes .scene{height:388px}}</style>
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="vmk">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 35</p><button class="bascule-theme" id="theme" title="Choisir le thème">Thème auto</button></div></header>
+<div class="titre"><div><h1>De l’ADN à la <em>protéine</em></h1><p class="lead">Un texte moléculaire, une copie provisoire, une traduction et un interrupteur.</p></div><dl class="sig"><dt>Échelle</dt><dd>noyau → bases</dd><dt>Temps</dt><dd>secondes · accélérées</dd><dt>Modèle</dt><dd>codons · opéron lac</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Module 35, quatre étapes"><div class="chap"><p class="chap-t"><b>35</b>Module 35 · Information génétique</p><div class="segs"><button class="seg" data-step="0" title="Un texte en quatre lettres"><b>1</b><span>Le texte</span></button><button class="seg" data-step="1" title="Transcription : une copie de travail"><b>2</b><span>La copie</span></button><button class="seg" data-step="2" title="Traduction : changer d’alphabet"><b>3</b><span>Traduire</span></button><button class="seg" data-step="3" title="Allumer un gène"><b>4</b><span>Allumer</span></button></div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche"><button role="tab" data-m="observer" aria-selected="true" data-indice="Observer : vois la relation entre texte et matière."><span>V</span>Observer</button><button role="tab" data-m="manipuler" aria-selected="false" data-indice="Manipuler : modifie les lettres, la lecture ou les signaux."><span>M</span>Manipuler</button><button role="tab" data-m="comprendre" aria-selected="false" data-indice="Comprendre : relie les mécanismes à la théorie."><span>K</span>Comprendre</button></div><p class="indice" id="indice">Observer le phénomène.</p></div>
+<div class="app">
+<main class="scene" id="scene"><canvas id="cv" role="img" aria-label="Visualisation du module 35 : information génétique" tabindex="0"></canvas><div class="scene-meta"><span id="sceneName">01 / 04 · L’ORDRE DES BASES</span><b id="clock">ADN · 5′ → 3′</b></div><div class="scene-bottom"><div class="objects" id="objects" aria-label="Découvrir les éléments scientifiques"></div><p class="guide" id="guide">Survole une forme ou touche son nom pour découvrir son rôle.</p></div></main>
+<aside class="panel" aria-label="Lecture de l’expérience"><section><p class="eyebrow" id="eyebrow">Module 35 · 1 / 4</p><h2 id="stepTitle">Un texte en quatre lettres</h2><p class="stepText couche-comp" id="stepText"></p><p class="status" id="status" aria-live="polite"></p></section><section class="couche-lire"><div class="meas" id="meas" aria-live="polite"></div></section><section class="couche-lire" id="scopeSection" hidden><p class="eyebrow">Expression dans le temps</p><div class="scopeBox"><canvas id="chart" aria-label="ARNm et protéines par cellule dans le temps" role="img"></canvas></div><p class="scope-caption">ARNm : lavande · protéine : or · axes propres à chaque courbe</p></section><p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p><nav class="questions couche-comp" id="questions" hidden aria-label="Pour aller plus loin"><a href="../08-replication-adn/index.html"><b>36 · Copie</b>Comment ce texte est-il recopié à chaque division, et que se passe-t-il si la copie se trompe ?</a><a href="../fondations-signalisation-homeostasie/index.html"><b>37 · Signaux</b>Qui envoie les signaux d’activation et comment entrent-ils dans la cellule ?</a><a href="../fondations-evolution-populations/index.html"><b>40 · Évolution</b>Si un gène change, que devient sa fréquence dans une population ?</a></nav><nav class="liens"><a class="comprendre couche-comp" href="explication.html#m35">Théorie du module 35 →</a><p class="hint couche-lire">Espace pause · ← → étapes · 1–4 accès · R recommencer · V M K couches · I infos</p></nav></aside>
+<div class="controls" role="toolbar" aria-label="Commandes de la simulation"><div class="grp"><button class="btn" id="prev" aria-label="Étape précédente">←</button><button class="btn" id="play">Pause</button><button class="btn" id="next" aria-label="Étape suivante">→</button><button class="btn" id="reset">Recommencer</button></div><div class="tools" id="tools">
+<div class="grp" data-act="0"><label class="range">Zoom <input type="range" id="zoom" min="0" max="100" step="1" value="67" title="Du noyau à la paire de bases"><output class="rv" id="zoomVal">67 %</output></label><label class="small-label" for="dnaInput">Brin 5′→3′</label><input class="text-field" id="dnaInput" type="text" spellcheck="false" autocomplete="off" maxlength="90" aria-label="Écrire des bases A, T, C, G"><button class="btn" id="unzip" aria-pressed="false">Ouvrir l’hélice</button></div>
+<div class="grp" data-act="1"><label class="range">Vitesse <input id="speed" type="range" min="20" max="80" step="5" value="50"><output class="rv" id="speedVal">50 nt/s</output></label><button class="btn" id="startPol">Lancer une polymérase</button><button class="btn" id="strand" aria-pressed="false" title="Un gène n’a qu’un sens de transcription défini par son promoteur">Lire l’autre brin</button><button class="btn" id="euk" aria-pressed="false">Cellule eucaryote</button></div>
+<div class="grp" data-act="2"><span class="small-label">Base choisie :</span><span class="rv" id="chosen">1</span><button class="btn" data-base="A">A</button><button class="btn" data-base="U">U</button><button class="btn" data-base="C">C</button><button class="btn" data-base="G">G</button><button class="btn" id="insert">Insérer A</button><button class="btn" id="delete">Supprimer</button><button class="btn" id="transNow">Traduire</button><button class="btn" id="hbs">β-globine : HbS</button></div>
+<div class="sequence-editor" id="rnaEditor" data-act="2" role="group" aria-label="ARN messager éditable : sélectionne une base puis remplace-la"></div>
+<div class="grp" data-act="3"><button class="btn" id="lactose" aria-pressed="false">Lactose absent</button><button class="btn" id="glucose" aria-pressed="true">Glucose présent</button><label class="range">γ protéine <input id="gamma" type="range" min="0.05" max="0.70" step="0.05" value="0.15" title="Vitesse de dégradation, par seconde"><output class="rv" id="gammaVal">0,15 s⁻¹</output></label><button class="btn" id="cells" aria-pressed="false">Même ADN, cellules différentes</button></div>
+</div></div>
+</div><div class="tip" id="tip" role="tooltip" hidden><b></b><span></span></div>
+<script>
+/* GEN-BEGIN */
+const Gen = (() => {
+  'use strict';
+  // Orientations : le brin codant est 5'→3', le brin matrice fourni est 3'→5'.
+  // Une fonction de séquence reçoit une chaîne sans espace et refuse les bases ambiguës.
+  const ALPH_DNA = 'ATCG';
+  const ALPH_RNA = 'AUCG';
+  const PAIRS = Object.freeze({A:'T',T:'A',C:'G',G:'C'});
+  const PAIRS_RNA = Object.freeze({A:'U',T:'A',C:'G',G:'C'});
+  const GENOME = Object.freeze({haploidBp:3.1e9, riseM:0.34e-9, nucleusDiameterM:6e-6, tennisDiameterM:0.067});
+  const TAUX = Object.freeze({polMin:20,polMax:80,riboMin:5,riboMax:20}); // nt/s et aa/s : plages pédagogiques
+  const AA = Object.freeze({
+    A:{nom:'alanine',trois:'Ala',propriete:'hydrophobe'},
+    R:{nom:'arginine',trois:'Arg',propriete:'chargé +'},
+    N:{nom:'asparagine',trois:'Asn',propriete:'polaire'},
+    D:{nom:'aspartate',trois:'Asp',propriete:'chargé −'},
+    C:{nom:'cystéine',trois:'Cys',propriete:'polaire'},
+    Q:{nom:'glutamine',trois:'Gln',propriete:'polaire'},
+    E:{nom:'glutamate',trois:'Glu',propriete:'chargé −'},
+    G:{nom:'glycine',trois:'Gly',propriete:'hydrophobe'},
+    H:{nom:'histidine',trois:'His',propriete:'chargé +'},
+    I:{nom:'isoleucine',trois:'Ile',propriete:'hydrophobe'},
+    L:{nom:'leucine',trois:'Leu',propriete:'hydrophobe'},
+    K:{nom:'lysine',trois:'Lys',propriete:'chargé +'},
+    M:{nom:'méthionine',trois:'Met',propriete:'hydrophobe'},
+    F:{nom:'phénylalanine',trois:'Phe',propriete:'hydrophobe'},
+    P:{nom:'proline',trois:'Pro',propriete:'hydrophobe'},
+    S:{nom:'sérine',trois:'Ser',propriete:'polaire'},
+    T:{nom:'thréonine',trois:'Thr',propriete:'polaire'},
+    W:{nom:'tryptophane',trois:'Trp',propriete:'hydrophobe'},
+    Y:{nom:'tyrosine',trois:'Tyr',propriete:'polaire'},
+    V:{nom:'valine',trois:'Val',propriete:'hydrophobe'}
+  });
+  // NCBI, table 1 (code nucléaire standard). L'ordre des bases est U,C,A,G ; la 3e varie d'abord.
+  const ORDRE = 'UCAG';
+  const CODES_NCBI = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG';
+  const code = {};
+  let indice = 0;
+  for (const a of ORDRE) for (const b of ORDRE) for (const c of ORDRE) {
+    const one = CODES_NCBI[indice++];
+    code[a+b+c] = Object.freeze(one === '*' ? {one:'*',three:'Stop',stop:true} : {one,three:AA[one].trois,stop:false});
+  }
+  const CODE = Object.freeze(code);
+  const nettoyer = (s, alphabet) => {
+    if (typeof s !== 'string' || [...s.toUpperCase()].some(c => !alphabet.includes(c))) throw new RangeError('Séquence de bases non valide');
+    return s.toUpperCase();
+  };
+  function complement(seq) { return [...nettoyer(seq, ALPH_DNA)].map(b => PAIRS[b]).join(''); }
+  function reverseComplement(seq) { return complement(seq).split('').reverse().join(''); }
+  function transcribe(templateStrand) { return [...nettoyer(templateStrand, ALPH_DNA)].map(b => PAIRS_RNA[b]).join(''); }
+  function codingFromTemplate(templateStrand) { return complement(templateStrand); }
+  function genomeMetrics(o = {}) {
+    const g = {...GENOME,...o};
+    const lengthHaploidM = g.haploidBp * g.riseM;
+    const lengthDiploidM = 2 * lengthHaploidM;
+    const compression = lengthDiploidM / g.nucleusDiameterM;
+    const tennisAnalogyM = compression * g.tennisDiameterM;
+    return { ...g, lengthHaploidM,lengthDiploidM,compression,tennisAnalogyM };
+  }
+  // Le gène modèle est entièrement fictif : 23 codons de sens et UAA (72 nt).
+  const CODONS_MODELE = 'AUG GCU UUC GAA CCA GGU AAA CUC UAU GAC AGC UGG CAA GUG ACU CGA AAC GGC UCU AUA CAG UGC GGA UAA'.split(' ');
+  const arnModele = CODONS_MODELE.join('');
+  const GENE = Object.freeze({
+    nom:'Gène modèle',promoteur:'TATAAT',terminateur:'signal de fin (stylisé)',
+    coding:arnModele.replace(/U/g,'T'),
+    template:complement(arnModele.replace(/U/g,'T')),
+    mrna:arnModele,
+    peptide:'MAFEPG KLYDSWQVTRNGSIQCG'.replace(/ /g,'')
+  });
+  // Début codant réel de HBB (ADN 5'→3'), Nature Education, Scitable, Genetic Mutation.
+  // Le 7e codon affiché correspond au 6e résidu de la chaîne mature, sans méthionine initiatrice.
+  const HBB = Object.freeze({
+    normal:'ATGGTGCACCTGACTCCTGAGGAGAAGTCTGCCGTTACT',
+    mutation:'ATGGTGCACCTGACTCCTGTGGAGAAGTCTGCCGTTACT',
+    indexBase:20,
+    codonIndex:6
+  });
+  function translate(mrna, frame = 0) {
+    const seq = nettoyer(mrna, ALPH_RNA);
+    let offset = 0, startAtAUG = false;
+    if (typeof frame === 'number') offset = frame;
+    else if (frame && typeof frame === 'object') { offset = frame.frame ?? 0; startAtAUG = !!frame.startAtAUG; }
+    if (!Number.isInteger(offset) || offset < 0 || offset > 2) throw new RangeError('Cadre de lecture : 0, 1 ou 2');
+    const start = startAtAUG ? seq.indexOf('AUG',offset) : offset;
+    if (start === -1) return {one:'',three:[],aminoAcids:[],codons:[],start:-1,stop:null,complete:false,ignored:seq.length};
+    const aminoAcids=[],codons=[];
+    let stop=null, cursor=start;
+    for (;cursor+2<seq.length;cursor+=3) {
+      const triplet=seq.slice(cursor,cursor+3), aa=CODE[triplet];
+      codons.push({triplet,index:cursor,aa:aa.one,three:aa.three,stop:aa.stop});
+      if(aa.stop){stop=cursor;break;}
+      aminoAcids.push({...aa,index:cursor,triplet});
+    }
+    return {one:aminoAcids.map(a=>a.one).join(''),three:aminoAcids.map(a=>a.three),aminoAcids,codons,start,stop,complete:stop!==null,ignored:Math.max(0,seq.length-(stop===null?cursor:stop+3))};
+  }
+  function modifier(seq, pos, operation, base) {
+    const alphabet = seq.toUpperCase().includes('U') ? ALPH_RNA : ALPH_DNA;
+    const s=nettoyer(seq, alphabet);
+    if (!Number.isInteger(pos) || pos<0 || pos>(operation==='ins' ? s.length:s.length-1)) throw new RangeError('Position hors séquence');
+    if(operation==='del') return s.slice(0,pos)+s.slice(pos+1);
+    const b=nettoyer(base,alphabet);
+    if(b.length!==1) throw new RangeError('Une seule base requise');
+    return operation==='ins' ? s.slice(0,pos)+b+s.slice(pos):s.slice(0,pos)+b+s.slice(pos+1);
+  }
+  const mutate=(s,p,b)=>modifier(s,p,'mut',b);
+  const insert=(s,p,b)=>modifier(s,p,'ins',b);
+  const del=(s,p)=>modifier(s,p,'del');
+  function classify(before, after) {
+    const b = nettoyer(before, before.toUpperCase().includes('U') ? ALPH_RNA:ALPH_DNA).replace(/T/g,'U');
+    const a = nettoyer(after, after.toUpperCase().includes('U') ? ALPH_RNA:ALPH_DNA).replace(/T/g,'U');
+    if(b===a)return 'aucune';
+    if((a.length-b.length)%3!==0)return 'décalage du cadre';
+    const x=translate(b),y=translate(a);
+    if(y.stop!==null && (x.stop===null || y.stop<x.stop))return 'non-sens';
+    if(a.length!==b.length)return 'modification en phase';
+    return x.one===y.one ? 'silencieuse':'faux-sens';
+  }
+  function transcriptionRun({length,rate=50,position=0}={}) {
+    if(!(Number.isFinite(length) && length>=0 && Number.isFinite(rate) && rate>0))throw new RangeError('Longueur ou vitesse de transcription non valide');
+    const s={length,rate,position:Math.min(length,Math.max(0,position)),t:0,finished:position>=length};
+    s.step=dt=>{if(!(dt>=0))throw new RangeError('Durée négative');s.t+=dt;s.position=Math.min(length,s.position+rate*dt);s.finished=s.position>=length;return s;};
+    return s;
+  }
+  // Tous les ribosomes parcourent le même ARNm ; espacement minimal imposé (stylisation).
+  function ribosomeRun({codons,rate=10,spacingCodons=6,maximum=4}={}) {
+    const n = typeof codons==='number' ? codons : Array.isArray(codons)?codons.length:Math.floor(nettoyer(codons,ALPH_RNA).length/3);
+    if(!(n>=0 && rate>0 && spacingCodons>=1 && maximum>=1))throw new RangeError('Paramètres des ribosomes non valides');
+    const s={codons:n,rate,spacingCodons,maximum,t:0,ribosomes:[],completed:0};
+    s.launch=()=>{if(s.ribosomes.length>=maximum || s.ribosomes.some(r=>r.position<spacingCodons))return false;s.ribosomes.push({position:0});return true;};
+    s.step=dt=>{
+      if(!(dt>=0))throw new RangeError('Durée négative');
+      s.t+=dt;
+      s.ribosomes.sort((a,b)=>b.position-a.position);
+      let ahead=Infinity;
+      for(const r of s.ribosomes){r.position=Math.min(n,Math.min(r.position+rate*dt,ahead-spacingCodons));ahead=r.position;}
+      const ending=s.ribosomes.filter(r=>r.position>=n).length;
+      s.completed+=ending;s.ribosomes=s.ribosomes.filter(r=>r.position<n);
+      return s;
+    };
+    return s;
+  }
+  // Lac : on modélise l'allolactose induit par le lactose et CAP–AMPc ; 0 / 0,08 / 1 sont relatifs.
+  function lacOperon({lactose=false,glucose=true}={}) {
+    const repressoreFixe=!lactose,activateurFixe=!glucose;
+    return {lactose:!!lactose,glucose:!!glucose,represseurFixe:repressoreFixe,activateurFixe,represseur:repressoreFixe?'fixé':'détaché',activateur:activateurFixe?'actif':'inactif',taux:repressoreFixe?0:activateurFixe?1:0.08};
+  }
+  function steady(k,gamma){if(!(Number.isFinite(k)&&k>=0&&Number.isFinite(gamma)&&gamma>0))throw new RangeError('k ≥ 0 et gamma > 0');return k/gamma;}
+  function niveau({k,gamma,on=1,initial=0},t){
+    if(!(Number.isFinite(t)&&t>=0&&Number.isFinite(on)&&on>=0&&on<=1))throw new RangeError('Durée ou commande non valide');
+    const eq=steady(k*on,gamma);
+    return eq+(initial-eq)*Math.exp(-gamma*t);
+  }
+  // Deux étages sans délai artificiel : dm/dt=k·on−gammaMrna·m, dp/dt=translationRate·m−gamma·p.
+  // Le champ « p » conserve la solution du cas élémentaire dp/dt=k·on−gamma·p.
+  function expression({k=6,gamma=0.12,on=1,initial=0,gammaMrna=0.45,translationRate=1,m0=0,p0=0}={},t=0) {
+    const simple=niveau({k,gamma,on,initial},t);
+    const mEq=steady(k*on,gammaMrna),pEq=steady(translationRate*mEq,gamma);
+    const em=Math.exp(-gammaMrna*t),ep=Math.exp(-gamma*t);
+    const m=mEq+(m0-mEq)*em;
+    const conv=Math.abs(gamma-gammaMrna)<1e-10 ? t*ep:(em-ep)/(gamma-gammaMrna);
+    const p=p0*ep+translationRate*mEq*(1-ep)/gamma+translationRate*(m0-mEq)*conv;
+    return {p:simple,mrna:m,protein:p,plateauSimple:steady(k*on,gamma),plateauMrna:mEq,plateauProteine:pEq,demiApproche:Math.LN2/gamma};
+  }
+  return Object.freeze({CODE,AA,GENE,HBB,GENOME,TAUX,complement,reverseComplement,transcribe,codingFromTemplate,genomeMetrics,translate,mutate,insert,delete:del,classify,transcriptionRun,ribosomeRun,lacOperon,steady,niveau,expression});
+})();
+/* GEN-END */
+(() => {
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const cv=$('#cv'),ctx=cv.getContext('2d'),chart=$('#chart'),scope=chart.getContext('2d');
+const C={bg:'#0a0d12',surface:'#11161e',rule:'#27323f',quiet:'#8a93a0',text:'#e8e4dc',accent:'#b3a3ff',turb:'#69d9cb',energy:'#ffd166',sand:'#dcc29a',pos:'#ff8a5b',neg:'#5bb8ff',base:{A:'#ffd166',T:'#fa9eae',U:'#fa9eae',C:'#78bfff',G:'#6bd4ab'}};
+const DECOUVERTES={
+ noyau:['Noyau','Compartiment eucaryote qui contient les chromosomes.'],chromosome:['Chromosome','Une longue molécule d’ADN associée à des protéines.'],helice:['Double hélice','Deux brins antiparallèles, reliés par leurs bases complémentaires.'],base:['Base','Une lettre A, T, C ou G ; son emplacement compte.'],matrice:['Brin matrice','Le brin d’ADN lu par l’ARN polymérase dans le sens 3′→5′.'],codant:['Brin codant','Sa séquence correspond à l’ARNm, avec T remplacé par U.'],
+ promoteur:['Promoteur','Région permettant l’initiation de la transcription dans un sens défini.'],terminateur:['Terminateur','Signal de fin de transcription, dessiné ici comme une borne.'],polymerase:['ARN polymérase','Enzyme qui allonge un ARN complémentaire au brin matrice.'],arnm:['ARN messager','Copie temporaire du gène, susceptible d’être traduite puis dégradée.'],pore:['Pore nucléaire','Passage contrôlé entre le noyau et le cytoplasme.'],
+ ribosome:['Ribosome','Complexe moléculaire qui assure la lecture de l’ARNm et l’assemblage du peptide.'],arnt:['ARNt','Molécule adaptatrice portant un acide aminé et reconnaissant un codon.'],codon:['Codon','Triplet de nucléotides de l’ARNm, associé à un acide aminé ou à l’arrêt.'],aa:['Acide aminé','Unité de la chaîne produite par le ribosome.'],stop:['Codon stop','Triplet reconnu par des facteurs de libération : la traduction s’arrête.'],
+ represseur:['Répresseur','Protéine qui peut se lier à l’opérateur et réduire la transcription.'],operateur:['Opérateur','Séquence régulatrice à laquelle le répresseur peut s’attacher.'],activateur:['Activateur CAP','Complexe CAP–AMPc qui favorise le recrutement de la polymérase.'],lactose:['Lactose','Sucre dont un dérivé, l’allolactose, lève la répression de l’opéron lac.']
+};
+const ETAPES=[
+ {titre:'Un texte en quatre lettres',nom:'L’ORDRE DES BASES',texte:'De la fibre compactée au texte moléculaire : une base fait face à une autre selon une règle précise. Change une seule lettre, le brin opposé suit.',cle:'L’information génétique est l’ordre des bases le long de l’ADN. Les deux brins sont complémentaires : chacun contient de quoi refaire l’autre.',note:'Zoom et compaction schématiques ; les longueurs du génome sont calculées, pas dessinées à l’échelle.'},
+ {titre:'Transcription : une copie de travail',nom:'DU GÈNE À L’ARN',texte:'Une polymérase lit un brin matrice, ouvre localement l’ADN et allonge un ARN. Le promoteur définit le sens de lecture de ce gène.',cle:'La transcription produit des copies de travail d’un gène. L’ARNm est temporaire et peut être détruit.',note:'Promoteur, bulle, terminateur et éventuel épissage stylisés ; vitesses illustratives.'},
+ {titre:'Traduction : changer d’alphabet',nom:'DU CODON AU PEPTIDE',texte:'Le ribosome fait défiler l’ARNm par groupes de trois bases. Un ARNt apporte un acide aminé ; un codon stop termine la chaîne. Une insertion décale les groupes.',cle:'Trois bases forment un codon. Déplacer le cadre d’une seule lettre peut modifier tous les acides aminés suivants.',note:'ARNt, ribosome et repliement schématiques ; le peptide ne prédit pas une structure 3D.'},
+ {titre:'Allumer un gène',nom:'SIGNAL ET EXPRESSION',texte:'Le répresseur empêche la transcription de l’opéron lac sans lactose. En l’absence de glucose, CAP–AMPc renforce une transcription déjà déverrouillée.',cle:'Les cellules lisent des portions différentes d’un même génome. Des interactions moléculaires modulent l’expression selon les signaux.',note:'Logique lac réduite à quatre états ; nombres moyens continus et cinétique à deux étages, non stochastique.'}
+];
+const PAS=1/120;
+let step=0,playing=true,acc=0,last=0,lastUI=0,temps=0, zones=[],projection={scale:1,ox:0,oy:0};
+let zoom=67, dna=Gen.GENE.coding.slice(0,36), opened=false;
+let speed=50, strand='matrice',euk=false,polys=[],arnCount=0,nonInitie=false;
+let referenceARN=Gen.GENE.mrna,arn=referenceARN,selection=6,fromHBB=false,ribo=null,mutationNote='';
+let lactose=false,glucose=true,gamma=.15,cellules=false;
+let mrna=0,proteine=0,regTime=0,histoire=[{t:0,m:0,p:0}];
+const f=(v,dec=1)=>Number(v).toLocaleString('fr-CA',{maximumFractionDigits:dec,minimumFractionDigits:dec});
+const compact=v=>Number(v).toLocaleString('fr-CA',{maximumFractionDigits:1});
+const borne=(x,a,b)=>Math.min(b,Math.max(a,x));
+const mobile=()=>innerWidth<=860;
+const box=(x,y,w,h,r=7,color=C.surface,stroke=C.rule)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(color){ctx.fillStyle=color;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}};
+const txt=(s,x,y,size=12,color=C.text,align='left',bold=false)=>{ctx.fillStyle=color;ctx.font=`${bold?'500':'400'} ${size}px "IBM Plex Mono",ui-monospace,monospace`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(String(s),x,y);};
+const ln=(x,y,xx,yy,color=C.rule,w=1,dash=[])=>{ctx.beginPath();ctx.setLineDash(dash);ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.strokeStyle=color;ctx.lineWidth=w;ctx.stroke();ctx.setLineDash([]);};
+const dot=(x,y,r,color,glow=0)=>{ctx.save();if(glow){ctx.shadowColor=color;ctx.shadowBlur=glow;}ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.restore();};
+const ellipse=(x,y,rx,ry,col,stroke)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}};
+const arrow=(x,y,xx,yy,col=C.accent)=>{ln(x,y,xx,yy,col,1.5);const a=Math.atan2(yy-y,xx-x);ln(xx,yy,xx-8*Math.cos(a-.55),yy-8*Math.sin(a-.55),col,1.5);ln(xx,yy,xx-8*Math.cos(a+.55),yy-8*Math.sin(a+.55),col,1.5);};
+const caption=(head,foot,x,y)=>{txt(head,x,y,11,C.text);if(foot)txt(foot,x,y+17,10,C.quiet);};
+const zone=(key,x,y,w,h)=>zones.push({key,x,y,w,h});
+const AA_COL=aa=>aa?.propriete==='chargé +'?C.pos:aa?.propriete==='chargé −'?C.neg:aa?.propriete==='polaire'?C.text:C.sand;
+function fond(W,H){
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#161e27';ctx.lineWidth=.7;
+  for(let x=26;x<W;x+=32){ctx.beginPath();ctx.moveTo(x,40);ctx.lineTo(x,H-80);ctx.stroke();}
+  for(let y=50;y<H-70;y+=32){ctx.beginPath();ctx.moveTo(25,y);ctx.lineTo(W-25,y);ctx.stroke();}
+}
+function ADNHelice(x,y,width,height,sequence,ouverte=false){
+  if(!sequence)return;
+  const n=Math.min(16,sequence.length), spacing=height/Math.max(1,n-1),gap=ouverte?54:0;
+  const gauche=[],droite=[];
+  for(let i=0;i<n;i++){
+    const yy=y+i*spacing, phase=i*.72-.8, dx=28*Math.sin(phase),p=28*Math.cos(phase);
+    const a=x-width*.28+dx-gap/2,b=x+width*.28-dx+gap/2;
+    gauche.push([a,yy]);droite.push([b,yy]);
+    const b1=sequence[i],b2=Gen.complement(b1);
+    ln(a,yy,b,yy,'#50606a',2);dot(a,yy,5,C.base[b1]);dot(b,yy,5,C.base[b2]);
+    if(i%2===0){txt(b1,a+(a<b?11:-11),yy-7,11,C.base[b1],'center',true);txt(b2,b+(a<b?-11:11),yy+8,11,C.base[b2],'center',true);}
+    if(i===4)zone('base',Math.min(a,b)-8,yy-10,Math.abs(b-a)+16,22);
+  }
+  for(const [pts,col] of [[gauche,C.turb],[droite,C.quiet]]){
+    ctx.beginPath();pts.forEach(([xx,yy],i)=>i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy));ctx.strokeStyle=col;ctx.lineWidth=3;ctx.stroke();
+  }
+  zone('helice',x-width/2-gap,y-10,width+2*gap,height+20);
+}
+function nucleus(x,y,r){
+  ellipse(x,y,r,r*.86,'#101d28',C.turb);ellipse(x,y,r*.91,r*.77,'#0c151e','#263a46');
+  for(let i=0;i<6;i++){const theta=i*1.04;const xx=x+Math.cos(theta)*r*.42,yy=y+Math.sin(theta)*r*.35;
+    ctx.beginPath();ctx.moveTo(xx-18,yy-17);ctx.bezierCurveTo(xx+20,yy-19,xx-15,yy+18,xx+18,yy+19);ctx.strokeStyle=C.turb;ctx.globalAlpha=.4;ctx.lineWidth=3;ctx.stroke();ctx.globalAlpha=1;
+  }
+  zone('noyau',x-r,y-r*.86,r*2,r*1.72);
+}
+function chromosome(x,y,h){
+  ln(x-h*.18,y-h*.4,x+h*.18,y+h*.4,C.turb,14);ln(x+h*.18,y-h*.4,x-h*.18,y+h*.4,C.accent,14);
+  dot(x,y,6,C.energy);zone('chromosome',x-h*.35,y-h*.6,h*.7,h*1.2);
+}
+function seqText(x,y,w,a,b,max=32){
+  box(x,y,w,70,3,'#10161f','#2a3441');txt('5′  BRIN CODANT  →  3′',x+12,y+14,10,C.turb);
+  const count=Math.min(max,a.length),group=a.slice(0,count).match(/.{1,3}/g)?.join(' ')||'—';
+  const group2=b.slice(0,count).match(/.{1,3}/g)?.join(' ')||'—';
+  txt(group,x+12,y+34,w<390?10:13,C.text);
+  txt(group2,x+12,y+53,w<390?10:13,C.quiet);
+  zone('codant',x+10,y+20,w-20,18);zone('matrice',x+10,y+41,w-20,18);
+}
+function dessineTexte(W,H){
+  const m=mobile(),mid=m?W/2:W*.54;
+  if(m){
+    const alpha=zoom<28?'noyau':zoom<50?'chromosome':zoom<77?'helice':'bases';
+    if(alpha==='noyau'){nucleus(mid,169,112);txt('NOYAU / ADN COMPACTÉ',mid,299,13,C.quiet,'center');}
+    if(alpha==='chromosome'){chromosome(mid,170,185);txt('CHROMOSOME / CHROMATINE',mid,301,12,C.quiet,'center');}
+    if(alpha==='helice'||alpha==='bases'){ADNHelice(mid,77,125,200,dna,opened);txt(opened?'DEUX BRINS SÉPARÉS':'ADN / DOUBLE HÉLICE',mid,300,12,C.turb,'center');}
+    if(zoom>70){seqText(24,315,W-48,dna,Gen.complement(dna),Math.min(15,dna.length));}
+    txt('ZOOM '+zoom+' %  ·  '+(zoom<28?'NOYAU':zoom<50?'CHROMOSOME':zoom<77?'HÉLICE':'BASES'),25,54,11,C.quiet);
+  }else{
+    ctx.globalAlpha=borne(1-(zoom-35)/45,.13,1);nucleus(198,260,103);caption('1 · NOYAU','6 µm · ordre de grandeur',90,399);ctx.globalAlpha=1;
+    arrow(300,260,369,260,C.rule);
+    ctx.globalAlpha=borne(1-Math.abs(zoom-36)/58,.22,1);chromosome(426,246,188);caption('2 · CHROMOSOME','ADN compacté',371,402);ctx.globalAlpha=1;
+    arrow(520,260,582,260,C.rule);
+    ADNHelice(717,115,205,260,dna,opened);caption('3 · DOUBLE HÉLICE','Deux brins, séquences liées',645,403);
+    if(zoom>72)seqText(174,438,625,dna,Gen.complement(dna),Math.min(28,dna.length));
+    txt('ZOOM / '+zoom+' %',80,85,12,C.quiet);
+  }
+  if(zoom>=38)zone('helice',m?80:610,m?70:100,m?260:235,m?220:295);
+}
+function chaineADN(x,y,width,n=Gen.GENE.coding.length){
+  ln(x,y,x+width,y,C.turb,2.5);ln(x,y+40,x+width,y+40,C.quiet,2.5);
+  for(let i=0;i<=n;i+=3){const xx=x+(i/n)*width;ln(xx,y,xx,y+40,'#304353',1.2);}
+}
+function dessineTranscription(W,H){
+  const m=mobile(),x=m?24:76,w=m?W-48:W-152,y=m?122:174;
+  box(x,y-50,w,116,6,'#0d141e','#263644');
+  chaineADN(x+16,y,w-32);
+  box(x+20,y-20,m?59:84,81,3,'#ffd16613',C.energy);txt('PROM.',x+28,y-32,10,C.energy);zone('promoteur',x+20,y-24,m?59:84,90);
+  box(x+w-(m?80:105),y-20,m?59:84,81,3,'#b3a3ff12',C.accent);txt('FIN',x+w-(m?77:101),y-32,10,C.accent);zone('terminateur',x+w-(m?80:105),y-24,90,90);
+  const start=x+(m?66:109),end=x+w-(m?86:110),len=Gen.GENE.coding.length;
+  let topIndex=-1;
+  polys.forEach(({sim},i)=>{
+    if(sim.finished)return;const p=sim.position/len,xx=start+(end-start)*p;topIndex=Math.max(topIndex,sim.position);
+    ellipse(xx,y+21,m?16:22,29,C.surface,C.accent);dot(xx,y+21,7,C.accent,6);
+    const current=Gen.GENE.mrna.slice(0,Math.floor(sim.position)),view=current.slice(-Math.min(m?12:25,current.length));
+    const rw= Math.min(m?130:270,view.length*10);
+    ln(xx,y+53,xx-rw/2,y+103,C.accent,2);
+    txt(view||'…',xx-rw/2,y+114,m?10:12,C.accent);
+    zone('polymerase',xx-24,y-10,48,66);
+  });
+  zone('matrice',x+10,y+32,w-20,20);zone('codant',x+10,y-8,w-20,20);
+  txt('BRIN CODANT · 5′→3′',x+14,y-10,10,C.turb);
+  txt('MATRICE · 3′→5′',x+14,y+56,10,C.quiet);
+  if(!polys.length){ellipse(start,y+20,21,28,C.surface,nonInitie?C.pos:C.accent);zone('polymerase',start-22,y-10,44,62);}
+  const arnV=topIndex>=0?Gen.GENE.mrna.slice(0,Math.max(0,Math.floor(topIndex))):'';
+  if(m){
+    box(24,288,W-48,54,4,C.surface,C.rule);txt('ARNm EN FORMATION  5′ → 3′',37,307,11,C.accent);
+    txt(arnV.slice(-29)||'Appuie sur « Lancer une polymérase »',37,328,10,C.text);
+    if(euk){ln(30,360,W-30,360,C.turb,1.5,[4,5]);txt('PORE : PRÉ-ARN → ARNm  (ÉPISSAGE STYLISÉ)',31,377,10,C.quiet);zone('pore',W/2-30,350,60,27);}
+    else txt('La copie est complémentaire du brin matrice.',28,380,11,C.quiet);
+  }else{
+    box(104,338,758,84,5,C.surface,C.rule);txt('ARNm · COPIE DE TRAVAIL',122,361,12,C.accent);
+    txt(arnV.slice(-56)||'Lancer une polymérase pour produire un ARN',122,391,12,C.text);
+    zone('arnm',104,340,758,82);
+    if(euk){ln(92,458,860,458,C.turb,1.3,[5,5]);box(466,437,76,41,18,C.surface,C.turb);txt('PORE',504,457,10,C.turb,'center');zone('pore',466,437,76,41);txt('Noyau  →  cytoplasme  ·  épissage schématique (introns fictifs)',108,479,11,C.quiet);}
+    else txt('Polymérases sur le même gène : plusieurs ARNm peuvent être produits.',105,461,12,C.quiet);
+  }
+}
+function dessineGrille(x,y,w,h,active){
+  box(x,y,w,h,5,'#101720','#273444');txt('CODE GÉNÉTIQUE / 64 CODONS',x+12,y+19,11,C.quiet);
+  const items=Object.entries(Gen.CODE), nCol=4,nRow=16, cellW=(w-24)/4,cellH=(h-41)/16;
+  for(let i=0;i<64;i++){
+    const [codon,aa]=items[i],cx=x+12+Math.floor(i/nRow)*cellW,cy=y+35+(i%nRow)*cellH;
+    if(codon===active)box(cx-2,cy-7,cellW-3,cellH-.5,2,'#403b5d',C.accent);
+    txt(codon,cx+2,cy,9.5,codon===active?C.text:C.quiet);
+    txt(aa.one,cx+cellW-12,cy,10,aa.stop?C.pos:AA_COL(Gen.AA[aa.one]),'right');
+  }
+  zone('codon',x+5,y+24,w-10,h-32);
+}
+function peptideBeads(x,y,n,lettres,maxW=400,fold=false){
+  const ar=lettres.slice(0,Math.max(0,Math.floor(n))).split('');
+  ar.forEach((a,i)=>{
+    const dx=fold?Math.sin(i*1.68)*Math.min(maxW*.17,45):i*17;
+    const dy=fold?Math.cos(i*1.68)*22-(i%4)*4: Math.sin(i*.5)*11;
+    const xx=x+dx,yy=y+dy;
+    if(i>0){const prev=i-1,px=x+(fold?Math.sin(prev*1.68)*Math.min(maxW*.17,45):prev*17),py=y+(fold?Math.cos(prev*1.68)*22-(prev%4)*4:Math.sin(prev*.5)*11);ln(px,py,xx,yy,'#626575',1.6);}
+    dot(xx,yy,6.5,AA_COL(Gen.AA[a]));
+    if(!fold&&i%2===0)txt(a,xx,yy-17,9,C.text,'center');
+  });
+  if(ar.length)zone('aa',x-12,y-40,Math.min(maxW,Math.max(35,ar.length*17)),85);
+}
+function dessineRibosome(x,y,small=false){
+  ellipse(x,y+7,small?40:56,small?22:28,'#1c1b2b',C.accent);
+  ellipse(x,y-28,small?32:46,small?24:30,'#1c1b2b',C.accent);
+  ln(x-24,y+9,x+24,y+9,C.accent,2);
+  zone('ribosome',x-(small?42:56),y-58,small?84:112,98);
+}
+function dessineARNt(x,y,lettre){
+  const aa=Gen.AA[lettre]||Gen.AA.M;
+  ctx.beginPath();ctx.moveTo(x-12,y-13);ctx.lineTo(x-12,y+7);ctx.lineTo(x+2,y+7);ctx.lineTo(x+2,y-25);
+  ctx.strokeStyle=C.turb;ctx.lineWidth=3;ctx.stroke();dot(x+2,y-32,8,AA_COL(aa));
+  txt(lettre,x+2,y-32,9,C.bg,'center',true);txt('ARNt',x-26,y+24,9,C.quiet);zone('arnt',x-20,y-42,48,65);
+}
+function dessineTraduction(W,H){
+  const m=mobile(),tr=Gen.translate(arn,{startAtAUG:true}), aa=tr.one;
+  const lead=ribo?.ribosomes?.[0],pos=Math.floor(lead?.position??(ribo?.completed?aa.length:0));
+  const idx=borne((tr.start<0?0:tr.start)+pos*3,0,Math.max(0,arn.length-1));
+  const triplet=arn.slice(idx,idx+3);const active=triplet.length===3?triplet:'—';
+  if(m){
+    txt('ARN MESSAGER · 5′ → 3′',25,70,11,C.accent);
+    arrow(30,229,W-28,229,C.accent);
+    dessineRibosome(186,221,true);
+    dessineARNt(260,168,Gen.CODE[active]?.one==='*'?'M':Gen.CODE[active]?.one||'M');
+    txt('CODON EN COURS',31,277,10,C.quiet);
+    box(27,287,180,45,4,C.surface,C.accent);
+    txt(active,116,307,20,active==='UAA'||active==='UGA'||active==='UAG'?C.pos:C.accent,'center',true);
+    txt('→ '+(Gen.CODE[active]?.three||'lecture terminée'),218,309,11,C.text);
+    peptideBeads(135,117,Math.min(pos,aa.length),aa,230,ribo?.completed>0&&!lead);
+    txt('PEPTIDE',26,116,10,C.quiet);
+    const sample=arn.slice(Math.max(0,idx-9),Math.min(arn.length,idx+12));
+    txt(sample.match(/.{1,3}/g)?.join(' ')||'—',24,350,12,C.text);
+    txt('Sélectionne une lettre dans la réglette en bas.',25,378,10,C.quiet);
+    zone('arnm',20,337,W-40,28);
+    zone('codon',27,287,180,45);
+  }else{
+    txt('01 / ARN MESSAGER',74,86,11,C.accent);
+    box(68,265,500,62,3,'#0e1620','#394257');
+    arrow(83,298,554,298,C.accent);
+    const readFrom=Math.max(0,idx-12),readTo=Math.min(arn.length,readFrom+28),block=arn.slice(readFrom,readTo);
+    for(let i=0;i<block.length;i++){
+      const bi=readFrom+i,xx=96+i*16.1,bb=block[i],isCurrent=bi>=idx&&bi<idx+3;
+      if(isCurrent)box(xx-6,280,16,32,2,'#3f3962',C.accent);
+      txt(bb,xx+2,297,13,C.base[bb]||C.text,'center',isCurrent);
+      if(bi===selection)ln(xx-5,315,xx+7,315,C.energy,2.4);
+    }
+    txt('5′',73,343,10,C.quiet);txt('3′',552,343,10,C.quiet,'right');
+    zone('arnm',68,265,500,78);
+    dessineRibosome(287,270);
+    dessineARNt(375,187,Gen.CODE[active]?.one==='*'?'M':Gen.CODE[active]?.one||'M');
+    txt('ARNt + ACIDE AMINÉ',392,163,11,C.quiet);
+    txt('CHAÎNE NAISSANTE',78,145,11,C.quiet);
+    peptideBeads(104,206,Math.min(pos,aa.length),aa,430,false);
+    if(ribo?.completed>0){txt('CHAÎNE LIBÉRÉE / REPLIEMENT SCHÉMATIQUE',77,404,11,C.quiet);peptideBeads(352,438,Math.min(aa.length,24),aa,140,true);}
+    else txt('Le codon stop déclenche la libération de la chaîne.',77,414,11,C.quiet);
+    dessineGrille(606,85,298,390,active);
+    box(606,485,298,32,4,C.surface,C.rule);txt('CODON LU : '+active+'    → '+(Gen.CODE[active]?.three||'fin'),622,502,11,C.text);
+    zone('stop',800,484,104,34);
+  }
+}
+function trace(x,y,w,h,hist,champ,max,stroke){
+  if(hist.length<2)return;
+  const start=Math.max(0,hist[hist.length-1].t-35),end=Math.max(35,hist[hist.length-1].t);
+  ctx.beginPath();let begun=false;
+  for(const e of hist){if(e.t<start)continue;const xx=x+(e.t-start)/(end-start)*w,yy=y+h-(e[champ]/max)*h;
+    if(!Number.isFinite(xx+yy))continue;if(!begun){ctx.moveTo(xx,yy);begun=true;}else ctx.lineTo(xx,yy);
+  }
+  ctx.strokeStyle=stroke;ctx.lineWidth=2.5;ctx.stroke();
+}
+function courbeReg(x,y,w,h){
+  box(x,y,w,h,6,'#101720','#283344');
+  const etat=Gen.lacOperon({lactose,glucose});
+  const maxM=Math.max(2,16*1.1,...histoire.map(a=>a.m*1.05));
+  const maxP=Math.max(3,16*1.5/gamma*1.08,...histoire.map(a=>a.p*1.05));
+  const mini=h<210, X=x+(mini?21:38),Y=y+(mini?31:49),CW=w-(mini?32:56),CH=h-(mini?59:85);
+  for(let k=0;k<5;k++)ln(X,Y+k*CH/4,X+CW,Y+k*CH/4,'#27313d',1);
+  txt('ARNm / PROTÉINE',x+14,y+(mini?13:20),11,C.text);
+  txt('t = '+f(regTime,1)+' s',x+w-14,y+(mini?13:20),10,C.quiet,'right');
+  txt('0',X-12,Y+CH,9,C.quiet,'right');txt('35 s',X+CW,Y+CH+20,9,C.quiet,'right');
+  txt('ARNm',X,Y-7,10,C.accent);txt('protéine',X+105,Y-7,10,C.energy);
+  const last=histoire[histoire.length-1];
+  if(!mini){txt('max '+f(maxM,0)+' ARN',X,Y+CH+33,9,C.quiet);txt('max '+f(maxP,0)+' prot.',X+130,Y+CH+33,9,C.quiet);}
+  trace(X,Y,CW,CH,histoire,'m',maxM,C.accent);trace(X,Y,CW,CH,histoire,'p',maxP,C.energy);
+  if(etat.taux===0)txt('répression active',x+w-15,y+41,9,C.sand,'right');
+  zone('arnm',X,Y,CW,CH);
+}
+function cellulesDifferentes(W,H){
+  const m=mobile(),x0=m?24:67,cw=m?118:245,gap=m?8:24,y=m?110:140;
+  const d=[['NEURONE',[true,false,true,false,true]],['ÉRYTHROBLASTE',[false,true,false,true,false]],['HÉPATOCYTE',[true,false,false,true,true]]];
+  d.forEach(([name,lights],i)=>{
+    const x=x0+i*(cw+gap);box(x,y,cw,m?214:280,7,'#101820','#344453');
+    txt(name,x+cw/2,y+25,m?9:12,C.text,'center');
+    ellipse(x+cw/2,y+(m?105:117),m?42:58,m?46:59,'#172330',C.turb);
+    txt('MÊME ADN',x+cw/2,y+(m?103:117),m?9:11,C.quiet,'center');
+    for(let j=0;j<5;j++){
+      const xx=x+cw/2+(j-2)*(m?17:26),yy=y+(m?165:207);
+      box(xx-7,yy-20,m?15:21,29,2,lights[j]?'#403d29':'#1a222c',lights[j]?C.energy:'#45515e');
+      if(lights[j])dot(xx,yy-6,3,C.energy,12);
+    }
+    txt('A B C D E',x+cw/2,y+(m?199:246),m?10:12,C.quiet,'center');
+  });
+  txt('Même génome dans ces cellules nucléées · les gènes actifs varient.',m?24:69,m?344:474,m?10:12,C.quiet);
+  if(m)txt('Le globule rouge mature n’a plus de noyau.',24,361,10,C.quiet);
+  zone('noyau',x0+cw*.15,y+48,cw*.7,125);
+}
+function dessineRegulation(W,H){
+  const m=mobile(),etat=Gen.lacOperon({lactose,glucose});
+  if(cellules){cellulesDifferentes(W,H);return;}
+  const x=m?24:54,w=m?W-48:450,y=m?125:235;
+  txt('OPÉRON LAC / BACTÉRIE',x,m?74:80,12,C.text);
+  ln(x+5,y,x+w-5,y,C.turb,5);
+  const pro=x+w*.19,op=x+w*.39,genes=x+w*.64;
+  if(etat.taux>0){ctx.save();ctx.shadowColor=C.energy;ctx.shadowBlur=16;box(pro-25,y-16,58,32,3,'#665522',C.energy);ctx.restore();}
+  else box(pro-25,y-16,58,32,3,C.surface,C.quiet);
+  box(op-25,y-16,58,32,3,C.surface,C.accent);
+  box(genes-28,y-13,w*.25,26,3,'#174139','#409b8e');
+  txt('prom.',pro,y+38,10,C.quiet,'center');txt('opér.',op,y+38,10,C.quiet,'center');txt('lacZ / lacY / lacA',genes+w*.105,y+38,m?9:11,C.turb,'center');
+  zone('promoteur',pro-30,y-18,63,36);zone('operateur',op-30,y-18,63,36);
+  const rX=op,rY=etat.represseurFixe?y-37:y-90;
+  box(rX-24,rY-12,48,24,10,C.sand,'#f1d6b0');txt('R',rX,rY,13,C.bg,'center',true);zone('represseur',rX-25,rY-20,50,35);
+  const actX=pro-40;box(actX-21,etat.activateurFixe?y-32:y-83,45,22,10,etat.activateurFixe?C.accent:C.surface,etat.activateurFixe?C.accent:C.quiet);
+  txt('CAP',actX,etat.activateurFixe?y-21:y-72,10,etat.activateurFixe?C.bg:C.quiet,'center');zone('activateur',actX-24,y-90,48,80);
+  const lx=x+w*.22,ly=m?218:413;
+  if(lactose){dot(lx,ly,9,C.energy);dot(lx+19,ly,9,C.energy);ln(lx,ly,lx+19,ly,C.energy,2);txt('ALLOLACTOSE → R DÉTACHÉ',lx+41,ly,10,C.energy);}
+  else txt('LACTOSE ABSENT → R FIXÉ',lx,ly,10,C.sand);
+  zone('lactose',lx-13,ly-14,w*.65,32);
+  if(m){
+    txt('TAUX : '+f(etat.taux*100,0)+' %',x+w-8,75,11,etat.taux?C.energy:C.quiet,'right');
+    txt('Glucose : '+(glucose?'présent':'absent'),x+w-8,97,10,C.quiet,'right');
+    courbeReg(24,247,W-48,114);
+  }else{
+    txt('CAP–AMPc = '+(etat.activateurFixe?'ACTIF':'INACTIF'),x+5,113,12,etat.activateurFixe?C.accent:C.quiet);
+    txt('RÉPRESSEUR = '+(etat.represseurFixe?'FIXÉ':'DÉTACHÉ'),x+5,138,12,etat.represseurFixe?C.sand:C.turb);
+    txt('TRANSCRIPTION  '+f(etat.taux*100,0)+' %',x+5,164,12,etat.taux?C.energy:C.quiet);
+    txt('ARNm : '+f(mrna,1)+' / cellule',x+7,480,12,C.accent);
+    txt('Protéines : '+f(proteine,1)+' / cellule',x+7,501,12,C.energy);
+    courbeReg(530,94,386,395);
+  }
+}
+function newRibo(){
+  const tr=Gen.translate(arn,{startAtAUG:true});
+  ribo=Gen.ribosomeRun({codons:tr.one.length,rate:10,spacingCodons:6,maximum:3});
+  if(tr.start>=0 && tr.one.length>0)ribo.launch();
+  mutationNote=Gen.classify(referenceARN,arn);
+}
+function fixed(){
+  temps+=PAS;
+  if(step===1){
+    for(const obj of polys){obj.sim.rate=speed;obj.sim.step(PAS);}
+    const finis=polys.filter(a=>a.sim.finished).length;
+    arnCount+=finis;polys=polys.filter(a=>!a.sim.finished);
+  }
+  if(step===2 && ribo){
+    ribo.step(PAS);
+    // Un nouveau ribosome peut s'engager lorsque le précédent a dégagé le début.
+    if(ribo.completed+ribo.ribosomes.length<3 && Math.floor(ribo.t*15)!==Math.floor((ribo.t-PAS)*15))ribo.launch();
+  }
+  if(step===3){
+    const reg=Gen.lacOperon({lactose,glucose});
+    const res=Gen.expression({k:8,gamma, on:reg.taux,gammaMrna:0.5,translationRate:1.5,m0:mrna,p0:proteine},PAS);
+    mrna=res.mrna;proteine=res.protein;regTime+=PAS;
+    if(histoire.length===0 || regTime-histoire[histoire.length-1].t>=.12){histoire.push({t:regTime,m:mrna,p:proteine});if(histoire.length>700)histoire.shift();}
+  }
+}
+function tick(n=1){if(!Number.isInteger(n)||n<0||n>1e6)throw new RangeError('Nombre de pas invalides');for(let i=0;i<n;i++)fixed();return state();}
+function setPlay(b){playing=!!b;$('#play').textContent=playing?'Pause':'Lecture';$('#play').setAttribute('aria-pressed',String(playing));return playing;}
+function setZoom(z){zoom=borne(Number(z)||0,0,100);$('#zoom').value=zoom;$('#zoomVal').textContent=f(zoom,0)+' %';afficheDonnees();return zoom;}
+function typeBases(s){dna=String(s).toUpperCase().replace(/[^ATCG]/g,'').slice(0,90);$('#dnaInput').value=dna;afficheDonnees();return dna;}
+function unzip(){opened=!opened;$('#unzip').setAttribute('aria-pressed',String(opened));$('#unzip').textContent=opened?'Refermer l’hélice':'Ouvrir l’hélice';afficheDonnees();return opened;}
+function startPol(){
+  if(strand!=='matrice'){nonInitie=true;afficheDonnees();return false;}
+  if(polys.length>=3)return false;
+  polys.push({sim:Gen.transcriptionRun({length:Gen.GENE.coding.length,rate:speed})});
+  nonInitie=false;setPlay(true);afficheDonnees();return true;
+}
+function setSpeed(x){speed=borne(Number(x)||50,20,80);$('#speed').value=speed;$('#speedVal').textContent=f(speed,0)+' nt/s';for(const a of polys)a.sim.rate=speed;afficheDonnees();return speed;}
+function eukaryote(on){euk=!!on;$('#euk').setAttribute('aria-pressed',String(euk));afficheDonnees();return euk;}
+function setBase(i,b){
+  if(!Number.isInteger(i)||i<0||i>=arn.length)throw new RangeError('Index de base absent');
+  arn=Gen.mutate(arn,i,b);selection=i;newRibo();afficheDonnees();editeur();return arn;
+}
+function insertBase(i,b){
+  if(!Number.isInteger(i)||i<0||i>arn.length)throw new RangeError('Index d’insertion absent');
+  arn=Gen.insert(arn,i,b);selection=Math.min(i,arn.length-1);newRibo();afficheDonnees();editeur();return arn;
+}
+function deleteBase(i){
+  if(!Number.isInteger(i)||i<0||i>=arn.length)throw new RangeError('Index de suppression absent');
+  arn=Gen.delete(arn,i);selection=Math.max(0,Math.min(i,arn.length-1));newRibo();afficheDonnees();editeur();return arn;
+}
+function translateNow(){newRibo();setPlay(true);afficheDonnees();return Gen.translate(arn,{startAtAUG:true});}
+function presetHbS(){referenceARN=Gen.HBB.normal.replace(/T/g,'U');arn=Gen.HBB.mutation.replace(/T/g,'U');selection=Gen.HBB.indexBase;fromHBB=true;newRibo();editeur();setPlay(true);afficheDonnees();return arn;}
+function setLactose(on){lactose=!!on;$('#lactose').setAttribute('aria-pressed',String(lactose));$('#lactose').textContent='Lactose '+(lactose?'présent':'absent');afficheDonnees();return lactose;}
+function setGlucose(on){glucose=!!on;$('#glucose').setAttribute('aria-pressed',String(glucose));$('#glucose').textContent='Glucose '+(glucose?'présent':'absent');afficheDonnees();return glucose;}
+function setGamma(x){gamma=borne(Number(x)||.15,.05,.70);$('#gamma').value=gamma;$('#gammaVal').textContent=f(gamma,2)+' s⁻¹';afficheDonnees();return gamma;}
+function cellTypes(on){cellules=!!on;$('#cells').setAttribute('aria-pressed',String(cellules));afficheDonnees();return cellules;}
+function restart(){
+  temps=0;
+  if(step===0){zoom=67;opened=false;dna=Gen.GENE.coding.slice(0,36);$('#unzip').setAttribute('aria-pressed','false');$('#unzip').textContent='Ouvrir l’hélice';$('#zoom').value=67;$('#zoomVal').textContent='67 %';$('#dnaInput').value=dna;}
+  if(step===1){speed=50;strand='matrice';euk=false;polys=[];arnCount=0;nonInitie=false;$('#speed').value=50;$('#strand').setAttribute('aria-pressed','false');$('#euk').setAttribute('aria-pressed','false');startPol();}
+  if(step===2){referenceARN=Gen.GENE.mrna;arn=referenceARN;selection=6;fromHBB=false;newRibo();editeur();}
+  if(step===3){lactose=false;glucose=true;gamma=.15;cellules=false;mrna=0;proteine=0;regTime=0;histoire=[{t:0,m:0,p:0}];setLactose(false);setGlucose(true);setGamma(.15);cellTypes(false);}
+  afficheDonnees();draw();
+}
+function goStep(i){
+  step=borne(Number(i)|0,0,3);temps=0;acc=0;
+  const d=ETAPES[step];
+  $('#eyebrow').textContent='Module 35 · étape '+(step+1)+' / 4';
+  $('#stepTitle').textContent=d.titre;$('#stepText').textContent=d.texte;$('#key').textContent=d.cle;$('#honesty').textContent=d.note;
+  $('#sceneName').textContent=String(step+1).padStart(2,'0')+' / 04 · '+d.nom;
+  $('#cv').setAttribute('aria-label',d.titre+' : '+d.texte);
+  $$('[data-step]').forEach(b=>b.dataset.step==step?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current'));
+  $$('[data-act]').forEach(el=>el.hidden=Number(el.dataset.act)!==step);
+  $('#questions').hidden=step!==3;$('#scopeSection').hidden=step!==3;
+  $('#prev').disabled=step===0;$('#next').disabled=step===3;
+  const steps=[['noyau','chromosome','helice','base'],['promoteur','matrice','codant','polymerase','arnm','terminateur','pore'],['ribosome','arnt','codon','aa','stop'],['represseur','operateur','activateur','lactose']];
+  const loc=$('#objects');loc.replaceChildren();
+  for(const id of steps[step]){
+    const b=document.createElement('button');b.type='button';b.className='object';b.textContent=DECOUVERTES[id][0];b.title=DECOUVERTES[id][1];
+    b.addEventListener('pointerenter',e=>infobulle(id,e));b.addEventListener('pointerleave',cacheBulle);
+    b.addEventListener('focus',e=>infobulle(id,e));b.addEventListener('blur',cacheBulle);b.addEventListener('click',e=>infobulle(id,e));loc.append(b);
+  }
+  if(step===1&&polys.length===0&&arnCount===0)startPol();
+  if(step===2&&!ribo){newRibo();editeur();}
+  afficheDonnees();draw();return step;
+}
+function state(){
+  if(step===0){const len=dna.length,gc=[...dna].filter(b=>'GC'.includes(b)).length;return{etape:0,zoom,ouvert:opened,sequence:dna,complement:Gen.complement(dna),longueur:len,gc:len?100*gc/len:0,...Gen.genomeMetrics()};}
+  if(step===1)return{etape:1,positions:polys.map(p=>p.sim.position),longueur:Gen.GENE.mrna.length,vitesse:speed,arnProduits:arnCount,brin:strand,eucaryote:euk,arn:Gen.GENE.mrna,peptide:Gen.translate(Gen.GENE.mrna).one};
+  if(step===2){const tr=Gen.translate(arn,{startAtAUG:true}), read=ribo?.completed?tr.codons.length:Math.floor(ribo?.ribosomes?.[0]?.position||0);return{etape:2,arn,reference:referenceARN,mutation:Gen.classify(referenceARN,arn),codonsLus:Math.max(0,read),codons:tr.codons,peptide:tr.one,trois:tr.three,longueur:tr.one.length,stop:tr.stop,produites:ribo?.completed||0,ribosomes:ribo?.ribosomes.length||0};}
+  const lac=Gen.lacOperon({lactose,glucose}),ss=Gen.expression({k:8,gamma,on:lac.taux,gammaMrna:.5,translationRate:1.5},1e4);
+  return{etape:3,temps:regTime,lactose,glucose,gamma,represseur:lac.represseur,activateur:lac.activateur,taux:lac.taux,kMrna:8*lac.taux,mrna,protein:proteine,plateauMrna:ss.plateauMrna,plateauProtein:ss.plateauProteine,demiApproche:ss.demiApproche,cellules};
+}
+const mesure=(label,val,unite='')=>`<div class="row"><span class="lab">${label}</span><span class="val">${val} ${unite?`<small>${unite}</small>`:''}</span></div>`;
+function afficheDonnees(){
+  const s=state();let st='',measure='';
+  if(step===0){
+    st=opened?'Deux brins séparés : chaque base garde son partenaire défini par la complémentarité.':dna.length?'A en face de T ; C en face de G. Connaître un brin permet de déduire l’autre.':'Écris des bases A, T, C ou G pour révéler la complémentarité.';
+    measure=mesure('Paires de bases',compact(s.longueur),'pb')+mesure('Teneur en GC',f(s.gc,1),'%')+mesure('Génome haploïde', '3,1 × 10⁹','pb')+mesure('ADN diploïde déployé',f(s.lengthDiploidM,2),'m')+mesure('Analogie balle de tennis',f(s.tennisAnalogyM/1000,1),'km de fil');
+    $('#clock').textContent='ADN · '+dna.length+' pb';
+  }else if(step===1){
+    st=nonInitie?'Le promoteur de ce gène est orienté pour l’autre brin : cette sélection ne produit pas d’ARN.':euk?'La copie quitte le noyau par un pore. L’épissage représenté est purement schématique.':polys.length?'La polymérase progresse sur le brin matrice. L’ARN reprend les bases du brin codant en remplaçant T par U.':'Une copie est terminée. L’ARNm est une molécule temporaire qui peut être produite en plusieurs exemplaires.';
+    measure=mesure('Position avancée',f(polys[0]?.sim.position||0,1),'nt')+mesure('Vitesse',f(speed,0),'nt/s')+mesure('ARNm achevés',compact(arnCount),'copies')+mesure('Polymérases',compact(polys.length),'en cours')+mesure('Gène modèle',compact(Gen.GENE.coding.length),'nt');
+    $('#clock').textContent='ARN · '+f(temps,1)+' s';
+  }else if(step===2){
+    const mutation=s.mutation;
+    st=mutation==='aucune'?'Le même ARNm produit le même peptide ; sélectionne une lettre pour l’éprouver.':mutation==='silencieuse'?'Le codon change, mais l’acide aminé ne change pas : le code est redondant.':mutation==='faux-sens'?'Un acide aminé change : l’effet dépend de sa place et des interactions de la protéine.':mutation==='non-sens'?'Un arrêt apparaît trop tôt : la chaîne est tronquée.':mutation==='décalage du cadre'?'Une base insérée ou retirée change les triplets de tous les codons suivants.':'Des bases ont été modifiées en multiples de trois sans déplacer le cadre de lecture.';
+    if(fromHBB && mutation==='faux-sens')st='β-globine HbS : GAG → GTG dans l’ADN codant (Glu → Val dans la chaîne mature).';
+    measure=mesure('Codons parcourus',compact(s.codonsLus),'triplets')+mesure('Peptide',s.peptide.slice(0,34)||'—','code 1 lettre')+mesure('Nombre d’acides aminés',compact(s.longueur),'aa')+mesure('Mutation',mutation)+mesure('Peptides libérés',compact(s.produites));
+    $('#clock').textContent='ARNm · '+arn.length+' nt';
+    $('#chosen').textContent=String(selection+1);
+  }else{
+    st=cellules?'Neurone, cellule du foie et globule rouge en formation : mêmes gènes, niveaux d’expression différents.':!lactose?'Sans lactose, le répresseur est fixé à l’opérateur : transcription presque nulle dans ce modèle.':!glucose?'Lactose présent et glucose absent : le répresseur est détaché et CAP–AMPc active fortement la transcription.':gamma>=.35?'Le glucose freine l’activation ; cette protéine est aussi éliminée rapidement.':'Lactose présent avec glucose : l’opéron est faiblement transcrit.';
+    measure=mesure('Répresseur',s.represseur)+mesure('Activateur',s.activateur)+mesure('Taux de transcription',f(s.kMrna,2),'ARNm/s')+mesure('ARNm par cellule',f(s.mrna,1),'molécules')+mesure('Protéines par cellule',f(s.protein,1),'molécules')+mesure('Plateau protéique',f(s.plateauProtein,1),'molécules')+mesure('t½ si ARNm fixe',f(s.demiApproche,2),'s');
+    $('#clock').textContent='GÈNE · '+f(regTime,1)+' s';
+    dessineScope();
+  }
+  $('#status').textContent=st;$('#meas').innerHTML=measure;
+  $('#guide').textContent=step===0?'Change le zoom, écris les lettres ou ouvre l’hélice.':step===1?'Lance plusieurs polymérases ; teste l’orientation du promoteur.':step===2?'Choisis une base de l’ARNm dans la réglette ; modifie, insère ou supprime.':'Fais varier le lactose, le glucose et la dégradation pour voir le retard entre ARN et protéine.';
+}
+function dessineScope(){
+  const w=chart.clientWidth||288,h=chart.clientHeight||105,dpr=Math.min(devicePixelRatio||1,2);
+  if(chart.width!==Math.round(w*dpr)||chart.height!==Math.round(h*dpr)){chart.width=Math.round(w*dpr);chart.height=Math.round(h*dpr);}
+  scope.setTransform(dpr,0,0,dpr,0,0);scope.clearRect(0,0,w,h);scope.fillStyle=C.bg;scope.fillRect(0,0,w,h);
+  const maxM=Math.max(16,...histoire.map(p=>p.m)),maxP=Math.max(150,...histoire.map(p=>p.p));
+  const xmax=Math.max(10,regTime),xmin=Math.max(0,xmax-30);
+  for(const [key,max,col] of [['m',maxM,C.accent],['p',maxP,C.energy]]){
+    scope.beginPath();let fst=true;for(const a of histoire){if(a.t<xmin)continue;const x=10+(a.t-xmin)/(xmax-xmin)*(w-20),y=h-8-(a[key]/max)*(h-17);
+      if(fst){scope.moveTo(x,y);fst=false;}else scope.lineTo(x,y);
+    }scope.strokeStyle=col;scope.lineWidth=1.5;scope.stroke();
+  }
+}
+function editeur(){
+  const el=$('#rnaEditor');el.replaceChildren();
+  for(let i=0;i<arn.length;i++){
+    const b=document.createElement('button');b.type='button';b.className='base'+(i===selection?' sel':'')+(arn[i]!==referenceARN[i]?' changed':'');
+    b.textContent=arn[i];b.dataset.i=i;b.title=`Base ${i+1} : ${arn[i]} ; sélectionner pour modifier`;b.setAttribute('aria-label',`Base ${i+1} : ${arn[i]}`);
+    b.addEventListener('click',()=>{selection=i;el.querySelectorAll('.base').forEach(bb=>bb.classList.toggle('sel',Number(bb.dataset.i)===i));$('#chosen').textContent=String(i+1);afficheDonnees();draw();});
+    el.append(b);
+  }
+}
+function infobulle(key,e){if(!DECOUVERTES[key])return;const b=$('#tip'),[nom,role]=DECOUVERTES[key];b.querySelector('b').textContent=nom;b.querySelector('span').textContent=role;b.hidden=false;
+  const x=borne((e?.clientX||100)+15,10,innerWidth-302),y=borne((e?.clientY||150)+16,10,innerHeight-90);b.style.left=x+'px';b.style.top=y+'px';
+}
+function cacheBulle(){$('#tip').hidden=true;}
+function fit(){
+  const w=cv.clientWidth,h=cv.clientHeight,dpr=Math.min(devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.max(1,Math.round(w*dpr));cv.height=Math.max(1,Math.round(h*dpr));}
+  const W=mobile()?420:960,H=mobile()?440:580,scale=Math.min(w/W,h/H);
+  projection={scale,ox:(w-W*scale)/2,oy:(h-H*scale)/2};
+  ctx.setTransform(dpr*scale,0,0,dpr*scale,dpr*projection.ox,dpr*projection.oy);
+  return{W,H};
+}
+function draw(){
+  const {W,H}=fit();ctx.clearRect(-projection.ox/projection.scale,-projection.oy/projection.scale,cv.clientWidth/projection.scale,cv.clientHeight/projection.scale);
+  zones=[];fond(W,H);
+  if(step===0)dessineTexte(W,H);
+  if(step===1)dessineTranscription(W,H);
+  if(step===2)dessineTraduction(W,H);
+  if(step===3)dessineRegulation(W,H);
+}
+function frame(t){
+  const delta=Math.min(.06,Math.max(0,(t-last)/1000||0));last=t;
+  if(playing){acc+=delta*(matchMedia('(prefers-reduced-motion: reduce)').matches?.3:1);let n=0;while(acc>=PAS && n<30){fixed();acc-=PAS;n++;}}
+  draw();if(t-lastUI>=100){afficheDonnees();lastUI=t;}requestAnimationFrame(frame);
+}
+$('#zoom').addEventListener('input',e=>setZoom(e.target.value));
+$('#dnaInput').addEventListener('input',e=>typeBases(e.target.value));
+$('#unzip').addEventListener('click',unzip);
+$('#speed').addEventListener('input',e=>setSpeed(e.target.value));
+$('#startPol').addEventListener('click',startPol);
+$('#strand').addEventListener('click',()=>{strand=strand==='matrice'?'codant':'matrice';polys=[];nonInitie=strand==='codant';$('#strand').setAttribute('aria-pressed',String(strand==='codant'));$('#strand').textContent=strand==='codant'?'Brin codant (inactif)':'Brin matrice (actif)';afficheDonnees();});
+$('#euk').addEventListener('click',()=>eukaryote(!euk));
+$$('[data-base]').forEach(b=>b.addEventListener('click',()=>{if(arn.length)setBase(selection,b.dataset.base);}));
+$('#insert').addEventListener('click',()=>insertBase(selection,'A'));$('#delete').addEventListener('click',()=>{if(arn.length)deleteBase(selection);});
+$('#transNow').addEventListener('click',translateNow);$('#hbs').addEventListener('click',presetHbS);
+$('#lactose').addEventListener('click',()=>setLactose(!lactose));$('#glucose').addEventListener('click',()=>setGlucose(!glucose));
+$('#gamma').addEventListener('input',e=>setGamma(e.target.value));$('#cells').addEventListener('click',()=>cellTypes(!cellules));
+$$('[data-step]').forEach(b=>b.addEventListener('click',()=>goStep(b.dataset.step)));
+$('#prev').addEventListener('click',()=>goStep(step-1));$('#next').addEventListener('click',()=>goStep(step+1));$('#play').addEventListener('click',()=>setPlay(!playing));$('#reset').addEventListener('click',restart);
+window.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select')||e.ctrlKey||e.altKey||e.metaKey)return;
+  const key=e.key.toLowerCase();
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){if(e.target.closest('[role=tablist]'))return;e.preventDefault();goStep(step+(e.key==='ArrowRight'?1:-1));}
+  else if(e.code==='Space'){e.preventDefault();setPlay(!playing);}
+  else if('1234'.includes(e.key)&&e.key.length===1)goStep(Number(e.key)-1);
+  else if(key==='r')restart();
+  else if(step===0 && 'atcg'.includes(key) && key.length===1){typeBases(dna+key.toUpperCase());}
+  else if(step===2 && 'aucg'.includes(key) && key.length===1 && arn.length){setBase(selection,key.toUpperCase());}
+});
+cv.addEventListener('wheel',e=>{if(step===0){e.preventDefault();setZoom(zoom+(e.deltaY<0?4:-4));}},{passive:false});
+const coords=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left-projection.ox)/projection.scale,y:(e.clientY-r.top-projection.oy)/projection.scale};};
+const picked=e=>{const{x,y}=coords(e);return zones.filter(z=>x>=z.x&&x<=z.x+z.w&&y>=z.y&&y<=z.y+z.h).sort((a,b)=>a.w*a.h-b.w*b.h)[0];};
+cv.addEventListener('pointermove',e=>{const z=picked(e);cv.style.cursor=z?'help':'default';z?infobulle(z.key,e):cacheBulle();});
+cv.addEventListener('pointerleave',cacheBulle);cv.addEventListener('click',e=>{const z=picked(e);if(z)infobulle(z.key,e);});
+let theme='auto';$('#theme').addEventListener('click',()=>{theme=theme==='auto'?'light':theme==='light'?'dark':'auto';if(theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme;$('#theme').textContent=theme==='auto'?'Thème auto':theme==='light'?'Thème clair':'Thème sombre';});
+window.__labo={moteur:Gen,get step(){return step;},goStep,state,tick,setPlay,setZoom,typeBases,unzip,startPol,setSpeed,eukaryote,setBase,insertBase,deleteBase,translateNow,presetHbS,setLactose,setGlucose,setGamma,cellTypes};
+window.addEventListener('DOMContentLoaded',()=>{if(window.Planche)window.Planche.surMode(()=>{cacheBulle();draw();});$('#dnaInput').value=dna;newRibo();editeur();goStep(0);setPlay(true);new ResizeObserver(draw).observe($('#scene'));requestAnimationFrame(frame);});
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

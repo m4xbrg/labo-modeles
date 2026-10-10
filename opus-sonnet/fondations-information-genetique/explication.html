@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<link rel="icon" href="data:,"><title>Comprendre l’information génétique — LABO</title>
+<meta name="description" content="Module 35 : complémentarité, transcription, traduction, mutations et expression des gènes.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#b3a3ff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;color:var(--texte);background:var(--fond);font:16px/1.7 var(--sans);overflow-x:hidden}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.wrap{max-width:780px;margin:auto;padding:36px 24px 85px}.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;margin-bottom:56px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.serie{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}h1{font:400 clamp(38px,6vw,63px)/1.06 var(--serif);margin:14px 0 22px}h1 em{color:var(--accent)}.lede{font-size:18px;line-height:1.6}h2{font:400 32px/1.2 var(--serif);margin:64px 0 18px;padding-top:22px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:8px}p{margin:0 0 16px}ul,ol{padding-left:22px}li{margin-bottom:10px}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:14px;border-bottom:1px solid var(--trait);padding:14px 0}.chiffres b{font:500 16px var(--mono);color:var(--energie)}details{margin:12px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{cursor:pointer;padding:12px 16px;font-weight:500}details p{padding:0 16px 14px 46px;margin:0}.cta{display:inline-block;border:1px solid var(--accent);padding:12px 18px;margin-top:32px;text-decoration:none}.acc{color:var(--accent)}.mut{color:var(--energie)}.references{font:12px/1.6 var(--mono);color:var(--texte-2);border-top:1px solid var(--trait);margin-top:28px;padding-top:15px}.references a{color:var(--texte-2)}@media(max-width:560px){.wrap{padding-inline:18px}.chiffres>div{grid-template-columns:1fr;gap:4px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+</head>
+<body><main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">← Retour à la planche</a><a href="../../labo/index.html">← LABO</a></nav>
+<p class="serie">LABO · Fondations 35</p><h1>Comprendre : de l’ADN à la <em>protéine</em></h1>
+<p class="lede">Une séquence d’ADN ne ressemble ni à un dessin de protéine ni à une commande exécutée toute seule. Elle est une information chimique que des molécules peuvent copier, décoder et utiliser différemment suivant la cellule et son état.</p>
+<h2><span>1</span>Ce que tu vois</h2>
+<p><strong>Le texte.</strong> Le zoom relie le noyau, le chromosome compacté et les deux brins d’une double hélice. Les quatre couleurs identifient des bases ; leur <em>ordre</em> est porteur d’information. Sur la bande, le brin codant est écrit de 5′ vers 3′, le brin complémentaire de 3′ vers 5′. Le dessin ouvre l’hélice sans simuler la réplication.</p>
+<p><strong>La copie.</strong> Un segment repéré par un promoteur est parcouru par l’ARN polymérase. L’ARN naissant reproduit la séquence du brin codant, avec U à la place de T. Dans la vue eucaryote, la sortie par un pore et l’épissage sont seulement des indications visuelles.</p>
+<p><strong>La lecture.</strong> Le ribosome parcourt l’ARNm trois bases à la fois, reçoit des ARNt et allonge une chaîne d’acides aminés. Les billes sont colorées selon une propriété chimique simplifiée. L’éditeur révèle la différence entre modifier une lettre sans effet sur le peptide, substituer un acide aminé ou décaler l’ensemble du cadre.</p>
+<p><strong>L’interrupteur.</strong> L’opéron lactose illustre l’action combinée d’un répresseur et d’un activateur. Les courbes montrent que l’ARNm apparaît avant la protéine, et que l’extinction ne détruit pas instantanément les molécules déjà présentes.</p>
+<h2><span>2</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m35"><b>35</b>Information génétique</a></li></ul>
+<section class="module" id="m35"><header><p class="num">Module 35</p><h3>Un même texte, plusieurs lectures</h3><p class="etapes">Sur la planche : 1 Un texte en quatre lettres · 2 Transcription · 3 Traduction · 4 Régulation</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Imagine une phrase imprimée sur deux rubans dont les lettres se font face. Sur l’ADN, les lettres sont de petites structures chimiques, appelées bases. L’une complète toujours l’autre : A fait face à T et C à G. Si tu connais entièrement un des rubans, tu peux retrouver le second. Cette propriété facilite la conservation de l’information, mais elle n’explique pas à elle seule comment une cellule produit une protéine.</p>
+<p>La production repose sur deux changements successifs. La transcription fabrique un ARN à partir d’un gène, comme une copie de travail. La traduction ne traduit pas des mots ordinaires : elle associe des triplets de bases, appelés codons, à des acides aminés. Les chaînes ainsi formées pourront se replier, s’associer et participer à des réactions. Le génome contient aussi de nombreux éléments de régulation.</p>
+<p>Une cellule n’exprime pas tous ses gènes au même niveau : les signaux, les régulateurs et son histoire de différenciation comptent. L’opéron lactose fournit un exemple réduit de régulation bactérienne.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Base et paire de bases <span class="u">pb</span></dt><dd>A, T, C ou G dans l’ADN ; une paire associe deux bases complémentaires face à face.</dd></div>
+<div><dt>Brins codant et matrice <span class="u">sans unité</span></dt><dd>Pour un gène donné, le brin matrice est lu 3′→5′ ; l’ARN obtenu est synthétisé 5′→3′ et correspond au brin codant avec U au lieu de T.</dd></div>
+<div><dt>Gène, promoteur, terminateur <span class="u">séquences</span></dt><dd>Région transcrite et signaux moléculaires qui contribuent à définir le départ, le sens et l’arrêt de la transcription.</dd></div>
+<div><dt>ARNm <span class="u">nt</span></dt><dd>ARN messager, chaîne de nucléotides servant de matrice pour la traduction.</dd></div>
+<div><dt>Codon et cadre de lecture <span class="u">triplet, index</span></dt><dd>Groupe de trois bases successives ; le choix de la première base fixe tous les groupes suivants.</dd></div>
+<div><dt>Acide aminé et peptide <span class="u">aa</span></dt><dd>Une unité chimique et la chaîne des unités assemblées pendant la traduction.</dd></div>
+<div><dt>Teneur en GC <span class="u">%</span></dt><dd>Pourcentage des nucléotides G ou C dans une séquence.</dd></div>
+<div><dt>Longueur \(n\) <span class="u">nt</span></dt><dd>Nombre de positions dans une séquence ; c’est aussi l’exposant utilisé pour compter les arrangements possibles.</dd></div>
+<div><dt>Concentrations moyennes \(m,p\) <span class="u">molécules/cellule</span></dt><dd>Nombre moyen d’ARNm et de protéines associé à l’expression du modèle.</dd></div>
+<div><dt>Taux \(k_{\rm tx},k_{\rm tl}\) <span class="u">ARNm/s, prot/(ARNm·s)</span></dt><dd>Cadence de transcription et nombre de protéines produites par ARNm et par seconde dans le modèle.</dd></div>
+<div><dt>Dégradation \(\gamma_m,\gamma_p\) <span class="u">s⁻¹</span></dt><dd>Taux de disparition par molécule et par unité de temps pour l’ARNm et la protéine.</dd></div>
+<div><dt>Commande \(u\) et temps \(t\) <span class="u">sans unité, s</span></dt><dd>Fraction relative de transcription autorisée par la régulation et durée écoulée.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[ A\leftrightarrow T,\qquad C\leftrightarrow G,\qquad T_{\rm ADN}\mapsto U_{\rm ARN} \]
+<p>Les deux brins d’ADN sont complémentaires et antiparallèles. La polymérase utilise le brin matrice, donc la copie ARN correspond au brin codant sauf pour la substitution T/U. L’ARN possède une chimie différente de celle de l’ADN.</p></div>
+<div class="relation">\[ N(n)=4^n,\qquad \%GC=100\frac{N_G+N_C}{n} \]
+<p>Quatre lettres peuvent former un très grand nombre de séquences. Pour la teneur en GC, on compte les positions occupées par G ou C puis on rapporte ce nombre à la longueur totale. Deux textes de même composition peuvent toutefois avoir des significations distinctes.</p></div>
+<div class="relation">\[ 4^3=64=61+3 \]
+<p>Le code nucléaire standard associe 61 triplets à 20 acides aminés et réserve UAA, UAG et UGA à l’arrêt. Plusieurs codons peuvent correspondre au même acide aminé ; une substitution de base n’a donc pas nécessairement d’effet sur le peptide.</p></div>
+<div class="relation">\[ \frac{\dd m}{\dd t}=k_{\rm tx}u-\gamma_m m,\qquad \frac{\dd p}{\dd t}=k_{\rm tl}m-\gamma_p p \]
+<p>Une production s’oppose à une disparition : d’abord pour l’ARNm, ensuite pour la protéine. La deuxième courbe répond avec retard, parce que le niveau de protéine dépend d’abord du niveau d’ARNm en circulation.</p></div>
+<div class="relation">\[ m^*=\frac{k_{\rm tx}u}{\gamma_m},\qquad p^*=\frac{k_{\rm tl}m^*}{\gamma_p},\qquad t_{1/2}=\frac{\ln 2}{\gamma_p} \]
+<p>Les deux plateaux valent production divisée par disparition dans un environnement constant. Le temps de demi-approche concerne la protéine si sa production est déjà constante ; le démarrage à partir de zéro de deux étages ne suit pas une unique exponentielle.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple">
+<p>Une séquence codante fictive produit un peptide de 300 acides aminés. Prenons une polymérase à 50 nt/s et un ribosome à 10 aa/s, valeurs illustratives parmi les plages du modèle. Pour ce premier calcul, supposons que les étapes se succèdent sans se chevaucher.</p>
+<ol>
+<li>Il faut 300 codons de sens, soit \(300\times3=900\) nucléotides. Un codon stop ajoute trois nucléotides : 903 au total, sans compter les régions non traduites.</li>
+<li>Temps de transcription de ce segment : \(903/(50\ \mathrm{nt/s})=18{,}06\ \mathrm{s}\).</li>
+<li>Temps de traduction des 300 acides aminés : \(300/(10\ \mathrm{aa/s})=30\ \mathrm{s}\). La lecture du stop termine le processus.</li>
+<li>Total séquentiel idéal : environ 48,06 s. Dans une bactérie, transcription et traduction peuvent se chevaucher et plusieurs ribosomes peuvent avancer sur le même ARNm. Une cellule eucaryote exige en outre maturation et transport.</li>
+</ol>
+<p>Dans l’étape 4, les paramètres pédagogiques sont différents et décrivent des populations moyennes : \(k_{\rm tx}=8\) ARNm/s, \(\gamma_m=0{,}5\ \mathrm{s}^{-1}\), \(k_{\rm tl}=1{,}5\) protéine/(ARNm·s) et \(\gamma_p=0{,}15\ \mathrm{s}^{-1}\). Avec l’opéron à pleine puissance, le plateau vaut 16 ARNm/cellule, puis 160 protéines/cellule. La demi-approche de la protéine à production constante vaut \(\ln2/0{,}15\approx4{,}62\) s. Ces chiffres illustrent la stabilité et la mémoire moléculaires ; ils ne sont pas des mesures de bactéries.</p>
+</div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« Un gène égale un caractère. »</strong> Un gène peut contribuer à produire une protéine impliquée dans plusieurs processus. De nombreux caractères dépendent de plusieurs gènes, des signaux et du milieu.</li>
+<li><strong>« L’ARN est identique au brin matrice. »</strong> Non. Il lui est complémentaire ; il a la séquence du brin codant, mais emploie U au lieu de T.</li>
+<li><strong>« L’ADN fabrique directement la protéine. »</strong> La transcription requiert des polymérases ; la traduction requiert ribosomes, ARNt chargés et autres facteurs.</li>
+<li><strong>« Une mutation est forcément nocive. »</strong> Certaines sont silencieuses, d’autres changent la protéine ou sa quantité ; leurs effets dépendent du contexte.</li>
+<li><strong>« Toutes les cellules n’ont que les gènes qu’elles utilisent. »</strong> En général, les cellules nucléées d’un même organisme partagent le génome ; leur expression varie. Les globules rouges humains matures n’ont plus de noyau.</li>
+<li><strong>« Le code génétique est absolument universel. »</strong> Le code standard est très répandu, mais des variantes existent, notamment dans certaines mitochondries.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>28</b><span><a href="../fondations-molecules-mole/index.html">Molécules et liaisons</a> : les interactions chimiques stabilisant les appariements des bases.</span></li>
+<li><b>32</b><span><a href="../fondations-cellule-membrane/index.html">Cellule et membrane</a> : noyau, membrane, récepteurs et protéines produites.</span></li>
+<li><b>34</b><span><a href="../../labo/index.html#fondations">Enzymes</a> : les protéines dont l’activité dépend de leur structure.</span></li>
+<li><b>36</b><span><a href="../08-replication-adn/index.html">Réplication de l’ADN</a> : copie, erreurs, mutations et héritage.</span></li>
+<li><b>37</b><span><a href="../fondations-signalisation-homeostasie/index.html">Signalisation</a> : comment des signaux extérieurs modulent l’expression.</span></li>
+<li><b>40</b><span><a href="../fondations-evolution-populations/index.html">Évolution des populations</a> : devenir des variantes transmissibles au fil des générations.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Pourquoi l’ARNm ressemble-t-il au brin codant, alors que la polymérase lit le brin matrice ?</summary><p>Parce que deux complémentarités s’enchaînent : le codant est complémentaire du matrice, puis l’ARN est complémentaire de ce même matrice. Les orientations sont opposées et, dans l’ARN, U remplace T.</p></details>
+<details><summary>Combien de secondes faut-il pour transcrire une région de 1 203 nt à 60 nt/s ?</summary><p>Divise le nombre de nucléotides par la vitesse : \(1\,203/60=20{,}05\) secondes. Cela ne compte ni initiation, ni maturation, ni export, ni traduction.</p></details>
+<details><summary>Avec lactose présent, pourquoi l’absence de glucose augmente-t-elle l’expression de l’opéron lac ?</summary><p>Le lactose permet au répresseur de se détacher. Quand le glucose est bas, l’AMPc augmente et active CAP : ce complexe favorise la fixation de la polymérase. Les deux conditions réunies produisent une forte transcription.</p></details>
+</section>
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Échelles.</strong> La double hélice, l’enroulement de l’ADN et le noyau sont dessinés à des tailles relatives inventées. Le calcul de longueur utilise 0,34 nm par paire et 3,1 milliards de paires pour un jeu haploïde humain.</li>
+<li><strong>Gène fictif.</strong> Le modèle de travail compte 72 nucléotides, 23 codons de sens et un stop. Son promoteur et son terminateur sont des repères, pas des séquences reconnues comme fonctionnelles dans tous les organismes.</li>
+<li><strong>Transcription.</strong> Les polymérases avancent à vitesse uniforme (réglable entre 20 et 80 nt/s) et leur progression est dessinée à la même échelle pour toutes. L’épaississement, la coiffe, la queue poly(A) et l’épissage réel ne sont pas calculés ; un éventuel intron est seulement évoqué visuellement.</li>
+<li><strong>Traduction.</strong> Les ribosomes progressent à 10 acides aminés/s, avec espacement imposé lorsqu’ils partagent l’ARNm. Les ARNt ne sont pas explicitement appariés par une cinétique ni chargés par leurs aminoacyl-ARNt synthétases. Les perles ne constituent pas une prédiction de repliement.</li>
+<li><strong>Mutation.</strong> Les quatre catégories principales se basent sur la séquence traduite dans le cadre standard ; les conséquences cliniques, les sites d’épissage et les effets sur la régulation ne sont pas prédits. Une insertion ou délétion de trois bases est étiquetée « modification en phase », distincte d’un décalage.</li>
+<li><strong>Régulation et population.</strong> Le lac suit une table booléenne avec taux relatifs 0, 0,08 et 1, sans liaison probabiliste. La dégradation suit deux équations continues ; « molécules par cellule » est une moyenne qui peut être décimale. Les courbes ne représentent ni bruits d’expression ni divisions cellulaires.</li>
+<li><strong>Cellules différentes.</strong> Les trois portraits partagent un schéma de gènes sans simuler le développement, les modifications épigénétiques, les variantes somatiques ou les exceptions au génome commun. « Globule rouge en formation » désigne une cellule nucléée, contrairement au globule rouge humain mature.</li>
+</ul>
+<h2><span>4</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>4 lettres / 64 codons</b><span>Vingt acides aminés standards, codons redondants et trois signaux d’arrêt dans le code nucléaire standard.</span></div>
+<div><b>3,1 × 10⁹ pb</b><span>Ordre de grandeur d’un génome humain haploïde, selon la convention arrondie de cette planche.</span></div>
+<div><b>≈ 2,11 m</b><span>Longueur déployée pour deux jeux haploïdes avec 0,34 nm par paire. Dans un noyau illustratif de 6 µm, l’analogie d’une balle de 6,7 cm donne ≈ 23,5 km.</span></div>
+<div><b>20–80 nt/s</b><span>Plage illustrative pour l’avancée d’une ARN polymérase, dépendant du système biologique et des conditions.</span></div>
+<div><b>5–20 aa/s</b><span>Ordre de grandeur pour la traduction selon l’organisme ; la planche prend 10 aa/s.</span></div>
+</div>
+<h2><span>5</span>Seulement introduit ici</h2>
+<p>L’épissage alternatif permet de produire plusieurs ARN à partir d’une même région transcrite ; les ARN non codants accomplissent d’autres fonctions. L’épigénétique, les modifications après traduction, les protéines destinées aux membranes et le code mitochondrial nécessitent chacun leur propre étude. La réplication, la méiose, la réparation et l’évolution des allèles relèvent des modules qui suivent. Les outils de biotechnologie, comme PCR et CRISPR, restent hors champ.</p>
+<p class="references">Références de contrôle : <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/taxonomyhome.html/index.cgi?chapter=tgencodes">NCBI, code génétique, table 1</a> · <a href="https://www.nature.com/scitable/topicpage/genetic-mutation-441/">Nature Education, mutation HBB</a> · <a href="https://www.ncbi.nlm.nih.gov/books/NBK21134/">NCBI Bookshelf, dimensions de la forme B</a> · <a href="https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet">NHGRI, ADN humain</a> · <a href="https://bioprinciples.biosci.gatech.edu/module-4-genes-and-genomes/4-7-gene-regulation/">Georgia Tech, opéron lac</a>.</p>
+<a class="cta" href="index.html">Retour à la planche →</a>
+</main></body></html>

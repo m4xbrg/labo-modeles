@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- Quatre expériences sur un même écran nocturne relient les phénomènes locaux aux horloges et aux horizons.
+Les trajectoires sont dessinées comme des mesures d'instrument ; les exagérations sont nommées et quantifiées.
+Les horloges, les rayons et la sonde bougent à partir du moteur GR, sans bruit ou mouvement décoratif. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>La gravité comme géométrie — LABO</title>
+<meta name="description" content="Relativité générale : équivalence, horloges GPS, géodésiques et horizon d'un trou noir en quatre expériences interactives.">
+<link rel="icon" href="data:,"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#a8b8d8;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box} [hidden]{display:none!important}button,input,select{font:inherit}a{color:inherit}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr) auto}
+.scene{display:flex;flex-direction:column;position:relative;min-width:0;min-height:0;overflow:hidden;color:var(--texte);background:var(--fond)}
+#cv{display:block;width:100%;height:100%;min-height:0;flex:1 1 auto;touch-action:manipulation}
+.scene-meta{position:absolute;top:12px;left:20px;right:20px;display:flex;justify-content:space-between;gap:10px;pointer-events:none;font:10px var(--mono);letter-spacing:.07em;color:var(--texte-2)}
+.scene-meta strong{font-weight:500;color:var(--accent)}
+.objects{position:relative;display:flex;gap:5px;flex-wrap:wrap;margin:0;padding:6px 14px 8px;flex:0 0 auto;border-top:1px solid var(--trait)}
+.object{border:1px solid #34404e;padding:3px 7px;min-height:26px;font:10px/1.5 var(--mono);color:var(--texte-2);background:transparent;border-radius:1px;transition:border-color .2s,color .2s}
+.object:hover,.object:focus-visible{color:var(--accent);border-color:var(--accent)}
+.tip{position:fixed;z-index:60;max-width:250px;background:#151a24;color:var(--texte);border:1px solid #435269;padding:9px 11px;box-shadow:0 10px 30px #0008;pointer-events:none;font:11px/1.5 var(--mono)}
+.tip b{display:block;color:var(--accent);font-weight:500;margin-bottom:3px}.tip span{color:var(--texte-2)}
+.panel{display:flex;flex-direction:column;overflow-y:auto;gap:12px;min-width:0}
+.panel section{min-width:0}.eyebrow{font:10px var(--mono);letter-spacing:.13em;text-transform:uppercase;margin:0 0 6px;color:var(--encre-3)}
+.panel h2{margin:0 0 9px}.panel p{margin:0}.panel #stepText{font-size:14px;line-height:1.5}
+.status{padding:9px 0 0;min-height:48px;font:12px/1.55 var(--mono);color:var(--encre-2);border-top:1px solid var(--filet)}
+.scopeBox{border:1px solid var(--filet);background:var(--fond)}#scope{height:110px;width:100%;display:block}
+.leg,.note{font:11px/1.6 var(--mono);color:var(--encre-3)}
+.meas{border-top:1px solid var(--filet)}.row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--filet)}
+.lab{font:11px var(--mono);color:var(--encre-3)}.val{font:12px var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;color:var(--encre)}
+.val.accent{color:var(--accent)}.val.energie{color:var(--energie)}.val.warn{color:var(--positif)}
+.cle{border-left:2px solid var(--encre);padding-left:12px;font:13px/1.55 var(--sans);color:var(--encre-2)}
+.questions{display:grid;gap:7px}.questions a{display:block;text-decoration:none;font:12px/1.45 var(--sans);padding-top:8px;border-top:1px solid var(--filet)}.questions b{display:block;font:500 10px var(--mono);color:var(--encre-2);margin-bottom:3px}
+.liens{margin-top:auto;display:grid;gap:8px}.comprendre{font:13px var(--sans);border:1px solid var(--encre);padding:9px;text-decoration:none}.comprendre:hover{background:var(--encre);color:var(--papier)}
+.hint{font:10px/1.5 var(--mono);color:var(--encre-3)}
+.controls{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:9px 16px;padding:9px 18px}
+.grp{display:flex;align-items:center;flex-wrap:wrap;gap:7px}.btn{min-height:31px;border:1px solid var(--filet);border-radius:1px;padding:5px 10px;background:var(--papier);font:11px/1.5 var(--mono);color:var(--encre)}
+.btn:hover,.btn:focus-visible{border-color:var(--encre)}.btn[aria-pressed=true],.btn.on{background:var(--papier-2);border-color:var(--encre)}
+.btn.action{font-weight:500;border-color:var(--encre);letter-spacing:.01em}
+.tools{border-top:1px solid var(--filet);padding-top:9px;width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px}
+.controls .range{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;font:11px var(--mono);color:var(--encre-2)}
+.controls .range input{width:100px;accent-color:var(--encre)}
+.controls select{max-width:160px;min-height:30px;color:var(--encre);background:var(--papier);border:1px solid var(--filet);padding:5px 8px;font:11px var(--mono)}
+.controls output{font:11px var(--mono);min-width:40px;text-align:right}
+.timeline{flex:1 1 150px;display:flex;align-items:center;gap:8px;min-width:120px;max-width:350px}
+.timeline input{width:100%;height:22px;accent-color:var(--encre)}.timeline output{min-width:54px;white-space:nowrap}
+#mainActions{flex:1 1 auto}#mainActions .btn{white-space:nowrap}
+.theme-local{font:11px var(--mono)}
+.labo-etapes .app{min-height:430px}.labo-etapes .panel{padding-top:17px;gap:13px}.labo-etapes .titre h1{font:400 clamp(32px,4.8vh,52px)/1 var(--serif);letter-spacing:-.016em}.labo-etapes .titre h1 em{font-style:italic;color:var(--encre)}
+.labo-etapes .titre{padding-top:12px}.labo-etapes .barre{padding-top:10px}.labo-etapes .modes{padding-top:8px}.labo-etapes .sig{gap:4px 18px}.labo-etapes .cle{color:var(--encre-2)}
+@media(max-width:860px){.app{display:flex;flex-direction:column}.scene{order:1;flex:0 0 auto;height:460px!important}.controls{order:2;padding:12px 14px}.panel{order:3;border-top:1px solid var(--filet);overflow:visible}.labo-etapes .app{height:auto!important;min-height:0}.labo-etapes .panel{padding:18px var(--gouttiere)}.labo-etapes .scene{height:460px!important}.labo-etapes .titre{gap:14px}}
+@media(max-width:520px){.labo-etapes .scene{height:425px!important}.labo-etapes .sig dd{font-size:11px}.object{font-size:9px;padding:3px 5px}.scene-meta{left:12px;right:12px}.btn{padding:5px 8px}.timeline{order:3;flex-basis:100%;max-width:100%}.tools .range{gap:5px}}
+@media(prefers-reduced-motion:reduce){.object{transition:none}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="omc" data-module="47">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 47</p><button class="bascule-theme theme-local" id="theme" type="button" aria-label="Changer le thème">Thème auto</button></div></header>
+<div class="titre"><div><h1>La gravité comme <em>géométrie</em></h1><p class="lead">Une cabine accélère. Deux horloges divergent. La lumière tourne. Au-delà de l'horizon, la lumière ne ressort plus.</p></div><dl class="sig"><dt>Échelle</dt><dd>3 m → millions de km</dd><dt>Temps</dt><dd>ns → siècles · ralentis</dd><dt>Modèle</dt><dd>Équivalence · Schwarzschild</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Module 47, quatre étapes"><div class="chap"><p class="chap-t"><b>47</b>Module 47 · Relativité générale</p><div class="segs"><button class="seg" data-step="0" title="47.1 · Le principe d'équivalence"><b>1</b><span>Cabines</span></button><button class="seg" data-step="1" title="47.2 · La gravité ralentit le temps"><b>2</b><span>Horloges</span></button><button class="seg" data-step="2" title="47.3 · Géodésiques et courbure"><b>3</b><span>Géodésiques</span></button><button class="seg" data-step="3" title="47.4 · Les horizons"><b>4</b><span>Horizon</span></button></div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche"><button role="tab" data-m="observer" data-indice="Observe d'abord le phénomène." aria-selected="true"><span>O</span>Observer</button><button role="tab" data-m="manipuler" data-indice="Déplace les valeurs et compare les prédictions." aria-selected="false"><span>M</span>Manipuler</button><button role="tab" data-m="comprendre" data-indice="Lis les mesures et leurs limites." aria-selected="false"><span>C</span>Comprendre</button></div><p class="indice" id="indice">Observe d'abord le phénomène.</p></div>
+<div class="app"><main class="scene" aria-label="Écran de simulation"><canvas id="cv" role="img" aria-label="Relativité générale : quatre scènes scientifiques interactives."></canvas><div class="scene-meta"><span id="sceneName">EXPÉRIENCE 01 / 04</span><strong id="clock">TEMPS SIMULÉ</strong></div><div class="objects" id="objects" aria-label="Objets de la scène à découvrir"></div></main>
+<aside class="panel" aria-label="Lecture de l'expérience"><section><p class="eyebrow" id="eyebrow">MODULE 47 · 01/04</p><h2 id="stepTitle">Le principe d'équivalence</h2><p id="stepText" class="couche-comp"></p></section><p class="status" id="status" aria-live="polite"></p><section class="couche-lire"><p class="eyebrow" id="scopeTitle">ENREGISTREUR</p><div class="scopeBox"><canvas id="scope" role="img" aria-label="Graphique des grandeurs physiques de l'étape active"></canvas></div><p class="leg" id="scopeLegend"></p></section><section class="couche-lire"><div class="meas" id="meas"></div></section><p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p><div class="questions couche-comp" id="questions" hidden><a href="../../labo/index.html#fondations"><b>COSMOS · MODULE 45</b>Si l'espace-temps se courbe, peut-il aussi s'étirer tout entier ?</a><a href="../../labo/index.html#phenomenes"><b>ONDES · ATLAS</b>Deux trous noirs qui tournent l'un autour de l'autre font-ils vibrer l'espace-temps ?</a><a href="explication.html#m47"><b>QUANTIQUE · POUR ALLER PLUS LOIN</b>Que se passe-t-il à l'horizon en présence d'effets quantiques ?</a></div><nav class="liens"><a class="comprendre couche-comp" href="explication.html#m47" id="theory">Théorie du module 47 →</a><p class="hint couche-lire">Espace : pause · ← → : étape · 1–4 : accès · R : reprendre · O M C : couches · I : infos</p></nav></aside>
+<div class="controls" role="toolbar" aria-label="Commandes de l'expérience"><div class="grp"><button type="button" class="btn" id="prev" aria-label="Étape précédente">←</button><button type="button" class="btn" id="play">Pause</button><button type="button" class="btn" id="next" aria-label="Étape suivante">→</button><button type="button" class="btn" id="reset">Recommencer</button></div><div class="grp" id="mainActions"></div><label class="timeline" title="Temps accéléré, illustratif. Le calcul physique reste distinct du temps d'écran."><span class="lab">Temps</span><input id="timeline" type="range" min="0" max="1000" step="1" value="0" aria-label="Parcourir le temps simulé"><output id="timeRead">0,0 s</output></label><div class="tools" id="tools"></div></div></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<script>
+/* GR-BEGIN */
+const GR = (() => {
+  'use strict';
+  // Les grandeurs d'entrée et les résultats sont en SI. L'angle orbital est en radians.
+  // G : CODATA 2022 ; c : définition SI ; masses et rayons : valeurs de référence IAU/NASA.
+  const G = 6.67430e-11;
+  const c = 299792458;
+  const MS = 1.98847e30;
+  const RS = 6.957e8;
+  const ME = 5.972e24;
+  const RE = 6.371e6;
+  const GM_E = 3.986004418e14;
+  const G0 = 9.80665;
+  const DAY = 86400;
+  const YEAR = 365.25 * DAY;
+  const ARCSEC = 180 * 3600 / Math.PI;
+  const mu = M => G * M;
+  const limite = (v, bas, haut) => Math.max(bas, Math.min(haut, v));
+  const valide = (v, nom) => { if (!(Number.isFinite(v) && v > 0)) throw new RangeError(nom + ' doit être positif et fini'); return v; };
+
+  function rs(M) { return 2 * G * valide(M, 'M') / (c * c); }
+  function isco(M) { return 3 * rs(M); }
+  function photonSphere(M) { return 1.5 * rs(M); }
+  function gravRate(r, M) {
+    valide(r, 'r');
+    return r <= rs(M) ? 0 : Math.sqrt(1 - rs(M) / r);
+  }
+  function redshiftFactor(r, M) { return gravRate(r, M); }
+  function weakRate(h, g = G0) { return 1 + g * h / (c * c); }
+  function poundRebka(h, g = G0) { return g * h / (c * c); }
+
+  function cabin({mode = 'sol', g = G0, largeur = 3, hauteur = 3} = {}, dt = 0) {
+    if (!['sol', 'fusée', 'chute', 'flotte'].includes(mode)) throw new RangeError('Situation inconnue');
+    const apparent = mode === 'sol' || mode === 'fusée' ? g : 0;
+    const t = Math.max(0, dt);
+    const descente = limite(apparent * t * t / 2, 0, hauteur - 0.35);
+    const laserSag = apparent * (largeur / c) ** 2 / 2;
+    const laser = Array.from({length: 41}, (_, i) => {
+      const x = largeur * i / 40;
+      return {x, y: apparent * (x / c) ** 2 / 2};
+    });
+    return {mode, accelerationApparente: apparent, balle: {x: largeur * 0.5, y: 0.35 + descente, chute: descente}, laser, laserSag, largeur, hauteur};
+  }
+
+  function gpsBudget({rOrbit = 26560e3} = {}) {
+    if (rOrbit <= RE) throw new RangeError('Orbite au-dessus de la surface');
+    const sol = gravRate(RE, ME);
+    const altitude = gravRate(rOrbit, ME);
+    const v = Math.sqrt(GM_E / rOrbit);
+    // La séparation des effets est faite relativement à une horloge statique au sol.
+    const dGrav = DAY * 1e6 * (altitude / sol - 1);
+    const dV = DAY * 1e6 * (altitude / sol) * (Math.sqrt(1 - v * v / (c * c)) - 1);
+    const total = dGrav + dV;
+    return {rOrbit, altitude: rOrbit - RE, vitesse: v, gravitation: dGrav, cinematique: dV,
+      total, erreurMetres: Math.abs(total) * 1e-6 * c, unites: 'µs/jour'};
+  }
+
+  function rk4(y, dy, pas, accel) {
+    const a1 = accel(y), k1 = dy;
+    const a2 = accel(y + pas * k1 / 2), k2 = dy + pas * a1 / 2;
+    const a3 = accel(y + pas * k2 / 2), k3 = dy + pas * a2 / 2;
+    const a4 = accel(y + pas * k3), k4 = dy + pas * a3;
+    return [y + pas * (k1 + 2 * k2 + 2 * k3 + k4) / 6,
+      dy + pas * (a1 + 2 * a2 + 2 * a3 + a4) / 6];
+  }
+
+  function orbitInit(a, e, M) {
+    valide(a, 'a');
+    if (!(e >= 0 && e < 1)) throw new RangeError('0 ≤ e < 1');
+    const p = a * (1 - e * e), h = Math.sqrt(mu(M) * p), w = 1 + e;
+    return {phi: 0, p, h, w, dw: 0, u: w / p, du: 0, r: p / w};
+  }
+  function orbitStep(s, M, dt) {
+    // Choix documenté : dt est un incrément d'angle Δφ, non un temps en secondes.
+    // w = p/r évite de soustraire de petits nombres lors des avances de périhélie.
+    const p = s.p ?? s.h * s.h / mu(M);
+    const k = 3 * mu(M) / (c * c * p);
+    const w = s.w ?? s.u * p, dw = s.dw ?? s.du * p;
+    const accel = x => 1 - x + k * x * x;
+    const [wn, dwn] = rk4(w, dw, dt, accel);
+    return {...s, phi: (s.phi ?? 0) + dt, p, w: wn, dw: dwn,
+      u: wn / p, du: dwn / p, r: p / wn};
+  }
+  function orbitAdvanceNumeric(a, e, M, pas = 0.0015) {
+    if (!(e > 0 && e < 1)) throw new RangeError('Orbite elliptique nécessaire');
+    let s = orbitInit(a, e, M), precedent = s;
+    const n = Math.ceil(2.1 * Math.PI / pas), h = 2.1 * Math.PI / n;
+    for (let i = 0; i < n; i++) {
+      s = orbitStep(s, M, h);
+      if (precedent.dw > 0 && s.dw <= 0 && s.phi > 1.5 * Math.PI) {
+        const alpha = precedent.dw / (precedent.dw - s.dw);
+        return precedent.phi + alpha * (s.phi - precedent.phi) - 2 * Math.PI;
+      }
+      precedent = s;
+    }
+    throw new Error('Périhélie suivant non détecté');
+  }
+  function precession(a, e, M) {
+    valide(a, 'a');
+    const parTour = 6 * Math.PI * mu(M) / (c * c * a * (1 - e * e));
+    const periode = 2 * Math.PI * Math.sqrt(a ** 3 / mu(M));
+    return {parTour, secondesArcTour: parTour * ARCSEC, secondesArcSiecle: parTour * ARCSEC * (100 * YEAR / periode), periode};
+  }
+
+  function photonPath(b, M, options = {}) {
+    valide(b, 'b');
+    const pasVoulu = options.pas ?? 0.0025;
+    const phiMax = options.phiMax ?? 22;
+    const pas = phiMax / Math.ceil(phiMax / pasVoulu);
+    const k = 3 * mu(M) / (c * c * b);
+    // w = b/r ; à l'infini entrant : w(0)=0 et w'(0)=1.
+    // w'' + w = (3GM/c²b) w² ; la sortie à w=0 fixe l'angle observé.
+    let phi = 0, w = 0, dw = 1, maxi = 0, points = [], angle = null, capture = false;
+    const accel = x => -x + k * x * x;
+    const conserver = () => {
+      if (w > 0 && Number.isFinite(w)) {
+        const r = b / w;
+        if (r < 18 * b && (points.length === 0 || phi - points[points.length - 1].phi > 0.015))
+          points.push({phi, r, x: r * Math.cos(phi), y: r * Math.sin(phi)});
+        maxi = Math.max(maxi, w);
+      }
+    };
+    for (let i = 0; i < Math.ceil(phiMax / pas); i++) {
+      const ancien = w, penteAvant = dw, pAvant = phi;
+      [w, dw] = rk4(w, dw, pas, accel); phi += pas;
+      if (!Number.isFinite(w) || w > b / rs(M) * 1.005) { capture = true; break; }
+      if (w <= 0 && i > 3) {
+        // Une interpolation cubique d'Hermite évite une erreur dominante sur
+        // un angle astronomique très petit (une interpolation linéaire ne suffit pas).
+        const hermite = t => (2*t*t*t-3*t*t+1)*ancien +
+          (t*t*t-2*t*t+t)*pas*penteAvant + (-2*t*t*t+3*t*t)*w +
+          (t*t*t-t*t)*pas*dw;
+        let bas = 0, haut = 1;
+        for (let j = 0; j < 38; j++) {
+          const milieu = (bas + haut) / 2;
+          if (hermite(milieu) > 0) bas = milieu; else haut = milieu;
+        }
+        angle = pAvant + (bas + haut) * pas / 2 - Math.PI;
+        break;
+      }
+      conserver();
+    }
+    if (angle === null) capture = true;
+    return {points, angle: capture ? null : angle, capture,
+      rMin: maxi > 0 ? b / maxi : Infinity, faible: 4 * mu(M) / (c * c * b),
+      newton: 2 * mu(M) / (c * c * b), b};
+  }
+  function deflection(b, M) { return photonPath(b, M).angle; }
+  function effPotential(r, L, M, massive = true) {
+    valide(r, 'r');
+    const f = 1 - rs(M) / r;
+    // (dr/dτ)²/2 + Veff = E²/2 (massif), unités m²/s².
+    // Photon : même écriture avec un paramètre affine et un L normalisé.
+    return f * ((massive ? c * c : 0) + L * L / (r * r)) / 2;
+  }
+  function circularOrbit(r, M, massive = true) {
+    const rayon = rs(M);
+    if (!massive) return {r: photonSphere(M), possible: Math.abs(r / photonSphere(M) - 1) < 1e-9,
+      stable: false, type: 'photon'};
+    const possible = r > 1.5 * rayon;
+    return {r, possible, stable: possible && r > 3 * rayon,
+      L: possible ? Math.sqrt(mu(M) * r * r / (r - 1.5 * rayon)) : null,
+      type: possible && r > 3 * rayon ? 'stable' : possible ? 'instable' : 'impossible'};
+  }
+  function photonCircularResidual(M) {
+    const r = photonSphere(M), u = 1 / r;
+    return -u + 3 * mu(M) * u * u / (c * c);
+  }
+  function embedding(r, M) {
+    return r < rs(M) ? null : 2 * Math.sqrt(rs(M) * (r - rs(M)));
+  }
+  function tidal(r, M, longueur = 2) {
+    return 2 * mu(M) * longueur / (r ** 3);
+  }
+  function infallRedshift(r, r0, M) {
+    const horizon = rs(M);
+    if (r <= horizon) return 0;
+    if (r > r0) throw new RangeError('Sonde au-dessus du départ');
+    const E = Math.sqrt(1 - horizon / r0), f = 1 - horizon / r;
+    // Photon radial sortant émis par une sonde en chute libre depuis le repos.
+    return f / (E + Math.sqrt(Math.max(0, E * E - f)));
+  }
+  function infall(r0, M) {
+    const horizon = rs(M);
+    if (r0 <= horizon) throw new RangeError('Départ hors de l’horizon obligatoire');
+    const q = horizon / r0, E = Math.sqrt(1 - q), A = Math.sqrt(r0 ** 3 / (8 * mu(M)));
+    const etaH = Math.acos(2 * q - 1);
+    const tau = eta => A * (eta + Math.sin(eta));
+    const rayon = eta => r0 * (1 + Math.cos(eta)) / 2;
+    const etaDeR = r => Math.acos(limite(2 * r / r0 - 1, -1, 1));
+    const tauH = tau(etaH), tauCentre = Math.PI * A;
+    const properAt = r => tau(etaDeR(limite(r, 0, r0)));
+    const farAt = r => {
+      if (r <= horizon) return Infinity;
+      if (r >= r0) return 0;
+      const eta = etaDeR(r);
+      const z = Math.sqrt(q / (1 - q)) * Math.tan(eta / 2);
+      if (z >= 1) return Infinity;
+      return E * A * ((1 + 2 * q) * eta + Math.sin(eta)) +
+        horizon / c * Math.log((1 + z) / (1 - z));
+    };
+    const etaPar = (valeur, fn, borne) => {
+      let bas = 0, haut = borne;
+      for (let i = 0; i < 64; i++) {
+        const milieu = (bas + haut) / 2;
+        if (fn(milieu) < valeur) bas = milieu; else haut = milieu;
+      }
+      return (bas + haut) / 2;
+    };
+    const rAtProper = t => rayon(etaPar(limite(t, 0, tauCentre), tau, Math.PI));
+    const rAtFar = t => {
+      if (t <= 0) return r0;
+      // La coordonnée t ne traverse jamais l'horizon ; asymptote, non blocage de la sonde.
+      const fn = eta => farAt(rayon(eta));
+      return rayon(etaPar(t, fn, etaH));
+    };
+    return {r0, M, rs: horizon, E, tauH, tauCentre, rAtProper, rAtFar,
+      properAt, farAt, redshiftAt: r => infallRedshift(r, r0, M)};
+  }
+
+  return {G, c, MS, RS, ME, RE, GM_E, G0, DAY, YEAR, ARCSEC,
+    rs, isco, photonSphere, gravRate, redshiftFactor, weakRate, poundRebka,
+    cabin, gpsBudget, orbitInit, orbitStep, orbitAdvanceNumeric, precession,
+    photonPath, deflection, effPotential, circularOrbit, photonCircularResidual,
+    embedding, tidal, infallRedshift, infall};
+})();
+/* GR-END */
+
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), cr = cv.getContext('2d'), scope = $('#scope'), sr = scope.getContext('2d');
+const g = GR.G0, secondesArc = GR.ARCSEC, fmt = (n, dec = 1) => Number(n).toLocaleString('fr-CA',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+const scientifique = n => {const [v,p]=n.toExponential(2).split('e');const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','+':'⁺'};return fmt(+v,2)+' × 10'+[...p].map(t=>sup[t]||t).join('');};
+const modeLabels = {sol:'posée sur la Terre', 'fusée':'fusée en accélération', chute:'en chute libre', flotte:'loin des masses'};
+const meta = [
+  {titre:'Le principe d’équivalence', sous:'Observe deux cabines fermées. Lâche une balle et active un faisceau horizontal.',
+    cle:'Localement, la gravité est indiscernable d’une accélération ; en chute libre, l’apesanteur apparaît. C’est le point de départ de la relativité générale.',
+    note:'La déviation du laser est grossie à l’écran. Un vrai laboratoire étendu décèlerait les effets de marée.',
+    scope:'CHUTE DE LA BALLE', leg:'Déplacement vertical dans la cabine · mètres (temps d’écran en secondes).',
+    objets:[['Cabine','Enceinte opaque : seules les expériences locales sont disponibles.'],['Balle','Une balle lâchée accélère vers le plancher si la cabine est soutenue ou accélérée.','lacher'],['Faisceau','Le rayon lumineux suit une ligne localement droite ; dans la cabine accélérée, sa trace paraît courbée.','laser'],['Fenêtre','En ouvrant la cabine, la situation extérieure devient visible.','fenetres']]},
+  {titre:'La gravité ralentit le temps', sous:'Compare des horloges à plusieurs altitudes. Un satellite GPS doit aussi tenir compte de sa vitesse.',
+    cle:'Plus bas dans un champ gravitationnel, le temps propre d’une horloge statique passe plus lentement ; la correction relativiste est indispensable au GPS.',
+    note:'Terre sphérique, sans rotation ; vitesse circulaire seulement au-delà de 200 km. cΔt est un biais de distance, pas une position GPS exacte.',
+    scope:'BILAN DU GPS', leg:'Gravitation +45,7 ; vitesse −7,2 ; bilan +38,5 µs/jour, à l’orbite GPS.',
+    objets:[['Horloge','Ses oscillations mesurent un temps propre ; les rythmes relatifs varient selon l’altitude.'],['Satellite GPS','Son horloge gagne du temps en altitude, mais en perd à cause de sa vitesse.'],['Récepteur','Il interprète les signaux horaires des satellites pour mesurer des distances.']]},
+  {titre:'Géodésiques et courbure', sous:'Compare les trajectoires d’un projectile et d’un rayon lumineux autour d’un astre. Puis observe le périhélie de Mercure.',
+    cle:'Une géodésique est une trajectoire libre : le chemin le plus droit possible dans un espace-temps courbé. Elle n’est pas forcément droite sur le dessin.',
+    note:'Schwarzschild : astre sphérique statique. Les angles tracés sont amplifiés ; les nombres proviennent de l’intégration des géodésiques.',
+    scope:'DÉVIATION LUMINEUSE', leg:'Courbes normalisées : déviation intégrée et estimation newtonienne ; angles réels dans les mesures.',
+    objets:[['Canon','Image de Newton : le projectile passe d’une chute à une orbite.'],['Géodésique','Trajectoire libre déterminée par la métrique de Schwarzschild.'],['Périhélie','Point orbital le plus proche du Soleil ; son orientation avance lentement.','mercure'],['Surface de Flamm','Coupe spatiale de Schwarzschild : représentation incomplète du temps.','drap'],['Lentille','Une masse déforme les images apparentes de sources lumineuses éloignées.']]},
+  {titre:'Les horizons', sous:'Lâche une sonde vers un trou noir. Compare son temps propre au temps de Schwarzschild d’un observateur éloigné.',
+    cle:'L’horizon est la frontière au-delà de laquelle les signaux ne peuvent plus rejoindre l’infini. Son rayon vaut 2GM/c², soit environ 3 km par masse solaire.',
+    note:'Trou noir non chargé, sans rotation. Le schéma radial est non linéaire ; la vue lointaine utilise le temps coordonné, sans trajet optique complet.',
+    scope:'DEUX DESCRIPTIONS DE LA CHUTE', leg:'Rayon normalisé à rₛ, selon le temps propre (bleu) et le temps lointain (jaune).',
+    objets:[['Horizon','Surface causale à rₛ ; la sonde peut la franchir en temps propre fini.'],['Sphère de photons','À 1,5 rₛ, une orbite lumineuse circulaire est possible mais instable.'],['Dernière orbite stable','À 3 rₛ se trouve l’orbite circulaire massive stable la plus intérieure.'],['Sonde','Horloge embarquée : son passage de l’horizon ne nécessite aucun freinage.','sonde'],['Impulsion','Chaque flash reçu de loin est décalé vers le rouge et de plus en plus espacé.']]}
+];
+const situations = ['sol','fusée'];
+const etat = {step:0,joue:true,vitesse:1,temps:0,lacher:false,laser:false,fenetres:false,g,
+  situations, altitude:20200e3, avecVitesse:true, correction:true,
+  masse:GR.MS, impactFacteur:1.001,exag:false, mercure:false,drap:false,
+  masseBH:10*GR.MS, depart:10,sondeActive:false, orbiteActive:false, rayonOrbite:4.5};
+const durees = [2.2,8,12,11], pasFixe = 1/120;
+let photon = null, chute = null, dernier = null, cumul = 0, dernierPanneau=0, tracéMercure=null;
+const rayonAstre = () => etat.masse === GR.MS ? GR.RS : 12000;
+// Le rayon lumineux doit éviter la surface matérielle de l'étoile compacte.
+const impactMinimum = () => etat.masse===GR.MS?1.001:Math.ceil(100/Math.sqrt(1-GR.rs(etat.masse)/rayonAstre()))/100;
+const photonCourant = () => photon || (photon=GR.photonPath(rayonAstre()*etat.impactFacteur,etat.masse));
+const chuteCourante = () => chute || (chute=GR.infall(etat.depart*GR.rs(etat.masseBH),etat.masseBH));
+const limite = (v,a,b) => Math.min(b,Math.max(a,v));
+function changerEtape(i) {
+  etat.step=limite(Math.trunc(i),0,3); etat.temps=0; etat.joue=true;
+  etat.lacher=false; etat.laser=false; etat.fenetres=false; etat.sondeActive=false; etat.orbiteActive=false;
+  document.querySelectorAll('[data-step]').forEach(b => b.setAttribute('aria-current',+b.dataset.step===etat.step?'step':'false'));
+  document.querySelectorAll('[data-step]').forEach(b => b.tabIndex=+b.dataset.step===etat.step?0:-1);
+  const m=meta[etat.step];
+  $('#eyebrow').textContent=`MODULE 47 · ${String(etat.step+1).padStart(2,'0')}/04`;
+  $('#sceneName').textContent=`EXPÉRIENCE ${String(etat.step+1).padStart(2,'0')} / 04`;
+  $('#stepTitle').textContent=m.titre; $('#stepText').textContent=m.sous; $('#key').textContent=m.cle;
+  $('#honesty').textContent=m.note; $('#scopeTitle').textContent=m.scope; $('#scopeLegend').textContent=m.leg;
+  $('#questions').hidden=etat.step!==3;
+  $('#theory').href='explication.html#m47';
+  configurerActions(); configurerOutils(); configurerObjets(); panneau(); dessiner();
+}
+function setPlay(oui) { etat.joue=!!oui; $('#play').textContent=etat.joue?'Pause':'Reprendre'; }
+function tirer() { etat.lacher=true; etat.temps=0; setPlay(true); panneau(); dessiner(); }
+function laser() { etat.laser=!etat.laser; configurerActions(); panneau(); }
+function ouvrir() { etat.fenetres=true; configurerActions(); panneau(); }
+function setCabin(i,mode) {
+  if (![0,1].includes(i) || !modeLabels[mode]) throw new RangeError('Cabine ou situation inconnue');
+  etat.situations[i]=mode; panneau(); dessiner();
+}
+function setAltitude(h){etat.altitude=limite(h,0,40000e3); panneau(); dessiner();}
+function velocity(on){etat.avecVitesse=!!on; configurerOutils(); panneau();}
+function gpsCorrection(on){etat.correction=!!on; configurerActions(); configurerOutils(); panneau();}
+function setMass(M){etat.masse=M;etat.impactFacteur=Math.max(etat.impactFacteur,impactMinimum());photon=null;configurerOutils();panneau();dessiner();}
+function setImpact(b){etat.impactFacteur=limite(b/rayonAstre(),impactMinimum(),3.2);photon=null;panneau();dessiner();}
+function mercury(on){etat.mercure=!!on;etat.drap=false;configurerActions();configurerOutils();panneau();dessiner();}
+function sheet(on){etat.drap=!!on;etat.mercure=false;configurerActions();configurerOutils();panneau();dessiner();}
+function setBH(M){etat.masseBH=M;chute=null;etat.temps=0;etat.sondeActive=false;configurerOutils();panneau();dessiner();}
+function dropProbe(r0){
+  etat.depart=limite(r0/GR.rs(etat.masseBH),4,20); chute=null;etat.sondeActive=true;etat.orbiteActive=false;
+  etat.temps=0;setPlay(true);configurerActions();panneau();dessiner();
+}
+function orbit(r){etat.rayonOrbite=limite(r/GR.rs(etat.masseBH),2,7);etat.orbiteActive=true;etat.sondeActive=false;
+  configurerActions();configurerOutils();panneau();dessiner();return GR.circularOrbit(etat.rayonOrbite*GR.rs(etat.masseBH),etat.masseBH);}
+function etatMesures(){
+  const s=etat.step;
+  if(s===0) {
+    const dt=etat.lacher?etat.temps:0;
+    return {cabines:etat.situations.map(mode=>GR.cabin({mode,g:etat.g},dt)),temps:dt,laser:etat.laser,fenetres:etat.fenetres};
+  }
+  if(s===1){
+    const fixe=GR.gpsBudget({rOrbit:26560e3}), h=etat.altitude;
+    const mobile=h>0 ? GR.gpsBudget({rOrbit:GR.RE+h}):{gravitation:0,cinematique:0,total:0};
+    const gravitation=mobile.gravitation, cinematique=etat.avecVitesse && h>=200000?mobile.cinematique:0;
+    const jours=etat.temps/4, erreur=etat.correction?0:fixe.erreurMetres*jours;
+    return {fixe, mobile, gravitation,cinematique,total:gravitation+cinematique,
+      altitude:h,jours,erreur,avecVitesse:etat.avecVitesse,correction:etat.correction};
+  }
+  if(s===2) {
+    const rayon=rayonAstre(), p=photonCourant();
+    return {masse:etat.masse,rayon,impact:rayon*etat.impactFacteur,photons:p,
+      deflexionArc:p.angle===null?null:p.angle*secondesArc,
+      newtonArc:p.newton*secondesArc,rs:GR.rs(etat.masse),
+      precession:GR.precession(5.79e10,.2056,GR.MS),mercure:etat.mercure,drap:etat.drap};
+  }
+  const f=chuteCourante(), m=etat.masseBH, rs=GR.rs(m);
+  const t=etat.sondeActive?Math.min(f.tauCentre, f.tauH*etat.temps/7):0;
+  const rp=f.rAtProper(t), tfar=f.tauH*etat.temps/7, rf=f.rAtFar(tfar);
+  return {M:m,rs,r0:f.r0,tau:t,tauH:f.tauH,tfar,rPropre:rp,rLointain:rf,
+    frequence:rp>rs?f.redshiftAt(rp):0,tEvenement:rp>rs?f.farAt(rp):Infinity,maree:GR.tidal(rs,m,2),
+    orbite:etat.rayonOrbite*rs,classification:GR.circularOrbit(etat.rayonOrbite*rs,m),
+    sondeActive:etat.sondeActive,orbiteActive:etat.orbiteActive};
+}
+function avancer(n){
+  const nombre=Math.max(0,Math.min(200000,Math.floor(n)));
+  for(let i=0;i<nombre;i++){
+    const pas=pasFixe*etat.vitesse;
+    const total=etat.temps+pas, max=durees[etat.step];
+    etat.temps=(etat.step===0 || etat.step===2) ? total%max : Math.min(total,max);
+    if(etat.temps===max) etat.joue=false;
+  }
+  panneau(); dessiner();
+}
+function bouton(id,libelle,appuye=false,classe='') {return `<button type="button" class="btn ${classe}" data-action="${id}" aria-pressed="${appuye?'true':'false'}">${libelle}</button>`;}
+function configurerActions(){
+  const s=etat.step, a=$('#mainActions');
+  if(s===0) a.innerHTML=bouton('lacher','Lâcher la balle',false,'action')+bouton('laser',etat.laser?'Éteindre laser':'Allumer laser',etat.laser)+bouton('fenetres',etat.fenetres?'Fenêtres ouvertes':'Ouvrir les fenêtres',etat.fenetres);
+  else if(s===1) a.innerHTML=bouton('correction',etat.correction?'GPS corrigé':'GPS sans correction',etat.correction,'action');
+  else if(s===2) a.innerHTML=bouton('mercure',etat.mercure?'Masquer Mercure':'Voir Mercure',etat.mercure,'action')+bouton('drap',etat.drap?'Quitter le drap':'Image du drap',etat.drap);
+  else a.innerHTML=bouton('sonde','Lâcher la sonde',etat.sondeActive,'action')+bouton('orbite','Mettre en orbite',etat.orbiteActive);
+}
+function configurerOutils(){
+  const o=$('#tools'),s=etat.step,optionMode=i=>`<label class="range">Cabine ${i+1} <select data-regle="cabine${i}">${Object.keys(modeLabels).map(k=>`<option value="${k}" ${etat.situations[i]===k?'selected':''}>${modeLabels[k]}</option>`).join('')}</select></label>`;
+  if(s===0) o.innerHTML=optionMode(0)+optionMode(1)+`<label class="range">g <input type="range" data-regle="g" min="0" max="20" step=".1" value="${etat.g}"><output id="gVal">${fmt(etat.g,1)} m/s²</output></label>`;
+  else if(s===1) o.innerHTML=`<label class="range">Altitude mobile <input type="range" data-regle="altitude" min="0" max="40000" step="100" value="${etat.altitude/1000}"><output id="altitudeVal">${fmt(etat.altitude/1000,0)} km</output></label>`+bouton('vitesse',etat.avecVitesse?'Vitesse incluse':'Vitesse ignorée',etat.avecVitesse);
+  else if(s===2) o.innerHTML=`<label class="range">Astre <select data-regle="masse"><option value="soleil" ${etat.masse===GR.MS?'selected':''}>Soleil</option><option value="neutron" ${etat.masse!==GR.MS?'selected':''}>Étoile à neutrons (1,4 M☉)</option></select></label><label class="range">Impact b/R <input type="range" data-regle="impact" min="${impactMinimum()}" max="3.2" step=".01" value="${etat.impactFacteur}"><output id="impactVal">${fmt(etat.impactFacteur,3)}</output></label>`+bouton('exagerer',etat.exag?'Trajectoire amplifiée +':'Exagérer le trait',etat.exag);
+  else o.innerHTML=`<label class="range">Trou noir <select data-regle="bh"><option value="petit" ${etat.masseBH===10*GR.MS?'selected':''}>10 M☉</option><option value="grand" ${etat.masseBH!==10*GR.MS?'selected':''}>Sagittarius A* · 4 × 10⁶ M☉</option></select></label><label class="range">Départ <input type="range" data-regle="depart" min="4" max="20" step="1" value="${etat.depart}"><output id="departVal">${etat.depart} rₛ</output></label><label class="range">Orbite <input type="range" data-regle="orbite" min="2" max="7" step=".1" value="${etat.rayonOrbite}"><output id="orbiteVal">${fmt(etat.rayonOrbite,1)} rₛ</output></label>`;
+}
+function configurerObjets(){
+  const zone=$('#objects'); zone.innerHTML='';
+  meta[etat.step].objets.forEach(([nom,role,action])=>{
+    const b=document.createElement('button');b.type='button';b.className='object';b.textContent=nom;
+    b.setAttribute('aria-label',`${nom} : ${role}`);b.dataset.nom=nom;b.dataset.role=role;
+    if(action)b.dataset.action=action;
+    b.addEventListener('mouseenter',montrerTip);b.addEventListener('focus',montrerTip);
+    b.addEventListener('mouseleave',fermerTip);b.addEventListener('blur',fermerTip);
+    b.addEventListener('click',()=>{if(action)agir(action);else montrerTip({currentTarget:b});});zone.append(b);
+  });
+}
+function montrerTip(ev){
+  const b=ev.currentTarget,tip=$('#tip');tip.replaceChildren();
+  const nom=document.createElement('b');nom.textContent=b.dataset.nom;
+  const role=document.createElement('span');role.textContent=b.dataset.role;tip.append(nom,role);tip.hidden=false;
+  const rc=b.getBoundingClientRect();tip.style.left=Math.min(innerWidth-260,Math.max(8,rc.left))+'px';tip.style.top=Math.max(8,rc.top-87)+'px';
+}
+function fermerTip(){$('#tip').hidden=true;}
+function agir(action){
+  if(action==='lacher')tirer();
+  else if(action==='laser')laser();
+  else if(action==='fenetres')ouvrir();
+  else if(action==='correction')gpsCorrection(!etat.correction);
+  else if(action==='vitesse')velocity(!etat.avecVitesse);
+  else if(action==='mercure')mercury(!etat.mercure);
+  else if(action==='drap')sheet(!etat.drap);
+  else if(action==='exagerer'){etat.exag=!etat.exag;configurerOutils();panneau();dessiner();}
+  else if(action==='sonde')dropProbe(etat.depart*GR.rs(etat.masseBH));
+  else if(action==='orbite')orbit(etat.rayonOrbite*GR.rs(etat.masseBH));
+}
+$('#mainActions').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)agir(b.dataset.action);});
+$('#tools').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)agir(b.dataset.action);});
+$('#tools').addEventListener('input',e=>{
+  const el=e.target,k=el.dataset.regle,v=+el.value;
+  if(k==='g'){etat.g=v;$('#gVal').textContent=fmt(v)+' m/s²';}
+  else if(k==='altitude'){setAltitude(v*1000);$('#altitudeVal').textContent=fmt(v,0)+' km';}
+  else if(k==='impact'){setImpact(v*rayonAstre());$('#impactVal').textContent=fmt(etat.impactFacteur,3);}
+  else if(k==='depart'){etat.depart=v;chute=null;etat.temps=0;etat.sondeActive=false;$('#departVal').textContent=v+' rₛ';}
+  else if(k==='orbite'){etat.rayonOrbite=v;$('#orbiteVal').textContent=fmt(v,1)+' rₛ';}
+  panneau();dessiner();
+});
+$('#tools').addEventListener('change',e=>{
+  const el=e.target,k=el.dataset.regle;
+  if(k==='cabine0')setCabin(0,el.value);
+  if(k==='cabine1')setCabin(1,el.value);
+  if(k==='masse')setMass(el.value==='soleil'?GR.MS:1.4*GR.MS);
+  if(k==='bh')setBH(el.value==='petit'?10*GR.MS:4e6*GR.MS);
+});
+$('#prev').addEventListener('click',()=>changerEtape(etat.step-1));
+$('#next').addEventListener('click',()=>changerEtape(etat.step+1));
+$('#reset').addEventListener('click',()=>changerEtape(etat.step));
+$('#play').addEventListener('click',()=>setPlay(!etat.joue));
+document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>changerEtape(+b.dataset.step)));
+$('#timeline').addEventListener('input',e=>{etat.temps=(+e.target.value)/1000*durees[etat.step];panneau();dessiner();});
+$('#theme').addEventListener('click',()=>{
+  const actuel=document.documentElement.getAttribute('data-theme');
+  const nouveau=actuel==='dark'?'light':actuel==='light'?null:'dark';
+  if(nouveau)document.documentElement.dataset.theme=nouveau;else document.documentElement.removeAttribute('data-theme');
+  $('#theme').textContent='Thème '+(nouveau==='dark'?'sombre':nouveau==='light'?'clair':'auto');
+});
+addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select,button') || e.altKey || e.metaKey || e.ctrlKey) return;
+  if(e.code==='Space'){e.preventDefault();setPlay(!etat.joue);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();changerEtape(etat.step-1);}
+  else if(e.key==='ArrowRight'){e.preventDefault();changerEtape(etat.step+1);}
+  else if(/^[1-4]$/.test(e.key)){changerEtape(+e.key-1);}
+  else if(e.key.toLowerCase()==='r'){changerEtape(etat.step);}
+});
+function panneau(){
+  const s=etat.step, x=etatMesures(), lignes=[];
+  const valeur=(libelle,v,cls='')=>lignes.push(`<div class="row"><span class="lab">${libelle}</span><span class="val ${cls}">${v}</span></div>`);
+  let statut='';
+  if(s===0){
+    const a=x.cabines[0],b=x.cabines[1];
+    statut=etat.fenetres?'Fenêtres ouvertes : une expérience locale ne distingue pas la gravité uniforme d’une accélération. La chute libre efface le poids apparent.':'Peux-tu dire laquelle est sur Terre ? Fais l’expérience avant d’ouvrir les fenêtres.';
+    valeur('Balle A · chute',fmt(a.balle.chute,3)+' m');
+    valeur('Balle B · chute',fmt(b.balle.chute,3)+' m');
+    valeur('Laser A · flèche',scientifique(a.laserSag)+' m','energie');
+    valeur('Laser B · flèche',scientifique(b.laserSag)+' m');
+  } else if(s===1){
+    statut=!etat.correction?`Sans correction, la distance équivalente dérive d’environ ${fmt(x.erreur/1000,1)} km après ${fmt(x.jours,1)} jour(s).`:etat.avecVitesse?'La gravité fait gagner environ 45,7 µs/j au GPS ; la vitesse en retranche 7,2.':'Plus haut, les horloges statiques battent plus vite. Active aussi l’effet cinématique.';
+    valeur('Mobile · altitude',fmt(x.altitude/1000,0)+' km');
+    valeur('Mobile · gravité',`+${fmt(x.gravitation,2)} µs/j`,'accent');
+    valeur('Mobile · vitesse',`${fmt(x.cinematique,2)} µs/j`);
+    valeur('GPS · bilan',`+${fmt(x.fixe.total,2)} µs/j`,'accent');
+    valeur('Biais équivalent',fmt(x.erreur/1000,2)+' km',!etat.correction?'warn':'');
+  } else if(s===2){
+    statut=etat.drap?'Ce drap ne montre que l’espace. En champ faible, la composante temporelle de la métrique joue un rôle dominant dans la chute lente.':etat.mercure?'Le périhélie de Mercure avance de 43 secondes d’arc par siècle. L’animation grossit cet angle de plusieurs millions de fois.':x.deflexionArc===null?'Ce paramètre d’impact produit une trajectoire capturée, sans déviation sortante.':'Au bord du Soleil, la lumière se dévie de 1,75″ : deux fois la prédiction newtonienne approximative.';
+    valeur('Déviation · relativité',x.deflexionArc===null?'capture':fmt(x.deflexionArc,3)+'″','accent');
+    valeur('Déviation · Newton',fmt(x.newtonArc,3)+'″');
+    valeur('Mercure · précession',fmt(x.precession.secondesArcSiecle,2)+'″/siècle');
+    valeur('Rayon de Schwarzschild',fmt(x.rs/1000,3)+' km');
+  } else {
+    const m=x;
+    statut=etat.orbiteActive?(m.classification.stable?'Cette orbite circulaire est stable dans ce modèle idéal.':m.classification.possible?'Orbite circulaire possible mais instable : une perturbation produit une chute ou un éloignement.':'Aucune orbite circulaire massive à ce rayon.'):etat.sondeActive && m.tau >= m.tauH?'La sonde a franchi l’horizon en un temps propre fini ; les messages destinés à l’infini ne peuvent plus en sortir.':etat.sondeActive?'Pour la sonde, la traversée n’est pas une paroi ; de loin, le temps coordonné s’étire et les signaux rougissent.':'Lâche une sonde. La sphère de photons et la dernière orbite stable sont des repères différents de l’horizon.';
+    valeur('Horizon rₛ',fmt(m.rs/1000,3)+' km','accent');
+    const echelle=m.tauH>=1?1:1000,unite=echelle===1?'s':'ms';
+    valeur('Temps propre τ',fmt(m.tau*echelle,3)+' '+unite);
+    valeur('τ jusqu’à rₛ',fmt(m.tauH*echelle,3)+' '+unite);
+    valeur('Temps lointain t',fmt(m.tfar*echelle,3)+' '+unite);
+    valeur('t du même événement',Number.isFinite(m.tEvenement)?fmt(m.tEvenement*echelle,3)+' '+unite:'∞ (Schwarzschild)');
+    valeur('Fréquence reçue/émise',fmt(m.frequence,5));
+    valeur('Marée sur 2 m',m.maree.toExponential(2)+' m/s²','energie');
+  }
+  $('#status').textContent=statut;
+  $('#meas').innerHTML=lignes.join('');
+  $('#clock').textContent=s===1?`${fmt(etat.temps/4,2)} j accélérés`:s===3?`${fmt(etat.temps,1)} s d’écran`: `${fmt(etat.temps,2)} s d’écran`;
+  $('#timeRead').textContent=fmt(etat.temps,1)+' s';
+  $('#timeline').value=Math.round(1000*etat.temps/durees[etat.step]);
+  $('#play').textContent=etat.joue?'Pause':'Reprendre';
+}
+// Instruments de dessin : coordonnées logiques avec hauteur fixe et échelle uniforme sur tous les écrans.
+let W=900, S=1, scopeMemo='';
+const couleurs={fond:'#0a0d12',panneau:'#11161e',trait:'#283440',texte:'#e8e4dc',second:'#8a93a0',accent:'#a8b8d8',energie:'#ffd166',rouge:'#ff8a5b',bleu:'#5bb8ff'};
+function taille(){
+  const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;
+  if(w<1||h<1)return false;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  S=h/620;W=w/S;cr.setTransform(dpr*S,0,0,dpr*S,0,0);return true;
+}
+function trait(x1,y1,x2,y2,c=couleurs.trait,ep=1,tirete=[]){cr.strokeStyle=c;cr.lineWidth=ep;cr.setLineDash(tirete);cr.beginPath();cr.moveTo(x1,y1);cr.lineTo(x2,y2);cr.stroke();cr.setLineDash([]);}
+function cercle(x,y,r,fill=null,stroke=null,ep=1){cr.beginPath();cr.arc(x,y,r,0,2*Math.PI);if(fill){cr.fillStyle=fill;cr.fill();}if(stroke){cr.lineWidth=ep;cr.strokeStyle=stroke;cr.stroke();}}
+function texte(t,x,y,taille=13,c=couleurs.second,align='left',police='mono'){cr.fillStyle=c;cr.textAlign=align;cr.font=`${taille}px ${police==='sans'?'IBM Plex Sans,system-ui':'IBM Plex Mono,monospace'}`;cr.fillText(t,x,y);cr.textAlign='left';}
+function boite(x,y,w,h,fill=couleurs.panneau,stroke=couleurs.trait){cr.fillStyle=fill;cr.fillRect(x,y,w,h);if(stroke){cr.strokeStyle=stroke;cr.lineWidth=1;cr.strokeRect(x,y,w,h);}}
+function courbe(points,c= couleurs.accent,ep=2,tirete=[]){if(!points.length)return;cr.strokeStyle=c;cr.lineWidth=ep;cr.setLineDash(tirete);cr.beginPath();cr.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)cr.lineTo(...points[i]);cr.stroke();cr.setLineDash([]);}
+function fleche(x1,y1,x2,y2,c,ep=2){trait(x1,y1,x2,y2,c,ep);const a=Math.atan2(y2-y1,x2-x1),d=8;trait(x2,y2,x2-d*Math.cos(a-0.5),y2-d*Math.sin(a-0.5),c,ep);trait(x2,y2,x2-d*Math.cos(a+0.5),y2-d*Math.sin(a+0.5),c,ep);}
+function grille(){cr.fillStyle=couleurs.fond;cr.fillRect(0,0,W,620);for(let x=22;x<W;x+=45)for(let y=30;y<620;y+=45)cercle(x,y,.7,'#1d2732');trait(20,565,W-20,565,'#1f2b36');}
+function montre(x,y,r,fraction,c=couleurs.accent){cercle(x,y,r,'#111922','#526275',1.2);cercle(x,y,1.8,c);const a=2*Math.PI*fraction-Math.PI/2;trait(x,y,x+Math.cos(a)*r*.73,y+Math.sin(a)*r*.73,c,2);trait(x,y,x+Math.cos(a*1.3)*r*.48,y+Math.sin(a*1.3)*r*.48,couleurs.energie,1.5);}
+function dessinerCabines(){
+  const t=etat.lacher?etat.temps:0,donnees=etatMesures(), moitie=W/2;
+  texte('UN LABORATOIRE, DEUX HISTOIRES',W/2,86,13,couleurs.accent,'center');
+  for(let i=0;i<2;i++){
+    const a=donnees.cabines[i], largeur=Math.min(365,moitie-32),x=moitie*i+(moitie-largeur)/2,y=142,h=345;
+    boite(x,y,largeur,h,'#0e1520','#576675');
+    trait(x+6,y+6,x+largeur-6,y+6,'#344459',2);trait(x+6,y+h-7,x+largeur-6,y+h-7,'#5d6a7d',2);
+    texte('CABINE '+(i?'B':'A'),x+12,y-15,15,couleurs.texte);
+    if(etat.fenetres){
+      texte(modeLabels[etat.situations[i]],x+largeur/2,y+h+32,11,couleurs.energie,'center');
+      if(a.mode==='fusée')fleche(x+largeur/2,y+h-14,x+largeur/2,y+h-56,couleurs.rouge,2);
+      if(a.mode==='sol'){trait(x-4,y+h+3,x+largeur+5,y+h+3,'#6a776d',4);}
+    } else {
+      texte('EXTÉRIEUR MASQUÉ',x+largeur/2,y+h+30,10,couleurs.second,'center');
+    }
+    const hommeX=x+largeur*.22, hommeY=y+h-28;
+    cercle(hommeX,hommeY-57,12,'#b8c5d3');
+    trait(hommeX,hommeY-44,hommeX,hommeY-16,'#b8c5d3',4);
+    trait(hommeX,hommeY-35,hommeX-13,hommeY-23,'#b8c5d3',3);
+    trait(hommeX,hommeY-35,hommeX+13,hommeY-23,'#b8c5d3',3);
+    trait(hommeX,hommeY-16,hommeX-12,hommeY,'#b8c5d3',3);
+    trait(hommeX,hommeY-16,hommeX+12,hommeY,'#b8c5d3',3);
+    const bx=x+largeur*.60,by=y+45+(a.balle.chute/(a.hauteur-0.35))*(h-99);
+    trait(bx,y+42,bx,h+y-50,'#2c4056',1,[3,6]);
+    cercle(bx,Math.min(y+h-38,by),7,couleurs.energie);texte('BALLE',bx+12,Math.min(y+h-38,by)+4,10,couleurs.second);
+    const ylaser=y+159, lx=x+20, rx=x+largeur-19;
+    trait(lx,ylaser,lx+10,ylaser,couleurs.energie,3);
+    if(etat.laser){
+      const pts=Array.from({length:50},(_,k)=>{const f=k/49;return [lx+f*(rx-lx),ylaser+(a.accelerationApparente>0?27*f*f:0)];});
+      courbe(pts,couleurs.energie,2.3);cercle(rx,pts[49][1],3,couleurs.energie);
+    } else trait(lx+12,ylaser,rx,ylaser,'#423b2b',1,[4,6]);
+    if(i===0||W>610){
+      texte('ACCÉLÉRATION LOCALE',x+16,y+215,10,couleurs.second);
+      texte(`${fmt(a.accelerationApparente,1)} m/s²`,x+16,y+232,13,a.accelerationApparente?couleurs.accent:couleurs.second);
+    }
+  }
+  texte('ÉCART DU LASER : LA COURBE EST AMPLIFIÉE · VALEUR RÉELLE DANS LA LECTURE',W/2,547,Math.max(9,Math.min(11,W/55)),couleurs.second,'center');
+}
+function dessinerHorloges(){
+  const x=etatMesures(),mobile=W<630;
+  const tx=mobile?W*.26:W*.29,ty=368, rayon=mobile?115:162;
+  const halo=cr.createRadialGradient(tx-38,ty-46,10,tx,ty,rayon*1.18);
+  halo.addColorStop(0,'#375f84');halo.addColorStop(.5,'#172b45');halo.addColorStop(1,'#081422');
+  cercle(tx,ty,rayon,halo,'#8097ad',1.2);
+  for(let k=0;k<7;k++){
+    cr.strokeStyle=k%2?'#486785':'#274968';cr.lineWidth=1.3;
+    cr.beginPath();cr.ellipse(tx,ty+(k-3)*rayon*.18,rayon*Math.sqrt(Math.max(0,1-(k-3)**2*.022)),rayon*.18,0,0,Math.PI*2);cr.stroke();
+  }
+  texte('TERRE · HORLOGE AU SOL',tx,ty+rayon+27,11,couleurs.accent,'center');
+  const niveaux=[['SOL',0],['TOUR',300],['AVION',10000],['ISS',408000],['GPS',20189000],['GÉOSTAT.',35786000]];
+  const start=mobile?W*.48:W*.59;
+  texte('ALTITUDE / GAIN GRAVITATIONNEL',start,125,mobile?9:11,couleurs.accent);
+  niveaux.forEach(([nom,h],i)=>{
+    const y=157+i*63,delta=h===0?0:GR.gpsBudget({rOrbit:GR.RE+h}).gravitation;
+    trait(start,y+17,W-18,y+17,'#283440');
+    montre(start+13,y,13,(((etat.temps/4)*delta*.13)%1+1)%1,'#a8b8d8');
+    texte(nom,start+36,y-3,11,couleurs.texte);
+    texte(`${h<1000?`${h} m`:`${fmt(h/1000,0)} km`}`,start+36,y+12,10,couleurs.second);
+    texte(`+${fmt(delta,2)} µs/j`,W-18,y+11,mobile?9:11,couleurs.energie,'right');
+  });
+  // Le compteur représente une distance équivalente c×Δt, pas une localisation déterminée.
+  const y=517;
+  boite(start-8,y-11,W-start-7,44,'#121b27','#3b4755');
+  texte(etat.correction?'CORRECTION GPS ACTIVE':'CORRECTION GPS DÉSACTIVÉE',start,y+5,mobile?10:12,etat.correction?couleurs.accent:couleurs.rouge);
+  texte(`${fmt(x.erreur/1000,2)} km · biais équivalent`,start,y+24,11,couleurs.energie);
+  if(!mobile){
+    const phi=etat.temps*.45,px=tx+Math.cos(phi)*(rayon+40),py=ty+Math.sin(phi)*(rayon+40);
+    cercle(tx,ty,rayon+42,null,'#2f4058');cercle(px,py,6,couleurs.energie);
+    texte('SATELLITE',tx,109,11,couleurs.second,'center');
+  }
+}
+function trajectoireDessinee(theta,xOrig,yOrig,xFinal){
+  const pts=[];
+  for(let i=0;i<=100;i++){
+    const x=xOrig+(xFinal-xOrig)*i/100,d=x-xOrig,centre=W*.47;
+    const progression=1/(1+Math.exp(-(x-centre)/28));
+    const saut=Math.max(0,x-centre)*progression;
+    pts.push([x,yOrig+theta*saut+Math.max(0,theta)*4*Math.exp(-(((x-centre)/95)**2))]);
+  }
+  return pts;
+}
+function dessinerCourbure(){
+  const m=etatMesures(),r0=rayonAstre(),radius=W<650?46:69;
+  if(etat.drap){
+    const cx=W/2,cy=332,rayon=50,rayonMax=Math.min(W*.41,265);
+    texte('SURFACE DE FLAMM · COUPE SPATIALE',W/2,87,12,couleurs.accent,'center');
+    for(let ring=0;ring<10;ring++){
+      const rho=rayon+(rayonMax-rayon)*ring/9;
+      const z=GR.embedding((1+ring*.8)*GR.rs(m.masse),m.masse)/GR.rs(m.masse);
+      cr.beginPath();cr.ellipse(cx,cy-z*12+rho*.09,rho,rho*.35,0,0,Math.PI*2);
+      cr.strokeStyle=ring%2?'#394a60':'#6c829c';cr.lineWidth=1;cr.stroke();
+    }
+    for(let k=0;k<18;k++){
+      const a=k*Math.PI/9,pts=[];
+      for(let i=0;i<80;i++){
+        const rho=rayon+i*(rayonMax-rayon)/79, z=GR.embedding((1+i*.08)*GR.rs(m.masse),m.masse)/GR.rs(m.masse);
+        pts.push([cx+rho*Math.cos(a),cy+rho*.35*Math.sin(a)-z*12+rho*.09]);
+      }
+      courbe(pts,'#273d56',1);
+    }
+    const points=Array.from({length:80},(_,i)=>{const rho=rayon+(rayonMax-rayon)*i/79;return [cx+rho*.78,cy-rho*.23-25*Math.exp(-rho/120)];});
+    courbe(points,couleurs.energie,2.5);
+    texte('Image limitée : utilise la gravité pour représenter la gravité.',W/2,519,W<600?10:13,couleurs.energie,'center');
+    texte('Le temps est essentiel à la chute : voir l’étape 2.',W/2,542,12,couleurs.second,'center');
+    return;
+  }
+  const cx=W*.47,cy=365;
+  const halo=cr.createRadialGradient(cx,cy,5,cx,cy,radius*2);
+  halo.addColorStop(0,'#e1c695');halo.addColorStop(.45,'#5a4532');halo.addColorStop(1,'#111b24');
+  cercle(cx,cy,radius+7,null,'#3d5065',1,[3,5]);cercle(cx,cy,radius,halo,'#bd9a72',1.2);
+  texte(etat.masse===GR.MS?'SOLEIL':'ÉTOILE À NEUTRONS',cx,cy+radius+25,11,couleurs.accent,'center');
+  texte('RAYON LUMINEUX',23,138,12,couleurs.energie);
+  const baseY=cy-radius-43,cam=etat.masse===GR.MS?(etat.exag?50000:12000):1;
+  const theta=limite((m.photons.angle??0)*cam,0,.55);
+  const debut=18,fin=W-20;
+  courbe(trajectoireDessinee(limite(m.photons.newton*cam,0,.55),debut,baseY,fin),'#707983',1.5,[4,6]);
+  courbe(trajectoireDessinee(theta,debut,baseY,fin),couleurs.accent,2.5);
+  fleche(fin-34,baseY+theta*(fin-34-cx),fin-13,baseY+theta*(fin-13-cx),couleurs.accent,1.5);
+  texte('NEWTON',W-25,baseY+8,10,couleurs.second,'right');
+  if(W>740)texte('RG',W-25,baseY+theta*Math.max(0,W-cx-30)-8,11,couleurs.accent,'right');
+  // Le canon rend explicite la continuité entre le projectile et l'orbite.
+  const canonX=38, canonY=480;
+  boite(canonX,canonY-20,37,22,'#17212e','#7b8996');
+  fleche(canonX+30,canonY-16,canonX+74,canonY-37,couleurs.accent,3);
+  texte('CANON',canonX+3,canonY+33,10,couleurs.second);
+  const pts=Array.from({length:65},(_,i)=>{const t=i/64,x=canonX+65+t*(cx-canonX-25);return [x,canonY-27-120*t+48*t*t];});
+  courbe(pts,'#9b9da4',1.2,[5,7]);
+  courbe(pts.map(([x,y],i)=>[x,y-(i/64)*3]),couleurs.accent,1.7);
+  // Source lointaine dédoublée : montage optique schématique.
+  const lx=W-108,ly=433;
+  cr.strokeStyle='#425571';cr.lineWidth=1;cr.beginPath();cr.arc(lx,ly,29,0,2*Math.PI);cr.stroke();
+  cr.strokeStyle=couleurs.energie;cr.lineWidth=3;
+  cr.beginPath();cr.arc(lx,ly,31,-.2,1.45);cr.stroke();
+  cr.beginPath();cr.arc(lx,ly,31,2.5,3.6);cr.stroke();
+  cercle(lx,ly,8,'#4f617d');texte('LENTILLE',lx,ly+54,10,couleurs.second,'center');
+  if(etat.mercure){
+    const ex=cx, ey=cy, ax=Math.min(180,W*.28),by=ax*.45;
+    const angle=etat.temps*.12;
+    cr.save();cr.translate(ex,ey);cr.rotate(angle);
+    // L'ellipse physique provient de l'équation orbitale du moteur ; seule
+    // l'orientation de chaque tour est artificiellement accélérée à l'écran.
+    if(!tracéMercure){
+      tracéMercure=[];let o=GR.orbitInit(5.79e10,.2056,GR.MS);
+      for(let i=0;i<=720;i++){
+        tracéMercure.push([o.r/5.79e10*Math.cos(o.phi),o.r/5.79e10*Math.sin(o.phi)]);
+        o=GR.orbitStep(o,GR.MS,2*Math.PI/720);
+      }
+    }
+    courbe(tracéMercure.map(([xx,yy])=>[xx*ax,yy*by]),couleurs.accent,1.7);
+    cercle((1-.2056)*ax,0,5,couleurs.energie);cr.restore();
+    texte('MERCURE · AVANCE EXAGÉRÉE',W/2,550,11,couleurs.energie,'center');
+  } else {
+    texte('TRAIT RECONSTRUIT À PARTIR DE L’ANGLE INTÉGRÉ',W/2,547,W<630?9:11,couleurs.second,'center');
+  }
+}
+function tracerAnneau(x,y,r,c,style){cr.strokeStyle=c;cr.lineWidth=style===0?2:1.4;cr.setLineDash(style===1?[6,6]:style===2?[2,6]:[]);cr.beginPath();cr.arc(x,y,r,0,2*Math.PI);cr.stroke();cr.setLineDash([]);}
+function dessinerHorizon(){
+  const x=etatMesures(),h=GR.rs(etat.masseBH),r=Math.min(W<650?51:72,W*.132),cx=W<650?W*.35:W*.33,cy=330;
+  texte('GÉOMÉTRIE DE SCHWARZSCHILD',W/2,91,W<600?10:12,couleurs.accent,'center');
+  tracerAnneau(cx,cy,3*r,'#536782',2);
+  tracerAnneau(cx,cy,1.5*r,'#8092b1',1);
+  const halo=cr.createRadialGradient(cx,cy,r*.7,cx,cy,3.35*r);
+  halo.addColorStop(0,'#000');halo.addColorStop(.3,'#111522');halo.addColorStop(.75,'#111d2d');halo.addColorStop(1,'#090e16');
+  cercle(cx,cy,3.2*r,halo);tracerAnneau(cx,cy,3*r,'#536782',2);
+  tracerAnneau(cx,cy,1.5*r,'#8092b1',1);
+  cercle(cx,cy,r,'#000000',couleurs.accent,2);
+  texte('rₛ',cx+r*.38,cy+6,17,couleurs.accent);
+  texte('1,5 rₛ',cx+1.15*r,cy-1.55*r,11,couleurs.accent);
+  texte('3 rₛ',cx-3.2*r,cy+3.1*r,11,couleurs.second);
+  const sondeVisible=etat.sondeActive;
+  if(sondeVisible){
+    const ratio=Math.max(.001,x.rPropre/h);
+    const log0=Math.log(etat.depart),fraction=limite(Math.log(Math.max(1,ratio))/log0,0,1);
+    const distance=ratio>=1 ? r+fraction*2*r : r*ratio,a=-Math.PI*.79;
+    const px=cx+Math.cos(a)*distance,py=cy+Math.sin(a)*distance;
+    const f=limite(x.frequence,0,1);
+    const rc=Math.round(255-(1-f)*10),gc=Math.round(205*f+20),bc=Math.round(175*f+16);
+    cercle(px,py,6,`rgb(${rc},${gc},${bc})`);
+    for(let i=0;i<4;i++){
+      const o=14+i*14+((etat.temps%1)*7);
+      cr.globalAlpha=limite(f*(1-i*.2),0,.75);
+      cercle(px,py,o,null,`rgb(${rc},${gc},${bc})`,1);cr.globalAlpha=1;
+    }
+    if(x.tau>=x.tauH)texte('HORIZON FRANCHI POUR LA SONDE',W/2,545,W<600?10:13,couleurs.energie,'center');
+  }
+  if(etat.orbiteActive){
+    const orbital=etat.rayonOrbite,rad= r+(orbital-1)*r*.35;
+    tracerAnneau(cx,cy,rad,x.classification.stable?'#a8b8d8':'#ff8a5b',x.classification.stable?0:1);
+    cercle(cx+rad*Math.cos(etat.temps*.4),cy+rad*Math.sin(etat.temps*.4),5,couleurs.energie);
+  }
+  const lx=W<650?W*.69:W*.70,large=W-lx-15,tm=x.tauH>=1?1:1000,unit=x.tauH>=1?'s':'ms';
+  texte('TEMPS PROPRE',lx,196,11,couleurs.accent);
+  boite(lx,207,large,80,'#121c2b','#394d61');
+  montre(lx+25,242,17,((x.tau/x.tauH)%1),couleurs.accent);
+  texte(`${fmt(x.tau*tm,2)} ${unit}`,lx+50,246,W<600?11:14,couleurs.texte);
+  texte(x.tau>=x.tauH?'PASSAGE ACCOMPLI':'SONDE EN CHUTE',lx+11,269,9,couleurs.second);
+  texte('TEMPS LOINTAIN',lx,333,11,couleurs.energie);
+  boite(lx,344,large,94,'#151821','#394453');
+  montre(lx+25,381,17,((x.tfar/x.tauH)%1),couleurs.energie);
+  texte(`${fmt(x.tfar*tm,2)} ${unit}`,lx+50,385,W<600?11:14,couleurs.texte);
+  texte('r(t) → rₛ ; jamais r < rₛ',lx+10,423,W<600?9:10,couleurs.second);
+  const baseY=496;
+  texte('FRÉQUENCE REÇUE / ÉMISE',lx,baseY,10,couleurs.second);
+  boite(lx,baseY+9,large,8,'#283342',null);
+  cr.fillStyle=couleurs.rouge;cr.fillRect(lx,baseY+9,large*limite(x.frequence,0,1),8);
+  texte(`${fmt(x.frequence,3)} ×`,lx+large,baseY+36,12,couleurs.energie,'right');
+  if(!etat.sondeActive && !etat.orbiteActive)texte('CHOISIS « LÂCHER LA SONDE »',W/2,545,W<630?10:12,couleurs.second,'center');
+}
+function tracerScope(){
+  const w=scope.clientWidth,h=scope.clientHeight,dpr=Math.min(devicePixelRatio||1,2);
+  if(w<2||h<2)return;
+  const cle=[etat.step,etat.situations.join(','),etat.g,etat.masse,etat.impactFacteur,etat.masseBH,etat.depart,Math.round(w),Math.round(h),dpr].join('|');
+  if(scopeMemo===cle)return;scopeMemo=cle;
+  scope.width=Math.round(w*dpr);scope.height=Math.round(h*dpr);
+  sr.setTransform(dpr,0,0,dpr,0,0);sr.fillStyle='#0a0d12';sr.fillRect(0,0,w,h);
+  sr.strokeStyle='#263240';sr.lineWidth=1;
+  for(let i=0;i<=4;i++){sr.beginPath();sr.moveTo(9,h*i/4);sr.lineTo(w-9,h*i/4);sr.stroke();}
+  for(let i=0;i<=7;i++){sr.beginPath();sr.moveTo(w*i/7,3);sr.lineTo(w*i/7,h-5);sr.stroke();}
+  const tracer=(fn,c,style=[])=>{sr.beginPath();sr.strokeStyle=c;sr.lineWidth=1.7;sr.setLineDash(style);
+    for(let i=0;i<=140;i++){const t=i/140;const x=12+t*(w-24),y=10+limite(fn(t),0,1)*(h-20);if(!i)sr.moveTo(x,y);else sr.lineTo(x,y);}sr.stroke();sr.setLineDash([]);};
+  const s=etat.step;
+  if(s===0){tracer(t=>1-GR.cabin({mode:etat.situations[0],g:etat.g},t*.9).balle.chute/2.65,'#a8b8d8');tracer(t=>1-GR.cabin({mode:etat.situations[1],g:etat.g},t*.9).balle.chute/2.65,'#ffd166',[4,4]);}
+  if(s===1){const x=GR.gpsBudget();tracer(t=>.5-x.gravitation/70*t,'#a8b8d8');tracer(t=>.5+(Math.abs(x.cinematique)/20)*t,'#9da4b1',[3,4]);tracer(t=>.5-x.total/70*t,'#ffd166');}
+  if(s===2){const p=photonCourant();tracer(t=>.83-.7*t,'#a8b8d8');tracer(t=>.83-.7*(p.angle ? p.newton/p.angle : 0)*t,'#8a93a0',[4,4]);}
+  if(s===3){const f=chuteCourante(),r0=f.r0;
+    tracer(t=>1-(f.rAtProper(t*f.tauH*1.012)-f.rs)/(r0-f.rs),'#a8b8d8');
+    tracer(t=>1-(f.rAtFar(t*f.tauH*2.5)-f.rs)/(r0-f.rs),'#ffd166',[4,3]);
+  }
+}
+function dessiner(){
+  if(!taille())return;
+  grille();
+  if(etat.step===0)dessinerCabines();
+  if(etat.step===1)dessinerHorloges();
+  if(etat.step===2)dessinerCourbure();
+  if(etat.step===3)dessinerHorizon();
+  tracerScope();
+}
+function boucle(timestamp){
+  if(dernier===null) dernier=timestamp;
+  const ecoule=Math.min((timestamp-dernier)/1000,.06);dernier=timestamp;
+  if(etat.joue){
+    const reduit=matchMedia('(prefers-reduced-motion: reduce)').matches ? .35 : 1;
+    cumul+=ecoule*reduit;
+    let n=0;while(cumul>=pasFixe && n<10){
+      cumul-=pasFixe;etat.temps+=pasFixe*etat.vitesse;
+      const d=durees[etat.step];
+      if(etat.step===0||etat.step===2)etat.temps%=d;
+      else if(etat.temps>=d){etat.temps=d;etat.joue=false;}
+      n++;
+    }
+  }
+  if(timestamp-dernierPanneau>90){panneau();dernierPanneau=timestamp;}
+  dessiner();requestAnimationFrame(boucle);
+}
+addEventListener('resize',()=>{panneau();dessiner();});
+if(window.ResizeObserver)new ResizeObserver(()=>dessiner()).observe(cv);
+window.__labo={moteur:GR,get step(){return etat.step;},goStep:changerEtape,state:etatMesures,tick:avancer,setPlay,
+  setCabin,drop:tirer,laser,openWindows:ouvrir,setAltitude,velocity,gpsCorrection,setMass,setImpact,
+  mercury,sheet,setBH,dropProbe,orbit};
+changerEtape(0);
+requestAnimationFrame(boucle);
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body></html>

@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- Le grain des impacts, et non une onde decorative, porte le moment de decouverte. -->
+<!-- Lavande pour les amplitudes ; orange et bleu seulement pour distinguer les chemins. -->
+<!-- Les phases tournent avec le dephaseur ; l'accumulation ne s'accelere jamais artificiellement. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Une particule, des amplitudes — LABO</title>
+<meta name="description" content="Une particule a la fois, deux amplitudes, de l'information de chemin et un paquet d'ondes libre.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){
+ --fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;
+ --accent:#a99cf0;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;
+ --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;
+ --serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)
+}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 var(--sans)}button,input,select{font:inherit}
+button{cursor:pointer}a{color:inherit}[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 328px;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+.scene{position:relative;background:var(--fond);color:var(--texte);min-height:0;min-width:0;overflow:hidden}
+#cv{width:100%;height:100%;display:block;touch-action:pan-y}
+.scene-meta{position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;gap:16px;pointer-events:none;color:var(--texte-2);font:10px var(--mono);letter-spacing:.075em}
+.scene-meta b{color:var(--accent);font-weight:400}
+.scene-legend{position:absolute;bottom:12px;left:20px;right:20px;pointer-events:none;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--texte-2);font:10px var(--mono)}
+.scene-legend b{font-weight:400;color:var(--texte)}
+.panel{overflow:auto;display:flex;flex-direction:column;gap:14px;min-width:0;padding:18px 18px 18px 20px}
+.panel h2{font:500 24px/1.15 var(--sans);letter-spacing:-.025em;margin:0 0 8px}
+.panel p{margin:0}.eyebrow{font:10px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--encre-3);margin-bottom:7px!important}
+.panel .prose{font-size:14px;line-height:1.55;color:var(--encre-2)}
+.status{font:12px/1.65 var(--mono);color:var(--encre-2);padding-left:12px;border-left:2px solid var(--accent);min-height:40px;margin-top:9px!important}
+.meas{border-top:1px solid var(--filet);padding-top:5px}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--filet);padding:7px 0}
+.lab{font:11px var(--mono);color:var(--encre-3)}.val{font:500 12px var(--mono);white-space:nowrap;color:var(--encre);font-variant-numeric:tabular-nums;text-align:right}
+.val i{font-size:10px;font-weight:400;color:var(--encre-3);font-style:normal}
+.scopeBox{border:1px solid var(--filet);background:var(--fond)}#scope{width:100%;height:112px;display:block}
+.cle{padding-left:12px;border-left:2px solid var(--encre);font-size:13px;line-height:1.5;color:var(--encre-2)}
+.note{font:11px/1.55 var(--mono);color:var(--encre-3)}
+.hint{font:10px/1.5 var(--mono);color:var(--encre-3)}.liens{display:grid;gap:10px;margin-top:auto}
+.comprendre{display:block;text-decoration:none;font-size:13px;border:1px solid var(--encre);padding:9px 11px;text-align:center;color:var(--encre)}
+.comprendre:hover{background:var(--encre);color:var(--papier)}
+.controls{grid-column:1/-1;display:flex;gap:9px 16px;align-items:center;flex-wrap:wrap;padding:9px 20px;background:var(--papier);border-top:1px solid var(--filet)}
+.grp{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:33px;padding:6px 10px;border:1px solid var(--filet);background:transparent;color:var(--encre);font:11px var(--mono)}
+.btn:hover{border-color:var(--encre)}.btn.on,.btn[aria-pressed=true]{border-color:var(--encre);background:var(--papier-2)}
+.tools{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;flex:1 1 100%;padding-top:8px;border-top:1px solid var(--filet)}
+.tools [data-act]{display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+.range{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:var(--encre-2);font:11px var(--mono)}
+.range output{color:var(--encre);min-width:35px;text-align:right}
+.range input{width:clamp(80px,10vw,138px);accent-color:var(--accent);height:18px}
+.soft{color:var(--encre-3);font:10px var(--mono)}
+.discovery{display:flex;gap:4px;flex-wrap:wrap;position:absolute;bottom:36px;left:20px;right:20px;z-index:2;pointer-events:none}
+.object{pointer-events:auto;background:rgba(10,13,18,.90);color:var(--texte-2);border:1px solid #313844;padding:3px 7px;min-height:24px;font:10px var(--mono);cursor:help}
+.object:hover,.object:focus-visible{border-color:var(--accent);color:var(--texte)}
+.tip{position:fixed;z-index:30;max-width:270px;color:var(--texte);background:var(--fond-2);border:1px solid #34404b;padding:10px 12px;pointer-events:none;box-shadow:0 12px 45px #0008;font:11px/1.5 var(--mono)}
+.tip b{display:block;color:var(--accent);margin-bottom:3px}.tip span{color:var(--texte-2)}
+.questions{display:grid;gap:7px}.questions a{font-size:12px;color:var(--encre-2);text-decoration:none;padding:8px 0;border-top:1px solid var(--filet)}.questions a b{display:block;color:var(--encre);font-weight:500}
+.serie{font:10px var(--mono);letter-spacing:.08em;white-space:nowrap;color:var(--encre-3)}
+.labo-etapes .titre h1{font:400 clamp(32px,5vh,55px)/1 var(--serif);letter-spacing:-.012em}.labo-etapes .titre h1 em{font-style:italic;color:var(--encre)}
+.labo-etapes .panel{gap:13px}.labo-etapes .cle{color:var(--encre-2)}.labo-etapes .scene{min-height:0}
+.labo-etapes .modes{gap:12px}.labo-etapes .barre{padding-top:11px}.labo-etapes .titre{padding-top:12px}.labo-etapes .sig{gap:4px 18px}
+@media(max-width:860px){
+ .app{display:flex;flex-direction:column}.scene{height:510px;flex:none;order:1}.controls{order:2;padding:12px 16px!important}.panel{order:3;border-top:1px solid var(--filet);overflow:visible}
+ .scene-meta{top:13px;left:13px;right:13px}.discovery{left:12px;right:12px;bottom:34px}.scene-legend{left:12px;right:12px}
+ .labo-etapes .titre{gap:14px}.labo-etapes .sig dd{font-size:11px}
+}
+@media(max-width:450px){.scene{height:420px}.range input{width:100px}.scene-legend{font-size:9px}.discovery{flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:none;touch-action:pan-x}.scene-legend{display:none}.discovery .object{font-size:9px;padding:3px 5px;flex:0 0 auto}.labo-etapes .panel{padding:16px}.btn{padding:5px 8px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="omc" data-module="48">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">&larr; LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO &middot; Fondations 48</p><button class="bascule-theme" type="button" id="themeButton">Th&egrave;me auto</button></div></header>
+<div class="titre"><div><h1>Une particule, des <em>amplitudes</em></h1><p class="lead">Un impact &agrave; la fois. Deux chemins possibles. Une r&egrave;gle de probabilit&eacute;.</p></div><dl class="sig"><dt>&Eacute;chelle</dt><dd>pm &rarr; &micro;m</dd><dt>Temps</dt><dd>fs &rarr; s &middot; illustratif</dd><dt>Mod&egrave;le</dt><dd>Young &middot; phaseurs &middot; paquet libre</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Module 48, quatre &eacute;tapes"><div class="chap"><p class="chap-t"><b>48</b>Module 48 &middot; Fondations quantiques</p><div class="segs"><button type="button" class="seg" data-step="0" title="Une particule &agrave; la fois"><b>1</b><span>Un impact</span></button><button type="button" class="seg" data-step="1" title="Additionner les amplitudes"><b>2</b><span>Amplitude</span></button><button type="button" class="seg" data-step="2" title="Savoir par o&ugrave; : perdre les franges"><b>3</b><span>Chemin</span></button><button type="button" class="seg" data-step="3" title="Le paquet d'onde"><b>4</b><span>Paquet</span></button></div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches de lecture"><button type="button" role="tab" data-m="observer" data-indice="Regarde d'abord les impacts un par un." aria-selected="true"><span>O</span>Observer</button><button type="button" role="tab" data-m="manipuler" data-indice="Change un param&egrave;tre et observe ce qui change." aria-selected="false"><span>M</span>Manipuler</button><button type="button" role="tab" data-m="comprendre" data-indice="Relie l'exp&eacute;rience aux amplitudes et aux probabilit&eacute;s." aria-selected="false"><span>C</span>Comprendre</button></div><p class="indice" id="indice">Regarde d'abord les impacts un par un.</p></div>
+<div class="app">
+<main class="scene" id="scene"><canvas id="cv" role="img" aria-label="Simulation interactive de fentes, d'interf&eacute;rom&egrave;tre et de paquet quantique"></canvas><div class="scene-meta"><span id="sceneName">YOUNG &middot; UN IMPACT &Agrave; LA FOIS</span><b id="clock">N = 0</b></div><div class="discovery" id="objects" aria-label="L&eacute;gende d&eacute;couverte, toucher pour en savoir plus"></div><div class="scene-legend"><span id="legendLeft">Points : arriv&eacute;es individuelles</span><span id="legendRight"><b>LABO / 48.1</b> &middot; g&eacute;om&eacute;trie agrandie</span></div></main>
+<aside class="panel" aria-label="Lecture de l'exp&eacute;rience"><section><p class="eyebrow" id="eyebrow">&Eacute;TAPE 01 / 04</p><h2 id="stepTitle">Une particule &agrave; la fois</h2><p class="prose couche-comp" id="stepText"></p><p class="status" role="status" aria-live="polite" id="status"></p></section><section class="couche-lire"><p class="eyebrow" id="scopeTitle">ACCUMULATION / PROBABILIT&Eacute;</p><div class="scopeBox"><canvas id="scope" role="img" aria-label="Graphique des mesures et pr&eacute;dictions"></canvas></div><p class="soft" id="scopeLegend">Histogramme des impacts.</p></section><section class="couche-lire"><div class="meas" id="meas"></div></section><p id="key" class="cle couche-comp"></p><p id="honesty" class="note"></p><div id="questions" class="questions couche-comp" hidden><a href="../../labo/index.html#fondations"><b>49 &middot; &Eacute;nergie</b>Pourquoi un &eacute;lectron pi&eacute;g&eacute; n'a-t-il que certaines &eacute;nergies ?</a><a href="../../labo/index.html#fondations"><b>49 &middot; Barri&egrave;res</b>Peut-on franchir un obstacle sans l'&eacute;nergie classique n&eacute;cessaire ?</a><a href="../../labo/index.html#fondations"><b>50 &middot; Corr&eacute;lations</b>Deux particules peuvent-elles partager un seul &eacute;tat ?</a></div><nav class="liens"><a class="comprendre couche-comp" href="explication.html#m48">Th&eacute;orie du module 48 &rarr;</a><p class="hint couche-lire">Espace : pause &middot; &larr; &rarr; : &eacute;tape &middot; 1&ndash;4 : &eacute;tape &middot; R : recommencer &middot; O M C : couches &middot; I : infos</p></nav></aside>
+<div class="controls" role="toolbar" aria-label="Commandes de la simulation"><div class="grp"><button class="btn" type="button" id="prev" title="&Eacute;tape pr&eacute;c&eacute;dente">&larr;</button><button class="btn" type="button" id="play" title="R&eacute;ductions de mouvement : simulation ralentie, non fig&eacute;e">Pause</button><button class="btn" type="button" id="next" title="&Eacute;tape suivante">&rarr;</button><button class="btn" type="button" id="reset">Recommencer</button></div><div class="tools" id="tools">
+<div data-act="0"><label class="range">Cadence <input type="range" id="rate1" min="0" max="3" step=".05" value="1.78"><output id="rate1Val">60 /s</output></label><label class="range">Tension <input type="range" id="voltage" min="50" max="1500" step="10" value="100"><output id="voltageVal">100 V</output></label><label class="range">Fentes <input type="range" id="spacing" min=".6" max="2.4" step=".1" value="1"><output id="spacingVal">1,0 &micro;m</output></label><button type="button" class="btn" id="closeSlit" aria-pressed="false">Fermer une fente</button><button type="button" class="btn" id="reveal" aria-pressed="false">Voir la pr&eacute;diction</button><button type="button" class="btn" id="burst1">10 000 d'un coup</button></div>
+<div data-act="1" hidden><label class="range">Phase <input id="phase" type="range" min="0" max="6.283185307179586" step=".025" value="0"><output id="phaseVal">0,00 rad</output></label><label class="range">Cadence <input id="rate2" type="range" min="0" max="3" step=".05" value="1.78"><output id="rate2Val">60 /s</output></label><button type="button" class="btn" id="blockArm" aria-pressed="false">Bloquer un bras</button><button type="button" class="btn" id="burst2">+ 1 000 photons</button></div>
+<div data-act="2" hidden><button type="button" class="btn on" id="setupYoung" aria-pressed="true">Deux fentes</button><button type="button" class="btn" id="setupMZ" aria-pressed="false">Mach-Zehnder</button><label class="range">D&eacute;tecteur de chemin <input type="range" id="which" min="0" max="100" step="5" value="0"><output id="whichVal">0 %</output></label><button class="btn" type="button" id="burst3">+ 10 000 impacts</button><button class="btn" type="button" id="clear">Effacer l'&eacute;cran</button></div>
+<div data-act="3" hidden><label class="range">Largeur <input type="range" id="sigma" min=".12" max="6" step=".04" value="1"><output id="sigmaVal">1,00 nm</output></label><label class="range">Nombre d'onde <input type="range" id="k" min=".2" max="5" step=".1" value="1.2"><output id="kVal">1,2 nm&sup1;</output></label><label class="range">Masse <select id="mass" aria-label="Choisir une particule"><option value="electron">&Eacute;lectron</option><option value="atom">Atome</option><option value="dust">Grain de poussi&egrave;re</option></select></label><button type="button" class="btn" id="measure">Mesurer la position</button></div>
+</div></div></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<script>
+/* QM-BEGIN */
+const QM = (() => {
+  'use strict';
+  // Constantes SI : CODATA 2022 (NIST), h, e et c definies exactement.
+  const h = 6.62607015e-34;
+  const hbar = h / (2 * Math.PI);
+  const me = 9.1093837139e-31;
+  const e = 1.602176634e-19;
+  const c = 299792458;
+  const u = 1.66053906892e-27;
+  const TAU = 2 * Math.PI;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const cadd = (a, b) => ({re: a.re + b.re, im: a.im + b.im});
+  const cmul = (a, b) => ({re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re});
+  const cabs2 = z => z.re * z.re + z.im * z.im;
+  const cexp = phi => ({re: Math.cos(phi), im: Math.sin(phi)});
+  const phasor = (amp, phase) => ({re: amp * Math.cos(phase), im: amp * Math.sin(phase)});
+  const sinc = z => Math.abs(z) < 1e-7 ? 1 - z * z / 6 + z ** 4 / 120 : Math.sin(z) / z;
+  const DEFAULT = Object.freeze({lambda: 1.226e-10, d: 1e-6, w: 0.18e-6, L: 0.45, xMin: -3.1e-4, xMax: 3.1e-4});
+
+  function mulberry32(seed = 1) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function validFentes(p) {
+    if (!(p.lambda > 0 && p.d > 0 && p.w > 0 && p.L > 0 && p.d >= p.w))
+      throw new RangeError('Longueurs positives et fentes distinctes requises');
+  }
+  function twoSlit({lambda, d, w, L}, x) {
+    validFentes({lambda, d, w, L});
+    // Fraunhofer paraxial : deux fentes rectangulaires identiques, phases opposees.
+    const enveloppe = sinc(Math.PI * w * x / (lambda * L));
+    const phase = Math.PI * d * x / (lambda * L);
+    return {psi1: phasor(enveloppe, -phase), psi2: phasor(enveloppe, phase)};
+  }
+  const interfrange = ({lambda, d, L}) => lambda * L / d;
+  function intensite(mode, x, p, eta = 1) {
+    const {psi1: a, psi2: b} = twoSlit(p, x);
+    if (mode === 'single') return cabs2(a);
+    const somme = cabs2(a) + cabs2(b);
+    if (mode === 'which') return somme;
+    if (mode !== 'both' && mode !== 'partial') throw new RangeError('Mode de fentes inconnu');
+    const coherence = mode === 'both' ? 1 : clamp(eta, 0, 1);
+    return Math.max(0, somme + 2 * coherence * (a.re * b.re + a.im * b.im));
+  }
+
+  function preparePattern(params = {}, mode = 'both', eta = 1) {
+    const p = {...DEFAULT, ...params};
+    validFentes(p);
+    if (!(p.xMax > p.xMin)) throw new RangeError('Intervalle de detection vide');
+    // Integration et CDF sur le MEME domaine fini que l'ecran : probas conditionnelles.
+    const N = 8192, dx = (p.xMax - p.xMin) / N;
+    const cumul = new Float64Array(N + 1);
+    let prev = intensite(mode, p.xMin, p, eta);
+    for (let i = 1; i <= N; i++) {
+      const next = intensite(mode, p.xMin + i * dx, p, eta);
+      cumul[i] = cumul[i - 1] + 0.5 * (prev + next) * dx;
+      prev = next;
+    }
+    const norme = cumul[N];
+    if (!(norme > 0)) throw new RangeError('Densite de detection nulle');
+    for (let i = 1; i <= N; i++) cumul[i] /= norme;
+    return {
+      mode, eta: mode === 'both' ? 1 : mode === 'which' ? 0 : clamp(eta, 0, 1),
+      params: p, xMin: p.xMin, xMax: p.xMax, dx, cumul,
+      pdf: x => x < p.xMin || x > p.xMax ? 0 : intensite(mode, x, p, eta) / norme,
+      interfrange: interfrange(p),
+      normalisation: norme
+    };
+  }
+  // Les affichages utilisent toujours le meme modele tant que les parametres restent fixes.
+  const cache = new Map();
+  function pattern(mode, x, params = {}) {
+    const key = JSON.stringify([mode, params]);
+    if (!cache.has(key)) {
+      if (cache.size >= 24) cache.clear();
+      cache.set(key, preparePattern(params, mode, params.eta ?? 1));
+    }
+    return cache.get(key).pdf(x);
+  }
+  function sampleHits(distribution, n, rng) {
+    if (!distribution || !distribution.cumul || !Number.isInteger(n) || n < 0 || typeof rng !== 'function')
+      throw new TypeError('Distribution, nombre entier et generateur requis');
+    const {cumul: f, xMin, dx} = distribution;
+    const hits = new Float64Array(n);
+    for (let k = 0; k < n; k++) {
+      const q = clamp(rng(), 0, 1 - Number.EPSILON);
+      let lo = 0, hi = f.length - 1;
+      while (hi - lo > 1) { const mid = (lo + hi) >>> 1; if (f[mid] < q) lo = mid; else hi = mid; }
+      const frac = f[hi] > f[lo] ? (q - f[lo]) / (f[hi] - f[lo]) : 0;
+      hits[k] = xMin + (lo + frac) * dx;
+    }
+    return hits;
+  }
+  function lambdaDB(m, v) {
+    if (!(m > 0 && v >= 0 && v < c)) throw new RangeError('Masse positive et vitesse sous c');
+    return v === 0 ? Infinity : h / (m * v / Math.sqrt(1 - (v / c) ** 2));
+  }
+  function lambdaElectron(V) {
+    if (!(V > 0)) throw new RangeError('Tension positive requise');
+    // K = eV ; (pc)^2 = K(K + 2 m_e c^2).
+    const K = e * V;
+    return h * c / Math.sqrt(K * (K + 2 * me * c * c));
+  }
+  function mz({phi = 0, blockArm = false, whichPath = false, eta = 1} = {}) {
+    // Convention relative des separatrices : D1 = (1 + exp(i phi))/2,
+    // D2 = (1 - exp(i phi))/2. La phase globale est non observable.
+    const a = phasor(0.5, 0), b = phasor(0.5, phi);
+    const voies = {d1: [a, b], d2: [a, {re: -b.re, im: -b.im}]};
+    const coherence = blockArm || whichPath === true ? 0 :
+      typeof whichPath === 'number' ? clamp(1 - whichPath, 0, 1) : clamp(eta, 0, 1);
+    const p1 = blockArm ? 0.25 : (1 + coherence * Math.cos(phi)) / 2;
+    const p2 = blockArm ? 0.25 : (1 - coherence * Math.cos(phi)) / 2;
+    return {d1: p1, d2: p2, absorbed: blockArm ? 0.5 : 0, coherence, voies};
+  }
+  function mzPhotons(n, params = {}, rng = mulberry32(1)) {
+    const p = mz(params), out = {d1: 0, d2: 0, absorbed: 0};
+    if (!Number.isInteger(n) || n < 0) throw new RangeError('Nombre de photons invalide');
+    for (let i = 0; i < n; i++) {
+      const r = rng();
+      if (r < p.d1) out.d1++;
+      else if (r < p.d1 + p.d2) out.d2++;
+      else out.absorbed++;
+    }
+    return out;
+  }
+  function sigmaT(sigma0, m, t) {
+    if (!(sigma0 > 0 && m > 0)) throw new RangeError('Largeur et masse positives');
+    return sigma0 * Math.hypot(1, hbar * t / (2 * m * sigma0 ** 2));
+  }
+  function momentumSpread(sigma0) {
+    if (!(sigma0 > 0)) throw new RangeError('Largeur initiale positive');
+    return hbar / (2 * sigma0);
+  }
+  function gaussPacket({x0 = 0, sigma0, k0 = 0, m = me}, x, t = 0) {
+    if (!(sigma0 > 0 && m > 0 && t >= 0)) throw new RangeError('Paquet initial invalide');
+    // Solution exacte libre pour |psi(x,0)|^2 gaussienne d'ecart-type sigma0.
+    const tau = hbar * t / (2 * m * sigma0 * sigma0);
+    const s = sigma0 * Math.hypot(1, tau);
+    const mean = x0 + hbar * k0 / m * t;
+    const z = x - mean;
+    const prob = Math.exp(-0.5 * (z / s) ** 2) / (Math.sqrt(TAU) * s);
+    const phase = k0 * (x - x0) - hbar * k0 * k0 * t / (2 * m)
+      + z * z * tau / (4 * sigma0 * sigma0 * (1 + tau * tau))
+      - 0.5 * Math.atan(tau);
+    const amp = Math.sqrt(prob);
+    return {re: amp * Math.cos(phase), im: amp * Math.sin(phase), abs2: prob, mean, sigma: s};
+  }
+  function expectation(psi, op) {
+    // psi = {at(x), min, max, n}. L'operateur op(x,psi_x) renvoie O psi(x).
+    const {at, min, max, n = 4096} = psi;
+    if (typeof at !== 'function' || typeof op !== 'function' || !(max > min) || n < 2)
+      throw new TypeError('Fonction d onde et operateur numeriques requis');
+    const dx = (max - min) / n;
+    let real = 0, imag = 0, norm = 0;
+    for (let i = 0; i <= n; i++) {
+      const x = min + i * dx, z = at(x), rz = op(x, z), w = (i === 0 || i === n ? 0.5 : 1) * dx;
+      const oz = typeof rz === 'number' ? {re: rz, im: 0} : rz;
+      real += (z.re * oz.re + z.im * oz.im) * w;
+      imag += (z.re * oz.im - z.im * oz.re) * w;
+      norm += cabs2(z) * w;
+    }
+    return {re: real / norm, im: imag / norm, norm};
+  }
+  function mesureInterfrange(points, attendu, min, max) {
+    if (points.length < 1200 || !(attendu > 0)) return null;
+    // Comparaison de la periode via autocorrelation d'un histogramme lisse.
+    const N = 256, hist = new Float64Array(N), dx = (max - min) / N;
+    for (const x of points) if (x >= min && x <= max) hist[Math.min(N - 1, Math.floor((x - min) / dx))]++;
+    const filtr = new Float64Array(N), largeur = Math.max(1, 0.12 * attendu / dx);
+    for (let i = 0; i < N; i++) {
+      let s = 0, w = 0;
+      for (let k = -5; k <= 5; k++) {
+        const j = i + k;
+        if (j >= 0 && j < N) { const poids = Math.exp(-0.5 * (k / largeur) ** 2); s += poids * hist[j]; w += poids; }
+      }
+      filtr[i] = s / w;
+    }
+    const lo = Math.max(2, Math.floor(0.75 * attendu / dx));
+    const hi = Math.min(N / 3, Math.ceil(1.25 * attendu / dx));
+    let best = lo, score = -Infinity;
+    for (let shift = lo; shift <= hi; shift++) {
+      let corr = 0, norm = 0;
+      for (let j = 24; j < N - 24 - shift; j++) {
+        const a = filtr[j], b = filtr[j + shift];
+        corr += a * b;
+        norm += a * a + b * b;
+      }
+      const s = corr / Math.max(norm, 1e-30);
+      if (s > score) {score = s; best = shift;}
+    }
+    return best * dx;
+  }
+  return {h, hbar, me, e, c, u, DEFAULT, mulberry32, cadd, cmul, cabs2, cexp, phasor,
+    twoSlit, intensite, interfrange, preparePattern, pattern, sampleHits,
+    lambdaDB, lambdaElectron, mz, mzPhotons, sigmaT, momentumSpread, gaussPacket,
+    expectation, mesureInterfrange};
+})();
+/* QM-END */
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const canvas = $('#cv'), ctx = canvas.getContext('2d');
+const mini = $('#scope'), sc = mini.getContext('2d');
+const C = {fond:'#0a0d12',surface:'#11161e',trait:'#27313c',blanc:'#e8e4dc',muet:'#8a93a0',accent:'#a99cf0',chemin1:'#ff8a5b',chemin2:'#5bb8ff',impact:'#ffd166'};
+const PAS = 1/60, MASSES = {electron:QM.me,atom:100*QM.u,dust:1e-12};
+const MAX_IMPACTS_VISIBLES = 15000;
+let ecran = {w:0,h:0}, petitEcran={w:0,h:0}, last=0, accum=0, frames=0;
+let seed=QM.mulberry32(480048), playing=true, step=0;
+let rate=60, voltage=100, d=1e-6, slitClosed=false, showTheory=false;
+let pYoung=null, phi=0, blocked=false, c2={d1:0,d2:0,absorbed:0};
+let hits1=[], hist1=new Uint32Array(80), frac=0, previewMesure=null;
+let setup='young', eta=1, decoChange=false, baseline=[], newest=[], baselineMZ={d1:0,d2:0}, newestMZ={d1:0,d2:0};
+let packet={x0:0,sigma0:1e-9,k0:1.2e9,m:QM.me}, massChoice='electron', pt=0, measured=null;
+const config = () => ({lambda:QM.lambdaElectron(voltage),d,w:0.18e-6,L:.45,xMin:-3.1e-4,xMax:3.1e-4});
+function density(mode='both',coherence=1){return QM.preparePattern(config(),mode,coherence);}
+let cache3 = null, cache3Old = null;
+function young3Model(){if(!cache3)cache3=density(eta===1?'both':eta===0?'which':'partial',eta);return cache3;}
+function young3Before(){if(!cache3Old)cache3Old=density('both');return cache3Old;}
+function refreshYoung(){pYoung=density(slitClosed?'single':'both');}
+refreshYoung();
+function fmt(x,n=2){return Number(x).toLocaleString('fr-CA',{minimumFractionDigits:n,maximumFractionDigits:n});}
+function integer(x){return Math.round(x).toLocaleString('fr-CA');}
+function row(k,v,unit=''){return `<div class="row"><span class="lab">${k}</span><span class="val">${v}${unit?` <i>${unit}</i>`:''}</span></div>`;}
+function scaleCanvas(cv, context, width, height) {
+ const dpr = Math.min(devicePixelRatio || 1,2);
+ const ww = Math.max(1,Math.floor(width*dpr)), hh=Math.max(1,Math.floor(height*dpr));
+ if (cv.width!==ww || cv.height!==hh){cv.width=ww;cv.height=hh;}
+ context.setTransform(dpr,0,0,dpr,0,0);
+ return {w:width,h:height};
+}
+function resize(){
+ const a=canvas.getBoundingClientRect();
+ if(a.width>2 && a.height>2) ecran=scaleCanvas(canvas,ctx,a.width,a.height);
+ const b=mini.getBoundingClientRect();
+ if(b.width>2 && b.height>2) petitEcran=scaleCanvas(mini,sc,b.width,b.height);
+ draw();
+}
+function randomNormal(){let a=Math.max(1e-12,seed()),b=seed();return Math.sqrt(-2*Math.log(a))*Math.cos(2*Math.PI*b);}
+function xToBin(x,dist,n=80){return Math.min(n-1,Math.max(0,Math.floor((x-dist.xMin)/(dist.xMax-dist.xMin)*n)));}
+function addOneHits(n){
+ if(n<=0)return;
+ const vals=QM.sampleHits(pYoung,n,seed);
+ for(const x of vals){hits1.push(x);hist1[xToBin(x,pYoung)]++;}
+ if(hits1.length>=1200 && hits1.length%250<Math.max(1,n))previewMesure=QM.mesureInterfrange(hits1,pYoung.interfrange,pYoung.xMin,pYoung.xMax);
+}
+function addYoung3(n){
+ if(n<=0)return;
+ const mod = young3Model();
+ const xs=QM.sampleHits(mod,n,seed);
+ const into = decoChange?newest:baseline;
+ for(const x of xs)into.push(x);
+}
+function addMZ3(n){
+ if(n<=0)return;
+ const z=QM.mzPhotons(n,{phi,eta},seed),into=decoChange?newestMZ:baselineMZ;
+ into.d1+=z.d1;into.d2+=z.d2;
+}
+function burst(n){
+ n = Math.max(0,Math.min(100000,Math.floor(n)));
+ if(step===0)addOneHits(n);
+ else if(step===1){const a=QM.mzPhotons(n,{phi,blockArm:blocked},seed);for(const k of Object.keys(c2))c2[k]+=a[k];}
+ else if(step===2)setup==='young'?addYoung3(n):addMZ3(n);
+ update();draw();return state();
+}
+function physicalStep(){
+ if(step===3){
+   const timePerSecond=massChoice==='electron'?2*QM.me*packet.sigma0**2/QM.hbar*0.5:massChoice==='atom'?2e-12:1;
+   pt=Math.min(pt+PAS*timePerSecond,8*timePerSecond);
+   return;
+ }
+ frac+=rate*PAS;
+ const n=Math.floor(frac);frac-=n;
+ if(!n)return;
+ if(step===0)addOneHits(n);
+ else if(step===1){const z=QM.mzPhotons(n,{phi,blockArm:blocked},seed);for(const k of Object.keys(c2))c2[k]+=z[k];}
+ else if(step===2)setup==='young'?addYoung3(n):addMZ3(n);
+}
+function tick(n=1){for(let i=0;i<Math.max(0,Math.min(60000,Math.floor(n)));i++)physicalStep();update();draw();return state();}
+function setPlay(v){playing=!!v;$('#play').textContent=playing?'Pause':'Reprendre';$('#play').setAttribute('aria-pressed',String(playing));return playing;}
+function setRate(r){rate=Math.max(1,Math.min(1000,Number(r)||1));$('#rate1').value=Math.log10(rate);$('#rate2').value=Math.log10(rate);$('#rate1Val').textContent=integer(rate)+' /s';$('#rate2Val').textContent=integer(rate)+' /s';update();}
+function setVoltage(V){voltage=Math.max(50,Math.min(1500,Number(V)));$('#voltage').value=voltage;$('#voltageVal').textContent=integer(voltage)+' V';refreshYoung();cache3=null;cache3Old=null;hits1=[];hist1.fill(0);previewMesure=null;clearScreen3();update();}
+function setSpacing(value){d=Math.max(.6e-6,Math.min(2.4e-6,Number(value)));$('#spacing').value=d*1e6;$('#spacingVal').textContent=fmt(d*1e6,1)+' \u00b5m';refreshYoung();cache3=null;cache3Old=null;hits1=[];hist1.fill(0);previewMesure=null;clearScreen3();update();}
+function closeSlit(on){slitClosed=!!on;$('#closeSlit').setAttribute('aria-pressed',String(slitClosed));$('#closeSlit').textContent=slitClosed?'Rouvrir la fente':'Fermer une fente';refreshYoung();hits1=[];hist1.fill(0);previewMesure=null;update();}
+function setPhase(value){phi=Math.max(0,Math.min(2*Math.PI,Number(value)));$('#phase').value=phi;$('#phaseVal').textContent=fmt(phi)+' rad';c2={d1:0,d2:0,absorbed:0};clearScreen3();update();}
+function blockArm(on){blocked=!!on;$('#blockArm').setAttribute('aria-pressed',String(blocked));$('#blockArm').textContent=blocked?'D\u00e9bloquer le bras':'Bloquer un bras';c2={d1:0,d2:0,absorbed:0};update();}
+function clearScreen3(){decoChange=false;baseline=[];newest=[];baselineMZ={d1:0,d2:0};newestMZ={d1:0,d2:0};}
+function setWhichPath(coherence){
+ const next=Math.max(0,Math.min(1,Number(coherence)));
+ if(next!==eta){
+  baseline.push(...newest);newest=[];
+  baselineMZ.d1+=newestMZ.d1;baselineMZ.d2+=newestMZ.d2;
+  newestMZ={d1:0,d2:0};decoChange=true;
+ }
+ eta=next;cache3=null;$('#which').value=Math.round((1-eta)*100);$('#whichVal').textContent=integer((1-eta)*100)+' %';update();
+}
+function clearScreen(){
+ if(step===0){hits1=[];hist1.fill(0);previewMesure=null;}
+ if(step===1)c2={d1:0,d2:0,absorbed:0};
+ if(step===2)clearScreen3();
+ update();draw();
+}
+function setSetup(kind){
+ if(kind!=='young' && kind!=='mz')throw new RangeError('Montage inconnu');
+ if(setup!==kind)clearScreen3();
+ setup=kind;
+ $('#setupYoung').setAttribute('aria-pressed',String(kind==='young'));
+ $('#setupMZ').setAttribute('aria-pressed',String(kind==='mz'));
+ $('#setupYoung').classList.toggle('on',kind==='young');
+ $('#setupMZ').classList.toggle('on',kind==='mz');
+ update();draw();
+}
+function setSigma(v){packet.sigma0=Math.max(.12e-9,Math.min(6e-9,Number(v)));packet.x0=0;pt=0;measured=null;$('#sigma').value=packet.sigma0*1e9;$('#sigmaVal').textContent=fmt(packet.sigma0*1e9)+' nm';update();}
+function setK(v){packet.k0=Math.max(.2e9,Math.min(5e9,Number(v)));pt=0;packet.x0=0;measured=null;$('#k').value=packet.k0*1e-9;$('#kVal').textContent=fmt(packet.k0*1e-9,1)+' nm\u207b\u00b9';update();}
+function setMass(m){
+ massChoice=typeof m==='string'?m:'custom';
+ if(massChoice!=='custom' && !MASSES[massChoice])throw new RangeError('Masse inconnue');
+ packet.m=massChoice==='custom'?Number(m):MASSES[massChoice];
+ if(!(packet.m>0))throw new RangeError('Masse non positive');
+ if(massChoice!=='custom')$('#mass').value=massChoice;
+ pt=0;packet.x0=0;measured=null;update();
+}
+function measureX(){
+ if(step!==3)return null;
+ const s=QM.sigmaT(packet.sigma0,packet.m,pt);
+ const pos=packet.x0+QM.hbar*packet.k0/packet.m*pt+randomNormal()*s;
+ packet={...packet,x0:pos,sigma0:Math.max(.12e-9,packet.sigma0*.34)};
+ pt=0;measured=pos;
+ $('#sigma').value=packet.sigma0*1e9;$('#sigmaVal').textContent=fmt(packet.sigma0*1e9)+' nm';update();draw();return pos;
+}
+const ETAPES=[
+ {title:'Une particule \u00e0 la fois',eyebrow:'01 / 04  \u00b7  ARRIV\u00c9ES',name:'YOUNG  \u00b7  UN IMPACT \u00c0 LA FOIS',text:'Des \u00e9lectrons sont envoy\u00e9s s\u00e9par\u00e9ment. Chacun donne un seul point sur l\u2019\u00e9cran. Accumule les points : leur distribution n\u2019est pas uniforme.',key:'Chaque \u00e9lectron arrive en un point, au hasard. La probabilit\u00e9 de ces points porte une interf\u00e9rence : \u03bb = h/p.',note:'Fentes rectangulaires id\u00e9ales, distance et taille du dessin agrandies ; exp\u00e9rience de Tonomura et coll. (1989) avec biprisme \u00e9lectronique.',scope:'HISTOGRAMME / DENSIT\u00c9',scopeLegend:'B\u00e2tons : comptages \u00b7 tirets : probabilit\u00e9 attendue.',legend:'Points r\u00e9els du tirage ; vue sch\u00e9matique'},
+ {title:'Additionner des amplitudes',eyebrow:'02 / 04  \u00b7  PHASE',name:'MACH-ZEHNDER  \u00b7  DEUX CHEMINS',text:'Deux fl\u00e8ches de phase se composent pour chaque sortie. Change leur angle relatif : D\u2081 peut recevoir tout, D\u2082 rien, ou l\u2019inverse.',key:'On additionne les amplitudes complexes des chemins possibles, puis on prend le carr\u00e9 du module : c\u2019est la probabilit\u00e9.',note:'Deux s\u00e9paratrices id\u00e9ales 50/50 ; phases conventionnelles, pas de trajectoire individuelle suivie.',scope:'DEUX D\u00c9TECTEURS / COMPTAGES',scopeLegend:'Colonnes observ\u00e9es et probabilit\u00e9s pr\u00e9dites.',legend:'Phaseurs : longueur = amplitude ; orientation = phase'},
+ {title:'Savoir par o\u00f9 : perdre les franges',eyebrow:'03 / 04  \u00b7  INFORMATION',name:'INFORMATION DE CHEMIN  \u00b7  AVANT / APR\u00c8S',text:'Un dispositif peut laisser une trace du chemin. M\u00eame sans lire cette trace, les franges disparaissent si les chemins deviennent distinguables.',key:'Si une information de chemin est disponible, le terme d\u2019interf\u00e9rence se r\u00e9duit ou dispara\u00eet. Ce n\u2019est pas une action de la conscience.',note:'Visibilit\u00e9 repr\u00e9sent\u00e9e par un seul facteur de coh\u00e9rence \u03b7. Les impacts pass\u00e9s restent dans le groupe \u00ab avant \u00bb.',scope:'AVANT / APR\u00c8S',scopeLegend:'Deux distributions mesur\u00e9es sous des conditions successives.',legend:'Le changement concerne les nouveaux impacts seulement'},
+ {title:'Le paquet d\u2019onde',eyebrow:'04 / 04  \u00b7  INCERTITUDE',name:'PARTICULE LIBRE  \u00b7  ESPACE / IMPULSION',text:'Le paquet porte des phases dans l\u2019espace. Une localisation plus pr\u00e9cise exige une gamme plus large de quantit\u00e9s de mouvement : le paquet s\u2019\u00e9tale.',key:'Une particule localis\u00e9e forme un paquet d\u2019ondes : \u0394x\u00b7\u0394p \u2265 \u0127/2.',note:'Solution gaussienne exacte en 1D pour une particule libre ; mesure = tirage suivi d\u2019un nouvel \u00e9tat gaussien impos\u00e9.',scope:'DISTRIBUTION EN IMPULSION',scopeLegend:'La courbe en p ne change pas au cours du mouvement libre.',legend:'Partie r\u00e9elle / module / densit\u00e9 de probabilit\u00e9'}
+];
+function status(){
+ if(step===0){
+  if(slitClosed)return 'Une fente ferm\u00e9e : plus de franges. Certains endroits re\u00e7oivent davantage d\u2019\u00e9lectrons.';
+  if(hits1.length<40)return 'Rien de r\u00e9gulier : chaque \u00e9lectron arrive en un point, au hasard.';
+  if(hits1.length<2000)return 'Les points s\u2019accumulent. Une structure commence \u00e0 se distinguer du bruit.';
+  return 'Les bandes apparaissent : la probabilit\u00e9 des arriv\u00e9es dessine une interf\u00e9rence.';
+ }
+ if(step===1){
+  if(blocked)return 'Bloquer un bras fait appara\u00eetre des photons en D\u2082 : on n\u2019additionne pas simplement des probabilit\u00e9s.';
+  if(Math.abs(Math.sin(phi/2))<0.04)return '\u00c0 phase nulle, D\u2082 est sombre : les deux amplitudes s\u2019y annulent.';
+  if(Math.abs(Math.cos(phi/2))<0.04)return 'D\u2081 devient sombre : un d\u00e9phasage inverse les interf\u00e9rences.';
+  return 'Le d\u00e9phaseur tourne une fl\u00e8che complexe. Les deux sorties se redistribuent.';
+ }
+ if(step===2){
+  if(eta<0.001)return 'D\u00e9tecteur parfait : on peut savoir par quel chemin. Plus aucune frange.';
+  if(eta>0.999)return 'D\u00e9tecteur \u00e9teint : les amplitudes peuvent encore interf\u00e9rer.';
+  return 'Information partielle sur le chemin : franges de visibilit\u00e9 partielle.';
+ }
+ if(measured!==null)return 'Position mesur\u00e9e : un seul point. Le paquet recr\u00e9\u00e9 est plus \u00e9troit, donc plus \u00e9tal\u00e9 en impulsion.';
+ if(massChoice==='dust')return 'Grain de poussi\u00e8re : \u00e0 cette \u00e9chelle de temps, l\u2019\u00e9talement est imperceptible.';
+ if(massChoice==='electron' && packet.sigma0===1e-9)return 'Un \u00e9lectron de largeur initiale 1 nm double en beaucoup moins d\u2019une picoseconde.';
+ return 'L\u2019\u00e9talement d\u00e9pend de la masse et du carr\u00e9 de la largeur initiale.';
+}
+function liveMeasures(){
+ if(step===0){
+  const lam=QM.lambdaElectron(voltage),dx=lam*.45/d;
+  const mesure=!slitClosed && previewMesure&&hits1.length>=1200?fmt(previewMesure*1e6,1)+' \u00b5m':'\u2014';
+  return row('Impacts',integer(hits1.length))+row('Longueur d\u2019onde',fmt(lam*1e9,3),'nm')+
+   row('Interfrange pr\u00e9vu',slitClosed?'sans franges':fmt(dx*1e6,2),'\u00b5m')+row('Interfrange estim\u00e9',mesure);
+ }
+ if(step===1){
+  const z=QM.mz({phi,blockArm:blocked});
+  return row('P(D\u2081)',fmt(z.d1*100,1),'%')+row('P(D\u2082)',fmt(z.d2*100,1),'%')+
+   row('Absorb\u00e9',fmt(z.absorbed*100,1),'%')+row('Comptage D\u2081 / D\u2082',integer(c2.d1)+' / '+integer(c2.d2));
+ }
+ if(step===2){
+  const b=setup==='young'?baseline.length:baselineMZ.d1+baselineMZ.d2;
+  const a=setup==='young'?newest.length:newestMZ.d1+newestMZ.d2;
+  return row('Efficacit\u00e9 du d\u00e9tecteur',integer((1-eta)*100),'%')+
+   row('Visibilit\u00e9 th\u00e9orique',integer(eta*100),'%')+row('Avant',integer(b),'impacts')+row('Apr\u00e8s',integer(a),'impacts');
+ }
+ const sig=QM.sigmaT(packet.sigma0,packet.m,pt),dp=QM.momentumSpread(packet.sigma0),
+  tDouble=2*packet.m*packet.sigma0**2/QM.hbar*Math.sqrt(3),lambda=2*Math.PI/packet.k0;
+ return row('\u0394x(t)',fmt(sig*1e9,3),'nm')+row('\u0394p',dp.toExponential(2),'kg m/s')+
+  row('\u0394x \u00b7 \u0394p',(sig*dp/QM.hbar).toFixed(3),'\u0127')+
+  row('Longueur d\u2019onde',fmt(lambda*1e9,2),'nm')+row('Largeur double en',fmtTime(tDouble))+
+  row('Temps physique \u00e9coul\u00e9',fmtTime(pt));
+}
+function fmtTime(t){if(t<1e-12)return fmt(t*1e15,1)+' fs';if(t<1e-9)return fmt(t*1e12,1)+' ps';if(t<1e-6)return fmt(t*1e9,1)+' ns';if(t<1)return fmt(t*1e3,1)+' ms';return fmt(t,1)+' s';}
+function state(){
+ if(step===0)return {step,play:playing,rate,voltage,d,closed:slitClosed,n:hits1.length,lambda:QM.lambdaElectron(voltage),interfrange:slitClosed?null:QM.interfrange(config()),interfrangeMesure:previewMesure};
+ if(step===1)return {step,play:playing,rate,phi,blocked,probabilities:QM.mz({phi,blockArm:blocked}),counts:{...c2}};
+ if(step===2)return {step,play:playing,setup,eta,efficacite:1-eta,visibilite:eta,avant:setup==='young'?baseline.length:baselineMZ.d1+baselineMZ.d2,apres:setup==='young'?newest.length:newestMZ.d1+newestMZ.d2};
+ const sx=QM.sigmaT(packet.sigma0,packet.m,pt),dp=QM.momentumSpread(packet.sigma0);
+ return {step,play:playing,x0:packet.x0,sigma0:packet.sigma0,sigma:sx,k0:packet.k0,m:packet.m,deltaP:dp,produit:sx*dp,centre:packet.x0+QM.hbar*packet.k0/packet.m*pt,temps:pt,mesure:measured};
+}
+function update(){
+ const a=ETAPES[step];$('#eyebrow').textContent=a.eyebrow;$('#stepTitle').textContent=a.title;
+ $('#stepText').textContent=a.text;$('#status').textContent=status();$('#key').textContent=a.key;$('#honesty').textContent=a.note;
+ $('#scopeTitle').textContent=a.scope;$('#scopeLegend').textContent=a.scopeLegend;$('#sceneName').textContent=a.name;
+ $('#legendLeft').textContent=a.legend;$('#legendRight').textContent='LABO / 48.'+(step+1)+'  \u00b7  mod\u00e8le id\u00e9alis\u00e9';
+ $('#meas').innerHTML=liveMeasures();
+ $('#questions').hidden=step!==3;
+ $$('[data-act]').forEach(x=>{x.hidden=Number(x.dataset.act)!==step;});
+ $$('[data-step]').forEach(x=>{const a=Number(x.dataset.step)===step;x.setAttribute('aria-current',a?'step':'false');});
+ $('#clock').textContent=step===0?'N = '+integer(hits1.length):step===1?'N = '+integer(c2.d1+c2.d2+c2.absorbed):step===2?'\u03b7 = '+fmt(eta):'t = '+fmtTime(pt);
+ discovery();
+}
+function goStep(v){
+ const next=Math.max(0,Math.min(3,Math.floor(v)));
+ if(step!==2 && next===2 && baseline.length===0 && newest.length===0 && !decoChange){
+  if(!slitClosed) baseline=hits1.slice();
+ }
+ step=next;frac=0;
+ hideTip();update();resize();return state();
+}
+function restart(){
+ if(step===0){rate=60;voltage=100;d=1e-6;slitClosed=false;showTheory=false;$('#reveal').setAttribute('aria-pressed','false');$('#closeSlit').setAttribute('aria-pressed','false');$('#closeSlit').textContent='Fermer une fente';$('#voltage').value=100;$('#spacing').value=1;$('#voltageVal').textContent='100 V';$('#spacingVal').textContent='1,0 \u00b5m';refreshYoung();hits1=[];hist1.fill(0);previewMesure=null;}
+ if(step===1){phi=0;blocked=false;$('#phase').value=0;$('#phaseVal').textContent='0,00 rad';$('#blockArm').setAttribute('aria-pressed','false');$('#blockArm').textContent='Bloquer un bras';c2={d1:0,d2:0,absorbed:0};}
+ if(step===2){eta=1;setup='young';$('#which').value=0;$('#whichVal').textContent='0 %';clearScreen3();setSetup('young');}
+ if(step===3){packet={x0:0,sigma0:1e-9,k0:1.2e9,m:QM.me};pt=0;measured=null;massChoice='electron';$('#sigma').value=1;$('#k').value=1.2;$('#mass').value='electron';$('#sigmaVal').textContent='1,00 nm';$('#kVal').textContent='1,2 nm\u207b\u00b9';}
+ setRate(rate);frac=0;update();draw();
+}
+function line(points,color=C.trait,width=1,dash=[]){
+ ctx.save();ctx.beginPath();ctx.lineWidth=width;ctx.strokeStyle=color;ctx.setLineDash(dash);
+ points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();
+}
+function text(str,x,y,color=C.muet,size=11,align='left',family='mono'){
+ ctx.save();ctx.fillStyle=color;ctx.font=`${size}px ${family==='mono'?'IBM Plex Mono, monospace':'IBM Plex Sans, sans-serif'}`;
+ ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(str,x,y);ctx.restore();
+}
+function dot(x,y,r,color,alpha=1){ctx.save();ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.restore();}
+function rect(x,y,w,h,fill,stroke=null){ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);}}
+function arrow(x1,y1,x2,y2,color,width=2){
+ line([[x1,y1],[x2,y2]],color,width);
+ const a=Math.atan2(y2-y1,x2-x1),r=7;
+ line([[x2-r*Math.cos(a-.55),y2-r*Math.sin(a-.55)],[x2,y2],[x2-r*Math.cos(a+.55),y2-r*Math.sin(a+.55)]],color,width);
+}
+function background(w,h){
+ ctx.clearRect(0,0,w,h);ctx.fillStyle=C.fond;ctx.fillRect(0,0,w,h);
+ ctx.strokeStyle='#171f28';ctx.lineWidth=.6;
+ for(let x=0;x<w;x+=48){ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,h);ctx.stroke();}
+ for(let y=0;y<h;y+=48){ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(w,y+.5);ctx.stroke();}
+ rect(0,0,w,1,'#25303c');
+}
+function graphHistogram(arr,model,x,y,w,h,withPred=false){
+ rect(x,y,w,h,'#0d1219','#25303b');
+ const N=80, counts=new Float64Array(N);
+ for(const v of arr) counts[xToBin(v,model,N)]++;
+ const peak=Math.max(2,...counts), dx=w/N;
+ for(let i=0;i<N;i++){
+  const height=(counts[i]/peak)*(h-12);
+  if(height<.2)continue;
+  rect(x+i*dx,y+h-height-3,Math.max(.7,dx-.6),height,C.blanc);
+ }
+ if(withPred){
+  const pdfMax=Math.max(...Array.from({length:200},(_,i)=>model.pdf(model.xMin+(i/199)*(model.xMax-model.xMin))));
+  const pts=[];
+  for(let i=0;i<=280;i++){
+   const u=i/280, xx=model.xMin+u*(model.xMax-model.xMin);
+   pts.push([x+u*w,y+h-3-(model.pdf(xx)/pdfMax)*(h-16)]);
+  }
+  line(pts,C.accent,1.6,[4,4]);
+ }
+}
+function stageYoung(w,h){
+ const graphY=h<500?Math.max(212,h*.63):Math.max(220,h*.71), top=50, bottom=graphY-20;
+ const sx=w*.11, slab=w*.42, screen=w*.79, screenWidth=Math.max(40,w*.08);
+ const center=(top+bottom)/2, half=(bottom-top)/2;
+ text(w<520?'SOURCE':'01   /   SOURCE',w*.07,top-15,C.muet,10);
+ text(w<520?'FENTES':'02   /   FENTES',slab,top-15,C.muet,10,'center');
+ text(w<520?'ECRAN':'03   /   DETECTION',screen,top-15,C.muet,10,'center');
+ const grad=ctx.createRadialGradient(sx,center,3,sx,center,28);
+ grad.addColorStop(0,'#ffd16622');grad.addColorStop(1,'#ffd16600');
+ ctx.fillStyle=grad;ctx.fillRect(sx-30,center-30,60,60);
+ rect(sx-23,center-10,31,20,'#25303c','#8a93a0');rect(sx+7,center-4,13,8,C.impact);
+ line([[sx+21,center],[slab-10,center]],'#687382',1,[5,6]);
+ const gap=Math.min(30,12+8*d/1e-6),hole=7;
+ rect(slab-4,top,8,half-gap-hole,'#637081');
+ rect(slab-4,center-gap+hole,8,2*gap-2*hole,'#637081');
+ rect(slab-4,center+gap+hole,8,half-gap-hole,'#637081');
+ if(slitClosed)rect(slab-7,center+gap-hole,14,2*hole,C.chemin1);
+ dot(slab,center-gap,2.4,C.chemin1);if(!slitClosed)dot(slab,center+gap,2.4,C.chemin2);
+ line([[slab+8,center-gap],[screen-6,top+10]],'#ff8a5b27',1);
+ line([[slab+8,center+gap],[screen-6,bottom-10]],'#5bb8ff27',1);
+ const maxP=Math.max(...Array.from({length:320},(_,i)=>pYoung.pdf(pYoung.xMin+i/319*(pYoung.xMax-pYoung.xMin))));
+ rect(screen-8,top-4,screenWidth+12,bottom-top+8,'#171d26','#5b6472');
+ for(let i=0;i<300;i++){
+  const u=i/299,x=pYoung.xMin+u*(pYoung.xMax-pYoung.xMin),rr=pYoung.pdf(x)/maxP;
+  rect(screen-4,top+u*(bottom-top),screenWidth+5,(bottom-top)/299+1,`rgba(169,156,240,${.02+.18*rr})`);
+ }
+ const advance=Math.max(1,Math.ceil(hits1.length/MAX_IMPACTS_VISIBLES));
+ for(let j=0;j<hits1.length;j+=advance){
+  const val=hits1[j],yy=top+(val-pYoung.xMin)/(pYoung.xMax-pYoung.xMin)*(bottom-top);
+  const xx=screen+4+(.5+.5*Math.sin(j*12.9898))*Math.max(10,screenWidth-3);
+  rect(xx,yy,1.2,1.2,j>=hits1.length-25?C.impact:C.blanc);
+ }
+ if(hits1.length){const v=hits1[hits1.length-1],y=top+(v-pYoung.xMin)/(pYoung.xMax-pYoung.xMin)*(bottom-top);dot(screen-11,y,3.2,C.impact);}
+ text('CANON',sx+1,center+29,C.muet,9,'center');
+ text(slitClosed?'UNE FENTE':'DEUX FENTES',slab,center+gap+25,C.muet,9,'center');
+ text('ECRAN',screen+screenWidth*.45,bottom+15,C.muet,9,'center');
+ const gy=graphY+12,gh=h<500?Math.max(35,h-gy-100):Math.max(40,h-gy-59);
+ text('IMPACTS / HISTOGRAMME',24,gy-10,C.blanc,10);
+ graphHistogram(hits1,pYoung,22,gy+4,w-44,gh,showTheory);
+ text('\u2212'+integer(Math.abs(pYoung.xMin*1e6))+' \u00b5m',23,gy+gh+19,C.muet,9);
+ text('0',w/2,gy+gh+19,C.muet,9,'center');
+ text('+'+integer(pYoung.xMax*1e6)+' \u00b5m',w-23,gy+gh+19,C.muet,9,'right');
+}
+function splitSymbol(x,y,scale=1){
+ ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);rect(-5*scale,-5*scale,10*scale,10*scale,'#4e5968','#c8ccd1');ctx.restore();
+}
+function mzSchematic(w,h,which=false){
+ const p1=[w*.30,h*.53],p2=[w*.68,h*.53],a=h*.21,b=h*.74;
+ const source=[w*.10,h*.53],D1=[w*.86,h*.39],D2=[w*.86,h*.67];
+ const broken=step===1 && blocked;
+ const col1=C.chemin1,col2=C.chemin2;
+ line([source,p1],'#c1c9d4',3);
+ line([p1,[p1[0],a],[p2[0],a],p2],col1,2.5,broken?[4,7]:[]);
+ line([p1,[p1[0],b],[p2[0],b],p2],col2,2.5);
+ line([p2,D1],C.blanc,2);line([p2,D2],C.blanc,2);
+ splitSymbol(...p1);splitSymbol(...p2);
+ for(const v of [[p1[0],a],[p2[0],a],[p1[0],b],[p2[0],b]]){
+  rect(v[0]-5,v[1]-5,10,10,'#647283','#c6c8cb');
+ }
+ rect(source[0]-15,source[1]-9,18,18,'#34404c','#919dac');dot(source[0]-3,source[1],3,C.impact);
+ dot(D1[0],D1[1],12,'#1e303f');dot(D2[0],D2[1],12,'#1e303f');
+ text('D1',Math.min(D1[0]+20,w-35),D1[1],C.blanc,w<520?11:14);
+ text('D2',Math.min(D2[0]+20,w-35),D2[1],C.blanc,w<520?11:14);
+ text('SEPARATRICE',p1[0],p1[1]+23,C.muet,8,'center');
+ text('RECOMBINAISON',p2[0],p2[1]+23,C.muet,8,'center');
+ text('PHASE \u03c6',w*.48,a-19,C.accent,11,'center');
+ text(which?'DETECTEUR DE CHEMIN':broken?'BRAS BLOQUE':'CHEMIN 1',w*.49,a+18,broken?C.chemin1:C.muet,10,'center');
+ text('CHEMIN 2',w*.50,b+20,C.muet,10,'center');
+ if(broken){rect(w*.51-7,a-8,14,16,'#3a2022',C.chemin1);line([[w*.51-4,a-5],[w*.51+5,a+5]],C.chemin1,2);}
+ if(which){
+  ctx.save();ctx.strokeStyle=C.blanc;ctx.lineWidth=1.3;ctx.beginPath();ctx.ellipse(w*.57,a+18,10,6,0,0,2*Math.PI);ctx.stroke();dot(w*.57,a+18,3,C.accent);ctx.restore();
+ }
+ const prob=QM.mz({phi,blockArm:broken,eta:step===2?eta:1});
+ const rectP=(xx,yy,p)=>{
+  rect(xx-6,yy-29,12,58,'#131b24');rect(xx-6,yy-29+(1-p)*58,12,Math.max(1,p*58),C.accent);
+ };
+ rectP(D1[0]+1,D1[1],prob.d1);rectP(D2[0]+1,D2[1],prob.d2);
+}
+function phaseGraph(cx,cy,phi2,label){
+ ctx.save();ctx.lineWidth=1;ctx.strokeStyle='#37414c';const small=ecran.w<520,r=small?31:43,mag=small?40:58;
+ ctx.beginPath();ctx.arc(cx,cy,r,0,2*Math.PI);ctx.stroke();
+ line([[cx-r-12,cy],[cx+r+12,cy]],'#2b3441');line([[cx,cy-r-12],[cx,cy+r+12]],'#2b3441');
+ const z1=QM.phasor(.5,0),z2=QM.phasor(.5,phi2),sx=cx+z1.re*mag,sy=cy-z1.im*mag;
+ arrow(cx,cy,sx,sy,C.chemin1,2.2);
+ arrow(sx,sy,sx+z2.re*mag,sy-z2.im*mag,C.chemin2,2.2);
+ arrow(cx,cy,cx+(z1.re+z2.re)*mag,cy-(z1.im+z2.im)*mag,C.accent,3);
+ text(label,cx,cy+(small?52:72),C.blanc,12,'center');ctx.restore();
+}
+function stageMach(w,h){
+ ctx.save();
+ const availableH=Math.min(h*.51,315);
+ ctx.beginPath();ctx.rect(16,32,w-32,availableH);ctx.clip();
+ mzSchematic(w,availableH/0.90);
+ ctx.restore();
+ const divY=Math.max(220,h*.52);
+ line([[21,divY],[w-21,divY]],'#33404e',1);
+ text('AMPLITUDES POUR CHAQUE DETECTEUR',25,divY+19,C.blanc,10);
+ const y=w<520?Math.min(h-122,divY+81):Math.min(h-101,divY+94),x1=w*.30,x2=w*.71;
+ phaseGraph(x1,y,phi,'D1 : +');phaseGraph(x2,y,phi+Math.PI,'D2 : \u2212');
+ if(w>520)text('ORANGE + BLEU = LAVANDE',w/2,Math.min(h-35,y+99),C.muet,9,'center');
+}
+function drawCompareYoung(w,h){
+ const margin=Math.max(20,w*.04),gap=14,pw=(w-2*margin-gap)/2;
+ const yy=65,topH=Math.max(135,h*.42),chartY=yy+topH+40,chartH=Math.max(45,h-chartY-55);
+ const baseModel=young3Before(),afterModel=young3Model();
+ for(const [id,values,model] of [[0,baseline,baseModel],[1,newest,afterModel]]){
+  const x=margin+id*(pw+gap);
+  rect(x,yy,pw,topH,'#111822','#35404c');
+  text(id?'APRES / NOUVEAUX':'AVANT / EXISTANTS',x,yy-17,id?C.accent:C.blanc,10);
+  const max= Math.max(1,values.length),stride=Math.max(1,Math.ceil(max/12000));
+  for(let k=0;k<values.length;k+=stride){
+   const u=(values[k]-model.xMin)/(model.xMax-model.xMin);
+   const dx=x+11+((k*173)%999)/999*Math.max(10,pw-24);
+   rect(dx,yy+3+u*(topH-6),1.3,1.3,k>values.length-12?C.impact:C.blanc);
+  }
+  graphHistogram(values,model,x,chartY,pw,chartH,document.body.dataset.mode==='comprendre');
+  text(integer(values.length)+' impacts',x+pw,chartY-13,C.muet,10,'right');
+ }
+ line([[w/2,yy],[w/2,chartY+chartH]],'#435061',1,[3,8]);
+ text('VISIBILITE THEORIQUE : '+integer(eta*100)+' %',w/2,h-24,C.accent,11,'center');
+}
+function drawCompareMZ(w,h){
+ const margin=Math.max(30,w*.07),gap=24,pw=(w-2*margin-gap)/2;
+ const pairs=[[baselineMZ,1],[newestMZ,eta]];
+ const top=76,chartHeight=Math.min(h*.49,240);
+ for(let i=0;i<2;i++){
+  const x=margin+i*(pw+gap),[counts,coherence]=pairs[i];
+  const n=counts.d1+counts.d2,p=QM.mz({phi,eta:coherence});
+  text(i?'APRES / NOUVEAUX':'AVANT / EXISTANTS',x,top-18,i?C.accent:C.blanc,11);
+  rect(x,top,pw,chartHeight,'#111822','#384451');
+  const available=chartHeight-65;
+  for(const [j,v,ratio] of [[0,counts.d1,p.d1],[1,counts.d2,p.d2]]){
+   const px=x+pw*(j?.72:.28), observed=n?v/n:0;
+   rect(px-22,top+24,44,available,'#17232c');
+   rect(px-22,top+24+available*(1-observed),44,Math.max(1,observed*available),C.blanc);
+   const py=top+24+available*(1-ratio);
+   line([[px-27,py],[px+27,py]],C.accent,2,[3,3]);
+   text(j?'D2':'D1',px,top+chartHeight-19,C.blanc,12,'center');
+  }
+  text(integer(n)+' photons',x+pw,top+chartHeight+25,C.muet,10,'right');
+ }
+ const sy=Math.min(h-95,top+chartHeight+82);
+ text('Phase '+fmt(phi)+' rad  \u00b7  sans fuite de photons',w/2,sy,C.muet,11,'center');
+ line([[margin,sy+22],[w-margin,sy+22]],'#354150',1,[4,5]);
+ text('BLANC : MESURE',w*.28,sy+42,C.blanc,10,'center');
+ text('LAVANDE : PREDICTION',w*.71,sy+42,C.accent,10,'center');
+}
+function drawDetecteurChemin(w){
+ const x=w-24,y=41,eff=1-eta;
+ ctx.save();ctx.globalAlpha=.38+.62*eff;ctx.strokeStyle=eff>.001?C.accent:C.muet;ctx.lineWidth=1.6;
+ ctx.beginPath();ctx.moveTo(x-16,y);ctx.quadraticCurveTo(x,y-14,x+16,y);ctx.quadraticCurveTo(x,y+14,x-16,y);ctx.stroke();
+ dot(x,y,eff>.001?4.5:2.4,eff>.001?C.accent:C.muet);ctx.restore();
+}
+function stageWhich(w,h){
+ if(setup==='young')drawCompareYoung(w,h);
+ else drawCompareMZ(w,h);
+ drawDetecteurChemin(w);
+}
+function stagePacket(w,h){
+ const T=packet,sd=QM.sigmaT(T.sigma0,T.m,pt),center=T.x0+QM.hbar*T.k0/T.m*pt;
+ const region=Math.max(7*T.sigma0,Math.abs(center)+5*sd);
+ const left=Math.max(27,w*.06),right=w-left,ybase=h*.52, top=h*.13;
+ const plotW=right-left, plotH=Math.max(110,ybase-top-20);
+ line([[left,ybase],[right,ybase]],'#637184',1);
+ for(let j=-3;j<=3;j++){
+   const x=(left+right)/2+j/7*plotW;
+   line([[x,top],[x,ybase]],'#26313d',1,[3,7]);
+ }
+ const spaceX=xx=>left+((xx+region)/(2*region))*plotW;
+ const pMax=1/(Math.sqrt(2*Math.PI)*sd),scaleY=plotH/pMax;
+ const points=[],upper=[],poly=[],rWave=[];
+ const maxWave=1/Math.sqrt(Math.sqrt(2*Math.PI)*sd);
+ for(let i=0;i<=360;i++){
+  const x=-region+i/360*2*region,psi=QM.gaussPacket(T,x,pt),sx=spaceX(x);
+  const probY=ybase-psi.abs2*scaleY;
+  points.push([sx,probY]);upper.push([sx,ybase-psi.abs2/pMax*plotH]);
+  rWave.push([sx,ybase*.64-psi.re/maxWave*plotH*.29]);
+ }
+ ctx.save();ctx.beginPath();ctx.moveTo(left,ybase);
+ for(const q of points)ctx.lineTo(q[0],q[1]);ctx.lineTo(right,ybase);ctx.closePath();ctx.fillStyle='#a99cf033';ctx.fill();ctx.restore();
+ line(points,C.accent,2);line(rWave,'#c5cbd3',1.3);
+ const xpos=spaceX(center);
+ line([[xpos,top+3],[xpos,ybase+9]],'#c6cbd44b',1,[3,5]);
+ if(measured!==null){const xm=spaceX(measured);dot(xm,ybase,5,C.impact);}
+ const s1=spaceX(center-sd),s2=spaceX(center+sd);
+ if(s1>left && s2<right){arrow(xpos,ybase+18,s2,ybase+18,C.accent,1.7);arrow(xpos,ybase+18,s1,ybase+18,C.accent,1.7);}
+ text('FONCTION D\u2019ONDE / ESPACE',left,top-11,C.blanc,11);
+ text('Re \u03c8',left+8,top+12,'#c5cbd3',10);
+ text('|\u03c8|\u00b2',left+76,top+12,C.accent,10);
+ text('\u2212'+fmt(region*1e9,1)+' nm',left,ybase+38,C.muet,10);
+ text('0',spaceX(0),ybase+38,C.muet,10,'center');
+ text('+'+fmt(region*1e9,1)+' nm',right,ybase+38,C.muet,10,'right');
+ const y2=w<520?h*.69:h*.73,plot2H=w<520?Math.max(28,h*.10):Math.max(32,h*.17),p0=QM.hbar*T.k0,dp=QM.momentumSpread(T.sigma0);
+ const maxDelta=3.5*dp, px=p=>left+(p-(p0-maxDelta))/(2*maxDelta)*plotW;
+ text('QUANTITE DE MOUVEMENT / DISTRIBUTION FIXE',left,y2-21,C.blanc,10);
+ line([[left,y2+plot2H],[right,y2+plot2H]],'#647284');
+ const mom=[];
+ for(let i=0;i<=240;i++){
+  const p=p0-maxDelta+i/240*maxDelta*2,zz=(p-p0)/dp;
+  mom.push([px(p),y2+plot2H-plot2H*Math.exp(-.5*zz*zz)]);
+ }
+ line(mom,C.impact,1.8);line([[px(p0),y2],[px(p0),y2+plot2H]],'#ffd16655',1,[3,3]);
+ text('p\u2080 = \u0127 k\u2080',px(p0),y2+plot2H+18,C.muet,10,'center');
+}
+function drawScope(){
+ if(petitEcran.w<=0||petitEcran.h<=0)return;
+ const {w,h}=petitEcran;
+ sc.clearRect(0,0,w,h);sc.fillStyle=C.fond;sc.fillRect(0,0,w,h);
+ sc.strokeStyle='#303945';sc.beginPath();sc.moveTo(9,h-12);sc.lineTo(w-9,h-12);sc.stroke();
+ if(step===0 || step===2 && setup==='young'){
+  const values=step===0?hits1:decoChange?newest:baseline;
+  const mod=step===0?pYoung:young3Model(),n=52,counts=new Float64Array(n);
+  for(const x of values)counts[xToBin(x,mod,n)]++;
+  const ymax=Math.max(2,...counts);
+  sc.fillStyle=C.blanc;
+  for(let i=0;i<n;i++){const height=(h-28)*counts[i]/ymax;sc.fillRect(10+i*(w-20)/n,h-12-height,(w-20)/n*.69,height);}
+  sc.beginPath();sc.strokeStyle=C.accent;sc.lineWidth=1.6;sc.setLineDash([4,4]);
+  const densMax=Math.max(...Array.from({length:100},(_,i)=>mod.pdf(mod.xMin+i/99*(mod.xMax-mod.xMin))));
+  for(let i=0;i<=130;i++){
+   const u=i/130,y=h-12-(h-29)*mod.pdf(mod.xMin+u*(mod.xMax-mod.xMin))/densMax;
+   if(i)sc.lineTo(10+u*(w-20),y);else sc.moveTo(10,y);
+  }sc.stroke();sc.setLineDash([]);
+ }
+ else if(step===1||step===2){
+  const c=step===1?c2:decoChange?newestMZ:baselineMZ;
+  const pp=QM.mz({phi,blockArm:step===1?blocked:false,eta:step===2?eta:1});
+  const n=c.d1+c.d2 || 1;
+  for(let i=0;i<2;i++){
+   const x=w*(i? .67:.30),val=(i?c.d2:c.d1)/n,pred=i?pp.d2:pp.d1;
+   sc.fillStyle=C.blanc;sc.fillRect(x-17,h-12-(h-35)*val,34,(h-35)*val);
+   sc.strokeStyle=C.accent;sc.beginPath();sc.moveTo(x-21,h-12-(h-35)*pred);sc.lineTo(x+21,h-12-(h-35)*pred);sc.stroke();
+   sc.fillStyle=C.muet;sc.font='10px monospace';sc.textAlign='center';sc.fillText(i?'D2':'D1',x,h-2);
+  }
+ }
+ else if(step===3){
+  sc.beginPath();sc.lineWidth=1.8;sc.strokeStyle=C.impact;
+  for(let i=0;i<=160;i++){
+   const z=-3.5+7*i/160;
+   const x=10+(w-20)*i/160,y=h-12-(h-28)*Math.exp(-.5*z*z);
+   if(i)sc.lineTo(x,y);else sc.moveTo(x,y);
+  }sc.stroke();
+ }
+}
+function draw(){
+ const {w,h}=ecran;if(w<5||h<5)return;
+ background(w,h);
+ if(step===0)stageYoung(w,h);else if(step===1)stageMach(w,h);else if(step===2)stageWhich(w,h);else stagePacket(w,h);
+ drawScope();
+}
+const GLOSSAIRE=[
+ [
+  ['Canon','Emet les electrons separement ; le dessin n\u2019indique pas leur trajectoire.',.12,.46],
+  ['Fentes','Deux ouvertures coherentes ; leurs amplitudes se composent sur l\u2019ecran.',.42,.36],
+  ['Ecran','Chaque detection depose exactement un impact localise.',.80,.43],
+  ['Impact','Un point individuel, tire selon une densite de probabilite.',.79,.58],
+  ['Histogramme','Compte les impacts par intervalle : la loi statistique emerge.',.36,.78]
+ ],[
+  ['Separatrice','Dans le modele ideal, une amplitude se partage 50/50 en probabilite.',.30,.36],
+  ['Miroir','Redirige l\u2019amplitude sans en changer le module.',.68,.20],
+  ['Dephaseur','Change une phase relative : la somme tourne.',.49,.20],
+  ['Phaseur','Fleche complexe : sa longueur est le module et son angle la phase.',.30,.77],
+  ['D1 / D2','Chaque photon compte pour un seul detecteur.',.85,.40]
+ ],[
+  ['Detecteur de chemin','Rend des chemins distinguables, donc reduit la coherence.',.56,.27],
+  ['Avant','Impacts accumules avant le changement de condition.',.29,.35],
+  ['Apres','Nouveaux impacts, produits sous la nouvelle condition.',.71,.35]
+ ],[
+  ['Paquet d\u2019onde','Fonction d\u2019onde localisee ; sa largeur evolue.',.43,.34],
+  ['Partie reelle','Composante oscillante de l\u2019amplitude complexe.',.26,.28],
+  ['|psi|\u00b2','Densite de probabilite de position ; son aire vaut 1.',.59,.41],
+  ['Distribution en p','Quantite de mouvement : sa distribution reste constante sans force.',.51,.84]
+ ]
+];
+let glossaryStep=-1;
+function showTip(item,left,top){
+ const tip=$('#tip');tip.innerHTML='<b>'+item[0]+'</b><span>'+item[1]+'</span>';tip.hidden=false;
+ const w=270,h=70;
+ tip.style.left=Math.max(8,Math.min(innerWidth-w-12,left))+'px';
+ tip.style.top=Math.max(8,Math.min(innerHeight-h-12,top))+'px';
+}
+function hideTip(){$('#tip').hidden=true;}
+function discovery(){
+ if(glossaryStep===step)return;
+ glossaryStep=step;
+ const parent=$('#objects');parent.replaceChildren();
+ GLOSSAIRE[step].forEach(obj=>{
+  const b=document.createElement('button');b.type='button';b.className='object';b.textContent=obj[0];
+  b.setAttribute('aria-label',obj[0]+' : '+obj[1]);
+  b.addEventListener('pointerenter',()=>{const r=b.getBoundingClientRect();showTip(obj,r.x, r.y-84);});
+  b.addEventListener('focus',()=>{const r=b.getBoundingClientRect();showTip(obj,r.x,r.y-84);});
+  b.addEventListener('pointerleave',hideTip);b.addEventListener('blur',hideTip);
+  b.addEventListener('click',()=>{const r=b.getBoundingClientRect();showTip(obj,r.x,r.y-84);});
+  parent.append(b);
+ });
+}
+canvas.addEventListener('pointermove',e=>{
+ const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+ const near=GLOSSAIRE[step].map(g=>({g,d:Math.hypot(x-g[2],y-g[3])})).sort((a,b)=>a.d-b.d)[0];
+ if(near && near.d<.055)showTip(near.g,e.clientX+11,e.clientY+11);else hideTip();
+});
+canvas.addEventListener('pointerleave',hideTip);
+canvas.addEventListener('pointerdown',e=>{
+ const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+ const near=GLOSSAIRE[step].map(g=>({g,d:Math.hypot(x-g[2],y-g[3])})).sort((a,b)=>a.d-b.d)[0];
+ if(near && near.d<.14)showTip(near.g,e.clientX+10,e.clientY+12);
+});
+$('#prev').addEventListener('click',()=>goStep(step-1));
+$('#next').addEventListener('click',()=>goStep(step+1));
+$('#play').addEventListener('click',()=>setPlay(!playing));
+$('#reset').addEventListener('click',restart);
+$$('[data-step]').forEach(b=>b.addEventListener('click',()=>goStep(Number(b.dataset.step))));
+$('#rate1').addEventListener('input',e=>setRate(10**Number(e.target.value)));
+$('#rate2').addEventListener('input',e=>setRate(10**Number(e.target.value)));
+$('#voltage').addEventListener('input',e=>setVoltage(Number(e.target.value)));
+$('#spacing').addEventListener('input',e=>setSpacing(Number(e.target.value)*1e-6));
+$('#closeSlit').addEventListener('click',()=>closeSlit(!slitClosed));
+$('#reveal').addEventListener('click',()=>{showTheory=!showTheory;$('#reveal').setAttribute('aria-pressed',String(showTheory));draw();});
+$('#burst1').addEventListener('click',()=>burst(10000));
+$('#phase').addEventListener('input',e=>setPhase(Number(e.target.value)));
+$('#blockArm').addEventListener('click',()=>blockArm(!blocked));
+$('#burst2').addEventListener('click',()=>burst(1000));
+$('#setupYoung').addEventListener('click',()=>setSetup('young'));
+$('#setupMZ').addEventListener('click',()=>setSetup('mz'));
+$('#which').addEventListener('input',e=>setWhichPath(1-Number(e.target.value)/100));
+$('#burst3').addEventListener('click',()=>burst(10000));
+$('#clear').addEventListener('click',clearScreen);
+$('#sigma').addEventListener('input',e=>setSigma(Number(e.target.value)*1e-9));
+$('#k').addEventListener('input',e=>setK(Number(e.target.value)*1e9));
+$('#mass').addEventListener('change',e=>setMass(e.target.value));
+$('#measure').addEventListener('click',measureX);
+$('#themeButton').addEventListener('click',()=>{
+ const root=document.documentElement;
+ const old=root.getAttribute('data-theme')||'auto';
+ const next=old==='auto'?'light':old==='light'?'dark':'auto';
+ if(next==='auto')root.removeAttribute('data-theme');else root.setAttribute('data-theme',next);
+ $('#themeButton').textContent='Th\u00e8me '+(next==='light'?'clair':next==='dark'?'sombre':'auto');
+});
+addEventListener('keydown',e=>{
+ if(e.target.closest('input,textarea,select,[role=tablist]')||e.ctrlKey||e.metaKey||e.altKey)return;
+ const k=e.key.toLowerCase();
+ if(k===' ' && e.target.closest('button,a'))return;
+ if(k===' '){e.preventDefault();setPlay(!playing);}
+ if(k==='arrowleft'){e.preventDefault();goStep(step-1);}
+ if(k==='arrowright'){e.preventDefault();goStep(step+1);}
+ if(/^[1-4]$/.test(k))goStep(Number(k)-1);
+ if(k==='r')restart();
+ if(k==='escape')hideTip();
+});
+let reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>reduceMotion=e.matches);
+function frame(t){
+ if(!last)last=t;
+ let dt=Math.min(.1,Math.max(0,(t-last)/1000));last=t;
+ if(playing){
+  accum+=dt*(reduceMotion?.40:1);
+  while(accum>=PAS){physicalStep();accum-=PAS;}
+ }
+ frames++;
+ if(frames%10===0)update();
+ if(playing||frames%3===0)draw();
+ requestAnimationFrame(frame);
+}
+window.__labo={moteur:QM,get step(){return step;},goStep,state,tick,setPlay,setRate,burst,setVoltage,setSpacing,closeSlit,
+ setPhase,blockArm,setWhichPath,clearScreen,setSetup,setSigma,setK,setMass,measureX,restart};
+setRate(60);update();
+new ResizeObserver(resize).observe(canvas);
+new ResizeObserver(resize).observe(mini);
+addEventListener('resize',resize);
+requestAnimationFrame(()=>{resize();requestAnimationFrame(frame);});
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

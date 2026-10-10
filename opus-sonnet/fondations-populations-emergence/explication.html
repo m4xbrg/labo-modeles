@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<link rel="icon" href="data:,"><title>Comprendre populations, réseaux et émergence — LABO</title>
+<meta name="description" content="Théorie des modules 41 et 42 : compétition, Lotka-Volterra, SIR, réseaux, automates, essaims et criticité.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#cbd67a;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;color:var(--texte);background:var(--fond);font:16px/1.72 var(--sans)}a{color:var(--accent);text-underline-offset:3px}a:hover{color:var(--energie)}:focus-visible{outline:1.5px solid var(--accent);outline-offset:3px}.wrap{max-width:790px;margin:auto;padding:34px 22px 86px}.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:50px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.serie{font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2)}h1{font:400 clamp(36px,7vw,66px)/1.07 var(--serif);margin:15px 0 22px}h1 em{color:var(--accent)}.lede{font-size:19px;line-height:1.5}h2{font:400 33px/1.15 var(--serif);margin:65px 0 20px;padding-top:18px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:9px}p{margin:0 0 16px}ul,ol{padding-left:24px}li{margin-bottom:10px}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(145px,235px) 1fr;gap:15px;padding:13px 0;border-bottom:1px solid var(--trait)}.chiffres b{font:500 16px var(--mono);color:var(--energie)}details{margin:12px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{cursor:pointer;padding:14px 16px;font-weight:500}details p{margin:0 0 14px}.cta{display:inline-block;border:1px solid var(--accent);padding:12px 18px;margin-top:38px;text-decoration:none}.acc{color:var(--accent)}.pos{color:var(--positif)}.neg{color:var(--negatif)}@media(max-width:560px){.wrap{padding:24px 17px 60px}h2{font-size:28px}.chiffres>div{grid-template-columns:1fr;gap:4px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+</head><body><main class="wrap">
+<nav class="top"><a href="index.html">← Retour à la planche</a><a class="back" href="../../labo/index.html">← LABO</a></nav>
+<p class="serie">LABO · Fondations 41 · 42</p><h1>Du local au <em>collectif</em></h1>
+<p class="lede">Une règle peut être entièrement locale et ses conséquences s'étendre à toute une population. Pour comprendre le collectif, il faut regarder les interactions, la structure des contacts, et ce qui s'accumule au cours du temps.</p>
+<h2><span>01</span>Ce que tu vois</h2>
+<p><strong>Les quatre premières étapes</strong> suivent des populations : deux espèces qui se concurrencent, deux espèces qui oscillent, une infection dans une population mélangée, puis cette même idée sur un réseau de contacts. Les points représentent des individus illustratifs ; les courbes proviennent du moteur. Le plan de phase place les deux effectifs sur des axes séparés ; il ne représente pas une carte géographique. Pour le SIR, les vaccinés sont protégés dès le départ et les personnes infectées guérissent selon le même taux par unité de temps.</p>
+<p><strong>Les quatre dernières étapes</strong> changent la nature des règles. Une grille obéit à une naissance ou une survie selon ses voisines. Un essaim réagit aux voisins proches et au curseur prédateur. Un tas se réorganise par basculements de grains ; sur une route circulaire, les voitures accélèrent ou freinent à chaque pas. Les courbes sont mesurées, mais les échelles de temps et de longueur de ces modèles discrets ne doivent pas être confondues avec des mesures du monde réel.</p>
+<h2><span>02</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m41"><b>41</b> Populations et propagation sur réseaux</a></li><li><a href="#m42"><b>42</b> Émergence</a></li></ul>
+<section class="module" id="m41">
+<header><p class="num">Module 41</p><h3>Populations et propagation sur réseaux</h3><p class="etapes">Sur la planche : 1 Croître et se concurrencer · 2 Proies et prédateurs · 3 Une épidémie · 4 Réseaux et cascades</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Un effectif ne varie pas indépendamment de son environnement. Une population peut croître vite quand la ressource est abondante, puis ralentir en approchant de sa capacité limite. Deux espèces qui partagent la ressource changent réciproquement la croissance de l'autre. Quand l'une sert aussi de nourriture à l'autre, une hausse des proies peut précéder une hausse des prédateurs : le retard construit une oscillation. Une infection suit une autre rétroaction : beaucoup de personnes susceptibles favorisent la transmission, mais chaque guérison ou infection réduit les cibles disponibles. Le sommet d'une épidémie n'exige donc pas que tout le monde soit infecté. Enfin, deux groupes de même taille et de même nombre moyen de contacts peuvent avoir des histoires très différentes si leurs liens sont distribués autrement.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Temps \(t\) <span class="u">jour</span></dt><dd>Variable continue du modèle ; un jour correspond ici à l'unité illustrative choisie.</dd></div>
+<div><dt>Effectif \(N,x,y\) <span class="u">individus ou unités de population</span></dt><dd>Taille d'une population ; \(x\) désigne les proies et \(y\) les prédateurs dans le modèle couplé.</dd></div>
+<div><dt>Croissance \(r,a\) <span class="u">jour⁻¹</span></dt><dd>Taux de croissance en l'absence de limitation ou de prédateurs.</dd></div>
+<div><dt>Capacité \(K,K_1,K_2\) <span class="u">individus</span></dt><dd>Effectif compatible avec les ressources dans un modèle logistique.</dd></div>
+<div><dt>Compétition \(\alpha_{12},\alpha_{21}\) <span class="u">sans unité</span></dt><dd>Effet d'un individu d'une espèce sur la limitation de l'autre espèce, rapporté à son effet interne.</dd></div>
+<div><dt>Prédation \(b,c,d\) <span class="u">(individu·jour)⁻¹, (individu·jour)⁻¹, jour⁻¹</span></dt><dd>Rencontre qui retire des proies, conversion en nouveaux prédateurs, puis mortalité naturelle des prédateurs.</dd></div>
+<div><dt>Compartiments \(S,I,R\) <span class="u">personnes</span></dt><dd>Susceptibles, infectées, puis retirées de la transmission, par guérison ou vaccination.</dd></div>
+<div><dt>Taux \(\beta,\gamma\) <span class="u">jour⁻¹</span></dt><dd>Contacts infectants moyens et sorties du compartiment infectieux par personne infectée.</dd></div>
+<div><dt>Reproduction \(R_0,R_{\mathrm{eff}}\) <span class="u">sans unité</span></dt><dd>Nombre moyen de nouvelles infections en population initialement susceptible, puis au cours de la vague.</dd></div>
+<div><dt>Couverture \(v\) et attaque finale \(z\) <span class="u">fraction</span></dt><dd>Part initialement vaccinée et part totale ayant contracté l'infection pendant la vague.</dd></div>
+<div><dt>Réseau \(k,C,L\) <span class="u">liens, fraction, liens</span></dt><dd>Degré d'un nœud, agrégation locale moyenne et longueur moyenne des plus courts chemins.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[\frac{\dd N}{\dd t}=rN\left(1-\frac{N}{K}\right)\]<p>La croissance logistique devient nulle à la capacité limite. Son taux relatif diminue avant que cette limite soit atteinte ; une hausse constante de l'effectif ne doit pas être extrapolée sans fin.</p></div>
+<div class="relation">\[\begin{aligned}\dot N_1&=r_1N_1\left(1-\frac{N_1+\alpha_{12}N_2}{K_1}\right)\\\dot N_2&=r_2N_2\left(1-\frac{N_2+\alpha_{21}N_1}{K_2}\right)\end{aligned}\]<p>Les isoclines indiquent où une dérivée vaut zéro. La coexistence stable de ce modèle exige notamment \(\alpha_{12}\lt K_1/K_2\) et \(\alpha_{21}\lt K_2/K_1\) ; hors de ce domaine, l'exclusion ou la priorité initiale deviennent possibles.</p></div>
+<div class="relation">\[\dot x=ax-bxy,\qquad\dot y=cxy-dy\]<p>La rencontre entre proies et prédateurs retire des proies, mais peut augmenter le nombre de prédateurs. Sans capacité limite, les oscillations idéales peuvent persister ; une limitation supplémentaire peut les amortir.</p></div>
+<div class="relation">\[\dot S=-\frac{\beta SI}{N},\qquad\dot I=\frac{\beta SI}{N}-\gamma I,\qquad\dot R=\gamma I,\qquad R_0=\frac{\beta}{\gamma}\]<p>Le modèle SIR conserve \(S+I+R=N\). La transmission suppose des rencontres homogènes ; \(\gamma^{-1}\) est la durée infectieuse moyenne.</p></div>
+<div class="relation">\[R_{\mathrm{eff}}=R_0\frac{S}{N},\qquad S_{\mathrm{pic}}=\frac{N}{R_0},\qquad v_c=1-\frac1{R_0}\]<p>Le nombre d'infectés augmente tant que \(R_{\mathrm{eff}}\gt1\). Le seuil \(v_c\) vaut pour un vaccin parfaitement protecteur, un mélange homogène et un \(R_0\) fixé ; il ne garantit pas l'absence de cas isolé.</p></div>
+<div class="relation">\[z=1-e^{-R_0z}\]<p>Cette équation donne la fraction finale infectée dans un SIR fermé, initialement entièrement susceptible avec un nombre initial infecté négligeable. Avec une fraction \(v\) vaccinée, la relation devient \(z=(1-v)(1-e^{-R_0z})\).</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p>Supposons une population homogène de 10 000 personnes, une durée infectieuse moyenne de cinq jours et \(R_0=2{,}5\). On cherche le pic, la fraction finalement touchée et l'effet d'une vaccination préventive.</p><ol>
+<li>Le taux de sortie vaut \(\gamma=1/5=0{,}2\) jour⁻¹. Donc \(\beta=R_0\gamma=0{,}5\) jour⁻¹ : il s'agit de contacts infectants effectifs, pas d'un nombre brut de conversations.</li>
+<li>Le pic se produit quand \(S=N/R_0=10\,000/2{,}5=4\,000\) personnes. Avec très peu d'infectés au départ, le maximum de \(I/N\) vaut approximativement \(1-1/R_0-\ln(R_0)/R_0=0{,}2335\), soit 2 335 personnes infectieuses au même instant.</li>
+<li>La racine positive de la relation de taille finale vaut \(z=0{,}892645\). Environ 8 926 personnes auront été infectées au total ; environ 1 074 restent jamais infectées, sans que cela suppose une disparition physique du virus.</li>
+<li>Une couverture de \(v_c=1-1/2{,}5=0{,}6\), soit 60 %, place le nombre effectif initial de reproduction à un au plus. Un vaccin imparfait ou des contacts inégaux changeraient ce calcul.</li>
+</ol><p>Pour un agent infectieux hypothétique de \(R_0=15\), le même calcul donne 93,3 % ; ce nombre n'est pas une consigne de vaccination pour une maladie réelle. La version à 400 points de la planche est stochastique : une vague peut s'éteindre beaucoup plus tôt que l'équation moyenne.</p></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« La croissance logistique reste exponentielle. »</strong> Elle est presque exponentielle au début ; la limitation devient ensuite décisive.</li>
+<li><strong>« Les prédateurs stabilisent forcément leurs proies. »</strong> La rétroaction peut produire des cycles persistants ou amortis, selon le modèle et les paramètres.</li>
+<li><strong>« L'épidémie finit lorsque chacun a été malade. »</strong> Elle décroît dès que chaque infecté produit en moyenne moins d'un autre cas ; des susceptibles subsistent.</li>
+<li><strong>« R₀ décrit seulement le virus. »</strong> Il dépend également des contacts, du milieu, de la durée infectieuse et de la définition de la population étudiée.</li>
+<li><strong>« Vacciner 10 % au hasard équivaut à vacciner les 10 % de hubs. »</strong> Sur un réseau hétérogène, enlever les grands relais coupe souvent davantage de chemins ; l'effet varie selon le réseau.</li>
+<li><strong>« Le seuil vaccinal supprime tout cas. »</strong> Il empêche une croissance soutenue dans le modèle moyen, pas toute chaîne locale ni toute réintroduction.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>04–05</b><span><a href="../fondations-systemes-hasard/index.html">Systèmes et croissance</a> : rétroactions, stabilité et croissance logistique avant le couplage.</span></li>
+<li><b>07</b><span><a href="../fondations-systemes-hasard/index.html">Hasard et distributions</a> : une moyenne déterministe ne prédit pas chaque petite population.</span></li>
+<li><b>39</b><span><a href="../../labo/index.html#fondations">Immunité collective</a> : mécanismes biologiques que le compartiment « retiré » résume grossièrement.</span></li>
+<li><b>40</b><span><a href="../fondations-evolution-populations/index.html">Évolution et populations</a> : sélection et voisinage local peuvent modifier les réseaux de transmission.</span></li>
+<li><b>08</b><span><a href="../../labo/index.html#fondations">Chaos et stabilité</a> : distinguer cycles stables, oscillations amorties et irrégularité chaotique.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Si R₀ = 4, quel pourcentage minimal de personnes parfaitement protégées empêche la croissance initiale dans le SIR homogène ?</summary><p>Le seuil est \(1-1/4=0{,}75\), soit 75 %. Le résultat suppose une efficacité parfaite et n'exclut pas des infections sporadiques.</p></details>
+<details><summary>Pourquoi la courbe de prédateurs atteint-elle généralement son maximum après celle des proies ?</summary><p>La croissance des prédateurs dépend de la rencontre avec les proies, et leur hausse réduit ensuite les proies. Le retard entre les deux réponses produit le déphasage.</p></details>
+<details><summary>Pourquoi un réseau avec quelques hubs peut-il diffuser plus vite qu'un anneau de même degré moyen ?</summary><p>Les hubs relient des régions nombreuses et éloignées. Des chemins plus courts atteignent de nouveaux groupes avant que la propagation locale ait progressé pas à pas.</p></details>
+</section>
+<section class="module" id="m42">
+<header><p class="num">Module 42</p><h3>Émergence</h3><p class="etapes">Sur la planche : 5 Le jeu de la vie · 6 L’essaim · 7 Le tas de sable · 8 Les bouchons fantômes</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Imagine des dizaines de points qui ne peuvent voir que quelques voisins. Aucun ne connaît la forme d'ensemble. Pourtant une vague, un déplacement régulier ou un ralentissement collectif peut apparaître. Des interactions répétées transmettent un effet de proche en proche. Le Jeu de la vie se contente de compter huit cellules autour de chaque case, mais certains patrons avancent ou se reproduisent. Trois règles de voisinage peuvent ordonner un essaim. Un tas de sable illustre autre chose : l'accumulation lente prépare de rares réorganisations très grandes. Sur une route, une petite hésitation peut parcourir la file en sens contraire du déplacement des voitures. L'émergence nomme le résultat collectif, pas une explication supplémentaire.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Cellule et voisinage <span class="u">états binaires</span></dt><dd>Case morte ou vivante et huit cases contiguës, avec recollement des bords dans la simulation.</dd></div>
+<div><dt>Génération \(g\) <span class="u">pas</span></dt><dd>Mise à jour simultanée de toutes les cellules à partir de l'état précédent.</dd></div>
+<div><dt>Vitesse individuelle \(\vec v_i\) <span class="u">unité de distance par pas</span></dt><dd>Direction et déplacement d'un boid, bornés par la vitesse maximale illustrative.</dd></div>
+<div><dt>Rayon \(r_p\) <span class="u">distance normalisée</span></dt><dd>Distance à l'intérieur de laquelle un agent observe un voisin.</dd></div>
+<div><dt>Paramètre d'ordre \(A\) <span class="u">de 0 à 1</span></dt><dd>Longueur du vecteur moyen des directions individuelles normalisées ; un vaut des directions parallèles.</dd></div>
+<div><dt>Taille d'avalanche \(s\) <span class="u">basculements</span></dt><dd>Nombre de transferts de quatre grains provoqués par un ajout unique.</dd></div>
+<div><dt>Probabilité \(P(s)\), exposant \(\tau\) <span class="u">fraction, sans unité</span></dt><dd>Fréquence d'une taille d'avalanche et pente de sa décroissance sur des axes logarithmiques.</dd></div>
+<div><dt>Densité \(\rho\) <span class="u">voitures/case</span></dt><dd>Part des cellules de la route occupées par des véhicules.</dd></div>
+<div><dt>Débit \(q\) <span class="u">voitures/(case·pas)</span></dt><dd>Distance totale parcourue par tous les véhicules, divisée par la longueur de la route et la durée.</dd></div>
+<div><dt>Vitesse \(v,v_{\max}\) <span class="u">cases/pas</span></dt><dd>Vitesse moyenne observée et vitesse maximale permise par l'automate.</dd></div>
+<div><dt>Freinage \(p\) <span class="u">fraction de 0 à 1</span></dt><dd>Probabilité qu'un véhicule réduise sa vitesse d'une case en un pas, lorsqu'il peut avancer.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[\begin{aligned}\text{Naissance :}&\quad n=3\\\text{Survie :}&\quad n=2\ \text{ou}\ n=3\end{aligned}\]<p>Règle B3/S23 : une cellule morte devient vivante avec exactement trois voisines vivantes ; une cellule déjà vivante survit avec deux ou trois. Toutes les autres configurations sont mortes à la génération suivante.</p></div>
+<div class="relation">\[\vec d_i=w_s\vec s_i+w_a\vec a_i+w_c\vec c_i\]<p>Dans le modèle de boids, \(\vec s_i\) écarte des voisins trop proches, \(\vec a_i\) s'aligne sur les vitesses voisines et \(\vec c_i\) pointe vers leur position moyenne. Les poids changent le compromis ; l'expression ne décrit pas une force physique mesurée.</p></div>
+<div class="relation">\[A=\frac1n\left\lVert\sum_{i=1}^{n}\frac{\vec v_i}{\lVert\vec v_i\rVert}\right\rVert\]<p>Le paramètre d'ordre vaut près de zéro lorsque les directions se compensent et près de un quand elles sont alignées. Cette mesure ne dénombre pas les groupes.</p></div>
+<div class="relation">\[P(s)\propto s^{-\tau}\]<p>Dans le tas de sable idéalisé, de nombreuses avalanches sont petites et les grandes sont plus rares, sans échelle typique unique dans le domaine où la loi de puissance s'applique. Un système fini coupe nécessairement la queue de la distribution.</p></div>
+<div class="relation">\[q=\rho\,v\]<p>Pour une route circulaire homogène, le débit égale la densité de voitures multipliée par leur vitesse moyenne. Ajouter des voitures augmente d'abord le débit ; ensuite, les freinages collectifs peuvent le réduire.</p></div>
+<div class="relation">\[\rho_c=\frac1{v_{\max}+1},\qquad q_{\max}=\frac{v_{\max}}{v_{\max}+1}\]<p>Résultat limite d'une route déterministe sans freinage aléatoire, avec une répartition régulière idéale. Cette limite n'est pas universelle.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p>Considérons une route circulaire de 240 cellules et un automate de Nagel–Schreckenberg sans freinage aléatoire, avec une vitesse maximale de cinq cellules par pas. On cherche le point où la capacité théorique de la route est maximale.</p><ol>
+<li>À faible densité, chaque véhicule avance de cinq cases par pas. Le débit est alors \(q=5\rho\), tant que cinq cases libres peuvent séparer les véhicules successifs.</li>
+<li>À forte densité, les intervalles vides limitent le mouvement. La borne déterministe devient \(q=1-\rho\). Le croisement donne \(5\rho=1-\rho\), donc \(\rho_c=1/6\), environ 16,7 %.</li>
+<li>Sur 240 cellules, la densité critique correspond à 40 voitures. Au maximum, \(q_{\max}=5/6=0{,}8333\) voiture par cellule et par pas. La distance totale parcourue est 200 cases à chaque pas, réparties entre les 40 voitures.</li>
+<li>Avec un freinage aléatoire de 30 %, des ralentissements se propagent et le pic réel du diagramme de la planche devient inférieur à cette borne : il dépend des graines et de la durée d'observation.</li>
+</ol><p>Un second ordre de grandeur se calcule sans trafic. Un planeur du Jeu de la vie se déplace d'une case en diagonale après quatre générations. Sur une grille torique de 100 cases de côté, il lui faut 400 générations pour revenir à sa position initiale et à son orientation initiale. La « vitesse » du planeur est donc un résultat de la règle, pas une propriété donnée à l'objet au départ.</p></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« Le collectif exige un meneur. »</strong> Des rétroactions entre voisins suffisent parfois. Le prédateur n'est qu'une perturbation.</li>
+<li><strong>« Émergent signifie inexplicable. »</strong> Chaque pas peut être calculé. Ce qui est difficile, c'est d'anticiper à l'œil la forme globale produite par de nombreux pas.</li>
+<li><strong>« Un planeur se déplace parce qu'une case reçoit une vitesse. »</strong> Seules les naissances et les morts ont lieu ; le déplacement apparaît quand on compare plusieurs générations.</li>
+<li><strong>« Une loi de puissance possède toujours une taille moyenne représentative. »</strong> Une queue large rend la moyenne parfois peu informative et, selon l'exposant idéal, elle peut ne pas converger.</li>
+<li><strong>« Les gros basculements du tas indiquent un danger réel prédit. »</strong> Le tas BTW est une abstraction discrète. Un vrai sable dépend des frottements ; le modèle n'est pas prédictif.</li>
+<li><strong>« Un bouchon exige un accident. »</strong> Un freinage aléatoire peut être amplifié par les voitures suivantes. La zone lente recule même si chaque véhicule continue à avancer.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>40</b><span><a href="../fondations-evolution-populations/index.html">Évolution et génétique</a> : la règle de voisinage modifie les résultats d'une même sélection.</span></li>
+<li><b>08</b><span><a href="../../labo/index.html#fondations">Stabilité et chaos</a> : distinguer ordre stable, fluctuation et sensibilité aux conditions initiales.</span></li>
+<li><b>18</b><span><a href="../../labo/index.html#fondations">Matière et transitions de phase</a> : les interactions d'éléments locaux peuvent modifier un état collectif.</span></li>
+<li><b>07</b><span><a href="../fondations-systemes-hasard/index.html">Distributions et hasard</a> : comment reconnaître une loi de puissance sans la confondre avec des points alignés par hasard.</span></li>
+<li><b>Atlas</b><span>Consensus, polarisation, modèle d'Ising et formation de motifs prolongent ces mécanismes ; aucune de ces extensions n'est simulée ici.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>À combien de générations un planeur se décale-t-il de dix cases en diagonale ?</summary><p>Quatre générations produisent une translation d'une case selon chacun des deux axes. Dix translations exigent donc 40 générations, tant que la grille ne produit pas d'interaction avec un autre motif.</p></details>
+<details><summary>Pourquoi l'alignement moyen peut-il augmenter sans qu'aucun oiseau ne connaît l'ensemble du groupe ?</summary><p>Chaque voisin influence la direction locale du suivant. Des interactions répétées transmettent la direction à travers le groupe ; le paramètre d'ordre mesure leur conséquence globale.</p></details>
+<details><summary>Comment une onde de bouchon peut-elle reculer alors que toutes les voitures vont vers l'avant ?</summary><p>Une voiture entre dans la zone lente, freine, puis repart. La voiture derrière répète le phénomène plus tôt dans l'espace : la frontière du ralentissement remonte vers l'amont.</p></details>
+</section>
+<h2><span>03</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Compétition et prédation.</strong> Les populations sont homogènes ; les points dessinés ne suivent pas une naissance ou une prédation individuelle. Les équations utilisent une intégration RK4. La capacité limite des proies introduit un amortissement, et l'illustration inspirée des fourrures de la Compagnie de la Baie d'Hudson n'est pas un jeu de données historiques mesurées.</li>
+<li><strong>SIR.</strong> La population de 400 se mélange statistiquement et l'infection suit des risques par pas. Les vaccinés sont protégés parfaitement et de façon permanente ; les décès, âges, quarantaines, réinfections et comportements ne sont pas simulés. Les segments entre points indiquent schématiquement une transmission et non un suivi de contacts physiques mesurés.</li>
+<li><strong>Réseaux.</strong> Les graphes régulier, petit monde et sans échelle sont fabriqués par des algorithmes synthétiques. La propagation suit un risque sur chaque lien ; les chemins moyens sont calculés dans le graphe, pas dans l'espace dessiné. Les deux stratégies vaccinent le même nombre de nœuds, mais ne garantissent pas le même résultat dans chaque essai.</li>
+<li><strong>Automate et essaim.</strong> La grille a des bords toriques ; les boids évoluent sur un plan normalisé où les frontières se rejoignent. Le prédateur n'ajoute qu'une répulsion ; rien ne modélise des poissons réels ou une décision volontaire.</li>
+<li><strong>Tas de sable.</strong> Chaque site bascule à quatre grains et l'excédent quitte la grille par ses bords. La taille est le nombre de basculements, non une énergie. La pente estimée dépend des compartiments logarithmiques, du temps de chauffe et de la coupure finie.</li>
+<li><strong>Trafic.</strong> Une voie circulaire, des cellules entières et une règle synchrone ; ni dépassements, ni carrefours, ni réactions humaines complexes. Les unités « cellules/pas » n'ont pas de conversion physique sans hypothèse additionnelle.</li>
+</ul>
+<h2><span>04</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>0,797 · 0,940</b><span>Fractions infectées finalement dans un SIR homogène sans vaccination, pour R₀ = 2 et R₀ = 3.</span></div>
+<div><b>1 − 1/R₀</b><span>Seuil de protection initiale dans le SIR idéal à vaccination parfaitement protectrice.</span></div>
+<div><b>4 générations</b><span>Un planeur B3/S23 se translate d'une case sur chacun des deux axes.</span></div>
+<div><b>0 à 1</b><span>Paramètre d'ordre d'un essaim : zéro signifie directions qui se compensent, un directions alignées.</span></div>
+<div><b>≈ 1/6</b><span>Densité critique idéale pour une route déterministe à vitesse maximale de cinq cellules par pas.</span></div>
+</div>
+<h2><span>05</span>Seulement introduit ici</h2>
+<p>Cette planche ne traite pas l'épidémiologie de santé publique avec classes d'âge, contacts réels et incertitudes paramétriques ; la théorie avancée des réseaux, les transitions de phase et la criticité en physique statistique sont seulement introduites. L'écologie complète, les stratégies de jeux, l'économie, les marchés et la prévision des foules appartiennent à d'autres modèles. Ce qui se transfère d'abord est la méthode : identifier une règle locale, choisir une grandeur collective, varier un paramètre, puis vérifier si le comportement observé résiste au hasard et au changement d'échelle.</p>
+<a class="cta" href="index.html">Retour aux huit expériences →</a>
+</main></body></html>

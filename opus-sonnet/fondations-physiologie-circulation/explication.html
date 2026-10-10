@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><link rel="icon" href="data:,">
+<title>Comprendre le muscle, le cœur et les échanges — LABO</title>
+<meta name="description" content="Fondation 38 : contraction, boucle pression-volume, Poiseuille, continuité et échanges gazeux.">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#e88a8a;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;color:var(--texte);background:var(--fond);font:16px/1.7 var(--sans)}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:4px}.wrap{max-width:790px;margin:auto;padding:34px 24px 80px}.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:55px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.serie{font:11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}h1{font:400 clamp(37px,7vw,64px)/1.07 var(--serif);margin:14px 0 18px}h1 em{color:var(--accent)}.lede{font-size:18px}h2{font:400 31px/1.16 var(--serif);margin:59px 0 18px;padding-top:22px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:8px}p{margin:0 0 16px}ul,ol{padding-left:23px}li{margin-bottom:9px}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(145px,216px) 1fr;gap:15px;padding:14px 0;border-bottom:1px solid var(--trait)}.chiffres b{font:500 16px var(--mono);color:var(--energie)}details{margin:12px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{padding:14px 16px;cursor:pointer;font-weight:500}details p{margin:0 0 14px}.cta{display:inline-block;border:1px solid var(--accent);padding:11px 17px;margin-top:35px;text-decoration:none}.muted{color:var(--texte-2)}.source{font:12px/1.6 var(--mono);overflow-wrap:anywhere;color:var(--texte-2)}@media(max-width:560px){.wrap{padding-inline:18px}.chiffres>div{grid-template-columns:1fr;gap:4px}h2{font-size:27px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+</head><body><main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">← Retour à la simulation</a><a href="../../labo/index.html">← LABO</a></nav>
+<p class="serie">LABO · Fondations 38</p><h1>Muscle, cœur et <em>échanges</em></h1>
+<p class="lede">Quatre parties d’une seule chaîne : de l’ATP qui anime un filament jusqu’à l’oxygène qui entre dans le sang. Chaque étape applique une loi physique connue, sans confondre l’image et l’organisme réel.</p>
+<h2><span>1</span>Ce que tu vois</h2>
+<p><strong>Le muscle.</strong> Les disques Z se rapprochent parce que les filaments fins d’actine glissent sur les filaments épais de myosine. Les petits points orange indiquent le calcium ; le jaune signale l’ATP. Une loupe distingue fixation, coup de rame et détachement.</p>
+<p><strong>Le cœur.</strong> Le volume de la cavité et ses deux valves suivent un cycle calculé. À droite, la boucle pression-volume trace l’histoire du ventricule : sa surface mesure le travail net par battement. <strong>Les vaisseaux.</strong> Trois territoires reçoivent du sang par des artérioles réglables, et une courbe expose la chute de pression.</p>
+<p><strong>Le poumon.</strong> Le dessin sépare l’air alvéolaire du capillaire : les anneaux bleus représentent l’oxygène diffusant vers le sang. Les globules rouges portent une hémoglobine dessinée avec quatre sites ; la courbe de Hill traduit son chargement. Le sang veineux est rouge sombre en réalité : le violet de l’image sert uniquement à différencier les trajets.</p>
+<h2><span>2</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m38"><b>38</b>Muscle, cœur, circulation et échanges</a></li></ul>
+<section class="module" id="m38">
+<header><p class="num">Module 38 · Physiologie</p><h3>Du moteur moléculaire au transport d’oxygène</h3><p class="etapes">Sur la planche : étape 1 Sarcomère · 2 Pompe · 3 Réseau · 4 Échanges</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Imagine plusieurs milliers de mains qui tirent une corde par petites prises. Chaque main s’accroche, tire et doit lâcher pour reprendre une nouvelle prise. C’est l’image du sarcomère : les filaments glissent sans se raccourcir. Le cœur transforme ensuite cette contraction en travail hydraulique. Les artères distribuent le débit ; les artérioles déterminent quelles branches offrent peu ou beaucoup de résistance. Dans les capillaires, une immense section totale ralentit le passage. Au poumon, une fine paroi suffit alors pour permettre à l’oxygène de diffuser, tandis que l’hémoglobine en transporte une quantité bien supérieure à celle simplement dissoute.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Sarcomère, longueur \(L_s\)<span class="u">m</span></dt><dd>Unité contractile entre deux disques Z ; la planche l’affiche en micromètres.</dd></div>
+<div><dt>Recouvrement \(\phi\)<span class="u">sans unité</span></dt><dd>Fraction des têtes pouvant atteindre un filament fin à la longueur considérée.</dd></div>
+<div><dt>Têtes liées \(N_a\), force \(F\)<span class="u">nombre, N</span></dt><dd>Nombre de ponts attachés et somme de leurs contributions mécaniques.</dd></div>
+<div><dt>Fréquence \(f_c\), volume éjecté \(V_{\mathrm{éj}}\)<span class="u">s⁻¹, m³</span></dt><dd>Battements par seconde et quantité quittant le ventricule à chaque cycle.</dd></div>
+<div><dt>Volumes VTD, VTS ; FE<span class="u">m³, sans unité</span></dt><dd>Volumes en fin de diastole et de systole ; fraction de VTD éjectée.</dd></div>
+<div><dt>Pression \(P\), volume \(V\)<span class="u">Pa, m³</span></dt><dd>Pression ventriculaire et volume courant ; le graphe les affiche en mmHg et mL.</dd></div>
+<div><dt>Élastance \(E(t)\), \(V_0\)<span class="u">Pa/m³, m³</span></dt><dd>Raideur ventriculaire variable et volume extrapolé pour une pression nulle.</dd></div>
+<div><dt>Débit \(Q\), résistance \(R\), travail \(W\)<span class="u">m³/s, Pa·s/m³, J</span></dt><dd>Flux volumique, opposition hydraulique et énergie mécanique par cycle.</dd></div>
+<div><dt>Rayon \(r\), longueur \(\ell\), viscosité \(\eta\)<span class="u">m, m, Pa·s</span></dt><dd>Dimensions d’un conduit et viscosité dynamique du liquide.</dd></div>
+<div><dt>Section totale \(A\), vitesse \(v\)<span class="u">m², m/s</span></dt><dd>Somme des aires traversées en parallèle et vitesse moyenne du fluide.</dd></div>
+<div><dt>Flux diffusif \(J\), coefficient \(D\), épaisseur \(e\)<span class="u">m³/s, m²/(Pa·s), m</span></dt><dd>Débit d’oxygène, coefficient pression-diffusion effectif et distance à traverser.</dd></div>
+<div><dt>Pressions partielles \(P_A,P_v,P_{O_2}\)<span class="u">Pa</span></dt><dd>Pression d’oxygène alvéolaire, veineuse et locale, affichée en mmHg.</dd></div>
+<div><dt>Saturation \(S\), \(P_{50}\), exposant \(n\)<span class="u">sans unité, Pa, sans unité</span></dt><dd>Fraction de sites occupés, pression à demi-saturation et pente de Hill.</dd></div>
+<div><dt>Hémoglobine \(\mathrm{Hb}\), contenu \(C_{O_2}\)<span class="u">g/L, m³ O₂/m³ sang</span></dt><dd>Concentration de la protéine porteuse et volume d’oxygène par volume de sang.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[ F\approx N_a\,(2\,\mathrm{pN}),\qquad N_a\propto\phi(L_s) \]
+<p>Une tête attachée contribue environ deux piconewtons. Le calcium rend la fixation possible, puis l’ATP autorise le détachement. L’absence d’ATP bloque les ponts déjà liés ; ce n’est pas une augmentation miraculeuse de force.</p></div>
+<div class="relation">\[ V_{\mathrm{éj}}=\mathrm{VTD}-\mathrm{VTS},\quad \mathrm{FE}=\frac{V_{\mathrm{éj}}}{\mathrm{VTD}},\quad Q=f_c V_{\mathrm{éj}} \]
+<p>Une fréquence élevée ne garantit pas un débit élevé : si la diastole devient trop courte, chaque cycle peut éjecter moins. Les trois grandeurs se calculent à partir d’un même battement.</p></div>
+<div class="relation">\[ P(t)=E(t)\bigl[V(t)-V_0\bigr],\qquad W=\left|\oint P\,\dd V\right| \]
+<p>L’élastance augmente pendant la contraction. La valeur absolue de l’intégrale donne l’aire de la boucle et le travail net positif ; avec le sens de parcours utilisé, \(\oint P\,\dd V\) est signé négativement.</p></div>
+<div class="relation">\[ R=\frac{8\eta\ell}{\pi r^4},\qquad \Delta P=RQ,\qquad Q=Av \]
+<p>Poiseuille suppose un tube rigide, cylindrique, un fluide newtonien et un écoulement laminaire établi. La quatrième puissance rend les artérioles déterminantes ; la conservation du débit explique la faible vitesse dans les milliards de capillaires.</p></div>
+<div class="relation">\[ J=\frac{DA\,(P_A-P_{O_2})}{e} \]
+<p>Cette forme membranaire de Fick emploie un coefficient effectif \(D\) qui intègre diffusion et solubilité afin que le gradient de pression soit utilisable. Une épaisseur triple réduit le flux, à gradient égal, d’un facteur trois.</p></div>
+<div class="relation">\[ S=\frac{P_{O_2}^{n}}{P_{O_2}^{n}+P_{50}^{n}},\quad C_{O_2}=1{,}34\,[\mathrm{Hb}]_{\mathrm{g/dL}}\,S+0{,}003\,P_{O_2,\mathrm{mmHg}} \]
+<p>La deuxième expression donne des millilitres d’O₂ par décilitre de sang. La saturation en S résume la coopérativité de l’hémoglobine. Dans le modèle, acidifier le sang déplace \(P_{50}\) de 26,8 à 30 mmHg.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p>Suivons l’oxygène sur une minute au repos. Prenons 70 battements/min, un volume éjecté de 72,6 mL, une section aortique de 4 cm², une section capillaire totale de 2 500 cm² et une hémoglobine à 150 g/L.</p>
+<ol>
+<li>Débit : \(Q=70\times72{,}6=5\,082\ \mathrm{mL/min}\), soit environ 5,08 L/min ou \(8{,}47\times10^{-5}\ \mathrm{m^3/s}\).</li>
+<li>Vitesse aortique : \(v=Q/A=(8{,}47\times10^{-5})/(4\times10^{-4})=0{,}212\ \mathrm{m/s}\), soit 21,2 cm/s.</li>
+<li>Vitesse capillaire cumulée : \(v=(8{,}47\times10^{-5})/0{,}25=0{,}000339\ \mathrm{m/s}\), soit 0,339 mm/s.</li>
+<li>À 100 mmHg, Hill donne \(S\approx0{,}972\). Le contenu artériel vaut \(1{,}34\times15\times0{,}972+0{,}003\times100\approx19{,}84\ \mathrm{mL/dL}\).</li>
+<li>À 40 mmHg, \(S\approx0{,}747\), donc contenu veineux \(\approx15{,}13\ \mathrm{mL/dL}\). La différence de 4,71 mL/dL, multipliée par 50,8 dL/min, correspond à environ 239 mL d’O₂ livrés par minute.</li>
+</ol><p>Le calcul relie un cœur, une géométrie de réseau et une propriété moléculaire sans supposer que chaque capillaire possède un débit identique.</p></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« Les filaments se raccourcissent. »</strong> Leur longueur reste pratiquement stable ; c’est leur recouvrement qui change. Le muscle se raccourcit par glissement.</li>
+<li><strong>« Le cœur aspire le sang. »</strong> Le remplissage résulte surtout d’un gradient de pression et de la relaxation ; les valves imposent le sens du débit.</li>
+<li><strong>« Un petit vaisseau accélère forcément le sang. »</strong> Il faut comparer la section <em>totale</em> de tous les conduits parallèles, pas le rayon d’un seul.</li>
+<li><strong>« Le sang veineux est bleu. »</strong> Il est rouge sombre. Les couleurs bleue ou violette des diagrammes servent de codes visuels.</li>
+<li><strong>« Une pression plus forte fait doubler tous les débits. »</strong> Chaque branche reçoit une part dictée par sa propre résistance et par les résistances communes.</li>
+<li><strong>« L’hémoglobine attire l’O₂ quand elle en a besoin. »</strong> La fixation dépend de la pression partielle, de la coopérativité et de l’environnement chimique, pas d’une intention.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>20</b><span><a href="../fondations-flux-fluides/index.html">Flux et fluides</a> : résistances hydrauliques, débit, pression et continuité.</span></li>
+<li><b>19 · 32</b><span><a href="../fondations-cellule-membrane/index.html">Diffusion et membrane</a> : gradients, perméabilité et transport.</span></li>
+<li><b>33 · 34</b><span><a href="../fondations-bioelectricite/index.html">Bioélectricité</a> et métabolisme : excitation, calcium et coût énergétique en ATP.</span></li>
+<li><b>37</b><span><a href="../fondations-signalisation-homeostasie/index.html">Régulation</a> : boucles qui modifient pression et rythme.</span></li>
+<li><b>39</b><span><a href="../../labo/index.html#fondations">Hémostase</a> : colmater une rupture vasculaire.</span></li>
+<li><b>Atlas</b><span>Battement du cœur, néphron et échanges pulmonaires : modèles plus détaillés.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Pourquoi ne peut-on pas conclure qu’un filament d’actine raccourcit quand deux disques Z se rapprochent ?</summary><p>Les filaments fins sont ancrés aux disques Z et glissent vers le centre sur la myosine. La distance entre disques diminue parce que le recouvrement augmente, non parce que les molécules raccourcissent.</p></details>
+<details><summary>Une artériole passe de 16 à 8 µm de rayon. Comment change sa résistance ?</summary><p>Dans le modèle de Poiseuille, \(R_2/R_1=(16/8)^4=16\). Son débit n’est pas automatiquement divisé par seize : la chute de pression locale et les autres résistances du réseau changent aussi.</p></details>
+<details><summary>Pourquoi un sang plus acide libère-t-il plus facilement de l’oxygène à PO₂ égale ?</summary><p>L’effet Bohr déplace la courbe de saturation vers la droite : \(P_{50}\) augmente. Ainsi, à même PO₂, une plus petite fraction de l’hémoglobine reste saturée. Cela favorise la livraison aux tissus actifs.</p></details>
+</section>
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Sarcomère.</strong> Environ 480 têtes discrètes et trois états stochastiques, sans régulation fine de la troponine ni élasticité passive. Chaque détachement consomme un ATP dans ce schéma ; les pas de glissement sont moyennés. La courbe s’inspire de Gordon, Huxley et Julian (1966) mais le plateau choisi, 2,00–2,25 µm, est arrondi ; l’article décrit 2,05–2,20 µm.</li>
+<li><strong>Cœur.</strong> Élastance ventriculaire sinusoïdale, deux valves unidirectionnelles idéales avec résistance à l’ouverture, oreillette à pression fixe et artères modélisées par une résistance et une capacité, analogue exact d’un RC. Ni atrium actif, ni quatre chambres, ni mécanique des fibres.</li>
+<li><strong>Vaisseaux.</strong> Trois organes, rayons équivalents, viscosité newtonienne dépendant empiriquement de l’hématocrite ; le débit moyen est stationnaire. Le grand nombre de capillaires représente une section totale, pas une microcirculation anatomique résolue.</li>
+<li><strong>Gaz.</strong> Un trajet pulmonaire en une dimension ; la capacité tampon d’Hb modifie une constante d’équilibration effective. La cinétique est calibrée pour l’expérience pédagogique, non mesurée sur un patient ; le paramètre informatique D est un multiplicateur relatif sans unité, distinct du coefficient effectif de Fick. Le CO₂ est représenté graphiquement mais pas calculé ; les cas d’altitude et d’effort sont des scénarios illustratifs.</li>
+</ul>
+<p class="source">Sources : Gordon, Huxley et Julian, <i>Journal of Physiology</i>, 1966 (doi:10.1113/jphysiol.1966.sp007909) ; Suga et modèles d’élastance variable ; NIST Handbook 133 (mmHg) ; NCBI Bookshelf, <i>Physiology, Oxygen Transport</i> (1,34 et 0,003). Les paramètres restants sont des choix du brief et de calibration, détaillés dans LIVRAISON.md.</p>
+<h2><span>4</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>2 pN · 10 nm</b><span>Ordres de grandeur de force et de déplacement par cycle d’une tête de myosine.</span></div>
+<div><b>≈ 5 L/min</b><span>Débit cardiaque représentatif au repos avec 70 battements/min et 70 mL par battement.</span></div>
+<div><b>× 16</b><span>Multiplication de la résistance hydraulique quand le rayon est divisé par deux.</span></div>
+<div><b>0,33 mm/s</b><span>Vitesse moyenne pour 5 L/min répartis sur 2 500 cm² de capillaires.</span></div>
+<div><b>26,8 mmHg</b><span>P₅₀ de Hill utilisé, avec un exposant 2,7 ; saturation ≈ 97 % à 100 mmHg.</span></div>
+</div>
+<h2><span>5</span>Seulement introduit ici</h2>
+<p>Le déclenchement électrique de la contraction, le calcium intracellulaire, les muscles lisse et cardiaque, les boucles nerveuses de régulation et la ventilation ne sont qu’évoqués. Le néphron, l’électrocardiogramme, les pathologies, la pharmacologie, le système lymphatique et la thermorégulation appartiennent à d’autres productions. Les valeurs présentées sont des ordres de grandeur pédagogiques, pas des critères cliniques individuels.</p>
+<a class="cta" href="index.html">Retour à la simulation →</a>
+</main></body></html>
