@@ -2,7 +2,7 @@
 
 Ce dossier décrit **ce qu'est le corpus de LABO** : la carte conceptuelle des fondations, les productions, les modèles réellement construits, les collections et l'Atlas des phénomènes qu'on pourrait un jour construire. C'est la référence actuelle. En cas de désaccord entre ce dossier et un autre document du dépôt (brief dans `prompts/`, ancien README, accueil du site, prototype d'interface), **ce dossier l'emporte**, sauf pour l'état du code lui-même : si une page existe ou n'existe pas, c'est le dépôt qui a raison, et ce dossier doit être corrigé.
 
-État décrit : `main` au commit `f7086eb` (jusqu'aux fondations 32 et 40), mis à jour le 2026-10-04. Module 40 (*Évolution et génétique des populations*) ajouté le 2026-10-04 (PR n° 16). Module 23 (*Magnétisme et induction*) ajouté le 2026-10-06. Module 30 (*Réactions chimiques*) ajouté le 2026-10-06.
+État préparé après fusion de la production 33, le 2026-10-07, à partir de `main` au commit `fc0d833`. Module 40 (*Évolution et génétique des populations*) ajouté le 2026-10-04 (PR n° 16). Module 23 (*Magnétisme et induction*) ajouté le 2026-10-06. Modules 28 et 29 (*Molécules et mole*) ajoutés le 2026-10-06 (20 modèles). Module 24 (*L'onde électromagnétique*) ajouté le 2026-10-07 (21 modèles). Page *Atomes, noyaux et lumière* ajoutée le 2026-10-07 en `partial` (module 26 couvert, module 27 en théorie seulement ; 22 modèles). Module 37 (*Signalisation et homéostasie*) ajouté le 2026-10-07 (23 modèles : 22 `built`, un `partial`). Page *D’un gradient à une tension* ajoutée le 2026-10-07 (`built`, couverture 33 `partial` en complément du neurone ; 24 modèles dont un partiel).
 
 ## Les fichiers
 
@@ -77,4 +77,4 @@ Un modèle peut être `built` et ne couvrir un module qu'en `partial`. On ne gon
 2. On ne crée jamais de module à partir d'un concept interne : « Dérivées » vit dans le module 03.
 3. Les numéros 01-50 sont ceux de la carte canonique. Les numéros 01-09 des dossiers `opus-sonnet/0N-…` sont des numéros historiques (`legacy_number`), gardés pour ne pas casser les URL ; ce ne sont ni des modules ni des rangs de collection. Voir [`historique.md`](historique.md).
 4. Les identifiants stables des modèles sont des slugs sans numéro (`mitose`, `replication-adn`).
-5. Une idée d'Atlas qui devient une page garde son entrée : on change son statut et on la relie au modèle.
+5. Une idée d'Atlas qui devient une page garde son entrée : on change son statut et on la relie au modèle. Module 30 (*Réactions : vitesse et équilibre*) ajouté le 2026-10-06.

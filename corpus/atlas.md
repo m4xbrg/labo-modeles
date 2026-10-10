@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 39 | 0 | 136 |
-| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 9 | 1 | 48 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 41 | 0 | 134 |
+| Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 16 | 1 | 41 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **48** | **2** | **184** |
+| **Total** | **265** | **16** | **15** | **57** | **2** | **175** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -163,7 +163,7 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Cyclotron | `partial` | 23 | 12, 21 | Magnétisme et induction | Acte II : période indépendante de la vitesse (deux protons) ; pas d’accélération entre les dés. |
 | Induction électromagnétique | `absorbed` | 23 | 21, 22 | Magnétisme et induction | Acte III des fondations Magnétisme et induction (aimant et bobine, deux bobines de Faraday). |
 | Transformateur | `idea` | 23 | 22 | — |  |
-| Onde électromagnétique | `idea` | 24 | 15, 21, 23 | — |  |
+| Onde électromagnétique | `absorbed` | 24 | 15, 21, 23 | L’onde électromagnétique | Étapes 1 et 2 des fondations L’onde électromagnétique (charge secouée dont la ride part à c ; E et B en phase, E = cB). |
 | Circuit RC | `absorbed` | 22 | 05, 21 | Courant et circuits |  |
 | Circuit RLC | `absorbed` | 22 | 14, 21 | Courant et circuits |  |
 | Résonance RLC | `idea` | 22 | 14 | — |  |
@@ -190,7 +190,7 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Mutation ADN | `idea` | 36 | 35 | — |  |
 | Réparation de l’ADN | `idea` | 36 | 35 | — |  |
 | Expression génique | `idea` | 35 | 37 | — |  |
-| Signalisation cellulaire | `idea` | 37 | 32 | — |  |
+| Signalisation cellulaire | `absorbed` | 37 | 32 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Étapes 1 et 2 : spécificité, liaison réversible, antagoniste, saturation et cascade amplificatrice ; seconds messagers détaillés hors champ. |
 | Apoptose | `idea` | 37 | 36 | — |  |
 
 ### 8 · Évolution, écologie et systèmes complexes
@@ -395,15 +395,15 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 | Ventilation pulmonaire | `idea` | 38 | 20 | — |  |
 | Relation pression-volume du poumon | `idea` | 38 | 17, 20 | — |  |
 | Boucle pression-volume cardiaque | `idea` | 38 | 20, 11 | — |  |
-| Régulation de la glycémie | `idea` | 37 | 04 | — |  |
-| Potentiel de membrane | `partial` | 33 | 21, 19 | Le neurone qui apprend | Potentiel de repos et dépolarisation dans la planche Neurone. |
+| Régulation de la glycémie | `absorbed` | 37 | 04 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Étape 3 : repas, insuline, retour à la base, résistance et production réduite ; modèle pédagogique sans valeur médicale. |
+| Potentiel de membrane | `absorbed` | 33 | 21, 19 | D’un gradient à une tension | Nernst, séparation de charge et potentiel de repos GHK manipulables ; renvoi au neurone pour le potentiel d’action et la plasticité. |
 
 ### Chimie
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Liaison chimique et géométrie moléculaire | `idea` | 28 | 21 | — |  |
-| Forces intermoléculaires | `idea` | 28 | 21 | — |  |
+| Liaison chimique et géométrie moléculaire | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étapes 1 à 3 (creux d’énergie, électronégativité, VSEPR et moment dipolaire). |
+| Forces intermoléculaires | `absorbed` | 28 | 21 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Étape 4 (modèle 2D qualitatif, liaisons hydrogène). |
 | Dissolution / solvatation | `idea` | 28 | 19 | — |  |
 | Diffusion réactionnelle | `idea` | 30 | 19 | — |  |
 | Le Chatelier interactif | `absorbed` | 30 | — | Réactions : vitesse et équilibre | Étape 4 (chauffer, comprimer, injecter du NO₂). |
@@ -427,7 +427,7 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 | Dipôle magnétique | `absorbed` | 23 | — | Magnétisme et induction | Acte I (spire et aimant vus de loin). |
 | Courants de Foucault | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (aimant qui tombe dans un tube de cuivre). |
 | Induction motrice | `absorbed` | 23 | — | Magnétisme et induction | Acte IV (tige sur des rails, ε = Bℓv). |
-| Propagation EM depuis une source oscillante | `idea` | 24 | 15 | — |  |
+| Propagation EM depuis une source oscillante | `absorbed` | 24 | 15 | L’onde électromagnétique | Étape 1 des fondations L’onde électromagnétique (charge qui oscille : onde sortante, λ = c/f, rien dans l’axe). |
 
 ### Optique
 
@@ -443,11 +443,11 @@ Absents de la liste historique ; proposés le 2026-10-02 pour rendre l'Atlas plu
 
 | Phénomène | Statut | Module d’accueil | Préparé par | Modèle | Note |
 |---|---|---|---|---|---|
-| Désintégration radioactive | `partial` | 26 | 05, 07 | Systèmes, croissance et hasard | Version statistique (étape D3 des fondations Systèmes, croissance et hasard) ; la physique nucléaire n’est pas traitée. |
+| Désintégration radioactive | `absorbed` | 26 | 05, 07 | Atomes, noyaux et lumière | Étape 4 des fondations Atomes, noyaux et lumière (transmutation α, β, écrans, absence de mémoire) ; la version statistique reste l’étape D3 des fondations Systèmes, croissance et hasard. |
 | Chaîne de désintégration | `idea` | 26 | 05 | — |  |
-| Fission | `idea` | 26 | 11 | — |  |
-| Fusion | `idea` | 26 | 11 | — |  |
-| Énergie de liaison nucléaire | `idea` | 26 | 11 | — |  |
+| Fission | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilan énergétique de ²³⁵U + n dans l’étape 3 des fondations Atomes, noyaux et lumière ; la réaction en chaîne et le réacteur ne sont pas construits. |
+| Fusion | `partial` | 26 | 11 | Atomes, noyaux et lumière | Bilans de ²H + ³H et de 3 ⁴He dans l’étape 3 des fondations Atomes, noyaux et lumière ; le confinement et les conditions de la fusion ne sont pas construits. |
+| Énergie de liaison nucléaire | `absorbed` | 26 | 11 | Atomes, noyaux et lumière | Étape 3 des fondations Atomes, noyaux et lumière (courbe B/A mesurée et semi-empirique, défaut de masse, bilans de réaction). |
 
 ### Quantique
 

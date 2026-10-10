@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les signaux et les équilibres du vivant — LABO</title>
+<meta name="description" content="Module 37 : liaison, amplification, glycémie et stabilité des boucles de rétroaction.">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#f0c27a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body><main class="wrap">
+<nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a class="back" href="../../labo/index.html">&larr; LABO</a></nav>
+<p class="serie">LABO · Fondations 37</p>
+<h1>Comprendre les signaux et les <em>équilibres du vivant</em></h1>
+<p class="lede">Une liaison à la membrane, une réponse qui s’amplifie, un écart qui se corrige : trois mécanismes relient la cellule à l’organisme.</p>
+<h2><span>1</span>Ce que tu vois</h2>
+<dl>
+<dt>1 · Ligand et récepteur</dt><dd>Les petites formes miel représentent des molécules signal. Une poche complémentaire se lie au ligand ; la lueur indique l’activation. L’antagoniste occupe une poche sans l’activer. Les autres formes restent libres.</dd>
+<dt>2 · Cascade</dt><dd>La gerbe de molécules jaunes s’élargit à chaque étage. Les compteurs donnent les populations actives calculées ; l’amplification potentielle est une grandeur distincte. L’arrêt des signaux rend visible leur extinction.</dd>
+<dt>3 · Glycémie</dt><dd>Le glucose lilas circule entre intestin, sang, foie et muscles. L’insuline miel suit la hausse ; le glucagon sable signale une baisse sous le niveau basal. La trace conserve l’histoire du repas et de la course.</dd>
+<dt>4 · Boucles</dt><dd>La consigne tiretée distingue température mesurée et température de référence. Le délai décale la correction. À côté, une impulsion peut faire basculer un commutateur abstrait ; son état reste élevé après l’impulsion.</dd>
+</dl>
+<h2><span>2</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m37"><b>37</b>Signalisation et homéostasie</a></li></ul>
+<section class="module" id="m37">
+<header><p class="num">Module 37</p><h3>Signalisation et homéostasie</h3><p class="etapes">Sur la planche : 1 Ligand · 2 Cascade · 3 Glycémie · 4 Boucles</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Une molécule signal n’apporte pas une phrase à exécuter. Sa liaison change l’état d’un récepteur ; les réactions couplées à ce récepteur produisent la réponse. Deux cellules exposées au même signal peuvent donc répondre différemment. Une cascade multiplie cette première activation, mais des mécanismes d’extinction limitent sa durée. À l’échelle de l’organisme, une hausse de glucose déclenche des réponses qui réduisent cette hausse : c’est une rétroaction négative. L’équilibre est dynamique, avec des écarts et des corrections permanentes. Le délai compte autant que la force de correction : agir sur une mesure devenue ancienne peut provoquer un dépassement. Une rétroaction positive amplifie plutôt la perturbation ; certains circuits non linéaires possèdent alors deux états stables et une mémoire.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Ligand, récepteur, antagoniste</dt><dd>Molécule liée, protéine qui la lie, et ligand qui occupe le récepteur sans produire l’activation étudiée.</dd></div>
+<div><dt>Concentration \(L\)<span class="u">nM</span></dt><dd>Concentration libre du ligand dans le bain ; une nanomole par litre vaut un nanomolaire.</dd></div>
+<div><dt>Occupation \(\theta\)<span class="u">sans unité</span></dt><dd>Fraction des récepteurs liés, comprise entre zéro et un.</dd></div>
+<div><dt>Affinité \(K_d\), seuil \(K\)<span class="u">nM</span></dt><dd>Concentrations de demi-occupation du modèle simple et de Hill ; un petit Kd indique une forte affinité.</dd></div>
+<div><dt>Coefficient de Hill \(n\)<span class="u">sans unité</span></dt><dd>Paramètre qui règle la pente ; il ne compte pas automatiquement les sites de liaison.</dd></div>
+<div><dt>Gain \(g\), étages \(N\), amplification \(A\)<span class="u">sans unité</span></dt><dd>Multiplicateur par étage, nombre d’étages et produit potentiel de ces multiplicateurs.</dd></div>
+<div><dt>État \(x\), consigne \(x^*\), état initial \(x_0\)</dt><dd>Grandeur suivie, valeur de référence et valeur au départ, toutes dans la même unité.</dd></div>
+<div><dt>Correction \(k\), temps \(t\), délai \(\tau\)</dt><dd>Taux de rappel en min⁻¹ et durées en minutes ; leur produit est sans unité.</dd></div>
+<div><dt>Glycémie \(G\), insuline \(I\)</dt><dd>Concentration sanguine en mmol/L et activité insulinique au-dessus du basal en unités arbitraires.</dd></div>
+<div><dt>Masse \(m\), masse molaire \(M\), volume \(V\)</dt><dd>Glucose en grammes, grammes par mole et volume de distribution supposé en litres.</dd></div>
+<div><dt>Hausse \(\Delta G\)<span class="u">mmol/L</span></dt><dd>Augmentation de concentration calculée dans le volume de distribution.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[\theta=\frac{L}{L+K_d},\qquad \theta_{\mathrm{Hill}}=\frac{L^n}{L^n+K^n}\]
+<p>Sans antagoniste, à l’équilibre, doubler le ligand ne double pas toujours l’occupation : elle sature. Hill décrit une pente plus raide si n dépasse un ; la première courbe a la forme de Michaelis-Menten.</p></div>
+<div class="relation">\[A=g^N\]
+<p>Quatre étages de gain 100 donnent un potentiel de 10⁸. Ce produit ne donne ni la population active instantanée ni un gain biologique mesuré : extinction et durée d’entrée modifient la réponse.</p></div>
+<div class="relation">\[\frac{\dd x}{\dd t}=-k(x-x^*),\qquad x(t)=x^*+(x_0-x^*)\mathrm e^{-kt}\]
+<p>Sans retard ni perturbation persistante, une consigne fixe et un rappel linéaire produisent un retour exponentiel. Après une durée 1/k, l’écart est divisé par e, environ 2,72.</p></div>
+<div class="relation">\[\frac{\dd x}{\dd t}=-k\,x(t-\tau)\]
+<p>Ici x désigne directement l’écart à la consigne. Le modèle utilise une histoire constante avant le départ : la correction porte sur l’écart mesuré un délai plus tôt.</p></div>
+<div class="relation">\[k\tau\lt 1/\mathrm e:\ 	ext{retour direct}\]
+\[1/\mathrm e\lt k\tau\lt\pi/2:\ 	ext{oscillations amorties}\]
+\[k\tau\gt\pi/2:\ 	ext{oscillations croissantes}\]
+<p>Ces seuils valent pour cette équation linéaire à retard et cette histoire initiale. À π/2, la frontière est marginale ; les seuils ne constituent pas des critères médicaux universels.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p>Prenons 75 g <em>d’équivalents glucose</em>, avec M = 180,156 g/mol et V = 15 L, volume supposé pour ce calcul pédagogique.</p>
+<ol>
+<li>La quantité vaut \(m/M=75/180{,}156\approx0{,}4163\) mol, soit 416,3 mmol.</li>
+<li>Sans aucune captation, \(\Delta G=1000m/(MV)\approx27{,}75\) mmol/L : ce scénario fictif dépasse largement une hausse ordinaire après un repas.</li>
+<li>La planche injecte seulement 15 % de cette perturbation, soit 4,16 mmol/L, répartis sur 45 minutes. Ce facteur regroupe premier passage et utilisation immédiate ; ce n’est pas une biodisponibilité mesurée.</li>
+<li>Avec la correction active, le profil « sain » culmine vers 8,28 mmol/L et revient sous 5,5 mmol/L vers 134 minutes après le repas. Ces résultats appartiennent au modèle, pas à une prédiction individuelle.</li>
+</ol></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li>« L’hormone porte l’ordre. » La liaison et les réactions présentes dans la cellule déterminent la réponse, sans intention.</li>
+<li>« Plus de signal donne toujours plus de réponse. » Les récepteurs saturent ; la réponse maximale peut être atteinte malgré une concentration croissante.</li>
+<li>« L’homéostasie est la constance. » Elle corrige continuellement des écarts ; une valeur fluctuante peut être régulée.</li>
+<li>« La fièvre est simplement une correction en panne. » Une consigne déplacée peut déclencher des frissons à 38 °C si la référence est plus haute.</li>
+<li>« Positive signifie bonne, négative mauvaise. » Les signes indiquent amplification ou réduction de l’écart ; ils ne jugent pas l’effet.</li>
+<li>« Le diabète de type 2 signifie absence d’insuline. » Une réponse tissulaire réduite peut coexister avec de l’insuline ; la maladie dépasse ce modèle.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>38</b><span>Organes : pression artérielle et adaptation du débit à l’effort, module prévu.</span></li>
+<li><b>39</b><span>Défense : amplification de la coagulation et mécanismes qui limitent son extension, module prévu.</span></li>
+<li><b>33</b><span><a href="../03-neurone/index.html">Le neurone</a> : une rétroaction positive déclenche une impulsion, puis l’inactivation l’arrête ; ce circuit excitable ne conserve pas l’état haut.</span></li>
+<li><b>35</b><span>Expression des gènes en réponse aux signaux, module prévu ; les préalables 30 et 34 sur liaison et enzymes sont aussi prévus.</span></li>
+<li><b>08</b><span>Stabilité et chaos, module prévu ; <a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a> montre déjà l’amortissement.</span></li>
+<li><b>41</b><span>Populations régulées, module prévu ; revoir la rétroaction dans <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a> et les récepteurs dans <a href="../fondations-cellule-membrane/index.html">Cellule et membrane</a>.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Pour Kd = 10 nM, quelles concentrations donnent 10 % et 90 % d’occupation ?</summary><p>Respectivement Kd/9, soit 1,11 nM, et 9 Kd, soit 90 nM. Le rapport vaut 81 : la saturation étale la transition sur presque deux ordres de grandeur.</p></details>
+<details><summary>Pourquoi enlever les mécanismes d’extinction prolonge-t-il la cascade ?</summary><p>Les populations actives ne sont plus retirées. L’arrêt du ligand ne suffit donc pas à effacer immédiatement l’activation déjà transmise aux étages suivants.</p></details>
+<details><summary>Une rétroaction positive garde-t-elle toujours une mémoire ?</summary><p>Non. Deux états stables séparés par un seuil sont nécessaires à la mémoire du commutateur montré. Une rétroaction positive peut aussi produire une réponse transitoire, comme le potentiel d’action.</p></details>
+</section>
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Liaison :</strong> récepteurs immobiles, bain bien mélangé, diffusion illustrative. Les liaisons stochastiques ne sont pas calculées à partir des collisions dessinées. À l’équilibre, liaisons et déliaisons continuent.</li>
+<li><strong>Cascade :</strong> gains constants, ressources illimitées, populations continues. L’adrénaline active un récepteur couplé à Gs, puis l’adénylate cyclase, l’AMPc, la PKA, la phosphorylase kinase et la glycogène phosphorylase. L’AMPc est un second messager ; les étages de gain 100 ne reproduisent pas cette séquence réelle.</li>
+<li><strong>Glycémie :</strong> deux variables inspirées du modèle minimal de <a href="https://doi.org/10.1152/ajpendo.1979.236.6.E667">Bergman et collaborateurs, 1979</a>, sans son compartiment d’action insulinique distante. Le glucagon affiché est un indicateur ; son effet est regroupé dans le rappel basal. Aucun usage diagnostique.</li>
+<li><strong>Boucles :</strong> thermostat linéaire à retard, bruit illustratif, commutateur abstrait bistable. Ovulation et coagulation comportent des mécanismes supplémentaires ; la mémoire n’est pas une propriété générale des rétroactions positives.</li>
+</ul>
+<h2><span>4</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>50 %</b><span>occupation à L = Kd dans le modèle de liaison simple, sans antagoniste.</span></div>
+<div><b>81 fois</b><span>rapport de concentrations entre 10 % et 90 % d’occupation pour Hill n = 1 ; trois fois pour n = 4.</span></div>
+<div><b>10⁸</b><span>amplification potentielle illustrative : quatre étages de gain 100.</span></div>
+<div><b>5 mmol/L</b><span>glycémie basale choisie pour la simulation ; la bande 4–6 est un repère pédagogique, pas une plage diagnostique.</span></div>
+<div><b>0,368 · 1,571</b><span>seuils sans unité 1/e et π/2 de l’équation linéaire à retard.</span></div>
+</div>
+<h2><span>5</span>Seulement introduit ici</h2>
+<p>Les seconds messagers en détail, les récepteurs nucléaires, le système nerveux autonome et les rythmes circadiens demandent d’autres modèles. L’endocrinologie détaillée, la pharmacologie et le diabète clinique restent hors champ.</p>
+<a class="cta" href="index.html">Retour à la simulation &rarr;</a>
+</main></body></html>

@@ -16,16 +16,16 @@ La numérotation 01-50 est canonique et ne change pas. Les productions sont dime
 
 Origine : la carte vient du paquet de fondations préparé avant la première production (hors dépôt). Elle regroupe une liste antérieure de 104 fondations numérotées #1-#104, toutes rattachées à un module principal, et ajoute trois modules absents de cette liste (20 Fluides, 25 Optique, 39 Immunité et coagulation). La liste des 104 elle-même n'est pas dans le dépôt.
 
-## État au 2026-10-06
+## État au 2026-10-07
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-23, 30, 32, 33, 40, 46 (25 modules) |
-| Couverture **partial** | 07, 08, 34, 36, 44 |
-| Seulement **supporting** | 09, 26, 31, 35 |
-| Rien | 24, 25, 27-29, 37-39, 41-43, 45, 47-50 |
+| Couverture **full** par au moins un modèle | 01-06, 10-24, 26, 28-30, 32, 33, 37, 40, 46 (30 modules) |
+| Couverture **partial** | 07, 08, 27, 34, 36, 44 |
+| Seulement **supporting** | 09, 31, 35 |
+| Rien | 25, 38-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Réactions chimiques* (module 30), est construite le même jour au même standard, avant 28·29 dans la branche E ; son moteur est testé avant la page (42 tests) et ses résultats sont cités dans la PR. Le module 33 est couvert sans production de fondations : le showcase *Le neurone qui apprend* l'enseigne presque entièrement. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Liaisons, molécules, mole et stœchiométrie* (modules 28 et 29), ouvre la branche E · Atomes, chimie et noyaux le même jour, en deux chapitres (4 + 3 étapes), avant les modules 26-27 qui la précèdent dans la carte. Une quatorzième, *L'onde électromagnétique* (module 24), poursuit la branche D au même standard (un chapitre de quatre étapes) ; son moteur, écrit et testé avant la page, est versionné dans `prompts/moteurs/`. Une quinzième, *Atomes, noyaux, photons et spectres* (modules 26 et 27), rejoint la branche E le 2026-10-07 ; seule la première moitié est livrée (chapitre 26 et explication des deux modules), le chapitre 27 suivra. Une seizième, *Signalisation et homéostasie* (module 37), ajoute le 2026-10-07 un chapitre de quatre étapes et prépare la physiologie (38 et 39). Une dix-septième, *Bioélectricité et synapses* (module 33), ajoute le 2026-10-07 la planche *D’un gradient à une tension* : quatre étapes sur Nernst, GHK, le câble et la sommation. Sa couverture est `partial` ; le showcase *Le neurone qui apprend* maintient la couverture globale `full` du module. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations. Une production de plus, *Réactions : vitesse et équilibre* (module 30), est construite le 2026-10-06 : quatre étapes, moteur versionné dans `prompts/moteurs/reactions-chimiques.js`.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
 
@@ -38,6 +38,12 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 - **46** : une seule dimension d’espace ; accélération propre, quadrivecteurs, aberration et Doppler relativistes hors champ. Le module 47 est annoncé en fin de planche, pas couvert.
 - **40** : générations non chevauchantes, un seul gène, reproduction à un parent pour le trait continu, mutations neutres ; ni recombinaison, ni coalescence, ni spéciation. Les modules 41 et 42 sont annoncés en fin de planche (grille mélangée ou par voisinage), pas couverts.
 - **23** : sources à symétrie axiale et fils infinis seulement, sans matériaux magnétiques (ni fer, ni hystérésis) ; particules non relativistes ; inductance propre de la bobine réceptrice et des anneaux du tube négligée. Auto-induction, transformateur et moteur seulement introduits ; le module 24 est annoncé en fin de planche.
+- **28** : VSEPR simulé par des domaines qui se repoussent sur une sphère, limité à quatre domaines (octet étendu hors champ) ; forces entre molécules en 2D, qualitatives, températures réduites ; orbitales, hybridation, liaison métallique, résonance et solubilité seulement introduites. **29** : réactions totales, sans vitesse ni équilibre ; volume du soluté négligé. Les modules 30 et 31 sont annoncés en fin de planche.
+- **24** : champ de rayonnement non relativiste et vitesse de la lumière ralentie à l'étape 1 ; onde plane idéale, polarisée verticalement ; frontières des domaines du spectre conventionnelles ; distances schématiques à l'étape 4. Le photon est seulement nommé (énergie hf affichée, d'où le `supporting` du module 27) ; équations de Maxwell complètes, courant de déplacement et polarisation seulement introduits. Les modules 25, 27 et 43 sont annoncés en fin de planche.
+- **26** : nucléons en billes, sans modèle en couches ; table des nucléides limitée à Z ≤ 26 (plus quelques repères) ; fils supposés stables, pas de chaînes. Force forte et interaction faible seulement introduites.
+- **27** `partial` : la théorie est dans l'explication d'*Atomes, noyaux et lumière*, les trois étapes de la planche (niveaux, raies, effet photoélectrique) sont à venir.
+- **37** : liaison réversible en bain bien mélangé, gains constants illustratifs, glycémie à deux variables et apport net calibré sans valeur médicale, thermostat linéaire à retard, commutateur abstrait. Seconds messagers détaillés, récepteurs nucléaires, système nerveux autonome et rythmes circadiens seulement introduits.
+- **33** `partial` dans la nouvelle fondation : canaux réduits, sans étude des portes Hodgkin-Huxley, sans chimie synaptique détaillée ni plasticité. Le showcase conserve sa couverture `full`.
 - **30** : boîte de collisions à deux dimensions en unités réduites (même masse, même taille ; Ea ≈ 3 kT au lieu de ≈ 20 kT pour une vraie réaction), facteur stérique schématique, une seule réaction à la fois ; catalyse sur des grains schématiques, abaissements de Ea illustratifs ; N₂O₄ et NO₂ en gaz parfaits, ΔH° et ΔS° constants, quelques centaines de molécules. Énergie libre de Gibbs, mécanismes en plusieurs étapes et cinétique enzymatique seulement introduits ; les modules 31, 34 et 18 sont annoncés en fin de planche.
 - **16** est enseigné par *Flux, gradients, champs et fluides*. Le gradient et le flux qui apparaissent dans *Matière, chaleur et transport* restent `supporting`.
 
@@ -51,9 +57,9 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | 02 | Vecteurs et géométrie des quantités | magnitude, direction, composantes, addition, projection | Langage scientifique fondamental (`built`) | **full** | Le champ électrique (supporting), Langage scientifique (full), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
 | 03 | Changement et accumulation | dérivée, intégrale, position, vitesse, accélération | Langage scientifique fondamental (`built`) | **full** | Langage scientifique (full), Systèmes, croissance et hasard (supporting), Forces, énergie et conservation (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (supporting) |
 | 04 | Systèmes qui évoluent dans le temps | EDO intuitives, état, taux de changement, conditions initiales, feedback positif/négatif | Systèmes, croissance et hasard (`built`) | **full** | Le neurone qui apprend (supporting), Systèmes, croissance et hasard (full), Oscillations et ondes (supporting) |
-| 05 | Exponentielles et logarithmes | croissance, décroissance, demi-vie, temps caractéristique, échelles logarithmiques | Systèmes, croissance et hasard (`built`) | **full** | Courant et circuits (supporting), Langage scientifique (supporting), Systèmes, croissance et hasard (full), Réactions : vitesse et équilibre (supporting) |
+| 05 | Exponentielles et logarithmes | croissance, décroissance, demi-vie, temps caractéristique, échelles logarithmiques | Systèmes, croissance et hasard (`built`) | **full** | Courant et circuits (supporting), Langage scientifique (supporting), Systèmes, croissance et hasard (full), Atomes, noyaux et lumière (supporting), Réactions : vitesse et équilibre (supporting) |
 | 06 | Sinusoïdes, cycles et phase | amplitude, fréquence, période, phase, déphasage | Oscillations et ondes (`built`) | **full** | Ondes et interférences (supporting), Oscillations et ondes (full) |
-| 07 | Hasard, probabilité et distributions | probabilité, moyenne, variance, distributions, échantillonnage | Systèmes, croissance et hasard (`built`) | partial | Systèmes, croissance et hasard (partial), Réactions : vitesse et équilibre (supporting) |
+| 07 | Hasard, probabilité et distributions | probabilité, moyenne, variance, distributions, échantillonnage | Systèmes, croissance et hasard (`built`) | partial | Systèmes, croissance et hasard (partial), Atomes, noyaux et lumière (supporting), Réactions : vitesse et équilibre (supporting) |
 | 08 | Non-linéarité, stabilité et chaos | non-linéarité, points fixes, stabilité, attracteurs, sensibilité aux conditions initiales | — | partial | Systèmes, croissance et hasard (partial) |
 | 09 | Signaux et Fourier | décomposition en fréquences, spectre, fréquence dominante, reconstruction | — | supporting | Oscillations et ondes (supporting) |
 
@@ -62,18 +68,18 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
 | 10 | Forces, inertie et lois de Newton | force résultante, inertie, masse, accélération, action-réaction | Forces, énergie et conservation (`built`) | **full** | Langage scientifique (supporting), Forces, énergie et conservation (full) |
-| 11 | Énergie et quantité de mouvement | travail, énergie cinétique, énergie potentielle, puissance, impulsion, quantité de mouvement, collisions, conservation | Forces, énergie et conservation (`built`) | **full** | Le champ électrique (supporting), Supernova par effondrement du cœur (supporting), Oscillations et ondes (supporting), Forces, énergie et conservation (full), Rotation, gravitation et orbites (supporting), Magnétisme et induction (supporting) |
+| 11 | Énergie et quantité de mouvement | travail, énergie cinétique, énergie potentielle, puissance, impulsion, quantité de mouvement, collisions, conservation | Forces, énergie et conservation (`built`) | **full** | Le champ électrique (supporting), Supernova par effondrement du cœur (supporting), Oscillations et ondes (supporting), Forces, énergie et conservation (full), Rotation, gravitation et orbites (supporting), Magnétisme et induction (supporting), Molécules et mole (supporting), Atomes, noyaux et lumière (supporting) |
 | 12 | Rotation | couple, vitesse angulaire, moment d’inertie, moment cinétique, précession (extension) | Rotation, gravitation et orbites (`built`) | **full** | Rotation, gravitation et orbites (full) |
 | 13 | Gravitation et orbites | gravitation newtonienne, potentiel, énergie orbitale, orbites elliptiques, vitesse de libération | Rotation, gravitation et orbites (`built`) | **full** | Supernova par effondrement du cœur (supporting), Rotation, gravitation et orbites (full) |
-| 14 | Oscillateurs et résonance | masse-ressort, oscillateur harmonique, amortissement, forçage, résonance | Oscillations et ondes (`built`) | **full** | Courant et circuits (supporting), Oscillations et ondes (full) |
-| 15 | Ondes | propagation, amplitude, fréquence, longueur d’onde, superposition, interférence, ondes stationnaires, modes, Doppler | Oscillations et ondes (`built`) | **full** | Ondes et interférences (partial), Oscillations et ondes (full) |
+| 14 | Oscillateurs et résonance | masse-ressort, oscillateur harmonique, amortissement, forçage, résonance | Oscillations et ondes (`built`) | **full** | Courant et circuits (supporting), Oscillations et ondes (full), Molécules et mole (supporting) |
+| 15 | Ondes | propagation, amplitude, fréquence, longueur d’onde, superposition, interférence, ondes stationnaires, modes, Doppler | Oscillations et ondes (`built`) | **full** | Ondes et interférences (partial), Oscillations et ondes (full), L’onde électromagnétique (supporting) |
 | 16 | Flux, gradients et champs continus | flux, gradient, champ scalaire, champ vectoriel, divergence, rotationnel | Flux, gradients, champs et fluides (`built`) | **full** | La respiration cellulaire (supporting), Le champ électrique (supporting), Matière, chaleur et transport (supporting), Rotation, gravitation et orbites (supporting), Flux, gradients, champs et fluides (full) |
 
 ### C · Matière, thermique et transport
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 17 | Monde microscopique des gaz | température, collisions, pression, P/V/T, gaz idéal | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full), Réactions : vitesse et équilibre (supporting) |
+| 17 | Monde microscopique des gaz | température, collisions, pression, P/V/T, gaz idéal | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full), Molécules et mole (supporting), Réactions : vitesse et équilibre (supporting) |
 | 18 | Chaleur, phases et entropie | chaleur, capacité thermique, changement de phase, chaleur latente, entropie | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full), Réactions : vitesse et équilibre (supporting) |
 | 19 | Transport thermique et moléculaire | conduction, convection, rayonnement, mouvement brownien, diffusion, osmose | Matière microscopique, thermique et transport (`built`) | **full** | Matière, chaleur et transport (full) |
 | 20 | Fluides, pression et débit | pression fluide, débit, continuité, viscosité / résistance, Bernoulli (éventuel) | Flux, gradients, champs et fluides (`built`) | **full** | Flux, gradients, champs et fluides (full) |
@@ -82,33 +88,33 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 21 | Électrostatique | charge, champ électrique, potentiel, tension | Électricité fondamentale et circuits (`built`) | **full** | Le champ électrique (full), Courant et circuits (supporting), Magnétisme et induction (supporting) |
-| 22 | Courant et circuits dynamiques | courant, résistance, loi d’Ohm, condensateur, RC / RL / RLC | Électricité fondamentale et circuits (`built`) | **full** | Courant et circuits (full), Magnétisme et induction (supporting) |
-| 23 | Magnétisme et induction | champ magnétique, force de Lorentz, flux magnétique, Faraday, Lenz | Magnétisme et induction (`built`) | **full** | Magnétisme et induction (full) |
-| 24 | Onde électromagnétique | E et B couplés, propagation, fréquence, longueur d’onde, énergie, spectre EM | Onde électromagnétique et spectre (`planned`) | — | — |
+| 21 | Électrostatique | charge, champ électrique, potentiel, tension | Électricité fondamentale et circuits (`built`) | **full** | Le champ électrique (full), Courant et circuits (supporting), Magnétisme et induction (supporting), L’onde électromagnétique (supporting), Atomes, noyaux et lumière (supporting), D’un gradient à une tension (supporting) |
+| 22 | Courant et circuits dynamiques | courant, résistance, loi d’Ohm, condensateur, RC / RL / RLC | Électricité fondamentale et circuits (`built`) | **full** | Courant et circuits (full), Magnétisme et induction (supporting), D’un gradient à une tension (supporting) |
+| 23 | Magnétisme et induction | champ magnétique, force de Lorentz, flux magnétique, Faraday, Lenz | Magnétisme et induction (`built`) | **full** | Magnétisme et induction (full), L’onde électromagnétique (supporting) |
+| 24 | Onde électromagnétique | E et B couplés, propagation, fréquence, longueur d’onde, énergie, spectre EM | Onde électromagnétique et spectre (`built`) | **full** | L’onde électromagnétique (full) |
 | 25 | Optique fondamentale | réflexion, réfraction, indice, réflexion totale, lentilles, dispersion, polarisation | Optique fondamentale (`planned`) | — | — |
 
 ### E · Atomes, chimie et noyaux
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`planned`) | supporting | Supernova par effondrement du cœur (supporting) |
-| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`planned`) | — | — |
-| 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
-| 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`planned`) | — | — |
-| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`built`) | **full** | La réplication de l’ADN (supporting), Réactions : vitesse et équilibre (full) |
+| 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`partial`) | **full** | Supernova par effondrement du cœur (supporting), Atomes, noyaux et lumière (full) |
+| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`partial`) | partial | L’onde électromagnétique (supporting), Atomes, noyaux et lumière (partial) |
+| 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`built`) | **full** | Molécules et mole (full) |
+| 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`built`) | **full** | Molécules et mole (full) |
+| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`built`) | **full** | La réplication de l’ADN (supporting), Molécules et mole (supporting), Réactions : vitesse et équilibre (full) |
 | 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`planned`) | supporting | La respiration cellulaire (supporting) |
 
 ### F · Cellule et biologie moléculaire
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 32 | Cellule, membrane et transport | compartiments, membrane, diffusion, transport facilité, pompes | Cellule, membrane et transport (`built`) | **full** | La mitose (supporting), Le neurone qui apprend (supporting), Cellule, membrane et transport (full) |
-| 33 | Bioélectricité et synapses | gradients ioniques, potentiel membranaire, seuil, canaux voltage-dépendants, potentiel d’action, transmission synaptique | Bioélectricité et synapses (`planned`) | **full** | Le neurone qui apprend (full) |
+| 32 | Cellule, membrane et transport | compartiments, membrane, diffusion, transport facilité, pompes | Cellule, membrane et transport (`built`) | **full** | La mitose (supporting), Le neurone qui apprend (supporting), Cellule, membrane et transport (full), D’un gradient à une tension (supporting) |
+| 33 | Bioélectricité et synapses | gradients ioniques, potentiel membranaire, seuil, canaux voltage-dépendants, potentiel d’action, transmission synaptique | Bioélectricité et synapses (`built`) | **full** | Le neurone qui apprend (full), D’un gradient à une tension (partial) |
 | 34 | Énergie biologique | ATP, couplage, enzymes, respiration, photosynthèse | Énergie biologique (`planned`) | partial | La respiration cellulaire (partial) |
 | 35 | Information génétique | ADN, nucléotides, chromosomes, transcription, traduction, ADN → ARN → protéine | Information génétique (`planned`) | supporting | La mitose (supporting), La réplication de l’ADN (supporting) |
 | 36 | Copie, variation et division du génome | réplication, cycle cellulaire, méiose, recombinaison, mutation, réparation | Copie, variation et division du génome (`planned`) | partial | La mitose (partial), La réplication de l’ADN (partial) |
-| 37 | Signalisation et homéostasie | ligand, récepteur, cascades, rétroaction, homéostasie | Signalisation et homéostasie (`planned`) | — | — |
+| 37 | Signalisation et homéostasie | ligand, récepteur, cascades, rétroaction, homéostasie | Signalisation et homéostasie (`built`) | **full** | Signaux et équilibres du vivant (full) |
 
 ### G · Physiologie
 
@@ -137,7 +143,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
-| 46 | Fondations de la relativité restreinte | référentiels, invariance de c, simultanéité, temps propre, dilatation, contraction | Relativité restreinte (`built`) | **full** | Relativité restreinte (full) |
+| 46 | Fondations de la relativité restreinte | référentiels, invariance de c, simultanéité, temps propre, dilatation, contraction | Relativité restreinte (`built`) | **full** | Relativité restreinte (full), Atomes, noyaux et lumière (supporting) |
 | 47 | Fondations de la relativité générale | principe d’équivalence, géodésiques, courbure, horizons | — | — | — |
 
 ### K · Quantique
@@ -166,15 +172,20 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
-| Réactions chimiques | 30 | [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | Un chapitre de quatre étapes : collisions et énergie d'activation, ce qui règle la vitesse, catalyse, équilibre dynamique et Le Chatelier. Construite avant 28·29 ; prépare 31, 34 et 37, et la planche 08 (polymérase). |
+| Onde électromagnétique et spectre | 24 | [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | Un chapitre de quatre étapes (secouer une charge, E et B, spectre, énergie). Moteur : `prompts/moteurs/onde-electromagnetique.js`. Répond à la première question laissée ouverte par *Magnétisme et induction*. |
+| Liaisons, molécules, mole et stœchiométrie | 28 · 29 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | Sept étapes en deux chapitres. Moteur testé : `prompts/moteurs/molecules-mole.js`. Ouvre la branche E ; annonce les modules 30 et 31. |
+| Réactions : vitesse et équilibre | 30 | [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | Un chapitre de quatre étapes : collisions et énergie d’activation, ce qui règle la vitesse, catalyse, équilibre dynamique et Le Chatelier. Construite le 2026-10-06, en parallèle de 28·29 ; prépare 31, 34 et 37, et la planche 08 (polymérase). |
+| Atomes, noyaux, photons et spectres (`partial`) | 26 · 27 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | Chapitre 26 (4 étapes) construit, chapitre 27 (3 étapes) à venir. Moteur verrouillé : `prompts/moteurs/atomes.js`. Reprend à la planche *Supernova* l'énergie de liaison par nucléon. |
+| Signalisation et homéostasie | 37 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | Quatre étapes ; saturation, amplification, glycémie et boucles à retard. Moteur et tests dans le scratchpad (27 tests). |
+| Bioélectricité et synapses | 33 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | Quatre étapes complémentaires au neurone ; couverture 33 partial (Hodgkin-Huxley, chimie synaptique détaillée et plasticité renvoyés au showcase). |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 24 Onde électromagnétique et spectre · 25 Optique fondamentale · 26 + 27 Atomes, noyaux, photons et spectres · 28 + 29 Liaisons, molécules, mole et stœchiométrie · 31 Acide-base, redox et électrochimie · puis 33 Bioélectricité et synapses · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome · 37 Signalisation et homéostasie.
+Dans cet ordre indicatif : 25 Optique fondamentale · 27 (chapitre restant d'*Atomes, noyaux, photons et spectres*) · 31 Acide-base, redox et électrochimie · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome.
 
 La maquette « magnétisme » du premier prototype d'interface, retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)), n'a rien à voir avec la planche *Magnétisme et induction* construite le 2026-10-06.
 
-Pour 33, 34 et 36, des showcases couvrent déjà une partie du module ; une future production pourrait se limiter à ce qui manque.
+Pour 34 et 36, des showcases couvrent déjà une partie du module ; une future production pourrait se limiter à ce qui manque.
 
 ### Sans production définie
 
@@ -210,4 +221,4 @@ mouvement → énergie → ondes → gravitation → relativité restreinte → 
 
 ## Ce que les fondations permettent
 
-Quand une fondation existe, un showcase s'appuie dessus au lieu de tout réenseigner. La planche *Supernova par effondrement du cœur* a été construite avant les fondations 26, 43 et 44 : elle porte encore elle-même beaucoup de théorie (énergie de liaison, dégénérescence). Une future supernova, ou une collision d'étoiles à neutrons, pourra considérer gravitation, pression, rayonnement et étoiles comme acquis, et se concentrer sur effondrement → rebond → choc → neutrinos → explosion.
+Quand une fondation existe, un showcase s'appuie dessus au lieu de tout réenseigner. La planche *Supernova par effondrement du cœur* a été construite avant les fondations 26, 43 et 44 : elle porte encore elle-même beaucoup de théorie (dégénérescence, couches de l'étoile) ; l'énergie de liaison par nucléon et le « mur du fer » sont désormais enseignés par *Atomes, noyaux et lumière* (étape 3). Une future supernova, ou une collision d'étoiles à neutrons, pourra considérer gravitation, pression, rayonnement et étoiles comme acquis, et se concentrer sur effondrement → rebond → choc → neutrinos → explosion.
