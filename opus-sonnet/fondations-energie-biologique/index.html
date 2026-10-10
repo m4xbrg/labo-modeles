@@ -1,0 +1,1855 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. L'énergie se lit sur une échelle verticale d'énergie libre : une réaction est une flèche (ce qui monte en gris, l'ATP en jaune, la somme en jaune si elle descend). L'étudiant glisse l'ATP contre la flèche qui monte ; les deux s'emboîtent par un engrenage (l'enzyme de couplage) et la flèche totale descend. Les enzymes sont des croissants ambre dans une boîte de molécules.
+  2. Le mouvement signifie quelque chose : l'agitation des molécules est thermique, les tentatives qui montent et retombent sont des essais qui échouent, le phosphate passe de l'ATP au substrat à cadence fixe et chaque passage débite le porte-monnaie ; la lueur est réservée à l'ATP, seule monnaie d'énergie utilisable.
+  3. Le moteur BioEn (fonctions pures, graine fixe, pas fixes) est séparé du dessin ; les étapes sont des greffons qui partagent une même coquille (panneau, enregistreur, clavier, infobulle), et la page dit ses échelles : kJ/mol à l'échelle fixe, boîte de 2D, Km en molécules par boîte.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L’énergie du vivant — LABO</title>
+<meta name="description" content="Énergie biologique : le couplage des réactions (l’ATP comme monnaie), les enzymes qui saturent, le bilan de la respiration et la photosynthèse. L’énergie du vivant se capte, se stocke et se dépense par couplage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#e0b48a;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:default}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:60px}
+.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 17px/1.35 var(--serif);color:var(--texte)}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 15px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+#scope{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg svg{width:20px;height:8px;overflow:visible}
+.leg .og{display:block;flex:1 0 100%;margin-top:6px;padding-top:8px;border-top:1px solid var(--trait);font:400 11.5px/1.55 var(--mono)}
+.leg .og b{color:var(--energie);font-weight:500}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.cards{display:grid;gap:8px}
+.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}
+.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}
+.card a{color:var(--texte-2)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.btn.sm{padding:7px 9px}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0;flex:1 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+.sTools{display:contents}
+input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:74vh;height:74svh;min-height:520px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:104px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Paillasse de l’énergie du vivant : une échelle d’énergie libre avec des flèches de réaction, des molécules et un porte-monnaie d’ATP, ou une boîte d’enzymes avec le graphe de leur vitesse."></canvas>
+    <header class="head">
+      <p class="serie">LABO · Fondations 34</p>
+      <h1>L’énergie du <em>vivant</em></h1>
+      <a class="back" href="../../labo/index.html">&larr; LABO</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
+      <h2 id="stepTitle">Descendre pour monter : le couplage</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+      <p class="cle" id="stepKey"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l’étape en fonction du temps sur les trente dernières secondes."></canvas></div>
+      <p class="leg" id="leg"></p>
+    </section>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+      <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
+      <div class="card"><b>Information</b>Qui décide quelles enzymes la cellule fabrique ?<small>Module 35 · information génétique (à venir)</small></div>
+      <div class="card"><b>Électricité</b>Combien d’ATP coûte un influx nerveux ?<small><a href="../03-neurone/index.html">Module 33 · planche Le neurone qui apprend</a></small></div>
+      <div class="card"><b>Écosystème</b>Pourquoi y a-t-il moins de prédateurs que de proies ?<small>Module 41 · populations et réseaux (à venir)</small></div>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser l'étape</li>
+        <li id="touches"></li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les quatre étapes">
+      <div class="sg"><span class="sgl"><span class="long">Module 34 · Énergie biologique</span><span class="short">34</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Étape 1 — Descendre pour monter : le couplage"><b>1</b><span>Couplage</span></button>
+        <button class="seg" data-a="1" title="Étape 2 — Les enzymes"><b>2</b><span>Enzymes</span></button>
+        <button class="seg" data-a="2" title="Étape 3 — Du glucose à l’ATP, en bilan"><b>3</b><span>Bilan</span></button>
+        <button class="seg" data-a="3" title="Étape 4 — La lumière entre : la photosynthèse"><b>4</b><span>Lumière</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* BIOEN-BEGIN */
+const BioEn = (function () {
+  'use strict';
+  const R = 8.314;            // J/(mol·K)
+  const T = 310;              // K, 37 °C
+  const F = 96485;            // C/mol
+  const NA = 6.02214076e23;   // 1/mol
+  const H = 6.62607015e-34;   // J·s
+  const C = 2.99792458e8;     // m/s
+  const M_ATP = 507.18;       // g/mol (acide libre)
+  const RT = (t) => R * (t || T) / 1000;   // kJ/mol ; 2,577 kJ/mol à 310 K
+
+  function mulberry32(a) {
+    a = a >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(rnd) {                      // Box-Muller
+    let u = 0; while (u === 0) u = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd());
+  }
+
+  /* ---------------- 1. Énergie libre et couplage ---------------- */
+
+  // ΔG = ΔG°' + RT ln Q   (kJ/mol)
+  const dG = (dG0, Q, t) => dG0 + RT(t) * Math.log(Q);
+
+  // Pompe Na⁺/K⁺ : 3 Na⁺ sortent, 2 K⁺ entrent, contre leurs gradients électrochimiques.
+  // Concentrations en mmol/L, Vm = potentiel intérieur − extérieur (V). Retourne ΔG du transport (kJ/mol de cycles).
+  const PUMP = { Nao: 145, Nai: 12, Ko: 4, Ki: 140, Vm: -0.070 };
+  function pumpDG(p) {
+    const q = Object.assign({}, PUMP, p || {});
+    const naOut = RT() * Math.log(q.Nao / q.Nai) + F * (-q.Vm) / 1000;   // par Na⁺ sorti
+    const kIn = RT() * Math.log(q.Ki / q.Ko) + F * q.Vm / 1000;          // par K⁺ entré
+    return 3 * naOut + 2 * kIn;
+  }
+  // Coup de rame d'une myosine : travail W = F·d par molécule, ramené à une mole.
+  const MYO = { F_pN: 5, d_nm: 8 };
+  const myosinWork = (F_pN, d_nm) => (F_pN == null ? MYO.F_pN : F_pN) * 1e-12 * (d_nm == null ? MYO.d_nm : d_nm) * 1e-9 * NA / 1000;
+
+  // Réactions de référence (ΔG°' en kJ/mol). dir : -1 descend, +1 monte.
+  const REACTIONS = {
+    atp: { id: 'atp', nom: 'Hydrolyse de l’ATP', eq: 'ATP + H₂O → ADP + Pi', dG0: -30.5,
+      src: 'Lehninger, Principles of Biochemistry, 7e éd., tableau 13-6' },
+    g6p: { id: 'g6p', nom: 'Phosphorylation du glucose', eq: 'glucose + Pi → glucose-6-P + H₂O', dG0: 13.8,
+      src: 'Lehninger, § 13.3 (hydrolyse du glucose-6-P : −13,8)' },
+    gln: { id: 'gln', nom: 'Synthèse de la glutamine', eq: 'glutamate + NH₄⁺ → glutamine + H₂O', dG0: 14.2,
+      src: 'Lehninger, § 13.3' },
+    muscle: { id: 'muscle', nom: 'Coup de rame d’une myosine', eq: 'travail mécanique F·d', dG0: myosinWork(),
+      src: 'ordre de grandeur : 5 pN sur 8 nm par molécule (pinces optiques, Finer et al. 1994)' },
+    pompe: { id: 'pompe', nom: 'Pompe Na⁺/K⁺ (un cycle)', eq: '3 Na⁺ sortent, 2 K⁺ entrent', dG0: pumpDG(),
+      src: 'calculé : 145/12 mmol/L de Na⁺, 4/140 de K⁺, −70 mV' },
+    pep: { id: 'pep', nom: 'Hydrolyse du phosphoénolpyruvate', eq: 'PEP + H₂O → pyruvate + Pi', dG0: -61.9,
+      src: 'Lehninger, tableau 13-6' },
+    pcr: { id: 'pcr', nom: 'Hydrolyse de la créatine-phosphate', eq: 'créatine-P + H₂O → créatine + Pi', dG0: -43.0,
+      src: 'Lehninger, tableau 13-6' },
+    glc: { id: 'glc', nom: 'Oxydation complète du glucose', eq: 'C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O', dG0: -2870,
+      src: 'Campbell, Biology (−686 kcal/mol)' }
+  };
+  const UPHILL = ['g6p', 'gln', 'muscle', 'pompe'];
+
+  // Couplage : ΔG global = somme. r1, r2 : identifiants, objets {dG0} ou nombres ; n2 = nombre de fois r2.
+  const val = (r) => (typeof r === 'number' ? r : typeof r === 'string' ? REACTIONS[r].dG0 : r.dG0);
+  const couple = (r1, r2, n2) => val(r1) + (n2 == null ? 1 : n2) * val(r2);
+
+  // ΔG réel de l'hydrolyse de l'ATP dans la cellule (concentrations en mmol/L).
+  const CELL = { ATP: 4, ADP: 0.5, Pi: 5 };
+  function cellATP(c, t) {
+    const q = Object.assign({}, CELL, c || {});
+    const Q = (q.ADP * 1e-3) * (q.Pi * 1e-3) / (q.ATP * 1e-3);
+    return dG(REACTIONS.atp.dG0, Q, t);
+  }
+  // Constante d'équilibre de l'hydrolyse : K = exp(−ΔG°'/RT).
+  const Keq = (dG0, t) => Math.exp(-dG0 / RT(t));
+
+  // Porte-monnaie : réserve ATP + ADP constante (mmol/L), Pi constant.
+  // dATP/dt = kR·ADP·(recharge) − use. Sans recharge, la réserve tombe en ≈ ATP/use secondes.
+  const WALLET = { total: 4.5, Pi: 5, use: 0.2, kR: 0.4 };   // use en mmol/(L·s) : réserve vidée en ≈ 20 s
+  function walletInit() { return { ATP: CELL.ATP, ADP: WALLET.total - CELL.ATP }; }
+  function walletStep(s, recharge, use, dt) {
+    const u = use == null ? WALLET.use : use;
+    let ATP = s.ATP + ((recharge ? WALLET.kR * s.ADP : 0) - (s.ATP > 0 ? u : 0)) * dt;
+    ATP = Math.min(WALLET.total, Math.max(0, ATP));
+    return { ATP, ADP: WALLET.total - ATP };
+  }
+  // Dépense ponctuelle de n mmol/L d'ATP : retourne null si la réserve ne suffit pas.
+  function walletSpend(s, n) {
+    if (s.ATP < n) return null;
+    return { ATP: s.ATP - n, ADP: s.ADP + n };
+  }
+  const walletDG = (s) => cellATP({ ATP: Math.max(1e-6, s.ATP), ADP: Math.max(1e-6, s.ADP), Pi: WALLET.Pi });
+
+  /* ---------------- 2. Enzymes ---------------- */
+
+  // Michaelis-Menten, avec inhibiteur compétitif de concentration I et constante Ki.
+  function mmRate(S, Vmax, Km, I, Ki) {
+    const KmApp = Km * (1 + (I && Ki ? I / Ki : 0));
+    return Vmax * S / (KmApp + S);
+  }
+  const KmOf = (kon, koff, kcat) => (koff + kcat) / kon;
+  const KmApp = (Km, I, Ki) => Km * (1 + I / Ki);
+
+  // Simulation particulaire 2D. Enzymes immobiles (site actif = disque de rayon r), substrats et
+  // inhibiteurs libres qui diffusent (coefficient D). Chaque molécule libre dans le site d'une enzyme
+  // libre s'y lie au taux λ = k_on/(π r²) : le taux de liaison par enzyme vaut k_on·[S], [S] en molécules
+  // par boîte. Complexe ES : se défait (k_off) ou réagit (k_cat) ; EI : se défait (kIoff).
+  // Concentrations libres maintenues constantes (bain) : une molécule liée est remplacée par une
+  // nouvelle, entrée au hasard ; une molécule relâchée en fait sortir une autre.
+  const ENZ = { nE: 8, nS: 60, kon: 0.02, koff: 0.4, kcat: 0.8, nI: 0, Ki: 30, kIoff: 0.3, D: 0.03, r: 0.045, site: 0.035, life: 1.5, seed: 1 };   // Km = 60 molécules par boîte
+  function enzymeSim(p) {
+    const P = Object.assign({}, ENZ, p || {});
+    const rnd = mulberry32(P.seed);
+    const sim = { P, rnd, t: 0, E: [], S: [], I: [], prod: [], events: [], nProd: 0, tStat: 0, occInt: 0, nBind: 0 };
+    // enzymes sur une grille tremblée, orientations au hasard
+    const n = Math.max(1, Math.ceil(Math.sqrt(P.nE)));
+    const cells = [];
+    for (let i = 0; i < n * n; i++) cells.push(i);
+    for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const t = cells[i]; cells[i] = cells[j]; cells[j] = t; }
+    for (let k = 0; k < P.nE; k++) {
+      const c = cells[k % cells.length], gx = c % n, gy = Math.floor(c / n);
+      const x = (gx + 0.3 + 0.4 * rnd()) / n, y = (gy + 0.3 + 0.4 * rnd()) / n, a = rnd() * 2 * Math.PI;
+      sim.E.push({ x, y, a, sx: (x + P.site * Math.cos(a) + 1) % 1, sy: (y + P.site * Math.sin(a) + 1) % 1, st: 'E', tIn: 0 });
+    }
+    for (let k = 0; k < P.nS; k++) sim.S.push({ x: rnd(), y: rnd(), age: 1 });
+    for (let k = 0; k < P.nI; k++) sim.I.push({ x: rnd(), y: rnd(), age: 1 });
+    return sim;
+  }
+  const wrapD = (d) => (d > 0.5 ? d - 1 : d < -0.5 ? d + 1 : d);
+  function enzymeStep(sim, dt) {
+    const P = sim.P, rnd = sim.rnd, sd = Math.sqrt(2 * P.D * dt), r2 = P.r * P.r;
+    const lamS = P.kon / (Math.PI * r2), kIon = P.Ki > 0 ? P.kIoff / P.Ki : 0, lamI = kIon / (Math.PI * r2);
+    sim.events.length = 0;
+    // diffusion
+    for (const L of [sim.S, sim.I]) for (const m of L) {
+      m.x = (m.x + sd * gauss(rnd) + 1) % 1; m.y = (m.y + sd * gauss(rnd) + 1) % 1; m.age += dt;
+    }
+    for (let i = sim.prod.length - 1; i >= 0; i--) {
+      const m = sim.prod[i]; m.x = (m.x + sd * gauss(rnd) + 1) % 1; m.y = (m.y + sd * gauss(rnd) + 1) % 1; m.age += dt;
+      if (m.age > P.life) sim.prod.splice(i, 1);
+    }
+    // réactions des enzymes
+    for (const e of sim.E) {
+      if (e.st === 'ES') {
+        const u = rnd(), pOut = 1 - Math.exp(-(P.koff + P.kcat) * dt);
+        if (u < pOut) {
+          if (rnd() < P.kcat / (P.koff + P.kcat)) {          // produit
+            e.st = 'E'; sim.nProd++;
+            sim.prod.push({ x: e.sx, y: e.sy, age: 0 });
+            sim.events.push({ k: 'prod', x: e.sx, y: e.sy });
+          } else {                                           // le substrat repart intact
+            e.st = 'E';
+            sim.S.push({ x: e.sx, y: e.sy, age: 1 });
+            const j = Math.floor(rnd() * (sim.S.length - 1));
+            const out = sim.S.splice(j, 1)[0];
+            sim.events.push({ k: 'off', x: e.sx, y: e.sy }, { k: 'outS', x: out.x, y: out.y });
+          }
+        }
+      } else if (e.st === 'EI') {
+        if (rnd() < 1 - Math.exp(-P.kIoff * dt)) {
+          e.st = 'E';
+          sim.I.push({ x: e.sx, y: e.sy, age: 1 });
+          const j = Math.floor(rnd() * (sim.I.length - 1));
+          const out = sim.I.splice(j, 1)[0];
+          sim.events.push({ k: 'offI', x: e.sx, y: e.sy }, { k: 'outI', x: out.x, y: out.y });
+        }
+      } else {
+        let nS = 0, nI = 0; const cS = [], cI = [];
+        for (let i = 0; i < sim.S.length; i++) { const m = sim.S[i], dx = wrapD(m.x - e.sx), dy = wrapD(m.y - e.sy); if (dx * dx + dy * dy < r2) { nS++; cS.push(i); } }
+        for (let i = 0; i < sim.I.length; i++) { const m = sim.I[i], dx = wrapD(m.x - e.sx), dy = wrapD(m.y - e.sy); if (dx * dx + dy * dy < r2) { nI++; cI.push(i); } }
+        const tot = lamS * nS + lamI * nI;
+        if (tot > 0 && rnd() < 1 - Math.exp(-tot * dt)) {
+          if (rnd() * tot < lamS * nS) {
+            const i = cS[Math.floor(rnd() * nS)]; sim.S.splice(i, 1);
+            e.st = 'ES'; e.tIn = sim.t; sim.nBind++;
+            const nw = { x: rnd(), y: rnd(), age: 0 }; sim.S.push(nw);
+            sim.events.push({ k: 'bind', x: e.sx, y: e.sy }, { k: 'inS', x: nw.x, y: nw.y });
+          } else {
+            const i = cI[Math.floor(rnd() * nI)]; sim.I.splice(i, 1);
+            e.st = 'EI'; e.tIn = sim.t;
+            const nw = { x: rnd(), y: rnd(), age: 0 }; sim.I.push(nw);
+            sim.events.push({ k: 'bindI', x: e.sx, y: e.sy }, { k: 'inI', x: nw.x, y: nw.y });
+          }
+        }
+      }
+    }
+    let occ = 0; for (const e of sim.E) if (e.st === 'ES') occ++;
+    sim.occInt += occ * dt; sim.tStat += dt; sim.t += dt;
+    return sim;
+  }
+  function enzymeResetStats(sim) { sim.nProd = 0; sim.tStat = 0; sim.occInt = 0; sim.nBind = 0; }
+  // Vitesse mesurée (produits/s) et occupation moyenne depuis la dernière remise à zéro.
+  const enzymeRate = (sim) => (sim.tStat > 0 ? sim.nProd / sim.tStat : 0);
+  const enzymeOcc = (sim) => (sim.tStat > 0 ? sim.occInt / sim.tStat / sim.P.nE : 0);
+  // Mesure complète : préchauffage puis fenêtre de mesure. Retourne {v, occ, theo}.
+  function enzymeMeasure(p, Tmeas, Twarm, dt) {
+    const sim = enzymeSim(p), h = dt || 1 / 120;
+    for (let t = 0; t < (Twarm == null ? 5 : Twarm); t += h) enzymeStep(sim, h);
+    enzymeResetStats(sim);
+    for (let t = 0; t < Tmeas; t += h) enzymeStep(sim, h);
+    const P = sim.P, Km = KmOf(P.kon, P.koff, P.kcat);
+    return { v: enzymeRate(sim), occ: enzymeOcc(sim), theo: mmRate(P.nS, P.kcat * P.nE, Km, P.nI, P.Ki), Km, Vmax: P.kcat * P.nE };
+  }
+
+  /* ---------------- 3. Bilans de la respiration ---------------- */
+
+  // Convention : 2,5 ATP par NADH mitochondrial, 1,5 par FADH₂ ; NADH du cytosol par la navette
+  // glycérol-3-phosphate (1,5) → 30 ATP, ou malate-aspartate (2,5) → 32 ATP (Lehninger, tableau 19-5).
+  const E0 = { NAD: -0.320, FUM: 0.031, O2: 0.816 };          // potentiels standard biochimiques (V)
+  const redoxDG = (n, Edon, Eacc) => -n * F * (Eacc - Edon) / 1000;   // kJ/mol
+  function respirationBudget(o) {
+    const opt = Object.assign({ O2: true, shuttle: 'glycerol' }, o || {});
+    const dGatp = -REACTIONS.atp.dG0;                            // 30,5 kJ/mol capturés par ATP (conditions standard)
+    if (!opt.O2) {
+      const dGferm = -196;                                       // glucose → 2 lactate (ΔG°', Lehninger § 14.3)
+      const captured = 2 * dGatp;
+      return {
+        O2: false, atp: { glycolyse: 2, krebs: 0, chaine: 0, total: 2 }, nadh: 0, fadh2: 0,
+        o2: 0, co2: 0, h2o: 0, lactate: 2, dGglucose: REACTIONS.glc.dG0, released: -dGferm,
+        captured, heat: -dGferm - captured, retained: -REACTIONS.glc.dG0 + dGferm,
+        yield: captured / -REACTIONS.glc.dG0, yieldReleased: captured / -dGferm,
+        flows: { glycoATP: captured, glycoHeat: -dGferm - captured, lactate: -REACTIONS.glc.dG0 + dGferm, carriers: 0, chainATP: 0, chainHeat: 0, krebsATP: 0 }
+      };
+    }
+    const cyto = opt.shuttle === 'malate' ? 2.5 : 1.5;
+    const chaine = 2 * cyto + 8 * 2.5 + 2 * 1.5;
+    const total = 2 + 2 + chaine;
+    const eNADH = redoxDG(2, E0.NAD, E0.O2), eFADH = redoxDG(2, E0.FUM, E0.O2);   // négatifs
+    const carriers = -(10 * eNADH + 2 * eFADH);                                    // ≈ 2 495 kJ portés vers l'O₂
+    const captured = total * dGatp, G = -REACTIONS.glc.dG0;
+    const chainATP = chaine * dGatp;
+    return {
+      O2: true, atp: { glycolyse: 2, krebs: 2, chaine, total }, nadh: 10, fadh2: 2,
+      o2: 6, co2: 6, h2o: 6, lactate: 0, dGglucose: REACTIONS.glc.dG0, released: G,
+      captured, heat: G - captured, retained: 0, yield: captured / G, yieldReleased: captured / G,
+      flows: { glycoATP: 2 * dGatp, krebsATP: 2 * dGatp, glycoHeat: G - carriers - 4 * dGatp, carriers,
+        chainATP, chainHeat: carriers - chainATP, lactate: 0 },
+      eNADH, eFADH
+    };
+  }
+  // Glucose nécessaire pour n ATP.
+  const glucoseFor = (nATP, O2) => nATP / respirationBudget({ O2 }).atp.total;
+  // Approvisionnement d'un muscle : demande d'ATP D, plafond aérobie A (mêmes unités, ATP/s).
+  function supply(D, A) {
+    const aer = Math.min(D, A), ana = Math.max(0, D - A);
+    return { aer, ana, glucose: aer / 30 + ana / 2, o2: aer / 5, co2: aer / 5, lactate: ana, fracAna: D > 0 ? ana / D : 0 };
+  }
+  // Masse d'ATP renouvelée par jour pour une puissance métabolique P (W), si toute cette puissance vient
+  // de l'oxydation du glucose avec 30 ATP par glucose : n = P·30/|ΔG°'glucose|. Borne haute : P/|ΔG réel|.
+  function dailyATP(P, o) {
+    const opt = Object.assign({ atpPerGlucose: 30 }, o || {});
+    const molPerS = P * opt.atpPerGlucose / (-REACTIONS.glc.dG0 * 1000);
+    const kg = molPerS * 86400 * M_ATP / 1000;
+    const kgUpper = P / (-cellATP() * 1000) * 86400 * M_ATP / 1000;
+    return { molPerS, kg, kgUpper, powerThroughATP: molPerS * -cellATP() * 1000 };
+  }
+  // Durée de la réserve d'ATP sans recyclage : réserve (mmol/L × L) / consommation.
+  function stockSeconds(P, V_L, ATP_mM) {
+    const use = dailyATP(P).molPerS;
+    return (ATP_mM == null ? CELL.ATP : ATP_mM) * 1e-3 * V_L / use;
+  }
+
+  /* ---------------- 4. Photosynthèse ---------------- */
+
+  // Spectre d'absorption approché (somme de gaussiennes, d'après les spectres en solution organique) ;
+  // chl a : bandes de Soret vers 430 nm et Qy vers 662 nm ; chl b : 453 et 642 nm. Un fond large et faible
+  // tient lieu de l'absorption résiduelle dans le vert. Normalisé : maximum de la chl a = 1.
+  // Mélange foliaire a:b = 3:1, ramené à un maximum de 1.
+  const BANDS = {
+    a: [[430, 15, 1.00], [411, 10, 0.25], [662, 10, 0.80], [616, 14, 0.12], [578, 14, 0.06]],
+    b: [[453, 13, 1.00], [432, 12, 0.25], [642, 10, 0.37], [595, 14, 0.07]],
+    fond: [520, 110, 0.035]
+  };
+  const gsum = (bands, l) => bands.reduce((s, b) => s + b[2] * Math.exp(-0.5 * Math.pow((l - b[0]) / b[1], 2)), 0);
+  const rawA = (l) => gsum(BANDS.a, l) + gsum([BANDS.fond], l), rawB = (l) => 0.62 * gsum(BANDS.b, l) + gsum([BANDS.fond], l);
+  const scanMax = (f) => { let m = 0; for (let l = 380; l <= 720; l += 0.5) m = Math.max(m, f(l)); return m; };
+  const NA_ = scanMax(rawA), NMIX = scanMax((l) => (0.75 * rawA(l) + 0.25 * rawB(l)) / NA_);
+  function chlAbs(l, pig) {
+    if (pig === 'a') return rawA(l) / NA_;
+    if (pig === 'b') return rawB(l) / NA_;
+    return (0.75 * rawA(l) + 0.25 * rawB(l)) / NA_ / NMIX;
+  }
+  // Fraction de la lumière absorbée par une feuille mince (absorbance de crête A0).
+  const PHOTO = { A0: 2.0, Pmax0: 20, alpha: 0.06, Kc: 300, CO2: 420, Iref: 2000 };
+  const absorbed = (l, A0) => 1 - Math.pow(10, -(A0 == null ? PHOTO.A0 : A0) * chlAbs(l));
+  // Lumière blanche : moyenne sur 400-700 nm (flux de photons uniforme).
+  function absorbedWhite(A0) { let s = 0, n = 0; for (let l = 400; l <= 700; l += 2) { s += absorbed(l, A0); n++; } return s / n; }
+  // Courbe de réponse à la lumière (Webb 1974) : P = Pmax (1 − e^(−αI/Pmax)). I en µmol photons/(m²·s).
+  function lightResponse(I, o) {
+    const q = Object.assign({ Pmax: PHOTO.Pmax0, alpha: PHOTO.alpha }, o || {});
+    return q.Pmax * (1 - Math.exp(-q.alpha * I / q.Pmax));
+  }
+  // Plafond imposé par le CO₂ (fixation par la rubisco, saturable) : Pmax = Pmax0·C/(Kc + C). C en ppm.
+  const pmaxCO2 = (c, o) => { const q = Object.assign({ Pmax0: PHOTO.Pmax0 * (1 + PHOTO.Kc / PHOTO.CO2), Kc: PHOTO.Kc }, o || {}); return q.Pmax0 * c / (q.Kc + c); };
+  // Vitesse de photosynthèse (µmol O₂/(m²·s)) : I incidente, couleur (nm) ou 'blanc', CO₂ (ppm).
+  function photoRate(o) {
+    const q = Object.assign({ lambda: 'blanc', I: 500, CO2: PHOTO.CO2 }, o || {});
+    const f = q.lambda === 'blanc' ? absorbedWhite() : absorbed(q.lambda);
+    const fRef = absorbedWhite();
+    const Iabs = q.I * f / fRef;                                 // ramené à l'échelle de la lumière blanche
+    const Pmax = pmaxCO2(q.CO2);
+    return { f, Iabs, Pmax, P: lightResponse(Iabs, { Pmax }) };
+  }
+  const photonE = (l) => H * C / (l * 1e-9) * NA / 1000;        // kJ par mole de photons
+  function photoBudget() {
+    const perO2 = 8, perGlc = 6 * perO2, E680 = photonE(680), G = -REACTIONS.glc.dG0;
+    return { eq: '6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂', dG0: G, o2: 6, co2: 6,
+      photonsPerO2: perO2, photonsPerGlucose: perGlc, E680, Ein: perGlc * E680, yieldRed: G / (perGlc * E680), yieldField: [0.01, 0.02] };
+  }
+
+  return {
+    R, T, F, NA, M_ATP, RT, mulberry32,
+    dG, REACTIONS, UPHILL, couple, cellATP, Keq, CELL, PUMP, pumpDG, MYO, myosinWork,
+    WALLET, walletInit, walletStep, walletSpend, walletDG,
+    mmRate, KmOf, KmApp, ENZ, enzymeSim, enzymeStep, enzymeResetStats, enzymeRate, enzymeOcc, enzymeMeasure,
+    E0, redoxDG, respirationBudget, glucoseFor, supply, dailyATP, stockSeconds,
+    BANDS, chlAbs, PHOTO, absorbed, absorbedWhite, lightResponse, pmaxCO2, photoRate, photonE, photoBudget
+  };
+})();
+/* BIOEN-END */
+
+
+/* ================= Interface : outils partagés ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPEED = reduce ? 0.4 : 1;                 // prefers-reduced-motion : ralentir (0,4), jamais figer
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono'),
+            lilas: '#b9a3ff', sable: '#dcc29a', chloro: '#7ec27a', co2: '#9aa3ad' };
+const rgbCache = {};
+const rgba = (hex, a) => {
+  let c = rgbCache[hex];
+  if (!c) c = rgbCache[hex] = [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+  return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+};
+const mono = px => px + 'px ' + C.mono;
+const TAU = Math.PI * 2;
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const fmtS = (n, d) => (n > Math.pow(10, -d) / 2 ? '+' : '') + fmt(n, d);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = x => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+
+let W = 800, H = 560, dpr = 1, now = 0;          // now : horloge d'animation (s), ralentie si reduce
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+function arrow(c, x0, y0, x1, y1, col, lw, dash, head) {
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy);
+  if (L < 1.5) return;
+  const hd = Math.min(head || 7, L * 0.7), ux = dx / L, uy = dy / L;
+  c.save(); c.strokeStyle = col; c.fillStyle = col; c.lineWidth = lw; c.setLineDash(dash || []);
+  c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1 - ux * hd * 0.6, y1 - uy * hd * 0.6); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - ux * hd - uy * hd * 0.45, y1 - uy * hd + ux * hd * 0.45); c.lineTo(x1 - ux * hd + uy * hd * 0.45, y1 - uy * hd - ux * hd * 0.45); c.closePath(); c.fill();
+  c.restore();
+}
+
+/* ---------------- Zones de survol ---------------- */
+const zones = [];
+function zone(x0, y0, x1, y1, key, name, role) { zones.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role) { zones.push({ fn: (x, y) => (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r, key, name, role }); }
+let tipKey = '';
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = '<b>' + name + '</b><span>' + role + '</span>'; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12;
+  if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+function hitZone(x, y) {
+  for (let i = zones.length - 1; i >= 0; i--) { const z = zones[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; }
+  return null;
+}
+
+/* ---------------- Enregistreur du panneau ---------------- */
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+
+/* ---------------- Légendes (SVG en ligne) ---------------- */
+const lg = (inner, text) => '<span><svg viewBox="0 0 20 8">' + inner + '</svg>' + text + '</span>';
+const ln = (col, w, dash) => '<line x1="0" y1="4" x2="20" y2="4" stroke="' + col + '" stroke-width="' + w + '"' + (dash ? ' stroke-dasharray="4 3"' : '') + '/>';
+const bx = (col, op) => '<rect x="0" y="0" width="20" height="8" fill="' + col + '" fill-opacity="' + (op || 1) + '"/>';
+const lgd = (col, r, hollow) => '<circle cx="10" cy="4" r="' + (r || 3) + '" ' + (hollow ? 'fill="none" stroke="' + col + '" stroke-width="1.4"' : 'fill="' + col + '"') + '/>';
+
+/* ---------------- Formes partagées ---------------- */
+function bead(c, x, y, r, col, glow) {
+  c.save();
+  if (glow) { c.shadowColor = col; c.shadowBlur = glow; }
+  c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.restore();
+}
+// Polygone régulier à n côtés
+function poly(c, x, y, r, n, rot) {
+  c.moveTo(x + r * Math.cos(rot), y + r * Math.sin(rot));
+  for (let i = 1; i < n; i++) c.lineTo(x + r * Math.cos(rot + i * TAU / n), y + r * Math.sin(rot + i * TAU / n));
+  c.closePath();
+}
+// ATP : bloc adénosine à droite, phosphates à gauche, le terminal (i = 0) lumineux. tx : x du phosphate terminal.
+function chain(c, tx, y, nb, r, alpha, label) {
+  if (alpha <= 0.01) return;
+  const sp = r * 2.5;
+  c.save(); c.globalAlpha *= alpha;
+  c.strokeStyle = rgba(C.ener, 0.55); c.lineWidth = 1.2; c.beginPath(); c.moveTo(tx, y); c.lineTo(tx + (nb - 1) * sp + r, y); c.stroke();
+  const bw = r * 3.4, bh = r * 2.4, bxx = tx + nb * sp - r * 0.4;
+  c.fillStyle = C.fond2; c.strokeStyle = rgba(C.texte, 0.75); c.lineWidth = 1.2;
+  c.beginPath(); c.rect(bxx, y - bh / 2, bw, bh); c.fill(); c.stroke();
+  c.save(); c.fillStyle = rgba(C.texte, 0.55); c.fillRect(bxx + bw * 0.28, y - bh * 0.5 + 2.2, bw * 0.44, bh - 4.4); c.restore();
+  for (let i = nb - 1; i >= 0; i--) bead(c, tx + i * sp, y, r, i === 0 ? '#fff0c4' : C.ener, i === 0 ? 14 : 0);
+  if (label) { c.font = mono(10); c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = rgba(C.ener, 0.95); c.fillText(label, tx + (nb * sp + r) / 2 - r * 0.5, y + r * 2 + 4); }
+  c.restore();
+}
+function gear(c, x, y, rp, teeth, rot, col, lw, fill) {
+  const ro = rp * 1.22, ri = rp * 0.86, n = teeth * 2;
+  c.beginPath();
+  for (let i = 0; i < n; i++) {
+    const a0 = rot + i * TAU / n, a1 = rot + (i + 0.5) * TAU / n, rr = i % 2 ? ri : ro;
+    c.lineTo(x + rr * Math.cos(a0), y + rr * Math.sin(a0)); c.lineTo(x + rr * Math.cos(a1), y + rr * Math.sin(a1));
+  }
+  c.closePath();
+  if (fill) { c.fillStyle = fill; c.fill(); }
+  c.strokeStyle = col; c.lineWidth = lw; c.stroke();
+  c.beginPath(); c.arc(x, y, rp * 0.28, 0, TAU); c.stroke();
+}
+
+
+/* ================= Étape 1 : descendre pour monter (couplage) ================= */
+const S1 = (() => {
+  const B = BioEn, EV = 1.5, SPEND = 0.1;                    // un événement toutes les 1,5 s ; 0,1 mmol/L d'ATP par ATP couplé
+  const st = {}, arrs = [{ init: false }, { init: false }];
+  const TAG = { g6p: 'glucose + Pi', gln: 'glutamine', muscle: 'coup de rame', pompe: 'pompe' };
+  const NOM = { g6p: 'Glucose-6-P', gln: 'Glutamine', muscle: 'Contraction musculaire', pompe: 'Pompe Na⁺/K⁺' };
+  const monoB = px => '500 ' + px + 'px ' + C.mono;
+
+  const dGup = () => B.REACTIONS[st.up].dG0;
+  const dGatp = () => st.cell ? B.walletDG(st.wallet) : B.REACTIONS.atp.dG0;
+  const dGtot = () => dGup() + st.n * dGatp();
+  const enough = () => st.wallet.ATP >= SPEND * st.n - 1e-9;
+  const goes = () => st.n > 0 && enough() && dGtot() < 0;
+
+  function reset() {
+    Object.assign(st, { up: 'g6p', n: 0, nA: 0, cell: false, resp: true, wallet: B.walletInit(), spent: 0, ev: 0, evT: 0, did: false,
+      at: 0, t: 0, acc: 0, rec: [], recT: 0, marks: [], cuts: [], pulse: 0, flash: 0, drag: null, first: false, gear: 0, mShift: 0, mShiftA: 0 });
+    st.disp = st.wallet.ATP; st.dGa = B.REACTIONS.atp.dG0;
+    arrs.forEach(a => { a.init = false; });
+    sync();
+  }
+
+  /* ---- Géométrie ---- */
+  function geo() {
+    const nar = W < 640;
+    const top = nar ? 112 : 130, bot = nar ? 30 : 38;
+    const ph = Math.max(200, H - top - bot), k = ph / 140;           // échelle fixe : l'axe va de +50 à −90 kJ/mol
+    const y0 = top + 50 * k, axisX = nar ? 34 : 66;
+    const xUp = axisX + (nar ? 52 : 100), dl = nar ? 22 : 32, xAtp = xUp + dl, xTot = xAtp + (nar ? 52 : 98);
+    const wW = nar ? 56 : 172, wx = W - (nar ? 6 : 22) - wW;
+    const cx0 = xTot + (nar ? 46 : 84), cx1 = wx - (nar ? 6 : 24);
+    const bw = nar ? 28 : 46, bx0 = wx + (nar ? 14 : 64), by0 = top + (nar ? 66 : 92), by1 = top + ph - (nar ? 30 : 46);
+    return { nar, top, bot, ph, yb: top + ph, k, y0, axisX, xUp, dl, xAtp, xTot, wW, wx, cx0, cx1, bw, bx0, by0, by1, tapX: bx0 + bw / 2, tapY: by0 - (nar ? 22 : 24) };
+  }
+  function slotTarget(k, g) {
+    const L = Math.abs(st.dGa) * g.k, yUp = g.y0 - dGup() * g.k;
+    if (st.drag && st.drag.k === k) return { x: st.drag.x - st.drag.ox, y: st.drag.y - st.drag.oy, al: 1 };
+    if (k < st.n) return { x: g.xAtp, y: yUp + k * L, al: 1 };
+    return { x: (g.axisX + g.xUp) / 2, y: g.y0 + (g.nar ? 20 : 26), al: k === st.n ? (st.n === 0 || st.drag ? 1 : 0.5) : 0 };
+  }
+
+  /* ---- Crochets ---- */
+  function setUphill(r) { if (!B.UPHILL.includes(r)) return; st.up = r; st.evT = 0; st.did = false; st.at = 0; sync(); }
+  function couple(n) {
+    n = clamp(Math.round(+n || 0), 0, 2);
+    if (n !== st.n) { if (n > st.n) { st.flash = 1; st.first = true; } st.n = n; st.evT = 0; st.did = false; st.at = 0; }
+    sync();
+  }
+  function cellConditions(on) { st.cell = !!on; sync(); }
+  function respiration(on) {
+    on = !!on; if (on === st.resp) return;
+    st.resp = on;
+    if (!on) st.cuts.push([st.t, null]); else { const b = st.cuts[st.cuts.length - 1]; if (b && b[1] == null) b[1] = st.t; }
+    sync();
+  }
+
+  /* ---- Avancement ---- */
+  function stepOnce(h, g) {
+    st.t += h; st.at += h;
+    st.dGa += (dGatp() - st.dGa) * (1 - Math.exp(-h / 0.18));
+    st.nA += (st.n - st.nA) * (1 - Math.exp(-h / 0.2));
+    st.disp += (st.wallet.ATP - st.disp) * (1 - Math.exp(-h / 0.12));
+    st.pulse = Math.max(0, st.pulse - h / 0.6); st.flash = Math.max(0, st.flash - h / 0.9);
+    st.mShiftA += (st.mShift - st.mShiftA) * (1 - Math.exp(-h / 0.25));
+    st.wallet = B.walletStep(st.wallet, st.resp, null, h);
+    if (goes()) {
+      st.evT += h; st.gear += 1.5 * h;
+      if (!st.did && st.evT >= 0.55 * EV) {
+        const w = B.walletSpend(st.wallet, SPEND * st.n);
+        if (w) { st.wallet = w; st.spent += st.n; st.ev++; st.marks.push(st.t); st.pulse = 1; if (st.up === 'muscle') st.mShift += 26; }
+        st.did = true;
+      }
+      if (st.evT >= EV) { st.evT -= EV; st.did = false; }
+    } else { st.evT = 0; st.did = false; }
+    st.recT += h;
+    if (st.recT >= 0.1) {
+      st.recT -= 0.1; st.rec.push({ t: st.t, a: st.wallet.ATP });
+      while (st.rec.length && st.rec[0].t < st.t - 31) st.rec.shift();
+      while (st.marks.length && st.marks[0] < st.t - 31) st.marks.shift();
+      while (st.cuts.length && st.cuts[0][1] != null && st.cuts[0][1] < st.t - 31) st.cuts.shift();
+    }
+    for (let k = 0; k < 2; k++) {                                   // ressorts amortis des deux flèches d'ATP
+      const a = arrs[k], T = slotTarget(k, g), dr = st.drag && st.drag.k === k;
+      if (!a.init) { a.x = T.x; a.y = T.y; a.vx = a.vy = 0; a.al = T.al; a.init = true; }
+      const K = dr ? 1500 : 380, D = dr ? 80 : 25;
+      a.vx += ((T.x - a.x) * K - a.vx * D) * h; a.vy += ((T.y - a.y) * K - a.vy * D) * h;
+      a.x += a.vx * h; a.y += a.vy * h; a.al += clamp(T.al - a.al, -h / 0.25, h / 0.25);
+    }
+  }
+  function adv(dt) {
+    st.acc += dt; const h = 1 / 60, g = geo(); let n = 0;
+    while (st.acc >= h - 1e-9 && n++ < 8) { stepOnce(h, g); st.acc -= h; }
+    if (st.acc > h) st.acc = 0;
+  }
+
+  /* ---- Phase de la scène moléculaire ---- */
+  function phase() {
+    if (st.n === 0 || !enough()) return { mode: 'solo', u: (st.at % 2.8) / 2.8 };
+    if (goes()) return { mode: 'event', u: st.evT / EV };
+    return { mode: 'try', u: (st.at % 3.2) / 3.2 };
+  }
+  const thx = (i, A) => A * Math.sin(now * 2.1 + i * 1.7) + 0.35 * A * Math.sin(now * 7.3 + i * 2.9);
+  const thy = (i, A) => A * Math.cos(now * 1.8 + i * 2.3) + 0.35 * A * Math.sin(now * 8.1 + i * 3.7);
+
+  /* ---- Dessin ---- */
+  function drawAxis(c, g) {
+    c.save();
+    c.strokeStyle = rgba(C.texte2, 0.7); c.lineWidth = 1;
+    c.beginPath(); c.moveTo(g.axisX + 0.5, g.top - 6); c.lineTo(g.axisX + 0.5, g.yb); c.stroke();
+    arrow(c, g.axisX + 0.5, g.top + 12, g.axisX + 0.5, g.top - 8, rgba(C.texte2, 0.7), 1, null, 6);
+    c.font = mono(10.5); c.textBaseline = 'middle';
+    const step = g.nar ? 40 : 20;
+    for (let v = 50; v >= -90; v -= 10) {
+      const y = g.y0 - v * g.k, major = v % step === 0;
+      c.strokeStyle = rgba(C.texte2, v === 0 ? 0.9 : 0.5); c.beginPath(); c.moveTo(g.axisX - (major ? 6 : 3), y + 0.5); c.lineTo(g.axisX, y + 0.5); c.stroke();
+      if (major) { c.fillStyle = v === 0 ? C.texte : C.texte2; c.textAlign = 'right'; c.fillText(v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0', g.axisX - 9, y); }
+    }
+    c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'bottom';
+    c.fillText(g.nar ? 'G' : 'G · kJ/mol', g.axisX + 8, g.top + 4);
+    c.textBaseline = 'top'; c.fillStyle = rgba(C.texte2, 0.85);
+    if (!g.nar) c.fillText('échelle fixe : 10 kJ/mol = ' + fmtI(10 * g.k) + ' px', g.axisX + 6, g.yb + 6);
+    c.restore();
+    zone(g.axisX - 30, g.top - 12, g.axisX + 6, g.yb, 'axe', 'Échelle d’énergie libre G', 'Graduée en kJ/mol, à échelle fixe. « Monter » veut dire aller vers un état de plus grande énergie libre ; ce n’est pas une altitude.');
+  }
+
+  function drawWallet(c, g) {
+    const nar = g.nar, h = g.by1 - g.by0, A = clamp(st.disp, 0, 4.5), yF = g.by1 - h * A / 4.5;
+    c.save();
+    // titre
+    c.fillStyle = C.texte2; c.font = mono(nar ? 9.5 : 10.5); c.textAlign = nar ? 'center' : 'left'; c.textBaseline = 'alphabetic';
+    if (nar) c.fillText('ATP', g.bx0 + g.bw / 2, g.top + 10);
+    else { c.fillText('PORTE-MONNAIE DE LA CELLULE', g.wx, g.top + 10); c.fillStyle = rgba(C.texte2, 0.8); c.fillText('ATP + ADP = 4,5 mmol/L', g.wx, g.top + 26); }
+    // robinet de la respiration : tuyau
+    const px = g.tapX, pt = g.by0 - (nar ? 46 : 52);
+    c.lineWidth = 5; c.lineCap = 'butt';
+    c.strokeStyle = st.resp ? rgba(C.texte2, 0.35) : rgba(C.trait, 1);
+    c.beginPath(); if (!nar) { c.moveTo(px - 64, pt); c.lineTo(px, pt); } else c.moveTo(px, pt - 4); c.lineTo(px, g.by0 - 2); c.stroke();
+    if (st.resp) {                                                   // gouttes d'ATP refait, du tuyau vers la barre
+      c.fillStyle = rgba(C.ener, 0.85);
+      for (let i = 0; i < 4; i++) { const s = ((now * 0.9 + i / 4) % 1), y = lerp(pt, g.by0 - 4, s); c.beginPath(); c.arc(px, y, nar ? 2 : 2.6, 0, TAU); c.fill(); }
+    }
+    // valve
+    c.strokeStyle = st.resp ? C.texte : C.texte2; c.fillStyle = C.fond; c.lineWidth = 1.6;
+    c.beginPath(); c.arc(px, g.tapY, 9, 0, TAU); c.fill(); c.stroke();
+    c.beginPath(); if (st.resp) { c.moveTo(px, g.tapY - 5); c.lineTo(px, g.tapY + 5); } else { c.moveTo(px - 5, g.tapY); c.lineTo(px + 5, g.tapY); } c.stroke();
+    c.font = mono(nar ? 9 : 10.5); c.fillStyle = st.resp ? C.texte2 : C.pos; c.textBaseline = 'middle';
+    if (nar) { c.textAlign = 'center'; c.fillText(st.resp ? 'resp.' : 'coupée', px, g.tapY - 18); }
+    else { c.textAlign = 'right'; c.fillText(st.resp ? 'respiration' : 'respiration coupée', px - 16, g.tapY); }
+    // barre : ADP au-dessus, ATP en dessous
+    c.fillStyle = rgba(C.texte2, 0.1); c.fillRect(g.bx0, g.by0, g.bw, yF - g.by0);
+    const gr = c.createLinearGradient(0, yF, 0, g.by1); gr.addColorStop(0, rgba(C.ener, 0.95)); gr.addColorStop(1, rgba(C.ener, 0.55));
+    c.fillStyle = gr; c.fillRect(g.bx0, yF, g.bw, g.by1 - yF);
+    if (A > 0.02) { c.shadowColor = C.ener; c.shadowBlur = 6 + 14 * st.pulse; c.strokeStyle = '#fff0c4'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(g.bx0, yF); c.lineTo(g.bx0 + g.bw, yF); c.stroke(); c.shadowBlur = 0; }
+    c.strokeStyle = rgba(C.texte2, 0.8); c.lineWidth = 1; c.strokeRect(g.bx0 + 0.5, g.by0 + 0.5, g.bw, h);
+    // graduations
+    c.font = mono(10); c.textBaseline = 'middle'; c.fillStyle = C.texte2;
+    for (let v = 0; v <= 4; v++) { const y = g.by1 - h * v / 4.5; c.strokeStyle = rgba(C.texte2, 0.7); c.beginPath(); c.moveTo(g.bx0 - 4, y + 0.5); c.lineTo(g.bx0, y + 0.5); c.stroke(); if (!nar) { c.textAlign = 'right'; c.fillText(String(v), g.bx0 - 8, y); } }
+    if (!nar) { c.textAlign = 'right'; c.fillText('4,5', g.bx0 - 8, g.by0); }
+    // seuil où la réaction cesse (conditions de la cellule)
+    if (st.cell && st.n > 0) {
+      let lo = 0.02, hi = 4.5; const f = a => dGup() + st.n * B.walletDG({ ATP: a, ADP: 4.5 - a });
+      if (f(hi) < 0 && f(lo) >= 0) {
+        for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2; if (f(m) < 0) hi = m; else lo = m; }
+        const thr = (lo + hi) / 2, ys = g.by1 - h * thr / 4.5;
+        c.strokeStyle = C.pos; c.lineWidth = 1.2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(g.bx0 - 6, ys); c.lineTo(g.bx0 + g.bw + 6, ys); c.stroke(); c.setLineDash([]);
+        if (!nar) { c.font = mono(10); c.textAlign = 'left'; c.fillStyle = C.pos; c.fillText('sous ' + fmt(thr, 1) + ', ' + TAG[st.up] + ' cesse', g.bx0 + g.bw + 8, ys + (ys - yF < 14 && yF > ys ? 0 : 0)); }
+        zone(g.bx0 - 8, ys - 5, g.bx0 + g.bw + 8, ys + 5, 'seuil', 'Seuil de la réaction', 'En dessous de ce niveau d’ATP, l’hydrolyse ne descend plus assez : le total devient positif et la réaction cesse, bien avant que la réserve soit vide.');
+      }
+    }
+    // valeur : sous la ligne de niveau, côté ATP ; l'étiquette ADP reste dans la zone du haut
+    c.fillStyle = C.ener; c.font = monoB(nar ? 12 : 15); c.textBaseline = 'middle';
+    const yVal = clamp(yF + 16, g.by0 + 22, g.by1 - 30);
+    if (nar) { c.textAlign = 'center'; c.fillText(fmt(st.wallet.ATP, 1), g.bx0 + g.bw / 2, g.by1 + 14); }
+    else {
+      c.textAlign = 'left'; c.fillText(fmt(st.wallet.ATP, 2), g.bx0 + g.bw + 8, yVal);
+      c.font = mono(10); c.fillStyle = C.texte2; c.fillText('mmol/L d’ATP', g.bx0 + g.bw + 8, yVal + 15);
+      if (yF - g.by0 > 24) { c.fillStyle = rgba(C.texte2, 0.85); c.fillText('ADP', g.bx0 + g.bw + 8, g.by0 + 9); }
+    }
+    // consommation de fond
+    arrow(c, g.bx0 + g.bw / 2, g.by1 + (nar ? 22 : 6), g.bx0 + g.bw / 2, g.by1 + (nar ? 28 : 24), rgba(C.texte2, 0.8), 1.2, null, 5);
+    if (!nar) { c.font = mono(10); c.fillStyle = rgba(C.texte2, 0.85); c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText('consommation de fond', g.bx0 + g.bw / 2, g.by1 + 28); }
+    c.restore();
+    zone(g.bx0 - 6, g.by0, g.bx0 + g.bw + 6, g.by1, 'bar', 'Porte-monnaie de la cellule', 'ATP + ADP = 4,5 mmol/L en tout. Chaque réaction débite de l’ATP (qui devient ADP) ; la respiration en refait.');
+    zcirc(g.tapX, g.tapY, 14, 'robinet', 'Robinet de la respiration', 'Clique pour couper ou rétablir la respiration, qui refait de l’ATP à partir de l’ADP. Coupée, la réserve tombe à zéro en une vingtaine de secondes.');
+  }
+
+  function drawLadder(c, g) {
+    const k = g.k, up = dGup(), yUp = g.y0 - up * k, L = Math.abs(st.dGa) * k;
+    const totA = up + st.nA * st.dGa, yFin = g.y0 - totA * k, n = st.n, go = goes();
+    const col = go ? C.ener : C.texte2;
+    c.save();
+    // niveaux (pointillés fins)
+    c.strokeStyle = rgba(C.texte, 0.16); c.lineWidth = 1; c.setLineDash([2, 5]);
+    const ln1 = (y, xa, xb) => { c.beginPath(); c.moveTo(xa, y + 0.5); c.lineTo(xb, y + 0.5); c.stroke(); };
+    ln1(g.y0, g.axisX + 2, g.xTot + 16);
+    if (n > 0 || st.nA > 0.05) { ln1(yUp, g.xUp, g.xAtp + 4); ln1(yFin, g.xAtp, g.xTot + 16); }
+    c.setLineDash([]);
+    // flèche qui monte
+    arrow(c, g.xUp, g.y0, g.xUp, yUp, C.texte2, 4, null, 11);
+    c.beginPath(); c.arc(g.xUp, g.y0, 2.6, 0, TAU); c.fillStyle = C.texte2; c.fill();
+    zone(g.xUp - 11, Math.min(g.y0, yUp) - 6, g.xUp + 11, Math.max(g.y0, yUp) + 4, 'monte', 'Réaction qui monte · ΔG°′ = ' + fmtS(up, 1) + ' kJ/mol', B.REACTIONS[st.up].nom + ' (' + B.REACTIONS[st.up].eq + '). Elle va vers plus d’énergie libre : elle ne se fait pas seule.');
+    c.font = mono(g.nar ? 9.5 : 10.5);
+    const midUp = (g.y0 + yUp) / 2;
+    if (!g.nar) tagText(c, TAG[st.up], g.xUp - 10, midUp - 9, 'right', 'middle', C.texte2);
+    c.font = monoB(g.nar ? 11.5 : 13.5); tagText(c, fmtS(up, 1), g.xUp - 10, midUp + (g.nar ? 0 : 7), 'right', 'middle', C.texte);
+
+    // prise d'accueil (flèche fantôme) quand une flèche d'ATP peut encore s'ajouter
+    const dragK = st.drag ? st.drag.k : -1;
+    let snap = false;
+    if (n < 2) {
+      const sx = g.xAtp, sy = yUp + n * L, a = arrs[n];
+      if (st.drag && st.drag.k === n) snap = Math.hypot(a.x - sx, a.y - sy) < (g.nar ? 34 : 46);
+      const pulse = 0.5 + 0.5 * Math.sin(now * 3);
+      c.strokeStyle = rgba(C.ener, snap ? 0.95 : (st.first ? 0.22 : 0.3 + 0.2 * pulse)); c.lineWidth = snap ? 2.2 : 1.4; c.setLineDash([4, 4]);
+      c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx, sy + L); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.arc(sx, sy, snap ? 7 : 4.5, 0, TAU); c.stroke();
+      if (!st.first && !g.nar && !st.drag) { c.font = mono(10.5); c.fillStyle = rgba(C.ener, 0.85); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText('glisse l’ATP ici', sx + 12, sy + 10); }
+    }
+    // épingle et engrenage : la flèche qui monte se prolonge dans l'ATP, l'enzyme de couplage est au-dessus
+    if (st.nA > 0.04 && n > 0) {
+      const gx = (g.xUp + g.xAtp) / 2, rp = g.dl / 2 - 1.5, gy = yUp - rp * 1.35 - 3, al = clamp(st.nA, 0, 1);
+      c.globalAlpha = al;
+      c.strokeStyle = rgba(C.texte, 0.85); c.lineWidth = 2; c.beginPath(); c.moveTo(g.xUp, yUp - 2); c.lineTo(g.xUp, yUp - 6); c.arc(gx, yUp - 6, g.dl / 2, Math.PI, 0); c.lineTo(g.xAtp, yUp); c.stroke();
+      const jam = !go, sh = jam ? 0.06 * Math.sin(now * 16) : 0;
+      c.shadowColor = C.ener; c.shadowBlur = go ? 8 + 8 * st.flash : 5 * st.flash;
+      gear(c, gx, gy, rp, 8, st.gear + sh, go ? C.ener : C.texte2, 1.5, C.fond);
+      c.shadowBlur = 0; c.globalAlpha = 1;
+      zcirc(gx, gy, rp + 6, 'engrenage', 'Enzyme de couplage', 'Elle relie les deux réactions par un intermédiaire commun : le phosphate de l’ATP passe à la molécule. Les deux s’emboîtent, la somme décide.');
+    }
+    // flèches d'ATP (ressorts)
+    for (let kk = 1; kk >= 0; kk--) {
+      const a = arrs[kk]; if (!a.init || a.al < 0.03) continue;
+      const docked = kk < n, dragging = dragK === kk, home = !docked && !dragging;
+      c.globalAlpha = a.al;
+      c.save();
+      if (go && docked) { c.shadowColor = C.ener; c.shadowBlur = 10 + 6 * Math.sin(now * 4); }
+      else if (dragging || home) { c.shadowColor = C.ener; c.shadowBlur = dragging ? 14 : 5 + 4 * Math.sin(now * 2.2); }
+      arrow(c, a.x, a.y, a.x, a.y + L, C.ener, 4, null, 11);
+      c.restore();
+      c.fillStyle = C.ener; c.beginPath(); c.arc(a.x, a.y, 2.6, 0, TAU); c.fill();
+      c.globalAlpha = a.al;
+      zone(a.x - 12, a.y - 6, a.x + 12, a.y + L + 6, 'atp' + kk, 'Hydrolyse de l’ATP · ΔG = ' + fmtS(st.dGa, 1) + ' kJ/mol', 'ATP + H₂O → ADP + Pi. L’énergie vient de l’écart entre l’état avant (ATP + H₂O) et l’état après (ADP + Pi), bien plus stable ; pas d’une liaison. Glisse-la contre la flèche qui monte.');
+      if (home && !g.nar) { c.font = mono(10.5); tagText(c, 'ATP → ADP', a.x + 12, a.y + L / 2 - 8, 'left', 'middle', C.ener); }
+      if (home && g.nar) { c.font = mono(9.5); tagText(c, 'ATP', a.x, a.y + L + 12, 'center', 'middle', C.ener); }
+      c.globalAlpha = 1;
+    }
+    // étiquette de l'ATP couplé
+    if (n > 0 && !g.nar) {
+      const a0 = arrs[0], yMid = a0.y + (n * L) / 2;
+      c.font = mono(10.5); tagText(c, n === 1 ? 'ATP → ADP' : '2 ATP → 2 ADP', g.xAtp + 12, yMid - 9, 'left', 'middle', C.ener);
+      c.font = monoB(13.5); tagText(c, fmtS(n * st.dGa, 1), g.xAtp + 12, yMid + 7, 'left', 'middle', C.ener);
+    } else if (n > 0) {
+      const a0 = arrs[0], yMid = a0.y + (n * L) / 2;
+      c.font = monoB(11); tagText(c, fmtS(n * st.dGa, 0), g.xAtp + 6, yMid, 'left', 'middle', C.ener);
+    }
+    // flèche totale
+    if (st.nA > 0.04) {
+      c.globalAlpha = clamp(st.nA, 0, 1);
+      c.save();
+      if (go) { c.shadowColor = C.ener; c.shadowBlur = 12 + 6 * Math.sin(now * 4); }
+      arrow(c, g.xTot, g.y0, g.xTot, yFin, col, 5, null, 13);
+      c.restore();
+      c.beginPath(); c.arc(g.xTot, g.y0, 2.8, 0, TAU); c.fillStyle = col; c.fill();
+      zone(g.xTot - 12, Math.min(g.y0, yFin) - 6, g.xTot + 12, Math.max(g.y0, yFin) + 6, 'total', 'ΔG global · ' + fmtS(dGtot(), 1) + ' kJ/mol', 'Somme des deux flèches. Si elle descend, la réaction se fait ; si elle monte, la cellule ne paie pas.');
+      const mid = (g.y0 + yFin) / 2;
+      c.font = mono(g.nar ? 9.5 : 10.5); tagText(c, 'total', g.xTot + 11, mid - (g.nar ? 8 : 9), 'left', 'middle', C.texte2);
+      c.font = monoB(g.nar ? 11.5 : 13.5); tagText(c, fmtS(dGtot(), 1), g.xTot + 11, mid + (g.nar ? 6 : 7), 'left', 'middle', go ? C.ener : C.texte);
+      c.globalAlpha = 1;
+    }
+    c.restore();
+    return { yUp, yFin, snap };
+  }
+
+  /* ---- Scène moléculaire ---- */
+  function chamber(c, g, L) {
+    const nar = g.nar, x0 = g.cx0, x1 = g.cx1, w = x1 - x0, k = g.k, y0 = g.y0, P = phase(), go = goes();
+    const up = dGup(), yUp = L.yUp, yFin = L.yFin;
+    c.save();
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x0 + 0.5, g.top - 10 + 0.5, w, g.yb - g.top + 10);
+    c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    if (!nar) {
+      c.fillText('À L’ÉCHELLE DES MOLÉCULES', x0 + 10, g.top + 6);
+      c.fillStyle = rgba(C.texte, 0.9); c.font = mono(11); c.fillText(B.REACTIONS[st.up].eq, x0 + 10, g.top + 22);
+    }
+    // niveaux dans la boîte (réactions chimiques seulement : le muscle et la pompe ne sont pas des changements de molécule)
+    const chem = st.up === 'g6p' || st.up === 'gln';
+    if (chem) {
+      c.setLineDash([2, 5]); c.strokeStyle = rgba(C.texte, 0.16);
+      const lv = (y, txt, col) => { c.beginPath(); c.moveTo(x0 + 1, y + 0.5); c.lineTo(x1 - 1, y + 0.5); c.stroke(); if (!nar && txt) { c.font = mono(9.5); c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillStyle = col; c.fillText(txt, x1 - 8, y - 3); } };
+      lv(y0, 'réactifs', rgba(C.texte2, 0.9));
+      lv(yUp, st.n && Math.abs(yUp - yFin) <= 16 ? '' : 'produits seuls', rgba(C.texte2, 0.9));
+      if (st.n > 0 && st.nA > 0.5) lv(yFin, go ? 'avec l’ATP : plus bas' : 'avec l’ATP : plus haut', go ? C.ener : C.texte2);
+      c.setLineDash([]);
+    }
+    const hr = nar ? 8.5 : 17, rb = nar ? 2.7 : 4.8, ax = x0 + w * (nar ? 0.3 : 0.34);
+    const dockTx = ax + hr + rb + (nar ? 8 : 22), sp = rb * 2.5, edge = x1 + 4;
+    if (chem) chemScene(c, g, P, { hr, rb, ax, dockTx, sp, edge, yUp, yFin, w, x0, x1 });
+    else if (st.up === 'muscle') muscleScene(c, g, P, { x0, x1, w });
+    else pumpScene(c, g, P, { x0, x1, w });
+    // légende basse
+    if (!nar) {
+      c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+      const t = st.wallet.ATP < SPEND * Math.max(1, st.n) - 1e-9 ? 'Plus d’ATP dans la réserve : plus de paiement.'
+        : st.n === 0 ? 'Seule, la réaction monte un peu, puis retombe.'
+        : go ? 'Le phosphate passe de l’ATP au substrat ; l’ensemble descend.' : 'Le total reste au-dessus : l’essai retombe.';
+      c.fillText(t, x0 + 10, g.yb - 10);
+    }
+    c.restore();
+  }
+
+  function chemScene(c, g, P, o) {
+    const { hr, rb, ax, dockTx, sp, edge, yUp, yFin, x0, x1 } = o, y0 = g.y0, w = o.w, gln = st.up === 'gln', sides = gln ? 5 : 6;
+    const u = P.u, mode = P.mode, nar = g.nar;
+    let lift = 0, hp = 0, descent = 0, atpTx = 0, atpAl = 0, atpNb = 3, adpTx = 0, adpAl = 0, actAl = 1, newAl = 0, piFlyAl = 0, nh4 = 0;
+    const gUp = y0 - yUp;                                              // hauteur (px) du niveau « produits seuls »
+    if (mode === 'solo') {
+      hp = u < 0.14 ? 0 : u < 0.28 ? sstep((u - 0.14) / 0.14) : u < 0.62 ? 1 : u < 0.76 ? 1 - sstep((u - 0.62) / 0.14) : 0;
+      if (u > 0.28 && u < 0.62) lift = 0.42 * gUp * Math.sin(Math.PI * (u - 0.28) / 0.34);
+      lift = Math.max(lift, 0);
+    } else if (mode === 'try') {
+      atpAl = u < 0.18 ? easeOut(u / 0.18) : u < 0.78 ? 1 : 1 - sstep((u - 0.78) / 0.2);
+      atpTx = u < 0.18 ? lerp(edge, dockTx, easeOut(u / 0.18)) : u < 0.78 ? dockTx : lerp(dockTx, edge, sstep((u - 0.78) / 0.2));
+      hp = u < 0.18 ? 0 : u < 0.3 ? sstep((u - 0.18) / 0.12) : u < 0.66 ? 1 : u < 0.76 ? 1 - sstep((u - 0.66) / 0.1) : 0;
+      if (u > 0.3 && u < 0.66) lift = 0.55 * Math.max(y0 - yFin, 22) * Math.sin(Math.PI * (u - 0.3) / 0.36);
+      atpNb = hp > 0.001 && hp < 0.999 ? 2 : (hp >= 0.999 ? 2 : 3);
+    } else {                                                           // événement : le phosphate passe, l'ensemble descend
+      atpAl = u < 0.28 ? easeOut(u / 0.28) : 1; atpTx = u < 0.28 ? lerp(edge, dockTx, easeOut(u / 0.28)) : dockTx;
+      hp = u < 0.28 ? 0 : u < 0.5 ? sstep((u - 0.28) / 0.22) : 1;
+      descent = u < 0.5 ? 0 : u < 0.82 ? sstep((u - 0.5) / 0.32) : 1;
+      atpNb = hp > 0 ? 2 : 3;
+      if (u > 0.58) { const s = sstep((u - 0.58) / 0.24); adpTx = lerp(dockTx, edge, s); adpAl = 1 - sstep((u - 0.72) / 0.1); atpAl = adpAl; } else adpTx = dockTx;
+      if (u > 0.82) { actAl = 1 - (u - 0.82) / 0.18; newAl = (u - 0.82) / 0.18; }
+      if (gln && u > 0.55) nh4 = sstep((u - 0.55) / 0.15);
+      piFlyAl = gln && u > 0.55 ? 1 - sstep((u - 0.55) / 0.25) : 0;
+    }
+    // acteur
+    const ay = y0 - lift + descent * (yFin - y0), axx = ax + thx(0, 0.8), ayy = ay + thy(0, 0.8) * 0.6;
+    const attX = axx + hr * 0.95, attY = ayy - hr * 0.2;
+    c.save();
+    c.lineWidth = 1.6;
+    // spectateurs : substrats lilas, partenaires en perles
+    const sub = (x, y, al) => { c.globalAlpha = al; c.fillStyle = rgba(C.lilas, 0.2); c.strokeStyle = C.lilas; c.beginPath(); poly(c, x, y, hr, sides, -Math.PI / 2 + (sides === 5 ? 0 : Math.PI / 6)); c.fill(); c.stroke(); c.globalAlpha = 1; };
+    const pcol = gln ? C.pos : rgba(C.texte, 0.9);
+    sub(ax - w * 0.2 + thx(1, 2.5), y0 + 12 + thy(1, 2.5), 1);
+    sub(ax - w * 0.1 + thx(2, 2.5), y0 + 40 + thy(2, 2.5), 1);
+    bead(c, ax - w * 0.14 + thx(3, 3), y0 - 22 + thy(3, 3), rb, pcol);
+    bead(c, ax + w * 0.1 + thx(4, 3), y0 + 30 + thy(4, 3), rb, pcol);
+    bead(c, ax - w * 0.26 + thx(5, 3), y0 + 24 + thy(5, 3), rb, pcol);
+    zcirc(ax - w * 0.2, y0 + 12, hr + 3, 'sub1', gln ? 'Glutamate' : 'Glucose', gln ? 'Acide aminé qui reçoit un groupement ammonium pour devenir glutamine.' : 'Un sucre à six atomes de carbone (hexagone lilas, comme dans les autres planches).');
+    // partenaire libre de l'acteur (Pi ou NH₄⁺)
+    const freeX = ax + hr + (nar ? 10 : 20) + thx(6, 3), freeY = y0 - 12 + thy(6, 3);
+    // acteur (avant et pendant)
+    if (actAl > 0.01) {
+      sub(axx, ayy, actAl);
+      c.globalAlpha = actAl;
+      let px, py;
+      if (mode === 'solo') { px = lerp(freeX, attX, hp); py = lerp(freeY, attY, hp) - 8 * Math.sin(Math.PI * hp); }
+      else {
+        const fromX = atpTx, fromY = y0;
+        px = lerp(fromX, attX, hp); py = lerp(fromY, attY, hp) - 16 * Math.sin(Math.PI * hp);
+        if (hp <= 0) { px = NaN; }
+      }
+      if (gln && mode !== 'solo') {                                    // le Pi passe à l'intermédiaire ; l'ion ammonium le remplace
+        if (hp > 0 && isFinite(px)) bead(c, px, py, rb, rgba(C.texte, 0.95) , hp < 1 ? 10 : 0);
+        if (nh4 > 0) { bead(c, lerp(freeX, attX, nh4), lerp(freeY, attY, nh4), rb, C.pos); }
+      } else if (isFinite(px)) bead(c, px, py, rb * (mode === 'solo' ? 1 : 1.05), pcol, mode !== 'solo' && hp < 1 && hp > 0 ? 12 : 0);
+      else if (mode === 'solo') bead(c, freeX, freeY, rb, pcol);
+      if (gln && mode === 'solo') { /* partenaire géré ci-dessus */ }
+      c.globalAlpha = 1;
+      zcirc(axx, ayy, hr + 3, 'acteur', gln ? (nh4 > 0.9 ? 'Glutamine' : 'Glutamate') : (hp >= 1 ? 'Glucose-6-P' : 'Glucose'), hp >= 1 ? 'Le phosphate est accroché : le produit est à un niveau d’énergie libre différent de celui des réactifs.' : 'Un sucre lilas ; le phosphate (perle) se fixe dessus ou se détache selon l’essai.');
+    }
+    if (newAl > 0.01) sub(ax, y0, newAl);
+    if (piFlyAl > 0.01) { const s = (u - 0.55) / 0.25; bead(c, attX - 6 - 16 * s, attY - 10 - 14 * s, rb, rgba(C.texte, 0.9 * piFlyAl)); }
+    // ATP / ADP
+    if (mode !== 'solo') {
+      if (mode === 'event') {
+        if (u < 0.28 || hp === 0) chain(c, atpTx, y0, 3, rb, atpAl, nar ? '' : 'ATP');
+        else chain(c, adpTx + sp, y0, 2, rb, adpAl > 0 ? adpAl : 1, nar ? '' : 'ADP');
+      } else {
+        chain(c, atpNb === 2 ? atpTx + sp : atpTx, y0, atpNb, rb, atpAl, nar ? '' : (atpNb === 2 ? 'ADP' : 'ATP'));
+      }
+      const cxA = (mode === 'event' ? (u < 0.58 ? dockTx : adpTx) : atpTx) + sp;
+      const alA = mode === 'event' ? (u < 0.28 ? easeOut(u / 0.28) : (u > 0.72 ? adpAl : 1)) : atpAl;
+      if (alA > 0.3) zcirc(cxA + sp * 0.4, y0, sp * 2, 'atp-mol', hp >= 1 || (mode === 'event' && u > 0.5) ? 'ADP' : 'ATP', 'Adénosine et phosphates. Le dernier phosphate (lumineux) passe à la molécule ; il reste l’ADP, deux phosphates.');
+    }
+    c.restore();
+  }
+
+  // Les scènes du muscle et de la pompe sont dessinées à l'échelle sc autour de (cx, cy) ; les zones de survol suivent.
+  function scaler(cx, cy, sc) {
+    return {
+      c: (x, y, r, k, n, rl) => zcirc(cx + (x - cx) * sc, cy + (y - cy) * sc, r * sc, k, n, rl),
+      r: (x0, y0, x1, y1, k, n, rl) => zone(cx + (x0 - cx) * sc, cy + (y0 - cy) * sc, cx + (x1 - cx) * sc, cy + (y1 - cy) * sc, k, n, rl)
+    };
+  }
+  // Calendrier de l'ATP pour les scènes locales (muscle, pompe) : renvoie les paramètres communs
+  function localPhase(P, dockTx, edge) {
+    const u = P.u, mode = P.mode;
+    let atpTx = dockTx, atpAl = 0, hp = 0, adpTx = dockTx, adpAl = 0, atpNb = 3, power = 0;
+    if (mode === 'event') {
+      atpAl = u < 0.28 ? easeOut(u / 0.28) : 1; atpTx = u < 0.28 ? lerp(edge, dockTx, easeOut(u / 0.28)) : dockTx;
+      hp = u < 0.28 ? 0 : sstep((u - 0.28) / 0.22); atpNb = hp > 0 ? 2 : 3;
+      power = u < 0.5 ? 0 : u < 0.82 ? sstep((u - 0.5) / 0.32) : 1;
+      if (u > 0.58) { adpTx = lerp(dockTx, edge, sstep((u - 0.58) / 0.24)); adpAl = 1 - sstep((u - 0.72) / 0.1); atpAl = adpAl; }
+    } else if (mode === 'try') {
+      atpAl = u < 0.18 ? easeOut(u / 0.18) : u < 0.78 ? 1 : 1 - sstep((u - 0.78) / 0.2);
+      atpTx = u < 0.18 ? lerp(edge, dockTx, easeOut(u / 0.18)) : u < 0.78 ? dockTx : lerp(dockTx, edge, sstep((u - 0.78) / 0.2));
+      hp = u < 0.18 ? 0 : u < 0.3 ? sstep((u - 0.18) / 0.12) : u < 0.66 ? 1 : u < 0.76 ? 1 - sstep((u - 0.66) / 0.1) : 0;
+      atpNb = hp > 0 ? 2 : 3;
+      power = u > 0.3 && u < 0.66 ? 0.3 * Math.sin(Math.PI * (u - 0.3) / 0.36) : 0;
+    } else power = u > 0.2 && u < 0.7 ? 0.2 * Math.sin(Math.PI * (u - 0.2) / 0.5) : 0;
+    return { u, mode, atpTx, atpAl, hp, adpTx, adpAl, atpNb, power };
+  }
+  function drawChain(c, L, sp, rb, yc, nar) {
+    if (L.mode === 'solo') return;
+    if (L.mode === 'event') { if (L.hp === 0) chain(c, L.atpTx, yc, 3, rb, L.atpAl, nar ? '' : 'ATP'); else chain(c, L.adpTx + sp, yc, 2, rb, L.adpAl > 0 ? L.adpAl : 1, nar ? '' : 'ADP'); }
+    else chain(c, L.atpNb === 2 ? L.atpTx + sp : L.atpTx, yc, L.atpNb, rb, L.atpAl, nar ? '' : (L.atpNb === 2 ? 'ADP' : 'ATP'));
+  }
+
+  function muscleScene(c, g, P, o) {
+    const nar = g.nar, sc = nar ? 1 : 1.3, rb = nar ? 2.7 : 4, x0 = o.x0, x1 = o.x1, w = o.w;
+    const cx = x0 + w / 2, cy = g.y0 + 30, X0 = cx - (cx - x0) / sc, X1 = cx + (x1 - cx) / sc, W2 = X1 - X0;
+    const Z = scaler(cx, cy, sc), sp = rb * 2.5, edge = X1 + 6;
+    const hx = cx - W2 * 0.05, yA = g.y0 + 2, yM = g.y0 + 62, hy = yM - 5, dockTx = hx + 22, yc = hy - 40;
+    const L = localPhase(P, dockTx, edge), u = L.u, dMax = 17;
+    let d = dMax, lift = 0;
+    if (L.mode === 'event') { if (u >= 0.5 && u < 0.82) d = lerp(dMax, -dMax, L.power); else if (u >= 0.82) { d = lerp(-dMax, dMax, sstep((u - 0.82) / 0.18)); lift = 8 * Math.sin(Math.PI * (u - 0.82) / 0.18); } }
+    else if (L.mode === 'try') d = lerp(dMax, dMax * 0.4, L.power / 0.3);
+    else d = dMax + 1.2 * Math.sin(now * 3);
+    c.save();
+    c.translate(cx, cy); c.scale(sc, sc); c.translate(-cx, -cy);
+    // filament épais
+    c.fillStyle = C.fond2; c.strokeStyle = rgba(C.texte2, 0.7); c.lineWidth = 1.2;
+    c.beginPath(); c.rect(X0 + 8, yM - 1, W2 - 16, 13); c.fill(); c.stroke();
+    // filament mince d'actine : perles lilas qui avancent d'un pas à chaque ATP
+    const span = W2 - 28, count = Math.floor(span / 17), spc = span / count, sh = st.mShiftA * 0.65;
+    c.fillStyle = rgba(C.lilas, 0.85); c.beginPath();
+    for (let i = 0; i < count; i++) { const x = X0 + 14 + (((i * spc - sh) % span) + span) % span; c.moveTo(x + rb * 1.5, yA); c.arc(x, yA, rb * 1.5, 0, TAU); }
+    c.fill();
+    c.strokeStyle = rgba(C.lilas, 0.3); c.lineWidth = 1; c.beginPath(); c.moveTo(X0 + 8, yA); c.lineTo(X1 - 8, yA); c.stroke();
+    // tête de myosine
+    const tipX = hx + d, tipY = yA + 9 - lift;
+    c.strokeStyle = C.accent; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(hx, hy); c.lineTo(tipX, tipY); c.stroke();
+    c.strokeStyle = C.fond2; c.lineWidth = 3; c.beginPath(); c.moveTo(hx, hy); c.lineTo(tipX, tipY); c.stroke();
+    c.lineWidth = 1.6; c.strokeStyle = C.accent; c.fillStyle = C.fond2;
+    c.beginPath(); c.arc(hx, hy, 4.5, 0, TAU); c.fill(); c.stroke();
+    c.beginPath(); c.ellipse(tipX, tipY - 2, 8.5, 6, -0.4, 0, TAU); c.fill(); c.stroke();
+    Z.r(hx - 14, tipY - 10, hx + 24, hy + 8, 'myosine', 'Tête de myosine', 'Elle se fixe sur le filament d’actine et le tire d’un pas (≈ 8 nm) à chaque ATP utilisé ; sans ATP, rien ne bouge.');
+    Z.r(X0 + 8, yA - 9, X1 - 8, yA + 9, 'actine', 'Filament d’actine', 'Rangée de perles que la myosine tire : c’est le travail mécanique (≈ 5 pN sur 8 nm) de la contraction.');
+    // ATP : le dernier phosphate part, l'ADP repart
+    drawChain(c, L, sp, rb, yc, nar);
+    if (L.mode === 'event' && L.hp > 0 && u < 0.8) { const s = (u - 0.28) / 0.5; bead(c, dockTx - 4 - 22 * s, yc - 6 - 18 * s, rb, rgba(C.texte, 0.85 * (1 - clamp(s, 0, 1)))); }
+    if (L.mode === 'try' && L.hp > 0 && L.hp < 1) bead(c, lerp(dockTx, hx, L.hp), lerp(yc, tipY, L.hp), rb, '#fff0c4', 10);
+    Z.c(dockTx + sp, yc, sp * 2, 'atp-mol', 'ATP', 'Adénosine et phosphates ; la myosine s’en sert pour avancer d’un pas le long de l’actine.');
+    c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText('actine', X0 + 12, yA - 14); c.fillText('myosine', X0 + 12, yM + 28);
+    c.restore();
+  }
+
+  function pumpScene(c, g, P, o) {
+    const nar = g.nar, sc = nar ? 1 : 1.3, rb = nar ? 2.7 : 4, x0 = o.x0, x1 = o.x1, w = o.w;
+    const cx = x0 + w / 2, cy = g.y0 + 30, X0 = cx - (cx - x0) / sc, X1 = cx + (x1 - cx) / sc, W2 = X1 - X0;
+    const Z = scaler(cx, cy, sc), sp = rb * 2.5, edge = X1 + 6;
+    const yM = g.y0 + 28, px = cx - W2 * 0.06, pw = 28, dockTx = px + 40, yc = yM + 62;
+    const L = localPhase(P, dockTx, edge), u = L.u, mode = L.mode, hp = L.hp;
+    const move = mode === 'event' ? (u < 0.5 ? 0 : u < 0.82 ? (u - 0.5) / 0.32 : 1) : L.power;
+    c.save();
+    c.translate(cx, cy); c.scale(sc, sc); c.translate(-cx, -cy);
+    // membrane et pompe
+    c.fillStyle = rgba(C.texte, 0.07); c.fillRect(X0 + 4, yM - 6, W2 - 8, 12);
+    c.strokeStyle = rgba(C.texte2, 0.6); c.lineWidth = 1; c.beginPath(); c.moveTo(X0 + 4, yM - 6.5); c.lineTo(X1 - 4, yM - 6.5); c.moveTo(X0 + 4, yM + 6.5); c.lineTo(X1 - 4, yM + 6.5); c.stroke();
+    c.fillStyle = C.fond2; c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath(); c.rect(px - pw / 2, yM - 18, pw, 36); c.fill(); c.stroke();
+    c.strokeStyle = rgba(C.accent, 0.5); c.lineWidth = 3; c.beginPath(); c.moveTo(px, yM - 13); c.lineTo(px, yM + 13); c.stroke();
+    Z.r(px - pw / 2 - 3, yM - 21, px + pw / 2 + 3, yM + 21, 'pompe', 'Pompe Na⁺/K⁺', 'Protéine de la membrane : à chaque cycle, 3 Na⁺ sortent et 2 K⁺ entrent, contre leurs gradients ; le travail vient de l’ATP.');
+    // 3 Na⁺ de l'intérieur vers l'extérieur, 2 K⁺ en sens inverse ; le reste est du bain
+    const na = (x, y, a) => bead(c, x, y, rb * 1.2, a === 1 ? C.pos : rgba(C.pos, a));
+    const kk = (x, y, a) => bead(c, x, y, rb * 1.2, a === 1 ? C.neg : rgba(C.neg, a));
+    const ease = t => t * t * (3 - 2 * t);
+    const naS = [[px - 19, yM + 32], [px + 1, yM + 42], [px + 21, yM + 31]], naE = [[px - 19, yM - 32], [px + 1, yM - 42], [px + 21, yM - 31]];
+    const kS = [[px - 15, yM - 33], [px + 15, yM - 40]], kE = [[px - 15, yM + 33], [px + 15, yM + 42]];
+    const fadeOut = mode === 'event' && u > 0.82 ? 1 - (u - 0.82) / 0.18 : 1, fadeIn = 1 - fadeOut;
+    for (let j = 0; j < 3; j++) {
+      const t = clamp((move - j * 0.1) / 0.7, 0, 1), arc = Math.sin(Math.PI * t), t2 = ease(t);
+      let x = lerp(naS[j][0], naE[j][0], t2), y = lerp(naS[j][1], naE[j][1], t2);
+      x += thx(10 + j, 1.8) * (1 - arc); y += thy(10 + j, 1.8) * (1 - arc);
+      if (t > 0.3 && t < 0.7) x = lerp(x, px, 0.85);
+      na(x, y, fadeOut);
+      if (fadeIn > 0.01) na(naS[j][0] + thx(10 + j, 1.8), naS[j][1] + thy(10 + j, 1.8), fadeIn);
+    }
+    for (let j = 0; j < 2; j++) {
+      const t = clamp((move - j * 0.1) / 0.7, 0, 1), arc = Math.sin(Math.PI * t), t2 = ease(t);
+      let x = lerp(kS[j][0], kE[j][0], t2), y = lerp(kS[j][1], kE[j][1], t2);
+      x += thx(20 + j, 1.8) * (1 - arc); y += thy(20 + j, 1.8) * (1 - arc);
+      if (t > 0.3 && t < 0.7) x = lerp(x, px, 0.85);
+      kk(x, y, fadeOut);
+      if (fadeIn > 0.01) kk(kS[j][0] + thx(20 + j, 1.8), kS[j][1] + thy(20 + j, 1.8), fadeIn);
+    }
+    const nx = [X0 + W2 * 0.08, X0 + W2 * 0.2, X0 + W2 * 0.34, X0 + W2 * 0.68, X0 + W2 * 0.8, X0 + W2 * 0.92];
+    for (let i = 0; i < 6; i++) na(nx[i] + thx(30 + i, 3), yM - 24 - (i % 3) * 15 + thy(30 + i, 3), 1);
+    for (let i = 0; i < 6; i++) kk(nx[(i + 2) % 6] + thx(40 + i, 3), yM + 26 + (i % 3) * 15 + thy(40 + i, 3), 1);
+    Z.c(nx[1], yM - 39, 10, 'na', 'Ion sodium Na⁺', 'Plus concentré dehors que dedans (145 contre 12 mmol/L) : la pompe le sort contre ce gradient.');
+    Z.c(nx[3], yM + 41, 10, 'k', 'Ion potassium K⁺', 'Plus concentré dedans que dehors (140 contre 4 mmol/L) : la pompe le fait entrer contre ce gradient.');
+    // ATP côté intérieur : donne son dernier phosphate à la pompe
+    if (mode !== 'solo') {
+      drawChain(c, L, sp, rb, yc, nar);
+      if (hp > 0 && hp < 1) bead(c, lerp(dockTx, px + pw / 2, hp), lerp(yc, yM + 16, hp), rb, '#fff0c4', 10);
+      Z.c(dockTx + sp, yc, sp * 2, 'atp-mol', 'ATP', 'Adénosine et phosphates : il donne son dernier phosphate à la pompe, qui change de forme.');
+    }
+    c.font = mono(10); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText('extérieur · plus de Na⁺', X0 + 12, yM - 70); c.fillText('intérieur · plus de K⁺', X0 + 12, yM + 100);
+    c.restore();
+  }
+
+  function draw() {
+    const c = ctx, g = geo();
+    const L = drawLadder(c, g);
+    drawAxis(c, g);
+    chamber(c, g, L);
+    drawWallet(c, g);
+    // le rappel d'échelle pour petit écran
+    if (g.nar) { c.save(); c.font = mono(9); c.fillStyle = rgba(C.texte2, 0.85); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('10 kJ/mol = ' + fmtI(10 * g.k) + ' px', 8, H - 8); if (st.n === 0 && !st.first) { c.fillStyle = rgba(C.ener, 0.9); c.fillText('glisse l’ATP contre la flèche qui monte', 8, H - 22); } c.restore(); }
+  }
+
+  /* ---- Graphe du panneau : réserve d'ATP sur 30 s ---- */
+  function graph() {
+    const { w, h } = scopeSetup(), c = sctx, padL = 34, padR = 10, padT = 12, padB = 18, pw = w - padL - padR, ph = h - padT - padB;
+    const yv = v => padT + ph * (1 - v / 4.5), xt = t => padL + pw * (1 - (st.t - t) / 30);
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+    c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+    c.fillStyle = rgba(C.accent, 0.14);
+    for (const b of st.cuts) { const x0 = Math.max(padL, xt(b[0])), x1 = Math.min(padL + pw, b[1] == null ? padL + pw : xt(b[1])); if (x1 > x0) c.fillRect(x0, padT, x1 - x0, ph); }
+    c.strokeStyle = C.trait; c.setLineDash([2, 4]); c.beginPath(); c.moveTo(padL, yv(4.5)); c.lineTo(padL + pw, yv(4.5)); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = rgba(C.texte2, 0.7); c.lineWidth = 1.2; c.beginPath();
+    for (const m of st.marks) { const x = xt(m); if (x < padL) continue; c.moveTo(x, padT + ph); c.lineTo(x, padT + ph - 7); }
+    c.stroke();
+    c.beginPath(); let first = true;
+    for (const r of st.rec) { const x = xt(r.t), y = yv(r.a); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; }
+    c.lineTo(padL + pw, yv(st.wallet.ATP));
+    c.strokeStyle = C.ener; c.lineWidth = 1.8; c.stroke();
+    c.restore();
+    c.font = mono(10); c.fillStyle = C.ener; c.textBaseline = 'middle'; c.textAlign = 'right';
+    c.fillText('4,5', padL - 4, yv(4.5) + 1); c.fillText('0', padL - 4, yv(0) - 1); c.fillText('2', padL - 4, yv(2));
+    c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('−30 s', padL, h - 4); c.textAlign = 'right'; c.fillText('maintenant', padL + pw, h - 4);
+    c.save(); c.translate(9, padT + ph / 2); c.rotate(-Math.PI / 2); c.textAlign = 'center'; c.fillStyle = C.texte2; c.fillText('mmol/L', 0, 0); c.restore();
+  }
+
+  /* ---- Texte réactif ---- */
+  function statut() {
+    const up = dGup(), a = dGatp(), n = st.n, tot = dGtot();
+    if (st.wallet.ATP < 0.05) return 'La réserve d’ATP est vide : plus aucun travail ne se paie. Sans respiration, elle tombe à zéro en une vingtaine de secondes.';
+    if (n === 0) return st.first ? 'Découplée : ' + fmt(up, 1) + ' kJ/mol à monter, rien pour payer. La réaction ne se fait plus.' : fmt(up, 1) + ' kJ/mol à monter : la réaction ne se fait pas seule. Glisse la flèche de l’ATP contre elle.';
+    if (!enough()) return 'Il reste moins d’ATP que ce qu’un événement demande : la réaction cesse. Sans respiration, la réserve s’épuise.';
+    if (tot >= 0) {
+      let t = fmt(up, 1) + ' kJ/mol à monter, ' + fmt(-n * a, 1) + ' à descendre : ensemble, on monte encore de ' + fmt(tot, 1) + '. Le total ne descend pas : la réaction ne se fait pas.';
+      if (st.up === 'pompe' && !st.cell) t += ' Dans la cellule, l’ATP descend davantage : essaie les conditions de la cellule.';
+      else if (st.cell) t += ' La réserve a trop baissé : l’hydrolyse ne descend plus assez.';
+      return t;
+    }
+    let t = fmt(up, 1) + ' kJ/mol à monter, ' + fmt(-n * a, 1) + ' à descendre : ensemble, on descend de ' + fmt(-tot, 1) + '. La cellule ne paie que si le total descend.';
+    if (!st.resp) t += ' Respiration coupée : la réserve baisse.';
+    else if (st.cell && up > 30) t += ' En conditions de la cellule, l’ATP descend de ' + fmt(-a, 1) + ' : assez pour cette réaction.';
+    return t;
+  }
+  function valeurs() {
+    const n = st.n;
+    return { dgUp: fmtS(dGup(), 1), dgAtp: n ? fmtS(n * dGatp(), 1) : '—', dgTot: fmtS(dGtot(), 1), ev: fmtI(st.ev), spent: fmtI(st.spent), res: fmt(st.wallet.ATP, 2) };
+  }
+  function etat() {
+    return { uphill: st.up, dGup: dGup(), dGatp: dGatp(), nATP: st.n, dGtot: dGtot(), goes: goes(), wallet: st.wallet.ATP, spent: st.spent, cell: st.cell, recharge: st.resp, reactions: st.ev, adp: st.wallet.ADP };
+  }
+
+  /* ---- Interface ---- */
+  function sync() {
+    const root = document.querySelector('[data-step="0"]'); if (!root) return;
+    root.querySelectorAll('[data-r]').forEach(b => b.setAttribute('aria-pressed', b.dataset.r === st.up ? 'true' : 'false'));
+    root.querySelectorAll('[data-n]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.n === st.n ? 'true' : 'false'));
+    const bc = root.querySelector('#s1Coupler'); bc.textContent = st.n ? 'Découpler' : 'Coupler'; bc.setAttribute('aria-pressed', st.n ? 'true' : 'false');
+    root.querySelector('#s1Cell').setAttribute('aria-pressed', st.cell ? 'true' : 'false');
+    root.querySelector('#s1Resp').setAttribute('aria-pressed', st.resp ? 'false' : 'true');
+  }
+  function init() {
+    const root = document.querySelector('[data-step="0"]');
+    root.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => { setUphill(b.dataset.r); b.blur(); }));
+    root.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => { couple(+b.dataset.n); b.blur(); }));
+    root.querySelector('#s1Coupler').addEventListener('click', e => { couple(st.n ? 0 : 1); e.currentTarget.blur(); });
+    root.querySelector('#s1Cell').addEventListener('click', e => { cellConditions(!st.cell); e.currentTarget.blur(); });
+    root.querySelector('#s1Resp').addEventListener('click', e => { respiration(!st.resp); e.currentTarget.blur(); });
+  }
+
+  const pointer = {
+    down(x, y, e) {
+      const g = geo(), r = e.pointerType === 'touch' ? 26 : 15;
+      if (Math.hypot(x - g.tapX, y - g.tapY) < r + 4) { respiration(!st.resp); return false; }
+      const L = Math.abs(st.dGa) * g.k;
+      for (const k of [st.n, st.n - 1]) {
+        if (k < 0 || k > 1) continue;
+        const a = arrs[k]; if (!a.init) continue;
+        if (Math.abs(x - a.x) < r && y > a.y - 10 && y < a.y + L + 10) {
+          st.drag = { k, ox: x - a.x, oy: y - a.y, x, y };
+          if (k === st.n - 1) { st.n = k; st.evT = 0; st.did = false; st.at = 0; sync(); }
+          return true;
+        }
+      }
+      return false;
+    },
+    move(x, y) { if (st.drag) { st.drag.x = x; st.drag.y = y; } },
+    up() {
+      if (!st.drag) return;
+      const g = geo(), k = st.drag.k, a = arrs[k], L = Math.abs(st.dGa) * g.k, yUp = g.y0 - dGup() * g.k;
+      const sx = g.xAtp, sy = yUp + st.n * L, ok = k === st.n && st.n < 2 && Math.hypot(a.x - sx, a.y - sy) < (g.nar ? 34 : 46);
+      st.drag = null;
+      if (ok) couple(st.n + 1);
+    },
+    hover(x, y) {
+      if (st.drag) return 'grabbing';
+      const g = geo(), L = Math.abs(st.dGa) * g.k;
+      if (Math.hypot(x - g.tapX, y - g.tapY) < 14) return 'hand';
+      for (const k of [st.n, st.n - 1]) { if (k < 0 || k > 1) continue; const a = arrs[k]; if (a.init && Math.abs(x - a.x) < 14 && y > a.y - 10 && y < a.y + L + 10) return 'grab'; }
+      return '';
+    }
+  };
+
+  return {
+    titre: 'Descendre pour monter : le couplage', mot: 'Couplage',
+    texte: 'Une réaction qui monte sur l’échelle d’énergie libre ne se fait pas seule. Glisse la flèche de l’hydrolyse de l’ATP contre elle : les deux s’emboîtent, et la somme dit si la réaction se fait. À droite, la réserve d’ATP de la cellule paie chaque réaction.',
+    cle: 'Une réaction qui monte ne se fait pas seule. Couplée à l’hydrolyse de l’ATP, qui descend davantage, l’ensemble descend : c’est ainsi que la cellule paie ses travaux.',
+    note: 'ΔG°′ : conditions standard biochimiques (pH 7, 1 mol/L) ; « monter » et « descendre » se lisent sur une échelle d’énergie libre, pas d’énergie potentielle.',
+    graphTitre: 'Enregistreur · réserve d’ATP', graphH: 130,
+    legende: lg(ln('#ffd166', 2.4), 'ATP libre') + lg(bx('#e0b48a', 0.3), 'respiration coupée') + lg('<line x1="10" y1="0" x2="10" y2="8" stroke="#8a93a0" stroke-width="1.5"/>', 'une dépense')
+      + '<span class="og"><b>Ordres de grandeur.</b> Un corps de 100 W renouvelle ≈ ' + fmtI(BioEn.dailyATP(100).kg) + ' kg d’ATP par jour, du même ordre que sa propre masse (hypothèses : 30 ATP par glucose, 507 g/mol). Un cerveau actif (20 W, 1 L) viderait sa réserve en ≈ ' + fmtI(BioEn.stockSeconds(20, 1)) + ' s sans recyclage.</span>',
+    outils: `<div class="grp"><span class="gl">Réaction à faire monter</span>
+      <button class="btn sm" data-r="g6p" title="glucose + Pi → glucose-6-phosphate">Glucose-6-P</button>
+      <button class="btn sm" data-r="gln" title="glutamate + NH₄⁺ → glutamine">Glutamine</button>
+      <button class="btn sm" data-r="muscle" title="un coup de rame de myosine">Contraction musculaire</button>
+      <button class="btn sm" data-r="pompe" title="3 Na⁺ sortent, 2 K⁺ entrent">Pompe Na⁺/K⁺</button></div>
+      <div class="grp"><span class="gl">ATP couplés</span><button class="btn sm" data-n="0" title="Découplé">0</button><button class="btn sm" data-n="1">1</button><button class="btn sm" data-n="2">2</button><button class="btn go" id="s1Coupler" title="Coupler / découpler (C)">Coupler</button></div>
+      <div class="grp"><button class="btn" id="s1Cell" aria-pressed="false" title="Remplace ΔG°′ par le ΔG réel de l’ATP dans la cellule (M)"><span class="dot"></span>Conditions de la cellule</button><button class="btn" id="s1Resp" aria-pressed="false" title="Coupe la recharge de la réserve d’ATP"><span class="dot"></span>Couper la respiration</button></div>`,
+    mesures: [['ΔG de la réaction', 'dgUp', 'kJ/mol'], ['ΔG de l’ATP (× n)', 'dgAtp', 'kJ/mol'], ['ΔG global', 'dgTot', 'kJ/mol'], ['Réactions accomplies', 'ev', ''], ['ATP dépensés', 'spent', ''], ['Réserve d’ATP', 'res', 'mmol/L']],
+    cartes: false, touches: '<kbd>C</kbd> coupler · <kbd>M</kbd> conditions de la cellule',
+    init, reset, adv, draw, graph, valeurs, statut, etat, sync, pointer,
+    keys: { c: () => couple(st.n ? 0 : 1), m: () => cellConditions(!st.cell) },
+    crochets: { setUphill, couple, cellConditions, respiration }
+  };
+})();
+
+
+/* ================= Étape 2 : les enzymes ================= */
+const S2 = (() => {
+  const B = BioEn, P0 = B.ENZ, KM = B.KmOf(P0.kon, P0.koff, P0.kcat), KI = P0.Ki, KCAT = P0.kcat;
+  const WARM = 2, WIN = 10, NMIN = 50, TMAX = 60, SWEEP = [8, 15, 30, 60, 150, 400], SPD = 8;
+  // géométrie du croissant (en unités de la boîte)
+  const RE = 0.05, RB = 0.028, DS = P0.site;
+  const PHI = Math.acos((RE * RE + DS * DS - RB * RB) / (2 * RE * DS)), PSI = Math.acos((RB * RB + DS * DS - RE * RE) / (2 * RB * DS));
+  const st = { seed: 34, first: true };
+
+  const Ieff = () => st.inhib ? st.I : 0;
+  const KmA = () => B.KmApp(KM, Ieff(), KI);
+  const Vmax = () => KCAT * st.nE;
+
+  function newSim() {
+    st.sim = B.enzymeSim({ nE: st.nE, nS: st.S, nI: Ieff(), Ki: KI, seed: st.seed });
+    st.win = { t0: 0, armed: false, posed: false, next: 0, moved: false }; st.prodT = []; st.flash = []; st.ghosts = [];
+  }
+  function restartWin() { st.win = { t0: st.sim.t, armed: false, posed: false, next: 0, moved: false }; }
+  function reset() {
+    Object.assign(st, { S: 60, nE: 8, inhib: false, I: 30, pts: [], ghost: null, acc: 0, sweep: null, rec: [], recT: 0, tc: 0, occS: 0, nCur: 0, above: false, below: false, big: false });
+    if (!st.first) st.seed = (Math.random() * 2147483647) | 0; st.first = false;
+    newSim(); sync();
+  }
+
+  /* ---- Bain : ajouter ou retirer des molécules libres en restant cohérent ---- */
+  function retune(list, n, kind) {
+    const sim = st.sim;
+    while (list.length < n) list.push({ x: sim.rnd(), y: sim.rnd(), age: 0 });
+    while (list.length > n) {
+      const j = Math.floor(sim.rnd() * list.length), m = list.splice(j, 1)[0];
+      if (st.ghosts.length < 60) st.ghosts.push({ x: m.x, y: m.y, t: 0, k: kind });
+    }
+  }
+  function curveShown() { return st.nCur >= 4; }
+  function recompute() {
+    const Ie = Ieff(), km = KmA(); let n = 0, ab = false, bl = false, big = false;
+    for (const p of st.pts) if (p.I === Ie) { n++; if (p.S < km) bl = true; if (p.S > km) ab = true; if (p.S >= 2 * km) big = true; }
+    st.nCur = n; st.below = bl; st.above = ab; st.big = big;
+  }
+  function conditionChange(oldNE, oldI, clearPts) {
+    const was = curveShown();
+    if (was) st.ghost = { nE: oldNE, I: oldI };
+    if (clearPts) st.pts = [];
+    if (st.ghost && st.ghost.nE === st.nE && st.ghost.I === Ieff()) st.ghost = null;
+    recompute();
+  }
+
+  /* ---- Crochets ---- */
+  function setS(S) {
+    st.S = clamp(Math.round(+S || 6), 6, 600);
+    st.sim.P.nS = st.S; retune(st.sim.S, st.S, 'S'); restartWin(); sync();
+  }
+  function setE(n) {
+    n = clamp(Math.round(+n || 8), 2, 16); if (n === st.nE) return;
+    const oldNE = st.nE, oldI = Ieff();
+    st.nE = n; st.sweep = null; conditionChange(oldNE, oldI, true); newSim(); sync();
+  }
+  function inhibitor(on, I) {
+    const oldI = Ieff();
+    st.inhib = !!on; if (I != null) st.I = clamp(Math.round(+I), 0, 90);
+    const ni = Ieff();
+    if (ni !== oldI) {
+      st.sim.P.nI = ni; retune(st.sim.I, ni, 'I'); conditionChange(st.nE, oldI, false); restartWin();
+    }
+    sync();
+  }
+  function sweep() { st.pts = st.pts.filter(p => p.I !== Ieff()); recompute(); st.sweep = { i: 0 }; setS(SWEEP[0]); }
+  function clearPts() { st.pts = []; st.ghost = null; st.sweep = null; recompute(); restartWin(); sync(); }
+
+  /* ---- Avancement ---- */
+  function pose() {
+    const sim = st.sim, N = sim.nProd, t = sim.tStat, v = N / t, err = Math.max(Math.sqrt(N), 1) / t, Ie = Ieff();
+    const p = { S: st.S, v, err, N, I: Ie }, i = st.pts.findIndex(q => q.S === st.S && q.I === Ie);
+    if (i >= 0) st.pts[i] = p; else st.pts.push(p);
+    recompute();
+  }
+  function stepOnce(h) {
+    const sim = st.sim; B.enzymeStep(sim, h); st.tc += h;
+    for (const e of sim.events) {
+      if (e.k === 'prod') { st.prodT.push(st.tc); st.flash.push({ x: e.x, y: e.y, t: 0 }); }
+      else if (e.k === 'outS' || e.k === 'outI') { if (st.ghosts.length < 60) st.ghosts.push({ x: e.x, y: e.y, t: 0, k: e.k === 'outS' ? 'S' : 'I' }); }
+    }
+    for (let i = st.flash.length - 1; i >= 0; i--) { st.flash[i].t += h; if (st.flash[i].t > 0.45) st.flash.splice(i, 1); }
+    for (let i = st.ghosts.length - 1; i >= 0; i--) { st.ghosts[i].t += h; if (st.ghosts[i].t > 0.3) st.ghosts.splice(i, 1); }
+    while (st.prodT.length && st.prodT[0] < st.tc - 6) st.prodT.shift();
+    let occ = 0; for (const e of sim.E) if (e.st === 'ES') occ++;
+    st.occS += (occ / sim.P.nE - st.occS) * (1 - Math.exp(-h / 1.5));
+    const w = st.win;
+    if (!w.armed) { if (sim.t - w.t0 >= WARM) { B.enzymeResetStats(sim); w.armed = true; } }
+    else if (sim.tStat >= WIN) {
+      // le point est posé après WIN s, puis affiné chaque seconde tant qu'on ne change pas le réglage
+      if (!w.posed || sim.tStat >= w.next) { w.posed = true; w.next = sim.tStat + 1; pose(); }
+      if (st.sweep && !w.moved && (sim.nProd >= NMIN || sim.tStat >= TMAX)) {
+        w.moved = true; st.sweep.i++;
+        if (st.sweep.i >= SWEEP.length) st.sweep = null; else setS(SWEEP[st.sweep.i]);
+      }
+    }
+    st.recT += h;
+    if (st.recT >= 0.25) { st.recT -= 0.25; st.rec.push({ t: st.tc, v: v5(), o: st.occS }); while (st.rec.length && st.rec[0].t < st.tc - 31) st.rec.shift(); }
+  }
+  const v5 = () => { let n = 0; const T = Math.min(5, Math.max(st.tc, 0.5)); for (const t of st.prodT) if (t > st.tc - 5) n++; return n / T; };
+  function adv(dt) {
+    st.acc += dt * (st.sweep ? SPD : 1);
+    const h = 1 / 120; let n = 0;
+    while (st.acc >= h - 1e-9 && n++ < 80) { stepOnce(h); st.acc -= h; }
+    if (st.acc > 0.25) st.acc = 0;
+  }
+  function winV() {                                           // vitesse sur la fenêtre depuis le dernier réglage
+    const sim = st.sim;
+    if (!st.win.armed || sim.tStat < 2) return null;
+    return { v: B.enzymeRate(sim), err: Math.max(Math.sqrt(sim.nProd), 1) / sim.tStat, occ: B.enzymeOcc(sim), t: sim.tStat };
+  }
+  function nOcc() { let n = 0; for (const e of st.sim.E) if (e.st === 'ES') n++; return n; }
+
+  /* ---- Mise en page ---- */
+  function lay() {
+    const nar = W < 640, top = nar ? 100 : 122;
+    if (!nar) {
+      const rw = W * 0.6 - 30, s = Math.max(180, Math.min(rw, H - top - 78));
+      return { nar, s, bx: Math.max(24, (W * 0.6 - s) / 2 + 4), by: top, gx0: W * 0.6 + 44, gx1: W - 24, gy0: top + 22, gy1: H - 62 };
+    }
+    const s = clamp(Math.min(W - 32, 250, H - 100 - 40 - 190), 160, 250);
+    return { nar, s, bx: (W - s) / 2, by: top, gx0: 46, gx1: W - 14, gy0: top + s + 70, gy1: H - 44 };
+  }
+
+  /* ---- Dessin de la boîte ---- */
+  function drawBox(c, Ly) {
+    const sim = st.sim, { s, bx, by } = Ly, sr = clamp(0.0125 * s, 3, 6.5), eR = RE * s;
+    c.save();
+    c.fillStyle = rgba(C.texte, 0.025); c.fillRect(bx, by, s, s);
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(bx + 0.5, by + 0.5, s - 1, s - 1);
+    c.beginPath(); c.rect(bx, by, s, s); c.clip();
+    // molécules qui sortent du bain (fondu court)
+    for (const m of st.ghosts) { c.globalAlpha = 0.7 * (1 - m.t / 0.3); c.fillStyle = m.k === 'S' ? C.lilas : 'rgba(0,0,0,0)'; c.strokeStyle = C.sable; c.lineWidth = 1.3; c.beginPath(); c.arc(bx + m.x * s, by + m.y * s, sr, 0, TAU); if (m.k === 'S') c.fill(); else c.stroke(); }
+    c.globalAlpha = 1;
+    // substrats libres (un seul tracé pour ceux qui sont installés)
+    c.fillStyle = C.lilas; c.beginPath();
+    for (const m of sim.S) if (m.age >= 0.35) { const x = bx + m.x * s, y = by + m.y * s; c.moveTo(x + sr, y); c.arc(x, y, sr, 0, TAU); }
+    c.fill();
+    for (const m of sim.S) if (m.age < 0.35) { c.globalAlpha = m.age / 0.35; c.beginPath(); c.arc(bx + m.x * s, by + m.y * s, sr, 0, TAU); c.fill(); }
+    c.globalAlpha = 1;
+    // inhibiteurs libres : anneaux sable
+    if (sim.I.length) {
+      c.strokeStyle = C.sable; c.lineWidth = 1.5; c.beginPath();
+      for (const m of sim.I) if (m.age >= 0.35) { const x = bx + m.x * s, y = by + m.y * s; c.moveTo(x + sr, y); c.arc(x, y, sr, 0, TAU); }
+      c.stroke();
+      for (const m of sim.I) if (m.age < 0.35) { c.globalAlpha = m.age / 0.35; c.beginPath(); c.arc(bx + m.x * s, by + m.y * s, sr, 0, TAU); c.stroke(); }
+      c.globalAlpha = 1;
+    }
+    // produits : s'éloignent et s'estompent
+    for (const m of sim.prod) { c.globalAlpha = Math.max(0, 1 - m.age / sim.P.life); c.fillStyle = C.accent; c.beginPath(); c.arc(bx + m.x * s, by + m.y * s, sr, 0, TAU); c.fill(); }
+    c.globalAlpha = 1;
+    // enzymes : croissants (un tracé pour tous)
+    c.fillStyle = C.fond2; c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath();
+    for (const e of sim.E) {
+      const cx = bx + e.x * s, cy = by + e.y * s, a = e.a, sx = bx + e.sx * s, sy = by + e.sy * s;
+      c.moveTo(cx + eR * Math.cos(a + PHI), cy + eR * Math.sin(a + PHI));
+      c.arc(cx, cy, eR, a + PHI, a - PHI + TAU, false);
+      c.arc(sx, sy, RB * s, a + Math.PI + PSI, a + Math.PI - PSI, true);
+      c.closePath();
+    }
+    c.fill(); c.stroke();
+    c.fillStyle = rgba(C.accent, 0.1); c.fill();
+    // site actif : cercle pointillé, plein si occupé
+    c.setLineDash([2, 3]); c.strokeStyle = rgba(C.accent, 0.8); c.lineWidth = 1; c.beginPath();
+    for (const e of sim.E) { const sx = bx + e.sx * s, sy = by + e.sy * s; c.moveTo(sx + sr + 2.5, sy); c.arc(sx, sy, sr + 2.5, 0, TAU); }
+    c.stroke(); c.setLineDash([]);
+    for (const e of sim.E) {
+      if (e.st === 'E') continue;
+      const sx = bx + e.sx * s, sy = by + e.sy * s;
+      if (e.st === 'ES') { c.fillStyle = C.lilas; c.beginPath(); c.arc(sx, sy, sr, 0, TAU); c.fill(); }
+      else { c.strokeStyle = C.sable; c.lineWidth = 1.8; c.fillStyle = rgba(C.sable, 0.28); c.beginPath(); c.arc(sx, sy, sr, 0, TAU); c.fill(); c.stroke(); }
+    }
+    // éclat quand un produit part
+    for (const f of st.flash) { const q = f.t / 0.45; c.globalAlpha = 1 - q; c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath(); c.arc(bx + f.x * s, by + f.y * s, sr * (1.4 + 3.2 * easeOut(q)), 0, TAU); c.stroke(); }
+    c.globalAlpha = 1;
+    c.restore();
+    // survol
+    for (const e of sim.E) {
+      zcirc(bx + e.x * s, by + e.y * s, eR + 2, 'enz' + (e.x * 997 | 0), 'Enzyme', 'Une protéine immobile ici ; elle accélère une seule réaction. Le croissant porte le site actif, qui ressort intacte de chaque réaction.');
+      zcirc(bx + e.sx * s, by + e.sy * s, sr + 4, 'site' + (e.sx * 997 | 0), 'Site actif', e.st === 'ES' ? 'Occupé par un substrat : il réagit ou repart ; un produit est libéré à la fin.' : e.st === 'EI' ? 'Occupé par un inhibiteur : il ressemble au substrat, mais ne réagit pas ; le site est bloqué un instant.' : 'Libre : un substrat qui passe dans ce disque peut s’y lier.');
+    }
+    zoneF((x, y) => { for (const m of sim.S) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 3) * (sr + 3)) return true; } return false; }, 'sub', 'Substrat', 'Molécule lilas qui diffuse au hasard dans le bain ; celle qui entre dans un site peut être transformée en produit.');
+    if (sim.I.length) zoneF((x, y) => { for (const m of sim.I) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 3) * (sr + 3)) return true; } return false; }, 'inh', 'Inhibiteur compétitif', 'Anneau sable qui ressemble au substrat : il occupe un site actif sans réagir, puis repart.');
+    zoneF((x, y) => { for (const m of sim.prod) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 4) * (sr + 4)) return true; } return false; }, 'prod', 'Produit', 'Molécule ambre libérée par un site ; elle s’éloigne et s’estompe de l’écran, le bain restant à concentration constante.');
+    // échelle de concentration
+    c.font = mono(Ly.nar ? 10 : 11); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    c.fillText('[S] = ' + st.S + ' molécules libres par boîte' + (Ieff() ? ' · [I] = ' + Ieff() : ''), bx + s / 2, by + s + 18);
+    c.fillStyle = rgba(C.texte2, 0.85); c.font = mono(10);
+    c.fillText('boîte 2D périodique · enzymes immobiles', bx + s / 2, by + s + 33);
+  }
+
+  /* ---- Graphe v(S) ---- */
+  function drawPlot(c, Ly) {
+    const { gx0, gx1, gy0, gy1 } = Ly, pw = gx1 - gx0, ph = gy1 - gy0, vmax = Vmax() * 1.18, kmA = KmA(), Ie = Ieff();
+    const xs = S => gx0 + pw * Math.log(S / 6) / Math.log(100), yv = v => gy1 - ph * v / vmax;
+    c.save();
+    c.font = mono(10.5); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    c.fillText('v en fonction de [S]', gx0, gy0 - 10);
+    // cadre, graduations
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(gx0 + 0.5, gy0 + 0.5, pw, ph);
+    c.textAlign = 'center'; c.textBaseline = 'top';
+    for (const S of [6, 10, 30, 60, 100, 300, 600]) { const x = xs(S); c.strokeStyle = C.trait; c.beginPath(); c.moveTo(x + 0.5, gy0); c.lineTo(x + 0.5, gy1); c.stroke(); c.fillStyle = C.texte2; c.fillText(String(S), x, gy1 + 5); }
+    c.textAlign = 'right'; c.textBaseline = 'middle';
+    const dv = Vmax() > 8 ? 4 : 2;
+    for (let v = 0; v <= vmax; v += dv) { const y = yv(v); c.strokeStyle = C.trait; c.beginPath(); c.moveTo(gx0, y + 0.5); c.lineTo(gx1, y + 0.5); c.stroke(); c.fillStyle = C.texte2; c.fillText(fmtI(v), gx0 - 6, y); }
+    c.textAlign = 'center'; c.textBaseline = 'top'; c.fillStyle = C.texte2;
+    c.fillText(Ly.nar ? '[S] · molécules par boîte (échelle log.)' : '[S] · molécules libres par boîte (échelle logarithmique)', gx0 + pw / 2, gy1 + 20);
+    c.save(); c.translate(gx0 - (Ly.nar ? 30 : 34), gy0 + ph / 2); c.rotate(-Math.PI / 2); c.textBaseline = 'alphabetic'; c.fillText('v · produits par seconde', 0, 0); c.restore();
+    c.save(); c.beginPath(); c.rect(gx0, gy0, pw, ph); c.clip();
+    const curve = (nE, I, col, lw, dash, al) => {
+      const km = B.KmApp(KM, I, KI), vm = KCAT * nE; c.beginPath();
+      for (let i = 0; i <= 80; i++) { const S = 6 * Math.pow(100, i / 80), v = B.mmRate(S, vm, KM, I, KI); i ? c.lineTo(xs(S), yv(v)) : c.moveTo(xs(S), yv(v)); }
+      c.globalAlpha = al; c.strokeStyle = col; c.lineWidth = lw; c.setLineDash(dash || []); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+    };
+    // courbe fantôme (ancien réglage)
+    if (st.ghost) curve(st.ghost.nE, st.ghost.I, C.texte2, 1.4, [4, 4], 0.7);
+    // [S] actuel
+    c.strokeStyle = rgba(C.lilas, 0.7); c.setLineDash([2, 3]); c.beginPath(); c.moveTo(xs(st.S) + 0.5, gy0); c.lineTo(xs(st.S) + 0.5, gy1); c.stroke(); c.setLineDash([]);
+    c.restore();
+    c.fillStyle = C.lilas; c.beginPath(); c.moveTo(xs(st.S), gy1); c.lineTo(xs(st.S) - 4, gy1 + 5); c.lineTo(xs(st.S) + 4, gy1 + 5); c.fill();
+    c.save(); c.beginPath(); c.rect(gx0 - 4, gy0 - 6, pw + 8, ph + 12); c.clip();
+    const shown = curveShown();
+    if (shown) curve(st.nE, Ie, C.accent, 2.2, null, 1);
+    // Vmax : une fois qu'un point dépasse 2 Km
+    if (shown && st.big) {
+      const y = yv(Vmax()); c.strokeStyle = rgba(C.accent, 0.8); c.lineWidth = 1.2; c.setLineDash([6, 4]); c.beginPath(); c.moveTo(gx0, y); c.lineTo(gx1, y); c.stroke(); c.setLineDash([]);
+      c.font = mono(10.5); tagText(c, 'Vmax = kcat × nE = ' + fmt(Vmax(), 1) + ' s⁻¹', gx1 - 6, y - 10, 'right', 'middle', C.accent);
+    }
+    // Km : points des deux côtés
+    if (shown && st.below && st.above) {
+      const x = xs(kmA), y = yv(Vmax() / 2); c.strokeStyle = rgba(C.accent, 0.8); c.lineWidth = 1.2; c.setLineDash([3, 3]);
+      c.beginPath(); c.moveTo(x, gy1); c.lineTo(x, y); c.lineTo(gx0, y); c.stroke(); c.setLineDash([]);
+      c.fillStyle = C.accent; c.beginPath(); c.arc(x, y, 3, 0, TAU); c.fill();
+      c.font = mono(10.5); tagText(c, 'v = Vmax/2', gx0 + 6, y - 9, 'left', 'middle', C.accent);
+      tagText(c, (Ie ? 'Km app. = ' : 'Km = ') + fmt(kmA, 0), x + 6, gy1 - 10, 'left', 'middle', C.accent);
+    }
+    // points mesurés (barres d'incertitude ± √N / t)
+    for (const p of st.pts) {
+      const cur = p.I === Ie, x = xs(p.S), y = yv(p.v), e = p.err * ph / vmax;
+      c.globalAlpha = cur ? 1 : 0.35; c.strokeStyle = C.texte; c.lineWidth = 1.2;
+      c.beginPath(); c.moveTo(x, y - e); c.lineTo(x, y + e); c.moveTo(x - 3, y - e); c.lineTo(x + 3, y - e); c.moveTo(x - 3, y + e); c.lineTo(x + 3, y + e); c.stroke();
+      c.fillStyle = p.I ? C.sable : C.texte; c.beginPath(); c.arc(x, y, 4, 0, TAU); c.fill();
+      c.globalAlpha = 1;
+    }
+    // mesure en cours
+    const w = winV();
+    if (w && !st.win.posed) { c.strokeStyle = C.texte; c.lineWidth = 1.4; c.beginPath(); c.arc(xs(st.S), yv(w.v), 4 + 1.2 * Math.sin(now * 5), 0, TAU); c.stroke(); }
+    c.restore();
+    for (const p of st.pts) { const x = xs(p.S), y = yv(p.v); zcirc(x, y, 8, 'pt' + p.S + '/' + p.I, 'Mesure · [S] = ' + p.S, 'v = ' + fmt(p.v, 2) + ' ± ' + fmt(p.err, 2) + ' produits/s, moyenne sur ' + WIN + ' s' + (p.I ? ' avec [I] = ' + p.I : '') + '.'); }
+    if (!st.pts.length) { c.font = mono(10.5); c.fillStyle = rgba(C.texte2, 0.9); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(Ly.nar ? 'Chaque [S] : 10 s de mesure.' : 'Laisse tourner 10 s à chaque [S],', gx0 + pw / 2, gy0 + ph / 2 - 8); if (!Ly.nar) c.fillText('ou lance « Balayer [S] » (×' + SPD + ').', gx0 + pw / 2, gy0 + ph / 2 + 10); }
+    c.restore();
+  }
+
+  function draw() {
+    const c = ctx, Ly = lay();
+    drawBox(c, Ly); drawPlot(c, Ly);
+    if (st.sweep) { c.save(); c.font = mono(10.5); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; tagText(c, 'Balayage ×' + SPD + ' · palier ' + (st.sweep.i + 1) + ' sur ' + SWEEP.length, Ly.gx0 + 4, Ly.gy1 - 8, 'left', 'alphabetic', C.lilas); c.restore(); }
+  }
+
+  /* ---- Graphe du panneau ---- */
+  function graph() {
+    const { w, h } = scopeSetup(), c = sctx, padL = 30, padR = 40, padT = 14, padB = 18, pw = w - padL - padR, ph = h - padT - padB;
+    const vmax = Math.max(Vmax() * 1.15, 1), yv = v => padT + ph * (1 - v / vmax), yo = o => padT + ph * (1 - o);
+    const xt = t => padL + pw * (1 - (st.tc - t) / 30);
+    c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(padL + 0.5, padT + 0.5, pw, ph);
+    c.save(); c.beginPath(); c.rect(padL, 0, pw, h); c.clip();
+    c.strokeStyle = rgba(C.accent, 0.7); c.setLineDash([5, 3]); c.beginPath(); c.moveTo(padL, yv(Vmax())); c.lineTo(padL + pw, yv(Vmax())); c.stroke(); c.setLineDash([]);
+    const path = f => { c.beginPath(); let first = true; for (const r of st.rec) { const x = xt(r.t), y = f(r); first ? c.moveTo(x, y) : c.lineTo(x, y); first = false; } };
+    path(r => yo(r.o)); c.strokeStyle = C.lilas; c.lineWidth = 1.6; c.stroke();
+    path(r => yv(r.v)); c.strokeStyle = C.accent; c.lineWidth = 1.8; c.stroke();
+    c.restore();
+    c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right'; c.fillStyle = C.accent;
+    c.fillText(fmt(vmax, 1), padL - 4, padT + 3); c.fillText('0', padL - 4, padT + ph - 3);
+    c.textAlign = 'left'; c.fillStyle = C.lilas; c.fillText('100 %', padL + pw + 4, padT + 3); c.fillText('0', padL + pw + 4, padT + ph - 3);
+    c.fillStyle = C.texte2; c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillText('−30 s', padL, h - 4); c.textAlign = 'right'; c.fillText('maintenant', padL + pw, h - 4);
+  }
+
+  /* ---- Texte réactif ---- */
+  function statut() {
+    const ratio = st.S / KmA(), occ = st.occS;
+    if (st.sweep) return 'Balayage de [S] en accéléré (×' + SPD + ') : palier ' + (st.sweep.i + 1) + ' sur ' + SWEEP.length + ', un point par palier.';
+    if (st.inhib && st.I > 0) {
+      if (st.S >= 4 * KmA()) return 'À très forte [S], le substrat l’emporte : la vitesse rejoint presque Vmax malgré l’inhibiteur.';
+      return 'Il faut plus de substrat pour atteindre la même vitesse : Km apparent = ' + fmt(KmA(), 0) + ' au lieu de ' + fmt(KM, 0) + ', mais à très forte [S], le substrat l’emporte.';
+    }
+    if (st.S >= 4 * KM) return 'Toutes les enzymes sont occupées : ajouter du substrat ne sert plus à rien ; doubler les enzymes double la vitesse.';
+    if (st.S <= KM / 4) return 'Peu de substrat : la plupart des sites attendent, et la vitesse est à peu près proportionnelle à [S].';
+    if (ratio > 0.6 && ratio < 1.7) return 'Autour de Km (' + fmt(KM, 0) + ') : environ la moitié des sites est occupée, la vitesse vaut la moitié de Vmax.';
+    return ratio < 1 ? 'La vitesse croît encore avec [S], mais moins vite : des sites commencent à être occupés.' : 'Presque tous les sites sont pris : la vitesse approche son plafond Vmax.';
+  }
+  function valeurs() {
+    const w = winV(), n = st.sim.P.nE;
+    return { v5: fmt(v5(), 2), vw: w ? fmt(w.v, 2) + ' ± ' + fmt(w.err, 2) : '—', occN: nOcc() + ' sur ' + n, occM: fmt(100 * (w ? w.occ : st.occS), 0),
+      km: st.inhib && st.I > 0 ? fmt(KmA(), 0) + ' app.' : fmt(KM, 0), vmax: fmt(Vmax(), 1), ratio: fmt(st.S / KmA(), 2) };
+  }
+  function etat() {
+    const w = winV(), Ie = Ieff();
+    return { S: st.S, nE: st.nE, I: Ie, inhib: st.inhib, v: w ? w.v : v5(), vTheo: B.mmRate(st.S, Vmax(), KM, Ie, KI), occ: w ? w.occ : st.occS, Km: KM, KmApp: KmA(), Vmax: Vmax(), nPoints: st.pts.length, curve: curveShown(), points: st.pts.map(p => [p.S, +p.v.toFixed(3), +p.err.toFixed(3), p.I]) };
+  }
+
+  /* ---- Interface ---- */
+  const sv = v => 6 * Math.pow(100, v);
+  function sync() {
+    const root = document.querySelector('[data-step="1"]'); if (!root) return;
+    const r = root.querySelector('#s2S'); r.value = Math.log(st.S / 6) / Math.log(100); root.querySelector('#s2Sv').textContent = st.S + ' mol.';
+    root.querySelector('#s2E').value = st.nE; root.querySelector('#s2Ev').textContent = st.nE;
+    root.querySelector('#s2Inh').setAttribute('aria-pressed', st.inhib ? 'true' : 'false');
+    for (const id of ['#s2Il', '#s2I', '#s2Iv']) root.querySelector(id).hidden = !st.inhib;
+    root.querySelector('#s2I').value = st.I; root.querySelector('#s2Iv').textContent = st.I + ' mol.';
+    root.querySelector('#s2Sweep').disabled = !!st.sweep;
+  }
+  function init() {
+    const root = document.querySelector('[data-step="1"]');
+    root.querySelector('#s2S').addEventListener('input', e => { if (st.sweep) st.sweep = null; setS(sv(+e.target.value)); });
+    root.querySelector('#s2E').addEventListener('input', e => setE(+e.target.value));
+    root.querySelector('#s2Inh').addEventListener('click', e => { inhibitor(!st.inhib); e.currentTarget.blur(); });
+    root.querySelector('#s2I').addEventListener('input', e => inhibitor(true, +e.target.value));
+    root.querySelector('#s2Sweep').addEventListener('click', e => { sweep(); e.currentTarget.blur(); });
+    root.querySelector('#s2Clear').addEventListener('click', e => { clearPts(); e.currentTarget.blur(); });
+  }
+
+  return {
+    titre: 'Les enzymes', mot: 'Enzymes',
+    texte: 'Dans une boîte de molécules, des enzymes immobiles offrent un site où le substrat réagit plus facilement. À faible [S], chaque enzyme attend ; à forte [S], tous les sites sont pris. Mesure la vitesse pour plusieurs [S] : les points dessinent une courbe.',
+    cle: 'Une enzyme accélère une réaction précise en lui offrant un site où elle se fait plus facilement. Elle sature : sa vitesse plafonne quand tous ses sites sont occupés.',
+    note: 'Simulation 2D, enzymes immobiles, bain à concentration constante ; la diffusion ralentit la vitesse mesurée d’environ 4 % sous la théorie. La catalyse en général : module 30.',
+    graphTitre: 'Enregistreur · vitesse et occupation', graphH: 130,
+    legende: lg(ln('#e0b48a', 2.2), 'produits par seconde (5 s)') + lg(ln('#b9a3ff', 2), 'sites occupés') + lg(ln('#e0b48a', 1.4, true), 'Vmax'),
+    outils: `<div class="grp"><span class="gl">[S]</span><input type="range" id="s2S" min="0" max="1" step="0.002" value="0.5" aria-label="Concentration en substrat, de 6 à 600 molécules libres par boîte, échelle logarithmique"><span class="rv" id="s2Sv"></span></div>
+      <div class="grp"><span class="gl">Enzymes</span><input type="range" id="s2E" min="2" max="16" step="1" value="8" aria-label="Nombre d’enzymes dans la boîte"><span class="rv" id="s2Ev"></span></div>
+      <div class="grp"><button class="btn" id="s2Inh" aria-pressed="false" title="Inhibiteur compétitif (I)"><span class="dot"></span>Inhibiteur compétitif</button><span class="gl" id="s2Il" hidden>[I]</span><input type="range" id="s2I" min="0" max="90" step="5" value="30" hidden aria-label="Concentration en inhibiteur, en molécules libres par boîte"><span class="rv" id="s2Iv" hidden></span></div>
+      <div class="grp"><button class="btn go" id="s2Sweep" title="Six paliers de [S] en accéléré (×${SPD}), un point par palier (B)">Balayer [S]</button><button class="btn" id="s2Clear">Effacer les points</button></div>`,
+    mesures: [['Vitesse (5 s)', 'v5', 's⁻¹'], ['Vitesse sur la fenêtre', 'vw', 's⁻¹'], ['Enzymes occupées', 'occN', ''], ['Occupation moyenne', 'occM', '%'], ['Km', 'km', 'molécules'], ['Vmax = kcat × nE', 'vmax', 's⁻¹'], ['[S] / Km', 'ratio', '']],
+    cartes: false, touches: '<kbd>I</kbd> inhibiteur · <kbd>B</kbd> balayer [S]',
+    init, reset, adv, draw, graph, valeurs, statut, etat, sync,
+    keys: { i: () => inhibitor(!st.inhib), b: () => { if (!st.sweep) sweep(); } },
+    crochets: { setS, setE, inhibitor, sweep, clearPoints: clearPts }
+  };
+})();
+
+
+/* ETAPES-3-4-BEGIN */
+// Greffons provisoires : l'orchestrateur remplace ce bloc à l'intégration. Ils respectent le contrat et ne plantent pas.
+const STUB = (o) => {
+  const m = { v: 0 };
+  return Object.assign({
+    legende: '', outils: '', mesures: [['Étape', 'e', '']], cartes: false, graphH: 120, graphTitre: 'Enregistreur',
+    init() {}, reset() { m.v = 0; }, adv(dt) { m.v += dt; },
+    draw() {
+      const c = ctx; c.save(); c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = C.texte2; c.font = '400 28px ' + tok('--serif'); c.fillText('Étape en construction', W / 2, H / 2 - 6);
+      c.font = mono(11); c.fillStyle = rgba(C.texte2, 0.8); c.fillText('Cette étape arrive avec l’intégration.', W / 2, H / 2 + 22); c.restore();
+    },
+    graph() { scopeSetup(); },
+    valeurs() { return { e: '—' }; }, statut() { return 'Étape en construction.'; },
+    etat() { return { enConstruction: true }; }
+  }, o);
+};
+const S3 = STUB({
+  titre: 'Du glucose à l’ATP, en bilan', mot: 'Bilan',
+  texte: 'Cette étape montrera le bilan d’une molécule de glucose, avec et sans oxygène. Elle est en construction.',
+  cle: 'La respiration fait descendre l’énergie du glucose par petites marches et en capture environ un tiers en ATP ; le reste part en chaleur. Sans oxygène au bout de la chaîne, presque tout s’arrête.',
+  note: 'Rendement en ATP par glucose selon une convention (de 30 à 32 selon les sources) ; le mécanisme est dans la planche 02.',
+  crochets: { oxygen(on) { return !!on; }, sprint() { return true; } }
+});
+const S4 = STUB({
+  titre: 'La lumière entre : la photosynthèse', mot: 'Lumière',
+  texte: 'Cette étape montrera comment la lumière, absorbée par la chlorophylle, fait monter ce que la respiration fait descendre. Elle est en construction.',
+  cle: 'La photosynthèse utilise la lumière pour faire monter ce que la respiration fait descendre. La matière tourne en cycle ; l’énergie, elle, traverse : elle entre comme lumière et sort comme chaleur.',
+  note: 'Chloroplaste schématique ; spectre de la chlorophylle approché par des gaussiennes.',
+  cartes: true,
+  crochets: { setLambda(nm) { return nm; }, white() { return true; }, setLight(I) { return I; }, setCO2(c) { return c; }, cycle(on) { return !!on; } }
+});
+/* ETAPES-3-4-END */
+
+
+/* ================= Coquille : étapes, panneau, clavier, boucle ================= */
+const STEPS = [S1, S2, S3, S4];
+const NSTEP = STEPS.length;
+let cur = 0, uiStep = 0, pending = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true;
+
+const toolsEl = $('#tools');
+STEPS.forEach((s, i) => {
+  const d = document.createElement('div'); d.className = 'sTools'; d.dataset.step = i; d.hidden = i !== 0; d.innerHTML = s.outils || '';
+  toolsEl.appendChild(d);
+});
+STEPS.forEach(s => s.init());
+STEPS.forEach(s => s.reset());                    // état de départ de chaque étape : les crochets marchent même hors de leur étape
+
+function syncTools() { const s = STEPS[cur]; if (s && s.sync) s.sync(); }
+
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) return;
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizeCanvas(scopeC, STEPS[cur].graphH);
+}
+
+/* ---------------- Mesures, textes ---------------- */
+const mEls = {};
+function buildMeas(s) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  for (const [lab, key, unit] of s.mesures) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="lab">' + lab + '</span><span class="val"><b>—</b><i>' + unit + '</i></span>';
+    m.appendChild(r); mEls[key] = r.querySelector('b');
+  }
+}
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function readouts() {
+  const s = STEPS[cur], v = s.valeurs();
+  for (const k in v) setM(k, v[k]);
+  const t = s.statut(), el = $('#status'); if (el.textContent !== t) el.textContent = t;
+}
+function updateUI(n) {
+  uiStep = n; const s = STEPS[n];
+  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = 'Étape <b>' + (n + 1) + '</b> sur ' + NSTEP;
+  $('#stepTitle').textContent = s.titre; $('#stepText').textContent = s.texte; $('#stepKey').textContent = '« ' + s.cle + ' »';
+  for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#rEye').textContent = s.graphTitre; $('#leg').innerHTML = s.legende || ''; $('#mNote').textContent = s.note;
+  $('#cards').hidden = !s.cartes;
+  const tk = $('#touches');
+  tk.innerHTML = s.touches ? s.touches : (s.keys ? Object.keys(s.keys).map(k => '<kbd>' + k.toUpperCase() + '</kbd>').join(' ') : '');
+  document.querySelectorAll('.sTools').forEach(d => { d.hidden = +d.dataset.step !== n; });
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NSTEP - 1;
+}
+function enterStep(n) {
+  cur = n; const s = STEPS[n];
+  s.reset(); hideTip(); dragging = false;
+  buildMeas(s); sizeCanvas(scopeC, s.graphH);
+  cv.style.touchAction = s.pointer ? 'none' : 'pan-y';
+  syncTools(); readouts();
+}
+// goStep : en test, entre tout de suite ; au clic, fondu sortant puis entrée (jamais de saut brutal)
+function goStep(i, restart, smooth) {
+  i = clamp(i | 0, 0, NSTEP - 1);
+  if (smooth && !reduce) {
+    if (i === cur && !restart && pending < 0) return;
+    pending = i; pendingRestart = !!restart; updateUI(i); fade = -1; return;
+  }
+  pending = -1; fade = 0; sceneA = 1; updateUI(i); enterStep(i);
+}
+function setPlay(p) {
+  playing = !!p;
+  $('#icPause').style.display = playing ? '' : 'none'; $('#icPlay').style.display = playing ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+}
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goStep(cur - 1, false, true); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goStep(cur + 1, false, true); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goStep(cur, true, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goStep(+b.dataset.a, false, true); e.currentTarget.blur(); }));
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goStep(cur + (e.key === 'ArrowRight' ? 1 : -1), false, true); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goStep(cur, true, true); return; }
+  if (/^[1-4]$/.test(e.key) && !isRange) { goStep(+e.key - 1, false, true); return; }
+  if (!isRange && !e.repeat) { const f = STEPS[cur].keys && STEPS[cur].keys[e.key.toLowerCase()]; if (f) { f(); syncTools(); } }
+});
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol et glisser ---------------- */
+const CVTITLE = reduce ? 'Mouvement réduit : les animations sont ralenties (facteur 0,4), jamais figées.' : 'Les animations ralentissent (facteur 0,4) si le système demande moins de mouvement.';
+cv.title = CVTITLE;
+let dragging = false;
+cv.addEventListener('pointerenter', () => cv.removeAttribute('title'));
+cv.addEventListener('pointerleave', () => { if (!dragging) { hideTip(); cv.className = ''; } cv.title = CVTITLE; });
+cv.addEventListener('pointerdown', e => {
+  const s = STEPS[cur]; if (!s.pointer || fade !== 0) return;
+  const r = cv.getBoundingClientRect();
+  if (s.pointer.down(e.clientX - r.left, e.clientY - r.top, e)) { dragging = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); }
+});
+cv.addEventListener('pointermove', e => {
+  const s = STEPS[cur], r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (dragging) { s.pointer.move(x, y, e); return; }
+  if (e.pointerType === 'touch') return;
+  const z = hitZone(x, y);
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+  cv.className = (s.pointer && s.pointer.hover && s.pointer.hover(x, y)) || '';
+});
+const endPtr = e => { if (dragging) { STEPS[cur].pointer.up(e); dragging = false; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} } cv.className = ''; };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+addEventListener('blur', () => { if (dragging) { STEPS[cur].pointer.up({}); dragging = false; } });
+
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle ---------------- */
+let last = 0, lastRead = 0;
+function frame(ts) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } loop(ts); }
+function loop(ts) {
+  const dt = last ? clamp((ts - last) / 1000, 0, 0.05) : 0.016; last = ts;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; enterStep(pending); pending = -1; fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  const s = STEPS[cur];
+  if (playing && fade <= 0) { const sd = dt * SPEED; now += sd; s.adv(sd); }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones.length = 0;
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  s.draw(); ctx.restore();
+  s.graph();
+  if (ts - lastRead > 100) { readouts(); lastRead = ts; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+function tick(n) { const s = STEPS[cur]; for (let i = 0; i < n; i++) s.adv(1 / 60); }
+window.__labo = Object.assign({
+  moteur: BioEn,
+  get step() { return cur; },
+  goStep(i, restart) { goStep(i, restart, false); },
+  state() { return Object.assign({ step: cur }, STEPS[cur].etat()); },
+  tick,
+  setPlay,
+  run(sec) { tick(Math.round(sec * 60)); }
+}, S1.crochets, S2.crochets, S3.crochets, S4.crochets);
+
+resize();
+setPlay(true);
+updateUI(0); enterStep(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
