@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**25 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 16 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**26 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 17 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -31,10 +31,11 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | foundation | Magnétisme et induction | — | 23 | 2026-10-06 |
 | [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-07 |
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
+| [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | foundation | Réactions chimiques | — | 30 | 2026-10-06 |
 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
-| [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | foundation | Réactions chimiques | — | 30 | 2026-10-06 |
+| [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | foundation | Acide-base, redox et électrochimie | — | 31 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -299,6 +300,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : 1 Collisions et énergie d’activation · 2 Ce qui règle la vitesse · 3 La catalyse · 4 L’équilibre dynamique et Le Chatelier
 - **Interaction** : Un chapitre de quatre étapes ; boîte de disques durs où seuls les chocs assez énergiques (et bien orientés) changent A + B en produits, histogramme des énergies de collision avec la queue au-delà de Ea, profil d’énergie qu’un point gravit à chaque choc ; trois boîtes de réaction en solution (référence, [A] doublée, +10 °C) avec courbes [A](t) et droite d’Arrhenius qui se remplit à chaque essai ; chemin catalysé plus bas, grains de catalyseur où A se fixe un instant, préréglage eau oxygénée avec bulles d’O₂ ; piston de N₂O₄ et de NO₂ dont la teinte suit la composition, dissociations et recombinaisons tirées au hasard, compteurs directs et inverses, Q et K, chauffage, compression, injection de NO₂, catalyseur.
 - **Notes** : Construite au standard d’une page à un module (quatre étapes), avant 28·29. Moteur `Rxn` écrit et testé avant la page (42 tests, aussi lancés sur la page livrée). Boîte 2D en unités réduites (Ea ≈ 3 kT), facteur stérique schématique, produits renouvelés en réactifs ; abaissements de Ea illustratifs ; gaz parfaits, quelques centaines de molécules. Se termine sur trois questions vers les modules 31, 34 et 18.
+
+### Protons et électrons qui passent
+
+- **Identifiant** : `fondations-acide-base-redox` · **chemin** : [`opus-sonnet/fondations-acide-base-redox/index.html`](../opus-sonnet/fondations-acide-base-redox/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-acide-base-redox/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Acide-base, redox et électrochimie
+- **Collection** : aucune
+- **Modules** : 31 Acide-base, redox et électrochimie (`full`), 29 Compter la matière (`supporting`), 30 Réactions chimiques (`supporting`), 22 Courant et circuits dynamiques (`supporting`)
+- **Étapes** : 1 Le pH, un compteur de protons · 2 Acides faibles et tampons · 3 Passer des électrons : le redox · 4 La pile et l’électrolyse
+- **Interaction** : Un chapitre de quatre étapes ; règle des pH logarithmique avec repères du quotidien et loupe de 1 µm³ où l’on compte les H₃O⁺ et les OH⁻ (dilution par dix, eau pure, HCl 10⁻⁸) ; eau pure et tampon (acétique, ammonium, phosphate) qui reçoivent la même goutte, courbe en direct avec la bande pKa ± 1, titrage complet par NaOH ; lame de métal plongée dans une solution d’ions avec prédiction, dépôt qui grandit, solution qui pâlit, échelle des couples ; pile Daniell (ou Fe/Cu, Zn/Ag) avec pont salin qu’on retire, électrons dans le fil, ions dans le pont, enregistreur U(t) en temps accéléré, générateur qui inverse la réaction (électrolyse).
+- **Notes** : Construite le 2026-10-06 au standard d’une page à un module (un chapitre « Module 31 », quatre étapes). Moteur ELC écrit et testé avant la page, versionné dans prompts/moteurs/acide-base-redox.js (145 tests, aussi lancés sur la page) : pH par résolution exacte du bilan de charge, Nernst, décharge par Euler implicite, Faraday. Construite avant les modules 29 et 30 qu’elle suppose (renvois par numéro, sans lien). Se termine sur trois questions vers les modules 32-33, 34 (et la planche Respiration) et l’électrochimie réversible. Limites : 25 °C, activités = concentrations, acides traités comme monoacides, cinétique du dépôt illustrative, résistance interne constante, surtensions ignorées.
 
 ## Pages d'appui
 

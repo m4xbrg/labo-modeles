@@ -24,7 +24,7 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 | 2 · E | [ ] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md) ; chapitre 26 construit le 2026-10-07, chapitre 27 à faire | 21, 24, 46 |
 | 2 · E | [x] `molecules-mole` | 28 · 29 | 4 + 3 | 1,1 | [écrit](fondations-molecules-mole.md), construite le 2026-10-06 | 21, 27 |
 | 2 · E | [x] `reactions-chimiques` | 30 | 4 | 0,8 | [écrit](fondations-reactions-chimiques.md), construite le 2026-10-06 | 17, 28, 29 |
-| 2 · E | [ ] `acide-base-redox` | 31 | 4 | 0,8 | [écrit](fondations-acide-base-redox.md) | 22, 29, 30 |
+| 2 · E | [x] `acide-base-redox` | 31 | 4 | 0,8 | [écrit](fondations-acide-base-redox.md), construite le 2026-10-06 | 22, 29, 30 |
 | 3 · F | [x] `bioelectricite` | 33 | 4 | 0,7 | [écrit](fondations-bioelectricite.md), construite le 2026-10-07 | 22, 32, 31 |
 | 3 · F | [ ] `energie-biologique` | 34 | 4 | 0,8 | [écrit](fondations-energie-biologique.md) | 30, 31, 32 |
 | 3 · F | [ ] `information-genetique` | 35 | 4 | 0,8 | [écrit](fondations-information-genetique.md) | 28, 32, 34 |

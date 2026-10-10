@@ -59,6 +59,7 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
 | D’un gradient à une tension | 33 | 4 | 4 | Conforme, gabarit LABO ; couverture partielle complémentaire au showcase Neurone. Ajoutée le 2026-10-07. |
 | Réactions : vitesse et équilibre | 30 | 4 | 4 | Construite le 2026-10-06, avant la migration : **pas encore au gabarit LABO** (`planche.js`, coque repliée). À migrer. |
+| Protons et électrons qui passent | 31 | 4 | 4 | Conforme ; pH, tampons et titrage, redox, pile et électrolyse. |
 
 Les quatre fondations récentes suivent aussi le gabarit. Les commandes de scène sont conservées : couches O/M/K pour Magnétisme et Molécules, V/M/C pour Onde électromagnétique, O/A/C pour Atomes, afin de garder C (couper ou casser), O (osciller) et M (changer de modèle). La conformité du nombre d’étapes ne signifie pas que toute la couverture conceptuelle est complète : les statuts restent ceux du corpus.
 

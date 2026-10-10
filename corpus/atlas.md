@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 41 | 0 | 134 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 45 | 0 | 130 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 16 | 1 | 41 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **57** | **2** | **175** |
+| **Total** | **265** | **16** | **15** | **61** | **2** | **171** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -132,11 +132,11 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Cinétique chimique | `absorbed` | 30 | 07, 05 | Réactions : vitesse et équilibre | Étapes 1 et 2 (chocs assez énergiques, loi de vitesse, droite d’Arrhenius). |
 | Catalyse | `absorbed` | 30 | — | Réactions : vitesse et équilibre | Étape 3 (chemin plus bas, grains de catalyseur, eau oxygénée). |
 | Équilibre chimique | `absorbed` | 30 | — | Réactions : vitesse et équilibre | Étape 4 (N₂O₄ ⇌ 2 NO₂, équilibre dynamique, Q et K). |
-| Titrage acide-base | `idea` | 31 | 29, 05 | — |  |
-| Tampon chimique | `idea` | 31 | — | — |  |
+| Titrage acide-base | `absorbed` | 31 | 29, 05 | Protons et électrons qui passent | Étape 2 des fondations Acide-base, redox et électrochimie (titrage complet, demi-équivalence et équivalence). |
+| Tampon chimique | `absorbed` | 31 | — | Protons et électrons qui passent | Étape 2 (eau pure et tampon reçoivent la même goutte). |
 | Précipitation | `idea` | — | 29, 28 | — | Rattachement de module à revoir (29, 30 ou 31). |
-| Électrolyse | `idea` | 31 | 22 | — |  |
-| Pile galvanique | `idea` | 31 | 21, 22 | — |  |
+| Électrolyse | `absorbed` | 31 | 22 | Protons et électrons qui passent | Étape 4 (générateur au-delà de la f.é.m. : la pile Daniell se recharge). |
+| Pile galvanique | `absorbed` | 31 | 21, 22 | Protons et électrons qui passent | Étape 4 (pile Daniell, pont salin, décharge et loi de Faraday). |
 
 ### 5 · Mécanique classique et oscillateurs
 
