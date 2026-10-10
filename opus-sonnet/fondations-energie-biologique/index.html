@@ -50,13 +50,13 @@ h1 em{color:var(--accent);font-style:italic}
 .tip.on{opacity:1;transform:none}
 .tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
 
-.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
 .eyebrow b{color:var(--accent);font-weight:500}
-h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
-#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
-.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:60px}
-.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 17px/1.35 var(--serif);color:var(--texte)}
+h2{font:400 25px/1.1 var(--serif);margin:0 0 6px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14px;line-height:1.45}
+.status{margin:8px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}
+.cle{margin:10px 0 0;padding:2px 0 2px 12px;border-left:2px solid var(--accent);font:italic 400 16px/1.3 var(--serif);color:var(--texte)}
 .swap{animation:swap .55s var(--ease)}
 @keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -70,8 +70,8 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 .leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
 .leg span{display:inline-flex;align-items:center;gap:6px}
 .leg svg{width:20px;height:8px;overflow:visible}
-.leg .og{display:block;flex:1 0 100%;margin-top:6px;padding-top:8px;border-top:1px solid var(--trait);font:400 11.5px/1.55 var(--mono)}
-.leg .og b{color:var(--energie);font-weight:500}
+.og{padding-top:8px;border-top:1px solid var(--trait)}
+.og b{color:var(--energie);font-weight:500}
 .note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
 .cards{display:grid;gap:8px}
 .card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}
@@ -174,6 +174,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
+      <p class="note og" id="mPlus" hidden></p>
     </section>
 
     <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
@@ -897,6 +898,12 @@ const S1 = (() => {
     for (let kk = 1; kk >= 0; kk--) {
       const a = arrs[kk]; if (!a.init || a.al < 0.03) continue;
       const docked = kk < n, dragging = dragK === kk, home = !docked && !dragging;
+      if (home && n > 0) {                                           // un ATP est déjà couplé : simple contour pour en ajouter un second
+        c.globalAlpha = a.al * 0.5; c.strokeStyle = rgba(C.ener, 0.3); c.lineWidth = 1.2; c.setLineDash([3, 4]);
+        c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(a.x, a.y + L); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+        zone(a.x - 12, a.y - 6, a.x + 12, a.y + L + 6, 'atp2', 'Un second ATP', 'Glisse-le contre la flèche pour coupler deux ATP à la même réaction.');
+        continue;
+      }
       c.globalAlpha = a.al;
       c.save();
       if (go && docked) { c.shadowColor = C.ener; c.shadowBlur = 10 + 6 * Math.sin(now * 4); }
@@ -917,7 +924,7 @@ const S1 = (() => {
       c.font = monoB(13.5); tagText(c, fmtS(n * st.dGa, 1), g.xAtp + 12, yMid + 7, 'left', 'middle', C.ener);
     } else if (n > 0) {
       const a0 = arrs[0], yMid = a0.y + (n * L) / 2;
-      c.font = monoB(11); tagText(c, fmtS(n * st.dGa, 0), g.xAtp + 6, yMid, 'left', 'middle', C.ener);
+      c.font = monoB(11); tagText(c, fmtS(n * st.dGa, 1), g.xAtp + 6, yMid, 'left', 'middle', C.ener);
     }
     // flèche totale
     if (st.nA > 0.04) {
@@ -1291,9 +1298,9 @@ const S1 = (() => {
     texte: 'Une réaction qui monte sur l’échelle d’énergie libre ne se fait pas seule. Glisse la flèche de l’hydrolyse de l’ATP contre elle : les deux s’emboîtent, et la somme dit si la réaction se fait. À droite, la réserve d’ATP de la cellule paie chaque réaction.',
     cle: 'Une réaction qui monte ne se fait pas seule. Couplée à l’hydrolyse de l’ATP, qui descend davantage, l’ensemble descend : c’est ainsi que la cellule paie ses travaux.',
     note: 'ΔG°′ : conditions standard biochimiques (pH 7, 1 mol/L) ; « monter » et « descendre » se lisent sur une échelle d’énergie libre, pas d’énergie potentielle.',
-    graphTitre: 'Enregistreur · réserve d’ATP', graphH: 130,
-    legende: lg(ln('#ffd166', 2.4), 'ATP libre') + lg(bx('#e0b48a', 0.3), 'respiration coupée') + lg('<line x1="10" y1="0" x2="10" y2="8" stroke="#8a93a0" stroke-width="1.5"/>', 'une dépense')
-      + '<span class="og"><b>Ordres de grandeur.</b> Un corps de 100 W renouvelle ≈ ' + fmtI(BioEn.dailyATP(100).kg) + ' kg d’ATP par jour, du même ordre que sa propre masse (hypothèses : 30 ATP par glucose, 507 g/mol). Un cerveau actif (20 W, 1 L) viderait sa réserve en ≈ ' + fmtI(BioEn.stockSeconds(20, 1)) + ' s sans recyclage.</span>',
+    graphTitre: 'Enregistreur · réserve d’ATP', graphH: 110,
+    encart: '<b>Ordres de grandeur.</b> Un corps de 100 W renouvelle ≈ ' + fmtI(BioEn.dailyATP(100).kg) + ' kg d’ATP par jour, du même ordre que sa propre masse (hypothèses : 30 ATP par glucose, 507 g/mol). Un cerveau actif (20 W, 1 L) viderait sa réserve en ≈ ' + fmtI(BioEn.stockSeconds(20, 1)) + ' s sans recyclage.',
+    legende: lg(ln('#ffd166', 2.4), 'ATP libre') + lg(bx('#e0b48a', 0.3), 'respiration coupée') + lg('<line x1="10" y1="0" x2="10" y2="8" stroke="#8a93a0" stroke-width="1.5"/>', 'dépense'),
     outils: `<div class="grp"><span class="gl">Réaction à faire monter</span>
       <button class="btn sm" data-r="g6p" title="glucose + Pi → glucose-6-phosphate">Glucose-6-P</button>
       <button class="btn sm" data-r="gln" title="glutamate + NH₄⁺ → glutamine">Glutamine</button>
@@ -1597,7 +1604,7 @@ const S2 = (() => {
       return 'Il faut plus de substrat pour atteindre la même vitesse : Km apparent = ' + fmt(KmA(), 0) + ' au lieu de ' + fmt(KM, 0) + ', mais à très forte [S], le substrat l’emporte.';
     }
     if (st.S >= 4 * KM) return 'Toutes les enzymes sont occupées : ajouter du substrat ne sert plus à rien ; doubler les enzymes double la vitesse.';
-    if (st.S <= KM / 4) return 'Peu de substrat : la plupart des sites attendent, et la vitesse est à peu près proportionnelle à [S].';
+    if (st.S <= KM / 4) return 'Peu de substrat : la plupart des sites sont libres la plupart du temps, et la vitesse est à peu près proportionnelle à [S].';
     if (ratio > 0.6 && ratio < 1.7) return 'Autour de Km (' + fmt(KM, 0) + ') : environ la moitié des sites est occupée, la vitesse vaut la moitié de Vmax.';
     return ratio < 1 ? 'La vitesse croît encore avec [S], mais moins vite : des sites commencent à être occupés.' : 'Presque tous les sites sont pris : la vitesse approche son plafond Vmax.';
   }
@@ -1615,11 +1622,11 @@ const S2 = (() => {
   const sv = v => 6 * Math.pow(100, v);
   function sync() {
     const root = document.querySelector('[data-step="1"]'); if (!root) return;
-    const r = root.querySelector('#s2S'); r.value = Math.log(st.S / 6) / Math.log(100); root.querySelector('#s2Sv').textContent = st.S + ' mol.';
+    const r = root.querySelector('#s2S'); r.value = Math.log(st.S / 6) / Math.log(100); root.querySelector('#s2Sv').textContent = st.S + ' molécules';
     root.querySelector('#s2E').value = st.nE; root.querySelector('#s2Ev').textContent = st.nE;
     root.querySelector('#s2Inh').setAttribute('aria-pressed', st.inhib ? 'true' : 'false');
     for (const id of ['#s2Il', '#s2I', '#s2Iv']) root.querySelector(id).hidden = !st.inhib;
-    root.querySelector('#s2I').value = st.I; root.querySelector('#s2Iv').textContent = st.I + ' mol.';
+    root.querySelector('#s2I').value = st.I; root.querySelector('#s2Iv').textContent = st.I + ' molécules';
     root.querySelector('#s2Sweep').disabled = !!st.sweep;
   }
   function init() {
@@ -1634,10 +1641,10 @@ const S2 = (() => {
 
   return {
     titre: 'Les enzymes', mot: 'Enzymes',
-    texte: 'Dans une boîte de molécules, des enzymes immobiles offrent un site où le substrat réagit plus facilement. À faible [S], chaque enzyme attend ; à forte [S], tous les sites sont pris. Mesure la vitesse pour plusieurs [S] : les points dessinent une courbe.',
+    texte: 'Dans une boîte de molécules, des enzymes immobiles offrent un site où le substrat réagit plus facilement. À faible [S], la plupart des sites sont libres ; à forte [S], tous sont occupés. Mesure la vitesse pour plusieurs [S] : les points dessinent une courbe.',
     cle: 'Une enzyme accélère une réaction précise en lui offrant un site où elle se fait plus facilement. Elle sature : sa vitesse plafonne quand tous ses sites sont occupés.',
     note: 'Simulation 2D, enzymes immobiles, bain à concentration constante ; la diffusion ralentit la vitesse mesurée d’environ 4 % sous la théorie. La catalyse en général : module 30.',
-    graphTitre: 'Enregistreur · vitesse et occupation', graphH: 130,
+    graphTitre: 'Enregistreur · vitesse et occupation', graphH: 110,
     legende: lg(ln('#e0b48a', 2.2), 'produits par seconde (5 s)') + lg(ln('#b9a3ff', 2), 'sites occupés') + lg(ln('#e0b48a', 1.4, true), 'Vmax'),
     outils: `<div class="grp"><span class="gl">[S]</span><input type="range" id="s2S" min="0" max="1" step="0.002" value="0.5" aria-label="Concentration en substrat, de 6 à 600 molécules libres par boîte, échelle logarithmique"><span class="rv" id="s2Sv"></span></div>
       <div class="grp"><span class="gl">Enzymes</span><input type="range" id="s2E" min="2" max="16" step="1" value="8" aria-label="Nombre d’enzymes dans la boîte"><span class="rv" id="s2Ev"></span></div>
@@ -1739,7 +1746,7 @@ function updateUI(n) {
   $('#eyebrow').innerHTML = 'Étape <b>' + (n + 1) + '</b> sur ' + NSTEP;
   $('#stepTitle').textContent = s.titre; $('#stepText').textContent = s.texte; $('#stepKey').textContent = '« ' + s.cle + ' »';
   for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
-  $('#rEye').textContent = s.graphTitre; $('#leg').innerHTML = s.legende || ''; $('#mNote').textContent = s.note;
+  $('#rEye').textContent = s.graphTitre; $('#leg').innerHTML = s.legende || ''; $('#mNote').textContent = s.note; const mp = $('#mPlus'); mp.innerHTML = s.encart || ''; mp.hidden = !s.encart;
   $('#cards').hidden = !s.cartes;
   const tk = $('#touches');
   tk.innerHTML = s.touches ? s.touches : (s.keys ? Object.keys(s.keys).map(k => '<kbd>' + k.toUpperCase() + '</kbd>').join(' ') : '');
