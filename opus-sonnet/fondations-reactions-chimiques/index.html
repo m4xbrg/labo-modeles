@@ -10,6 +10,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Réactions : vitesse et équilibre — LABO</title>
 <meta name="description" content="Une réaction a lieu quand des molécules se heurtent avec assez d'énergie : quatre étapes pour voir les collisions, la vitesse, la catalyse et l'équilibre dynamique.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,7 +149,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 <body>
 <div class="app">
   <main class="scene" id="scene">
-    <canvas id="cv" role="img" aria-label="Scène de l'étape : boîte de molécules A et B qui se heurtent, profil d'énergie et histogramme des énergies de collision (étape 1) ; trois boîtes miniatures, graphe de la concentration de A en fonction du temps (étape 2)."></canvas>
+    <canvas id="cv" role="img" aria-label="Scène de l'étape : boîte de molécules A et B qui se heurtent, profil d'énergie et histogramme des énergies de collision (étape 1) ; trois boîtes miniatures, graphe de la concentration de A en fonction du temps (étape 2) ; profils d'énergie et boîtes avec et sans catalyseur (étape 3) ; piston, loupe moléculaire et compteurs de dissociation et de recombinaison (étape 4)."></canvas>
     <header class="head">
       <p class="serie">LABO · Fondations 30</p>
       <h1>Réactions : vitesse et <em>équilibre</em></h1>
@@ -1696,8 +1697,8 @@ const MEAS = [
   [['N₂O₄ (molécules · mmol)', [['N', ''], ['nN', 'mmol']]], ['NO₂ (molécules · mmol)', [['M', ''], ['nM', 'mmol']]], ['P (gaz parfait)', [['P', 'bar']]],
    ['Q', [['Q', '']], 'Q = p(NO₂)² / (p(N₂O₄) · P°) : le rapport de l’instant.'], ['K = Kp(T)', [['K', '']], 'Sa valeur quand les vitesses directe et inverse sont égales.'], ['sens d’évolution', [['dir', '']]], ['vitesses → · ←', [['vf', ''], ['vr', '/s']]]]
 ];
-const MNOTE = n => n === 2 ? 'Abaissements de Ea illustratifs (ordres de grandeur réels dans l’explication) ; même facteur A supposé ; grains et mécanisme schématiques (A se fixe, B le heurte). Profil en kJ/mol, boîtes en unités réduites : Ea = 5 kT, T = T/298 K ; bulles : débit ∝ log₁₀ du facteur.'
-  : n === 3 ? 'Équilibre dynamique, comme celui de <a href="../fondations-cellule-membrane/index.html">Cellule, membrane et transport</a> (acte III) ; gaz parfaits ; 400 molécules équivalentes N₂O₄, tirages au hasard ; temps ralenti : 1 s affichée = 0,3 s du modèle.'
+const MNOTE = n => n === 2 ? 'Abaissements de Ea illustratifs (ordres de grandeur réels dans l’explication) ; même facteur A supposé ; grains et mécanisme schématiques (A se fixe, B le heurte). Changer le nombre de grains ou activer/désactiver le catalyseur recrée la boîte de droite. Profil en kJ/mol, boîtes en unités réduites : Ea = 5 kT, T = T/298 K ; bulles : débit ∝ log₁₀ du facteur.'
+  : n === 3 ? 'Équilibre dynamique, comme celui de <a href="../fondations-cellule-membrane/index.html">Cellule, membrane et transport</a> (acte III) ; gaz parfaits ; 400 molécules équivalentes N₂O₄, tirages au hasard ; temps ralenti : 0,3 s du modèle par seconde d’animation.'
   : n === 0 ? `Boîte à deux dimensions, unités réduites, une seule réaction A + B → C + D ; site réactif de ${fmt(2 * (k1.box ? k1.box.alpha : PI / 4) * 180 / PI, 0)}° sur A (P = ${fmt(P1({ steric: true, alpha: k1.box ? k1.box.alpha : PI / 4 }), 2)}) ; les produits pâlissent et redeviennent réactifs après ${k1.box ? fmt(k1.box.renew, 0) : 8} τ pour garder la boîte en marche.`
   : n === 1 ? 'La loi de vitesse se mesure : elle ne se lit pas toujours dans l’équation (réactions en plusieurs étapes, seulement mentionnées). Molécules dessinées : 30 par mol/L ; tirages stochastiques.'
   : '';
