@@ -1,0 +1,1498 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+ Note de design.
+ 1. Un atome se lit à deux échelles : la feuille d’or montre le noyau par ce qu’il renvoie (éclats sur un écran, histogramme en log contre 1/sin⁴), la carte des nucléides le range en case, la courbe B/A l’énergie ; orchidée pour l’accent, orange (+), bleu (−) et jaune (énergie) gardent le sens de la série.
+ 2. Le mouvement ne sert qu’à signifier : les α ralentissent près du noyau dans la loupe (v² = v∞² − k/r), la balance penche comme un fléau amorti, les noyaux d’un échantillon se défont au hasard et un noyau suivi garde la même chance à tout âge ; seuls les décors (respiration du noyau) sont ralentis par prefers-reduced-motion.
+ 3. Le moteur Atom est un bloc de fonctions pures, copié tel quel entre ses marqueurs ; les deux chapitres (26 et 27) partagent une seule coquille, et le chapitre 2 se branche entre les marqueurs CH2.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atomes, noyaux et lumière — LABO</title>
+<meta name="description" content="Du noyau à la lumière : feuille d’or de Rutherford, isotopes et carte des nucléides, énergie de liaison, radioactivité, puis niveaux d’énergie, spectres de raies et photons.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>:root, :root[data-theme], :root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#e9b6ff;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;--sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;--ease:cubic-bezier(0.22,1,0.36,1);}*{box-sizing:border-box}html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit;color:inherit}a{color:inherit}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y pinch-zoom;cursor:default}#cv.hand{cursor:pointer}.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}h1{font:400 clamp(28px,3.6vw,42px)/1 var(--serif);margin:0;letter-spacing:-.005em}h1 em{color:var(--accent);font-style:italic}.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}.back:hover{color:var(--texte)}.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}.tip.on{opacity:1;transform:none}.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}.panel>*{flex:none}.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}.eyebrow b{color:var(--accent);font-weight:500}h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}.status a{color:inherit;text-decoration:underline;text-underline-offset:2px}.swap{animation:swap .55s var(--ease)}@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.meas{display:grid;gap:0;border-top:1px solid var(--trait)}.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}.lab{font:400 12px var(--mono);color:var(--texte-2)}.leg .blk{display:block;flex:1 0 100%}.val{font:500 14px var(--mono);display:flex;align-items:baseline;gap:6px;text-align:right;justify-content:flex-end;white-space:nowrap}.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal}.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}#recSec[hidden]{display:none}#scope{display:block;width:100%}.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}.leg span{display:inline-flex;align-items:center;gap:6px}.leg svg{width:20px;height:8px;overflow:visible}.leg a{color:var(--texte-2)}.cle{margin:0;border-left:2px solid var(--accent);padding:1px 0 1px 12px;font:400 18px/1.3 var(--serif)}.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:0}.cards{display:grid;gap:8px}.cards[hidden]{display:none}.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}.comprendre:hover{background:var(--accent);color:var(--fond)}.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grp[hidden],.sub[hidden]{display:none}.sub{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}.btn:hover{border-color:var(--texte-2)}.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}.btn:disabled{opacity:.35;cursor:default}.btn.go{border-color:var(--accent);color:var(--accent)}.btn.go:hover{background:var(--accent);color:var(--fond)}.btn svg{width:14px;height:14px;display:block;fill:currentColor}.btn.sm{padding:7px 9px}.ico{padding:7px 9px}.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}.btn[aria-pressed="true"] .dot{background:currentColor}select{background:var(--fond);color:var(--texte);border:1px solid var(--trait);font:400 12px var(--mono);padding:6px 8px;min-height:34px;border-radius:2px;cursor:pointer;max-width:100%}select:hover{border-color:var(--texte-2)}.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}.sg{display:flex;flex-direction:column;min-width:0}.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sgl .short{display:none}.sgs{display:flex;gap:4px;min-width:0}.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}.seg b{font-weight:500;margin-right:6px}.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}.seg[aria-current="step"] b{color:var(--accent)}.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}input[type=range]{-webkit-appearance:none;appearance:none;width:124px;height:24px;background:transparent;margin:0;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}.rv{font:500 12px var(--mono);min-width:64px}
+/* CH2-CSS-BEGIN */
+/* CH2-CSS-END */
+@media (max-width:860px){.app{display:flex;flex-direction:column;height:auto}.scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}.controls{order:2;padding:10px 16px}.panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}.head{left:16px;top:14px}.liens{margin-top:0;position:static;padding:0;margin-bottom:0}.stepper{flex:1 0 100%;order:5}input[type=range]{width:104px}}
+@media (max-width:640px){.seg span{display:none}.seg b{margin:0;font-size:13px}.sgl .long{display:none}.sgl .short{display:inline}.stepper{gap:10px}.rv{min-width:50px}.head{max-width:78%}}
+@media (hover:none) and (pointer:coarse){.kbd{display:none}}
+@media (prefers-reduced-motion:reduce){.swap{animation:none}.tip,.btn,.comprendre,.seg{transition:none}}</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* Coque LABO ; l’écran conserve sa palette d’origine. */
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .status,.labo-etapes .cle,.labo-etapes .real{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes select{background:var(--papier);color:var(--encre);border-color:var(--filet)}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="oac">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 26 · 27</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Atomes, noyaux et lumière</h1><p class="lead">Sonder l’atome, parcourir les isotopes, mesurer l’énergie de liaison et suivre la radioactivité. Photons et spectres : à venir.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~1 fm à ~1 Å</dd><dt>Temps</dt><dd>tir et demi-vie</dd><dt>Modèle</dt><dd>diffusion et noyaux</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>A</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
+<div class="app">
+ <main class="scene" id="scene">
+  <canvas id="cv" role="img" aria-label="Scène de la planche Atomes, noyaux et lumière : feuille d’or bombardée de particules α, carte des nucléides, courbe de l’énergie de liaison, échantillon radioactif, puis niveaux d’énergie et spectres."></canvas>
+ </main>
+ <div class="tip" id="tip" role="tooltip"></div>
+ <aside class="panel" aria-label="Panneau de lecture">
+  <section>
+   <p class="eyebrow" id="eyebrow"></p>
+   <h2 id="stepTitle"></h2>
+   <p id="stepText" class="couche-comp"></p>
+   <p class="status couche-lire" id="status" aria-live="polite"></p>
+  </section>
+  <section id="recSec" class="couche-lire">
+   <p class="eyebrow" id="rEye">Enregistreur</p>
+   <div class="scopeBox" id="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur de l’étape : histogramme ou courbe des grandeurs mesurées."></canvas></div>
+   <p class="leg" id="leg"></p>
+  </section>
+  <section><div class="meas couche-lire" id="meas"></div></section>
+  <p class="cle couche-comp" id="cle"></p>
+  <p class="note couche-comp" id="note"></p>
+  <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+   <div class="card"><b>Molécules</b>Que se passe-t-il quand deux atomes partagent leurs électrons ?<small><a href="../fondations-molecules-mole/index.html">Module 28 · liaisons</a></small></div>
+   <div class="card"><b>Étoiles</b>D’où vient la lumière continue d’une étoile, et comment lit-on sa composition dans ses raies sombres ?<small>Modules 43 et 44 · corps noir et fusion stellaire (à venir)</small></div>
+   <div class="card"><b>Quantique</b>Pourquoi l’énergie d’un électron lié est-elle quantifiée ?<small>Modules 48 et 49 · physique quantique (à venir)</small></div>
+  </section>
+  <section class="kbd couche-lire">
+   <p class="eyebrow">Clavier</p>
+   <ul class="hints">
+    <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>7</kbd> aller à l’étape</li>
+    <li><kbd>R</kbd> réinitialiser · <kbd>T</kbd> 10 000 α (étape 1) · <kbd>M</kbd> changer de modèle (1) · <kbd>S</kbd> suivre un noyau (4)</li>
+   </ul>
+  </section>
+  <nav class="liens couche-comp">
+   <a class="comprendre" id="lienTheorie" href="explication.html#m26"><span>Lire la théorie · module <b id="numTheorie">26</b></span><span aria-hidden="true">&rarr;</span></a>
+  </nav>
+ </aside>
+ <div class="controls" role="toolbar" aria-label="Contrôles">
+  <div class="grp">
+   <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+   <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+   <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+   <button class="btn" id="bReset" title="Réinitialiser l’étape (R)">Réinitialiser</button>
+  </div>
+
+  <div class="tools" id="tools">
+   <!-- 1 · feuille d’or -->
+   <div class="grp" data-steps="0"><span class="gl">Modèle</span><button class="btn" id="bTh" aria-pressed="false" title="Thomson : charge positive étalée dans tout l’atome (M)">Thomson (charge positive étalée)</button><button class="btn" id="bRu" aria-pressed="true" title="Rutherford : charge positive concentrée dans un noyau (M)">Rutherford (noyau concentré)</button></div>
+   <div class="grp" data-steps="0"><span class="gl">Énergie des α</span><input type="range" id="rE" min="2" max="8" step="0.1" value="5" aria-label="Énergie des particules α en mégaélectronvolts"><span class="rv" id="vE"></span></div>
+   <div class="grp" data-steps="0"><span class="gl">Cadence</span><input type="range" id="rRate" min="1" max="3.301" step="0.01" value="2.48" aria-label="Cadence de tir en particules par seconde, échelle logarithmique"><span class="rv" id="vRate"></span></div>
+   <div class="grp" data-steps="0"><button class="btn go" id="bBurst" title="Tirer 10 000 α d’un coup (T)">Tirer 10 000 α d’un coup</button><button class="btn" id="bScale" aria-pressed="false" title="Zoom continu de l’atome au noyau"><span class="dot"></span>Échelles</button></div>
+   <!-- 2 · isotopes -->
+   <div class="grp" data-steps="1"><button class="btn" id="bPp">+ p</button><button class="btn" id="bMp">− p</button><button class="btn" id="bPn">+ n</button><button class="btn" id="bMn">− n</button></div>
+   <div class="grp" data-steps="1"><label class="gl" for="selEl">Aller à un élément</label><select id="selEl"></select></div>
+   <div class="grp" data-steps="1"><button class="btn" id="bAll" aria-pressed="false"><span class="dot"></span>Tout montrer</button></div>
+   <!-- 3 · énergie de liaison -->
+   <div class="grp" data-steps="2"><span class="gl">Réaction</span><button class="btn sm" data-rx="dt">²H + ³H</button><button class="btn sm" data-rx="alpha3">3 ⁴He</button><button class="btn sm" data-rx="fission">²³⁵U + n</button><button class="btn sm" data-rx="fefe">⁵⁶Fe + ⁵⁶Fe</button><button class="btn sm" id="bBuild" aria-pressed="false">Construire</button></div>
+   <div class="grp" data-steps="-1" id="gBuild" hidden><label class="gl" for="selA">Noyau 1</label><select id="selA"></select><label class="gl" for="selB">Noyau 2</label><select id="selB"></select></div>
+   <!-- 4 · radioactivité -->
+   <div class="grp" data-steps="3"><span class="gl">Nucléide</span><button class="btn sm" data-nu="14C">¹⁴C</button><button class="btn sm" data-nu="3H">³H</button><button class="btn sm" data-nu="18F">¹⁸F</button><button class="btn sm" data-nu="131I">¹³¹I</button><button class="btn sm" data-nu="60Co">⁶⁰Co</button><button class="btn sm" data-nu="222Rn">²²²Rn</button></div>
+   <div class="grp" data-steps="3"><button class="btn" id="bNew">Nouvel échantillon</button><button class="btn go" id="bFollow" title="Suivre un noyau (S)">Suivre un noyau</button></div>
+   <!-- CH2-TOOLS-BEGIN -->
+   <div class="grp" data-steps="4"></div>
+   <div class="grp" data-steps="5"></div>
+   <div class="grp" data-steps="6"></div>
+   <!-- CH2-TOOLS-END -->
+  </div>
+ </div>
+</div>
+<script>
+(() => { 'use strict';
+/* ATOM-BEGIN */
+const Atom = (function () {
+  'use strict';
+  const PI = Math.PI;
+
+  // ---------- Constantes (CODATA 2018 ; AME2020 pour les masses)
+  const KE2 = 1.439964548;        // e²/(4π ε0), MeV·fm
+  const U_MEV = 931.49410242;     // 1 u · c², MeV
+  const M_ALPHA = 3727.3794066;   // masse de la particule α, MeV/c²
+  const M_N_U = 1.00866491595;    // neutron, u
+  const M_H_U = 1.007825031898;   // atome ¹H, u
+  const D_N = 8071.31806;         // excès de masse du neutron, keV
+  const D_H = 7288.971064;        // excès de masse de ¹H, keV
+  const H_EVS = 4.135667696e-15;  // constante de Planck, eV·s
+  const C = 299792458;            // m/s
+  const HC = 1239.841984;         // h c, eV·nm
+  const RY_H = 13.598434;         // énergie d'ionisation de l'hydrogène, eV (Rydberg corrigé de la masse réduite)
+  const R_H = 10967758.34;        // constante de Rydberg de l'hydrogène, m⁻¹
+  const R_AU = 1.44e5;            // rayon atomique de l'or, fm (144 pm)
+  const B_DISPLAY = 1000;         // rayon du disque visé autour d'un noyau sur la planche, fm
+  const YEAR = 31556926;          // s (convention NUBASE : 365,2422 j)
+
+  // ---------- Hasard à graine
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* =================== 1. Diffusion de Rutherford =================== */
+
+  // Distance minimale d'approche frontale (b = 0) d'une particule α d'énergie cinétique E (MeV)
+  // sur un noyau de charge Z fixe : d = 2 Z e²/(4π ε0 E).
+  function closestApproach(E, Z) { return 2 * Z * KE2 / E; }
+  // Distance minimale pour un paramètre d'impact b (fm).
+  function rMin(E, Z, b) { const d = closestApproach(E, Z); return d / 2 + Math.sqrt(d * d / 4 + b * b); }
+  // Angle de déviation analytique (noyau fixe) : θ = 2 arctan(d / 2b), en radians.
+  function rutherfordAngle(E, Z, b) { const d = closestApproach(E, Z); return b <= 0 ? PI : 2 * Math.atan(d / (2 * b)); }
+  // Paramètre d'impact qui donne la déviation θ : b = d / (2 tan(θ/2)).
+  function impactForAngle(E, Z, theta) { return closestApproach(E, Z) / (2 * Math.tan(theta / 2)); }
+
+  // Trajectoire coulombienne intégrée (RK4, pas adaptatif), noyau fixe à l'origine.
+  // La particule part de x = −R0 (R0 = 1e5 · max(d, b)), à la hauteur b, vers +x, avec l'énergie
+  // cinétique E à l'infini. dt : fraction de min(r/v, √(r³ m / k)) par pas (défaut 0,01).
+  // Rend { pts : [[x, y], …] (fm, seulement r < keep), theta, rmin, dEmax (écart relatif d'énergie) }.
+  function rutherfordTraj(E, Z, b, dt, keep) {
+    dt = dt || 0.01;
+    const d = closestApproach(E, Z), k = 2 * Z * KE2, m = M_ALPHA;
+    const scale = Math.max(d, Math.abs(b), 1e-3);
+    const R0 = 1e5 * scale;
+    keep = keep || 30 * scale;
+    let x = -R0, y = b;
+    let r = Math.hypot(x, y);
+    let vx = Math.sqrt(2 * (E - k / r) / m), vy = 0;
+    const energy = (x, y, vx, vy) => 0.5 * m * (vx * vx + vy * vy) + k / Math.hypot(x, y);
+    const E0 = energy(x, y, vx, vy);
+    const acc = (x, y) => { const r2 = x * x + y * y, r = Math.sqrt(r2), f = k / (m * r2 * r); return [f * x, f * y]; };
+    const pts = [];
+    let rmin = r, dEmax = 0, guard = 0;
+    while (guard++ < 200000) {
+      r = Math.hypot(x, y);
+      if (r < rmin) rmin = r;
+      if (r < keep) pts.push([x, y]);
+      if (r > R0 * 1.0001 && (x * vx + y * vy) > 0) break;
+      const v = Math.hypot(vx, vy);
+      const h = dt * Math.min(r / v, Math.sqrt(r * r * r * m / k));
+      const a1 = acc(x, y);
+      const x2 = x + 0.5 * h * vx, y2 = y + 0.5 * h * vy, vx2 = vx + 0.5 * h * a1[0], vy2 = vy + 0.5 * h * a1[1];
+      const a2 = acc(x2, y2);
+      const x3 = x + 0.5 * h * vx2, y3 = y + 0.5 * h * vy2, vx3 = vx + 0.5 * h * a2[0], vy3 = vy + 0.5 * h * a2[1];
+      const a3 = acc(x3, y3);
+      const x4 = x + h * vx3, y4 = y + h * vy3, vx4 = vx + h * a3[0], vy4 = vy + h * a3[1];
+      const a4 = acc(x4, y4);
+      x += h / 6 * (vx + 2 * vx2 + 2 * vx3 + vx4);
+      y += h / 6 * (vy + 2 * vy2 + 2 * vy3 + vy4);
+      vx += h / 6 * (a1[0] + 2 * a2[0] + 2 * a3[0] + a4[0]);
+      vy += h / 6 * (a1[1] + 2 * a2[1] + 2 * a3[1] + a4[1]);
+      const dE = Math.abs(energy(x, y, vx, vy) - E0) / E0;
+      if (dE > dEmax) dEmax = dE;
+    }
+    return { pts, theta: Math.abs(Math.atan2(vy, vx)), rmin, dEmax, d };
+  }
+
+  // Modèle de Thomson : charge +Ze répartie uniformément dans une sphère de rayon R (fm, défaut :
+  // rayon atomique de l'or), atome neutre vu de l'extérieur (aucune force au-delà de R).
+  // Déviation en approximation d'impulsion (trajectoire droite) : θ = d · b √(R² − b²) / R³.
+  function thomsonDeflect(E, Z, b, R) {
+    R = R || R_AU;
+    b = Math.abs(b);
+    if (b >= R) return 0;
+    return closestApproach(E, Z) * b * Math.sqrt(R * R - b * b) / (R * R * R);
+  }
+
+  // Un tir : paramètre d'impact uniforme dans un disque de rayon bmax (fm) autour d'un noyau.
+  // model : 'rutherford' ou 'thomson'. Rend { b, theta } (radians).
+  function shot(E, Z, model, rng, bmax) {
+    bmax = bmax || (model === 'thomson' ? R_AU : B_DISPLAY);
+    const b = bmax * Math.sqrt(rng());
+    return { b, theta: model === 'thomson' ? thomsonDeflect(E, Z, b) : rutherfordAngle(E, Z, b) };
+  }
+  // Nombre attendu de tirs déviés entre θ1 et θ2 (radians, θ1 < θ2) sur n tirs à b uniforme
+  // dans le disque bmax : n (b(θ1)² − b(θ2)²) / bmax², avec b(θ) borné à bmax.
+  function expectedCount(n, E, Z, th1, th2, bmax) {
+    bmax = bmax || B_DISPLAY;
+    const bb = th => Math.min(bmax, impactForAngle(E, Z, th));
+    const b1 = bb(th1), b2 = th2 >= PI ? 0 : bb(th2);
+    return n * (b1 * b1 - b2 * b2) / (bmax * bmax);
+  }
+  // Section efficace différentielle de Rutherford, fm²/sr : (d/4)² / sin⁴(θ/2).
+  function dSigma(E, Z, theta) { const d = closestApproach(E, Z), s = Math.sin(theta / 2); return (d * d / 16) / (s * s * s * s); }
+  // Rayon d'un noyau : r ≈ 1,2 fm · A^(1/3).
+  function nuclearRadius(A) { return 1.2 * Math.cbrt(A); }
+
+  /* =================== 2. Noyaux =================== */
+
+  const SYMBOLS = ['n', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu'];
+  const NAMES = ['neutron', 'hydrogène', 'hélium', 'lithium', 'béryllium', 'bore', 'carbone', 'azote', 'oxygène', 'fluor', 'néon', 'sodium', 'magnésium', 'aluminium', 'silicium', 'phosphore', 'soufre', 'chlore', 'argon', 'potassium', 'calcium', 'scandium', 'titane', 'vanadium', 'chrome', 'manganèse', 'fer', 'cobalt', 'nickel', 'cuivre'];
+  const EXTRA = { 36: ['Kr', 'krypton'], 40: ['Zr', 'zirconium'], 50: ['Sn', 'étain'], 51: ['Sb', 'antimoine'], 52: ['Te', 'tellure'], 53: ['I', 'iode'], 54: ['Xe', 'xénon'], 55: ['Cs', 'césium'], 56: ['Ba', 'baryum'], 79: ['Au', 'or'], 82: ['Pb', 'plomb'], 84: ['Po', 'polonium'], 85: ['At', 'astate'], 86: ['Rn', 'radon'], 87: ['Fr', 'francium'], 88: ['Ra', 'radium'], 92: ['U', 'uranium'] };
+  function symbol(Z) { return Z < SYMBOLS.length ? SYMBOLS[Z] : (EXTRA[Z] ? EXTRA[Z][0] : '?'); }
+  function elementName(Z) { return Z < NAMES.length ? NAMES[Z] : (EXTRA[Z] ? EXTRA[Z][1] : 'élément ' + Z); }
+
+  // Table des nucléides. Source : NUBASE2020 (F. G. Kondev et al., Chinese Physics C 45, 030001, 2021)
+  // pour les demi-vies et les modes de désintégration ; AME2020 (M. Wang et al., Chinese Physics C 45,
+  // 030003, 2021) pour les excès de masse, extraits de la base du paquet mendeleev 1.3 qui reprend ces
+  // deux évaluations. Contenu : Z = 1 à 26, tous les nucléides stables et tous les instables de demi-vie
+  // supérieure à 1 ms, plus ⁸Be (instable, 8,19 × 10⁻¹⁷ s) ; hors de cette plage, ⁶⁰Co, ¹³¹I, ²²²Rn et
+  // leurs voisins (Z ± 2, N ± 2, demi-vie > 1 ms), ⁹⁰Zr, ¹²⁰Sn, ¹⁹⁷Au, ²⁰⁸Pb, ²³⁵U, ²³⁸U, ¹⁴¹Ba, ⁹²Kr, ¹¹²Te.
+  // Format : 'Z:N T mode Δ,…' ; T demi-vie en s (0 = stable), mode : s stable, b- β⁻, b+ β⁺ ou capture
+  // électronique, a α, p proton, n neutron (mode principal seulement) ; Δ excès de masse atomique, keV.
+  const NUC_SRC = [
+    '1:0 0 s 7289,1 0 s 13135.7,2 3.888e8 b- 14949.8',
+    '2:1 0 s 14931.2,2 0 s 2424.9,4 0.8069 b- 17592.1,6 0.1195 b- 31609.7',
+    '3:3 0 s 14086.9,4 0 s 14907.1,5 0.8387 b- 20945.8,6 0.1782 b- 24954.9,8 0.00875 b- 40728.3',
+    '4:3 4.598e6 b+ 15769,4 8.19e-17 a 4941.7,5 0 s 11348.5,6 4.377e13 b- 12607.5,7 13.76 b- 20177.2,8 0.02146 b- 25077.8,10 0.00453 b- 39954.5',
+    '5:3 0.7719 b+ 22921.6,5 0 s 12050.6,6 0 s 8667.7,7 0.0202 b- 13369.4,8 0.01716 b- 16561.9,9 0.01236 b- 23663.7,10 0.01018 b- 28957.4,12 0.00508 b- 43716.3,14 0.00292 b- 59770.3',
+    '6:3 0.1265 b+ 28911,4 19.3 b+ 15698.7,5 1220 b+ 10649.4,6 0 s 0,7 0 s 3125,8 1.799e11 b- 3019.9,9 2.449 b- 9873.1,10 0.75 b- 13694.1,11 0.193 b- 21031.9,12 0.092 b- 24919.3,13 0.0462 b- 32413.8,14 0.016 b- 37503.6,16 0.0062 b- 53611.2',
+    '7:5 0.011 b+ 17338.1,6 597.9 b+ 5345.5,7 0 s 2863.4,8 0 s 101.4,9 7.13 b- 5683.9,10 4.173 b- 7870.1,11 0.6192 b- 13113.2,12 0.336 b- 15856.3,13 0.136 b- 21766.5,14 0.085 b- 25231.9,15 0.023 b- 31764.8,16 0.0139 b- 36720.4',
+    '8:5 0.00858 b+ 23115.4,6 70.62 b+ 8007.8,7 122.3 b+ 2855.6,8 0 s -4737,9 0 s -808.8,10 0 s -782.8,11 26.47 b- 3332.9,12 13.51 b- 3796.2,13 3.42 b- 8062,14 2.25 b- 9283,15 0.097 b- 14621.4,16 0.0774 b- 18500.4',
+    '9:8 64.37 b+ 1951.7,9 6584 b+ 873.1,10 0 s -1487.4,11 11.01 b- -17.5,12 4.158 b- -47.6,13 4.23 b- 2793.4,14 2.23 b- 3285.3,15 0.384 b- 7544.5,16 0.08 b- 11334.2,17 0.0082 b- 18674.7,18 0.005 b- 25133.5,20 0.0025 b- 40150.2',
+    '10:7 0.1092 b+ 16500.5,8 1.664 b+ 5317.6,9 17.26 b+ 1752.1,10 0 s -7041.9,11 0 s -5731.8,12 0 s -8024.7,13 37.15 b- -5154,14 202.8 b- -5951.6,15 0.602 b- -2035.5,16 0.197 b- 481.1,17 0.0309 b- 7050.9,18 0.0188 b- 11299.7,19 0.0147 b- 18399.8,20 0.00722 b- 23280.1,21 0.0034 b- 31181.6,22 0.0035 b- 36998.9',
+    '11:9 0.4479 b+ 6850.5,10 22.45 b+ -2184.9,11 8.211e7 b+ -5181.4,12 0 s -9529.9,13 5.384e4 b- -8417.9,14 59.1 b- -9357.8,15 1.071 b- -6860.8,16 0.301 b- -5517.8,17 0.0331 b- -988.3,18 0.0432 b- 2680,19 0.0459 b- 8474.7,20 0.0168 b- 12246,21 0.0129 b- 18640.2,22 0.0082 b- 23780.1,23 0.0055 b- 31680.1,24 0.0015 b- 37831.7',
+    '12:8 0.0904 b+ 17477.7,9 0.12 b+ 10903.9,10 3.874 b+ -400,11 11.3 b+ -5473.7,12 0 s -13933.6,13 0 s -13192.8,14 0 s -16214.5,15 566.1 b- -14586.6,16 7.529e4 b- -15019.9,17 1.3 b- -10612.4,18 0.317 b- -8881.4,19 0.27 b- -3122.2,20 0.0804 b- -828.9,21 0.092 b- 4962.9,22 0.0449 b- 8323.3,23 0.0113 b- 15639.8,24 0.0039 b- 20380.2,25 0.008 b- 28211.5',
+    '13:9 0.0911 b+ 18201.4,10 0.446 b+ 6748.1,11 2.053 b+ -48.8,12 7.167 b+ -8916,13 2.263e13 b+ -12210.1,14 0 s -17196.9,15 134.7 b- -16850.7,16 393.6 b- -18207.8,17 3.62 b- -15864.1,18 0.644 b- -14950.7,19 0.0326 b- -11099.4,20 0.04146 b- -8497.4,21 0.05373 b- -2997.6,22 0.03816 b- -223.7,23 0.09 b- 5950.4,24 0.0114 b- 9809.6,25 0.009 b- 16469.7,26 0.0076 b- 21489.6',
+    '14:8 0.0287 b+ 33640,9 0.0423 b+ 23949.6,10 0.1432 b+ 10745.2,11 0.2206 b+ 3827.3,12 2.245 b+ -7141,13 4.117 b+ -12384.5,14 0 s -21492.8,15 0 s -21895.1,16 0 s -24433,17 9430 b- -22949,18 4.954e9 b- -24077.7,19 6.18 b- -20514.3,20 2.77 b- -19991.7,21 0.78 b- -14391.5,22 0.503 b- -12436.1,23 0.141 b- -6571.5,24 0.063 b- -4170.3,25 0.0412 b- 2320.4,26 0.0312 b- 5666.9,27 0.02 b- 13200.2,28 0.0125 b- 16839.6',
+    '15:11 0.0436 b+ 10973,12 0.26 b+ -659,13 0.2703 b+ -7147.9,14 4.102 b+ -16952.8,15 150 b+ -20200.9,16 0 s -24440.5,17 1.233e6 b- -24304.9,18 2.19e6 b- -26337.4,19 12.43 b- -24548.7,20 47.3 b- -24857.8,21 5.6 b- -20251,22 2.31 b- -18996,23 0.64 b- -14621.6,24 0.282 b- -12774.6,25 0.15 b- -8139.2,26 0.101 b- -4979.8,27 0.0485 b- 1091.8,28 0.0358 b- 5040.3,29 0.0185 b- 11109.9',
+    '16:11 0.0163 b+ 17490.7,12 0.125 b+ 4073.2,13 0.188 b+ -3094.4,14 1.18 b+ -14059.3,15 2.553 b+ -19042.5,16 0 s -26015.5,17 0 s -26585.9,18 0 s -29931.7,19 7.549e6 b- -28846.2,20 0 s -30664.1,21 303 b- -26896.4,22 1.022e4 b- -26861.2,23 11.5 b- -23162.7,24 8.8 b- -22837.8,25 1.99 b- -19008.6,26 1.016 b- -17637.7,27 0.265 b- -12195.5,28 0.1 b- -9204.2,29 0.068 b- -3340.3,30 0.05 b- 639.9',
+    '17:14 0.19 b+ -7034.6,15 0.298 b+ -13334.7,16 2.504 b+ -21003.3,17 1.527 b+ -24440.1,18 0 s -29013.5,19 9.508e12 b- -29522,20 0 s -31761.6,21 2234 b- -29798.1,22 3372 b- -29800.2,23 81 b- -27557.8,24 38.4 b- -27307.2,25 6.8 b- -24831.8,26 3.13 b- -24159.5,27 0.562 b- -20479,28 0.413 b- -18262.5,29 0.232 b- -13734.9,30 0.101 b- -9580.4',
+    '18:13 0.015 b+ 11325.1,14 0.098 b+ -2200.4,15 0.173 b+ -9384.3,16 0.8465 b+ -18378.3,17 1.776 b+ -23047.3,18 0 s -30231.5,19 3.025e6 b+ -30947.7,20 0 s -34714.8,21 8.457e9 b- -33242.2,22 0 s -35039.9,23 6577 b- -33067.5,24 1.038e9 b- -34422.7,25 322.2 b- -32009.8,26 712.2 b- -32673.3,27 21.48 b- -29770.8,28 8.4 b- -29771.3,29 1.23 b- -25367.3,30 0.415 b- -22354.9,31 0.236 b- -17060.3,32 0.106 b- -13230',
+    '19:16 0.1752 b+ -11172.9,17 0.341 b+ -17417.2,18 1.237 b+ -24800.2,19 459.1 b+ -28800.8,20 0 s -33807.2,21 3.938e16 b- -33535.5,22 0 s -35559.5,23 4.448e4 b- -35022,24 8.028e4 b- -36575.4,25 1328 b- -35781.5,26 1068 b- -36615.6,27 96.3 b- -35413.9,28 17.38 b- -35712,29 6.83 b- -32284.5,30 1.26 b- -29611.5,31 0.472 b- -25727.9,32 0.365 b- -22515.5,33 0.11 b- -17137.6,34 0.03 b- -12295.7,35 0.01 b- -5150.2',
+    '20:15 0.0257 b+ 5190.3,16 0.1009 b+ -6451.2,17 0.181 b+ -13136.1,18 0.4437 b+ -22058.5,19 0.8603 b+ -27282.7,20 0 s -34846.4,21 3.137e12 b+ -35137.9,22 0 s -38547.3,23 0 s -38408.9,24 0 s -41468.7,25 1.405e7 b- -40812.2,26 0 s -43139.6,27 3.919e5 b- -42344.7,28 1.767e27 b- -44224.9,29 523.1 b- -41300,30 13.45 b- -39589.2,31 10 b- -36332.3,32 4.6 b- -34266.3,33 0.461 b- -29387.7,34 0.09 b- -25160.6,35 0.022 b- -18650.4,36 0.011 b- -13510.4',
+    '21:19 0.1823 b+ -20523.4,20 0.5963 b+ -28642.4,21 0.6807 b+ -32121,22 1.401e4 b+ -36188.1,23 1.455e4 b+ -37816,24 0 s -41072.3,25 7.237e6 b- -41761.6,26 2.894e5 b- -44336.8,27 1.572e5 b- -44504.1,28 3431 b- -46562.4,29 102.5 b- -44537.1,30 12.4 b- -43250.4,31 8.2 b- -40523.6,32 2.4 b- -38769.6,33 0.526 b- -34437.9,34 0.096 b- -30842.1,35 0.026 b- -25515.8,36 0.022 b- -21379.7,37 0.012 b- -15479.6',
+    '22:17 0.0285 b+ 2500.1,18 0.0524 b+ -8993.4,19 0.0819 b+ -15697.5,20 0.2083 b+ -25104.4,21 0.509 b+ -29315.6,22 1.865e9 b+ -37548.6,23 1.109e4 b+ -39010.3,24 0 s -44128.3,25 0 s -44937.6,26 0 s -48493,27 0 s -48564,28 0 s -51431.9,29 345.6 b- -49733,30 102 b- -49477.7,31 32.7 b- -46881.4,32 2.1 b- -45743.8,33 1.3 b- -41832.5,34 0.2 b- -39423,35 0.095 b- -34401.8,36 0.055 b- -30917.7,37 0.0285 b- -25879.7,38 0.0222 b- -22099.7,39 0.015 b- -16370.1',
+    '23:20 0.0793 b+ -17916.4,21 0.111 b+ -23808.1,22 0.547 b+ -31886.4,23 0.4226 b+ -37075.9,24 1956 b+ -42007.1,25 1.38e6 b+ -44478,26 2.851e7 b+ -47962.2,27 8.552e24 b+ -49223.2,28 0 s -52203.1,29 224.6 b- -51443,30 92.58 b- -51851.7,31 49.8 b- -49898.3,32 6.54 b- -49125.1,33 0.216 b- -46183.4,34 0.35 b- -44435.1,35 0.191 b- -40430.6,36 0.095 b- -37610.6,37 0.122 b- -33087.4,38 0.0482 b- -30177.1,39 0.0336 b- -25213.2,40 0.0196 b- -21740.1,41 0.015 b- -16319.8',
+    '24:18 0.0133 b+ 7059.8,19 0.0211 b+ -1970.1,20 0.0428 b+ -13421.9,21 0.0609 b+ -19514.8,22 0.2243 b+ -29471.6,23 0.4616 b+ -34563.1,24 7.762e4 b+ -42821.3,25 2538 b+ -45332.4,26 0 s -50261.4,27 2.393e6 b+ -51450.7,28 0 s -55419.5,29 0 s -55287.6,30 0 s -56935.4,31 209.8 b- -55110.3,32 356.4 b- -55285.1,33 21.1 b- -52525,34 7 b- -51991.8,35 1.05 b- -48115.9,36 0.49 b- -46908.5,37 0.243 b- -42496.5,38 0.206 b- -40852.6,39 0.129 b- -36178.3,40 0.043 b- -33640,41 0.0275 b- -28310,42 0.0238 b- -25140.1',
+    '25:21 0.0362 b+ -12417.7,22 0.088 b+ -22566.4,23 0.1581 b+ -29296.6,24 0.382 b+ -37619.9,25 0.2832 b+ -42626.9,26 2749 b+ -48243.2,27 4.831e5 b+ -50711.4,28 1.168e14 b+ -54690.4,29 2.696e7 b+ -55558.2,30 0 s -57712.5,31 9284 b- -56911.7,32 85.4 b- -57486.3,33 3 b- -55827.6,34 4.59 b- -55525.3,35 0.28 b- -52967.9,36 0.709 b- -51742.1,37 0.092 b- -48524,38 0.275 b- -46887.1,39 0.0888 b- -42989,40 0.0919 b- -40967.3,41 0.0638 b- -36750.4,42 0.0467 b- -33580.4,43 0.0337 b- -28920.1,44 0.0221 b- -25359.9,45 0.0199 b- -20450',
+    '26:19 0.0025 p 14407.4,20 0.013 b+ 1210,21 0.0219 b+ -7129.7,22 0.0453 b+ -18008.6,23 0.0647 b+ -24750.7,24 0.152 b+ -34476.5,25 0.3054 b+ -40189.2,26 2.979e4 b+ -48332.1,27 510.6 b+ -50947.5,28 0 s -56254.6,29 8.698e7 b+ -57481.4,30 0 s -60607.2,31 0 s -60182,32 0 s -62155.3,33 3.845e6 b- -60665,34 8.268e13 b- -61413.2,35 358.8 b- -58920.5,36 68 b- -58878.1,37 6.1 b- -55635.6,38 2 b- -54969.6,39 0.805 b- -51217.9,40 0.467 b- -50067.8,41 0.394 b- -45708.4,42 0.188 b- -43896.7,43 0.162 b- -39199.1,44 0.0614 b- -36890,45 0.0343 b- -31929.8,46 0.017 b- -29249.8,47 0.0129 b- -23989.7,48 0.005 b- -20659.6',
+    '27:31 6.121e6 b+ -59847.3,32 0 s -62229.8,33 1.663e8 b- -61650.4,34 5936 b- -62898.2,35 92.4 b- -61424.4',
+    '28:31 2.556e12 b+ -61156.8,32 0 s -64473.2,33 0 s -64222,34 0 s -66746.4,35 3.194e9 b- -65512.9',
+    '29:31 1422 b+ -58345.3,32 1.203e4 b+ -61984.1,33 580.3 b+ -62787.5,34 0 s -65579.9,35 4.572e4 b+ -65424.4',
+    '36:56 1.84 b- -68769.3',
+    '40:50 0 s -88772.5',
+    '50:70 0 s -91097.7',
+    '51:76 3.326e5 b- -86698.3,77 3.258e4 b- -84629.9,78 1.572e4 b- -84629.4,79 2370 b- -82285.7,80 1382 b- -81981.4',
+    '52:60 120 b+ -77567.5,76 7.1e31 b- -88993.8,77 4176 b- -87004.9,78 2.496e28 b- -87353,79 1500 b- -85211,80 2.768e5 b- -85188.2',
+    '53:76 5.093e14 b- -88507.2,77 4.45e4 b- -86936.2,78 6.934e5 b- -87442.7,79 8262 b- -85703.5,80 7.499e4 b- -85857.3',
+    '54:76 0 s -89880.5,77 0 s -88413.6,78 0 s -89279,79 4.534e5 b- -87643.6,80 0 s -88125.8',
+    '55:76 8.371e5 b+ -88055.6,77 5.599e5 b+ -87152.7,78 0 s -88070.9,79 6.517e7 b- -86891.2,80 4.197e13 b- -87582',
+    '56:85 1096 b- -79732.5',
+    '79:118 0 s -31139.8',
+    '82:126 0 s -21748.5',
+    '84:134 185.8 a 8356.7,135 618 b- 12681.4,137 132 b- 19773.8,138 546 b- 22486.3',
+    '85:134 56 a 10396,135 222.6 b- 14375.7,136 138 b- 16782.7,137 54 b- 20953,138 50 b- 23428',
+    '86:134 55.6 a 10612,135 1542 b- 14471.4,136 3.302e5 a 16372,137 1458 b- 20389.7,138 6420 b- 22445.1',
+    '87:134 288.1 a 13277.3,135 852 b- 16378.1,136 1320 b- 18382.3,137 199.8 b- 21748.6,138 237 b- 23820.6',
+    '88:134 33.6 a 14320.2,135 9.88e5 a 17233.2,136 3.138e5 a 18825.8,137 1.28e6 b- 21993,138 5.049e10 a 23667.6',
+    '92:143 2.222e16 a 40918.8,146 1.408e17 a 47307.7'
+  ];
+  const MODE_LABEL = { s: 'stable', 'b-': 'β⁻', 'b+': 'β⁺/CE', a: 'α', p: 'p', n: 'n' };
+  const SUP = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+  const sup = n => String(n).split('').map(c => SUP[c]).join('');
+  const NUCLIDES = [];
+  const NUC_MAP = new Map();
+  const key = (Z, N) => Z * 1000 + N;
+  for (const line of NUC_SRC) {
+    const [zs, rest] = line.split(':');
+    const Z = +zs;
+    for (const item of rest.split(',')) {
+      const f = item.split(' ');
+      const N = +f[0], T = +f[1], mode = f[2] === 's' ? 'stable' : f[2], dm = +f[3];
+      const A = Z + N;
+      const nu = { Z, N, A, symbol: symbol(Z), name: elementName(Z), id: A + symbol(Z), label: sup(A) + symbol(Z),
+                   halfLife: mode === 'stable' ? Infinity : T, mode, dm };
+      NUCLIDES.push(nu);
+      NUC_MAP.set(key(Z, N), nu);
+    }
+  }
+  function nuclide(Z, N) { return NUC_MAP.get(key(Z, N)) || null; }
+  function byId(id) {
+    const m = /^(\d+)([A-Za-z]+)$/.exec(id);
+    if (!m) return null;
+    const A = +m[1];
+    for (const nu of NUCLIDES) if (nu.A === A && nu.symbol === m[2]) return nu;
+    return null;
+  }
+  function modeLabel(mode) { return MODE_LABEL[mode === 'stable' ? 's' : mode] || mode; }
+
+  // Masse atomique (u) et énergie de liaison mesurée (MeV) à partir des excès de masse AME2020.
+  // B = Z Δ(¹H) + N Δ(n) − Δ(Z, N) : on compte les masses atomiques, les électrons se compensent
+  // (leur énergie de liaison, quelques keV au plus ici, est négligée).
+  function atomicMass(Z, N) { const nu = nuclide(Z, N); return nu ? nu.A + nu.dm / (U_MEV * 1000) : null; }
+  function bindingMeasured(Z, N) { const nu = nuclide(Z, N); return nu ? (Z * D_H + N * D_N - nu.dm) / 1000 : null; }
+
+  // Formule semi-empirique de Weizsäcker (goutte liquide), coefficients en MeV
+  // (ajustement de J. W. Rohlf, Modern Physics from α to Z⁰, Wiley, 1994, chap. 11) :
+  // B = aV A − aS A^(2/3) − aC Z(Z−1)/A^(1/3) − aA (A−2Z)²/A + δ, δ = ± aP / A^(1/2) (pair-pair +, impair-impair −).
+  const SEMF = { aV: 15.75, aS: 17.8, aC: 0.711, aA: 23.7, aP: 11.18 };
+  function semf(Z, A) {
+    if (A < 1 || Z < 0 || Z > A) return 0;
+    const N = A - Z, c = SEMF;
+    let B = c.aV * A - c.aS * Math.pow(A, 2 / 3) - c.aC * Z * (Z - 1) / Math.cbrt(A) - c.aA * (A - 2 * Z) * (A - 2 * Z) / A;
+    if (A % 2 === 0) B += (Z % 2 === 0 ? 1 : -1) * c.aP / Math.sqrt(A);
+    return B;
+  }
+  // Énergie de liaison la meilleure disponible : mesurée si le nucléide est dans la table, sinon semf.
+  function binding(Z, N) {
+    const Bm = bindingMeasured(Z, N);
+    return Bm !== null ? { B: Bm, src: 'mesure' } : { B: Math.max(0, semf(Z, Z + N)), src: 'semf' };
+  }
+  // Fond de la vallée de stabilité selon la formule semi-empirique : Z qui minimise la masse atomique
+  // à A fixé (inclut la différence de masse neutron − hydrogène, 0,782 MeV). Valeur continue.
+  function valleyZ(A) {
+    const c = SEMF, dnh = (D_N - D_H) / 1000, a3 = Math.cbrt(A);
+    return (dnh + c.aC / a3 + 4 * c.aA) / (2 * c.aC / a3 + 8 * c.aA / A);
+  }
+
+  // B/A mesurées (MeV par nucléon), calculées à partir des masses AME2020.
+  const BA_DATA = [
+  ];
+  const BA_IDS = ['2H', '3He', '4He', '6Li', '7Li', '9Be', '12C', '14N', '16O', '20Ne', '24Mg', '28Si', '32S', '40Ca', '56Fe', '58Fe', '62Ni', '90Zr', '120Sn', '197Au', '208Pb', '235U', '238U'];
+  for (const id of BA_IDS) { const nu = byId(id); BA_DATA.push({ id, label: nu.label, Z: nu.Z, N: nu.N, A: nu.A, BA: bindingMeasured(nu.Z, nu.N) / nu.A }); }
+
+  // Bilan d'une réaction nucléaire, Z et A conservés. Particules données par [Z, N] (neutron : [0, 1]).
+  // Q = Σ Δ(réactifs) − Σ Δ(produits) avec les excès de masse atomiques ; Q > 0 : énergie libérée.
+  // Un nucléide absent de la table prend l'excès de masse déduit de semf (measured = false).
+  function deltaZN(Z, N) {
+    if (Z === 0 && N === 1) return { d: D_N, m: true };
+    const nu = nuclide(Z, N);
+    if (nu) return { d: nu.dm, m: true };
+    return { d: Z * D_H + N * D_N - 1000 * Math.max(0, semf(Z, Z + N)), m: false };
+  }
+  function qZN(reactants, products) {
+    let sZ = 0, sN = 0, Q = 0, measured = true, massR = 0, massP = 0;
+    for (const [Z, N] of reactants) { const r = deltaZN(Z, N); Q += r.d; measured = measured && r.m; sZ += Z; sN += N; massR += Z + N + r.d / (U_MEV * 1000); }
+    for (const [Z, N] of products) { const r = deltaZN(Z, N); Q -= r.d; measured = measured && r.m; sZ -= Z; sN -= N; massP += Z + N + r.d / (U_MEV * 1000); }
+    return { Q: Q / 1000, dm: massR - massP, massR, massP, measured, conserved: sZ === 0 && sN === 0 };
+  }
+  function toZN(id) {
+    if (id === 'n') return [0, 1];
+    const nu = byId(id);
+    if (nu) return [nu.Z, nu.N];
+    const m = /^(\d+)([A-Za-z]+)$/.exec(id);
+    const Z = SYMBOLS.indexOf(m[2]) >= 0 ? SYMBOLS.indexOf(m[2]) : +Object.keys(EXTRA).find(z => EXTRA[z][0] === m[2]);
+    return [Z, +m[1] - Z];
+  }
+  function qValue(reactants, products) { return qZN(reactants.map(toZN), products.map(toZN)); }
+
+  const REACTIONS = {
+    dt:      { label: 'fusion ²H + ³H → ⁴He + n', kind: 'fusion', r: ['2H', '3H'], p: ['4He', 'n'], fuel: ['2H', '3H'] },
+    alpha3:  { label: 'fusion de l’hélium : 3 ⁴He → ¹²C', kind: 'fusion', r: ['4He', '4He', '4He'], p: ['12C'], fuel: ['4He', '4He', '4He'] },
+    fission: { label: 'fission ²³⁵U + n → ¹⁴¹Ba + ⁹²Kr + 3 n', kind: 'fission', r: ['235U', 'n'], p: ['141Ba', '92Kr', 'n', 'n', 'n'], fuel: ['235U'] },
+    fefe:    { label: 'fusion ⁵⁶Fe + ⁵⁶Fe → ¹¹²Te', kind: 'fusion', r: ['56Fe', '56Fe'], p: ['112Te'], fuel: ['56Fe', '56Fe'] }
+  };
+  const J_PER_MEV = 1.602176634e-13, KG_PER_U = 1.66053906660e-27;
+  const METHANE_J_PER_KG = 50e6;  // pouvoir calorifique inférieur du méthane, ≈ 50 MJ/kg
+  // Bilan d'une réaction prédéfinie : Q (MeV), énergie par kilogramme de combustible (J/kg),
+  // rapport à la combustion du méthane.
+  function reaction(name) {
+    const R = REACTIONS[name];
+    const q = qValue(R.r, R.p);
+    const fuelU = R.fuel.reduce((s, id) => { const [Z, N] = toZN(id); return s + Z + N + deltaZN(Z, N).d / (U_MEV * 1000); }, 0);
+    const perKg = q.Q * J_PER_MEV / (fuelU * KG_PER_U);
+    return Object.assign({ name, label: R.label, kind: R.kind, perKg, vsMethane: perKg / METHANE_J_PER_KG, fuelU }, q);
+  }
+
+  /* =================== 3. Désintégration =================== */
+
+  // Probabilité qu'un noyau se désintègre pendant dt (s) : 1 − 2^(−dt/T½), la même à tout âge.
+  function decayProb(halfLife, dt) { return isFinite(halfLife) ? 1 - Math.pow(2, -dt / halfLife) : 0; }
+  // Nombre de désintégrations parmi n noyaux pendant dt (tirage noyau par noyau).
+  function decaySample(n, halfLife, rng, dt) {
+    const p = decayProb(halfLife, dt);
+    let k = 0;
+    for (let i = 0; i < n; i++) if (rng() < p) k++;
+    return k;
+  }
+  function decayConst(halfLife) { return Math.LN2 / halfLife; }
+  // Ce que devient le noyau, et ce qui sort.
+  function transmute(Z, N, mode) {
+    switch (mode) {
+      case 'b-': return { Z: Z + 1, N: N - 1, out: 'électron et antineutrino', ray: 'beta' };
+      case 'b+': return { Z: Z - 1, N: N + 1, out: 'positon et neutrino (ou capture d’un électron)', ray: 'beta' };
+      case 'a':  return { Z: Z - 2, N: N - 2, out: 'particule α (noyau d’hélium 4)', ray: 'alpha' };
+      case 'p':  return { Z: Z - 1, N: N, out: 'proton', ray: 'p' };
+      case 'n':  return { Z: Z, N: N - 1, out: 'neutron', ray: 'n' };
+      default:   return { Z, N, out: '', ray: null };
+    }
+  }
+  // Écrans : épaisseurs par défaut de la planche (m) et masses volumiques (g/cm³).
+  const MATERIALS = {
+    papier:    { label: 'papier', rho: 0.8, thick: 1e-4, muG: 0.0632, rAlpha: 0.0040 },
+    aluminium: { label: 'aluminium', rho: 2.699, thick: 5e-3, muG: 0.05496, rAlpha: 0.0058 },
+    plomb:     { label: 'plomb', rho: 11.35, thick: 5e-2, muG: 0.05876, rAlpha: 0.016 }
+  };
+  // Fraction transmise par un écran d'épaisseur thickness (m).
+  // α (5 MeV par défaut) : arrêtée net au-delà de sa portée (ASTAR, NIST : ≈ 4 mg/cm² dans le papier,
+  //   5,8 mg/cm² dans l'aluminium, 16 mg/cm² dans le plomb ; portée ∝ E^1,5, règle de Geiger).
+  // β (énergie maximale 1 MeV par défaut) : portée de Katz et Penfold R = 0,412 E^(1,265 − 0,0954 ln E) g/cm²,
+  //   atténuation e^(−μ ρ x) avec μ = 17 E^(−1,14) cm²/g en deçà de la portée.
+  // γ (1,25 MeV par défaut, ⁶⁰Co) : e^(−(μ/ρ) ρ x), μ/ρ de NIST XCOM à 1,25 MeV (papier assimilé à l'eau).
+  function attenuate(kind, material, thickness, E) {
+    const M = MATERIALS[material];
+    if (thickness == null) thickness = M.thick;
+    const rx = M.rho * thickness * 100;   // g/cm²
+    if (kind === 'alpha') { E = E || 5; return rx < M.rAlpha * Math.pow(E / 5, 1.5) ? 1 : 0; }
+    if (kind === 'beta') {
+      E = E || 1;
+      const R = 0.412 * Math.pow(E, 1.265 - 0.0954 * Math.log(E));
+      return rx >= R ? 0 : Math.exp(-17 * Math.pow(E, -1.14) * rx);
+    }
+    if (kind === 'gamma') return Math.exp(-M.muG * rx);
+    return 0;
+  }
+
+  /* =================== 4. Hydrogène et raies =================== */
+
+  // Indice de l'air sec standard (formule d'Edlén 1966, forme adoptée par l'UAI, Morton 2000).
+  function airIndex(lambdaVac) { const s2 = Math.pow(1000 / lambdaVac, 2); return 1 + 8.34254e-5 + 2.406147e-2 / (130 - s2) + 1.5998e-4 / (38.9 - s2); }
+  function vacToAir(lambdaVac) { return lambdaVac < 200 ? lambdaVac : lambdaVac / airIndex(lambdaVac); }
+  // Niveaux de l'hydrogène (modèle de Bohr, masse réduite) : E_n = −13,598 eV / n².
+  function hLevel(n) { return -RY_H / (n * n); }
+  // Raie n2 → n1 (n2 > n1) : formule de Rydberg. Longueurs d'onde en nm, énergie en eV.
+  function hLine(n1, n2) {
+    const lo = Math.min(n1, n2), hi = Math.max(n1, n2);
+    const vac = 1e9 / (R_H * (1 / (lo * lo) - 1 / (hi * hi)));
+    return { n1: lo, n2: hi, vac, air: vacToAir(vac), E: HC / vac };
+  }
+  const H_LEVELS = [1, 2, 3, 4, 5, 6].map(hLevel);
+  // Absorption d'un photon d'énergie E (eV) par un atome dont les niveaux liés sont levels (eV, croissants,
+  // négatifs) et qui occupe le niveau d'indice from. Absorbé si E égale un écart à tol près (défaut 0,03 eV,
+  // tolérance de la planche, bien plus large que la largeur réelle des raies) ; ionisation si E dépasse
+  // l'énergie de liaison : l'électron libre emporte le surplus.
+  function absorb(E, levels, tol, from) {
+    levels = levels || H_LEVELS; tol = tol == null ? 0.03 : tol; from = from || 0;
+    const Ei = levels[from];
+    if (E >= -Ei) return { type: 'ionize', from, Ekin: E + Ei };
+    let best = -1, err = Infinity;
+    for (let j = from + 1; j < levels.length; j++) { const e = Math.abs(levels[j] - Ei - E); if (e < err) { err = e; best = j; } }
+    if (best >= 0 && err <= tol) return { type: 'absorb', from, to: best, dE: levels[best] - Ei };
+    return { type: 'pass', from };
+  }
+  // Coefficients d'Einstein A (s⁻¹) de l'hydrogène, moyennés sur les sous-niveaux (NIST ASD,
+  // Wiese et Fuhr 2009). HA[n][m] : n → m.
+  const HA = {
+    2: { 1: 4.6986e8 },
+    3: { 1: 5.5751e7, 2: 4.4101e7 },
+    4: { 1: 1.2785e7, 2: 8.4193e6, 3: 8.9860e6 },
+    5: { 1: 4.1250e6, 2: 2.5304e6, 3: 2.2008e6, 4: 2.6993e6 },
+    6: { 1: 1.6440e6, 2: 9.7320e5, 3: 7.7829e5, 4: 7.7109e5, 5: 1.0254e6 }
+  };
+  // Désexcitation spontanée depuis n : niveau d'arrivée tiré selon les A, durée exponentielle (s).
+  function hDecay(n, rng) {
+    if (n <= 1) return null;
+    const row = HA[n]; let tot = 0;
+    for (const m in row) tot += row[m];
+    let u = rng() * tot, to = 1;
+    for (const m in row) { u -= row[m]; if (u <= 0) { to = +m; break; } }
+    return { from: n, to, t: -Math.log(1 - rng()) / tot, line: hLine(to, n) };
+  }
+
+  // Raies visibles les plus intenses (longueurs d'onde dans l'air, nm ; intensités relatives approximatives,
+  // maximum 100 par gaz). Source : NIST Atomic Spectra Database (raies persistantes), arrondies au centième.
+  // g : raie dont le niveau bas est le fondamental (absorbée par le gaz froid).
+  const LINES = {
+    // H : valeurs mesurées (structure fine moyennée) ; hLine(2, n) les retrouve à 0,01 nm près.
+    H: [[656.28, 100, 3], [486.13, 36, 4], [434.05, 18, 5], [410.17, 10, 6]].map(([nm, I, n]) => ({ nm, I, up: n, lo: 2, g: false })),
+    He: [[447.15, 25], [471.31, 6], [492.19, 5], [501.57, 12], [587.56, 100], [667.82, 20], [706.52, 15]].map(([nm, I]) => ({ nm, I, g: false })),
+    Na: [[497.85, 3], [498.28, 4], [568.27, 3], [568.82, 5], [588.99, 100], [589.59, 55], [615.42, 2], [616.08, 3]].map(([nm, I]) => ({ nm, I, g: nm > 588 && nm < 590 })),
+    Hg: [[404.66, 45], [407.78, 6], [435.83, 100], [546.07, 80], [576.96, 22], [579.07, 24]].map(([nm, I]) => ({ nm, I, g: false })),
+    Ne: [[540.06, 10], [585.25, 70], [588.19, 25], [594.48, 30], [597.55, 12], [603.00, 20], [607.43, 22], [609.62, 28], [614.31, 40], [616.36, 22], [621.73, 18],
+         [626.65, 25], [630.48, 12], [633.44, 30], [638.30, 32], [640.22, 100], [650.65, 45], [659.90, 25], [667.83, 22], [671.70, 15], [692.95, 30], [703.24, 40]].map(([nm, I]) => ({ nm, I, g: false }))
+  };
+  const GASES = ['H', 'He', 'Na', 'Hg', 'Ne'];
+  const GAS_NAMES = { H: 'hydrogène', He: 'hélium', Na: 'sodium', Hg: 'mercure', Ne: 'néon' };
+  // Gaz mystère : 2 ou 3 gaz distincts tirés au hasard.
+  function mystery(rng) {
+    const pool = GASES.slice(), k = rng() < 0.5 ? 2 : 3, out = [];
+    while (out.length < k) out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+    return out.sort((a, b) => GASES.indexOf(a) - GASES.indexOf(b));
+  }
+
+  // Couleur perçue d'une longueur d'onde (nm), [r, g, b] de 0 à 255, ou null hors de 380–750 nm
+  // (approximation de D. Bruton, atténuée aux bords du visible).
+  function visibleColor(nm) {
+    if (nm < 380 || nm > 750) return null;
+    let r = 0, g = 0, b = 0;
+    if (nm < 440) { r = -(nm - 440) / 60; b = 1; }
+    else if (nm < 490) { g = (nm - 440) / 50; b = 1; }
+    else if (nm < 510) { g = 1; b = -(nm - 510) / 20; }
+    else if (nm < 580) { r = (nm - 510) / 70; g = 1; }
+    else if (nm < 645) { r = 1; g = -(nm - 645) / 65; }
+    else { r = 1; }
+    const f = nm < 420 ? 0.3 + 0.7 * (nm - 380) / 40 : nm > 700 ? 0.3 + 0.7 * (750 - nm) / 50 : 1;
+    const gam = 0.8, c = x => Math.round(255 * Math.pow(x * f, gam));
+    return [c(r), c(g), c(b)];
+  }
+
+  /* =================== 5. Effet photoélectrique =================== */
+
+  // Travaux d'extraction typiques de surfaces polycristallines (eV) : Na 2,28 (Halliday, Resnick et Walker),
+  // K 2,29 (CRC Handbook), Zn 4,31 et Cu 4,70 (Serway et Jewett, tableau des travaux d'extraction).
+  const WORK = { Na: 2.28, K: 2.29, Zn: 4.31, Cu: 4.70 };
+  const METAL_NAMES = { Na: 'sodium', K: 'potassium', Zn: 'zinc', Cu: 'cuivre' };
+  const QE = 1e-4;  // rendement quantique typique d'un métal : un électron pour 10 000 photons
+  function photo(lambda, metal) {
+    const W = WORK[metal], Eph = HC / lambda, f = C / (lambda * 1e-9);
+    const Kmax = Eph - W, emits = Kmax > 0;
+    return { Eph, f, W, f0: W / H_EVS, lambda0: HC / W, emits, Kmax: emits ? Kmax : 0, Vstop: emits ? Kmax : 0 };
+  }
+  // Électrons éjectés par seconde par une lumière de puissance P (W) : QE × (nombre de photons par seconde)
+  // si hf > W, zéro sinon, quelle que soit P.
+  function ejectionRate(P, lambda, metal) {
+    const p = photo(lambda, metal);
+    return p.emits ? QE * P / (p.Eph * J_PER_MEV * 1e-6) : 0;
+  }
+  // Courant reçu par l'électrode (A) sous une tension de freinage V (V) : énergies cinétiques supposées
+  // réparties uniformément entre 0 et Kmax, donc fraction 1 − V/Kmax qui franchit la barrière.
+  function current(P, lambda, metal, V) {
+    const p = photo(lambda, metal), rate = ejectionRate(P, lambda, metal);
+    if (!p.emits) return 0;
+    const frac = V <= 0 ? 1 : Math.max(0, 1 - V / p.Kmax);
+    return rate * frac * 1.602176634e-19;
+  }
+
+  return {
+    // constantes
+    KE2, U_MEV, M_ALPHA, M_N_U, M_H_U, H_EVS, HC, C, RY_H, R_H, R_AU, B_DISPLAY, YEAR, METHANE_J_PER_KG, QE,
+    mulberry32,
+    // 1
+    closestApproach, rMin, rutherfordAngle, impactForAngle, rutherfordTraj, thomsonDeflect, shot, expectedCount, dSigma, nuclearRadius,
+    // 2
+    NUCLIDES, nuclide, byId, symbol, elementName, modeLabel, atomicMass, bindingMeasured, SEMF, semf, binding, valleyZ, BA_DATA,
+    qZN, qValue, REACTIONS, reaction,
+    // 3
+    decayProb, decaySample, decayConst, transmute, MATERIALS, attenuate,
+    // 4
+    airIndex, vacToAir, hLevel, hLine, H_LEVELS, absorb, HA, hDecay, LINES, GASES, GAS_NAMES, mystery, visibleColor,
+    // 5
+    WORK, METAL_NAMES, photo, ejectionRate, current
+  };
+})();
+/* ATOM-END */
+/* ================= SOCLE : utilitaires partagés (contrat §2) ================= */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const rootCS = getComputedStyle(document.documentElement), tok = n => rootCS.getPropertyValue(n).trim();
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+      accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie') };
+const RGB = {}; for (const k in C) RGB[k] = hex(C[k]);
+const rgba = (a, al) => `rgba(${a[0]},${a[1]},${a[2]},${al})`;
+const FM = tok('--mono'), FS = tok('--sans'), FSE = tok('--serif');
+const mono = px => `${px}px ${FM}`, sans = px => `${px}px ${FS}`, serif = (px, it) => `${it ? 'italic ' : ''}${px}px ${FSE}`;
+const TAU = Math.PI * 2, PI = Math.PI;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SLOW = reduce ? 0.5 : 1;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const easeOut = t => 1 - Math.pow(1 - clamp(t, 0, 1), 4);
+const fmt = (x, d) => { if (!isFinite(x)) return '—'; if (Math.abs(x) < Math.pow(10, -d) / 2) x = 0; return x.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+const SUPD = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const supS = n => String(n).replace(/[\d-]/g, d => d === '-' ? '⁻' : SUPD[d]);
+function fmtSci(x, d) {
+ if (d == null) d = 2;
+ if (!isFinite(x)) return '—';
+ if (x === 0) return '0';
+ const a = Math.abs(x);
+ if (a >= 0.01 && a < 1e4) return fmt(x, clamp(d - Math.floor(Math.log10(a)), 0, 8));
+ let e = Math.floor(Math.log10(a)), m = x / Math.pow(10, e), s = m.toFixed(d);
+ if (Math.abs(+s) >= 10) { e++; s = (m / 10).toFixed(d); }
+ return s.replace('.', ',').replace('-', '−') + ' × 10' + supS(e);
+}
+function fmtDur(s) {
+ if (!isFinite(s)) return 'stable';
+ const Y = Atom.YEAR;
+ let v, u;
+ if (s < 1e-15) { v = s * 1e18; u = 'as'; } else if (s < 1e-12) { v = s * 1e15; u = 'fs'; } else if (s < 1e-9) { v = s * 1e12; u = 'ps'; }
+ else if (s < 1e-6) { v = s * 1e9; u = 'ns'; } else if (s < 1e-3) { v = s * 1e6; u = 'µs'; } else if (s < 1) { v = s * 1e3; u = 'ms'; }
+ else if (s < 60) { v = s; u = 's'; } else if (s < 3600) { v = s / 60; u = 'min'; } else if (s < 86400) { v = s / 3600; u = 'h'; }
+ else if (s < Y) { v = s / 86400; u = 'j'; } else {
+  v = s / Y; u = 'a';
+  if (v >= 1e6) return fmtSci(v, 2) + ' a';
+ }
+ if (v >= 100) { const p = Math.pow(10, Math.floor(Math.log10(v)) - 2); v = Math.round(v / p) * p; }
+ const d = v >= 99.95 ? 0 : v >= 9.995 ? 1 : 2;
+ let t = d ? fmt(v, d) : fmtI(Math.round(v));
+ if (t.indexOf(',') > 0) t = t.replace(/0+$/, '').replace(/,$/, '');
+ return t + ' ' + u;
+}
+const newRng = () => Atom.mulberry32((Math.random() * 4294967296) >>> 0);
+function tag(c, text, x, y, o) {
+ o = o || {};
+ c.font = mono(11); c.textAlign = o.align || 'left'; c.textBaseline = o.base || 'middle';
+ if (o.bg) {
+  const w = c.measureText(text).width, al = c.textAlign, rx = al === 'right' ? x - w : al === 'center' ? x - w / 2 : x;
+  c.fillStyle = rgba(RGB.fond, 0.8); c.fillRect(rx - 3, y - 8, w + 6, 16);
+ }
+ c.fillStyle = o.color || C.texte2; c.fillText(text, x, y);
+}
+function glow(c, x, y, r, col, a) {
+ const g = c.createRadialGradient(x, y, 0, x, y, r);
+ g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0));
+ c.fillStyle = g; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+}
+const disc = (c, x, y, r, f) => { c.fillStyle = f; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); };
+const ring = (c, x, y, r, s, lw) => { c.strokeStyle = s; c.lineWidth = lw || 1; c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke(); };
+const seg = (c, x0, y0, x1, y1, s, lw) => { c.strokeStyle = s; c.lineWidth = lw || 1; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); };
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+let forceRead = true;
+const notify = () => { forceRead = true; };
+const STEPS = [];
+/* ================= CH1 : module 26 · Atome et noyau ================= */
+const nucSym = Z => { const s = Atom.symbol(Z); return s === '?' ? ['Zn', 'Ga', 'Ge', 'As', 'Se', 'Br'][Z - 30] || 'Z' + Z : s; };
+const nucLabel = (Z, N) => { const nu = Atom.nuclide(Z, N); return nu ? nu.label : supS(Z + N) + nucSym(Z); };
+const cellFill = nu => { const m = nu.mode; return m === 'stable' ? rgba(RGB.texte, 0.92) : m === 'b-' ? rgba(RGB.neg, 0.6) : m === 'b+' ? rgba(RGB.pos, 0.6) : m === 'a' ? rgba(RGB.ener, 0.6) : rgba(RGB.texte2, 0.4); };
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const lgLine = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const on = (id, ev, f) => $(id).addEventListener(ev, f);
+const press = (id, v) => $(id).setAttribute('aria-pressed', v ? 'true' : 'false');
+const bin10 = deg => Math.min(17, Math.floor(deg / 10));
+let NL = null;
+function nucLayout() {
+ if (NL) return NL;
+ const rng = Atom.mulberry32(26), pts = [], s = Math.SQRT2, o = [0.31 * s, 0.17 * s, 0.23 * s];
+ for (let i = -9; i <= 9; i++) for (let j = -9; j <= 9; j++) for (let k = -9; k <= 9; k++) if (!((i + j + k) & 1)) {
+  const x = i * s - o[0], y = j * s - o[1], z = k * s - o[2]; pts.push([x, y, z, x * x + y * y + z * z]);
+ }
+ pts.sort((a, b) => a[3] - b[3]);
+ const n = 240, x = new Float32Array(n), y = new Float32Array(n), z = new Float32Array(n), rad = new Float32Array(n + 1);
+ const c1 = Math.cos(0.7), s1 = Math.sin(0.7), c2 = Math.cos(0.45), s2 = Math.sin(0.45);   // rotation d'ensemble
+ for (let i = 0; i < n; i++) {
+  let [px, py, pz] = pts[i], t = px * c1 - pz * s1; pz = px * s1 + pz * c1; px = t;
+  t = py * c2 - pz * s2; pz = py * s2 + pz * c2; py = t;
+  x[i] = px + (rng() - 0.5) * 0.1; y[i] = py + (rng() - 0.5) * 0.1; z[i] = pz + (rng() - 0.5) * 0.1;
+  rad[i + 1] = Math.max(rad[i], Math.hypot(x[i], y[i], z[i]) + 1);
+ }
+ return (NL = { x, y, z, rad });
+}
+const isProton = (i, Z, A) => Math.floor((i + 1) * Z / A) > Math.floor(i * Z / A);
+const BALL = { p: [], n: [] };
+for (let i = 0; i < 6; i++) { BALL.p.push(rgba(RGB.pos, 0.6 + 0.08 * i)); BALL.n.push(rgba(RGB.texte2, 0.6 + 0.08 * i)); }
+function drawBalls(c, cx, cy, rb, list, psi, tilt, rlim, al) {
+ const cs = Math.cos(psi), sn = Math.sin(psi), ct = Math.cos(tilt), st = Math.sin(tilt);
+ for (const b of list) {
+  const z1 = -b.x * sn + b.z * cs;
+  b.sx = cx + (b.x * cs + b.z * sn) * rb; b.sy = cy + (b.y * ct - z1 * st) * rb; b.sz = b.y * st + z1 * ct; b.sr = rb * 0.96;
+ }
+ for (const b of list.slice().sort((a, b) => a.sz - b.sz)) {
+  c.globalAlpha = al * (b.a == null ? 1 : b.a);
+  disc(c, b.sx, b.sy, b.sr, BALL[b.k][clamp(Math.floor((b.sz / rlim + 1) * 3), 0, 5)]);
+  if (b.sr > 4) disc(c, b.sx - b.sr * 0.3, b.sy - b.sr * 0.3, b.sr * 0.36, 'rgba(255,255,255,0.16)');
+ }
+ c.globalAlpha = 1;
+}
+const mkBalls = (Z, A) => { const L = nucLayout(), r = []; for (let i = 0; i < A; i++) r.push({ x: L.x[i], y: L.y[i], z: L.z[i], k: isProton(i, Z, A) ? 'p' : 'n', a: 1 }); return r; };
+/* ---------------- Étape 1 : feuille d'or ---------------- */
+const RATIO = Atom.R_AU / Atom.nuclearRadius(197);
+const k1 = { model: 'rutherford', E: 5, lr: 2.48, n: 0, bins: new Array(18).fill(0), c: [0, 0, 0, 0], fl: [], al: [], acc: 0, zt: 0, zOn: false, mix: 0, msg: '', msgT: 0, tr: null, trE: 0, lt: 0, rng: newRng(), g: null, nuc: null };
+const rate1 = () => Math.pow(10, k1.lr);
+function resetCounts1() { const k = k1; k.n = 0; k.bins.fill(0); k.c = [0, 0, 0, 0]; k.fl = []; k.al = []; k.acc = 0; k.msgT = 0; notify(); }
+function sync1() {
+ const k = k1;
+ $('#rE').value = k.E; $('#vE').textContent = fmt(k.E, 1) + ' MeV'; $('#rRate').value = k.lr; $('#vRate').textContent = fmtI(rate1()) + ' α/s';
+ press('#bTh', k.model === 'thomson'); press('#bRu', k.model === 'rutherford'); press('#bScale', k.zOn);
+}
+function setModel1(m) { if (m !== k1.model) { k1.model = m; resetCounts1(); sync1(); } }
+function sayE1(old) {
+ const k = k1, d = fmt(Atom.closestApproach(k.E, 79), 0); if (k.E === old) return;
+ k.msgT = 9; k.msg = `À ${fmt(k.E, 1)} MeV les α, ` + (k.E < old ? `plus lents, sont déviés plus souvent et plus fort, mais n’approchent qu’à ${d} fm du noyau.` : `plus rapides, sont moins déviés et s’approchent jusqu’à ${d} fm du noyau.`);
+ notify();
+}
+function setE1(E, say) {
+ const k = k1, old = k.E; k.E = clamp(Math.round(E * 10) / 10, 2, 8); if (k.E === old) return;
+ resetCounts1(); sync1(); if (say) sayE1(old);
+}
+function tally1(th) { const k = k1, deg = th * 180 / PI; k.n++; k.bins[bin10(deg)]++; k.c[deg < 1 ? 0 : deg < 10 ? 1 : deg < 90 ? 2 : 3]++; }
+const land1 = (th, phi, delay) => { tally1(th); k1.fl.push({ a: phi, t: -(delay || 0) }); };
+function burst1(n) {
+ const k = k1; k.zOn = false; k.zt = 0;
+ for (let i = 0; i < n; i++) {
+  const s = Atom.shot(k.E, 79, k.model, k.rng);
+  if (i < 400) land1(s.theta, (k.rng() < 0.5 ? -1 : 1) * s.theta, k.rng() * 0.6); else tally1(s.theta);
+ }
+ sync1(); notify();
+}
+function geo1(W, H) {
+ const nw = W < 640, L = clamp(Math.min(W, H) * 0.33, 118, 230), cx = W * (nw ? 0.5 : 0.46);
+ let R = Math.min((H - 64) / 2, cx - 56);
+ if (!nw) R = Math.min(R, W - cx - L - 24);
+ R = Math.max(80, R);
+ return { cx, cy: H / 2, R, L, lx: W - L - 12, ly: H - L - 12, nw, hF: Math.min(R * 0.92, 300) };
+}
+function loupeTraj() {
+ const k = k1; if (k.tr && k.trE === k.E) return k.tr;
+ const d = Atom.closestApproach(k.E, 79), out = [];
+ for (const b of [0, 8, 16, 30, 60, 120, 250]) {
+  const pts = Atom.rutherfordTraj(k.E, 79, b, 0.01, 500).pts, tc = new Float32Array(pts.length); let T = 0;
+  for (let i = 1; i < pts.length; i++) { const r = Math.hypot(pts[i][0], pts[i][1]); T += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]) / Math.max(0.12, Math.sqrt(Math.max(0, 1 - d / r))); tc[i] = T; }
+  out.push({ pts, tc, T });
+ }
+ k.trE = k.E; return (k.tr = out);
+}
+function trajPos(tr, dist) {
+ const tc = tr.tc; let lo = 0, hi = tc.length - 1;
+ if (dist >= tc[hi]) return null;
+ while (hi - lo > 1) { const m = (lo + hi) >> 1; if (tc[m] <= dist) lo = m; else hi = m; }
+ const f = (dist - tc[lo]) / Math.max(1e-9, tc[hi] - tc[lo]), a = tr.pts[lo], b = tr.pts[hi];
+ return [lerp(a[0], b[0], f), lerp(a[1], b[1], f)];
+}
+function drawLoupe(c, g) {
+ const k = k1, { lx, ly, L } = g, mx = lx + L / 2, my = ly + L / 2 + 8, th = k.mix > 0.5, half = L / 2 - 8, by = ly + L - 12;
+ c.save();
+ c.fillStyle = rgba(RGB.fond, 0.93); c.fillRect(lx, ly, L, L); c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(lx + 0.5, ly + 0.5, L - 1, L - 1);
+ c.beginPath(); c.rect(lx, ly, L, L); c.clip();
+ if (!th) {
+  const s = half / 330, d = Atom.closestApproach(k.E, 79), tr = loupeTraj(), V = 294;
+  c.strokeStyle = rgba(RGB.pos, 0.34); c.lineWidth = 1;
+  for (const t of tr) for (const sg of [1, -1]) { c.beginPath(); t.pts.forEach((p, i) => { const X = mx + p[0] * s, Y = my - sg * p[1] * s; i ? c.lineTo(X, Y) : c.moveTo(X, Y); }); c.stroke(); }
+  c.setLineDash([3, 3]); ring(c, mx, my, d * s, rgba(RGB.texte, 0.5)); c.setLineDash([]);
+  disc(c, mx, my, Math.max(2, Atom.nuclearRadius(197) * s), C.pos);
+  for (const t of tr) { const p = trajPos(t, (k.lt * V) % (t.T + 0.5 * V)); if (p) for (const sg of [1, -1]) disc(c, mx + p[0] * s, my - sg * p[1] * s, 2.4, C.pos); }
+  tag(c, 'Noyau · échelle des fm', lx + 7, ly + 11);
+  tag(c, 'd = ' + fmt(d, 1) + ' fm', mx + d * s * 0.72 + 4, my - d * s * 0.72 - 4, { color: rgba(RGB.texte, 0.8) });
+  const bl = 100 * s > 28 ? 100 : 50; seg(c, lx + 8, by, lx + 8 + bl * s, by, C.texte2, 1.2); tag(c, bl + ' fm', lx + 12 + bl * s, by);
+ } else {
+  const s = half / 2e5, R = Atom.R_AU * s;
+  disc(c, mx, my, R, rgba(RGB.pos, 0.24)); c.setLineDash([3, 3]); ring(c, mx, my, R, rgba(RGB.texte, 0.5)); c.setLineDash([]);
+  [0, 36, 72, 108, 135].forEach((b, i) => {
+   for (const sg of (b ? [1, -1] : [1])) { const Y = my - sg * b * 1000 * s; seg(c, lx, Y, lx + L, Y, rgba(RGB.pos, 0.34)); disc(c, lx + ((k.lt / 3.4 + i * 0.21) % 1) * L, Y, 2.4, C.pos); }
+  });
+  tag(c, 'Atome entier · échelle des pm', lx + 7, ly + 11); seg(c, lx + 8, by, lx + 8 + 1e5 * s, by, C.texte2, 1.2); tag(c, '100 pm', lx + 12 + 1e5 * s, by);
+ }
+ c.restore();
+}
+function niceBar(s, lo) { for (let e = -1; e < 9; e++) for (const m of [1, 2, 5]) if (m * Math.pow(10, e) * s >= lo) return m * Math.pow(10, e); return 1e9; }
+const fmtLen = f => f >= 1e3 ? fmt(f / 1e3, 0) + ' pm' : fmt(f, f < 1 ? 1 : 0) + ' fm';
+function drawScales(c, W, H, g) {
+ const k = k1, zz = lerp(k.zt, sstep(k.zt), 0.6), Rv = Math.min(W, H) * 0.3, s = Rv / Atom.R_AU * Math.pow(RATIO, zz);
+ const cx = W / 2, cy = H / 2 - 6, ra = Atom.R_AU * s, rn = Atom.nuclearRadius(197) * s, big = Math.max(W, H);
+ c.fillStyle = rgba(RGB.fond, Math.min(1, k.zt * 6)); c.fillRect(0, 0, W, H);
+ if (ra < 6 * big) {
+  const gr = c.createRadialGradient(cx, cy, 0, cx, cy, ra); gr.addColorStop(0, rgba(RGB.neg, 0.2)); gr.addColorStop(1, rgba(RGB.neg, 0.04));
+  c.fillStyle = gr; c.beginPath(); c.arc(cx, cy, ra, 0, TAU); c.fill();
+  if (ra < 0.9 * big) { c.setLineDash([4, 4]); c.strokeStyle = rgba(RGB.neg, 0.5); c.lineWidth = 1; c.stroke(); c.setLineDash([]); }
+ }
+ if (rn < 2.5) { glow(c, cx, cy, 9, RGB.pos, 0.6); disc(c, cx, cy, 2.2, C.pos); }
+ else {
+  c.fillStyle = rgba(RGB.pos, 0.16); c.beginPath(); c.arc(cx, cy, rn, 0, TAU); c.fill(); ring(c, cx, cy, rn, rgba(RGB.pos, 0.6), 1.2);
+  if (rn > 12) { const L = nucLayout(); if (!k.nuc) k.nuc = mkBalls(79, 197); drawBalls(c, cx, cy, rn / L.rad[197], k.nuc, performance.now() * 0.00012 * SLOW, 0.35, L.rad[197], sstep((rn - 12) / 30)); }
+ }
+ tag(c, zz < 0.5 ? 'atome d’or · rayon ' + fmt(Atom.R_AU / 1000, 0) + ' pm' : 'noyau d’or · rayon ' + fmt(Atom.nuclearRadius(197), 1) + ' fm', cx, H - 114, { align: 'center', color: C.texte });
+ tag(c, 'grossissement × ' + fmtI(Math.pow(RATIO, zz)), cx, g.nw ? 112 : 26, { align: 'center' });
+ const bl = niceBar(s, 80) * s, by = H - 26;
+ c.strokeStyle = C.texte; c.lineWidth = 1.5; c.beginPath(); c.moveTo(cx - bl / 2, by); c.lineTo(cx + bl / 2, by); for (const x of [cx - bl / 2, cx + bl / 2]) { c.moveTo(x, by - 5); c.lineTo(x, by + 5); } c.stroke();
+ tag(c, fmtLen(bl / s), cx, by - 12, { align: 'center', color: C.texte });
+ const a = sstep((zz - 0.6) / 0.3);
+ if (a > 0.01) {
+  c.globalAlpha = a; c.fillStyle = C.texte; c.font = sans(g.nw ? 14 : 16); c.textAlign = 'center';
+  c.fillText('Si le noyau était une bille de 1 cm,', cx, H - 90); c.fillText('l’atome d’or ferait ≈ ' + fmtI(RATIO * 0.01) + ' m de diamètre.', cx, H - 68); c.globalAlpha = 1;
+ }
+}
+function drawMain1(c, W, H, g) {
+ const k = k1, { cx, cy, R } = g, th = k.mix, G = [PI + 0.09, PI - 0.09 + TAU], xs = cx - R - 46;
+ c.lineWidth = 8; c.strokeStyle = rgba(RGB.texte, 0.05); c.beginPath(); c.arc(cx, cy, R, G[0], G[1]); c.stroke();
+ c.lineWidth = 1; c.strokeStyle = C.trait; for (const d of [-4, 4]) { c.beginPath(); c.arc(cx, cy, R + d, G[0], G[1]); c.stroke(); }
+ c.strokeStyle = C.texte2; c.beginPath();
+ for (let a = 0; a < 360; a += 10) if (a !== 180) { const r = a * PI / 180, l = a % 90 === 0 ? 9 : a % 30 === 0 ? 6 : 3; c.moveTo(cx + (R + 6) * Math.cos(r), cy - (R + 6) * Math.sin(r)); c.lineTo(cx + (R + 6 + l) * Math.cos(r), cy - (R + 6 + l) * Math.sin(r)); }
+ c.stroke();
+ tag(c, '0°', cx + R + 28, cy); tag(c, '90°', cx, cy - R - 22, { align: 'center' }); tag(c, '90°', cx, cy + R + 22, { align: 'center' });
+ c.fillStyle = C.fond2; c.strokeStyle = rgba(RGB.texte2, 0.7); c.lineWidth = 1.2; c.fillRect(xs, cy - 14, 32, 28); c.strokeRect(xs + 0.5, cy - 13.5, 32, 27);
+ c.fillStyle = C.fond; c.fillRect(xs + 26, cy - 2, 8, 4); tag(c, 'source α', xs, cy + 27);
+ c.fillStyle = rgba(RGB.pos, 0.07); c.fillRect(xs + 32, cy - 5, cx - xs - 32, 10); seg(c, xs + 32, cy, cx, cy, rgba(RGB.pos, 0.3));
+ const sp = clamp(R / 10, 14, 24), m = Math.floor(g.hF / sp / 2), ra = sp * 0.42;
+ for (let i = -m; i <= m; i++) {
+  const y = cy + i * sp;
+  if (th > 0.01) disc(c, cx, y, ra, rgba(RGB.pos, 0.2 * th));
+  ring(c, cx, y, ra, rgba(RGB.texte, 0.24)); if (th < 0.99) disc(c, cx, y, 1.8, rgba(RGB.pos, 1 - th));
+ }
+ if (th < 0.99) glow(c, cx, cy, 12, RGB.pos, 0.5 * (1 - th));
+ tag(c, 'feuille d’or', cx, cy - m * sp - ra - 12, { align: 'center' });
+ const L1 = R + 14, pos = (a, s) => { if (s < L1) return [xs + 32 + s, cy]; const d = s - L1; return [cx + d * Math.cos(a.phi), cy - d * Math.sin(a.phi)]; };
+ c.lineWidth = 1.4; c.strokeStyle = rgba(RGB.pos, 0.4); c.beginPath();
+ for (const a of k.al) { const p = pos(a, a.s), q = pos(a, Math.max(0, a.s - 11)); c.moveTo(q[0], q[1]); c.lineTo(p[0], p[1]); }
+ c.stroke(); c.fillStyle = C.pos; c.beginPath();
+ for (const a of k.al) { const p = pos(a, a.s); c.moveTo(p[0] + 2.4, p[1]); c.arc(p[0], p[1], 2.4, 0, TAU); }
+ c.fill();
+ const bk = [[], [], [], []]; for (const f of k.fl) if (f.t >= 0) bk[Math.min(3, Math.floor(f.t / 1.5 * 4))].push(f);
+ [1, 0.65, 0.35, 0.15].forEach((al, j) => {
+  for (const [r, a] of j ? [[2.6, al]] : [[2.6, 1], [7, 0.12]]) {
+   if (!bk[j].length) return; c.fillStyle = rgba(RGB.ener, a); c.beginPath();
+   for (const f of bk[j]) { const x = cx + R * Math.cos(f.a), y = cy - R * Math.sin(f.a); c.moveTo(x + r, y); c.arc(x, y, r, 0, TAU); }
+   c.fill();
+  }
+ });
+ drawLoupe(c, g);
+}
+STEPS.push({
+ key: 'or', ch: 0, title: 'Tirer sur une feuille d’or', word: 'Or',
+ text: 'Des projectiles chargés, les particules α, sont tirés sur une feuille d’or épaisse d’un seul atome. Chacun laisse un éclat là où il frappe l’écran : compare ce que donnent les deux modèles de l’atome.',
+ cle: 'L’atome est presque vide. Toute sa charge positive et presque toute sa masse tiennent dans un noyau 10⁴ à 10⁵ fois plus petit que lui.',
+ note: 'Une seule couche d’atomes, tirs visant 1 000 fm autour d’un noyau (retours bien plus fréquents qu’en vrai) ; écran sans perte ; électrons ignorés.',
+ rec: 'Tirs par tranche de 10° de déviation',
+ legend: lg('<rect width="20" height="8" fill="' + C.accent + '" fill-opacity=".75"/>', 'tirs') + lg(lgLine(C.texte2, 1.4, 1), 'attendu, 1/sin⁴(θ/2)') + '<span>échelle log</span>',
+ enter(restart) { if (restart) { Object.assign(k1, { model: 'rutherford', E: 5, lr: 2.48, mix: 0, zOn: false, zt: 0 }); resetCounts1(); } sync1(); },
+ step(dt) {
+  const k = k1, g = k.g; k.lt += dt;
+  k.mix += clamp((k.model === 'thomson' ? 1 : 0) - k.mix, -dt / 0.5, dt / 0.5); k.zt += clamp((k.zOn ? 1 : 0) - k.zt, -dt / 4, dt / 4);
+  if (k.msgT > 0) k.msgT -= dt;
+  let j = 0; for (const f of k.fl) { f.t += dt; if (f.t < 1.5) k.fl[j++] = f; } k.fl.length = j;
+  if (k.zt > 0.001) { k.acc = 0; return; }
+  k.acc += rate1() * dt;
+  for (let m = 0; k.acc >= 1 && m < 80; m++, k.acc--) {
+   const s = Atom.shot(k.E, 79, k.model, k.rng), phi = (k.rng() < 0.5 ? -1 : 1) * s.theta;
+   if (k.al.length < 60) k.al.push({ th: s.theta, phi, s: 0 }); else land1(s.theta, phi);
+  }
+  if (k.acc >= 1) k.acc = 0;
+  const vs = 380 * Math.sqrt(k.E / 5) * dt, R = g ? g.R : 300; j = 0;
+  for (const a of k.al) { a.s += vs; if (a.s >= 2 * R + 14) land1(a.th, a.phi); else k.al[j++] = a; }
+  k.al.length = j;
+ },
+ draw(c, W, H) { const g = k1.g = geo1(W, H); if (k1.zt < 0.3) drawMain1(c, W, H, g); if (k1.zt > 0.001) drawScales(c, W, H, g); },
+ scope(c, w, h) {
+  const k = k1, pl = 36, pr = 8, pt = 10, pb = 18, pw = w - pl - pr, ph = h - pt - pb, nb = 18, exp = [];
+  for (let i = 0; i < nb; i++) exp.push(k.n ? Atom.expectedCount(k.n, k.E, 79, i * 10 * PI / 180, (i + 1) * 10 * PI / 180) : 0);
+  const hi = Math.ceil(Math.log10(Math.max(10, ...k.bins, ...exp) * 1.3)), lo = Math.log10(0.4);
+  const y = v => pt + ph * (1 - (Math.log10(Math.max(v, 0.4)) - lo) / (hi - lo)), x = i => pl + pw * i / nb;
+  c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (let e = 0; e <= hi; e++) { const yy = y(Math.pow(10, e)); seg(c, pl, yy, pl + pw, yy, C.trait); c.fillStyle = C.texte2; c.fillText(e < 3 ? fmtI(Math.pow(10, e)) : '10' + supS(e), pl - 4, yy); }
+  c.strokeStyle = C.trait; c.strokeRect(pl + 0.5, pt + 0.5, pw, ph); c.fillStyle = rgba(RGB.accent, 0.75);
+  k.bins.forEach((v, i) => { if (v > 0) c.fillRect(x(i) + 1, y(v), pw / nb - 2, pt + ph - y(v)); });
+  c.strokeStyle = C.texte2; c.lineWidth = 1.4; c.setLineDash([4, 3]); c.beginPath();
+  exp.forEach((v, i) => { const X = x(i) + pw / nb / 2, Y = y(v); i ? c.lineTo(X, Y) : c.moveTo(X, Y); }); c.stroke(); c.setLineDash([]);
+  c.fillStyle = C.texte2; c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillText('0°', pl, h - 4); c.textAlign = 'center'; c.fillText('90°', pl + pw / 2, h - 4); c.textAlign = 'right'; c.fillText('180°', pl + pw, h - 4);
+  if (!k.n) { c.textAlign = 'center'; c.fillText('aucun tir', pl + pw / 2, pt + ph / 2); }
+ },
+ meas() {
+  const k = k1, f = k.n ? k.c[3] / k.n * 100 : 0;
+  return [['Tirs', fmtI(k.n), ''], ['0–1°', fmtI(k.c[0]), ''], ['1–10°', fmtI(k.c[1]), ''], ['10–90°', fmtI(k.c[2]), ''], ['au-delà de 90°', fmtI(k.c[3]), ''],
+   ['Fraction > 90°', fmt(f, f < 0.1 ? 3 : 2), '%'], ['Approche minimale d', fmt(Atom.closestApproach(k.E, 79), 1), 'fm']];
+ },
+ status() {
+  const k = k1;
+  if (k.zt > 0.02) return k.zt > 0.98 ? 'Si le noyau était une bille de 1 cm, l’atome d’or ferait ≈ ' + fmtI(RATIO * 0.01) + ' m de diamètre : presque tout est vide.' : 'Zoom de l’atome d’or (rayon 144 pm) vers son noyau (7,0 fm) : un facteur ≈ ' + fmtI(Math.round(RATIO / 100) * 100) + ' sur le rayon.';
+  if (k.msgT > 0) return k.msg;
+  if (!k.n) return 'Chaque α laisse un éclat là où il frappe l’écran. Lance des tirs.';
+  if (k.model === 'rutherford') return k.c[3] ? 'Comme un obus de 15 pouces qui rebondirait sur une feuille de papier (Rutherford) : la charge positive est concentrée dans un tout petit noyau.' : 'La plupart des α traversent presque sans dévier. Un retour est rare : continue de tirer.';
+  return k.n < 3000 ? 'Avec une charge étalée, chaque α n’est dévié que d’une fraction de degré.' : 'Après quelques milliers de tirs, aucun α ne revient : une charge étalée ne peut pas renvoyer un α.';
+ },
+ hit(x, y) {
+  const k = k1, g = k.g; if (!g) return null;
+  const { cx, cy, R } = g, th = k.mix > 0.5;
+  if (k.zt > 0.5) return k.zt > 0.9 && Math.hypot(x - W / 2, y - (H / 2 - 6)) < 24 ? { name: 'Noyau', role: 'Quelques fm de rayon : 79 protons et 118 neutrons.' } : null;
+  if (x > g.lx && y > g.ly) return Math.hypot(x - g.lx - g.L / 2, y - g.ly - g.L / 2 - 8) < 10 && !th ? { name: 'Noyau', role: 'Rayon ≈ 7 fm : toute la charge + de l’atome.' } : { name: 'Loupe', role: th ? 'Atome de Thomson à l’échelle des pm.' : 'Trajectoires des α à l’échelle du noyau (fm).' };
+  if (Math.abs(x - (cx - R - 30)) < 18 && Math.abs(y - cy) < 16) return { name: 'Source α', role: 'Boîte de plomb percée d’un trou : un faisceau étroit d’α.' };
+  if (Math.hypot(x - cx, y - cy) < 7) return th ? { name: 'Atome de Thomson', role: 'Charge positive étalée dans toute la sphère.' } : { name: 'Noyau', role: 'Un point au centre de l’atome (dessiné très agrandi).' };
+  if (Math.abs(x - cx) < 14 && Math.abs(y - cy) < g.hF / 2 + 6) return { name: 'Feuille d’or', role: 'Une colonne d’atomes vue en coupe.' };
+  return Math.abs(Math.hypot(x - cx, y - cy) - R) < 10 ? { name: 'Écran', role: 'Chaque α qui le frappe laisse un éclat qui s’estompe.' } : null;
+ },
+ onKey(kk) { if (kk === 't') burst1(10000); else if (kk === 'm') setModel1(k1.model === 'thomson' ? 'rutherford' : 'thomson'); else return false; return true; },
+ state() { const k = k1; return { model: k.model, E: k.E, n: k.n, bins: k.bins.slice(), back: k.c[3], fracBack: k.n ? k.c[3] / k.n : 0, c: k.c.slice(), zt: k.zt, rate: rate1() }; },
+ api: { setModel: setModel1, burst: burst1, setEalpha(E) { setE1(E, true); } }
+});
+on('#bTh', 'click', () => setModel1('thomson')); on('#bRu', 'click', () => setModel1('rutherford'));
+on('#rE', 'input', e => { if (k1.eFrom == null) k1.eFrom = k1.E; setE1(+e.target.value, false); });
+on('#rE', 'change', () => { if (k1.eFrom != null) sayE1(k1.eFrom); k1.eFrom = null; });
+on('#rRate', 'input', e => { k1.lr = +e.target.value; $('#vRate').textContent = fmtI(rate1()) + ' α/s'; });
+on('#bBurst', 'click', () => burst1(10000));
+on('#bScale', 'click', () => { k1.zOn = !k1.zOn; sync1(); notify(); });
+/* ---------------- Étape 2 : protons, neutrons, isotopes ---------------- */
+const ISO = [0, 1, 4, 7, 9, 11, 12, 14, 16, 19, 20, 23, 24, 27, 28, 31, 32, 35, 40, 39, 40, 45, 48, 51, 52, 55, 56];   // A de l'isotope le plus abondant
+const CELLS = Atom.NUCLIDES.filter(n => n.Z >= 1 && n.Z <= 26 && n.N <= 40);
+const k2 = { Z: 6, N: 6, vis: new Set(), ghost: new Set(), all: false, balls: [], gone: [], last: { dZ: 0, dN: 0 }, drag: false, g: null, pulse: 0 };
+const key2 = (Z, N) => Z * 100 + N;
+const dur2 = s => fmtDur(s).replace(/ a$/, s < 3.2e8 ? ' an' : ' ans');
+function addBall(kind) { const L = nucLayout(), s = k2.balls.length; if (s < 240) k2.balls.push({ slot: s, k: kind, x: L.x[s] * 3.5, y: L.y[s] * 3.5, z: L.z[s] * 3.5, a: 0 }); }
+function dropBall(kind) {
+ const bl = k2.balls; let i = bl.length - 1; while (i >= 0 && bl[i].k !== kind) i--;
+ if (i < 0) return;
+ const b = bl[i], last = bl.pop();
+ if (last !== b) { last.slot = i; bl[i] = last; }
+ k2.gone.push(b);
+}
+function rebuild2() {
+ const k = k2, A = k.Z + k.N;
+ for (let i = 0; i < A; i++) { const kd = isProton(i, k.Z, A) ? 'p' : 'n'; if (k.balls[i]) k.balls[i].k = kd; else addBall(kd); }
+ while (k.balls.length > A) k.gone.push(k.balls.pop());
+ k.balls.forEach((b, i) => { b.slot = i; });
+}
+function go2(Z, N) {
+ const k = k2; Z = clamp(Z, 1, 26); N = clamp(N, 0, 40);
+ const dZ = Z - k.Z, dN = N - k.N; if (!dZ && !dN) return;
+ k.last = { dZ, dN }; k.Z = Z; k.N = N;
+ if (Math.abs(dZ) + Math.abs(dN) === 1) { const d = dZ || dN; (d > 0 ? addBall : dropBall)(dZ ? 'p' : 'n'); } else rebuild2();
+ (Atom.nuclide(Z, N) ? k.vis : k.ghost).add(key2(Z, N));
+ k.pulse = 1; sync2(); notify();
+}
+function sync2() {
+ const k = k2;
+ $('#bMp').disabled = k.Z <= 1; $('#bPp').disabled = k.Z >= 26; $('#bMn').disabled = k.N <= 0; $('#bPn').disabled = k.N >= 40;
+ $('#selEl').value = k.Z; press('#bAll', k.all);
+}
+function geo2(W, H) {
+ const stack = W < 700 || W < H;
+ const nuc = stack ? { x: 0, y: 24, w: W, h: Math.max(124, H * 0.46 - 24) } : { x: 0, y: 0, w: Math.min(W * 0.32, 400), h: H };
+ const ax = stack ? 0 : nuc.w, ay = stack ? nuc.y + nuc.h : 0, aw = W - ax, ah = H - ay, ml = 30, mb = 24, mt = stack ? 6 : 36, mr = 12;
+ const cs = Math.min((aw - ml - mr) / 41, (ah - mb - mt) / 26);
+ return { stack, nuc, cs, x0: ax + ml + (aw - ml - mr - cs * 41) / 2, y0: ay + mt + (ah - mt - mb - cs * 26) / 2 };
+}
+function cellAt2(x, y) {
+ const g = k2.g, N = Math.floor((x - g.x0) / g.cs), Z = 26 - Math.floor((y - g.y0) / g.cs);
+ return N >= 0 && N <= 40 && Z >= 1 && Z <= 26 ? { Z, N } : null;
+}
+function drawNuc2(c, g, now) {
+ const k = k2, { nuc, stack } = g, A = k.Z + k.N, L = nucLayout(), nu = Atom.nuclide(k.Z, k.N);
+ const Rmax = stack ? Math.min(nuc.w * 0.26, nuc.h * 0.46) : Math.min(nuc.w * 0.36, nuc.h * 0.25), rb = Math.min(22, Rmax / L.rad[66]);
+ const cx = stack ? nuc.w * 0.27 : nuc.w / 2, cy = stack ? nuc.y + nuc.h / 2 : nuc.h * 0.6;
+ glow(c, cx, cy, Rmax * 1.5, RGB.neg, 0.1);
+ drawBalls(c, cx, cy, rb * (1 + 0.02 * Math.sin(now * 0.0011 * SLOW) + k.pulse * 0.05), k.balls.concat(k.gone), now * 0.00013 * SLOW, 0.32, L.rad[Math.min(A + 2, 239)], 1);
+ const lx = stack ? nuc.w * 0.55 : cx, ly = stack ? cy - 8 : cy - Rmax - 18;
+ c.textAlign = stack ? 'left' : 'center'; c.fillStyle = C.texte; c.font = serif(stack ? 46 : 58); c.fillText(nucLabel(k.Z, k.N), lx, ly);
+ c.font = sans(13); c.fillStyle = C.texte2; c.fillText(Atom.elementName(k.Z) + ' ' + A, lx, ly + 22);
+ c.font = mono(11); c.fillStyle = nu ? (nu.mode === 'stable' ? C.texte : C.accent) : C.neg;
+ c.fillText(nu ? (nu.mode === 'stable' ? 'stable' : Atom.modeLabel(nu.mode) + ' · ' + dur2(nu.halfLife)) : 'se défait aussitôt', lx, ly + 40);
+ if (!stack) tag(c, 'Z électrons autour (hors échelle)', cx, cy + Rmax * 1.4 + 6, { align: 'center' });
+}
+function drawMap2(c, g) {
+ const k = k2, { x0, y0, cs } = g, bx = x0 + 41 * cs, by = y0 + 26 * cs, gp = Math.max(0.6, cs * 0.07);
+ c.setLineDash([3, 4]); seg(c, x0, by, x0 + 26 * cs, y0, rgba(RGB.texte2, 0.4)); c.setLineDash([]);
+ c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'right';
+ for (const z of [1, 5, 10, 15, 20, 25]) c.fillText(z, x0 - 5, y0 + (26 - z + 0.5) * cs);
+ c.textAlign = 'center'; c.textBaseline = 'top';
+ for (const n of [0, 10, 20, 30, 40]) c.fillText(n, x0 + (n + 0.5) * cs, by + 4);
+ c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('Z protons', x0 - 26, y0 - 8); c.textAlign = 'right'; c.fillText('N neutrons', bx, by + 22);
+ tag(c, 'N = Z', x0 + 26 * cs + 6, y0 + 4);
+ c.fillStyle = C.trait; c.beginPath();
+ for (let z = 1; z <= 26; z++) for (let n = 0; n <= 40; n++) c.rect(x0 + (n + 0.5) * cs - 0.8, y0 + (26 - z + 0.5) * cs - 0.8, 1.6, 1.6);
+ c.fill();
+ let stab = 0, ref = null;
+ for (const nu of CELLS) if (k.all || k.vis.has(key2(nu.Z, nu.N))) {
+  if (nu.mode === 'stable') { stab++; if (nu.Z >= 8 && nu.Z < 20 && (!ref || nu.Z > ref.Z)) ref = nu; }
+  c.fillStyle = cellFill(nu); c.fillRect(x0 + nu.N * cs + gp, y0 + (26 - nu.Z) * cs + gp, cs - 2 * gp, cs - 2 * gp);
+ }
+ c.strokeStyle = rgba(RGB.texte2, 0.4);
+ for (const kk of k.ghost) c.strokeRect(x0 + kk % 100 * cs + gp + 0.5, y0 + (26 - Math.floor(kk / 100)) * cs + gp + 0.5, cs - 2 * gp - 1, cs - 2 * gp - 1);
+ if (stab >= 6 && ref) tag(c, 'vallée de stabilité', x0 + (ref.N + 2.5) * cs, y0 + (26 - ref.Z + 0.5) * cs, { bg: true, color: C.texte });
+ const cx = x0 + k.N * cs, cy = y0 + (26 - k.Z) * cs, p = k.pulse;
+ c.strokeStyle = C.accent; c.lineWidth = 1.4; c.strokeRect(cx - 1.5, cy - 1.5, cs + 3, cs + 3); seg(c, cx - 2, cy + cs + 4.5, cx + cs + 2, cy + cs + 4.5, C.accent, 2.4);
+ if (p > 0.01) { c.globalAlpha = p * 0.5; c.lineWidth = 1; c.strokeRect(cx - 1.5 - p * 5, cy - 1.5 - p * 5, cs + 3 + p * 10, cs + 3 + p * 10); c.globalAlpha = 1; }
+}
+STEPS.push({
+ key: 'isotopes', ch: 0, title: 'Protons, neutrons, isotopes', word: 'Isotopes',
+ text: 'Ajoute ou retire des protons et des neutrons, ou clique une case de la carte : le nombre de protons fixe l’élément, le nombre de neutrons fixe l’isotope. Chaque combinaison est une case ; seules certaines sont stables.',
+ cle: 'Le nombre de protons fait l’élément ; le nombre de neutrons fait l’isotope. Seules certaines combinaisons sont stables : une vallée étroite sur la carte.',
+ note: 'Nucléons dessinés comme des billes, sans structure en couches ; rayon du noyau ∝ A^(1/3).',
+ rec: null,
+ enter(restart) {
+  const k = k2;
+  if (restart || !k.balls.length) { Object.assign(k, { Z: 6, N: 6, balls: [], gone: [], vis: new Set([key2(6, 6)]), ghost: new Set(), all: false, last: { dZ: 0, dN: 0 } }); rebuild2(); }
+  sync2();
+ },
+ step(dt) {
+  const k = k2, f = 1 - Math.exp(-dt * 9), L = nucLayout();
+  for (const b of k.balls) { b.x += (L.x[b.slot] - b.x) * f; b.y += (L.y[b.slot] - b.y) * f; b.z += (L.z[b.slot] - b.z) * f; b.a = Math.min(1, b.a + dt * 3); }
+  let j = 0; for (const b of k.gone) { b.x *= 1 + dt * 5; b.y *= 1 + dt * 5; b.z *= 1 + dt * 5; b.a -= dt * 3; if (b.a > 0.02) k.gone[j++] = b; } k.gone.length = j;
+  k.pulse = Math.max(0, k.pulse - dt * 1.6);
+ },
+ draw(c, W, H, now) { const g = k2.g = geo2(W, H); drawNuc2(c, g, now); drawMap2(c, g); },
+ meas() {
+  const k = k2, nu = Atom.nuclide(k.Z, k.N);
+  return [['Protons Z', k.Z, ''], ['Neutrons N', k.N, ''], ['Nucléons A', k.Z + k.N, ''], ['Nucléide', nucLabel(k.Z, k.N), Atom.elementName(k.Z)],
+   ['Désintégration', nu ? (nu.mode === 'stable' ? 'stable' : Atom.modeLabel(nu.mode) + ' · ' + dur2(nu.halfLife)) : 'aucune : se défait', ''], ['N / Z', fmt(k.N / k.Z, 2), '']];
+ },
+ status() {
+  const k = k2, nu = Atom.nuclide(k.Z, k.N), lab = nucLabel(k.Z, k.N), { dZ, dN } = k.last, sameEl = dZ === 0 && dN !== 0;
+  const tooP = 'Trop de protons pour ce nombre de neutrons : la répulsion électrique l’emporte.', tooN = 'Trop de neutrons : l’un d’eux finit par se changer en proton (β⁻).';
+  if (!nu) return `${lab} ne vit pas une milliseconde : il se défait aussitôt. ` + (k.Z > Atom.valleyZ(k.Z + k.N) ? tooP : tooN);
+  if (nu.mode === 'stable') return `${lab} est stable.` + (sameEl ? ` Même élément, ${dN > 0 ? 'un neutron de plus' : 'un neutron de moins'} : un autre isotope.` : dN === 0 && dZ ? ` Un proton de ${dZ > 0 ? 'plus' : 'moins'} : on change d’élément.` : '');
+  return `${lab} se désintègre (${dur2(nu.halfLife)})` + (sameEl ? ' : même élément, autre isotope.' : '.') +
+   (nu.halfLife < 3600 ? ' ' + (nu.mode === 'b+' || nu.mode === 'p' ? tooP : nu.mode === 'a' ? 'Il se scinde en émettant un noyau d’hélium (α).' : tooN) : '');
+ },
+ hit(x, y) {
+  const k = k2, g = k.g; if (!g) return null;
+  for (const b of k.balls.slice().sort((a, b) => b.sz - a.sz)) if (b.sx != null && Math.hypot(x - b.sx, y - b.sy) < b.sr) return b.k === 'p' ? { name: 'Proton', role: 'Charge +, son nombre fait l’élément.' } : { name: 'Neutron', role: 'Sans charge, son nombre fait l’isotope.' };
+  const ce = cellAt2(x, y); if (!ce) return null;
+  const nu = Atom.nuclide(ce.Z, ce.N);
+  if (nu && (k.all || k.vis.has(key2(ce.Z, ce.N)))) return nu.mode === 'stable' ? { name: 'Vallée de stabilité', role: nu.label + ' est stable : une case de la bande étroite.' } : { name: 'Case de la carte', role: nu.label + ' · ' + Atom.modeLabel(nu.mode) + ' · ' + dur2(nu.halfLife) };
+  return { name: 'Case de la carte', role: 'Pas encore visitée : clique pour y aller.' };
+ },
+ down(x, y) { const ce = cellAt2(x, y); if (!ce) return false; k2.drag = true; go2(ce.Z, ce.N); return true; },
+ move(x, y) { if (k2.drag) { const ce = cellAt2(x, y); if (ce) go2(ce.Z, ce.N); } },
+ up() { k2.drag = false; },
+ state() { const k = k2, nu = Atom.nuclide(k.Z, k.N); return { Z: k.Z, N: k.N, A: k.Z + k.N, id: nu ? nu.id : (k.Z + k.N) + nucSym(k.Z), inTable: !!nu, mode: nu ? nu.mode : 'absent', halfLife: nu ? nu.halfLife : 0, visited: k.vis.size, balls: k.balls.length }; },
+ api: { addNucleon(kind, d) { go2(k2.Z + (kind === 'p' ? d : 0), k2.N + (kind === 'n' ? d : 0)); }, goElement(Z) { Z = clamp(Math.round(Z), 1, 26); go2(Z, ISO[Z] - Z); } }
+});
+$('#selEl').innerHTML = ISO.slice(1).map((a, i) => `<option value="${i + 1}">${i + 1} · ${Atom.symbol(i + 1)} · ${Atom.elementName(i + 1)}</option>`).join('');
+on('#bPp', 'click', () => go2(k2.Z + 1, k2.N)); on('#bMp', 'click', () => go2(k2.Z - 1, k2.N)); on('#bPn', 'click', () => go2(k2.Z, k2.N + 1)); on('#bMn', 'click', () => go2(k2.Z, k2.N - 1));
+on('#selEl', 'change', e => { const Z = +e.target.value; go2(Z, ISO[Z] - Z); e.target.blur(); });
+on('#bAll', 'click', () => { k2.all = !k2.all; sync2(); notify(); });
+/* ---------------- Étape 3 : énergie de liaison ---------------- */
+const BUILD = ['2H', '3H', '3He', '4He', '6Li', '12C', '16O', '20Ne', '28Si', '56Fe'];
+const k3 = { rx: 'dt', build: false, ia: '2H', ib: '3H', res: null, tilt: 0, vt: 0, qShow: 0, fly: 1, g: null, ca: {}, pans: [] };
+const zn3 = id => { if (id === 'n') return [0, 1]; const nu = Atom.byId(id); return [nu.Z, nu.N]; };
+function compute3() {
+ const k = k3;
+ if (!k.build) { const R = Atom.REACTIONS[k.rx], r = Atom.reaction(k.rx); r.R = R.r.map(zn3); r.P = R.p.map(zn3); return (k.res = r); }
+ const a = zn3(k.ia), b = zn3(k.ib), p = [a[0] + b[0], a[1] + b[1]], q = Atom.qZN([a, b], [p]);
+ q.perKg = q.Q / (q.massR * Atom.U_MEV) * Atom.C * Atom.C; q.vsMethane = q.perKg / Atom.METHANE_J_PER_KG;
+ q.label = nucLabel(...a) + ' + ' + nucLabel(...b) + ' → ' + nucLabel(...p); q.kind = 'fusion'; q.name = 'build'; q.R = [a, b]; q.P = [p];
+ return (k.res = q);
+}
+function pick3(rx, build) { const k = k3; if (rx) k.rx = rx; k.build = !!build; compute3(); k.fly = 0; sync3(); notify(); }
+function sync3() {
+ const k = k3;
+ $$('[data-rx]').forEach(b => b.setAttribute('aria-pressed', !k.build && k.rx === b.dataset.rx ? 'true' : 'false'));
+ press('#bBuild', k.build); $('#gBuild').hidden = !k.build || cur !== 2; $('#selA').value = k.ia; $('#selB').value = k.ib;
+}
+const xA3 = (g, A) => g.pl + g.pw * Math.sqrt(A / 240), yB3 = (g, v) => g.pb - g.ph * v / 9;
+function geo3(W, H) {
+ const nw = W < 640, top = 26, zb = Math.round(H * (nw ? 0.5 : 0.44)), pl = nw ? 34 : 46, pt = zb + 26, pb = H - 28;
+ return { nw, top, zb, pl, pw: W - pl - 14, pt, pb, ph: pb - pt, px: nw ? W / 2 : W * 0.655, Lb: clamp(W * (nw ? 0.26 : 0.15), 70, 160) };
+}
+const groups3 = l => { const m = new Map(); l.forEach(([Z, N]) => { const kk = Z + ':' + N; m.set(kk, (m.get(kk) || 0) + 1); }); return [...m].map(([kk, n]) => { const [Z, N] = kk.split(':').map(Number); return { Z, N, n, A: Math.max(1, Z + N) }; }); };
+function drawBalance(c, W, H, g) {
+ const k = k3, r = k.res, { px, Lb, top } = g, a = k.tilt, py = top + 22, gr = [groups3(r.R), groups3(r.P)], L = nucLayout(), panW = Lb * 1.45;
+ const units = gr.map(l => l.reduce((s, it) => s + it.n * (2 * L.rad[it.A] + 1.2), 0)), maxR = Math.max(...gr.flat().map(it => L.rad[it.A])), ls = clamp((g.zb - g.top) * 0.34, 44, 110);
+ const rb = Math.min(g.nw ? 3.6 : 6.5, panW * 0.95 / Math.max(...units), (ls - 12) / (2 * maxR)), ex = Lb * Math.cos(a), ey = Lb * Math.sin(a), ends = [[px - ex, py + ey], [px + ex, py - ey]];
+ c.lineCap = 'round'; seg(c, ends[0][0], ends[0][1], ends[1][0], ends[1][1], C.texte, 3); c.lineCap = 'butt';
+ c.fillStyle = C.texte2; c.beginPath(); c.moveTo(px, py + 2); c.lineTo(px - 10, py + 26); c.lineTo(px + 10, py + 26); c.fill();
+ k.pans = [];
+ [0, 1].forEach(i => {
+  const [x0, y0] = ends[i], y2 = y0 + ls, w2 = panW / 2;
+  seg(c, x0, y0, x0 - w2, y2, rgba(RGB.texte2, 0.7)); seg(c, x0, y0, x0 + w2, y2, rgba(RGB.texte2, 0.7)); seg(c, x0 - w2, y2, x0 + w2, y2, C.texte, 2);
+  let xx = x0 - units[i] * rb / 2;
+  for (const it of gr[i]) for (let n = 0; n < it.n; n++) {
+   const rr = L.rad[it.A] * rb; drawBalls(c, xx + rr, y2 - rr - 1.5, rb, k.ca[it.Z + ':' + it.A] || (k.ca[it.Z + ':' + it.A] = mkBalls(it.Z, it.A)), 0, 0, L.rad[it.A], 1); xx += 2 * rr + 1.2 * rb;
+  }
+  tag(c, i ? 'produits' : 'réactifs', x0, y2 + 14, { align: 'center' }); tag(c, fmt(i ? r.massP : r.massR, 6) + ' u', x0, y2 + 28, { align: 'center', color: C.texte });
+  k.pans.push([x0 - w2, y0, x0 + w2, y2 + 34]);
+ });
+ const bw = clamp(Math.abs(r.Q) / 200, 0, 1) * Lb * 2 * k.qShow, by = py + Lb * 0.2 + ls + 56, bx = px - Lb;
+ if (r.Q >= 0) { c.fillStyle = rgba(RGB.ener, 0.92); c.fillRect(bx, by, Math.max(2, bw), 10); } else { c.strokeStyle = C.ener; c.setLineDash([4, 3]); c.lineWidth = 1.3; c.strokeRect(bx + 0.5, by + 0.5, Math.max(2, bw), 9); c.setLineDash([]); }
+ tag(c, r.Q >= 0 ? 'Q = +' + fmt(r.Q, 2) + ' MeV libérés' : 'énergie à fournir : ' + fmt(-r.Q, 2) + ' MeV', bx, by - 10, { color: C.ener });
+}
+function drawCurve3(c, W, H, g) {
+ const r = k3.res, { pl, pw, pt, pb } = g;
+ c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right';
+ for (const v of [0, 2, 4, 6, 8]) { const y = yB3(g, v); seg(c, pl, y, pl + pw, y, C.trait); c.fillStyle = C.texte2; c.fillText(v, pl - 5, y); }
+ c.textAlign = 'center'; c.textBaseline = 'top';
+ for (const A of [10, 25, 50, 100, 150, 200, 240]) { const x = xA3(g, A); seg(c, x, pb, x, pb + 4, C.trait); c.fillStyle = C.texte2; c.fillText(A, x, pb + 6); }
+ c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillText('B/A (MeV)', pl + 4, pt - 6); c.textAlign = 'right'; c.fillText('A (nucléons)', pl + pw, pb + 24);
+ const xf = xA3(g, 58); c.setLineDash([2, 3]); seg(c, xf, pb, xf, yB3(g, 8.8) - 12, rgba(RGB.texte2, 0.5)); c.setLineDash([]);
+ tag(c, 'sommet : ⁵⁶Fe, ⁶²Ni', xf, yB3(g, 8.8) - 22, { align: 'center', color: C.texte });
+ c.strokeStyle = rgba(RGB.ener, 0.6); c.lineWidth = 1.8; c.beginPath();   // semf, A impair : pas de terme d'appariement
+ for (let A = 11; A <= 239; A += 2) { const x = xA3(g, A), y = yB3(g, Atom.semf(Math.round(Atom.valleyZ(A)), A) / A); A === 11 ? c.moveTo(x, y) : c.lineTo(x, y); }
+ c.stroke();
+ const lab = { '4He': [-1, -1], '12C': [-1, 1], '16O': [1, 1], '56Fe': [-1, 1], '62Ni': [1, 1], '235U': [-1, 1] };
+ for (const d of Atom.BA_DATA) {
+  const x = xA3(g, d.A), y = yB3(g, d.BA), o = lab[d.id]; disc(c, x, y, 2.4, rgba(RGB.texte, 0.85));
+  if (o) tag(c, d.id === '235U' ? '²³⁵U ²³⁸U' : d.label, x + o[0] * 7, y + o[1] * 11, { align: o[0] < 0 ? 'right' : o[0] > 0 ? 'left' : 'center' });
+ }
+ const side = (list, filled) => {
+  let sB = 0, sA = 0;
+  for (const it of groups3(list)) {
+   const B = Atom.binding(it.Z, it.N).B, x = xA3(g, it.A), y = yB3(g, B / it.A); sB += it.n * B; sA += it.n * it.A;
+   if (filled) disc(c, x, y, 4.6, C.accent); else ring(c, x, y, 4.6, C.texte, 1.5);
+   tag(c, (it.n > 1 ? it.n + '×' : '') + (it.Z ? nucLabel(it.Z, it.N) : 'n'), x + (filled ? 8 : -8), y + (filled ? -9 : 9), { align: filled ? 'left' : 'right', color: filled ? C.accent : C.texte, bg: true });
+  }
+  return sB / sA;
+ };
+ const yR = yB3(g, side(r.R, false)), yP = yB3(g, side(r.P, true)), xa = xA3(g, r.R.reduce((s, [Z, N]) => s + Z + N, 0)), dir = Math.sign(yR - yP) || 1, rt = xa > pl + pw * 0.6;
+ g.arrow = [xa, yR, yP]; c.setLineDash(r.Q < 0 ? [4, 3] : []); seg(c, xa, yR, xa, yP + dir * 5, C.ener, 2.4); c.setLineDash([]);
+ c.fillStyle = C.ener; c.beginPath(); c.moveTo(xa, yP); c.lineTo(xa - 5, yP + dir * 8); c.lineTo(xa + 5, yP + dir * 8); c.fill();
+ tag(c, r.Q >= 0 ? 'vers le haut : énergie libérée' : 'vers le bas : énergie à fournir', xa + (rt ? -10 : 10), Math.max(yR, yP) + 18, { color: C.ener, bg: true, align: rt ? 'right' : 'left' });
+}
+STEPS.push({
+ key: 'liaison', ch: 0, title: 'Énergie de liaison', word: 'Liaison',
+ text: 'Choisis une réaction et regarde la balance : les produits pèsent moins que les réactifs, et la masse manquante devient de l’énergie. Sur la courbe, la flèche monte quand de l’énergie est libérée.',
+ cle: 'Un noyau pèse moins que ses nucléons séparés. Monter sur la courbe de l’énergie de liaison, par fusion ou par fission, libère cette différence : E = Δm c².',
+ note: 'Courbe semi-empirique (A impair), points mesurés ; inclinaison de la balance très exagérée ; abscisse en racine de A.',
+ rec: null,
+ enter(restart) { if (restart) Object.assign(k3, { rx: 'dt', build: false, ia: '2H', ib: '3H', tilt: 0, vt: 0, qShow: 0, fly: 0 }); compute3(); sync3(); },
+ step(dt) {
+  const k = k3, r = k.res, tgt = Math.sign(r.dm) * Math.min(0.2, 0.05 + 45 * Math.abs(r.dm) / r.massR);
+  k.vt += ((tgt - k.tilt) * 60 - k.vt * 7) * dt; k.tilt += k.vt * dt;
+  if (k.fly > 0.5) k.qShow = Math.min(1, k.qShow + dt); k.fly = Math.min(1, k.fly + dt / 1.1);
+ },
+ draw(c, W, H) { const g = k3.g = geo3(W, H); drawBalance(c, W, H, g); drawCurve3(c, W, H, g); },
+ meas() {
+  const r = k3.res;
+  return [['Masse des réactifs', fmt(r.massR, 6), 'u'], ['Masse des produits', fmt(r.massP, 6), 'u'], ['Défaut de masse Δm', fmt(r.dm, 6), 'u'], ['Q', (r.Q > 0 ? '+' : '') + fmt(r.Q, 2), 'MeV'],
+   ['Énergie par kg', fmtSci(r.perKg, 2), 'J/kg'], ['Rapport au méthane brûlé', fmtSci(r.vsMethane, 2), '×']];
+ },
+ status() {
+  const r = k3.res, hors = r.measured ? '' : ' Produit hors table : formule semi-empirique.';
+  if (r.Q < 0) return 'Au-delà du fer, fusionner coûte de l’énergie : c’est ce qui condamne le cœur d’une étoile massive (<a href="../09-supernova/index.html">planche Supernova</a>).' + hors;
+  return (r.kind === 'fission' ? 'On monte sur la courbe, vue depuis la droite : les fragments sont plus liés que l’uranium, la différence part en énergie.' : 'On monte sur la courbe : les produits sont plus liés, la différence part en énergie.') + hors;
+ },
+ hit(x, y) {
+  const k = k3, g = k.g; if (!g) return null;
+  for (const p of k.pans) if (x > p[0] - 6 && x < p[2] + 6 && y > p[1] - 6 && y < p[3]) return { name: 'Balance', role: 'Le plateau le plus lourd descend ; ici, inclinaison très exagérée.' };
+  if (g.arrow && Math.abs(x - g.arrow[0]) < 9 && y > Math.min(g.arrow[1], g.arrow[2]) - 6 && y < Math.max(g.arrow[1], g.arrow[2]) + 6) return { name: 'Réaction', role: 'Des réactifs aux produits : vers le haut, de l’énergie est libérée.' };
+  if (y > g.pt && y < g.pb && Math.hypot(x - xA3(g, 58), y - yB3(g, 8.8)) < 14) return { name: 'Fer', role: '⁵⁶Fe, ⁶²Ni : les noyaux les plus liés, au sommet de la courbe.' };
+  if (x > g.pl && x < g.pl + g.pw && y > g.pt - 10 && y < g.pb) {
+   const A = Math.round(240 * Math.pow((x - g.pl) / g.pw, 2));
+   if (A > 11 && A < 239 && Math.abs(y - yB3(g, Atom.semf(Math.round(Atom.valleyZ(A)), A) / A)) < 9) return { name: 'Courbe', role: 'B/A : l’énergie de liaison par nucléon, en fonction de A.' };
+  }
+  return null;
+ },
+ state() { const r = k3.res; return { name: r.name, label: r.label, Q: r.Q, dm: r.dm, perKg: r.perKg, vsMethane: r.vsMethane, measured: r.measured, build: k3.build, tilt: k3.tilt }; },
+ api: { reaction(name) { pick3(name); }, build(a, b) { k3.ia = a; k3.ib = b; pick3(null, true); } }
+});
+for (const s of ['#selA', '#selB']) $(s).innerHTML = BUILD.map(id => { const n = Atom.byId(id); return `<option value="${id}">${n.label} · ${n.name}</option>`; }).join('');
+$$('[data-rx]').forEach(b => b.addEventListener('click', () => pick3(b.dataset.rx)));
+on('#bBuild', 'click', () => pick3(null, !k3.build));
+on('#selA', 'change', e => { k3.ia = e.target.value; pick3(null, true); }); on('#selB', 'change', e => { k3.ib = e.target.value; pick3(null, true); });
+/* ---------------- Étape 4 : radioactivité ---------------- */
+const MATS = ['papier', 'aluminium', 'plomb'], KINDS = ['alpha', 'beta', 'gamma'], KSYM = ['α', 'β', 'γ'], KRGB = [RGB.pos, RGB.neg, RGB.ener];
+const EMIT = { '14C': [1], '3H': [1], '18F': [1, 2], '131I': [1, 2], '60Co': [1, 2], '222Rn': [0] };
+const TRN = KINDS.map(kd => MATS.map(m => Atom.attenuate(kd, m)));
+const CUM = TRN.map(r => { let p = 1; return r.map(t => (p *= t)); });
+const SCR_U = [0.3, 0.5, 0.7], SCR_W = [3, 12, 26], NSAMP = 400, HALF_PAGE = 8;
+const k4 = { id: '14C', nu: null, dau: null, tr: null, T: 0, tf: 1, alive: new Uint8Array(NSAMP), tdec: new Float32Array(NSAMP), t: 0, rec: [], rc: 0, ev: [], dec: 0, part: [], sp: [], sf: [], sacc: [0, 0, 0], follow: -1, msg: '', msgT: 0, rng: newRng(), g: null };
+function setNuc4(id) {
+ const k = k4, nu = Atom.byId(id); if (!nu) return;
+ Object.assign(k, { id, nu, T: nu.halfLife, tf: nu.halfLife / HALF_PAGE, tr: Atom.transmute(nu.Z, nu.N, nu.mode), t: 0, rec: [{ t: 0, n: NSAMP }], rc: 0, ev: [], dec: 0, part: [], follow: -1, msgT: 0, rng: newRng() });
+ k.dau = Atom.nuclide(k.tr.Z, k.tr.N); k.alive.fill(1); k.tdec.fill(-9);
+ $$('[data-nu]').forEach(b => b.setAttribute('aria-pressed', b.dataset.nu === id ? 'true' : 'false')); notify();
+}
+const remaining4 = () => k4.alive.reduce((a, b) => a + b, 0);
+function follow4() {
+ const k = k4, al = []; for (let i = 0; i < NSAMP; i++) if (k.alive[i]) al.push(i);
+ if (al.length) { k.follow = al[Math.floor(k.rng() * al.length)]; k.msgT = 0; notify(); }
+}
+function geo4(W, H) {
+ const nw = W < 640, gs = nw ? 8 : clamp(Math.floor((H * 0.6 - 150) / 20), 8, 16), cm = nw ? Math.floor((W - 46 - 20 * gs) / 5) : clamp(gs * 3.4, 34, 50), gap = nw ? 16 : 80;
+ const gx = nw ? 14 : Math.max(32, (W - 20 * gs - gap - 5 * cm) / 2), gy = 36, sy0 = gy + 20 * gs + 30, sh = H - sy0 - 6;
+ return { nw, gs, cm, gx, gy, mx: gx + 20 * gs + gap, my: gy + (20 * gs - 5 * cm) / 2 + (nw ? 0 : 6), sy0, sh, bx0: nw ? 10 : 36, xs0: (nw ? 10 : 36) + 38, xs1: W - (nw ? 12 : 44), by: [0.28, 0.54, 0.8].map(f => sy0 + sh * f) };
+}
+const dot4 = (g, i) => [g.gx + (i % 20 + 0.5) * g.gs, g.gy + (Math.floor(i / 20) + 0.5) * g.gs];
+const pct4 = p => { p *= 100; return p >= 99.5 ? '100' : p >= 9.95 ? fmt(p, 0) : p > 0 ? fmt(p, 1) : '0'; };
+function drawShield(c, g, now) {
+ const k = k4, { xs0, xs1, by, sy0, sh, bx0 } = g, L = xs1 - xs0, em = EMIT[k.id] || [], y0 = sy0 + sh * 0.08;
+ c.fillStyle = C.fond2; c.strokeStyle = rgba(RGB.texte2, 0.7); c.lineWidth = 1.2; c.fillRect(bx0, y0, 34, sh * 0.84); c.strokeRect(bx0 + 0.5, y0 + 0.5, 34, sh * 0.84 - 1);
+ c.fillStyle = C.fond; for (const y of by) c.fillRect(bx0 + 28, y - 2.5, 7, 5);
+ tag(c, 'source', bx0 + 17, y0 - 8, { align: 'center' });
+ const beam = (x0, x1, y, p, i) => { if (p > 0) seg(c, x0, y, x1, y, rgba(KRGB[i], 0.25 + 0.45 * Math.sqrt(p)), 0.8 + 2.2 * Math.sqrt(p)); };
+ KINDS.forEach((kd, i) => {
+  const y = by[i]; let xp = xs0, p = 1;
+  tag(c, KSYM[i] + (em.includes(i) ? ' · émis ici' : ''), xs0 + 4, y - 14, { color: em.includes(i) ? rgba(KRGB[i], 1) : C.texte2 });
+  MATS.forEach((m, j) => {
+   const xa = xs0 + L * SCR_U[j] - SCR_W[j] / 2, xb = xa + SCR_W[j]; beam(xp, xa, y, p, i); p = CUM[i][j]; xp = xb;
+   tag(c, pct4(p) + ' %', xb + 5, y - 9, { color: p > 0 ? rgba(KRGB[i], 0.3 + 0.7 * Math.sqrt(p)) : C.texte2 });
+  });
+  beam(xp, xs1, y, p, i);
+ });
+ const nm = g.nw ? ['papier', 'alu', 'plomb'] : ['papier 0,1 mm', 'aluminium 5 mm', 'plomb 5 cm'];
+ MATS.forEach((m, j) => {
+  const xa = xs0 + L * SCR_U[j] - SCR_W[j] / 2;
+  c.fillStyle = [rgba(RGB.texte, 0.65), rgba(RGB.texte2, 0.8), rgba(RGB.texte2, 0.5)][j]; c.fillRect(xa, sy0 + sh * 0.1, SCR_W[j], sh * 0.8);
+  tag(c, nm[j], xa + SCR_W[j] / 2, sy0 + sh * 0.1 - 9, { align: 'center' });
+ });
+ for (const q of k.sp) {
+  const x = xs0 + q.x * L, y = by[q.k];
+  if (q.k === 0) { disc(c, x, y, 3.2, C.pos); disc(c, x - 0.9, y - 0.9, 0.9, C.fond); } else if (q.k === 1) disc(c, x, y, 2.2, C.neg);
+  else { c.strokeStyle = C.ener; c.lineWidth = 1.4; c.beginPath(); for (let s = -7; s <= 7; s += 1.5) { const yy = y + Math.sin((s + q.x * 400) * 0.9) * 3; s === -7 ? c.moveTo(x + s, yy) : c.lineTo(x + s, yy); } c.stroke(); }
+ }
+ for (const f of k.sf) ring(c, f.x, f.y, 3 + f.t * 24, rgba(KRGB[f.k], 1 - f.t / 0.35), 1.2);
+}
+function drawSample(c, g, now) {
+ const k = k4, { gx, gy, gs } = g, nu = k.nu, mc = nu.mode === 'b-' ? C.neg : nu.mode === 'b+' ? C.pos : C.ener, r = gs * 0.33;
+ c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(gx - 5.5, gy - 5.5, 20 * gs + 11, 20 * gs + 11);
+ for (const [al, col, rr] of [[1, mc, r], [0, C.texte, r * 0.8]]) {
+  c.fillStyle = col; c.globalAlpha = 0.88; c.beginPath();
+  for (let i = 0; i < NSAMP; i++) if (k.alive[i] === al) { const p = dot4(g, i); c.moveTo(p[0] + rr, p[1]); c.arc(p[0], p[1], rr, 0, TAU); }
+  c.fill();
+ }
+ c.globalAlpha = 1;
+ for (let i = 0; i < NSAMP; i++) { const a = k.t - k.tdec[i]; if (!k.alive[i] && a < 0.4) { const p = dot4(g, i); ring(c, p[0], p[1], gs * (0.4 + a * 3), rgba(RGB.ener, 1 - a / 0.4), 1.5); } }
+ for (const q of k.part) { c.globalAlpha = Math.max(0, 1 - q.t / 0.8); disc(c, q.x, q.y, 2, q.col); }
+ c.globalAlpha = 1;
+ if (k.follow >= 0) { const p = dot4(g, k.follow); ring(c, p[0], p[1], gs * 0.62 + Math.sin(now * 0.006 * SLOW) * 0.6, C.accent, 1.8); }
+ if (!g.nw) tag(c, nucLabel(nu.Z, nu.N) + ' · ' + NSAMP + ' noyaux', gx - 5, gy - 16);
+ tag(c, (g.nw ? NSAMP + ' noyaux · ' : '') + (k.follow >= 0 && !g.nw ? '1 s = ' : '1 s à l’écran = ') + fmtDur(k.tf), gx - 5, gy + 20 * gs + 14);
+ if (k.follow >= 0) tag(c, 'suivi : ' + fmt(k.t / HALF_PAGE, 1) + ' demi-vies', gx + 20 * gs + 5, g.nw ? gy - 12 : gy + 20 * gs + 14, { align: 'right', color: C.accent });
+}
+function drawMap4(c, g) {
+ const nu = k4.nu, { mx, my, cm } = g, tr = k4.tr, cell = (dN, dZ) => [mx + (dN + 2) * cm, my + (2 - dZ) * cm];
+ c.font = mono(10); c.textAlign = 'center'; c.textBaseline = 'middle';
+ for (let dz = -2; dz <= 2; dz++) for (let dn = -2; dn <= 2; dn++) {
+  const n2 = Atom.nuclide(nu.Z + dz, nu.N + dn), p = cell(dn, dz);
+  if (n2) { c.fillStyle = cellFill(n2); c.fillRect(p[0] + 1, p[1] + 1, cm - 2, cm - 2); if (cm >= 34) { c.fillStyle = n2.mode === 'stable' ? C.fond : C.texte; c.fillText(n2.label, p[0] + cm / 2, p[1] + cm / 2); } }
+  else { c.strokeStyle = rgba(RGB.texte2, 0.25); c.setLineDash([2, 3]); c.strokeRect(p[0] + 1.5, p[1] + 1.5, cm - 3, cm - 3); c.setLineDash([]); }
+ }
+ const a = cell(0, 0), b = cell(tr.N - nu.N, tr.Z - nu.Z), x0 = a[0] + cm / 2, y0 = a[1] + cm / 2, x1 = b[0] + cm / 2, y1 = b[1] + cm / 2, L = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / L, uy = (y1 - y0) / L;
+ c.strokeStyle = C.accent; c.lineWidth = 1.6; c.strokeRect(a[0], a[1], cm, cm); c.strokeRect(b[0], b[1], cm, cm);
+ const hx = x1 - ux * cm * 0.32, hy = y1 - uy * cm * 0.32; seg(c, x0 + ux * cm * 0.3, y0 + uy * cm * 0.3, hx - ux * 6, hy - uy * 6, C.accent, 2);
+ c.fillStyle = C.accent; c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx - ux * 9 - uy * 4.5, hy - uy * 9 + ux * 4.5); c.lineTo(hx - ux * 9 + uy * 4.5, hy - uy * 9 - ux * 4.5); c.fill();
+ c.font = serif(g.nw ? 20 : 24); c.fillStyle = C.texte; c.textBaseline = 'alphabetic'; c.fillText(nu.label + ' → ' + nucLabel(tr.Z, tr.N), mx + 2.5 * cm, my - 12);
+ c.font = mono(10); c.fillStyle = C.texte2; c.textBaseline = 'top'; c.fillText('N →', mx + 2.5 * cm, my + 5 * cm + 3);
+ c.save(); c.translate(mx - 8, my + 2.5 * cm); c.rotate(-PI / 2); c.fillText('Z →', 0, -3); c.restore();
+}
+STEPS.push({
+ key: 'radio', ch: 0, title: 'Radioactivité', word: 'Radioactivité',
+ text: 'Quatre cents noyaux instables du même nucléide : chacun se désintègre au hasard, sans que rien ne le prévienne. Le temps est accéléré pour qu’une demi-vie dure 8 secondes à l’écran.',
+ cle: 'Un noyau instable se transforme au hasard, sans mémoire, en un autre élément. Ce qui sort (α, β, γ) dit ce qui a changé dans le noyau.',
+ note: 'Pas de chaînes complètes : les fils sont supposés stables sauf mention. Énergies typiques : α 5 MeV, β 1 MeV, γ 1,25 MeV.',
+ rec: 'Noyaux restants N(t)',
+ legend: lg(lgLine(C.texte, 1.8), 'N(t) mesuré') + lg(lgLine(C.texte2, 1.4, 1), '400 · 2<sup>−t/T½</sup>') + '<span class="blk">Pour la courbe : <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard, étape D3</a></span>',
+ enter(restart) { if (restart || !k4.nu) setNuc4(restart && k4.nu ? k4.id : '14C'); },
+ step(dt) {
+  const k = k4, g = k.g, p = Atom.decayProb(k.T, dt * k.tf); k.t += dt;
+  for (let i = 0; i < NSAMP; i++) if (k.alive[i] && k.rng() < p) {
+   k.alive[i] = 0; k.tdec[i] = k.t; k.ev.push(k.t); k.dec++;
+   if (g && k.tr.ray && k.part.length < 90) { const q = dot4(g, i), a = k.rng() * TAU, v = k.tr.ray === 'alpha' ? 70 : 150; k.part.push({ x: q[0], y: q[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, col: k.tr.ray === 'alpha' || k.nu.mode === 'b+' ? C.pos : C.neg }); }
+   if (i === k.follow) { k.msg = `Le noyau suivi s’est désintégré à l’âge de ${fmt(k.t / HALF_PAGE, 1)} demi-vie : rien ne l’annonçait.`; k.msgT = 8; k.follow = -1; }
+  }
+  while (k.ev.length && k.ev[0] < k.t - 1) k.ev.shift();
+  if (k.msgT > 0) k.msgT -= dt;
+  let j = 0; for (const q of k.part) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; if (q.t < 0.8) k.part[j++] = q; } k.part.length = j;
+  if (++k.rc % 6 === 0) k.rec.push({ t: k.t / HALF_PAGE, n: remaining4() });
+  k.sf = k.sf.filter(f => (f.t += dt) < 0.35);
+  for (let i = 0; i < 3; i++) { k.sacc[i] += dt * 1.6; while (k.sacc[i] >= 1) { k.sacc[i]--; k.sp.push({ k: i, x: 0 }); } }
+  j = 0;
+  for (const q of k.sp) {
+   const x0 = q.x; q.x += dt * 0.26; let dead = false;
+   for (let s = 0; s < 3; s++) if (x0 < SCR_U[s] && q.x >= SCR_U[s] && k.rng() >= TRN[q.k][s]) { dead = true; if (g) k.sf.push({ k: q.k, x: g.xs0 + (g.xs1 - g.xs0) * SCR_U[s], y: g.by[q.k], t: 0 }); }
+   if (!dead && q.x < 1) k.sp[j++] = q;
+  }
+  k.sp.length = j;
+ },
+ draw(c, W, H, now) { const g = k4.g = geo4(W, H); drawSample(c, g, now); drawMap4(c, g); drawShield(c, g, now); },
+ scope(c, w, h) {
+  const k = k4, pl = 34, pt = 12, pw = w - pl - 10, ph = h - pt - 20, tHL = k.t / HALF_PAGE, xm = Math.max(6, Math.ceil(tHL + 0.3));
+  const X = t => pl + pw * t / xm, Y = n => pt + ph * (1 - n / NSAMP);
+  c.font = mono(10); c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (let e = 0; e <= 4; e++) { const n = NSAMP * e / 4; seg(c, pl, Y(n), pl + pw, Y(n), C.trait); c.fillStyle = C.texte2; c.fillText(n, pl - 4, Y(n)); }
+  c.strokeStyle = C.trait; c.strokeRect(pl + 0.5, pt + 0.5, pw, ph); c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let t = 1; t <= xm; t++) {
+   c.setLineDash([2, 3]); seg(c, X(t), pt, X(t), pt + ph, C.trait); c.setLineDash([]);
+   const e = NSAMP * Math.pow(2, -t); disc(c, X(t), Y(e), 2.2, C.texte2); c.fillStyle = C.texte2;
+   if (t <= 3) c.fillText(fmt(e, 0), X(t) + 12, Y(e) - 5);
+   c.fillText(t === 1 ? 'T½' : t + ' T½', X(t), h - 5);
+  }
+  c.strokeStyle = C.texte2; c.lineWidth = 1.4; c.setLineDash([4, 3]); c.beginPath();
+  for (let i = 0; i <= 60; i++) { const t = xm * i / 60; i ? c.lineTo(X(t), Y(NSAMP * Math.pow(2, -t))) : c.moveTo(X(t), Y(NSAMP)); } c.stroke(); c.setLineDash([]);
+  c.strokeStyle = C.texte; c.lineWidth = 1.8; c.beginPath(); k.rec.forEach((r, i) => { i ? c.lineTo(X(r.t), Y(r.n)) : c.moveTo(X(r.t), Y(r.n)); }); c.stroke();
+ },
+ meas() {
+  const k = k4, n = remaining4(), rows = [['Noyaux restants', n, '/ ' + NSAMP], ['Désintégrations', fmtI(k.ev.length), '/ s d’écran'], ['Demi-vie', fmtDur(k.T), ''],
+   ['Activité réelle λN', fmtSci(Atom.decayConst(k.T) * n, 2), 'Bq'], ['Fils', nucLabel(k.tr.Z, k.tr.N) + (k.dau && k.dau.mode !== 'stable' ? ' (traité comme stable)' : ''), ''], ['Ce qui sort', k.tr.out, '']];
+  if (k.follow >= 0) rows.push(['Âge du noyau suivi', fmt(k.t / HALF_PAGE, 1), 'demi-vies']);
+  return rows;
+ },
+ status() {
+  const k = k4, age = k.t / HALF_PAGE, rn = k.id === '222Rn' ? ' Le fils ²¹⁸Po est lui-même radioactif (3,1 min), mais traité comme stable ici.' : '';
+  if (k.msgT > 0) return k.msg;
+  if (k.follow >= 0) return age >= 3 ? 'Le noyau suivi est vieux de trois demi-vies, et il n’a pas plus de chances de se désintégrer qu’au premier ' + (k.T >= 86400 ? 'jour.' : 'instant.') : 'Le noyau suivi est entouré : à chaque instant il a la même chance de se désintégrer, quel que soit son âge.';
+  if (!remaining4()) return 'Tous les noyaux d’origine se sont transformés.';
+  if (k.t < 0.5) return `${NSAMP} noyaux de ${k.nu.label} : chacun peut se désintégrer à tout instant, au hasard.` + rn;
+  return (age < 1 ? 'Les désintégrations arrivent sans ordre : rien ne distingue un noyau d’un autre.' : 'Après une demi-vie, il reste à peu près la moitié des noyaux ; lesquels ? Personne ne peut le dire à l’avance.') + rn;
+ },
+ hit(x, y) {
+  const k = k4, g = k.g; if (!g) return null;
+  if (k.follow >= 0) { const p = dot4(g, k.follow); if (Math.hypot(x - p[0], y - p[1]) < g.gs * 0.7) return { name: 'Noyau suivi', role: 'Même chance de se désintégrer à chaque instant, quel que soit son âge.' }; }
+  if (x > g.gx - 5 && x < g.gx + 20 * g.gs + 5 && y > g.gy - 5 && y < g.gy + 20 * g.gs + 5) return { name: 'Échantillon', role: NSAMP + ' noyaux de ' + k.nu.label + ' ; chacun se désintègre au hasard.' };
+  if (x > g.mx && x < g.mx + 5 * g.cm && y > g.my && y < g.my + 5 * g.cm) return { name: 'Carte des nucléides', role: 'Vue locale 5 × 5 : le fils est une case voisine du parent.' };
+  for (let j = 0; j < 3; j++) {
+   const xa = g.xs0 + (g.xs1 - g.xs0) * SCR_U[j] - SCR_W[j] / 2;
+   if (x > xa - 3 && x < xa + SCR_W[j] + 3 && y > g.sy0 + g.sh * 0.1 && y < g.sy0 + g.sh * 0.9) return { name: 'Écran en ' + MATS[j], role: 'Laisse passer : α ' + pct4(TRN[0][j]) + ' % · β ' + pct4(TRN[1][j]) + ' % · γ ' + pct4(TRN[2][j]) + ' %.' };
+  }
+  return null;
+ },
+ onKey(kk) { if (kk !== 's') return false; follow4(); return true; },
+ state() { const k = k4; return { id: k.id, remaining: remaining4(), t: k.t, tHL: k.t / HALF_PAGE, halfLife: k.T, daughter: nucLabel(k.tr.Z, k.tr.N), daughterId: k.dau ? k.dau.id : null, followAgeHL: k.follow >= 0 ? k.t / HALF_PAGE : null, decays: k.dec, tf: k.tf }; },
+ api: { setNuclide: setNuc4, followOne: follow4 }
+});
+$$('[data-nu]').forEach(b => b.addEventListener('click', () => setNuc4(b.dataset.nu)));
+on('#bNew', 'click', () => setNuc4(k4.id)); on('#bFollow', 'click', follow4);
+/* CH2-BEGIN */
+function stubStep(key, title, word, last) {
+ STEPS.push({
+  key, ch: 1, title, word, text: 'Cette étape est en construction.', cle: 'À venir.', note: 'Le chapitre 27 est à venir ; sa théorie est disponible.',
+  rec: null, cards: !!last,
+  enter() {}, step() {}, meas() { return []; }, status() { return ''; }, state() { return { stub: true }; }, api: {},
+  draw(c, W, H) { c.font = serif(28, true); c.fillStyle = C.texte2; c.textAlign = 'center'; c.fillText('Étape en construction', W / 2, H / 2); }
+ });
+}
+stubStep('niveaux', 'Une échelle d’énergies', 'Niveaux');
+stubStep('raies', 'Des raies comme des empreintes', 'Raies');
+stubStep('photons', 'Des paquets de lumière', 'Photons', true);
+/* CH2-END */
+/* ================= COQUILLE : stepper, panneau, boucle, clavier, infobulle, window.__labo ================= */
+const cv = $('#cv'), ctx = cv.getContext('2d'), sceneEl = $('#scene'), tipEl = $('#tip'), scopeBox = $('#scopeBox');
+const NS = STEPS.length, STEP = 1 / 60;
+let cur = 0, pend = -1, pendRestart = false, fade = 0, sceneA = 1, playing = true, acc = 0, last = 0, W = 800, H = 560, dpr = 1, frameN = 0;
+let statusHTML = null, measKey = '', sw = 0, sh = 0, tipKey = '', tipTimer = 0, dragging = false;
+const seen = new Array(NS).fill(false);
+if (reduce) cv.title = 'Mouvement réduit demandé : les mouvements décoratifs sont ralentis de moitié ; les phénomènes (tirs, désintégrations, sauts) restent animés, car leur mouvement est le sujet.';
+{
+ const host = $('#stepper');
+ [['Module 26 · Atome et noyau', '26'], ['Module 27 · Photons et spectres', '27']].forEach((g, gi) => {
+  const idx = STEPS.map((s, i) => i).filter(i => STEPS[i].ch === gi);
+  host.insertAdjacentHTML('beforeend', `<div class="chap"><p class="chap-t"><b>${26 + gi}</b>${gi ? 'À venir · Quantification, photons et spectres atomiques' : 'Architecture atomique et nucléaire'}</p><div class="segs">${idx.map((i, j) => `<button class="seg" data-a="${i}" title="Étape ${i + 1} — ${STEPS[i].title}"><b>${26 + gi}.${j + 1}</b><span>${STEPS[i].word}${gi ? ' · à venir' : ''}</span></button>`).join('')}</div></div>`);
+ });
+}
+function sizeScope() {
+ const S = STEPS[cur]; if (!S || !S.rec || $('#recSec').hidden) return;
+ const w = Math.max(100, Math.round(scopeBox.clientWidth)), h = S.recH || 150;
+ if (w === sw && h === sh && scopeC.width === Math.round(w * dpr)) return;
+ sw = w; sh = h; scopeC.width = Math.round(w * dpr); scopeC.height = Math.round(h * dpr); scopeC.style.height = h + 'px';
+}
+function resize() {
+ const r = sceneEl.getBoundingClientRect(), nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height)), dp = Math.min(window.devicePixelRatio || 1, 2);
+ if (nw !== W || nh !== H || dp !== dpr || !cv.width) { W = nw; H = nh; dpr = dp; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+ sizeScope();
+}
+function swap(el) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); }
+function updateUI(n) {
+ const S = STEPS[n];
+ $('#lienTheorie').href = 'explication.html#m' + (26 + S.ch); $('#numTheorie').textContent = 26 + S.ch;
+ $$('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+ $('#eyebrow').innerHTML = `Module ${26 + S.ch} · étape <b>${26 + S.ch}.${S.ch ? n - 3 : n + 1}</b>${S.ch ? " · à venir" : ""}`;
+ $('#stepTitle').textContent = S.title; $('#stepText').innerHTML = S.text; $('#cle').innerHTML = S.cle || ''; $('#note').innerHTML = S.note || '';
+ $('#recSec').hidden = !S.rec; $('#rEye').textContent = S.rec || ''; $('#leg').innerHTML = S.legend || ''; $('#cards').hidden = !S.cards;
+ $$('#tools .grp[data-steps]').forEach(g => { g.hidden = !g.dataset.steps.split(' ').includes(String(n)); });
+ swap($('#stepTitle')); swap($('#stepText'));
+ $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NS - 1;
+ statusHTML = null; measKey = null;
+}
+function renderMeas(rows) {
+ const m = $('#meas'), key = rows.map(r => r[0]).join('|');
+ if (key !== measKey) {
+  measKey = key; m.innerHTML = rows.map(() => '<div class="row"><span class="lab"></span><span class="val"><b></b><i></i></span></div>').join('');
+  m.querySelectorAll('.lab').forEach((e, i) => { e.textContent = rows[i][0]; });
+ }
+ const bs = m.querySelectorAll('b'), is = m.querySelectorAll('i');
+ rows.forEach((r, i) => { const v = String(r[1]), u = r[2] || ''; if (bs[i].textContent !== v) bs[i].textContent = v; if (is[i].textContent !== u) is[i].textContent = u; });
+}
+function refresh(force) {
+ if (pend >= 0) return;
+ if (!force && !forceRead && frameN % 6) return;
+ forceRead = false;
+ const S = STEPS[cur], st = S.status ? S.status() : '';
+ if (st !== statusHTML) { const el = $('#status'), first = statusHTML === null; el.innerHTML = st; statusHTML = st; if (!first) swap(el); }
+ renderMeas(S.meas ? S.meas() : []);
+}
+function enter(n, restart) {
+ cur = n; const first = !seen[n]; seen[n] = true;
+ hideTip(); sizeScope(); STEPS[n].enter(!!restart || first); refresh(true);
+ if (restart) setPlay(true);
+}
+function go(n, restart) {
+ n = clamp(n, 0, NS - 1);
+ if (n === cur && !restart && pend < 0) return;
+ pend = n; pendRestart = !!restart; updateUI(n);
+ if (reduce) { const p = pend; pend = -1; fade = 0; sceneA = 1; enter(p, pendRestart); } else fade = -1;
+}
+function goNow(n, restart) { pend = -1; fade = 0; sceneA = 1; updateUI(n); enter(n, restart); }
+function setPlay(p) {
+ playing = p;
+ $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+ $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+on('#bPlay', 'click', () => setPlay(!playing));
+on('#bPrev', 'click', () => go(cur - 1)); on('#bNext', 'click', () => go(cur + 1)); on('#bReset', 'click', () => go(cur, true));
+$$('.seg').forEach(s => s.addEventListener('click', () => go(+s.dataset.a)));
+$('.controls').addEventListener('click', e => { const b = e.target.closest('button'); if (b) b.blur(); });
+/* ---------- Infobulle de découverte ---------- */
+function showTip(h, cx, cy) {
+ const key = h.name + h.role;
+ if (key !== tipKey) { tipEl.innerHTML = `<b>${h.name}</b><span>${h.role}</span>`; tipKey = key; }
+ const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+ let tx = cx + 14, ty = cy + 16;
+ if (tx + tw > innerWidth - 6) tx = cx - tw - 12;
+ if (ty + th > innerHeight - 6) ty = cy - th - 12;
+ tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; }
+/* ---------- Pointeur ---------- */
+const ptr = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+cv.addEventListener('pointerdown', e => {
+ if (pend >= 0) return;
+ const p = ptr(e), S = STEPS[cur];
+ if (S.down && S.down(p.x, p.y)) { dragging = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} hideTip(); e.preventDefault(); return; }
+ if (e.pointerType === 'touch') {
+  const h = S.hit && S.hit(p.x, p.y);
+  if (h) { showTip(h, e.clientX, e.clientY); clearTimeout(tipTimer); tipTimer = setTimeout(hideTip, 3200); } else hideTip();
+ }
+});
+cv.addEventListener('pointermove', e => {
+ if (pend >= 0) return;
+ const p = ptr(e), S = STEPS[cur];
+ if (dragging) { if (S.move) S.move(p.x, p.y); return; }
+ if (e.pointerType === 'touch') return;
+ if (S.move) S.move(p.x, p.y);
+ const h = S.hit && S.hit(p.x, p.y);
+ if (h) showTip(h, e.clientX, e.clientY); else hideTip();
+});
+const endPtr = e => { if (dragging) { dragging = false; const S = STEPS[cur]; if (S.up) S.up(); try { cv.releasePointerCapture(e.pointerId); } catch (_) {} } };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', e => { if (!dragging && e.pointerType !== 'touch') hideTip(); });
+/* ---------- Clavier ---------- */
+addEventListener('keydown', e => {
+ if (e.ctrlKey || e.metaKey || e.altKey) return;
+ const tg = e.target && e.target.tagName, inp = tg === 'INPUT' || tg === 'SELECT' || tg === 'TEXTAREA';
+ if (e.key === ' ' || e.code === 'Space') { if (tg === 'BUTTON' || inp || tg === 'A' || tg === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
+ if (inp) return;
+ if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); go(cur + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+ if (e.key === 'r' || e.key === 'R') { go(cur, true); return; }
+ if (/^[1-7]$/.test(e.key)) { go(+e.key - 1); return; }
+ if (e.repeat || pend >= 0) return;
+ const S = STEPS[cur], hk = S.onKey || (typeof S.key === 'function' ? S.key : null); if (hk && hk.call(S, e.key.toLowerCase())) e.preventDefault();
+});
+addEventListener('blur', () => { dragging = false; });
+document.addEventListener('visibilitychange', () => { last = 0; });
+/* ---------- Boucle : pas fixes de 1/60 s, dessin à chaque image ---------- */
+function render(now) {
+ ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+ const S = STEPS[cur];
+ ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left'; S.draw(ctx, W, H, now); ctx.restore();
+ if (S.rec && sw) { sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, sw, sh); sctx.save(); sctx.textBaseline = 'alphabetic'; sctx.textAlign = 'left'; if (S.scope) S.scope(sctx, sw, sh); sctx.restore(); }
+}
+function loop(now) {
+ const dt = last ? clamp((now - last) / 1000, 0, 0.1) : STEP; last = now;
+ if (fade < 0) { sceneA -= dt / 0.17; if (sceneA <= 0.2) { sceneA = 0.2; const p = pend; pend = -1; enter(p, pendRestart); fade = 1; } }
+ else if (fade > 0) { sceneA += dt / 0.18; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+ if (playing && fade <= 0) { acc += dt; let n = 0; while (acc >= STEP && n++ < 8) { STEPS[cur].step(STEP); acc -= STEP; } if (acc >= STEP) acc = 0; }
+ render(now); frameN++; refresh(false);
+}
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } loop(now); }
+/* ---------- window.__labo ---------- */
+const fullState = () => Object.assign({ step: cur, key: typeof STEPS[cur].key === 'string' ? STEPS[cur].key : STEPS[cur].id }, STEPS[cur].state ? STEPS[cur].state() : {});
+const API = {};
+STEPS.forEach((s, i) => { for (const k in s.api || {}) API[k] = (...a) => { if (cur !== i || pend >= 0) goNow(i); const r = s.api[k](...a); refresh(true); return r; }; });
+window.__labo = Object.assign({
+ Atom, get step() { return cur; }, goStep(i) { i = clamp(Math.round(i), 0, NS - 1); if (i !== cur || pend >= 0) goNow(i); return fullState(); },
+ state: fullState, setPlay,
+ tick(n) { if (pend >= 0) goNow(pend, pendRestart); const S = STEPS[cur]; for (let i = 0; i < n; i++) S.step(STEP); refresh(true); return fullState(); }
+}, API);
+new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizeScope()).observe(scopeBox);
+addEventListener('resize', resize);
+resize(); goNow(0, true); requestAnimationFrame(frame);
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

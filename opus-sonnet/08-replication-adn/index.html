@@ -15,8 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#4fe0d2; --arn:#ff7b9c;
@@ -36,8 +37,8 @@ a{color:inherit}
 #view{position:relative;flex:1;min-height:0;overflow:hidden}
 #c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:crosshair}
 #view::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 56% 50%,transparent 52%,rgba(10,13,18,.55) 100%)}
-.titre{position:absolute;left:22px;top:18px;z-index:2;pointer-events:none;max-width:70%}
-.titre::before{content:"";position:absolute;z-index:-1;left:-110px;top:-60px;right:-90px;bottom:-70px;background:radial-gradient(closest-side,var(--fond) 55%,rgba(10,13,18,.8) 75%,rgba(10,13,18,0) 100%);pointer-events:none}
+.ancien-titre{position:absolute;left:22px;top:18px;z-index:2;pointer-events:none;max-width:70%}
+.ancien-titre::before{content:"";position:absolute;z-index:-1;left:-110px;top:-60px;right:-90px;bottom:-70px;background:radial-gradient(closest-side,var(--fond) 55%,rgba(10,13,18,.8) 75%,rgba(10,13,18,0) 100%);pointer-events:none}
 .serie{margin:0 0 2px;font:400 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2)}
 h1{margin:0;font:400 34px/1.05 var(--serif);letter-spacing:.005em}
 h1 em{color:var(--accent);font-style:italic}
@@ -94,7 +95,7 @@ h2{margin:-4px 0 0;font:400 38px/1.05 var(--serif)}
   #app{display:block;height:auto}
   #stage{border-right:0}
   #view{flex:none;height:min(58svh,520px);min-height:340px}
-  .titre{left:16px;top:12px;max-width:none;right:16px}
+  .ancien-titre{left:16px;top:12px;max-width:none;right:16px}
   h1{font-size:25px}
   .controls{padding:10px 16px 12px}
   .row.r1{flex-wrap:wrap}
@@ -110,40 +111,80 @@ h2{margin:-4px 0 0;font:400 38px/1.05 var(--serif)}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+body.labo-etapes #app{height:max(400px,calc(100svh - var(--chrome,262px)));grid-template-columns:minmax(0,1fr) 330px}
+body.labo-etapes #stage{border:0;min-width:0}
+body.labo-etapes #panel{background:var(--papier);color:var(--encre);border-left:1px solid var(--filet);padding:18px 0 18px 22px}
+body.labo-etapes .tabs{border:0;gap:3px}
+body.labo-etapes .tabs .seg{border:0;border-top:2px solid var(--filet);height:auto;border-radius:0}
+body.labo-etapes .tabs .seg[aria-current=step]{border-color:var(--encre);color:var(--encre);background:transparent}
+body.labo-etapes .controls .row{justify-content:initial;border:0}
+body.labo-etapes .controls .r1{width:100%}
+body.labo-etapes .controls .scrub{flex:1;min-width:0}
+body.labo-etapes #etTexte,body.labo-etapes #etMaint,body.labo-etapes .bloc,body.labo-etapes .legende,body.labo-etapes .kbd,body.labo-etapes .etape{color:var(--encre-2);border-color:var(--filet)}
+body.labo-etapes .compt>div,body.labo-etapes .compt small,body.labo-etapes .bloc h3,body.labo-etapes .ligne,body.labo-etapes .atp .u{color:var(--encre-3)}
+body.labo-etapes .compt strong{color:var(--encre)}
+body.labo-etapes .ligne .v,body.labo-etapes .grad .l b,body.labo-etapes .atp .n,body.labo-etapes #etNum{color:var(--encre)}
+body.labo-etapes .grad .l,body.labo-etapes #etMaint small,body.labo-etapes .liens a{color:var(--encre-2)}
+body.labo-etapes .gnote{color:var(--encre-2);background:var(--papier-2)}
+body.labo-etapes .gleg{color:var(--encre-3)}
+body.labo-etapes .cta{color:var(--encre);border-color:var(--encre)}
+@media(max-width:900px){body.labo-etapes #app{display:block;height:auto;margin:0}body.labo-etapes #panel{padding:18px var(--gouttiere);border-left:0}body.labo-etapes .controls{padding:10px var(--gouttiere)}}
+
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .barre p.pos{margin:0}
+.labo-etapes .titre{position:static;max-width:none;pointer-events:auto;left:auto;right:auto;top:auto}
+.labo-etapes .titre::before{display:none}
+.labo-etapes .chap .segs{position:static;height:auto}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
-<div id="app">
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou"><a class="marque" href="../../labo/index.html">LABO</a><a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a></div>
+  <div class="droite"><p class="pos">L’invisible en mouvement</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>La réplication de l’ADN</h1><p class="lead">Deux brins se copient dans un seul sens, par deux chemins différents.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~10 nm</dd><dt>Temps</dt><dd>secondes, ralenties</dd><dt>Modèle</dt><dd>fourche simplifiée</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>La réplication de l’ADN</p>        <div class="segs tabs">
+          <button class="seg" type="button" data-a="0" aria-label="Acte 1, Ouvrir"><b>1</b><span class="t">Ouvrir</span></button>
+          <button class="seg" type="button" data-a="1" aria-label="Acte 2, Copier dans un seul sens"><b>2</b><span class="t">Un seul sens</span></button>
+          <button class="seg" type="button" data-a="2" aria-label="Acte 3, Copier à reculons"><b>3</b><span class="t">À reculons</span></button>
+          <button class="seg" type="button" data-a="3" aria-label="Acte 4, Coudre"><b>4</b><span class="t">Coudre</span></button>
+          <button class="seg" type="button" data-a="4" aria-label="Acte 5, La vraie machine"><b>5</b><span class="t">La vraie machine</span></button>
+        </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder le phénomène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes, les mesures et les repères apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire ce qui se passe et ouvrir l’explication du phénomène."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
+<div id="app" class="app">
   <main id="stage">
-    <div id="view">
+    <div id="view" class="scene">
       <canvas id="c" role="img" aria-label="Fourche de réplication de l'ADN : l'hélicase ouvre la double hélice, une polymérase copie le brin directeur d'un trait, l'autre copie le brin retardé par fragments d'Okazaki."></canvas>
-      <header class="titre">
-        <p class="serie">LABO · L’invisible en mouvement</p>
-        <h1>La réplication de l'<em>ADN</em></h1>
-      </header>
-      <div id="tip" role="status"></div>
+        <div id="tip" role="status"></div>
       <div id="hint">Survole ou touche un élément pour l'identifier</div>
     </div>
     <div class="controls">
       <div class="row r1">
         <button class="btn play" id="bPlay" type="button" aria-label="Lecture ou pause"><svg viewBox="0 0 12 12" aria-hidden="true"><path id="ico" d="M2 1h3v10H2zM7 1h3v10H7z"/></svg><span id="bPlayT">Pause</span></button>
-        <div class="tabs" role="group" aria-label="Actes">
-          <button class="btn" type="button" data-a="0" aria-label="Acte 1, Ouvrir"><b>1</b><span class="t">Ouvrir</span></button>
-          <button class="btn" type="button" data-a="1" aria-label="Acte 2, Copier dans un seul sens"><b>2</b><span class="t">Un seul sens</span></button>
-          <button class="btn" type="button" data-a="2" aria-label="Acte 3, Copier à reculons"><b>3</b><span class="t">À reculons</span></button>
-          <button class="btn" type="button" data-a="3" aria-label="Acte 4, Coudre"><b>4</b><span class="t">Coudre</span></button>
-          <button class="btn" type="button" data-a="4" aria-label="Acte 5, La vraie machine"><b>5</b><span class="t">La vraie machine</span></button>
-        </div>
+
         <button class="btn" id="bSpeed" type="button" aria-label="Vitesse de lecture">×1</button>
         <button class="btn" id="bReset" type="button" aria-label="Réinitialiser">Réinit.</button>
       </div>
     </div>
   </main>
-  <aside id="panel" aria-label="Panneau de lecture">
+  <aside class="panel" id="panel" aria-label="Panneau de lecture">
     <div class="etape"><span id="etNum">Acte 1 / 5</span><span>Fourche</span></div>
     <h2 id="etTitre">Ouvrir</h2>
-    <p id="etTexte"></p>
-    <p id="etMaint"><small>En ce moment</small><span id="etMaintT"></span></p>
-    <div class="bloc">
+    <p id="etTexte" class="couche-comp"></p>
+    <p id="etMaint" class="couche-comp"><small>En ce moment</small><span id="etMaintT"></span></p>
+    <div class="bloc couche-lire">
       <h3>Mesures en direct</h3>
       <div class="compt">
         <div class="c-n">Nucléotides copiés<strong id="cNt">0</strong><small>ADN neuf, amorces exclues</small></div>
@@ -152,7 +193,7 @@ h2{margin:-4px 0 0;font:400 38px/1.05 var(--serif)}
         <div>Coupures<strong id="cCo">0</strong><small>en attente de scellement</small></div>
       </div>
     </div>
-    <div class="bloc">
+    <div class="bloc couche-lire">
       <h3>Distance de la polymérase à la fourche</h3>
       <div class="graphe" id="grWrap">
         <canvas id="gr" aria-label="Graphe de la distance de chaque polymérase à la fourche : ligne plate pour le brin directeur, dent de scie pour le brin retardé."></canvas>
@@ -160,15 +201,15 @@ h2{margin:-4px 0 0;font:400 38px/1.05 var(--serif)}
       </div>
       <div class="gleg"><span>directeur</span><span class="r">retardé</span></div>
     </div>
-    <div class="legende" aria-label="Code couleur">
-      <span style="--c:rgba(232,228,220,.7)">ADN parental</span>
+    <div class="legende couche-lire" aria-label="Code couleur">
+      <span style="--c:var(--encre-2)">ADN parental</span>
       <span style="--c:var(--accent)">ADN neuf</span>
       <span style="--c:var(--arn)">amorce d'ARN</span>
       <span style="--c:var(--energie)">ATP (ligase)</span>
     </div>
-    <p class="kbd">Espace : lecture. Flèches : acte précédent ou suivant. 1 à 5 : acte. R : réinitialiser.</p>
+    <p class="kbd couche-lire">Espace : lecture. Flèches : acte précédent ou suivant. 1 à 5 : acte. R : réinitialiser.</p>
     <nav class="liens">
-      <a class="cta" href="explication.html">Comprendre ce qui se passe &rarr;</a>
+      <a class="couche-comp cta" href="explication.html">Comprendre ce qui se passe &rarr;</a>
       <a href="../../labo/index.html">&larr; LABO</a>
     </nav>
   </aside>
@@ -836,7 +877,8 @@ function updatePanel() {
   const ic = playing ? 'M2 1h3v10H2zM7 1h3v10H7z' : 'M2 1l9 5-9 5z'; if (cache.ic !== ic) { cache.ic = ic; el.ico.setAttribute('d', ic); }
   const off = act < 2; if (cache.off !== off) { cache.off = off; el.grWrap.classList.toggle('off', off); }
   document.querySelectorAll('.tabs [data-a]').forEach(b => {
-    const on = +b.dataset.a === (trans ? trans.to : act); if (b.getAttribute('aria-pressed') !== String(on)) b.setAttribute('aria-pressed', on);
+    const on = +b.dataset.a === (trans ? trans.to : act); if (on) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    if (b.getAttribute('aria-pressed') !== String(on)) b.setAttribute('aria-pressed', on);
   });
 }
 function updateTip() {
@@ -937,5 +979,6 @@ function frame(now) {
 requestAnimationFrame(t => { lastT = t; frame(t); });
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

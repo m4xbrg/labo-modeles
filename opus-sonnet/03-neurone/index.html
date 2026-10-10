@@ -14,8 +14,9 @@ Couleur = sens : orange pour Na+ et la dépolarisation, bleu pour K+ et la repol
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833; --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#ff6fae; --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
   --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
@@ -104,32 +105,64 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.25)}
   .fade,.tip,.btn{transition-duration:.01s}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+.labo-etapes .chap .seg{display:block}
+.labo-etapes .controls .row{justify-content:initial;border:0}
+.labo-etapes .metrics dt,.labo-etapes .legend,.labo-etapes .readout,.labo-etapes .kick{color:var(--encre-3)}
+.labo-etapes .metrics dd{color:var(--encre)}
+.labo-etapes .metrics,.labo-etapes .metrics dt,.labo-etapes .metrics dd,.labo-etapes .links{border-color:var(--filet)}
+.labo-etapes .links a{color:var(--encre);border-color:var(--encre)}
+.labo-etapes #intenVal{color:var(--encre)!important}
+
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .barre p.pos{margin:0}
+.labo-etapes .titre{position:static;max-width:none;pointer-events:auto;left:auto;right:auto;top:auto}
+.labo-etapes .titre::before{display:none}
+.labo-etapes .chap .segs{position:static;height:auto}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou"><a class="marque" href="../../labo/index.html">LABO</a><a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a></div>
+  <div class="droite"><p class="pos">L’invisible en mouvement</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Le neurone qui apprend</h1><p class="lead">Une impulsion électrique traverse le neurone et renforce une synapse.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>µm à mm</dd><dt>Temps</dt><dd>ms à secondes</dd><dt>Modèle</dt><dd>Hodgkin–Huxley, synapse simplifiée</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>Le neurone qui apprend</p>      <div class="segs">
+        <button class="seg" id="bAct1" aria-current="step" aria-pressed="true"><b>1</b><span>Impulsion</span></button>
+        <button class="seg" id="bAct2" aria-pressed="false"><b>2</b><span>Synapse</span></button>
+      </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder le phénomène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes, les mesures et les repères apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire ce qui se passe et ouvrir l’explication du phénomène."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
   <div class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène interactive : un neurone, un oscilloscope de la tension de membrane, une vue rapprochée de la membrane, puis une synapse qui se renforce"></canvas>
-    <header class="head" id="head">
-      <div class="kicker">LABO · L’invisible en mouvement</div>
-      <h1>Le neurone : de l’impulsion à l’<em>apprentissage</em></h1>
-    </header>
     <div class="tip" id="tip" role="status"></div>
   </div>
 
   <aside class="panel" id="panel">
     <div class="kick" id="kick">Acte 1 — Le potentiel d’action</div>
     <h2 class="step fade" id="stepTitle">Repos</h2>
-    <p class="stext fade" id="stepText" aria-live="polite"></p>
-    <dl class="metrics" id="metrics"></dl>
-    <p class="note" id="note"></p>
-    <div class="legend" aria-label="Code couleur de la série">
+    <p class="couche-comp stext fade" id="stepText" aria-live="polite"></p>
+    <dl class="metrics couche-lire" id="metrics"></dl>
+    <p class="note couche-comp" id="note"></p>
+    <div class="legend couche-lire" aria-label="Code couleur de la série">
       <span><i style="background:var(--positif)"></i>Na⁺, dépolarisation</span>
       <span><i style="background:var(--negatif)"></i>K⁺, repolarisation</span>
       <span><i style="background:var(--energie)"></i>énergie, moment clé</span>
       <span><i style="background:var(--accent)"></i>synapse, mémoire</span>
     </div>
     <nav class="links">
-      <a href="explication.html">Comprendre ce qui se passe <span>→</span></a>
+      <a href="explication.html" class="comprendre couche-comp">Comprendre ce qui se passe <span>→</span></a>
       <a class="sub" href="../../labo/index.html"><span>←</span> LABO</a>
     </nav>
   </aside>
@@ -145,19 +178,16 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.25)}
       <button class="btn" id="bReset" aria-label="Réinitialiser (R)" title="Réinitialiser (R)"><svg viewBox="0 0 16 16"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v3h3"/></svg><span class="txt">Réinit.</span></button>
     </div>
     <div class="row">
-      <div class="seg" role="group" aria-label="Choisir l’acte">
-        <button class="btn" id="bAct1" aria-pressed="true">Acte 1 · Impulsion</button>
-        <button class="btn" id="bAct2" aria-pressed="false">Acte 2 · Synapse</button>
-      </div>
+
       <span class="sp"></span>
       <div class="row only1" style="gap:10px">
-        <span class="lab">intensité</span>
-        <input type="range" id="inten" min="0" max="100" value="62" step="1" style="width:130px;--p:62%" aria-label="Intensité de la stimulation">
-        <span class="lab" id="intenVal" style="min-width:74px;color:var(--texte)">50 µA/cm²</span>
-        <button class="btn go" id="bStim" title="Stimuler (S)">Stimuler <span class="kbd">S</span></button>
+        <span class="lab couche-lire">intensité</span>
+        <input type="range" class="couche-lire" id="inten" min="0" max="100" value="62" step="1" style="width:130px;--p:62%" aria-label="Intensité de la stimulation">
+        <span class="lab couche-lire" id="intenVal" style="min-width:74px;color:var(--texte)">50 µA/cm²</span>
+        <button class="btn go" id="bStim" title="Stimuler (S)">Stimuler <span class="kbd couche-lire">S</span></button>
       </div>
       <div class="row only2" style="gap:10px">
-        <button class="btn syn" id="bRep" title="Envoyer un influx (S)">Répéter <span class="kbd">S</span></button>
+        <button class="btn syn" id="bRep" title="Envoyer un influx (S)">Répéter <span class="kbd couche-lire">S</span></button>
         <button class="btn syn" id="bBurst" title="Dix influx rapprochés">Rafale ×10</button>
       </div>
     </div>
@@ -346,14 +376,14 @@ function spr(o, tg, w, dt) { const n = Math.max(1, Math.ceil(dt * w / 0.25)), h 
 const cam = { s: 1, ox: 0, oy: 0, vx: 0, vy: 0, vw: 1, vh: 1 };
 
 const cv = $('#cv'), ctx = cv.getContext('2d');
-const sceneEl = $('#scene'), headEl = $('#head');
+const sceneEl = $('#scene');
 let W = 0, H = 0, DPR = 1, narrow = false, L = null, vignette = null;
 function layout() {
   const rect = sceneEl.getBoundingClientRect();
   W = Math.max(280, rect.width); H = Math.max(300, rect.height); DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
   narrow = W < 640;
-  const top = headEl.offsetTop + headEl.offsetHeight + 16, pad = narrow ? 16 : 22;
+  const top = 24, pad = narrow ? 16 : 22;
   L = { full: { x: 0, y: 0, w: W, h: H } };
   if (!narrow) {
     const nh = Math.min((H - top - pad) * 0.42, (W - 2 * pad) * 0.31);
@@ -1120,6 +1150,7 @@ function doReset() {
   if (viewAct() === 1) reset1(); else reset2(); playing = true; syncPlay();
 }
 function setAct(n) {
+  document.querySelectorAll('.chap .seg').forEach((b, i) => { if (i + 1 === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
   $('#bAct1').setAttribute('aria-pressed', n === 1 ? 'true' : 'false'); $('#bAct2').setAttribute('aria-pressed', n === 2 ? 'true' : 'false'); ctl.dataset.act = String(n);
   if (n === 2 && (mode === 'a1' || mode === 'out')) {
     S1.cur = S1.h.length - 1; playing = true; syncPlay(); followT = 0;
@@ -1228,5 +1259,6 @@ requestAnimationFrame(frame);
 window.__neurone = { S1, S2, HH, seek1, reset1, vOf, tOf1, get mode() { return mode; }, setAct, stimulate, fireSyn, burst };
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
