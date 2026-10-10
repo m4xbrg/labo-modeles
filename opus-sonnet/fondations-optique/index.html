@@ -1249,8 +1249,8 @@ function targetFib() {
   const pts = G.left.concat(G.right, [[-D * ca - e * sa, -D * sa + e * ca], [-D * ca + e * sa, -D * sa - e * ca]]);
   let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
   for (const q of pts) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
-  const s = Math.min(0.70 * W / (x1 - x0), 0.66 * H / (y1 - y0));
-  return { s, cx: 0.05 * W - x0 * s, cy: H * 0.56 + ((y0 + y1) / 2) * s };
+  const s = Math.min((0.70 * W - 12) / (x1 - x0), 0.66 * H / (y1 - y0));
+  return { s, cx: 0.04 * W + 24 - x0 * s, cy: H * 0.56 + ((y0 + y1) / 2) * s };
 }
 function layoutFib() {
   if (!s1.inFib) { s1.snap = true; s1.inFib = true; }
