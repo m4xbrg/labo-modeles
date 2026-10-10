@@ -166,7 +166,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Évolution et génétique des populations | 40 | [Évolution et génétique des populations](../opus-sonnet/fondations-evolution-populations/index.html) | Ouvre la branche H · Évolution, populations et systèmes complexes. Les modules 41 et 42 sont seulement annoncés. |
 | Cellule, membrane et transport | 32 | [Cellule, membrane et transport](../opus-sonnet/fondations-cellule-membrane/index.html) | Ouvre la branche F · Cellule et biologie moléculaire. Diffusion et osmose reprises côté cellule ; pompe Na⁺/K⁺ en appui des modules 33 et 34. |
 | Magnétisme et induction | 23 | [Magnétisme et induction](../opus-sonnet/fondations-magnetisme-induction/index.html) | Quatre actes en deux paillasses (champ et force, induction). Moteur verrouillé : `prompts/moteurs/magnetisme.js`. Répond à la question laissée ouverte par l'acte IV de *Courant et circuits*. |
-| Optique fondamentale | 25 | [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | Un chapitre de quatre étapes (réfraction et réflexion totale, lentilles, couleurs, polarisation) sur une même table d'optique. Moteur testé hors page (61 tests, aussi lancés sur la page). Construite avant le module 24. |
+| Optique fondamentale | 25 | [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | Un chapitre de quatre étapes (réfraction et réflexion totale, lentilles, couleurs, polarisation) sur une même table d'optique. Moteur versionné dans prompts/moteurs/optique.js (61 tests dans optique.test.js, aussi lancés sur la page). Construite avant le module 24. |
 
 ### Prévues (rien de construit)
 
