@@ -49,18 +49,18 @@ h1 em{color:var(--accent);font-style:italic}
 .tip.on{opacity:1;transform:none}
 .tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
 
-.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:18px 24px 20px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
 .eyebrow b{color:var(--accent);font-weight:500}
 h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 #stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
-.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:54px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:50px}
 .cle{margin:0;padding:9px 12px;border-left:2px solid var(--accent);background:var(--fond);font-size:14px;line-height:1.5}
 .swap{animation:swap .55s var(--ease)}
 @keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 .meas{display:grid;gap:0;border-top:1px solid var(--trait)}
-.row{flex-wrap:wrap;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.row{flex-wrap:wrap;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px solid var(--trait)}
 .lab{font:400 12px var(--mono);color:var(--texte-2)}
 .val{font:500 14px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
 .val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
@@ -69,6 +69,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 #scope{display:block;width:100%}
 .leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
 .leg span{display:inline-flex;align-items:center;gap:6px}
+.leg[hidden],.eyebrow[hidden]{display:none}
 .leg svg{width:20px;height:8px;overflow:visible}
 .note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
 .note a{color:var(--texte)}
@@ -80,7 +81,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 .card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
 .card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}
 .card a{color:var(--texte-2)}
-.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:10px 0 20px;margin-bottom:-20px}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;position:sticky;bottom:-20px;background:var(--fond-2);padding:6px 0 20px;margin-bottom:-20px}
 .comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
 .comprendre:hover{background:var(--accent);color:var(--fond)}
 
@@ -685,7 +686,7 @@ function sizeCanvas(c, cssH) {
   c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
 }
 function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
-function sizePanelCanvases() { sizeCanvas(scopeC, Math.round(clamp(innerHeight * 0.2, 110, 170))); }
+function sizePanelCanvases() { updatePanelRec(); sizeCanvas(scopeC, Math.round(clamp(innerHeight * 0.2, 110, 170))); }
 function resize() {
   const r = sceneEl.getBoundingClientRect();
   const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
@@ -1452,7 +1453,9 @@ function geo3() {
     const rx0 = right + 6, rw = W - rx0 - 6, bkW = Math.min(rw * 0.6, 106), bkH = 112;
     bk = { x: rx0 + (rw - bkW) / 2, y: top + 8 + bladeL, w: bkW, h: bkH }; ls = Math.min(rw, 176); lx = rx0 + (rw - ls) / 2; ly = bk.y + bkH + 34;
   }
-  return { nar, top, bot, ry0, ry1, sx0, tx, right, bk, ls, lx, ly, bladeL };
+  let rec = null;
+  if (!nar) { const x = Math.max(right + 30, bk.x - 30), w = lx - 24 - x, y = bk.y + bk.h + 32, h = H - 10 - y; if (w >= 150 && h >= 90) rec = { x, y, w, h }; }
+  return { nar, top, bot, ry0, ry1, sx0, tx, right, bk, ls, lx, ly, bladeL, rec };
 }
 function drawScale3(c, g) {
   const yE = E => g.ry0 + (0.9 - E) / 1.8 * (g.ry1 - g.ry0), s = S3.s;
@@ -1475,12 +1478,15 @@ function drawScale3(c, g) {
   // flèche des électrons : du métal du couple du bas vers l'ion du couple du haut
   if (s.spont && P3.metal !== P3.ion) {
     const yl = pos[P3.metal], yu = pos[P3.ion], xT = g.tx, dy = yl - yu;
-    const p0 = [xT + 80, yl], p1 = [xT + 104, yl - dy * 0.3], p2 = [xT - 62, yu + dy * 0.2], p3 = [xT - 12, yu + 9];
+    const p0 = [xT + 4, yl - 8], p1 = [xT + 8, yl - dy * 0.35], p2 = [xT - 8, yu + dy * 0.35], p3 = [xT - 4, yu + 8];
     c.save(); c.strokeStyle = C.neg; c.fillStyle = C.neg; c.lineWidth = 1.8; c.setLineDash([5, 4]); c.lineDashOffset = P3.dipped ? -K3.t * 26 : 0;
     c.beginPath(); c.moveTo(p0[0], p0[1]); c.bezierCurveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]); c.stroke(); c.setLineDash([]);
-    const dx2 = p3[0] - p2[0], dy2 = p3[1] - p2[1], dl = Math.hypot(dx2, dy2), ux = dx2 / dl, uy = dy2 / dl;
-    c.beginPath(); c.moveTo(p3[0] + ux * 3, p3[1] + uy * 3); c.lineTo(p3[0] - ux * 7 - uy * 4.5, p3[1] - uy * 7 + ux * 4.5); c.lineTo(p3[0] - ux * 7 + uy * 4.5, p3[1] - uy * 7 - ux * 4.5); c.closePath(); c.fill();
-    const my = (yl + yu) / 2; c.font = mono(11); tagText(c, 'e⁻', xT, my, 'center', 'middle', C.neg); c.restore();
+    const ux = 0, uy = -1;
+    c.beginPath(); c.moveTo(p3[0] + 1, p3[1] - 4); c.lineTo(p3[0] - 4.5, p3[1] + 5); c.lineTo(p3[0] + 5.5, p3[1] + 5); c.closePath(); c.fill();
+    // « e⁻ » : au milieu, décalé s'il tombe sur la ligne d'un couple
+    let my = (yl + yu) / 2; const rows = COUPLE_ORDER.map(k => pos[k]);
+    for (let k = 0; k < 40 && rows.some(r => Math.abs(r - my) < 10); k++) my += (k % 2 ? 1 : -1) * (k + 1) * 3;
+    c.font = mono(11); tagText(c, 'e⁻', xT, my, 'center', 'middle', C.neg); c.restore();
     zone(xT - 40, Math.min(yl, yu), xT + 40, Math.max(yl, yu), 'earrow', 'Passage des électrons', 'L’ion du couple du haut capte les électrons du métal du couple du bas : l’échange a lieu dans ce sens parce que E° de l’ion est plus haut que celui du métal.');
   }
 }
@@ -1521,6 +1527,7 @@ function draw3() {
   // ---- bécher : solution d'ions
   const lv = 0.62, dipK = K3.dip.x;
   const bd = drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
+  c.fillStyle = 'rgba(232,228,220,0.06)'; c.fillRect(bk.x + 1, bd.ys, bk.w - 2, bk.y + bk.h - bd.ys - 1);
   const layers = [[P3.ion, d.cIon], [P3.metal, d.cMetalIon]];
   for (const [k, cc] of layers) { const t = ION_TINT[k]; if (!t || !(cc > 0)) continue; c.save(); c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / C0_3, 0, 1) * (k === P3.ion ? 1 : 1)); c.fillRect(bk.x + 1, bd.ys, bk.w - 2, bk.y + bk.h - bd.ys - 1); c.restore(); }
   drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
@@ -1590,12 +1597,26 @@ function draw3() {
   c.fillStyle = C.texte2; c.textAlign = 'left'; yy += 15;
   const msg = s.same ? 'même couple : aucun échange net' : s.spont ? 'électrons échangés : ' + fmt(S3.d.nE * 1000, 2) + ' mmol' : 'aucun électron ne passe';
   paragraph(c, msg, g.lx, yy, L, 14, C.texte2);
+  scene3Rec(c, g);
+}
+function plot3(c, box, fs, top) {
+  const rec = K3.rec, t1 = Math.max(30, P3.t * 1.05), mMax = S3.s.spont ? Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, K3.xEq).mDeposit : 0;
+  const b = plotArea(c, box, { x0: 0, x1: t1, y0: 0, y1: C0_3, yt: [0, C0_3 / 2, C0_3], fy: q => fmt(q, 2), xt: [0, Math.round(t1)], fx: q => fmt(q, 0), xl: 't (s, temps d’affichage)', padL: 32, padR: 44, padT: top, padB: fs + 20, fs,
+    lines: [{ pts: rec.map(r => [r.t, r.c]), col: C.neg, lw: 1.8 }, { pts: rec.map(r => [r.t, mMax > 0 ? r.m / mMax * C0_3 : 0]), col: C.ener, lw: 1.6, dash: [4, 3] }] });
+  c.font = mono(fs); c.fillStyle = C.ener; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(fmt(mMax, 2) + ' g', b.px + b.pw + 4, b.py + 5); c.fillText('0', b.px + b.pw + 4, b.py + b.ph);
+  return b;
+}
+function scene3Rec(c, g) {
+  if (!g.rec) return;
+  const b = plot3(c, g.rec, 11, 20);
+  c.font = mono(11); c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.strokeStyle = C.neg; c.lineWidth = 2; c.beginPath(); c.moveTo(b.px, g.rec.y + 9); c.lineTo(b.px + 14, g.rec.y + 9); c.stroke(); const ltxt = '[' + cname(P3.ion).ion + ']'; c.fillStyle = C.neg; c.fillText(ltxt, b.px + 19, g.rec.y + 9);
+  const x2 = b.px + 19 + c.measureText(ltxt).width + 16; c.strokeStyle = C.ener; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x2, g.rec.y + 9); c.lineTo(x2 + 14, g.rec.y + 9); c.stroke(); c.setLineDash([]); c.fillStyle = C.ener; c.fillText('masse déposée', x2 + 19, g.rec.y + 9);
+  zone(b.px, b.py, b.px + b.pw, b.py + b.ph, 'rec3', 'Enregistreur · [ion] et masse déposée', 'Les ions diminuent et la masse déposée augmente ensemble : l’un vient de l’autre. Vitesse illustrative.');
 }
 function scope3() {
-  const { w, h } = scopeSetup(), c = sctx, rec = K3.rec, t1 = Math.max(30, P3.t * 1.05), mMax = S3.s.spont ? Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, K3.xEq).mDeposit : 0;
-  const b = plotArea(c, { x: 0, y: 2, w, h: h - 2 }, { x0: 0, x1: t1, y0: 0, y1: C0_3, yt: [0, C0_3 / 2, C0_3], fy: q => fmt(q, 2), xt: [0, Math.round(t1)], fx: q => fmt(q, 0), xl: 't (s, temps d’affichage)', padL: 30, padR: 34, padB: 30, fs: 10,
-    lines: [{ pts: rec.map(r => [r.t, r.c]), col: C.neg, lw: 1.8 }, { pts: rec.map(r => [r.t, mMax > 0 ? r.m / mMax * C0_3 : 0]), col: C.ener, lw: 1.6, dash: [4, 3] }] });
-  c.font = mono(10); c.fillStyle = C.ener; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(fmt(mMax, 2) + ' g', b.px + b.pw + 3, b.py + 4); c.fillText('0', b.px + b.pw + 3, b.py + b.ph);
+  const g = geo3(); if (g.rec) return;
+  const { w, h } = scopeSetup(); plot3(sctx, { x: 0, y: 2, w, h: h - 2 }, 10, 8);
 }
 function state3() {
   const s = S3.s, d = S3.d;
@@ -1658,10 +1679,12 @@ function geo4() {
   const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
   const spacing = nar ? W * 0.62 : clamp(W * 0.38, 220, 400), bw = nar ? Math.min(140, spacing * 0.6) : Math.min(190, spacing * 0.62);
   const cxA = W / 2 - spacing / 2, cxC = W / 2 + spacing / 2;
-  const yV = nar ? top + 24 : top + 14, yR = yV + (nar ? 30 : 32), yB = nar ? top + 176 : top + 160, bh = nar ? 150 : clamp(H * 0.3, 150, 200);
-  return { nar, top, bot, spacing, bw, cxA, cxC, yV, yR, yB, bh, exA: cxA - bw / 2 + 32, exC: cxC + bw / 2 - 32, legA: cxA + bw / 2 - 20, legC: cxC - bw / 2 + 20, ys: yB + bh * 0.3, xm: W / 2 };
+  const yV = nar ? top + 24 : top + 14, yR = yV + (nar ? 30 : 32), yB = nar ? top + 176 : top + 160, bh = nar ? 130 : clamp(H * 0.22, 120, 190);
+  const ry = yB + bh + 58, rec = { x: nar ? 6 : cxA - bw / 2, y: ry, w: nar ? W - 12 : cxC - cxA + bw, h: H - 8 - ry };
+  return { rec, nar, top, bot, spacing, bw, cxA, cxC, yV, yR, yB, bh, exA: cxA - bw / 2 + 32, exC: cxC + bw / 2 - 32, legA: cxA + bw / 2 - 20, legC: cxC - bw / 2 + 20, ys: yB + bh * 0.3, xm: W / 2 };
 }
 function tintLiquid(c, x, w, ys, yb, key, cc) {
+  c.fillStyle = 'rgba(232,228,220,0.06)'; c.fillRect(x + 1, ys, w - 2, yb - ys - 1);
   const t = ION_TINT[key]; if (!t || !(cc > 0)) return;
   c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / 1, 0, 1.25)); c.fillRect(x + 1, ys, w - 2, yb - ys - 1);
 }
@@ -1743,16 +1766,24 @@ function draw4() {
   if (Math.abs(L.I) > 1e-5) for (let i = 0; i < ne; i++) els.push(pathPoint(wp, (((K4.ph + i * sp) % Lw) + Lw) % Lw));
   for (const p of els) { c.fillStyle = C.neg; c.shadowColor = C.neg; c.shadowBlur = 8; c.beginPath(); c.arc(p[0], p[1], 3.1, 0, TAU); c.fill(); c.shadowBlur = 0; }
   zoneF((x, y) => els.some(p => Math.hypot(x - p[0], y - p[1]) < 8), 'elec4', 'Électron · e⁻', 'Il circule dans le fil de l’anode vers la cathode pendant la décharge (sens inverse en électrolyse) ; la solution, elle, est parcourue par des ions.');
-  // légende d'échelle
-  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2;
-  if (!g.nar) c.fillText('échelle fixe : la vitesse des points ∝ |I|, pas le nombre réel d’électrons', 24, H - 10);
+  recorder4(c, g, L);
 }
-function scope4() {
-  const { w, h } = scopeSetup(), c = sctx, rec = K4.rec, tmax = rec.length ? rec[rec.length - 1].t : 0, t1 = Math.max(10, Math.ceil(tmax * 1.1 / 10) * 10);
+function recorder4(c, g, L) {
+  const b = g.rec, rec = K4.rec, ymax = (P4.gen || K4.E0 > 1.4) ? 2.1 : 1.6, tmax = rec.length ? rec[rec.length - 1].t : 0, t1 = Math.max(10, Math.ceil(tmax * 1.1 / 10) * 10);
+  if (b.h < 60) return;
   const segs = []; let cur = []; for (const r of rec) { if (r.U == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([r.t, r.U]); } if (cur.length) segs.push(cur);
-  plotArea(c, { x: 0, y: 2, w, h: h - 2 }, { x0: 0, x1: t1, y0: 0, y1: 2, yt: [0, 1, 2], fy: q => fmt(q, 0), xt: [0, t1 / 2, t1], fx: q => fmt(q, 0), xl: 'temps simulé (h)', padL: 22, padR: 8, padB: 30, fs: 10,
-    lines: [{ pts: rec.map(r => [r.t, r.E]), col: rgba(RT2, 0.9), lw: 1.3, dash: [4, 3] }, ...segs.map(s => ({ pts: s, col: C.ener, lw: 1.9 }))] });
+  const tn = tmax, dots = [{ pts: [[tn, L.E]], col: C.texte2, r: 3.6, ring: C.texte }]; if (P4.bridge) dots.push({ pts: [[tn, L.U]], col: C.ener, r: 4.2, ring: C.texte });
+  const P = plotArea(c, b, { x0: 0, x1: t1, y0: 0, y1: ymax, yt: ymax > 2 ? [0, 0.5, 1, 1.5, 2] : [0, 0.5, 1, 1.5], fy: q => fmt(q, 1), xt: [0, t1 / 2, t1], fx: q => fmt(q, 0), xl: 'temps simulé (h)', padL: 34, padR: 12, padT: 20, padB: 32, fs: 11,
+    lines: [{ pts: rec.map(r => [r.t, r.E]), col: rgba(RT2, 0.95), lw: 1.4, dash: [4, 3] }, ...segs.map(s => ({ pts: s, col: C.ener, lw: 2 }))], dots });
+  c.font = mono(11); c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.strokeStyle = C.ener; c.lineWidth = 2; c.beginPath(); c.moveTo(P.px, b.y + 9); c.lineTo(P.px + 16, b.y + 9); c.stroke();
+  c.fillStyle = C.ener; c.fillText('U ' + (P4.bridge ? fmt(L.U, 2) + ' V' : '—'), P.px + 21, b.y + 9);
+  const x2 = P.px + (g.nar ? 98 : 120);
+  c.strokeStyle = C.texte2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x2, b.y + 9); c.lineTo(x2 + 16, b.y + 9); c.stroke(); c.setLineDash([]);
+  c.fillStyle = C.texte2; c.fillText('E ' + fmt(L.E, 2) + ' V', x2 + 21, b.y + 9);
+  zone(P.px, P.py, P.px + P.pw, P.py + P.ph, 'rec4', 'Enregistreur · U et E en fonction du temps', 'Tension aux bornes U et f.é.m. E : plateau, puis effondrement quand les ions du couple qui se réduit viennent à manquer. En électrolyse, E remonte.');
 }
+function scope4() { scopeSetup(); }
 function state4() {
   const c = K4.cell, L = live4();
   return { step: 3, anode: P4.anode, cathode: P4.cathode, R: P4.R, gen: P4.gen, Ugen: P4.U, bridge: P4.bridge, E: L.E, U: L.U, I: L.I, Q: c.Q, t: c.t, tH: c.t / 3600, cA: c.cA, cC: c.cC, mA: c.mA, mC: c.mC, mode: L.mode, speed: P4.speed };
@@ -1772,7 +1803,9 @@ function status4() {
 function readouts4() {
   const c = K4.cell, L = live4(), A = cname(P4.anode), Cc = cname(P4.cathode);
   setM('E', fmt(L.E, 3)); setM('U', P4.bridge ? fmt(L.U, 3) : '—'); setM('I', fmt(L.I * 1000, 1)); setM('Q', fmtI(c.Q)); setM('th', fmt(c.t / 3600, 2));
-  setM('dmC', fmt(c.mC - 20, 3)); setM('dmA', fmt(20 - c.mA, 3)); setM('cA', fmt(c.cA, 3)); setM('cC', fmt(c.cC, c.cC < 0.01 ? 4 : 3));
+  const dC = c.mC - 20, dA = 20 - c.mA;
+  setLab('dmC', Cc.name + (dC >= -5e-4 ? ' déposé' : ' dissous')); setLab('dmA', A.name + (dA >= -5e-4 ? ' dissous' : ' déposé'));
+  setM('dmC', fmt(Math.abs(dC), 3)); setM('dmA', fmt(Math.abs(dA), 3)); setM('cA', fmt(c.cA, 3)); setM('cC', fmt(c.cC, c.cC < 0.01 ? 4 : 3));
 }
 
 /* Un tableau de fonctions par étape. */
@@ -1811,7 +1844,7 @@ function INFO(n) {
   };
   return {
     t: 'La pile et l’électrolyse',
-    x: 'Les mêmes électrons passent maintenant par un fil : deux demi-réactions dans deux béchers, reliées par ce fil et par un pont salin. Le voltmètre donne la tension ; la résistance règle le courant. Avec le générateur, tout peut s’inverser.',
+    x: 'Les mêmes électrons passent par un fil : deux demi-réactions dans deux béchers, reliées par ce fil et un pont salin. Le voltmètre donne la tension, la résistance règle le courant ; le générateur peut tout inverser.',
     cle: 'Une pile sépare l’oxydation et la réduction et oblige les électrons à passer par un fil : la tension est l’écart entre les deux couples. Imposer une tension plus grande inverse la réaction.',
     note: 'Résistance interne constante (2 Ω) ; temps accéléré ; électrons et ions dessinés à une échelle fixe ; surtensions ignorées.',
     eye: 'Enregistreur · U et E en fonction du temps'
@@ -1835,20 +1868,26 @@ function MEAS(n) {
   if (n === 2) return [['oxydation', [['ox', '']]], ['réduction', [['red', '']]], ['bilan', [['eq', '']]], ['ΔE°', [['dE', 'V']]], ['électrons échangés', [['nE', 'mmol']]], ['métal déposé', [['mdep', 'mg']]], ['métal dissous', [['mdis', 'mg']]], ['[ion] restant', [['cion', 'mol/L']]], ['constante K', [['K', '']]]];
   const A = cname(P4.anode), Cc = cname(P4.cathode);
   return [['f.é.m. E', [['E', 'V']]], ['tension U aux bornes', [['U', 'V']]], ['courant I', [['I', 'mA']]], ['charge écoulée Q', [['Q', 'C']]], ['temps simulé', [['th', 'h']]],
-          ['masse de ' + Cc.name + ' gagnée', [['dmC', 'g']]], ['masse de ' + A.name + ' perdue', [['dmA', 'g']]], ['[' + A.ion + ']', [['cA', 'mol/L']]], ['[' + Cc.ion + ']', [['cC', 'mol/L']]]];
+          [Cc.name + ' déposé', [['dmC', 'g']]], [A.name + ' dissous', [['dmA', 'g']]], ['[' + A.ion + ']', [['cA', 'mol/L']]], ['[' + Cc.ion + ']', [['cC', 'mol/L']]]];
 }
 const mEls = {};
 function buildMeas(n) {
-  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k];
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k]; for (const k in lEls) delete lEls[k];
   for (const [lab, vals] of MEAS(n)) {
     const r = document.createElement('div'); r.className = 'row';
     r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
-    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; });
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; }); lEls[vals[0][0]] = r.querySelector('.lab');
   }
   const I = INFO(n);
   $('#mNote').innerHTML = I.note; $('#rEye').textContent = I.eye; $('#leg').innerHTML = LEG(n);
-  $('#cards').hidden = n !== 3;
+  $('#cards').hidden = n !== 3; updatePanelRec();
 }
+function updatePanelRec() {
+  const hide = step === 3 || (step === 2 && !!geo3().rec);
+  $('#scope').parentElement.hidden = hide; $('#rEye').hidden = hide; $('#leg').hidden = hide;
+}
+const lEls = {};
+function setLab(k, s) { const e = lEls[k]; if (e && e.textContent !== s) e.textContent = s; }
 function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
 function updateText() {
   const I = INFO(uiStep); $('#stepText').textContent = I.x;
