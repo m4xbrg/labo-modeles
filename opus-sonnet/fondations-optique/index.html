@@ -228,7 +228,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-steps="0"><button class="btn" id="bFib" aria-pressed="false" title="Remplacer l'interface par une tige de verre courbe (touche B)"><span class="dot"></span>Fibre optique</button></div>
       <!-- Étape 2 : lentilles -->
       <div class="grp" data-steps="1"><span class="gl">f</span><input type="range" id="rF" min="-200" max="200" step="5" value="100" aria-label="Distance focale f en millimètres, négative pour une lentille divergente"><span class="rv" id="vF"></span></div>
-      <div class="grp" data-steps="1" data-mode="ideal"><span class="gl">d_o</span><input type="range" id="rDo" min="20" max="600" step="5" value="300" aria-label="Distance de l'objet à la lentille, en millimètres"><span class="rv" id="vDo"></span></div>
+      <div class="grp" data-steps="1" data-mode="ideal"><span class="gl">dₒ</span><input type="range" id="rDo" min="20" max="600" step="5" value="300" aria-label="Distance de l'objet à la lentille, en millimètres"><span class="rv" id="vDo"></span></div>
       <div class="grp" data-steps="1" data-mode="ideal"><button class="btn" id="bReal" aria-pressed="false" title="Deux surfaces sphériques et 15 rayons tracés exactement (touche V)">Rayons réels à travers le verre</button></div>
       <div class="grp" data-steps="1" data-mode="real"><button class="btn go" id="bIdeal" title="Revenir à la lentille mince (touche V)">Modèle idéal</button></div>
       <div class="grp" data-steps="1" data-mode="ideal"><button class="btn sm" data-pre="photo">Appareil photo (objet lointain)</button><button class="btn sm" data-pre="proj">Projecteur (objet juste au-delà de f)</button><button class="btn sm" data-pre="loupe">Loupe (objet entre f et la lentille)</button></div>
@@ -991,7 +991,7 @@ function setText(sel, t) { const e = $(sel); if (e.textContent !== t) e.textCont
 
 /* ================= Étape 1 · Réfraction et réflexion totale ================= */
 const p1 = prm.s1 = {};                    // th (rad, signé : + = laser à gauche), n (milieu dense), rev, fr, fib, fa (rad), R1, R2 (mm)
-const s1 = { t: 5, fkey: '', fib: null, ckey: '', curves: null };
+const s1 = { t: 5, fkey: '', fib: null, ckey: '', curves: null, v: null, snap: true };
 const GEO = { w: 12, lead: 50, phi: 70 * DEG, rMin: 14, rMax: 100, D: 62 };   // fibre : largeur du cœur, tronçons droits, angle des virages, distance du laser (mm)
 const MED = Opt.MEDIA, NAIR = MED.air.n;
 const medName = n => ['eau', 'verre', 'diamant'].find(k => Math.abs(n - MED[k].n) < 0.004) || 'milieu';
@@ -1002,7 +1002,7 @@ const kmsF = v => nbsp(fmtI(v));
 
 function init1() {
   Object.assign(p1, { th: 40 * DEG, n: MED.verre.n, rev: false, fr: false, fib: false, fa: 15 * DEG, R1: 60, R2: 60 });
-  s1.t = 5; s1.fkey = ''; s1.fib = null; s1.ckey = '';
+  s1.t = 5; s1.fkey = ''; s1.fib = null; s1.ckey = ''; s1.v = null; s1.snap = true;
 }
 // Grandeurs physiques de l'interface, toutes issues du moteur.
 function phys1() {
@@ -1033,6 +1033,7 @@ function layout1() {
   return { Lr: Math.min(H * 0.38, W * 0.40), O: [view.cx, view.cy] };
 }
 function draw1() {
+  if (!p1.fib) s1.inFib = false;
   if (p1.fib) return drawFib();
   const ph = phys1(), { Lr, O } = layout1(), th = p1.th, sn = Math.sin(th), cs = Math.cos(th), s = view.s;
   const th2s = ph.total ? NaN : (th < 0 ? -1 : 1) * ph.th2;
@@ -1219,7 +1220,7 @@ function fibCompute() {
   const rays = []; let ntir = 0, nleak = 0, deliv = 0, maxK = 0;
   for (const q of [-0.8, -0.4, 0, 0.4, 0.8]) {
     const u = q * h * Math.cos(a), st = [front[0] + perp[0] * u, front[1] + perp[1] * u];
-    const tr = Opt.trace({ x: st[0], y: st[1], dx: dir[0], dy: dir[1], I: 1 }, F.scene, 400, { fresnel: true, far: 90 });
+    const tr = Opt.trace({ x: st[0], y: st[1], dx: dir[0], dy: dir[1], I: 1 }, F.scene, 400, { fresnel: true, far: 130 });
     const segs = tr.segs.filter(g => g.kind === 'main');
     const ev = tr.events.map(e => Object.assign({}, e, { tag: F.scene[e.surf] && F.scene[e.surf].tag || '' }));
     const tir = ev.filter(e => e.type === 'tir').length, leaks = ev.filter(e => e.type === 'refract' && e.tag.indexOf('paroi') === 0);
@@ -1242,9 +1243,21 @@ function fibCompute() {
   const fb = { G, F, rays, ntir, nleak, fout: deliv / rays.length * 100, maxK, rmin: Math.min(p1.R1, p1.R2), acc: Opt.acceptance(p1.n, NAIR, NAIR), thc: Opt.critical(p1.n, NAIR) };
   s1.fkey = key; s1.fib = fb; return fb;
 }
+// Vue de la fibre : ajustée au chemin courant (fibre + laser = ~70 % de la largeur), lissée ; figée pendant qu'on tire une poignée.
+function targetFib() {
+  const G = fibGeom(p1.R1, p1.R2), a = p1.fa, ca = Math.cos(a), sa = Math.sin(a), D = GEO.D + 10, e = 8;
+  const pts = G.left.concat(G.right, [[-D * ca - e * sa, -D * sa + e * ca], [-D * ca + e * sa, -D * sa - e * ca]]);
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const q of pts) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+  const s = Math.min(0.70 * W / (x1 - x0), 0.66 * H / (y1 - y0));
+  return { s, cx: 0.05 * W - x0 * s, cy: H * 0.56 + ((y0 + y1) / 2) * s };
+}
 function layoutFib() {
-  const bw = 375, bh = 190, s = Math.min(W * 0.94 / bw, H * 0.78 / bh);
-  view.s = s; view.cx = (W - bw * s) / 2 + 80 * s; view.cy = (H - bh * s) / 2 + 145 * s;
+  if (!s1.inFib) { s1.snap = true; s1.inFib = true; }
+  const t = targetFib(), v = s1.v;
+  if (!v || !playing || s1.snap) { s1.v = t; s1.snap = false; }
+  else if (!dragKey) { const k = 0.16; v.s += (t.s - v.s) * k; v.cx += (t.cx - v.cx) * k; v.cy += (t.cy - v.cy) * k; }
+  view.s = s1.v.s; view.cx = s1.v.cx; view.cy = s1.v.cy;
 }
 function drawFib() {
   layoutFib();
@@ -1524,6 +1537,9 @@ function drawIdeal() {
     }
     ctx.restore();
   }
+  // l'écran est opaque : un rayon dont le trajet coupe l'écran (hauteur finie) s'y arrête
+  { const xs0 = p2.xs, hs0 = 1.5 * ha;
+    for (const r of rays) { const a = r.post[0], b = r.post[1]; if (xs0 > a[0] && xs0 < b[0]) { const y = a[1] + (b[1] - a[1]) * (xs0 - a[0]) / (b[0] - a[0]); if (Math.abs(y) <= hs0) r.post = [a, [xs0, y]]; } } }
   for (const r of rays) { beam(ctx, r.pre.map(P), C.texte, 0.9, 1.6); beam(ctx, r.post.map(P), C.texte, 0.9, 1.6); }
   // prolongements et image
   const inScene = isFinite(L.dImg) && Math.abs(L.dImg) < 1e5 && X(L.dImg) > -200 && X(L.dImg) < W + 200;
@@ -1543,12 +1559,12 @@ function drawIdeal() {
   arrow(ctx, tx, cy, tx, ty, C.accent, 2.8, far ? [4, 3] : null, 9);
   ctx.font = mono(10);
   tagText(ctx, far ? `objet à ${nbsp(fmtI(p2.dO))} mm (hors champ)` : 'objet', tx + (far ? 14 : 0), ty - 8, far ? 'left' : 'center', 'bottom', C.accent);
-  zone(tx - 10, Math.min(cy, ty) - 6, tx + 10, Math.max(cy, ty) + 6, 'obj', 'Objet', 'Flèche posée sur l’axe : glisse sa pointe pour changer d_o et la hauteur.');
+  zone(tx - 10, Math.min(cy, ty) - 6, tx + 10, Math.max(cy, ty) + 6, 'obj', 'Objet', 'Flèche posée sur l’axe : glisse sa pointe pour changer dₒ et la hauteur.');
   handle(tx, ty, 14, 'obj', (x, y) => {
     const m = toMM(x, y); let d = clamp(-m[0], Math.max(10, 0.12 * F), Math.max(10, (view.cx - 24) / s));
     for (const t of [F, 2 * F]) if (Math.abs(d - t) < 0.03 * t) d = t;
     p2.dO = d; p2.hO = m[1];
-  }, 'Objet', 'Glisse la pointe : la distance d_o et la hauteur de l’objet changent.');
+  }, 'Objet', 'Glisse la pointe : la distance dₒ et la hauteur de l’objet changent.');
 
   // écran
   const xs = p2.xs, sx = X(xs), hs = 1.5 * ha;
@@ -1564,7 +1580,7 @@ function drawIdeal() {
     ctx.restore();
   }
   ctx.font = mono(10); tagText(ctx, 'écran', sx, Y(hs) - 6, 'center', 'bottom', C.texte2);
-  zone(sx - 10, Y(hs), sx + 10, Y(-hs), 'ecran', 'Écran', 'Recueille l’image réelle ; elle n’y est nette qu’à la distance d_i de la lentille.');
+  zone(sx - 10, Y(hs), sx + 10, Y(-hs), 'ecran', 'Écran', 'Recueille l’image réelle ; elle n’y est nette qu’à la distance dᵢ de la lentille.');
   handle(sx, Y(hs), 13, 'ecran', (x) => { let v = toMM(x, 0)[0]; if (L.real && isFinite(L.dImg) && Math.abs(v - L.dImg) * s < 6) v = L.dImg; p2.xs = v; fix2(); },
     'Écran', 'Glisse-le le long de l’axe : l’image n’est nette qu’à la bonne distance.');
 }
@@ -1589,8 +1605,9 @@ function drawReal() {
   ctx.save(); ctx.lineWidth = 1.4;
   ctx.strokeStyle = C.texte; ctx.beginPath(); ctx.moveTo(xp, cy - 9); ctx.lineTo(xp, cy + 9); ctx.stroke();
   ctx.strokeStyle = C.accent; ctx.beginPath(); ctx.moveTo(xm, cy - 9); ctx.lineTo(xm, cy + 9); ctx.stroke(); ctx.restore();
-  tagText(ctx, `foyer paraxial ${fmt(R.par, 1)} mm`, xp + 8, cy - 13, 'left', 'bottom', C.texte);
-  tagText(ctx, `foyer marginal ${fmt(R.marg, 1)} mm`, xm - 8, cy + 13, 'right', 'top', C.accent);
+  { const place = (txt, x, y, base, col) => { ctx.font = mono(10); const w = ctx.measureText(txt).width; tagText(ctx, txt, clamp(x - w / 2, 8, W - 8 - w), y, 'left', base, col); };
+    place(`foyer paraxial ${fmt(R.par, 1)} mm`, xp, cy - 14, 'bottom', C.texte);
+    place(`foyer marginal ${fmt(R.marg, 1)} mm`, xm, cy + 14, 'top', C.accent); }
   zcirc(xp, cy, 12, 'fpar', 'Foyer paraxial', 'Là où se croisent les rayons proches de l’axe : c’est la focale de la formule de la lentille mince.');
   zcirc(xm, cy, 12, 'fmar', 'Foyer marginal', 'Là où se croisent les rayons du bord : plus près de la lentille, c’est l’aberration sphérique.');
   caption(`Objet à l’infini : quinze rayons parallèles à l’axe, tracés à travers deux surfaces sphériques (n = ${fmt(N_LENS, 1)}). L’échelle est agrandie.`, 18, H - 14, C.texte2, Math.min(W - 36, 470));
@@ -1617,7 +1634,7 @@ function scope2() {
   const L = Opt.thinLens(f, p2.dO, p2.hO), br = hyp2();
   const cs = br.map(p => ({ pts: p, col: C.texte, lw: 1.8 }));
   cs.push({ pts: [[0, f], [4 * F, f]], col: C.texte2, lw: 1.1, dash: [4, 3] });
-  const vl = f > 0 ? [{ x: f, col: C.texte2, label: 'd_o = f' }] : [];
+  const vl = f > 0 ? [{ x: f, col: C.texte2, label: 'dₒ = f' }] : [];
   const pts = []; if (isFinite(L.dImg) && p2.dO <= 4 * F && Math.abs(L.dImg) <= 3 * F) pts.push({ x: p2.dO, y: L.dImg, col: C.accent });
   plotXY({ x0: 0, x1: 4 * F, y0: -3 * F, y1: 3 * F, xl: ['0', fmtI(4 * F)], yl: [fmtI(-3 * F), fmtI(3 * F)], curves: cs, vlines: vl, points: pts });
 }
@@ -1630,7 +1647,7 @@ function sync2() {
   if (p2.real) {
     setText('#rEye', 'Enregistreur · aberration sphérique'); setLeg(lgSvg(lgLine(C.accent, 1.8), 'coupe l’axe à…') + lgSvg(lgLine(C.texte2, 1.2, 1), 'foyer paraxial'));
   } else {
-    setText('#rEye', 'Enregistreur · d_i selon d_o'); setLeg(lgSvg(lgLine(C.texte, 1.8), 'd_i(d_o)') + lgSvg(lgLine(C.texte2, 1.1, 1), 'asymptotes') + lgSvg('<circle cx="10" cy="4" r="3" fill="#f6c6a0"/>', 'état actuel'));
+    setText('#rEye', 'Enregistreur · dᵢ selon dₒ'); setLeg(lgSvg(lgLine(C.texte, 1.8), 'dᵢ(dₒ)') + lgSvg(lgLine(C.texte2, 1.1, 1), 'asymptotes') + lgSvg('<circle cx="10" cy="4" r="3" fill="#f6c6a0"/>', 'état actuel'));
   }
 }
 function read2() {
@@ -1682,12 +1699,12 @@ function preset2(name) {
 STEPS[1] = {
   t: 'Lentilles et images', short: 'Lentilles',
   x: 'Une lentille réunit en un point de l\'image les rayons issus d\'un point de l\'objet. Glisse la flèche : trois rayons suffisent à placer l\'image, réelle ou virtuelle. Change f pour passer à une lentille divergente.',
-  cle: 'Une lentille réunit en un point tous les rayons qui partent d\'un point de l\'objet : 1/d_o + 1/d_i = 1/f.',
+  cle: 'Une lentille réunit en un point tous les rayons qui partent d\'un point de l\'objet : 1/dₒ + 1/dᵢ = 1/f.',
   note: 'Lentille mince idéale dans le mode par défaut ; l\'œil, le microscope et les télescopes sont seulement nommés. L\'échelle suit f (±2,5 f tiennent dans la scène) et s\'agrandit pour les rayons réels.',
   meas: [
     ['Distance focale f', [['f', 'mm']]],
-    ['Distance objet d_o', [['dO', 'mm']]],
-    ['Distance image d_i', [['dI', 'mm']]],
+    ['Distance objet dₒ', [['dO', 'mm']]],
+    ['Distance image dᵢ', [['dI', 'mm']]],
     ['Grandissement m', [['m', '']]],
     ['Image', [['nat', '']]],
     ['Position de l\'écran', [['xs', 'mm']]],
