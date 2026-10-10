@@ -60,7 +60,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 @keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 .meas{display:grid;gap:0;border-top:1px solid var(--trait)}
-.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
+.row{flex-wrap:wrap;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--trait)}
 .lab{font:400 12px var(--mono);color:var(--texte-2)}
 .val{font:500 14px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
 .val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
@@ -91,6 +91,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 .btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .btn:hover{border-color:var(--texte-2)}
 .btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn[hidden]{display:none}
 .btn:disabled{opacity:.35;cursor:default}
 .btn.go{border-color:var(--accent);color:var(--accent)}
 .btn.go:hover{background:var(--accent);color:var(--fond)}
@@ -171,17 +172,22 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <p class="cle" id="cle"></p>
 
     <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section>
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : pH et pOH en barre empilée, historique des pH, ou pH des deux béchers en fonction des gouttes ajoutées."></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
 
-    <section>
-      <div class="meas" id="meas"></div>
-      <p class="note" id="mNote"></p>
+    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+      <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
+      <div class="card"><b>Cellule</b>Une membrane qui sépare des ions de concentrations différentes, est-ce une pile ?<small><a href="../fondations-cellule-membrane/index.html">Modules 32 · 33 · Cellule, membrane et transport</a></small></div>
+      <div class="card"><b>Vivant</b>La respiration est-elle une pile ? D’où viennent ses électrons, où vont-ils ?<small>Module 34 (à venir) · <a href="../02-respiration/index.html">planche Respiration</a></small></div>
+      <div class="card"><b>Énergie</b>Pourquoi certaines batteries se rechargent et d’autres non ?<small>Seulement introduit : électrochimie réversible</small></div>
     </section>
-
-    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes"></section>
 
     <section class="kbd">
       <p class="eyebrow">Clavier</p>
@@ -225,6 +231,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-acts="1" data-m2="gouttes"><span class="gl" id="glRat">[A⁻]/[HA]</span><input type="range" id="rRat" min="-1" max="1" step="0.01" value="0" aria-label="Rapport base conjuguée sur acide du tampon, échelle logarithmique de 0,1 à 10"><span class="rv" id="vRat"></span></div>
       <div class="grp" data-acts="1" data-m2="titrage"><span class="gl">V_base</span><input type="range" id="rVb" min="0" max="50" step="0.1" value="12.5" aria-label="Volume de soude versé, de 0 à 50 millilitres"><span class="rv" id="vVb"></span></div>
       <div class="grp" data-acts="1"><button class="btn" id="bTit" aria-pressed="false"><span class="dot"></span>Titrage complet</button><button class="btn" id="bClr" title="Vider les béchers et recommencer (touche R)">Vider</button></div>
+      <!-- étape 3 -->
+      <div class="grp" data-acts="2"><span class="gl">Métal</span><button class="btn sm" data-metal="Zn" aria-pressed="true" title="Lame de zinc">Zn</button><button class="btn sm" data-metal="Fe" aria-pressed="false" title="Lame de fer">Fe</button><button class="btn sm" data-metal="Pb" aria-pressed="false" title="Lame de plomb">Pb</button><button class="btn sm" data-metal="Cu" aria-pressed="false" title="Lame de cuivre">Cu</button><button class="btn sm" data-metal="Ag" aria-pressed="false" title="Lame d'argent">Ag</button></div>
+      <div class="grp" data-acts="2"><span class="gl">Solution</span><button class="btn sm" data-ion="Zn" aria-pressed="false" title="Ions zinc Zn²⁺, 0,10 mol/L">Zn²⁺</button><button class="btn sm" data-ion="Fe" aria-pressed="false" title="Ions fer Fe²⁺, 0,10 mol/L">Fe²⁺</button><button class="btn sm" data-ion="Pb" aria-pressed="false" title="Ions plomb Pb²⁺, 0,10 mol/L">Pb²⁺</button><button class="btn sm" data-ion="Cu" aria-pressed="true" title="Ions cuivre Cu²⁺, 0,10 mol/L">Cu²⁺</button><button class="btn sm" data-ion="Ag" aria-pressed="false" title="Ions argent Ag⁺, 0,10 mol/L">Ag⁺</button></div>
+      <div class="grp" data-acts="2"><button class="btn" id="bPred" aria-pressed="false"><span class="dot"></span>Je prédis</button><button class="btn" id="bPredY" aria-pressed="false" hidden>Il va se passer quelque chose</button><button class="btn" id="bPredN" aria-pressed="false" hidden>Rien ne va se passer</button></div>
+      <div class="grp" data-acts="2"><button class="btn go" id="bDip" title="Plonger la lame (touche P)">Plonger</button></div>
+      <!-- étape 4 -->
+      <div class="grp" data-acts="3"><span class="gl">Couples</span><button class="btn" data-cell="Zn,Cu" aria-pressed="true" title="Pile Daniell : zinc et cuivre, 1,10 V">Zn/Cu</button><button class="btn" data-cell="Fe,Cu" aria-pressed="false" title="Fer et cuivre, 0,78 V">Fe/Cu</button><button class="btn" data-cell="Zn,Ag" aria-pressed="false" title="Zinc et argent, 1,56 V">Zn/Ag</button></div>
+      <div class="grp" data-acts="3"><span class="gl">R</span><input type="range" id="rR" min="0" max="3" step="0.01" value="1" aria-label="Résistance de charge, échelle logarithmique de 1 à 1000 ohms"><span class="rv" id="vR"></span></div>
+      <div class="grp" data-acts="3"><button class="btn" id="bGen" aria-pressed="false"><span class="dot"></span>Générateur</button><input type="range" id="rU" min="0" max="2" step="0.01" value="1.3" aria-label="Tension du générateur, de 0 à 2 volts"><span class="rv" id="vU"></span></div>
+      <div class="grp" data-acts="3"><button class="btn" id="bBridge" title="Retirer ou remettre le pont salin (touche S)">Retirer le pont salin</button></div>
+      <div class="grp" data-acts="3"><span class="gl">Temps</span><button class="btn sm" data-speed="60" aria-pressed="false" title="1 s affichée = 1 min simulée">×60</button><button class="btn sm" data-speed="3600" aria-pressed="true" title="1 s affichée = 1 h simulée">×3600</button><button class="btn sm" data-speed="36000" aria-pressed="false" title="1 s affichée = 10 h simulées">×36 000</button></div>
     </div>
   </div>
 </div>
@@ -668,7 +685,7 @@ function sizeCanvas(c, cssH) {
   c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
 }
 function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
-function sizePanelCanvases() { sizeCanvas(scopeC, 168); }
+function sizePanelCanvases() { sizeCanvas(scopeC, Math.round(clamp(innerHeight * 0.2, 110, 170))); }
 function resize() {
   const r = sceneEl.getBoundingClientRect();
   const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
@@ -923,7 +940,7 @@ function pure1(on) { P1.pure = !!on; if (!on) P1.last = 'set'; p1Changed(on ? 'p
 /* ================= Étape 2 : acides faibles et tampons ================= */
 const DROP_V = 5e-5, DROP_MMOL = 0.05, NMOL = 24, VIS_MAX = 6, VOL_TIT = 0.025, CONC_TIT = 0.1;
 const P2 = { mode: 'gouttes', acid: 'acetique', ratio: 1, nA: 0, nB: 0, vb: 0.0125, seq: 0, pts: [], last: 'init', lastKind: null, btnA: false, btnB: false, keyA: false, keyB: false, holdT: 0 };
-const K2 = { t: 0, sw: { x: 7, v: 0 }, sb: { x: 4.76, v: 0 }, st: { x: 2.9, v: 0 }, dispW: 7, dispB: 4.76, queue: [], falls: [], rip: { w: 0, b: 0, t: 0 }, mols: [], anim: [], water: [], rng: null, baseHA: 12, cool: 0, convCool: 0, curveKey: '', cw: [], cb: [], tkey: '', ct: [], eq: null, lastVb: 0.0125, vbAcc: 0, tipGlow: 0 };
+const K2 = { t: 0, sw: { x: 7, v: 0 }, sb: { x: 4.76, v: 0 }, st: { x: 2.9, v: 0 }, dispW: 7, dispB: 4.76, queue: [], falls: [], rip: { w: 0, b: 0, t: 0 }, mols: [], anim: [], water: [], rng: null, baseHA: 12, cool: 0, convCool: 0, curveKey: '', cw: [], cb: [], tkey: '', ct: [], eq: null, lastVb: 0.0125, vbAcc: 0, tipGlow: 0, evt: 'none', back: false };
 let S2 = null;
 const ACID_LABEL = { acetique: 'tampon acétique', ammonium: 'tampon ammonium', phosphate: 'tampon phosphate' };
 const ratioLabel = k => { const z = Elc.ACIDS[k].zA; return z === 0 ? '[A⁻]/[HA]' : z > 0 ? '[A]/[HA⁺]' : '[A²⁻]/[HA⁻]'; };
@@ -1005,7 +1022,7 @@ function landed(rec) {
   K2.dispW = rec.pw; K2.dispB = rec.pb;
   P2.pts.push({ seq: rec.seq, x: rec.x, pw: rec.pw, pb: rec.pb });
   if (P2.pts.length > 800) P2.pts.shift();
-  K2.rip = { w: 1, b: 1, t: 0 };
+  K2.rip = { w: 1, b: 1, t: 0 }; K2.evt = rec.kind;
   applyConv(rec);
 }
 function addDrops(kind, n) {
@@ -1030,7 +1047,7 @@ function addDrops(kind, n) {
 }
 function settleSilent(r) { K2.mols.forEach(m => { m.busy = false; }); K2.anim = []; let have = K2.mols.filter(m => m.state === 'HA').length; for (const m of K2.mols) { if (have > r.nHA && m.state === 'HA') { m.state = 'A'; have--; } if (have < r.nHA && m.state === 'A') { m.state = 'HA'; have++; } } K2.baseHA = r.nHA; }
 function clearDrops2() {
-  P2.nA = 0; P2.nB = 0; P2.seq = 0; P2.pts = []; K2.queue = []; K2.falls = []; K2.rip = { w: 0, b: 0, t: 0 };
+  P2.nA = 0; P2.nB = 0; P2.seq = 0; P2.pts = []; K2.queue = []; K2.falls = []; K2.rip = { w: 0, b: 0, t: 0 }; K2.evt = 'none';
   computeS2(); K2.dispW = S2.w.pH; K2.dispB = S2.b.pH; K2.sw.x = K2.dispW; K2.sb.x = K2.dispB; K2.sw.v = K2.sb.v = 0; settleMols();
 }
 function modeChanged2() {
@@ -1041,6 +1058,7 @@ function resetP2() { Object.assign(P2, { mode: 'gouttes', acid: 'acetique', rati
 function enter2(restart) {
   if (restart) resetP2();
   K2.queue = []; K2.falls = []; K2.rip = { w: 0, b: 0, t: 0 }; K2.t = 0; K2.curveKey = ''; K2.tkey = '';
+  K2.evt = P2.nA + P2.nB > 0 ? (P2.lastKind || 'none') : 'none'; K2.back = false;
   computeS2(); curves2(); initMols2();
   K2.dispW = S2.w.pH; K2.dispB = S2.b.pH; K2.sw = { x: K2.dispW, v: 0 }; K2.sb = { x: K2.dispB, v: 0 }; K2.st = { x: S2.pHtit, v: 0 }; K2.lastVb = P2.vb; K2.vbAcc = 0;
   if (P2.pts.length === 0) P2.seq = 0;
@@ -1062,10 +1080,14 @@ function adv2(h) {
   // mode titrage : la goutte visible suit le curseur
   if (P2.mode === 'titrage') {
     const dv = P2.vb - K2.lastVb; K2.lastVb = P2.vb;
-    if (dv > 0) { K2.vbAcc += dv; if (K2.vbAcc >= 0.0006 && K2.falls.length < 3) { K2.falls.push({ rec: null, t: 0 }); K2.vbAcc = 0; } } else if (dv < 0) K2.vbAcc = 0;
+    if (dv > 0) { K2.back = false; K2.vbAcc += dv; if (K2.vbAcc >= 0.0006 && K2.falls.length < 3) { K2.falls.push({ rec: null, t: 0 }); K2.vbAcc = 0; } } else if (dv < 0) { K2.vbAcc = 0; K2.back = true; }
     K2.convCool -= h;
     const tgt = targetHA();
-    if (K2.baseHA !== tgt && K2.convCool <= 0) { if (convert(tgt > K2.baseHA ? 'H' : 'OH', 0)) K2.baseHA += Math.sign(tgt - K2.baseHA); K2.convCool = 0.09; }
+    if (K2.baseHA !== tgt && K2.convCool <= 0) {
+      if (tgt < K2.baseHA) { if (convert('OH', 0)) K2.baseHA--; }
+      else { const i = pickMol('A'); if (i >= 0) { K2.mols[i].state = 'HA'; K2.mols[i].flash = 1; K2.baseHA++; } }   // retour en arrière : bascule sans ion qui arrive
+      K2.convCool = 0.09;
+    }
     spring(K2.st, S2.pHtit, h);
   } else { spring(K2.sw, K2.dispW, h); spring(K2.sb, K2.dispB, h); }
   // agitation des molécules
@@ -1216,7 +1238,7 @@ function loupe2(c, g) {
       c.fillStyle = C.fond; c.font = '500 ' + Math.round(9 * Math.max(s, 0.9)) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(a.kind === 'H' ? '+' : '−', g.lx + x * inner, g.ly + y * inner + 0.5);
     } else if (a.type === 'fly') drawProtonFly(c, a.x, a.y, a, g);
   }
-  if (!g.legend) {
+  if (!g.legend && W >= 640) {
     const yy = g.ly + L - 12; c.fillStyle = 'rgba(10,13,18,.6)'; c.fillRect(g.lx, yy - 12, L, 24);
     drawMol(c, g.lx + 22, yy, 0, 0.9, 'HA', A.zA, 0); c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('HA', g.lx + 38, yy);
     drawMol(c, g.lx + L / 2 + 12, yy, 0, 0.9, 'A', A.zA, 0); c.fillStyle = C.texte; c.fillText('A', g.lx + L / 2 + 28, yy);
@@ -1234,8 +1256,17 @@ function loupe2(c, g) {
     const nHA = K2.mols.filter(m => m.state === 'HA').length;
     c.fillStyle = C.texte2; c.fillText('dans la loupe : ' + nHA + ' HA · ' + (NMOL - nHA) + ' A', x, y); y += 14;
     c.fillText('dans le bécher : [A]/[HA] = ' + fmt(pr.ratio, 2), x, y); y += 18;
-    paragraph(c, 'Un proton arrive : il se fixe sur une base conjuguée, qui redevient acide faible.', x, y, w, 14, rgba(RT2, 0.8));
+    paragraph(c, loupeNote2(), x, y, w, 14, rgba(RT2, 0.8));
   }
+}
+function loupeNote2() {
+  if (P2.mode === 'titrage') {
+    if (K2.back) return 'Le curseur recule : la courbe se relit à l’envers, sans nouvelle réaction.';
+    return P2.vb > 0.00005 ? 'Un OH⁻ arrive : il prend le proton d’un acide faible, qui devient base conjuguée ; une molécule d’eau se forme.' : 'Rien n’est encore ajouté : HA et A coexistent dans le rapport choisi.';
+  }
+  if (K2.evt === 'acide') return 'Un proton arrive : il se fixe sur une base conjuguée, qui redevient acide faible.';
+  if (K2.evt === 'base') return 'Un OH⁻ arrive : il prend le proton d’un acide faible, qui devient base conjuguée ; une molécule d’eau se forme.';
+  return 'Rien n’est encore ajouté : HA et A coexistent dans le rapport choisi.';
 }
 function curve2(c, g) {
   const cb = g.curve, A = Elc.ACIDS[P2.acid], pKa = A.pKa, band = [{ y0: pKa - 1, y1: pKa + 1, col: rgba(RA, 0.14) }];
@@ -1324,22 +1355,432 @@ function readouts2() {
   }
 }
 
-/* ================= Étapes 3 et 4 : amorces (lot 3) ================= */
-function stubStep(i) {
-  return {
-    enter() {}, adv() {},
-    draw() { const c = ctx; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.font = '400 26px ' + tok('--serif'); c.fillText(INFO(i).t, W / 2, H / 2 - 4); c.font = mono(12); c.fillText('en construction', W / 2, H / 2 + 22); },
-    scope() { scopeSetup(); },
-    state() { return { step: i }; },
-    status() { return 'En construction : cette étape arrive bientôt.'; },
-    readouts() {}
-  };
+/* ================= Étape 3 : passer des électrons, le redox ================= */
+const COUPLE_ORDER = ['Zn', 'Fe', 'Pb', 'H', 'Cu', 'Ag'];
+const METAL_COL = { Zn: '#9aa3ad', Fe: '#7b8088', Pb: '#6b7178', Cu: '#c8763a', Ag: '#d9dde0' };
+const DEP_COL = { Zn: '#9aa3ad', Fe: '#555a62', Pb: '#4f555c', Cu: '#c8763a', Ag: '#cfd3d6' };
+const ION_TINT = { Cu: { col: '#4f8fd8', max: 0.55 }, Fe: { col: '#9fc79a', max: 0.24 } };
+const TAU3 = 8, C0_3 = 0.1, V0_3 = 0.1, NGR = 240, DEP_SLOTS = 14;
+const P3 = { metal: 'Zn', ion: 'Cu', dipped: false, t: 0, pm: false, pred: null };
+const K3 = { t: 0, dip: { x: 0, v: 0 }, rng: null, atoms: [], ions: [], dep: [], prods: [], evs: [], elec: [], evAcc: 0, grains: [], rec: [], recT: 0, eqKey: '', xEq: 0 };
+let S3 = null;
+const cname = k => Elc.COUPLES[k];
+const kExp = () => (S3.s.spont ? Math.round(Math.log10(S3.s.K)) : 0);
+function calc3() {
+  const key = P3.metal + '|' + P3.ion;
+  const s = Elc.spontaneous(P3.metal, P3.ion);
+  if (K3.eqKey !== key) { K3.eqKey = key; K3.xEq = s.spont ? Elc.displacementEq(P3.metal, P3.ion, C0_3) : 0; }
+  const x = s.spont && P3.dipped ? K3.xEq * (1 - Math.exp(-P3.t / TAU3)) : 0;
+  S3 = { s, x, xEq: K3.xEq, d: Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, x) };
 }
-/* Un tableau de fonctions par étape : le lot 3 remplace STEPS[2] et STEPS[3] par { enter, adv, draw, scope, state, status, readouts }. */
+function initLoupe3() {
+  K3.rng = Elc.rng((Math.random() * 4294967296) >>> 0);
+  K3.atoms = []; for (let col = 0; col < 4; col++) for (let j = -3; j <= 3; j++) K3.atoms.push({ col, j, alive: true, rs: 0, ph: K3.rng() * 6.28, a: 1 });
+  K3.ions = []; for (let i = 0; i < 9; i++) K3.ions.push({ x: 0.35 + K3.rng() * 0.5, y: (K3.rng() - 0.5) * 1.3, a: 0, busy: false });
+  K3.dep = []; K3.prods = []; K3.evs = []; K3.elec = []; K3.evAcc = 0;
+  K3.grains = []; for (let i = 0; i < NGR; i++) K3.grains.push({ u: K3.rng() * 2 - 1, v: K3.rng(), r: 0.9 + K3.rng() * 1.5, al: 0.55 + K3.rng() * 0.45 });
+}
+function resetP3(full) { Object.assign(P3, { dipped: false, t: 0, pred: null }); if (full) Object.assign(P3, { metal: 'Zn', ion: 'Cu', pm: false }); K3.rec = []; K3.recT = 0; }
+function enter3(restart) {
+  if (restart) resetP3(true);
+  K3.t = 0; K3.dip = { x: P3.dipped ? 1 : 0, v: 0 }; initLoupe3(); calc3(); syncTools();
+}
+function setMetal3(m) { P3.metal = m; resetP3(false); initLoupe3(); calc3(); syncTools(); }
+function setIon3(i) { P3.ion = i; resetP3(false); initLoupe3(); calc3(); syncTools(); }
+function dip3(on) { const want = on == null ? true : !!on; if (want && !P3.dipped) { P3.t = 0; K3.rec = []; K3.recT = 0; } P3.dipped = want; if (!want) { P3.t = 0; } calc3(); syncTools(); }
+function predict3(b) { P3.pm = true; P3.pred = b == null ? null : !!b; syncTools(); }
+function spawnEv3() {
+  const s = S3.s, nI = s.depositPerTurn || 1, free = K3.ions.map((q, i) => i).filter(i => K3.ions[i].a > 0.5 && !K3.ions[i].busy);
+  const don = K3.atoms.map((q, i) => i).filter(i => K3.atoms[i].col === 0 && K3.atoms[i].alive && !K3.evs.some(e => e.donor === i));
+  if (free.length < nI || !don.length) return false;
+  free.sort((a, b) => K3.ions[a].x - K3.ions[b].x);
+  const donor = don[Math.floor(K3.rng() * don.length)], picks = free.slice(0, nI);
+  picks.forEach(i => { K3.ions[i].busy = true; });
+  K3.evs.push({ t: 0, donor, ions: picks.map(i => ({ i, x0: K3.ions[i].x, y0: K3.ions[i].y })), eN: cname(P3.ion).n, done: false });
+  return true;
+}
+const atomPos = a => ({ x: -0.1 - (a.col + 0.5) * 0.2, y: a.j * 0.2 });
+function adv3(h) {
+  K3.t += h; spring(K3.dip, P3.dipped ? 1 : 0, h);
+  if (P3.dipped) P3.t += h;
+  calc3();
+  const s = S3.s, frac = clamp(S3.d.cIon / C0_3, 0, 1), nSol = Math.round(9 * frac);
+  K3.ions.forEach((q, idx) => {
+    if (!q.busy) {
+      const tgt = idx < nSol ? 1 : 0, d = tgt - q.a, r = 1.6 * h; q.a += Math.abs(d) <= r ? d : Math.sign(d) * r;
+      q.x += (K3.rng() - 0.5) * 0.02 * AG; q.y += (K3.rng() - 0.5) * 0.02 * AG;
+      q.x = clamp(q.x, 0.34, 0.86); q.y = clamp(q.y, -0.78, 0.78); const rr = Math.hypot(q.x, q.y); if (rr > 0.92) { q.x *= 0.92 / rr; q.y *= 0.92 / rr; }
+    }
+  });
+  for (const a of K3.atoms) if (!a.alive) { a.rs -= h; if (a.rs <= 0) { a.alive = true; a.a = 0; } } else a.a = Math.min(1, a.a + h * 1.5);
+  for (const p of K3.prods) { p.x += p.vx * h * AG; p.y += p.vy * h * AG; p.vx += (K3.rng() - 0.5) * 0.05; p.vy += (K3.rng() - 0.5) * 0.05; p.vx = clamp(p.vx, -0.05, 0.08); p.x = clamp(p.x, 0.3, 0.88); p.y = clamp(p.y, -0.8, 0.8); }
+  // échanges d'électrons : fréquence ∝ dx/dt, au moins un toutes les 1,5 s tant que la réaction avance
+  const running = P3.dipped && s.spont && S3.x < S3.xEq * 0.995 && K3.dip.x > 0.9;
+  if (running) { K3.evAcc += (0.67 + 3.3 * Math.exp(-P3.t / TAU3)) * h; if (K3.evAcc >= 1 && K3.evs.length < 3) { if (spawnEv3()) K3.evAcc -= 1; else K3.evAcc = 1; } }
+  for (let k = K3.evs.length - 1; k >= 0; k--) {
+    const e = K3.evs[k]; e.t += h;
+    const ne = e.ions.length * e.eN;
+    if (e.t >= 0.8 + 0.1 * (ne - 1) + 0.5 && !e.done) {
+      e.done = true; const dp = atomPos(K3.atoms[e.donor]);
+      for (const it of e.ions) {
+        const q = K3.ions[it.i];
+        if (K3.dep.length < DEP_SLOTS) K3.dep.push({ slot: K3.dep.length, x0: q.x, y0: q.y, t: 0 });
+        q.busy = false; q.a = 0; q.x = 0.4 + K3.rng() * 0.45; q.y = (K3.rng() - 0.5) * 1.3;
+      }
+      const at = K3.atoms[e.donor]; at.alive = false; at.rs = 1.8;
+      K3.prods.push({ x: Math.max(0.35, dp.x + 0.5), y: dp.y, vx: 0.05, vy: (K3.rng() - 0.5) * 0.04 }); if (K3.prods.length > 8) K3.prods.shift();
+      K3.evs.splice(k, 1);
+    }
+  }
+  for (const d of K3.dep) d.t += h;
+  // enregistreur
+  K3.recT += h;
+  if (P3.dipped && K3.recT >= 0.25) { K3.recT = 0; K3.rec.push({ t: P3.t, c: S3.d.cIon, m: S3.d.mDeposit }); if (K3.rec.length > 400) K3.rec.shift(); }
+}
+const depSlotPos = i => { const rows = [-3, 0, 3, -2, 1, 2, -1]; return { x: -0.1 + (Math.floor(i / 7) + 0.5) * 0.2, y: rows[i % 7] * 0.2 }; };
+function geo3() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const ry0 = top + 54, ry1 = H - bot - 6, sx0 = nar ? 6 : 22, tx = sx0 + (nar ? 36 : 40), right = tx + 86;
+  let bk, ls, lx, ly, bladeL = nar ? 120 : 140;
+  if (!nar) {
+    const rx0 = right + 30, rw = W - rx0 - 24, bkW = clamp(rw * 0.28, 120, 180), gap = clamp(rw * 0.1, 50, 90);
+    ls = clamp(Math.min(rw - bkW - gap, H - top - bot - 60), 140, 400);
+    const x0 = rx0 + Math.max(0, (rw - (bkW + gap + ls)) / 2);
+    const bkH = clamp(H * 0.26, 130, 190);
+    bk = { x: x0, y: top + 24 + bladeL, w: bkW, h: bkH }; lx = x0 + bkW + gap; ly = top + 10;
+  } else {
+    const rx0 = right + 6, rw = W - rx0 - 6, bkW = Math.min(rw * 0.6, 106), bkH = 112;
+    bk = { x: rx0 + (rw - bkW) / 2, y: top + 8 + bladeL, w: bkW, h: bkH }; ls = Math.min(rw, 176); lx = rx0 + (rw - ls) / 2; ly = bk.y + bkH + 34;
+  }
+  return { nar, top, bot, ry0, ry1, sx0, tx, right, bk, ls, lx, ly, bladeL };
+}
+function drawScale3(c, g) {
+  const yE = E => g.ry0 + (0.9 - E) / 1.8 * (g.ry1 - g.ry0), s = S3.s;
+  c.font = mono(11); c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = C.texte2;
+  c.fillText('échelle des couples', g.sx0, g.ry0 - 26); c.fillText('E° (V), ion | métal', g.sx0, g.ry0 - 12);
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1; c.beginPath(); c.moveTo(g.tx + 0.5, g.ry0 - 4); c.lineTo(g.tx + 0.5, g.ry1 + 4); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.25); for (const E of [-0.6, -0.3, 0.3, 0.6]) { c.beginPath(); c.moveTo(g.tx - 3, yE(E)); c.lineTo(g.tx + 3, yE(E)); c.stroke(); }
+  const pos = {};
+  for (const k of COUPLE_ORDER) {
+    const cp = Elc.COUPLES[k], E = cp.E0, y = yE(E), sel = k === P3.metal || k === P3.ion, ref = k === 'H';
+    pos[k] = y;
+    if (sel) { c.fillStyle = rgba(RA, 0.13); c.fillRect(g.sx0 - 4, y - 9, g.right - g.sx0 + 4, 18); }
+    c.strokeStyle = sel ? C.accent : ref ? rgba(RT2, 0.8) : rgba(RT, 0.8); c.lineWidth = sel ? 1.8 : 1.2; c.beginPath(); c.moveTo(g.tx - 6, y); c.lineTo(g.tx + 6, y); c.stroke();
+    c.font = mono(11); c.textBaseline = 'middle'; c.fillStyle = sel ? C.accent : ref ? C.texte2 : C.texte;
+    c.textAlign = 'right'; c.fillText(cp.ion, g.tx - 9, y); c.textAlign = 'left'; c.fillText(cp.metal, g.tx + 9, y);
+    c.fillStyle = sel ? C.accent : C.texte2; c.fillText((E > 0 ? '+' : E < 0 ? '−' : '') + fmt(Math.abs(E), 2) + ' V', g.tx + 30, y);
+    zone(g.sx0 - 4, y - 9, g.right, y + 9, 'cp' + k, cp.ion + ' / ' + cp.metal + ' · E° = ' + (E > 0 ? '+' : E < 0 ? '−' : '') + fmt(Math.abs(E), 2) + ' V' + (ref ? ' (référence)' : ''),
+      ref ? 'Couple de référence, fixé à 0 V : les autres potentiels se mesurent par rapport à lui.' : 'Plus E° est haut, plus l’ion capte facilement des électrons ; plus il est bas, plus le métal peut en céder.');
+  }
+  // flèche des électrons : du métal du couple du bas vers l'ion du couple du haut
+  if (s.spont && P3.metal !== P3.ion) {
+    const yl = pos[P3.metal], yu = pos[P3.ion], xT = g.tx, dy = yl - yu;
+    const p0 = [xT + 80, yl], p1 = [xT + 104, yl - dy * 0.3], p2 = [xT - 62, yu + dy * 0.2], p3 = [xT - 12, yu + 9];
+    c.save(); c.strokeStyle = C.neg; c.fillStyle = C.neg; c.lineWidth = 1.8; c.setLineDash([5, 4]); c.lineDashOffset = P3.dipped ? -K3.t * 26 : 0;
+    c.beginPath(); c.moveTo(p0[0], p0[1]); c.bezierCurveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]); c.stroke(); c.setLineDash([]);
+    const dx2 = p3[0] - p2[0], dy2 = p3[1] - p2[1], dl = Math.hypot(dx2, dy2), ux = dx2 / dl, uy = dy2 / dl;
+    c.beginPath(); c.moveTo(p3[0] + ux * 3, p3[1] + uy * 3); c.lineTo(p3[0] - ux * 7 - uy * 4.5, p3[1] - uy * 7 + ux * 4.5); c.lineTo(p3[0] - ux * 7 + uy * 4.5, p3[1] - uy * 7 - ux * 4.5); c.closePath(); c.fill();
+    const my = (yl + yu) / 2; c.font = mono(11); tagText(c, 'e⁻', xT, my, 'center', 'middle', C.neg); c.restore();
+    zone(xT - 40, Math.min(yl, yu), xT + 40, Math.max(yl, yu), 'earrow', 'Passage des électrons', 'L’ion du couple du haut capte les électrons du métal du couple du bas : l’échange a lieu dans ce sens parce que E° de l’ion est plus haut que celui du métal.');
+  }
+}
+function drawBlade3(c, g, ys, dipK) {
+  const bk = g.bk, w = 20, cx = bk.x + bk.w / 2 - 14;
+  const yOut = bk.y - 14, yIn = bk.y + bk.h - 22, bot = lerp(yOut, yIn, dipK), top = bot - g.bladeL;
+  const thin = clamp(S3.d.mDissolved / 2, 0, 0.35), wE = w * (1 - thin), col = METAL_COL[P3.metal], dcol = DEP_COL[P3.ion];
+  // tige et support
+  c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 2; c.beginPath(); c.moveTo(cx, top - 26); c.lineTo(cx, top); c.stroke();
+  c.fillStyle = rgba(RT2, 0.8); c.fillRect(cx - 12, top - 28, 24, 3);
+  // lame
+  c.fillStyle = col; c.fillRect(cx - wE / 2, top, wE, bot - top);
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(cx - wE / 2, top, wE * 0.3, bot - top);
+  c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.strokeRect(cx - wE / 2 + 0.5, top + 0.5, wE - 1, bot - top - 1);
+  // dépôt granuleux sur la partie immergée
+  const imLen = Math.max(0, bot - ys);
+  if (S3.x > 0.001 && imLen > 0 && S3.d.mDeposit > 0) {
+    const coat = 4.5 * (S3.x / Math.max(S3.xEq, 1e-9)) * 0.9 + 0.3;
+    c.fillStyle = rgba(rgb(dcol), 0.55); c.fillRect(cx - wE / 2 - coat, ys, coat, imLen); c.fillRect(cx + wE / 2, ys, coat, imLen);
+    const nvis = Math.floor(NGR * clamp(S3.x / Math.max(S3.xEq, 1e-9), 0, 1));
+    for (let i = 0; i < nvis; i++) { const gr = K3.grains[i]; c.fillStyle = rgba(rgb(dcol), gr.al); c.beginPath(); c.arc(cx + gr.u * (wE / 2 + coat), bot - 2 - gr.v * (imLen - 3), gr.r, 0, TAU); c.fill(); }
+  }
+  zone(cx - w / 2 - 6, top, cx + w / 2 + 6, bot, 'lame', 'Lame de ' + cname(P3.metal).name + ' · ' + cname(P3.metal).metal, 'Le métal de la lame : ses atomes peuvent céder des électrons à des ions du bain.');
+  if (S3.x > 0.001 && imLen > 0) zone(cx - w / 2 - 6, ys, cx + w / 2 + 6, bot, 'depot', 'Dépôt de ' + cname(P3.ion).name, 'Des atomes de ' + cname(P3.ion).name + ' formés quand les ions ont capté des électrons : ils restent collés à la lame.');
+  return { cx, bot, top, imLen };
+}
+function drawIonDisc(c, x, y, r, kind, label, a) {
+  c.globalAlpha = a; const k = kind;
+  const tint = ION_TINT[k];
+  if (tint) { c.fillStyle = rgba(rgb(tint.col), k === 'Cu' ? 1 : 0.55); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.fillStyle = k === 'Cu' ? C.fond : C.texte; }
+  else { c.strokeStyle = rgba(RT2, 1); c.lineWidth = 1.3; c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke(); c.fillStyle = C.texte2; }
+  c.font = '500 ' + Math.max(8, Math.round(r * 0.95)) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, x, y + 0.5); c.globalAlpha = 1;
+}
+const chargeOf = k => { const n = Elc.COUPLES[k].n; return n === 1 ? '+' : n + '+'; };
+function draw3() {
+  const c = ctx, g = geo3(), s = S3.s, bk = g.bk, d = S3.d, nar = g.nar;
+  drawScale3(c, g);
+  // ---- bécher : solution d'ions
+  const lv = 0.62, dipK = K3.dip.x;
+  const bd = drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
+  const layers = [[P3.ion, d.cIon], [P3.metal, d.cMetalIon]];
+  for (const [k, cc] of layers) { const t = ION_TINT[k]; if (!t || !(cc > 0)) continue; c.save(); c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / C0_3, 0, 1) * (k === P3.ion ? 1 : 1)); c.fillRect(bk.x + 1, bd.ys, bk.w - 2, bk.y + bk.h - bd.ys - 1); c.restore(); }
+  drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
+  zoneF((x, y) => x >= bk.x && x <= bk.x + bk.w && y >= bd.ys && y <= bk.y + bk.h, 'sol3', 'Solution d’ions ' + cname(P3.ion).ion + ' · 0,10 mol/L', 'Les ions sont dispersés dans l’eau ; ' + (ION_TINT[P3.ion] ? 'ils donnent leur teinte à la solution, d’autant plus pâle qu’il en reste peu.' : 'incolores, on ne les voit qu’à la loupe.'));
+  const bl = drawBlade3(c, g, bd.ys, dipK);
+  c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2;
+  c.fillText('[' + cname(P3.ion).ion + '] = ' + fmt(d.cIon, d.cIon < 0.01 ? 4 : 3) + ' mol/L', bk.x + bk.w / 2, bk.y + bk.h + 17);
+  // petit cercle d'observation et traits
+  const ox = bl.cx + 11, oy = bd.ys + Math.max(14, (bk.y + bk.h - bd.ys) * 0.45), oR = 6;
+  c.strokeStyle = rgba(RA, 0.9); c.lineWidth = 1.2; c.beginPath(); c.arc(ox, oy, oR, 0, TAU); c.stroke();
+  zcirc(ox, oy, oR + 3, 'obs3', 'Surface immergée', 'La petite zone de la lame observée dans la loupe.');
+  const L = g.ls, R = L / 2, cx = g.lx + R, cy = g.ly + R;
+  c.save(); c.strokeStyle = rgba(RA, 0.5); c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath();
+  if (!nar) { c.moveTo(ox + oR, oy - 2); c.lineTo(g.lx + R * 0.1, g.ly + R * 0.14); c.moveTo(ox + oR, oy + 2); c.lineTo(g.lx + R * 0.1, g.ly + L - R * 0.14); }
+  else { c.moveTo(ox - 2, oy + oR); c.lineTo(g.lx + R * 0.35, g.ly + R * 0.1); c.moveTo(ox + 2, oy + oR); c.lineTo(g.lx + L - R * 0.35, g.ly + R * 0.1); }
+  c.stroke(); c.restore();
+  // ---- loupe
+  c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = C.fond2; c.fill();
+  const t1 = ION_TINT[P3.ion]; if (t1) { c.fillStyle = rgba(rgb(t1.col), t1.max * 0.5 * clamp(d.cIon / C0_3, 0.05, 1)); c.fill(); }
+  c.clip(); c.globalAlpha = P3.dipped ? 1 : 0.55;
+  const rA = 0.088 * R, rI = 0.072 * R, X = u => cx + u * R, Y = v => cy + v * R, tt = K3.t;
+  // surface du métal
+  c.strokeStyle = rgba(RT2, 0.5); c.setLineDash([4, 4]); c.beginPath(); c.moveTo(X(-0.1), cy - R); c.lineTo(X(-0.1), cy + R); c.stroke(); c.setLineDash([]);
+  const mcol = METAL_COL[P3.metal];
+  K3.atoms.forEach(a => {
+    if (!a.alive && a.a < 0.02) return; const p = atomPos(a), ex = Math.sin(tt * 3 + a.ph) * 0.012, ey = Math.cos(tt * 2.6 + a.ph) * 0.012;
+    c.globalAlpha = (P3.dipped ? 1 : 0.55) * (a.alive ? a.a : 0); c.fillStyle = mcol; c.beginPath(); c.arc(X(p.x + ex), Y(p.y + ey), rA, 0, TAU); c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1; c.stroke();
+  });
+  c.globalAlpha = P3.dipped ? 1 : 0.55;
+  for (const dp of K3.dep) { const sp = depSlotPos(dp.slot), u = sstep(dp.t / 0.35), ex = lerp(dp.x0, sp.x, u), ey = lerp(dp.y0, sp.y, u); c.fillStyle = DEP_COL[P3.ion]; c.beginPath(); c.arc(X(ex), Y(ey), rA, 0, TAU); c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.stroke(); }
+  for (const q of K3.ions) {
+    if (q.a < 0.02) continue; let px = q.x, py = q.y;
+    const e = K3.evs.find(ev => ev.ions.some(it => it.i === K3.ions.indexOf(q)));
+    if (e) { const idx = e.ions.findIndex(it => it.i === K3.ions.indexOf(q)), dpos = atomPos(K3.atoms[e.donor]), tx = -0.1 + 0.12, ty = dpos.y + (idx ? 0.2 : (e.ions.length > 1 ? -0.2 : 0)), u = sstep(e.t / 0.8); px = lerp(e.ions[idx].x0, tx, u); py = lerp(e.ions[idx].y0, ty, u); }
+    drawIonDisc(c, X(px), Y(py), rI * 1.15, P3.ion, e && e.t > 0.8 + 0.1 * (e.ions.length * e.eN - 1) ? '' : chargeOf(P3.ion), P3.dipped ? q.a : q.a * 0.55);
+  }
+  for (const p of K3.prods) drawIonDisc(c, X(p.x), Y(p.y), rI * 1.15, P3.metal, chargeOf(P3.metal), 0.95);
+  // électrons en vol
+  c.globalAlpha = 1;
+  for (const e of K3.evs) {
+    let k = 0; const dpos = atomPos(K3.atoms[e.donor]);
+    e.ions.forEach((it, idx) => {
+      const tx = -0.1 + 0.12, ty = dpos.y + (idx ? 0.2 : (e.ions.length > 1 ? -0.2 : 0));
+      for (let m = 0; m < e.eN; m++, k++) {
+        const t0 = 0.8 + 0.1 * k, u = (e.t - t0) / 0.45; if (u < 0 || u > 1) continue;
+        const ex = lerp(dpos.x, tx, sstep(u)), ey = lerp(dpos.y, ty, sstep(u)) - Math.sin(u * PI) * 0.06;
+        c.fillStyle = C.neg; c.shadowColor = C.neg; c.shadowBlur = 8; c.beginPath(); c.arc(X(ex), Y(ey), Math.max(2.6, R * 0.026), 0, TAU); c.fill(); c.shadowBlur = 0;
+        c.strokeStyle = '#fff'; c.lineWidth = 0.8; c.stroke();
+      }
+    });
+  }
+  c.restore();
+  c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.3; c.beginPath(); c.arc(cx, cy, R - 0.5, 0, TAU); c.stroke();
+  c.font = mono(11); c.textBaseline = 'alphabetic'; c.textAlign = 'center';
+  if (!P3.dipped) tagText(c, 'lame hors de la solution', cx, cy + R * 0.85, 'center', 'middle', C.texte2);
+  // légendes de la loupe
+  c.fillStyle = C.texte2; c.textAlign = 'left'; let yy = g.ly + L + 17;
+  c.fillText('loupe sur la surface immergée', g.lx, yy);
+  zcirc(cx, cy, R, 'loupe3', 'Loupe · surface de la lame', 'Atomes du métal à gauche, ions de la solution à droite. Le dessin montre quelques particules : la réaction réelle en met des milliards de milliards en jeu.');
+  const nm = cname(P3.metal), ni = cname(P3.ion), rr = 0.088 * R;
+  zoneF((x, y) => K3.atoms.some(a => a.alive && Math.hypot(x - X(atomPos(a).x), y - Y(atomPos(a).y)) < rr), 'atome', 'Atome de ' + nm.name + ' · ' + nm.metal, 'Un atome du réseau du métal : il peut céder des électrons à un ion qui touche la surface.');
+  zoneF((x, y) => K3.dep.some(dp => { const sp = depSlotPos(dp.slot); return Math.hypot(x - X(sp.x), y - Y(sp.y)) < rr; }), 'depatom', 'Atome de ' + ni.name + ' déposé', 'Un ion qui a capté ses électrons est devenu un atome ; il reste collé à la surface.');
+  zoneF((x, y) => K3.ions.some(q => q.a > 0.3 && Math.hypot(x - X(q.x), y - Y(q.y)) < rI * 1.5), 'ion3', ni.ion + ' · ion en solution', 'Un atome de ' + ni.name + ' privé de ' + ni.n + ' électron' + (ni.n > 1 ? 's' : '') + ' : il peut en capter à la surface du métal.');
+  zoneF((x, y) => K3.prods.some(q => Math.hypot(x - X(q.x), y - Y(q.y)) < rI * 1.5), 'prod3', nm.ion + ' · ion formé', 'Un atome de ' + nm.name + ' qui a cédé ses électrons : il quitte le métal et passe en solution.');
+  zoneF((x, y) => K3.evs.some(e => { const dpos = atomPos(K3.atoms[e.donor]); return e.t > 0.7 && Math.hypot(x - X(lerp(dpos.x, 0.02, 0.5)), y - Y(dpos.y)) < R * 0.2; }), 'e3', 'Électron · e⁻', 'Charge négative : il passe d’un atome du métal à un ion qui touche la surface.');
+  // état de la dernière ligne
+  c.fillStyle = C.texte2; c.textAlign = 'left'; yy += 15;
+  const msg = s.same ? 'même couple : aucun échange net' : s.spont ? 'électrons échangés : ' + fmt(S3.d.nE * 1000, 2) + ' mmol' : 'aucun électron ne passe';
+  paragraph(c, msg, g.lx, yy, L, 14, C.texte2);
+}
+function scope3() {
+  const { w, h } = scopeSetup(), c = sctx, rec = K3.rec, t1 = Math.max(30, P3.t * 1.05), mMax = S3.s.spont ? Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, K3.xEq).mDeposit : 0;
+  const b = plotArea(c, { x: 0, y: 2, w, h: h - 2 }, { x0: 0, x1: t1, y0: 0, y1: C0_3, yt: [0, C0_3 / 2, C0_3], fy: q => fmt(q, 2), xt: [0, Math.round(t1)], fx: q => fmt(q, 0), xl: 't (s, temps d’affichage)', padL: 30, padR: 34, padB: 30, fs: 10,
+    lines: [{ pts: rec.map(r => [r.t, r.c]), col: C.neg, lw: 1.8 }, { pts: rec.map(r => [r.t, mMax > 0 ? r.m / mMax * C0_3 : 0]), col: C.ener, lw: 1.6, dash: [4, 3] }] });
+  c.font = mono(10); c.fillStyle = C.ener; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(fmt(mMax, 2) + ' g', b.px + b.pw + 3, b.py + 4); c.fillText('0', b.px + b.pw + 3, b.py + b.ph);
+}
+function state3() {
+  const s = S3.s, d = S3.d;
+  return { step: 2, metal: P3.metal, ion: P3.ion, predicted: P3.pred, dipped: P3.dipped, spont: s.spont, x: S3.x, xEq: S3.xEq, mDeposit: d.mDeposit, mDissolved: d.mDissolved, cIon: d.cIon, cMetalIon: d.cMetalIon,
+           nE: d.nE, dE: s.dE, K: s.K, t: P3.t, eq: s.eq, ox: s.ox, red: s.red, predMode: P3.pm };
+}
+function verdict3() {
+  if (P3.pred == null || !P3.dipped || P3.t < 1.5) return '';
+  const s = S3.s;
+  if (P3.pred === (s.spont)) return 'Prédiction juste : ' + (s.spont ? 'les ions ' + cname(P3.ion).ion + ' captent les électrons du ' + cname(P3.metal).name + '.' : s.same ? 'même couple, aucun échange.' : 'rien ne se passe.') + ' ';
+  return 'Ce n’est pas ce qui arrive : regarde l’échelle des couples. ';
+}
+function status3() {
+  const s = S3.s, nm = cname(P3.metal), ni = cname(P3.ion), v = verdict3();
+  if (P3.pm && P3.pred == null && !P3.dipped) return 'Avant de plonger : va-t-il se passer quelque chose ? Regarde l’échelle des couples, puis choisis.';
+  if (!P3.dipped) return 'Choisis un métal et une solution, puis plonge la lame. Sur l’échelle, les couples choisis sont surlignés.';
+  if (s.same) return v + 'Même couple de part et d’autre : aucun échange net.';
+  if (!s.spont) return v + 'Le ' + nm.name + ' ne cède pas ses électrons aux ions ' + ni.name + ' : sur l’échelle, le couple du ' + nm.name + ' est au-dessus de celui du ' + ni.name + '.';
+  if (S3.x >= S3.xEq * 0.995) return v + 'La solution a perdu ' + (ION_TINT[P3.ion] && P3.ion === 'Cu' ? 'sa couleur' : 'presque tous ses ions') + ' : presque tous les ions ' + ni.name + ' sont devenus du ' + ni.name + ' métal (K ≈ 10' + sup(kExp()) + ').';
+  return v + 'Le ' + nm.name + ' s’oxyde et passe en solution ; les ions ' + ni.name + ' se réduisent et se déposent. ' + (ni.n === 2 ? 'Deux électrons par ion' : 'Un électron par ion') + ', passés directement d’un atome à l’autre.';
+}
+function readouts3() {
+  const s = S3.s, d = S3.d;
+  setM('ox', s.same ? '—' : s.ox); setM('red', s.same ? '—' : s.red); setM('eq', s.same ? '—' : s.spont ? s.eq : s.eq + ' : n’a pas lieu');
+  setM('dE', s.same ? '0,00' : (s.dE > 0 ? '+' : '−') + fmt(Math.abs(s.dE), 2)); setM('nE', fmt(d.nE * 1000, 2)); setM('mdep', fmt(d.mDeposit * 1000, 0)); setM('mdis', fmt(d.mDissolved * 1000, 0));
+  setM('cion', fmt(d.cIon, d.cIon < 0.01 ? 4 : 3)); setM('K', s.same ? '—' : s.spont ? '≈ 10' + sup(kExp()) : '≈ 10' + sup(Math.round(Math.log10(s.K))));
+}
+
+/* ================= Étape 4 : la pile et l'électrolyse ================= */
+const CELLS = [['Zn', 'Cu'], ['Fe', 'Cu'], ['Zn', 'Ag']];
+const P4 = { anode: 'Zn', cathode: 'Cu', R: 10, gen: false, U: 1.3, bridge: true, speed: 3600 };
+const K4 = { cell: null, rec: [], rc: 0, ph: 0, bph: 0, lift: { x: 0, v: 0 }, E0: 1.1, t: 0 };
+const fmtR = r => (r >= 100 ? fmt(Math.round(r), 0) : r >= 10 ? fmt(r, 1) : fmt(r, 2)).replace(/,0$/, '').replace(/,00$/, '');
+function newCell4() {
+  K4.cell = Elc.cell({ anode: P4.anode, cathode: P4.cathode, cA: 1, cC: 1, VA: 0.1, VC: 0.1, mA: 20, mC: 20, Rint: 2 });
+  K4.cell.bridge = P4.bridge; K4.E0 = Elc.cellEMF(P4.cathode, P4.anode); K4.rec = []; K4.rc = 0; K4.cell.E = Elc.emfOf(K4.cell);
+}
+const Reff4 = () => (P4.gen ? 1 : P4.R), Uext4 = () => (P4.gen ? P4.U : 0);
+function live4() {
+  const c = K4.cell, E = Elc.emfOf(c), I = P4.bridge ? Elc.current(Object.assign({}, c, { bridge: true }), Reff4(), Uext4()) : 0;
+  const mode = !P4.bridge ? 'ouvert' : Math.abs(I) < 1e-12 ? 'équilibre' : I > 0 ? 'pile' : 'électrolyse';
+  const U = !P4.bridge ? 0 : P4.gen ? P4.U : E - I * c.Rint;
+  return { E, I, U, mode };
+}
+function enter4(restart) {
+  if (restart) Object.assign(P4, { anode: 'Zn', cathode: 'Cu', R: 10, gen: false, U: 1.3, bridge: true, speed: 3600 });
+  if (restart || !K4.cell) newCell4();
+  K4.lift = { x: P4.bridge ? 0 : 1, v: 0 }; K4.t = 0; syncTools();
+}
+function adv4(h) {
+  K4.t += h; spring(K4.lift, P4.bridge ? 0 : 1, h);
+  K4.cell.bridge = P4.bridge;
+  const o = Elc.cellStep(K4.cell, Reff4(), P4.speed * h, Uext4()); o.bridge = P4.bridge; K4.cell = o;
+  const L = live4(), I = L.I;
+  const v = clamp(Math.abs(I) * 1100, 0, 260) * (reduce ? 0.7 : 1), sg = I > 0 ? 1 : I < 0 ? -1 : 0;
+  K4.ph += sg * v * h; K4.bph += sg * v * 0.5 * h;
+  if (++K4.rc % 6 === 0) { K4.rec.push({ t: o.t / 3600, E: L.E, U: P4.bridge ? L.U : null }); if (K4.rec.length > 1600) K4.rec = K4.rec.filter((r, i) => i % 2 === 0); }
+}
+function geo4() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const spacing = nar ? W * 0.62 : clamp(W * 0.38, 220, 400), bw = nar ? Math.min(140, spacing * 0.6) : Math.min(190, spacing * 0.62);
+  const cxA = W / 2 - spacing / 2, cxC = W / 2 + spacing / 2;
+  const yV = nar ? top + 24 : top + 14, yR = yV + (nar ? 30 : 32), yB = nar ? top + 176 : top + 160, bh = nar ? 150 : clamp(H * 0.3, 150, 200);
+  return { nar, top, bot, spacing, bw, cxA, cxC, yV, yR, yB, bh, exA: cxA - bw / 2 + 32, exC: cxC + bw / 2 - 32, legA: cxA + bw / 2 - 20, legC: cxC - bw / 2 + 20, ys: yB + bh * 0.3, xm: W / 2 };
+}
+function tintLiquid(c, x, w, ys, yb, key, cc) {
+  const t = ION_TINT[key]; if (!t || !(cc > 0)) return;
+  c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / 1, 0, 1.25)); c.fillRect(x + 1, ys, w - 2, yb - ys - 1);
+}
+function pathPoint(pts, s) {
+  let rem = s; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (rem <= l) return [a[0] + (b[0] - a[0]) * rem / l, a[1] + (b[1] - a[1]) * rem / l]; rem -= l; }
+  return pts[pts.length - 1];
+}
+const pathLen = pts => { let L = 0; for (let i = 0; i < pts.length - 1; i++) L += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]); return L; };
+function draw4() {
+  const c = ctx, g = geo4(), cell = K4.cell, L = live4(), A = P4.anode, Ca = P4.cathode, cA = cname(A), cC = cname(Ca), electro = L.mode === 'électrolyse';
+  const lift = K4.lift.x, plateTop = g.yB + 8, plateBot = g.yB + g.bh - 14;
+  // ---- béchers
+  const beakers = [{ cx: g.cxA, key: A, cc: cell.cA, m: cell.mA, ex: g.exA, side: 'A' }, { cx: g.cxC, key: Ca, cc: cell.cC, m: cell.mC, ex: g.exC, side: 'C' }];
+  for (const b of beakers) {
+    const x = b.cx - g.bw / 2, bd = drawBeaker(c, x, g.yB, g.bw, g.bh, 0.7, 0, 0, K4.t);
+    tintLiquid(c, x, g.bw, bd.ys, g.yB + g.bh, b.key, b.cc); drawBeaker(c, x, g.yB, g.bw, g.bh, 0.7, 0, 0, K4.t);
+    const cp = cname(b.key), role = (b.side === 'A') !== electro ? 'anode' : 'cathode';
+    zoneF((xx, yy) => xx >= x && xx <= x + g.bw && yy >= bd.ys && yy <= g.yB + g.bh, 'sol4' + b.side, 'Solution de ' + cp.ion + ' · ' + fmt(b.cc, 2) + ' mol/L', ION_TINT[b.key] ? 'Les ions colorent la solution : plus pâle quand il en reste moins.' : 'Ions incolores : on ne voit leur quantité que par le calcul.');
+    // plaque
+    const th = clamp(16 * b.m / 20, 4, 30), col = METAL_COL[b.key];
+    c.fillStyle = col; c.fillRect(b.ex - th / 2, plateTop, th, plateBot - plateTop); c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(b.ex - th / 2, plateTop, th * 0.3, plateBot - plateTop);
+    c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.strokeRect(b.ex - th / 2 + 0.5, plateTop + 0.5, th - 1, plateBot - plateTop - 1);
+    zone(b.ex - th / 2 - 4, plateTop, b.ex + th / 2 + 4, plateBot, 'el' + b.side, 'Électrode de ' + cp.name + ' · ' + role, role === 'anode' ? 'Siège de l’oxydation : les atomes du métal cèdent des électrons et passent en solution.' : 'Siège de la réduction : les ions de la solution captent des électrons et se déposent.');
+    // étiquettes
+    const isAnode = role === 'anode';
+    c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.font = mono(11);
+    let y = g.yB + g.bh + 17; c.fillStyle = C.texte; c.fillText(isAnode ? 'anode · oxydation' : 'cathode · réduction', b.cx, y);
+    zone(b.cx - g.bw / 2, y - 12, b.cx + g.bw / 2, y + 4, 'role' + b.side, isAnode ? 'Anode' : 'Cathode', isAnode ? 'L’électrode où a lieu l’oxydation, quel que soit le sens du courant.' : 'L’électrode où a lieu la réduction, quel que soit le sens du courant.');
+    y += 15; c.fillStyle = C.accent; c.fillText(isAnode ? Elc.halfOx(b.key) : Elc.halfRed(b.key), b.cx, y);
+    y += 15; c.fillStyle = C.texte2; c.fillText('[' + cp.ion + '] = ' + fmt(b.cc, 2) + ' mol/L', b.cx, y);
+  }
+  // ---- pont salin
+  const S = 64 * lift, yArch = g.yB - 24 - S, yLeg = g.ys + 34 - S, bpts = [[g.legA, yLeg], [g.legA, yArch], [g.legC, yArch], [g.legC, yLeg]], Lb = pathLen(bpts);
+  c.save(); c.lineJoin = 'round'; c.lineCap = 'butt';
+  c.strokeStyle = rgba(RT, lift > 0.5 ? 0.25 : 0.5); c.lineWidth = 16; c.setLineDash(lift > 0.5 ? [5, 4] : []); c.beginPath(); bpts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke();
+  c.setLineDash([]); c.strokeStyle = C.fond; c.lineWidth = 13; c.beginPath(); bpts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke();
+  c.strokeStyle = rgba(RA, 0.07); c.lineWidth = 13; c.stroke(); c.restore();
+  const nI = 7, ions = [];
+  for (let i = 0; i < nI; i++) {
+    const sK = (((K4.bph + i * Lb / nI) % Lb) + Lb) % Lb, sN = (((-K4.bph + (i + 0.5) * Lb / nI) % Lb) + Lb) % Lb;
+    ions.push({ p: pathPoint(bpts, sK), k: 'K' }, { p: pathPoint(bpts, sN), k: 'N' });
+  }
+  c.globalAlpha = lift > 0.5 ? 0.35 : 1;
+  for (const q of ions) { c.fillStyle = q.k === 'K' ? C.pos : C.neg; c.beginPath(); c.arc(q.p[0], q.p[1], 3.6, 0, TAU); c.fill(); c.fillStyle = C.fond; c.font = '500 9px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(q.k === 'K' ? '+' : '−', q.p[0], q.p[1] + 0.5); }
+  c.globalAlpha = 1;
+  zoneF((x, y) => ions.some(q => Math.hypot(x - q.p[0], y - q.p[1]) < 7), 'bion', 'Ions du pont · K⁺ et NO₃⁻', 'Les cations vont vers la cathode, les anions vers l’anode : chaque bécher reste neutre. Plus le courant est grand, plus ils se déplacent vite.');
+  zoneF((x, y) => { const inx = x >= g.legA - 9 && x <= g.legC + 9; return (inx && Math.abs(y - yArch) <= 9) || ((Math.abs(x - g.legA) <= 9 || Math.abs(x - g.legC) <= 9) && y >= yArch && y <= yLeg); }, 'pont', 'Pont salin' + (P4.bridge ? '' : ' (retiré)'), 'Il laisse passer des ions entre les béchers pour qu’aucun ne se charge ; sans lui, le courant s’arrête.');
+  // ---- circuit extérieur
+  const wire = rgba(RT, 0.8), xm = g.xm;
+  c.strokeStyle = wire; c.lineWidth = 1.8; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(g.exA, plateTop); c.lineTo(g.exA, g.yV); c.moveTo(g.exC, plateTop); c.lineTo(g.exC, g.yV); c.stroke();
+  // branche du voltmètre
+  const vx = xm - 46, bx0 = xm - 26, bW = 84;
+  c.beginPath(); c.moveTo(g.exA, g.yV); c.lineTo(vx - 14, g.yV); c.moveTo(vx + 14, g.yV); c.lineTo(bx0, g.yV); c.moveTo(bx0 + bW, g.yV); c.lineTo(g.exC, g.yV); c.stroke();
+  c.fillStyle = C.fond; c.strokeStyle = C.ener; c.lineWidth = 1.6; c.beginPath(); c.arc(vx, g.yV, 14, 0, TAU); c.fill(); c.stroke();
+  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('V', vx, g.yV + 0.5);
+  c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; rrect(c, bx0 + 0.5, g.yV - 12.5, bW, 25, 3); c.fill(); c.stroke();
+  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.fillText(P4.bridge ? fmt(L.U, 2) + ' V' : '— V', bx0 + bW / 2, g.yV + 1);
+  zone(vx - 15, g.yV - 15, bx0 + bW, g.yV + 15, 'volt', 'Voltmètre · tension entre les électrodes', P4.bridge ? 'Il mesure l’écart de potentiel entre les deux électrodes : la tension de la pile.' : 'Circuit ouvert : aucune tension mesurable entre deux béchers isolés, il affiche « — ».');
+  // branche principale : résistance ou générateur
+  c.strokeStyle = wire; c.lineWidth = 1.8; c.beginPath(); c.moveTo(g.exA, g.yR); c.lineTo(xm - 38, g.yR); c.moveTo(xm + 38, g.yR); c.lineTo(g.exC, g.yR); c.stroke();
+  if (!P4.gen) {
+    c.strokeStyle = C.texte; c.lineWidth = 1.8; c.beginPath(); c.moveTo(xm - 38, g.yR);
+    for (let i = 0; i < 8; i++) c.lineTo(xm - 38 + 76 * (i + 0.5) / 8, g.yR + (i % 2 ? 8 : -8)); c.lineTo(xm + 38, g.yR); c.stroke();
+    c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('R = ' + fmtR(P4.R) + ' Ω', xm + 62, g.yR - 14);
+    zone(xm - 40, g.yR - 11, xm + 62 + 60, g.yR + 11, 'res', 'Résistance de charge · R = ' + fmtR(P4.R) + ' Ω', 'Elle limite le courant : plus R est grande, moins la pile débite.');
+  } else {
+    c.strokeStyle = C.ener; c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm - 38, g.yR); c.lineTo(xm - 8, g.yR); c.moveTo(xm + 8, g.yR); c.lineTo(xm + 38, g.yR); c.stroke();
+    c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm - 8, g.yR - 7); c.lineTo(xm - 8, g.yR + 7); c.stroke(); c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm + 8, g.yR - 13); c.lineTo(xm + 8, g.yR + 13); c.stroke();
+    c.font = '500 12px ' + C.mono; c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('−', xm - 20, g.yR - 12); c.fillText('+', xm + 20, g.yR - 12);
+    c.textAlign = 'left'; c.font = mono(11); c.fillText('U = ' + fmt(P4.U, 2) + ' V', xm + 62, g.yR - 14);
+    zone(xm - 40, g.yR - 15, xm + 44 + 70, g.yR + 15, 'genr', 'Générateur · U = ' + fmt(P4.U, 2) + ' V', 'Source de tension réglable : si U dépasse la f.é.m. de la pile, il impose le sens du courant et fait marcher la réaction à l’envers.');
+  }
+  for (const [x, y] of [[g.exA, g.yV], [g.exA, g.yR], [g.exC, g.yV], [g.exC, g.yR]]) { c.fillStyle = wire; c.beginPath(); c.arc(x, y, 2.6, 0, TAU); c.fill(); }
+  zone(g.exA - 5, g.yV, g.exA + 5, plateTop, 'filA', 'Fil de cuivre', 'Les électrons peuvent y circuler librement ; c’est le chemin extérieur du circuit.');
+  zone(g.exC - 5, g.yV, g.exC + 5, plateTop, 'filC', 'Fil de cuivre', 'Les électrons peuvent y circuler librement ; c’est le chemin extérieur du circuit.');
+  // ---- électrons dans le fil
+  const wp = [[g.exA, plateTop], [g.exA, g.yR], [g.exC, g.yR], [g.exC, plateTop]], Lw = pathLen(wp), sp = 30, ne = Math.floor(Lw / sp), els = [];
+  if (Math.abs(L.I) > 1e-5) for (let i = 0; i < ne; i++) els.push(pathPoint(wp, (((K4.ph + i * sp) % Lw) + Lw) % Lw));
+  for (const p of els) { c.fillStyle = C.neg; c.shadowColor = C.neg; c.shadowBlur = 8; c.beginPath(); c.arc(p[0], p[1], 3.1, 0, TAU); c.fill(); c.shadowBlur = 0; }
+  zoneF((x, y) => els.some(p => Math.hypot(x - p[0], y - p[1]) < 8), 'elec4', 'Électron · e⁻', 'Il circule dans le fil de l’anode vers la cathode pendant la décharge (sens inverse en électrolyse) ; la solution, elle, est parcourue par des ions.');
+  // légende d'échelle
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2;
+  if (!g.nar) c.fillText('échelle fixe : la vitesse des points ∝ |I|, pas le nombre réel d’électrons', 24, H - 10);
+}
+function scope4() {
+  const { w, h } = scopeSetup(), c = sctx, rec = K4.rec, tmax = rec.length ? rec[rec.length - 1].t : 0, t1 = Math.max(10, Math.ceil(tmax * 1.1 / 10) * 10);
+  const segs = []; let cur = []; for (const r of rec) { if (r.U == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([r.t, r.U]); } if (cur.length) segs.push(cur);
+  plotArea(c, { x: 0, y: 2, w, h: h - 2 }, { x0: 0, x1: t1, y0: 0, y1: 2, yt: [0, 1, 2], fy: q => fmt(q, 0), xt: [0, t1 / 2, t1], fx: q => fmt(q, 0), xl: 'temps simulé (h)', padL: 22, padR: 8, padB: 30, fs: 10,
+    lines: [{ pts: rec.map(r => [r.t, r.E]), col: rgba(RT2, 0.9), lw: 1.3, dash: [4, 3] }, ...segs.map(s => ({ pts: s, col: C.ener, lw: 1.9 }))] });
+}
+function state4() {
+  const c = K4.cell, L = live4();
+  return { step: 3, anode: P4.anode, cathode: P4.cathode, R: P4.R, gen: P4.gen, Ugen: P4.U, bridge: P4.bridge, E: L.E, U: L.U, I: L.I, Q: c.Q, t: c.t, tH: c.t / 3600, cA: c.cA, cC: c.cC, mA: c.mA, mC: c.mC, mode: L.mode, speed: P4.speed };
+}
+function status4() {
+  const L = live4(), E0 = K4.E0;
+  if (!P4.bridge) return 'Les béchers se chargeraient : le courant s’arrête.';
+  if (P4.gen) {
+    if (L.U > L.E + 0.005) return 'On paie de l’énergie électrique pour faire marcher la réaction à l’envers : ' + cname(P4.anode).name + ' se redépose, ' + cname(P4.cathode).name + ' se dissout. C’est une électrolyse, une recharge.';
+    if (Math.abs(L.U - L.E) <= 0.005) return 'Tensions égales : aucun courant.';
+    return 'Le générateur s’oppose à la pile, mais moins fort qu’elle : la pile débite encore.';
+  }
+  if (L.E < 0.05) return 'Pile vide : il ne reste presque plus d’ions ' + cname(P4.cathode).name + '. Rien ne s’est « vidé » d’électricité : ce sont les réactifs qui manquent.';
+  if (L.E < E0 - 0.05) return 'La pile s’use : [' + cname(P4.cathode).ion + '] baisse, [' + cname(P4.anode).ion + '] monte, et la tension baisse avec elles (Nernst).';
+  return 'Les électrons passent par le fil, du ' + cname(P4.anode).name + ' vers le ' + cname(P4.cathode).name + '. Dans les béchers et le pont salin, ce sont des ions qui se déplacent.';
+}
+function readouts4() {
+  const c = K4.cell, L = live4(), A = cname(P4.anode), Cc = cname(P4.cathode);
+  setM('E', fmt(L.E, 3)); setM('U', P4.bridge ? fmt(L.U, 3) : '—'); setM('I', fmt(L.I * 1000, 1)); setM('Q', fmtI(c.Q)); setM('th', fmt(c.t / 3600, 2));
+  setM('dmC', fmt(c.mC - 20, 3)); setM('dmA', fmt(20 - c.mA, 3)); setM('cA', fmt(c.cA, 3)); setM('cC', fmt(c.cC, c.cC < 0.01 ? 4 : 3));
+}
+
+/* Un tableau de fonctions par étape. */
 const STEPS = [
   { enter: enter1, adv: adv1, draw: draw1, scope: scope1, state: state1, status: status1, readouts: readouts1 },
   { enter: enter2, adv: adv2, draw: draw2, scope: scope2, state: state2, status: status2, readouts: readouts2 },
-  stubStep(2), stubStep(3)
+  { enter: enter3, adv: adv3, draw: draw3, scope: scope3, state: state3, status: status3, readouts: readouts3 },
+  { enter: enter4, adv: adv4, draw: draw4, scope: scope4, state: state4, status: status4, readouts: readouts4 }
 ];
 
 /* ---------------- Textes, légendes, mesures ---------------- */
@@ -1361,8 +1802,20 @@ function INFO(n) {
       + 'Le sang est tamponné (bicarbonate, protéines) autour de 7,4. Gradient de protons : planche <a href="../02-respiration/index.html">Respiration</a>.',
     eye: P2.mode === 'titrage' ? 'Enregistreur · titrage' : 'Enregistreur · deux béchers'
   };
-  if (n === 2) return { t: 'Passer des électrons : le redox', x: 'Cette étape arrive bientôt : une lame de zinc plongée dans une solution de cuivre, et les électrons qui passent directement d’un atome à un ion.', cle: '', note: 'En construction.', eye: 'Enregistreur' };
-  return { t: 'La pile et l’électrolyse', x: 'Cette étape arrive bientôt : une pile Daniell, un fil, un pont salin, et la tension qui mesure l’écart entre deux couples.', cle: '', note: 'En construction.', eye: 'Enregistreur' };
+  if (n === 2) return {
+    t: 'Passer des électrons : le redox',
+    x: 'Une lame de métal est plongée dans une solution d’ions d’un autre métal. Prédis d’abord ce qui va se passer, puis plonge : si la réaction a lieu, des électrons passent directement d’un atome de la lame à un ion de la solution.',
+    cle: 'Une oxydation cède des électrons, une réduction en capte ; l’une ne va pas sans l’autre. Sur l’échelle des potentiels, l’ion du couple du haut capte les électrons du métal du couple du bas.',
+    note: 'Potentiels standards à 25 °C ; vitesse du dépôt illustrative (en vrai, de quelques minutes à quelques heures).',
+    eye: 'Enregistreur · [ion] et masse déposée'
+  };
+  return {
+    t: 'La pile et l’électrolyse',
+    x: 'Les mêmes électrons passent maintenant par un fil : deux demi-réactions dans deux béchers, reliées par ce fil et par un pont salin. Le voltmètre donne la tension ; la résistance règle le courant. Avec le générateur, tout peut s’inverser.',
+    cle: 'Une pile sépare l’oxydation et la réduction et oblige les électrons à passer par un fil : la tension est l’écart entre les deux couples. Imposer une tension plus grande inverse la réaction.',
+    note: 'Résistance interne constante (2 Ω) ; temps accéléré ; électrons et ions dessinés à une échelle fixe ; surtensions ignorées.',
+    eye: 'Enregistreur · U et E en fonction du temps'
+  };
 }
 const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
 const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
@@ -1370,7 +1823,8 @@ const bx = (col, op) => `<rect x="0" y="0" width="20" height="8" fill="${col}" f
 function LEG(n) {
   if (n === 0) return lg(bx('#9ef0f0', .85), 'pH') + lg(bx('#5bb8ff', .85), 'pOH') + lg('<circle cx="10" cy="4" r="3" fill="#9ef0f0"/>', 'pH après chaque changement');
   if (n === 1) return P2.mode === 'titrage' ? lg(ln('#9ef0f0', 1.8), 'pH du bécher') + lg(bx('#9ef0f0', .2), 'zone tampon') : lg(ln('#8a93a0', 1.6, 1), 'eau pure') + lg(ln('#9ef0f0', 2), ratioName());
-  return '';
+  if (n === 2) return lg(ln('#5bb8ff', 1.8), '[ion]') + lg(ln('#ffd166', 1.8, 1), 'masse déposée');
+  return lg(ln('#ffd166', 2), 'U (aux bornes)') + lg(ln('#8a93a0', 1.4, 1), 'E (f.é.m.)');
 }
 const ratioName = () => ACID_LABEL[P2.acid];
 function MEAS(n) {
@@ -1378,7 +1832,10 @@ function MEAS(n) {
   if (n === 1) return P2.mode === 'titrage'
     ? [['V_base', [['vb', 'mL']]], ['pH', [['pht', '']]], ['V_éq', [['veq', 'mL']]], ['pH à l’équivalence', [['pheq', '']]], [ratioLabel(P2.acid), [['aha', '']]], ['pKa', [['pka', '']]]]
     : [['pH eau pure', [['pHw', '']]], ['pH tampon', [['pHb', '']]], [ratioLabel(P2.acid), [['aha', '']]], ['pKa', [['pka', '']]], ['gouttes acide · base', [['nA', ''], ['nB', '']]]];
-  return [];
+  if (n === 2) return [['oxydation', [['ox', '']]], ['réduction', [['red', '']]], ['bilan', [['eq', '']]], ['ΔE°', [['dE', 'V']]], ['électrons échangés', [['nE', 'mmol']]], ['métal déposé', [['mdep', 'mg']]], ['métal dissous', [['mdis', 'mg']]], ['[ion] restant', [['cion', 'mol/L']]], ['constante K', [['K', '']]]];
+  const A = cname(P4.anode), Cc = cname(P4.cathode);
+  return [['f.é.m. E', [['E', 'V']]], ['tension U aux bornes', [['U', 'V']]], ['courant I', [['I', 'mA']]], ['charge écoulée Q', [['Q', 'C']]], ['temps simulé', [['th', 'h']]],
+          ['masse de ' + Cc.name + ' gagnée', [['dmC', 'g']]], ['masse de ' + A.name + ' perdue', [['dmA', 'g']]], ['[' + A.ion + ']', [['cA', 'mol/L']]], ['[' + Cc.ion + ']', [['cC', 'mol/L']]]];
 }
 const mEls = {};
 function buildMeas(n) {
@@ -1390,8 +1847,7 @@ function buildMeas(n) {
   }
   const I = INFO(n);
   $('#mNote').innerHTML = I.note; $('#rEye').textContent = I.eye; $('#leg').innerHTML = LEG(n);
-  $('#scope').parentElement.hidden = n >= 2;
-  $('#rEye').hidden = n >= 2; $('#leg').hidden = n >= 2;
+  $('#cards').hidden = n !== 3;
 }
 function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
 function updateText() {
@@ -1412,6 +1868,17 @@ function syncTools() {
   $('#rRat').value = Math.log10(P2.ratio); $('#vRat').textContent = fmt(P2.ratio, 1); $('#glRat').textContent = ratioLabel(P2.acid) + ' =';
   $('#rVb').value = P2.vb * 1000; $('#vVb').textContent = fmt(P2.vb * 1000, 1) + ' mL';
   set('bTit', P2.mode === 'titrage');
+  document.querySelectorAll('[data-metal]').forEach(b => b.setAttribute('aria-pressed', b.dataset.metal === P3.metal ? 'true' : 'false'));
+  document.querySelectorAll('[data-ion]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ion === P3.ion ? 'true' : 'false'));
+  set('bPred', P3.pm); set('bPredY', P3.pred === true); set('bPredN', P3.pred === false);
+  $('#bPredY').hidden = !P3.pm; $('#bPredN').hidden = !P3.pm;
+  $('#bDip').textContent = P3.dipped ? 'Ressortir' : 'Plonger'; $('#bDip').disabled = P3.pm && P3.pred == null && !P3.dipped;
+  $('#bDip').title = $('#bDip').disabled ? 'Fais d’abord ta prédiction' : (P3.dipped ? 'Ressortir la lame (touche P)' : 'Plonger la lame (touche P)');
+  document.querySelectorAll('[data-cell]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cell === P4.anode + ',' + P4.cathode ? 'true' : 'false'));
+  document.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.speed === P4.speed ? 'true' : 'false'));
+  $('#rR').value = Math.log10(P4.R); $('#vR').textContent = fmtR(P4.R) + ' Ω'; $('#rR').disabled = P4.gen;
+  $('#rU').value = P4.U; $('#vU').textContent = fmt(P4.U, 2) + ' V'; $('#rU').disabled = !P4.gen; set('bGen', P4.gen);
+  $('#bBridge').textContent = P4.bridge ? 'Retirer le pont salin' : 'Remettre le pont salin';
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => {
     gp.hidden = !gp.dataset.acts.split(' ').includes(String(uiStep)) || (gp.dataset.m2 && gp.dataset.m2 !== P2.mode);
   });
@@ -1471,6 +1938,21 @@ $('#rRat').addEventListener('input', e => { userAct(); setRatio2(Math.pow(10, sn
 $('#rVb').addEventListener('input', e => { userAct(); P2.vb = clamp(+e.target.value / 1000, 0, 0.05); P2.last = 'vb'; computeS2(); syncTools(); });
 $('#bTit').addEventListener('click', e => { userAct(); P2.mode = P2.mode === 'titrage' ? 'gouttes' : 'titrage'; P2.last = 'tit'; modeChanged2(); e.currentTarget.blur(); });
 $('#bClr').addEventListener('click', e => { goAnim(1, true); e.currentTarget.blur(); });
+// étape 3
+document.querySelectorAll('[data-metal]').forEach(b => b.addEventListener('click', e => { userAct(); setMetal3(b.dataset.metal); e.currentTarget.blur(); }));
+document.querySelectorAll('[data-ion]').forEach(b => b.addEventListener('click', e => { userAct(); setIon3(b.dataset.ion); e.currentTarget.blur(); }));
+$('#bPred').addEventListener('click', e => { P3.pm = !P3.pm; if (!P3.pm) P3.pred = null; syncTools(); e.currentTarget.blur(); });
+$('#bPredY').addEventListener('click', e => { predict3(true); e.currentTarget.blur(); });
+$('#bPredN').addEventListener('click', e => { predict3(false); e.currentTarget.blur(); });
+$('#bDip').addEventListener('click', e => { userAct(); dip3(!P3.dipped); e.currentTarget.blur(); });
+// étape 4
+document.querySelectorAll('[data-cell]').forEach(b => b.addEventListener('click', e => { userAct(); setCell4(...b.dataset.cell.split(',')); e.currentTarget.blur(); }));
+$('#rR').addEventListener('input', e => { userAct(); P4.R = Math.pow(10, snap(+e.target.value * 4) / 4); P4.R = clamp(P4.R, 1, 1000); $('#vR').textContent = fmtR(P4.R) + ' Ω'; });
+$('#rU').addEventListener('input', e => { userAct(); P4.U = +e.target.value; $('#vU').textContent = fmt(P4.U, 2) + ' V'; });
+$('#bGen').addEventListener('click', e => { userAct(); P4.gen = !P4.gen; syncTools(); e.currentTarget.blur(); });
+$('#bBridge').addEventListener('click', e => { userAct(); P4.bridge = !P4.bridge; syncTools(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', e => { P4.speed = +b.dataset.speed; syncTools(); e.currentTarget.blur(); }));
+function setCell4(a, c) { P4.anode = a; P4.cathode = c; newCell4(); buildMeas(3); syncTools(); }
 function setAcid2(k) { P2.acid = k; P2.last = 'acid'; clearDrops2(); K2.curveKey = ''; K2.tkey = ''; computeS2(); curves2(); initMols2(); buildMeas(1); updateText(); syncTools(); }
 function setRatio2(r) { P2.ratio = clamp(r, 0.1, 10); P2.last = 'ratio'; clearDrops2(); curves2(); computeS2(); syncTools(); }
 
@@ -1490,7 +1972,8 @@ addEventListener('keydown', e => {
   else if (step === 1 && (k === 'a' || k === 'b') && !e.repeat && P2.mode === 'gouttes') {
     userAct(); addDrops(k === 'a' ? 'acide' : 'base', 1); P2.holdT = 0.12; if (k === 'a') P2.keyA = true; else P2.keyB = true;
   }
-  // P (plonger) et S (pont salin) : étapes 3 et 4, lot 3
+  else if (k === 'p' && step === 2 && !e.repeat) { if (!$('#bDip').disabled) { userAct(); dip3(!P3.dipped); } }
+  else if (k === 's' && step === 3 && !e.repeat) { userAct(); P4.bridge = !P4.bridge; syncTools(); }
 });
 addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k === 'a') P2.keyA = false; if (k === 'b') P2.keyB = false; });
 addEventListener('blur', () => { P2.keyA = P2.keyB = P2.btnA = P2.btnB = false; });
@@ -1549,10 +2032,11 @@ window.__labo = {
   drop(kind, n) { ensure(1); addDrops(kind, n == null ? 1 : n); return stateNow(); },
   setBuffer(acid, ratio) { ensure(1); if (acid) { P2.acid = acid; } if (ratio != null) P2.ratio = clamp(ratio, 0.1, 10); P2.last = 'ratio'; clearDrops2(); K2.curveKey = ''; K2.tkey = ''; computeS2(); curves2(); initMols2(); buildMeas(1); updateText(); syncTools(); return stateNow(); },
   titrate(Vb) { ensure(1); if (P2.mode !== 'titrage') { P2.mode = 'titrage'; P2.last = 'tit'; modeChanged2(); } P2.vb = clamp(Vb, 0, 0.05); P2.last = 'vb'; computeS2(); syncTools(); return stateNow(); },
-  // étape 3 (lot 3)
-  setMetal(m) { ensure(2); return stateNow(); }, setIon(i) { ensure(2); return stateNow(); }, dip() { ensure(2); return stateNow(); }, predict(b) { ensure(2); return stateNow(); },
-  // étape 4 (lot 3)
-  setCell(anode, cathode) { ensure(3); return stateNow(); }, setLoad(R) { ensure(3); return stateNow(); }, generator(on, U) { ensure(3); return stateNow(); }, saltBridge(on) { ensure(3); return stateNow(); }
+  // étape 3
+  setMetal(m) { ensure(2); setMetal3(m); return stateNow(); }, setIon(i) { ensure(2); setIon3(i); return stateNow(); }, dip(on) { ensure(2); dip3(on); return stateNow(); }, predict(b) { ensure(2); predict3(b); return stateNow(); },
+  // étape 4
+  setCell(anode, cathode) { ensure(3); setCell4(anode, cathode); return stateNow(); }, setLoad(R) { ensure(3); P4.R = clamp(R, 1, 1000); syncTools(); return stateNow(); },
+  generator(on, U) { ensure(3); P4.gen = !!on; if (U != null) P4.U = clamp(U, 0, 2); syncTools(); return stateNow(); }, saltBridge(on) { ensure(3); P4.bridge = on == null ? true : !!on; syncTools(); return stateNow(); }
 };
 
 resize();
