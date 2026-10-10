@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 47 | 0 | 128 |
+| Liste historique (18 groupes) | 192 | 6 | 12 | 48 | 0 | 126 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 15 | 1 | 42 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **62** | **2** | **170** |
+| **Total** | **265** | **16** | **16** | **63** | **2** | **168** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -94,8 +94,8 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Échange gazeux pulmonaire | `idea` | 38 | 19, 17 | — |  |
 | Néphron | `idea` | — | 20, 32, 19 | — | Rattachement de module à revoir (38 ou 37). |
 | Digestion | `idea` | — | 30, 34 | — | Rattachement de module à revoir. |
-| Photosynthèse | `idea` | 34 | 27, 31, 30 | — |  |
-| Enzyme-substrat | `idea` | 34 | 30 | — | Peut aussi servir le module 30 (catalyse). |
+| Photosynthèse | `partial` | 34 | 27, 31, 30 | L’énergie du vivant | Étape 4 des fondations L’énergie du vivant (spectre d’absorption, réponse à la lumière, grand cycle) ; le showcase reste à faire (photosystèmes, cycle de Calvin). |
+| Enzyme-substrat | `absorbed` | 34 | 30 | L’énergie du vivant | Étape 2 des fondations L’énergie du vivant (saturation, inhibiteur compétitif). Peut aussi servir le module 30 (catalyse). |
 
 ### 2 · Terre et environnement
 

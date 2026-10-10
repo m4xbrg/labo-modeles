@@ -20,16 +20,18 @@ Origine : la carte vient du paquet de fondations préparé avant la première pr
 
 | | Modules |
 |---|---|
-| Couverture **full** par au moins un modèle | 01-06, 10-26, 28, 29, 31-33, 37, 40, 46 (31 modules) |
-| Couverture **partial** | 07, 08, 27, 34, 36, 44 |
+| Couverture **full** par au moins un modèle | 01-06, 10-26, 28-29, 31-34, 37, 40, 46 (32 modules) |
+| Couverture **partial** | 07-08, 27, 36, 44 |
 | Seulement **supporting** | 09, 30, 35 |
 | Rien | 38-39, 41-43, 45, 47-50 |
 
-Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Liaisons, molécules, mole et stœchiométrie* (modules 28 et 29), ouvre la branche E · Atomes, chimie et noyaux le même jour, en deux chapitres (4 + 3 étapes), avant les modules 26-27 qui la précèdent dans la carte. Une quatorzième, *L'onde électromagnétique* (module 24), poursuit la branche D au même standard (un chapitre de quatre étapes) ; son moteur, écrit et testé avant la page, est versionné dans `prompts/moteurs/`. Une quinzième, *Atomes, noyaux, photons et spectres* (modules 26 et 27), rejoint la branche E le 2026-10-07 ; seule la première moitié est livrée (chapitre 26 et explication des deux modules), le chapitre 27 suivra. Une seizième, *Signalisation et homéostasie* (module 37), ajoute le 2026-10-07 un chapitre de quatre étapes et prépare la physiologie (38 et 39). Une dix-septième, *Bioélectricité et synapses* (module 33), ajoute le 2026-10-07 la planche *D’un gradient à une tension* : quatre étapes sur Nernst, GHK, le câble et la sommation. Sa couverture est `partial` ; le showcase *Le neurone qui apprend* maintient la couverture globale `full` du module. Une dix-huitième, *Acide-base, redox et électrochimie* (module 31), ajoute la planche *Protons et électrons qui passent* : un chapitre de quatre étapes, avec un moteur versionné dans `prompts/moteurs/acide-base-redox.js`. Les couvertures partielles des modules 34, 36 et 44 viennent de showcases (respiration, mitose et réplication, supernova), pas de fondations.
+Les huit productions de fondations définies au départ sont toutes construites. Une neuvième, *Relativité restreinte* (module 46), ouvre la branche J · Relativité le 2026-10-02. Une dixième, *Évolution et génétique des populations* (module 40), ouvre la branche H · Évolution, populations et systèmes complexes le 2026-10-04 (PR n° 16). Une onzième, *Cellule, membrane et transport* (module 32), ouvre la branche F · Cellule et biologie moléculaire le même jour (PR n° 17). Une douzième, *Magnétisme et induction* (module 23), reprend la feuille de route de la branche D le 2026-10-06 ; c'est la première construite au standard d'une page à un module (quatre étapes, `standards.md`), à partir d'un moteur verrouillé versionné dans `prompts/moteurs/`. Une treizième, *Liaisons, molécules, mole et stœchiométrie* (modules 28 et 29), ouvre la branche E · Atomes, chimie et noyaux le même jour, en deux chapitres (4 + 3 étapes), avant les modules 26-27 qui la précèdent dans la carte. Une quatorzième, *L'onde électromagnétique* (module 24), poursuit la branche D au même standard (un chapitre de quatre étapes) ; son moteur, écrit et testé avant la page, est versionné dans `prompts/moteurs/`. Une quinzième, *Atomes, noyaux, photons et spectres* (modules 26 et 27), rejoint la branche E le 2026-10-07 ; seule la première moitié est livrée (chapitre 26 et explication des deux modules), le chapitre 27 suivra. Une seizième, *Signalisation et homéostasie* (module 37), ajoute le 2026-10-07 un chapitre de quatre étapes et prépare la physiologie (38 et 39). Une dix-septième, *Bioélectricité et synapses* (module 33), ajoute le 2026-10-07 la planche *D’un gradient à une tension* : quatre étapes sur Nernst, GHK, le câble et la sommation. Sa couverture est `partial` ; le showcase *Le neurone qui apprend* maintient la couverture globale `full` du module. Une dix-huitième, *Acide-base, redox et électrochimie* (module 31), ajoute la planche *Protons et électrons qui passent* : un chapitre de quatre étapes, avec un moteur versionné dans `prompts/moteurs/acide-base-redox.js`. La production *Énergie biologique* (module 34) ajoute *L’énergie du vivant* : quatre étapes sur le couplage, les enzymes, le bilan de la respiration et la photosynthèse, sans reconstruire le mécanisme du showcase 02. Les couvertures partielles des modules 36 et 44 viennent de showcases (mitose et réplication, supernova), pas de fondations.
 
 *Optique fondamentale* (module 25) est construite le 2026-10-06, avant le module 24 : la planche utilise la vibration transverse de E pour la polarisation sans enseigner l’onde électromagnétique.
 
 Limites connues des fondations construites (détail dans [`modeles.md`](modeles.md)) :
+
+- **34** : ΔG°′ standard (ΔG réel pour l'ATP seulement) ; enzymes immobiles en 2D dans un bain à concentration constante ; bilans selon une convention (30 ATP par glucose) ; chloroplaste schématique et spectre de la chlorophylle approché. Cycle de Krebs, photosystèmes, cycle de Calvin et régulation allostérique seulement introduits ; les modules 33, 35 et 41 sont annoncés en fin de planche.
 
 - **01** : l'analyse dimensionnelle n'est que dans l'explication, aucun toy ne la manipule.
 - **03** : mouvement en 1D, accélération constante par morceaux ; les mots « dérivée » et « intégrale » sont dans l'explication et l'accueil, pas dans les toys.
@@ -102,11 +104,11 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | # | Module | Concepts | Production | Couverture actuelle | Par |
 |---|---|---|---|---|---|
 | 26 | Architecture atomique et nucléaire | atome, électron, proton, neutron, isotopes, énergie de liaison, stabilité nucléaire, radioactivité de base | Atomes, noyaux, photons et spectres (`partial`) | **full** | Supernova par effondrement du cœur (supporting), Atomes, noyaux et lumière (full) |
-| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`partial`) | partial | L’onde électromagnétique (supporting), Atomes, noyaux et lumière (partial) |
+| 27 | Quantification, photons et spectres atomiques | niveaux d’énergie, absorption, émission, photons, effet photoélectrique, spectres | Atomes, noyaux, photons et spectres (`partial`) | partial | L’onde électromagnétique (supporting), Atomes, noyaux et lumière (partial), L’énergie du vivant (supporting) |
 | 28 | Liaisons et structure moléculaire | covalence, ionicité, polarité, géométrie, électronégativité, forces intermoléculaires, VSEPR intuitif | Liaisons, molécules, mole et stœchiométrie (`built`) | **full** | Molécules et mole (full) |
 | 29 | Compter la matière | mole, masse molaire, concentration, stœchiométrie | Liaisons, molécules, mole et stœchiométrie (`built`) | **full** | Molécules et mole (full), Protons et électrons qui passent (supporting) |
-| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting), Molécules et mole (supporting), Protons et électrons qui passent (supporting) |
-| 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`built`) | **full** | Protons et électrons qui passent (full), La respiration cellulaire (supporting) |
+| 30 | Réactions chimiques | énergie de réaction, activation, cinétique, catalyse, équilibre, Le Chatelier | Réactions chimiques (`planned`) | supporting | La réplication de l’ADN (supporting), Molécules et mole (supporting), Protons et électrons qui passent (supporting), L’énergie du vivant (supporting) |
+| 31 | Acide-base, redox et électrochimie | pH, pKa, tampons, redox, potentiel, piles, électrolyse | Acide-base, redox et électrochimie (`built`) | **full** | Protons et électrons qui passent (full), La respiration cellulaire (supporting), L’énergie du vivant (supporting) |
 
 ### F · Cellule et biologie moléculaire
 
@@ -114,7 +116,7 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 |---|---|---|---|---|---|
 | 32 | Cellule, membrane et transport | compartiments, membrane, diffusion, transport facilité, pompes | Cellule, membrane et transport (`built`) | **full** | La mitose (supporting), Le neurone qui apprend (supporting), Cellule, membrane et transport (full), D’un gradient à une tension (supporting) |
 | 33 | Bioélectricité et synapses | gradients ioniques, potentiel membranaire, seuil, canaux voltage-dépendants, potentiel d’action, transmission synaptique | Bioélectricité et synapses (`built`) | **full** | Le neurone qui apprend (full), D’un gradient à une tension (partial) |
-| 34 | Énergie biologique | ATP, couplage, enzymes, respiration, photosynthèse | Énergie biologique (`planned`) | partial | La respiration cellulaire (partial) |
+| 34 | Énergie biologique | ATP, couplage, enzymes, respiration, photosynthèse | Énergie biologique (`built`) | **full** | L’énergie du vivant (full), La respiration cellulaire (partial), Cellule, membrane et transport (supporting) |
 | 35 | Information génétique | ADN, nucléotides, chromosomes, transcription, traduction, ADN → ARN → protéine | Information génétique (`planned`) | supporting | La mitose (supporting), La réplication de l’ADN (supporting) |
 | 36 | Copie, variation et division du génome | réplication, cycle cellulaire, méiose, recombinaison, mutation, réparation | Copie, variation et division du génome (`planned`) | partial | La mitose (partial), La réplication de l’ADN (partial) |
 | 37 | Signalisation et homéostasie | ligand, récepteur, cascades, rétroaction, homéostasie | Signalisation et homéostasie (`built`) | **full** | Signaux et équilibres du vivant (full) |
@@ -182,18 +184,19 @@ Limites connues des fondations construites (détail dans [`modeles.md`](modeles.
 | Bioélectricité et synapses | 33 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | Quatre étapes complémentaires au neurone ; couverture 33 partial (Hodgkin-Huxley, chimie synaptique détaillée et plasticité renvoyés au showcase). |
 | Acide-base, redox et électrochimie | 31 | [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | Un chapitre de quatre étapes (pH, tampons, redox, pile et électrolyse). Moteur verrouillé : `prompts/moteurs/acide-base-redox.js`. Le module 30 reste un préalable annoncé. |
 | Optique fondamentale | 25 | [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | Un chapitre de quatre étapes (réfraction et réflexion totale, lentilles, couleurs, polarisation) sur une même table d'optique. Moteur versionné dans prompts/moteurs/optique.js (61 tests dans optique.test.js, aussi lancés sur la page). Construite avant le module 24. |
+| Énergie biologique | 34 | [L’énergie du vivant](../opus-sonnet/fondations-energie-biologique/index.html) | Quatre étapes : couplage, enzymes, bilan de la respiration, photosynthèse. Moteur verrouillé : `prompts/moteurs/energie-biologique.js`. Le mécanisme de la chaîne respiratoire reste dans la planche 02 ; répond à la question « énergie » laissée ouverte par *Cellule, membrane et transport*. |
 
 ### Prévues (rien de construit)
 
-Dans cet ordre indicatif : 27 (chapitre restant d'*Atomes, noyaux, photons et spectres*) · 30 Réactions chimiques · 34 Énergie biologique · 35 Information génétique · 36 Copie, variation et division du génome.
+Dans cet ordre indicatif : 27 (chapitre restant d'*Atomes, noyaux, photons et spectres*) · 30 Réactions chimiques · 35 Information génétique · 36 Copie, variation et division du génome.
 
 La maquette « magnétisme » du premier prototype d'interface, retirée le 2026-10-04 (voir [`historique.md`](historique.md#prototype-dinterface-labo)), n'a rien à voir avec la planche *Magnétisme et induction* construite le 2026-10-06.
 
-Pour 34 et 36, des showcases couvrent déjà une partie du module ; une future production pourrait se limiter à ce qui manque.
+Pour 36, des showcases couvrent déjà une partie du module ; une future production pourrait se limiter à ce qui manque.
 
 ### Sans production définie
 
-Modules 08 et 09, puis la physiologie (38-39), les populations et l'émergence (41-42), l'astrophysique (43-45), la relativité générale (47) et la quantique (48-50). Candidats évidents au découpage en plusieurs productions : 34 Énergie biologique, 38 Muscle, circulation et échanges, 44 Comment fonctionne une étoile, 48 Fondations quantiques.
+Modules 08 et 09, puis la physiologie (38-39), les populations et l'émergence (41-42), l'astrophysique (43-45), la relativité générale (47) et la quantique (48-50). Candidats évidents au découpage en plusieurs productions : 38 Muscle, circulation et échanges, 44 Comment fonctionne une étoile, 48 Fondations quantiques.
 
 ## Chaînes de préalables
 

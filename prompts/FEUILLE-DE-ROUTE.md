@@ -26,7 +26,7 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 | 2 · E | [ ] `reactions-chimiques` | 30 | 4 | 0,8 | [écrit](fondations-reactions-chimiques.md) | 17, 28, 29 |
 | 2 · E | [x] `acide-base-redox` | 31 | 4 | 0,8 | [écrit](fondations-acide-base-redox.md), construite le 2026-10-06 | 22, 29, 30 |
 | 3 · F | [x] `bioelectricite` | 33 | 4 | 0,7 | [écrit](fondations-bioelectricite.md), construite le 2026-10-07 | 22, 32, 31 |
-| 3 · F | [ ] `energie-biologique` | 34 | 4 | 0,8 | [écrit](fondations-energie-biologique.md) | 30, 31, 32 |
+| 3 · F | [x] `energie-biologique` | 34 | 4 | 0,8 | [écrit](fondations-energie-biologique.md), construite le 2026-10-06 | 30, 31, 32 |
 | 3 · F | [ ] `information-genetique` | 35 | 4 | 0,8 | [écrit](fondations-information-genetique.md) | 28, 32, 34 |
 | 3 · F | [ ] `genome-variation` | 36 | 4 | 0,8 | [écrit](fondations-genome-variation.md) | 35, 07 |
 | 3 · F | [x] `signalisation-homeostasie` | 37 | 4 | 0,8 | [écrit](fondations-signalisation-homeostasie.md), construite le 2026-10-07 | 04, 30, 34, 35 |
