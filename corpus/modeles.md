@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**26 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 17 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**27 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 18 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -35,6 +35,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
 | [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | foundation | Acide-base, redox et électrochimie | — | 31 | 2026-10-06 |
+| [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | foundation | Optique fondamentale | — | 25 | 2026-10-06 |
 | [L’énergie du vivant](../opus-sonnet/fondations-energie-biologique/index.html) | foundation | Énergie biologique | — | 34 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
@@ -65,7 +66,7 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Modules** : 34 Énergie biologique (`partial`), 31 Acide-base, redox et électrochimie (`supporting`), 16 Flux, gradients et champs continus (`supporting`)
 - **Étapes** : Glycolyse · Pyruvate · Cycle de Krebs · Chaîne de transport et ATP synthase · Tout le trajet
 - **Interaction** : Étapes narratives, curseur d’O₂ qui pilote le gradient de protons, frise, identification au survol.
-- **Notes** : Couvre le mécanisme de la respiration (chaîne, gradient de protons, ATP synthase) ; la comptabilité de l’énergie, les enzymes et la photosynthèse sont dans *L’énergie du vivant*, qui renvoie ici.
+- **Notes** : Couvre ATP, enzymes et respiration du module 34 ; la photosynthèse et le couplage énergétique général n’y sont pas.
 
 ### Le neurone qui apprend
 
@@ -116,6 +117,28 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I Supergéante · II En couches · III Cœur de fer · IV Effondrement · V Rebond · VI Le choc cale · VII Explosion · VIII Résidu
 - **Interaction** : Frise logarithmique glissable, actes, mesures en direct et bilan d’énergie ; pas de curseur physique (choix du brief).
 - **Notes** : Showcase narratif. Les préalables (`prealables.html`) n’ont pas de section pour elle. Elle suppose les modules 13, 26, 43 et 44, dont seuls 11 et 13 sont construits.
+
+## Pages d'appui
+
+| Page | Rôle | État |
+|---|---|---|
+| [`labo/index.html`](../labo/index.html) | Accueil de LABO depuis le 2026-10-04 : fondations par domaine, phénomènes et collections, tous lus dans `corpus/*.json`. | Construit. |
+| [`opus-sonnet/index.html`](../opus-sonnet/index.html) | Ancien accueil (« L'invisible en mouvement »), devenu une redirection vers `labo/` : les planches y renvoient toutes. | Redirection. |
+| [`opus-sonnet/prealables.html`](../opus-sonnet/prealables.html) | « Avant de commencer » : théorie préalable par planche. | Partiel : sections 01 à 08 ; rien pour la 09 ni pour les fondations. Aucune planche n'y renvoie ; on y arrive par la barre de l'accueil. |
+| [`index.html`](../index.html) | Redirection de la racine vers `labo/`. | Construit. |
+
+## Hors corpus (ne pas prendre pour des modèles)
+
+- **Gabarit de planche** (`labo/gabarit.html`) : squelette commenté d'une planche, avec une scène de démonstration ; ce n'est pas un modèle. Mode d'emploi : `labo/GABARIT.md`.
+- **Version Astra du neurone** : annoncée par l'ancien README (`astra/03-neurone/`), absente du dépôt.
+- **Briefs de showcases non construits** : double pendule, effet tunnel (voir [`atlas.md`](atlas.md#les-deux-idées-sélectionnées)).
+
+## Constats transversaux
+
+- Aucun lien relatif cassé dans `opus-sonnet/` (vérifié le 2026-10-02).
+- Aucune planche ni page de fondations ne renvoie vers `prealables.html` ; les renvois entre pages sont rares et souvent du texte sans lien (« planche 06 »).
+- Deux libellés de série coexistent dans les pages de fondations : « L'invisible en mouvement — Fondations 1·2·3 / 10·11 / 12·13 » (langage, forces, rotation) et « Fondations — modules 4 · 5 · 7 / 6 · 14 · 15 » ou « Fondations 16·20 » (les trois autres). Les nombres affichés sont des numéros de modules canoniques.
+- Dans l'explication de *Langage scientifique*, la rubrique « Circuits » renvoie au neurone (03) et non à *Courant et circuits* (06).
 
 ## Pages de fondations
 
@@ -301,6 +324,17 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : 1 Le pH, un compteur de protons · 2 Acides faibles et tampons · 3 Passer des électrons : le redox · 4 La pile et l’électrolyse
 - **Interaction** : Un chapitre de quatre étapes ; règle des pH logarithmique avec repères du quotidien et loupe de 1 µm³ où l’on compte les H₃O⁺ et les OH⁻ (dilution par dix, eau pure, HCl 10⁻⁸) ; eau pure et tampon (acétique, ammonium, phosphate) qui reçoivent la même goutte, courbe en direct avec la bande pKa ± 1, titrage complet par NaOH ; lame de métal plongée dans une solution d’ions avec prédiction, dépôt qui grandit, solution qui pâlit, échelle des couples ; pile Daniell (ou Fe/Cu, Zn/Ag) avec pont salin qu’on retire, électrons dans le fil, ions dans le pont, enregistreur U(t) en temps accéléré, générateur qui inverse la réaction (électrolyse).
 - **Notes** : Construite le 2026-10-06 au standard d’une page à un module (un chapitre « Module 31 », quatre étapes). Moteur ELC écrit et testé avant la page, versionné dans prompts/moteurs/acide-base-redox.js (145 tests, aussi lancés sur la page) : pH par résolution exacte du bilan de charge, Nernst, décharge par Euler implicite, Faraday. Construite avant les modules 29 et 30 qu’elle suppose (renvois par numéro, sans lien). Se termine sur trois questions vers les modules 32-33, 34 (et la planche Respiration) et l’électrochimie réversible. Limites : 25 °C, activités = concentrations, acides traités comme monoacides, cinétique du dépôt illustrative, résistance interne constante, surtensions ignorées.
+
+### Optique : la lumière qui tourne
+
+- **Identifiant** : `fondations-optique` · **chemin** : [`opus-sonnet/fondations-optique/index.html`](../opus-sonnet/fondations-optique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-optique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Optique fondamentale
+- **Collection** : aucune
+- **Modules** : 25 Optique fondamentale (`full`), 15 Ondes (`supporting`), 24 Onde électromagnétique (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`)
+- **Étapes** : 1 Réfraction et réflexion totale · 2 Lentilles et images · 3 Couleurs et dispersion · 4 Polarisation
+- **Interaction** : Un chapitre de quatre étapes sur une table d’optique vue de dessus ; laser qu’on tire autour d’une interface (eau, verre, diamant), rayons réfléchi et réfracté d’opacité R et T, impulsions plus lentes dans le milieu dense, fronts d’onde qui se resserrent et pivotent, sens inverse jusqu’à la réflexion totale, tige courbée (deux rayons de courbure) jusqu’à ce qu’elle fuie ; lentille mince avec objet et écran glissés, trois rayons, tache sur l’écran, préréglages appareil photo, projecteur et loupe, lentille épaisse tracée exactement (aberration sphérique) ; prisme à l’échelle avec loupe sur l’écran, une seule couleur, deuxième prisme qui recompose le blanc, goutte d’eau et angles de l’arc-en-ciel ; polariseurs qu’on tourne, troisième polariseur glissé entre deux polariseurs croisés (I₀/8), reflet sur une vitre éteint à l’angle de Brewster.
+- **Notes** : Construite avant le module 24 : la vibration transverse de E n’y est qu’utilisée. Moteur versionné dans `prompts/moteurs/optique.js` (objet `Opt`, 61 tests dans `optique.test.js`, aussi lancés sur la page). Optique géométrique seulement (ni diffraction ni couches minces) ; lentille mince idéale par défaut ; loi de Cauchy approchée ; polariseurs idéaux. Se termine sur trois questions vers les modules 15, 47, 48 et 50.
+
 ### L’énergie du vivant
 
 - **Identifiant** : `fondations-energie-biologique` · **chemin** : [`opus-sonnet/fondations-energie-biologique/index.html`](../opus-sonnet/fondations-energie-biologique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-energie-biologique/explication.html)
