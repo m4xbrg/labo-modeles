@@ -58,6 +58,7 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | Atomes, noyaux et lumière | 26 · 27 | 4 + 3 emplacements à venir | 4 réalisées + 3 emplacements | Gabarit LABO ; chapitre 26 réalisé, chapitre 27 explicitement à venir ; théorie disponible. |
 | Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
 | D’un gradient à une tension | 33 | 4 | 4 | Conforme, gabarit LABO ; couverture partielle complémentaire au showcase Neurone. Ajoutée le 2026-10-07. |
+| Protons et électrons qui passent | 31 | 4 | 4 | Conforme ; pH, tampons et titrage, redox, pile et électrolyse. |
 
 Les quatre fondations récentes suivent aussi le gabarit. Les commandes de scène sont conservées : couches O/M/K pour Magnétisme et Molécules, V/M/C pour Onde électromagnétique, O/A/C pour Atomes, afin de garder C (couper ou casser), O (osciller) et M (changer de modèle). La conformité du nombre d’étapes ne signifie pas que toute la couverture conceptuelle est complète : les statuts restent ceux du corpus.
 

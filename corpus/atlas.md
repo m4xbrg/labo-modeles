@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 38 | 0 | 137 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 42 | 0 | 133 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 15 | 1 | 42 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **53** | **2** | **179** |
+| **Total** | **265** | **16** | **15** | **57** | **2** | **175** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -132,11 +132,11 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Cinétique chimique | `idea` | 30 | 07, 05 | — |  |
 | Catalyse | `idea` | 30 | — | — |  |
 | Équilibre chimique | `idea` | 30 | — | — |  |
-| Titrage acide-base | `idea` | 31 | 29, 05 | — |  |
-| Tampon chimique | `idea` | 31 | — | — |  |
+| Titrage acide-base | `absorbed` | 31 | 29, 05 | Protons et électrons qui passent | Étape 2 des fondations Acide-base, redox et électrochimie (titrage complet, demi-équivalence et équivalence). |
+| Tampon chimique | `absorbed` | 31 | — | Protons et électrons qui passent | Étape 2 (eau pure et tampon reçoivent la même goutte). |
 | Précipitation | `idea` | — | 29, 28 | — | Rattachement de module à revoir (29, 30 ou 31). |
-| Électrolyse | `idea` | 31 | 22 | — |  |
-| Pile galvanique | `idea` | 31 | 21, 22 | — |  |
+| Électrolyse | `absorbed` | 31 | 22 | Protons et électrons qui passent | Étape 4 (générateur au-delà de la f.é.m. : la pile Daniell se recharge). |
+| Pile galvanique | `absorbed` | 31 | 21, 22 | Protons et électrons qui passent | Étape 4 (pile Daniell, pont salin, décharge et loi de Faraday). |
 
 ### 5 · Mécanique classique et oscillateurs
 

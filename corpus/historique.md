@@ -20,6 +20,8 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-07 | **Fondations 24 · L'onde électromagnétique.** Un chapitre de quatre étapes ; moteur écrit et testé dans la session de construction (`prompts/moteurs/onde-electromagnetique.js`), page et explication déléguées à des sous-agents, selon `prompts/SESSION-FONDATION.md`. |
 | 2026-10-07 | **Fondations 26 · 27 · Atomes, noyaux et lumière (première moitié).** Chapitre 26 (quatre étapes) et explication des deux modules ; le chapitre 27 suivra. Moteur verrouillé `prompts/moteurs/atomes.js`, avec une table des nucléides recopiée de NUBASE2020 et AME2020. |
 
+| 2026-10-06 | **Fondations 31 · Acide-base, redox et électrochimie** (« Protons et électrons qui passent »). Un chapitre, quatre étapes numérotées (pH, tampons, redox, pile). Moteur écrit et testé avant la page, versionné dans `prompts/moteurs/acide-base-redox.js`. |
+
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 
 ## Anciens noms

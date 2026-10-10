@@ -1,7 +1,7 @@
 {
   "as_of": {
-    "commit": "fc0d833",
-    "date": "2026-10-07"
+    "commit": "e6064d5",
+    "date": "2026-10-10"
   },
   "models": [
     {
@@ -1003,6 +1003,45 @@
       "interactivity": "Concentrations et ion perméant, perméabilités et pompe, diamètre et stimulation du câble passif/actif/myélinisé, électrodes déplaçables, entrées synaptiques excitatrices et inhibitrices.",
       "first_built": "2026-10-07",
       "notes": "Complète le showcase Neurone par Nernst, GHK, charge séparée, câble et sommation. Couverture 33 partial : ni étude des portes Hodgkin-Huxley, ni chimie de libération/récepteurs, ni plasticité ; renvoi au showcase. Marche stochastique agrégée avec réservoirs bien mélangés et représentation amplifiée ; câble implicite et FitzHugh–Nagumo réduit ; myéline effective, vitesses du modèle ; soma intègre-et-tire à fuite.",
+      "collections": []
+    },
+    {
+      "id": "fondations-acide-base-redox",
+      "title": "Protons et électrons qui passent",
+      "path": "opus-sonnet/fondations-acide-base-redox/index.html",
+      "explanation": "opus-sonnet/fondations-acide-base-redox/explication.html",
+      "type": "foundation",
+      "status": "built",
+      "production": "fondations-acide-base-redox",
+      "modules": [
+        {
+          "id": 31,
+          "coverage": "full"
+        },
+        {
+          "id": 29,
+          "coverage": "supporting"
+        },
+        {
+          "id": 30,
+          "coverage": "supporting"
+        },
+        {
+          "id": 22,
+          "coverage": "supporting"
+        }
+      ],
+      "parts_kind": "step",
+      "parts": [
+        "1 Le pH, un compteur de protons",
+        "2 Acides faibles et tampons",
+        "3 Passer des électrons : le redox",
+        "4 La pile et l’électrolyse"
+      ],
+      "interactivity": "Un chapitre de quatre étapes ; règle des pH logarithmique avec repères du quotidien et loupe de 1 µm³ où l’on compte les H₃O⁺ et les OH⁻ (dilution par dix, eau pure, HCl 10⁻⁸) ; eau pure et tampon (acétique, ammonium, phosphate) qui reçoivent la même goutte, courbe en direct avec la bande pKa ± 1, titrage complet par NaOH ; lame de métal plongée dans une solution d’ions avec prédiction, dépôt qui grandit, solution qui pâlit, échelle des couples ; pile Daniell (ou Fe/Cu, Zn/Ag) avec pont salin qu’on retire, électrons dans le fil, ions dans le pont, enregistreur U(t) en temps accéléré, générateur qui inverse la réaction (électrolyse).",
+      "first_built": "2026-10-06",
+      "notes": "Construite le 2026-10-06 au standard d’une page à un module (un chapitre « Module 31 », quatre étapes). Moteur ELC écrit et testé avant la page, versionné dans prompts/moteurs/acide-base-redox.js (145 tests, aussi lancés sur la page) : pH par résolution exacte du bilan de charge, Nernst, décharge par Euler implicite, Faraday. Construite avant les modules 29 et 30 qu’elle suppose (renvois par numéro, sans lien). Se termine sur trois questions vers les modules 32-33, 34 (et la planche Respiration) et l’électrochimie réversible.",
+      "legacy_number": null,
       "collections": []
     }
   ],

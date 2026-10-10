@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**24 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 15 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**25 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 16 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -34,6 +34,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
+| [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | foundation | Acide-base, redox et électrochimie | — | 31 | 2026-10-06 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -289,6 +290,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Étapes** : Un gradient devient une tension · Le potentiel de repos · Le long de l’axone · Additionner pour décider.
 - **Interaction** : Concentrations, sélection K⁺/Na⁺/Cl⁻, perméabilités, arrêt de pompe ; câble passif, nu ou myélinisé, diamètre, stimulation, électrodes ; synapses, rafales et inhibition.
 - **Limites** : Électrodiffusion agrégée, réservoirs bien mélangés et charge visible amplifiée ; FHN réduit, myéline effective et vitesses du modèle ; soma à fuite, sans chimie synaptique. Hodgkin-Huxley et plasticité renvoyés au showcase 03. Moteur et tests conservés au scratchpad selon les règles communes ; résultat et vérifications cités dans la PR.
+
+### Protons et électrons qui passent
+
+- **Identifiant** : `fondations-acide-base-redox` · **chemin** : [`opus-sonnet/fondations-acide-base-redox/index.html`](../opus-sonnet/fondations-acide-base-redox/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-acide-base-redox/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Acide-base, redox et électrochimie
+- **Collection** : aucune
+- **Modules** : 31 Acide-base, redox et électrochimie (`full`), 29 Compter la matière (`supporting`), 30 Réactions chimiques (`supporting`), 22 Courant et circuits dynamiques (`supporting`)
+- **Étapes** : 1 Le pH, un compteur de protons · 2 Acides faibles et tampons · 3 Passer des électrons : le redox · 4 La pile et l’électrolyse
+- **Interaction** : Un chapitre de quatre étapes ; règle des pH logarithmique avec repères du quotidien et loupe de 1 µm³ où l’on compte les H₃O⁺ et les OH⁻ (dilution par dix, eau pure, HCl 10⁻⁸) ; eau pure et tampon (acétique, ammonium, phosphate) qui reçoivent la même goutte, courbe en direct avec la bande pKa ± 1, titrage complet par NaOH ; lame de métal plongée dans une solution d’ions avec prédiction, dépôt qui grandit, solution qui pâlit, échelle des couples ; pile Daniell (ou Fe/Cu, Zn/Ag) avec pont salin qu’on retire, électrons dans le fil, ions dans le pont, enregistreur U(t) en temps accéléré, générateur qui inverse la réaction (électrolyse).
+- **Notes** : Construite le 2026-10-06 au standard d’une page à un module (un chapitre « Module 31 », quatre étapes). Moteur ELC écrit et testé avant la page, versionné dans prompts/moteurs/acide-base-redox.js (145 tests, aussi lancés sur la page) : pH par résolution exacte du bilan de charge, Nernst, décharge par Euler implicite, Faraday. Construite avant les modules 29 et 30 qu’elle suppose (renvois par numéro, sans lien). Se termine sur trois questions vers les modules 32-33, 34 (et la planche Respiration) et l’électrochimie réversible. Limites : 25 °C, activités = concentrations, acides traités comme monoacides, cinétique du dépôt illustrative, résistance interne constante, surtensions ignorées.
 
 ## Pages d'appui
 
