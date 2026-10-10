@@ -22,6 +22,7 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-07 | **Fondations 26 · 27 · Atomes, noyaux et lumière (première moitié).** Chapitre 26 (quatre étapes) et explication des deux modules ; le chapitre 27 suivra. Moteur verrouillé `prompts/moteurs/atomes.js`, avec une table des nucléides recopiée de NUBASE2020 et AME2020. |
 
 | 2026-10-06 | **Fondations 31 · Acide-base, redox et électrochimie** (« Protons et électrons qui passent »). Un chapitre, quatre étapes numérotées (pH, tampons, redox, pile). Moteur écrit et testé avant la page, versionné dans `prompts/moteurs/acide-base-redox.js`. |
+| 2026-10-06 | **Fondations 25 · Optique.** Construite avant le module 24 ; premier découpage en lots parallèles contre un contrat d'interface (coquille et étapes 1-2, étapes 3-4 en fragment, explication). |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 

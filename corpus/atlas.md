@@ -8,10 +8,10 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 
 | | Entrées | `built` | `partial` | `absorbed` | `selected` | `idea` |
 |---|---|---|---|---|---|---|
-| Liste historique (18 groupes) | 192 | 6 | 11 | 45 | 0 | 130 |
+| Liste historique (18 groupes) | 192 | 6 | 11 | 50 | 0 | 125 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 16 | 1 | 41 |
 | Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **15** | **61** | **2** | **171** |
+| **Total** | **265** | **16** | **15** | **66** | **2** | **166** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -35,9 +35,9 @@ Cas particulier : la respiration cellulaire, la chaîne de transport d'électron
 
 ## Absorbée n'est pas effacée
 
-Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46) ; la sélection naturelle, la dérive génétique, l'effet fondateur et le goulot d'étranglement dans *Évolution et génétique des populations* (40) ; le champ magnétique, la force de Lorentz, l'induction, la génératrice et les courants de Foucault dans *Magnétisme et induction* (23) ; la cinétique chimique, la catalyse et l'équilibre chimique dans *Réactions : vitesse et équilibre* (30).
+Beaucoup d'idées de la liste historique sont devenues, pour l'essentiel, des morceaux de fondations : la diffusion, l'osmose et le brownien vivent dans *Matière, chaleur et transport* (modules 17·18·19) ; l'effet Doppler, les ondes sur une corde et les ondes stationnaires dans *Oscillations et ondes* (6·14·15) ; le circuit RC, le condensateur et le RLC dans *Courant et circuits* (22) ; le champ vectoriel, la divergence, le rotationnel et les lignes de niveau dans *Flux, gradients, champs et fluides* (16·20) ; les orbites et le moment cinétique dans *Rotation, gravitation et orbites* (12·13) ; la dilatation du temps, la contraction des longueurs, le train et les éclairs et l’énergie relativiste dans *Relativité restreinte* (46) ; la sélection naturelle, la dérive génétique, l'effet fondateur et le goulot d'étranglement dans *Évolution et génétique des populations* (40) ; le champ magnétique, la force de Lorentz, l'induction, la génératrice et les courants de Foucault dans *Magnétisme et induction* (23) ; la cinétique chimique, la catalyse et l'équilibre chimique dans *Réactions : vitesse et équilibre* (30) ; la réfraction, la réflexion totale, les lentilles, la dispersion dans un prisme et la polarisation dans *Optique : la lumière qui tourne* (25).
 
-Ces entrées restent dans l'Atlas avec le statut `absorbed` et un lien vers le modèle. Rien n'empêche qu'un de ces sujets reçoive un jour son propre toy. Une idée dont la fondation d'accueil n'est pas encore construite (la réfraction, module 25) reste `idea`.
+Ces entrées restent dans l'Atlas avec le statut `absorbed` et un lien vers le modèle. Rien n'empêche qu'un de ces sujets reçoive un jour son propre toy. Une idée dont la fondation d'accueil n'est pas encore construite (la coagulation sanguine, module 39) reste `idea`.
 
 À l'inverse, une idée historique peut rester longtemps une simple idée sans que ce soit un manque : « Collision de deux étoiles à neutrons » est dans l'Atlas avec le statut `idea`, aucun modèle, et la liste des modules qui la prépareront.
 
@@ -112,11 +112,11 @@ Le même paquet contenait un brief « 09 · Supernova par effondrement du cœur 
 | Interférences | `built` | 15 | 06 | Ondes et interférences | Aussi présentes dans les fondations Oscillations et ondes. |
 | Ondes stationnaires | `absorbed` | 15 | 06, 14 | Oscillations et ondes | Modes de la corde. |
 | Effet Doppler | `absorbed` | 15 | 06 | Oscillations et ondes |  |
-| Réfraction | `idea` | 25 | 15 | — |  |
-| Réflexion totale interne | `idea` | 25 | 15 | — |  |
-| Lentilles | `idea` | 25 | 15 | — |  |
-| Polarisation de la lumière | `idea` | 25 | 24 | — |  |
-| Dispersion dans un prisme | `idea` | 25 | 24 | — |  |
+| Réfraction | `absorbed` | 25 | 15 | Optique : la lumière qui tourne | Étape 1 des fondations Optique (laser, trois milieux, fronts d’onde qui pivotent). |
+| Réflexion totale interne | `absorbed` | 25 | 15 | Optique : la lumière qui tourne | Étape 1 des fondations Optique (sens inverse, angle critique, tige de verre courbée). |
+| Lentilles | `absorbed` | 25 | 15 | Optique : la lumière qui tourne | Étape 2 des fondations Optique (lentille mince, trois rayons, écran ; lentille épaisse et aberration sphérique). |
+| Polarisation de la lumière | `absorbed` | 25 | 24 | Optique : la lumière qui tourne | Étape 4 des fondations Optique (polariseurs, Malus, trois polariseurs, reflet à l’angle de Brewster). |
+| Dispersion dans un prisme | `absorbed` | 25 | 24 | Optique : la lumière qui tourne | Étape 3 des fondations Optique (prisme, deuxième prisme de Newton, goutte et arc-en-ciel). |
 
 ### 4 · Matière, thermique et chimie
 
