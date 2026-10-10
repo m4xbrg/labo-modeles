@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -149,85 +150,109 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 46</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Fondations de la relativité restreinte</h1>
+    <p class="lead">Une seule géométrie, celle de l’espace-temps, rend compte de la dilatation, de la contraction, de la simultanéité relative et de la vitesse limite.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>du quai à quelques années-lumière</dd>
+    <dt>Temps</dt><dd>~1 µs à quelques années</dd>
+    <dt>Modèle</dt><dd>espace-temps plat, c = 1, une dimension d’espace</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes : le module 46">
+  <div class="chap"><p class="chap-t"><b>46</b>Fondations de la relativité restreinte</p><div class="segs">
+    <button class="seg" data-a="0" data-b="1" title="46.1 — Référentiels et lumière (deux référentiels ou horloge lumineuse)"><b>46.1</b><span>Lumière</span></button>
+    <button class="seg" data-a="2" data-b="3" title="46.2 — Simultanéité et espace-temps (train et éclairs ou diagramme)"><b>46.2</b><span>Simultanéité</span></button>
+    <button class="seg" data-a="4" data-b="5" title="46.3 — Durées et longueurs (dilatation et contraction ou temps propre)"><b>46.3</b><span>Durées</span></button>
+    <button class="seg" data-a="6" data-b="7" title="46.4 — Vitesse limite et énergie (addition des vitesses ou énergie)"><b>46.4</b><span>Limite</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer de scène."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change une valeur, déplace un événement ou une pointe de trajet."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 46."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Planche de relativité restreinte : quai et train, horloge lumineuse, éclairs et simultanéité, diagrammes d’espace-temps, addition des vitesses et énergie, dessinés en coordonnées mesurées."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 46</p>
-      <h1>Relativité <em>restreinte</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VIII</p>
+      <p class="eyebrow" id="eyebrow">Module <b>46</b> · étape 1 sur 4</p>
       <h2 id="stepTitle">Deux référentiels</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
     </section>
 
-    <section class="extra" id="extra" hidden></section>
+    <section class="extra couche-lire" id="extra" hidden></section>
 
-    <section id="scopeSec">
+    <section id="scopeSec" class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
-      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : courbe de l’acte en cours."></canvas></div>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : courbe de la scène en cours."></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section class="bridge" id="bridge" hidden>
+    <section class="bridge couche-lire" id="bridge" hidden>
       <b>Jusqu’ici : des référentiels inertiels, un espace-temps plat.</b><br>
       Que se passe-t-il si l’observateur accélère ? Si la gravitation s’en mêle ? Si l’espace-temps lui-même se courbe ?<br>
       &rarr; Fondations 47 · Relativité générale (à venir).
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>8</kbd> aller à l’acte</li>
-        <li><kbd>R</kbd> réinitialiser · <kbd>L</kbd> lampe / lancer (actes I, VII) · <kbd>F</kbd> changer de référentiel (I, II, III, IV, VI)</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> scène · <kbd>1</kbd>–<kbd>8</kbd> aller à la scène</li>
+        <li><kbd>R</kbd> réinitialiser · <kbd>L</kbd> lampe / lancer (scènes 1 et 7) · <kbd>F</kbd> changer de référentiel (scènes 1 à 4 et 6) · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m46"><span>Théorie du module <b id="numTheorie">46</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
   <div class="controls" role="toolbar" aria-label="Contrôles">
     <div class="grp">
-      <button class="btn ico" id="bPrev" title="Acte précédent (←)" aria-label="Acte précédent"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPrev" title="Scène précédente (←)" aria-label="Scène précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
       <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
-      <button class="btn ico" id="bNext" title="Acte suivant (→)" aria-label="Acte suivant"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
-      <button class="btn" id="bReset" title="Réinitialiser l’acte (R)">Réinitialiser</button>
-    </div>
-
-    <div class="stepper" id="stepper" role="group" aria-label="Les huit actes">
-      <div class="sg" data-g="R"><span class="sgl"><span class="long">Paillasse R · référentiels et lumière</span><span class="short">R</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Acte I — Deux référentiels"><b>I</b><span>Référentiels</span></button>
-        <button class="seg" data-a="1" title="Acte II — Horloge lumineuse"><b>II</b><span>Horloge</span></button>
-        <button class="seg" data-a="2" title="Acte III — Train et éclairs"><b>III</b><span>Éclairs</span></button>
-      </div></div>
-      <div class="sg" data-g="E"><span class="sgl"><span class="long">Paillasse E · espace-temps</span><span class="short">E</span></span><div class="sgs">
-        <button class="seg" data-a="3" title="Acte IV — Diagramme d’espace-temps"><b>IV</b><span>Diagramme</span></button>
-        <button class="seg" data-a="4" title="Acte V — Dilatation et contraction"><b>V</b><span>Dilat. et contr.</span></button>
-        <button class="seg" data-a="5" title="Acte VI — Temps propre"><b>VI</b><span>Temps propre</span></button>
-      </div></div>
-      <div class="sg" data-g="D"><span class="sgl"><span class="long">Paillasse D · limite et énergie</span><span class="short">D</span></span><div class="sgs">
-        <button class="seg" data-a="6" title="Acte VII — Addition des vitesses"><b>VII</b><span>Vitesses</span></button>
-        <button class="seg" data-a="7" title="Acte VIII — Énergie et quantité de mouvement"><b>VIII</b><span>Énergie</span></button>
-      </div></div>
+      <button class="btn ico" id="bNext" title="Scène suivante (→)" aria-label="Scène suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser la scène (R)">Réinitialiser</button>
     </div>
 
     <div class="tools" id="tools">
+      <div class="grp" data-acts="0 1"><span class="gl">Scène</span><button class="btn" id="bSc0" aria-pressed="true">Deux référentiels</button><button class="btn" id="bSc1" aria-pressed="false">Horloge lumineuse</button></div>
+      <div class="grp" data-acts="2 3"><span class="gl">Scène</span><button class="btn" id="bSc2" aria-pressed="true">Train et éclairs</button><button class="btn" id="bSc3" aria-pressed="false">Diagramme</button></div>
+      <div class="grp" data-acts="4 5"><span class="gl">Scène</span><button class="btn" id="bSc4" aria-pressed="true">Dilatation et contraction</button><button class="btn" id="bSc5" aria-pressed="false">Temps propre</button></div>
+      <div class="grp" data-acts="6 7"><span class="gl">Scène</span><button class="btn" id="bSc6" aria-pressed="true">Addition des vitesses</button><button class="btn" id="bSc7" aria-pressed="false">Énergie</button></div>
       <!-- I -->
       <div class="grp" data-acts="0"><span class="gl">Référentiel</span><button class="btn" id="bFrQ" aria-pressed="true">quai</button><button class="btn" id="bFrT" aria-pressed="false">train</button></div>
       <div class="grp" data-acts="0"><span class="gl">b = v/c</span><input type="range" id="rB1" min="0" max="0.5" step="0.01" value="0.3" aria-label="Vitesse du train en fraction de c"><span class="rv" id="vB1"></span></div>
@@ -246,7 +271,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-acts="3"><span class="gl">Couches</span><button class="btn sm" data-ly="1">Événements</button><button class="btn sm" data-ly="2">Lignes d’univers</button><button class="btn sm" data-ly="3">Cône de lumière</button><button class="btn sm" data-ly="4">Axes de S′</button><button class="btn sm" data-ly="5">Invariance</button></div>
       <div class="grp" data-acts="3"><span class="gl">b</span><input type="range" id="rB4" min="-0.9" max="0.9" step="0.05" value="0.6" aria-label="Vitesse de S′ en fraction de c"><span class="rv" id="vB4"></span></div>
       <div class="grp" data-acts="3"><button class="btn go" id="bBoost">Passer dans S′</button><button class="btn" id="bUnboost">Revenir dans S</button></div>
-      <div class="grp" data-acts="3"><button class="btn sm" id="bPreA">Éclairs de l’acte III</button><button class="btn sm" id="bPreC">Cause et effet</button><button class="btn sm" id="bClr4">Effacer</button></div>
+      <div class="grp" data-acts="3"><button class="btn sm" id="bPreA">Éclairs du train</button><button class="btn sm" id="bPreC">Cause et effet</button><button class="btn sm" id="bClr4">Effacer</button></div>
       <!-- V -->
       <div class="grp" data-acts="4"><button class="btn" id="bMh" aria-pressed="true">Horloge</button><button class="btn" id="bMr" aria-pressed="false">Règle</button></div>
       <div class="grp" data-acts="4"><span class="gl">b</span><input type="range" id="rB5" min="0" max="0.95" step="0.01" value="0.6" aria-label="Vitesse de S′ en fraction de c"><span class="rv" id="vB5"></span></div>
@@ -814,7 +839,7 @@ function extra2() {
 }
 function status2() {
   if (prm.oth) return 'Si elle prenait du retard sur l’horloge lumineuse, le passager saurait qu’il bouge : contraire au principe de relativité. Ce n’est pas l’horloge qui est ralentie : c’est le temps entre deux événements qui dépend du référentiel.';
-  if (prm.rec) return 'Chacun mesure l’horloge de l’autre plus lente. Pas de contradiction : comparer deux horloges éloignées demande de décider ce qui est simultané. Voir l’acte III.';
+  if (prm.rec) return 'Chacun mesure l’horloge de l’autre plus lente. Pas de contradiction : comparer deux horloges éloignées demande de décider ce qui est simultané. Voir la scène « Train et éclairs ».';
   if (prm.b2 < 0.005) return 'À b = 0, les deux volets sont identiques : le photon fait 2L par tic partout.';
   return 'Même vitesse c, trajet plus long : le tic dure γ fois plus longtemps. Δt = γΔτ.';
 }
@@ -915,7 +940,7 @@ function draw3() {
   c.font = mono(9.5); c.fillStyle = C.texte; c.textAlign = 'center'; c.textBaseline = 'bottom'; c.fillText('A', ox - lt.Lq / 2 * sc, oy - 5); c.fillText('B', ox + lt.Lq / 2 * sc, oy - 5);
   c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = C.texte; c.fillText('horizontale : quai', bx + 6, by + bh - 13); c.fillStyle = C.mob; c.fillText('inclinée : train', bx + 6, by + bh - 3);
   c.restore();
-  zone(bx, by, bx + bw, by + bh, 'ins', 'Aperçu : diagramme d’espace-temps', 'Axes x et ct. A et B sont sur la ligne de simultanéité du quai (horizontale). La ligne de simultanéité du train est inclinée de pente b : elle rencontre B avant A. Acte IV : la carte complète.');
+  zone(bx, by, bx + bw, by + bh, 'ins', 'Aperçu : diagramme d’espace-temps', 'Axes x et ct. A et B sont sur la ligne de simultanéité du quai (horizontale). La ligne de simultanéité du train est inclinée de pente b : elle rencontre B avant A. Scène « Diagramme d’espace-temps » : la carte complète.');
   c.restore();
 }
 function recon3() {
@@ -1124,7 +1149,7 @@ function pointer5(type, x, y) {
 }
 function status5() {
   const G = geo5();
-  if (prm.mode === 'regle') return 'Mesurer une longueur, c’est décider quels événements sont simultanés. S et S′ coupent le même ruban d’espace-temps selon des lignes différentes : c’est la même chose que l’acte III.';
+  if (prm.mode === 'regle') return 'Mesurer une longueur, c’est décider quels événements sont simultanés. S et S′ coupent le même ruban d’espace-temps selon des lignes différentes : c’est la même chose que la scène « Train et éclairs ».';
   return G.mN + ' mesure l’horloge de ' + G.oN + ' : chaque année de temps propre dure γ = ' + fmt(G.g, 2) + ' ans pour ' + G.mN + '. Inverse les rôles : ' + G.oN + ' mesure l’horloge de ' + G.mN + ' plus lente, avec le même γ.';
 }
 
@@ -1453,7 +1478,7 @@ const MEAS = [
   [['v/c', [['b', '']]], ['γ', [['g', '']]], ['m', [['m', '']]], ['E₀ = mc²', [['E0', 'mc²']]], ['K = (γ − 1)mc²', [['K', 'mc²']]], ['K newtonienne ½mv²', [['Kn', 'mc²']]], ['E = γmc²', [['E', 'mc²']]], ['p', [['p', 'mc']]], ['pc', [['pc', 'mc²']]], ['E² − (pc)²', [['chk', '(mc²)²']], 1], ['E en GeV (proton)', [['Eg', 'GeV']]]]
 ];
 const MNOTE = [
-  'Train fictif : aucun train réel n’approche c ; à 300 km/h l’effet serait de l’ordre de 10⁻¹³. On fait semblant que Galilée a raison pour la balle ; on verra à l’acte VII. Réalité : Michelson-Morley (1887), mesures modernes à 10⁻¹⁷ près ; les équations de Maxwell ne contiennent aucune vitesse de référence.',
+  'Train fictif : aucun train réel n’approche c ; à 300 km/h l’effet serait de l’ordre de 10⁻¹³. On fait semblant que Galilée a raison pour la balle ; on verra à la scène « Addition des vitesses ». Réalité : Michelson-Morley (1887), mesures modernes à 10⁻¹⁷ près ; les équations de Maxwell ne contiennent aucune vitesse de référence.',
   'Une seule dimension d’espace : la hauteur L de l’horloge est la même pour tous (les directions perpendiculaires ne sont pas contractées). Horloge fictive ; échelle de temps choisie pour être visible : 1 s d’écran = 0,8 µs.',
   'Train fictif jusqu’à 0,9 c. Les scènes montrent les coordonnées mesurées dans un référentiel, pas ce qu’une caméra enregistrerait. Les éclairs sont séparés par plus de distance que la lumière ne peut en couvrir dans leur écart de temps : aucun ne peut causer l’autre. C’est pourquoi leur ordre peut dépendre du référentiel (acte IV).',
   'Une dimension d’espace ; unités : années et années-lumière. Les événements sont des points idéaux ; les axes ct′ et x′ sont tracés dans le dessin de S.',
@@ -1554,8 +1579,9 @@ function enterAct(n, restart) {
 }
 function updateUI(n) {
   uiAct = n;
-  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur VIII`;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n || +s.dataset.b === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  for (let k = 0; k < NA; k++) $('#bSc' + k).setAttribute('aria-pressed', k === n ? 'true' : 'false');
+  $('#eyebrow').innerHTML = `Module <b>46</b> · étape ${(n >> 1) + 1} sur 4`;
   $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
   for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(n)); });
@@ -1580,7 +1606,8 @@ $('#bPlay').addEventListener('click', () => setPlay(!playing));
 $('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
 $('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
 $('#bReset').addEventListener('click', e => { goAct(act, true); e.currentTarget.blur(); });
-document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAct(+s.dataset.a); e.currentTarget.blur(); }));
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { const a = +s.dataset.a, b = +s.dataset.b; goAct(act === a || act === b ? act : a); e.currentTarget.blur(); }));
+for (let k = 0; k < NA; k++) $('#bSc' + k).addEventListener('click', e => { if (act !== k) goAct(k); e.currentTarget.blur(); });
 const onB = (id, fn) => $('#' + id).addEventListener('click', e => { fn(e); e.currentTarget.blur(); });
 const bindRange = (id, fn) => $('#' + id).addEventListener('input', e => { fn(+e.target.value); syncTools(); });
 bindRange('rB1', v => { prm.b1 = v; k1.ball = null; k1.marks = []; }); bindRange('rU1', v => { prm.u1 = v; });
@@ -1732,5 +1759,6 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

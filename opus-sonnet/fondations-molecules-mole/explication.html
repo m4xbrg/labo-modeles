@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre les molécules et la mole — LABO</title>
+<meta name="description" content="Théorie des modules 28 et 29 (liaisons et structure moléculaire, compter la matière) et ce que montre la planche Molécules et mole.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9ad0f5;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html{background:var(--fond)}
+body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
+.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
+.top a:hover{color:var(--texte)}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
+h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
+h1 em{color:var(--accent)}
+.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
+h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
+h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
+p{margin:0 0 16px}
+ul{padding-left:20px;margin:0 0 16px}
+li{margin-bottom:8px}
+code,.m{font-family:var(--mono);font-size:.9em}
+.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
+.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
+dl{margin:0 0 16px;border-top:1px solid var(--trait)}
+dt{font:500 15px var(--sans);padding-top:12px}
+dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
+.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
+.chiffres b{font:500 17px var(--mono);color:var(--energie)}
+details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
+summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
+details[open] summary::before{content:"\2713"}
+details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.cta:hover{background:var(--accent);color:var(--fond)}
+@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
+  <p class="serie">LABO · Fondations 28 · 29</p>
+  <h1>Comprendre les molécules et la <em>mole</em></h1>
+  <p class="lede">Cette planche part d’un creux d’énergie entre deux atomes et arrive à une balance de cuisine. Entre les deux, tu vois pourquoi les atomes se lient, quelle forme prend une molécule, pourquoi certaines molécules se collent entre elles, puis comment on compte, en les pesant, des particules qu’on ne verra jamais une à une.</p>
+
+  <h2><span>1</span>Ce que tu vois</h2>
+  <dl>
+    <dt>Les atomes et leurs nuages</dt>
+    <dd>Chaque atome est un disque dont le rayon et la couleur sont conventionnels (code sobre : H clair, C gris, N bleuté, O rouge-orangé, Cl vert, Na violet). Autour, un nuage <span class="neg">bleu</span> translucide figure les électrons : quand deux atomes se rapprochent, les nuages se recouvrent et une densité commune apparaît entre les noyaux. Dans une vraie molécule, la densité électronique n’a pas de bord net ; le nuage est un schéma.</dd>
+    <dt>La courbe d’énergie et le point mobile</dt>
+    <dd>Sous les atomes, la courbe donne l’énergie potentielle du système en fonction de la distance entre les noyaux. Le point suit la distance courante. Le fond du creux, en <span class="ener">jaune</span>, est la longueur de liaison. Quand tu lâches les atomes, le point oscille autour du fond : c’est la vibration de la liaison, ralentie environ 10<sup>14</sup> fois pour que l’œil la suive (dans H₂, un aller-retour dure environ 8 femtosecondes).</dd>
+    <dt>Les flèches de force</dt>
+    <dd>Sur chaque atome, une flèche montre la force qu’exerce l’autre : vers l’autre atome au-delà du fond du creux (attraction), à l’opposé en deçà (répulsion des noyaux). Elle est nulle au fond. C’est la pente de la courbe, changée de signe.</dd>
+    <dt>La règle Δχ</dt>
+    <dd>Une règle graduée de 0 à 3,3 porte trois zones : non polaire, polaire, ionique. Un curseur s’y place tout seul selon la paire d’atomes choisie. Les frontières sont des conventions, pas des murs.</dd>
+    <dt><span class="pos">δ⁺</span> et <span class="neg">δ⁻</span></dt>
+    <dd>De petits signes marquent le côté de la liaison qui porte un peu moins (<span class="pos">δ⁺</span>) et un peu plus (<span class="neg">δ⁻</span>) d’électrons. Dans Na–Cl, le nuage passe entièrement d’un côté : deux ions.</dd>
+    <dt>Les ballons des doublets libres</dt>
+    <dd>Les paires d’électrons qui ne forment pas de liaison sont dessinées comme des ballons gris translucides. Ils occupent de la place autour de l’atome central, comme les liaisons, et se repoussent avec elles.</dd>
+    <dt><span class="acc">Les flèches de moment dipolaire</span></dt>
+    <dd>Une flèche par liaison polaire et une flèche pour la molécule entière. Elles vont de <span class="pos">δ⁺</span> vers <span class="neg">δ⁻</span> (convention des chimistes). Quand les flèches se compensent, comme dans CO₂, la molécule n’a pas de moment total.</dd>
+    <dt>Les trois boîtes</dt>
+    <dd>Une quarantaine de molécules en deux dimensions dans chacune : « type méthane », « type HCl », « type eau ». Les pointillés <span class="acc">bleu ciel</span> sont les liaisons hydrogène de la boîte d’eau. Les compteurs donnent la fraction de molécules en amas, signe d’un liquide.</dd>
+    <dt>L’échelle des ébullitions</dt>
+    <dd>Les températures d’ébullition réelles de CH₄ (−161,5 °C), H₂S (−60 °C), NH₃ (−33 °C), HF (19,5 °C) et H₂O (100 °C), pour comparer ce que montrent les boîtes à ce qu’on mesure.</dd>
+    <dt>La cuillère et le zoom</dt>
+    <dd>Une cuillère d’eau (18 mL, une mole), puis un zoom par puissances de 10 jusqu’aux molécules. Le compteur défile en notation scientifique.</dd>
+    <dt>La balance</dt>
+    <dd>On y pose une mole d’eau, de sel, de sucre, de fer ou d’hélium : même nombre de particules, masses très différentes. Les barres <span class="acc">bleu ciel</span> donnent les quantités de matière.</dd>
+    <dt>Le bécher et la loupe</dt>
+    <dd>Un bécher gradué où l’on dissout du soluté ; la loupe montre un petit volume dont la densité d’ions suit la concentration. Quand on dilue, la densité baisse, mais le compteur du nombre total d’ions ne bouge pas.</dd>
+    <dt>L’établi et le réactif limitant</dt>
+    <dd>Deux réservoirs de molécules dessinées se combinent sur l’établi selon l’équation équilibrée. Le réactif épuisé en premier arrête tout ; ce qui reste de l’autre demeure. La balance du dessus affiche la même masse avant et après.</dd>
+  </dl>
+
+  <h2><span>2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m28"><b>28</b>Liaisons et structure moléculaire</a></li>
+    <li><a href="#m29"><b>29</b>Compter la matière</a></li>
+  </ul>
+
+  <!-- ===================== Module 28 ===================== -->
+  <section class="module" id="m28">
+    <header>
+      <p class="num">Module 28</p>
+      <h3>Liaisons et structure moléculaire</h3>
+      <p class="etapes">Sur la planche : étapes 1 Un creux d’énergie · 2 Partager ou céder · 3 La forme des molécules · 4 Entre les molécules</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Approche deux atomes d’hydrogène l’un de l’autre. De loin, ils ne s’influencent presque pas. À distance moyenne, l’électron de chacun est aussi attiré par l’autre noyau : l’énergie est plus basse que pour les atomes séparés. Trop près, les deux noyaux positifs se repoussent et l’énergie remonte à toute vitesse. Entre les deux, il y a un creux. Voilà une liaison : ni corde ni colle, un creux d’énergie. Sa position est la longueur de liaison, sa profondeur le coût de la séparation.</p>
+    <p>Entre atomes différents, les électrons de liaison ne sont pas toujours partagés à parts égales : on passe de façon continue du partage égal au transfert presque complet, et l’électronégativité dit où l’on se trouve. Les paires d’électrons autour d’un atome se repoussent : la molécule prend une forme, qui décide si elle est polaire. Entre molécules, de faibles attractions décident si une substance est gaz ou liquide.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Liaison covalente</dt><dd>Électrons partagés : une densité d’électrons s’accumule entre les noyaux.</dd></div>
+      <div><dt>Liaison ionique</dt><dd>Cas extrême : les électrons sont presque tous du côté d’un atome ; deux ions opposés s’attirent (Na⁺ et Cl⁻).</dd></div>
+      <div><dt>Distance \(r\)<span class="u">pm</span></dt><dd>Distance entre les noyaux. 1 pm = 10⁻¹² m.</dd></div>
+      <div><dt>Longueur de liaison \(r_e\)<span class="u">pm</span></dt><dd>Distance au fond du creux : 74 pm pour H–H, 127 pour H–Cl.</dd></div>
+      <div><dt>Énergie potentielle \(E(r)\)<span class="u">eV</span></dt><dd>Énergie du système à la distance \(r\), nulle quand les atomes sont loin.</dd></div>
+      <div><dt>Force \(F\)<span class="u">eV/pm</span></dt><dd>Force d’un atome sur l’autre : positive, elle les éloigne ; négative, elle les rapproche.</dd></div>
+      <div><dt>Profondeur \(D_e\) et paramètre \(a\)<span class="u">eV ; pm⁻¹</span></dt><dd>\(D_e\) est la profondeur du creux (4,75 eV pour H₂) ; \(a\) règle sa largeur (0,0194 pm⁻¹).</dd></div>
+      <div><dt>Énergie de liaison<span class="u">kJ/mol ou eV par liaison</span></dt><dd>Énergie pour séparer les atomes liés : 436 kJ/mol pour H–H. 1 eV par liaison vaut 96,5 kJ/mol.</dd></div>
+      <div><dt>Électronégativité \(\chi\)</dt><dd>Sans unité. Échelle de Pauling (0,82 pour K, 3,98 pour F) : mesure comment un atome lié attire les électrons de liaison. H 2,20 ; O 3,44.</dd></div>
+      <div><dt>Charge partielle \(\delta\)<span class="u">e</span></dt><dd>Fraction de la charge élémentaire \(e = 1{,}602 \times 10^{-19}\) C portée par un atome lié : \(\delta^-\) sur le plus électronégatif, \(\delta^+\) sur l’autre.</dd></div>
+      <div><dt>Moment dipolaire \(\mu\)<span class="u">D</span></dt><dd>Séparation des charges : \(\vec\mu = q\,\vec d\), avec \(q = \delta e\) et \(\vec d\) le vecteur de \(\delta^+\) vers \(\delta^-\) (convention des chimistes ; les physiciens font l’inverse). 1 D = 3,336 × 10⁻³⁰ C·m.</dd></div>
+      <div><dt>Doublet libre</dt><dd>Paire d’électrons externes sans liaison. L’oxygène de l’eau en porte deux.</dd></div>
+      <div><dt>Domaine d’électrons</dt><dd>Une liaison (simple, double ou triple) ou un doublet libre autour d’un atome.</dd></div>
+      <div><dt>Liaison hydrogène</dt><dd>Attraction entre un H lié à O, N ou F et un doublet libre d’une autre molécule : ≈ 20 kJ/mol.</dd></div>
+      <div><dt>Forces intermoléculaires (van der Waals)</dt><dd>Attractions faibles entre molécules neutres : 10 à 100 fois moins qu’une liaison.</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ \Delta\chi = |\chi_A - \chi_B| \]
+      <p>Plus l’écart est grand, plus les électrons sont déplacés. Seuils conventionnels de la planche, 0,4 et 1,8 : C–H (0,35) non polaire, O–H (1,24) polaire, Na–Cl (2,23) ionique.</p></div>
+    <div class="relation">\[ \vec\mu = q\,\vec d, \qquad \vec\mu_{\text{tot}} = \sum_i \vec\mu_i \]
+      <p>Chaque liaison polaire a son moment ; celui de la molécule est la somme des vecteurs, qui peut être nulle : tout dépend de la forme.</p></div>
+    <div class="relation">\[ F = -\frac{\dd E}{\dd r}, \qquad E(r) = D_e\,\bigl(1 - \mathrm e^{-a(r - r_e)}\bigr)^2 - D_e \]
+      <p>La force est la pente du creux, changée de signe : nulle au fond, répulsive en deçà, attractive au-delà. La forme de Morse est une courbe ajustée, pas une loi.</p></div>
+    <div class="relation">\[ \Delta E_{\text{réaction}} \approx \sum E_{\text{liaisons rompues}} - \sum E_{\text{liaisons formées}} \]
+      <p>Rompre coûte de l’énergie, former en libère. Seulement introduit ici (module 30).</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Casser une mole de liaisons H–H, puis calculer le moment de l’eau.</p>
+      <ol>
+        <li>Énergie par liaison : \(436\,000\ \text{J/mol} \,/\, 6{,}022 \times 10^{23}\ \text{mol}^{-1} \approx 7{,}24 \times 10^{-19}\) J.</li>
+        <li>En électronvolts : \(7{,}24 \times 10^{-19} / 1{,}602 \times 10^{-19} \approx 4{,}52\) eV.</li>
+        <li>Un photon de cette énergie a \(\lambda = hc/E \approx 1240\ \text{eV·nm} / 4{,}52\ \text{eV} \approx 274\) nm : de l’UV-C. La lumière visible (1,8 à 3,1 eV) n’y suffit pas.</li>
+        <li>La profondeur \(D_e = 4{,}75\) eV dépasse 4,52 eV. Même au zéro absolu, la liaison vibre et ne part pas du fond : son énergie de vibration du point zéro, ≈ 0,27 eV, ramène l’énergie à fournir à 4,48 eV. La valeur tabulée à 298 K, 4,52 eV, y ajoute un peu d’agitation thermique.</li>
+        <li>Moment de l’eau : deux moments O–H de 1,51 D, de H vers O, à 104,5° l’un de l’autre. Leur somme, le long de la bissectrice, vaut \(2 \times 1{,}51 \times \cos 52{,}25° \approx 3{,}02 \times 0{,}612 \approx 1{,}85\) D : la valeur mesurée.</li>
+        <li>CO₂ : deux moments C=O de 2,3 D en sens opposés : \(2{,}3 - 2{,}3 = 0\).</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>« Une liaison stocke de l’énergie qu’on libère en la cassant. » Non : casser une liaison coûte toujours. Une réaction en libère quand les liaisons formées sont plus profondes que celles rompues.</li>
+      <li>« Liaisons polaires, donc molécule polaire. » Dans CO₂ et BF₃, les moments se compensent : la forme compte autant que les liaisons.</li>
+      <li>« La liaison hydrogène est une liaison covalente avec un H. » C’est une attraction entre deux molécules, d’environ 20 kJ/mol, contre environ 460 kJ/mol pour O–H à l’intérieur de la molécule.</li>
+      <li>« Bouillir casse les molécules d’eau. » Vaporiser une mole d’eau coûte 40,7 kJ ; casser les deux liaisons O–H de chaque molécule en coûterait plus de 900. La vapeur est faite de molécules H₂O intactes.</li>
+      <li>Dessiner les molécules à plat. CH₄ n’est pas une croix à 90° : ses liaisons visent les sommets d’un tétraèdre, à 109,5°.</li>
+      <li>« Les seuils de Δχ sont des frontières naturelles. » HF (Δχ = 1,78) tombe de justesse sous 1,8, NaCl (2,23) au-dessus : ce sont des conventions de classement.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>30</b><span>L’énergie d’une réaction vient du bilan des liaisons rompues et formées.</span></li>
+      <li><b>31</b><span>Les ions en solution : l’eau, polaire, entoure et sépare les ions du sel.</span></li>
+      <li><b>32</b><span>Molécules polaires et apolaires : ce qui se mêle à l’eau ou non fait tenir une membrane. <a href="../fondations-cellule-membrane/index.html">Planche Cellule, membrane et transport</a>.</span></li>
+      <li><b>34</b><span>L’ATP et ses liaisons dites « riches en énergie » : le premier piège ci-dessus s’y applique.</span></li>
+      <li><b>35</b><span>Des liaisons hydrogène relient les deux brins de l’ADN. <a href="../08-replication-adn/index.html">Planche Réplication de l’ADN</a>.</span></li>
+      <li><b>14</b><span>Près du fond, le creux est une parabole : la vibration d’une liaison est un oscillateur (7,6 fs pour H₂). <a href="../fondations-oscillations-ondes/index.html">Planche Oscillations et ondes</a>.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>NH₃ et BF₃ ont trois liaisons polaires chacune. Pourquoi NH₃ est-elle polaire et BF₃ non ?</summary>
+      <p>BF₃ est plane, avec trois liaisons à 120° : trois vecteurs égaux à 120° se somment à zéro. NH₃ a un doublet libre sur l’azote, donc une forme pyramidale (106,7°) : les moments ne se compensent pas (1,47 D mesurés).</p></details>
+    <details><summary>HCl a un moment de 1,08 D et une longueur de liaison de 127 pm. Quelle charge partielle cela représente-t-il ?</summary>
+      <p>\(\mu = \delta\,e\,d\), donc \(\delta = \mu / (e\,d) = (1{,}08 \times 3{,}336 \times 10^{-30}) / (1{,}602 \times 10^{-19} \times 127 \times 10^{-12}) \approx 0{,}18\). Chaque extrémité porte environ 0,18 e. La formule indicative de la planche (Δχ = 0,96) donne 0,21 : même ordre de grandeur, loin d’une charge entière.</p></details>
+    <details><summary>H₂S est plus lourde que H₂O (34 contre 18 g/mol), pourtant l’eau bout à 100 °C et H₂S à −60 °C. Pourquoi ?</summary>
+      <p>Les liaisons hydrogène : chaque molécule d’eau en forme plusieurs (deux H, deux doublets libres), il faut donc chauffer davantage pour les séparer. Dans H₂S, la liaison S–H est à peine polaire (Δχ = 0,38) : pas de liaison hydrogène notable.</p></details>
+  </section>
+
+  <!-- ===================== Module 29 ===================== -->
+  <section class="module" id="m29">
+    <header>
+      <p class="num">Module 29</p>
+      <h3>Compter la matière</h3>
+      <p class="etapes">Sur la planche : étapes 5 La mole · 6 Concentration et dilution · 7 Le réactif limitant</p>
+    </header>
+
+    <h4 data-n="1">Intuition</h4>
+    <p>Personne ne compte des molécules : une seule est bien trop légère pour être pesée (une molécule d’eau, environ 3 × 10⁻²⁶ kg). On les pèse en paquets. La mole est un paquet assez gros pour se poser sur une balance : 6,022 × 10²³ particules. Ce nombre est choisi pour que la masse d’une mole en grammes ait la même valeur que la masse d’une particule en unités de masse atomique. Un atome de carbone 12 pèse 12 u ; une mole de ces atomes, 12 g (à un milliardième près depuis la redéfinition de 2019).</p>
+    <p>Une mole d’eau, de sel ou de fer contient donc le même nombre de particules, mais pas la même masse, car les particules n’ont pas la même masse. La mole fait le pont entre ce qu’on pèse et ce qu’on ne peut pas voir. Pour une solution, on compte les moles par litre : c’est la concentration, et diluer revient à ajouter du solvant sans retirer de soluté. Dans une réaction, les particules se combinent dans les proportions de l’équation équilibrée ; le réactif qui manque en premier arrête tout, et la masse totale ne change pas : les atomes sont réarrangés, ni créés ni détruits.</p>
+
+    <h4 data-n="2">Définitions</h4>
+    <dl class="defs">
+      <div><dt>Quantité de matière \(n\)<span class="u">mol</span></dt><dd>Nombre d’entités (atomes, molécules, ions) exprimé en paquets de \(N_A\).</dd></div>
+      <div><dt>Mole</dt><dd>Quantité de matière qui contient exactement 6,022&nbsp;140&nbsp;76 × 10²³ entités élémentaires (définition du SI depuis 2019).</dd></div>
+      <div><dt>Constante d’Avogadro \(N_A\)<span class="u">mol⁻¹</span></dt><dd>Le nombre d’entités par mole : \(N_A = 6{,}022\,140\,76 \times 10^{23}\ \text{mol}^{-1}\), valeur exacte par définition.</dd></div>
+      <div><dt>Nombre d’entités \(N\)</dt><dd>Nombre de particules dans un échantillon, sans unité.</dd></div>
+      <div><dt>Masse \(m\)<span class="u">g</span></dt><dd>Ce que lit la balance.</dd></div>
+      <div><dt>Masse molaire \(M\)<span class="u">g/mol</span></dt><dd>Masse d’une mole d’entités : 18,015 g/mol pour H₂O, 44,009 pour CO₂, 58,44 pour NaCl. On additionne les masses atomiques de la formule.</dd></div>
+      <div><dt>Unité de masse atomique u</dt><dd>Un douzième de la masse d’un atome de carbone 12, soit environ 1,6605 × 10⁻²⁷ kg. La masse d’une entité en u a la même valeur que \(M\) en g/mol.</dd></div>
+      <div><dt>Volume \(V\)<span class="u">L</span></dt><dd>Volume de la solution entière, pas celui du solvant seul.</dd></div>
+      <div><dt>Concentration \(C\)<span class="u">mol/L</span></dt><dd>Quantité de soluté par litre de solution. La concentration massique, en g/L, vaut \(C\) multipliée par \(M\).</dd></div>
+      <div><dt>Coefficient stœchiométrique \(\nu\)</dt><dd>Nombre qui précède chaque espèce dans l’équation équilibrée. Dans l’écriture de la relation plus bas, \(\nu\) est négatif pour un réactif et positif pour un produit.</dd></div>
+      <div><dt>Avancement \(\xi\)<span class="u">mol</span></dt><dd>Nombre de fois que la réaction s’est produite, en moles. Il vaut 0 au départ et \(\xi_{\max}\) quand elle s’arrête.</dd></div>
+      <div><dt>Réactif limitant</dt><dd>Réactif qui s’épuise le premier, donc celui qui fixe \(\xi_{\max}\).</dd></div>
+    </dl>
+
+    <h4 data-n="3">Relations clés</h4>
+    <div class="relation">\[ n = \frac{m}{M}, \qquad N = n\,N_A \]
+      <p>On pèse pour trouver la quantité de matière, puis le nombre de particules. Avec \(m\) en g et \(M\) en g/mol, \(n\) sort en mol.</p></div>
+    <div class="relation">\[ C = \frac{n}{V} \]
+      <p>Combien de moles par litre de solution. Un volume en millilitres se convertit d’abord en litres.</p></div>
+    <div class="relation">\[ C_1 V_1 = C_2 V_2 \]
+      <p>Diluer ajoute du solvant : la concentration baisse, mais la quantité de soluté \(n = CV\) reste la même avant et après. Les deux volumes doivent avoir la même unité.</p></div>
+    <div class="relation">\[ n_i = n_{i,0} + \nu_i\,\xi \]
+      <p>Quantité de l’espèce \(i\) quand l’avancement vaut \(\xi\), avec \(\nu_i \lt 0\) pour un réactif et \(\nu_i \gt 0\) pour un produit. Certains manuels notent les coefficients en valeur positive et écrivent \(n_i = n_{i,0} - \nu_i\xi\) pour un réactif : c’est la même chose, avec une autre convention de signe.</p></div>
+    <div class="relation">\[ \xi_{\max} = \min_i \frac{n_{i,0}}{|\nu_i|} \quad \text{(sur les réactifs)} \]
+      <p>Pour chaque réactif, on divise sa quantité de départ par son coefficient, et le plus petit rapport l’emporte : ce réactif est limitant. La réaction est supposée totale.</p></div>
+
+    <h4 data-n="4">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un litre d’essence, assimilée à l’octane C₈H₁₈ qui brûle complètement. Combien de CO₂ en sort-il ?</p>
+      <ol>
+        <li>Masse : l’octane pur a une masse volumique de 0,703 kg/L, donc 703 g (l’essence réelle, un mélange, est plus près de 0,74 kg/L).</li>
+        <li>\(M(\text{C}_8\text{H}_{18}) = 8 \times 12{,}011 + 18 \times 1{,}008 = 114{,}23\) g/mol, donc \(n = 703 / 114{,}23 \approx 6{,}15\) mol, soit \(6{,}15 \times 6{,}022 \times 10^{23} \approx 3{,}7 \times 10^{24}\) molécules.</li>
+        <li>Équation équilibrée : \(2\,\text{C}_8\text{H}_{18} + 25\,\text{O}_2 \rightarrow 16\,\text{CO}_2 + 18\,\text{H}_2\text{O}\). On vérifie : 16 C, 36 H et 50 O de chaque côté.</li>
+        <li>Chaque octane donne 8 CO₂ : \(n(\text{CO}_2) = 8 \times 6{,}15 \approx 49{,}2\) mol.</li>
+        <li>Masse : \(m = 49{,}2 \times 44{,}009 \approx 2170\) g, soit environ 2,17 kg de CO₂ (avec 740 g d’essence : 2,28 kg).</li>
+        <li>Le CO₂ pèse plus de trois fois l’essence qui l’a produit. Les atomes d’oxygène viennent de l’air : \(n(\text{O}_2) = \tfrac{25}{2} \times 6{,}15 \approx 76{,}9\) mol, soit \(76{,}9 \times 31{,}998 \approx 2{,}46\) kg.</li>
+        <li>Bilan de masse : l’eau formée vaut \(9 \times 6{,}15 \approx 55{,}4\) mol, soit 0,998 kg. Avant : 0,703 + 2,46 = 3,16 kg. Après : 2,17 + 0,998 = 3,16 kg. La masse se conserve.</li>
+      </ol>
+      <p>Autre calcul du même genre : un sérum physiologique contient 9 g de NaCl par litre, soit \(9 / 58{,}44 \approx 0{,}154\) mol/L.</p>
+    </div>
+
+    <h4 data-n="5">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Confondre masse et quantité de matière. 18 g d’eau et 18 g de fer ne contiennent pas le même nombre de particules : 1,0 mol d’eau contre 0,32 mol de fer.</li>
+      <li>« Une mole d’O₂ pèse 16 g. » C’est la masse molaire de l’atome O. Le dioxygène est formé de deux atomes : 32,00 g/mol.</li>
+      <li>Oublier d’équilibrer. Avec CH₄ + O₂ → CO₂ + H₂O, les atomes d’oxygène et d’hydrogène ne balancent pas ; les bons coefficients (1, 2, 1, 2) changent tous les calculs.</li>
+      <li>Prendre pour limitant le réactif de plus petite masse, ou de plus petite quantité, sans diviser par \(\nu\). Avec 1 mol de CH₄ et 1,5 mol de O₂, le plus petit \(n\) est celui de CH₄, mais O₂ limite : \(1{,}5/2 = 0{,}75\) est plus petit que \(1/1 = 1\).</li>
+      <li>Mélanger mL et L. 2,0 g de NaCl dans 250 mL : \(n = 0{,}034\) mol et \(C = 0{,}034 / 0{,}250 \approx 0{,}14\) mol/L. Diviser par 250 donne une erreur d’un facteur 1000.</li>
+      <li>Croire qu’en diluant, on détruit du soluté. Le nombre de moles ne change pas ; il est seulement réparti dans un plus grand volume.</li>
+    </ul>
+
+    <h4 data-n="6">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>30</b><span>Les réactions : proportions des équations, quantités consommées, et plus tard vitesse et équilibre.</span></li>
+      <li><b>31</b><span>Le pH est un logarithme d’une concentration en mol/L ; les ions en solution se comptent comme ici.</span></li>
+      <li><b>17</b><span>Les gaz : \(n\) et \(N\) dans \(PV = nRT\). <a href="../07-matiere-chaleur/index.html">Planche Matière et chaleur</a>.</span></li>
+      <li><b>34</b><span>Les bilans de la respiration : combien de glucose et de dioxygène pour combien de CO₂. <a href="../02-respiration/index.html">Planche Respiration</a>.</span></li>
+      <li><b>33</b><span>Les gradients de concentration d’ions de part et d’autre d’une membrane se chiffrent en mmol/L.</span></li>
+    </ul>
+
+    <h4 data-n="7">Teste-toi</h4>
+    <details><summary>Combien de molécules d’eau y a-t-il dans 1 g d’eau ?</summary>
+      <p>\(n = 1 / 18{,}015 \approx 0{,}0555\) mol, donc \(N = 0{,}0555 \times 6{,}022 \times 10^{23} \approx 3{,}34 \times 10^{22}\) molécules.</p></details>
+    <details><summary>On réunit 4 g de H₂ et 16 g de O₂ pour former de l’eau (2 H₂ + O₂ → 2 H₂O). Quel est le réactif limitant, et quelle masse d’eau se forme ?</summary>
+      <p>\(n(\text{H}_2) = 4 / 2{,}016 \approx 1{,}98\) mol et \(n(\text{O}_2) = 16 / 31{,}998 = 0{,}500\) mol. On divise par les coefficients : \(1{,}98/2 = 0{,}99\) pour H₂, \(0{,}500/1 = 0{,}500\) pour O₂. Le dioxygène limite, bien qu’il soit le plus lourd : \(\xi_{\max} = 0{,}500\) mol, donc 1,00 mol d’eau, soit 18,0 g. Il reste \(1{,}98 - 1{,}00 \approx 0{,}98\) mol de H₂, soit 1,98 g. Vérification : 1,98 + 18,0 = 20,0 g, comme au départ.</p></details>
+    <details><summary>On ajoute 100 mL d’eau à 100 mL d’une solution à 0,50 mol/L. Que deviennent la concentration et la quantité de soluté ?</summary>
+      <p>La quantité de soluté ne change pas : \(n = 0{,}50 \times 0{,}100 = 0{,}050\) mol. Le volume double (en négligeant la variation de volume du mélange) : \(C_2 = C_1V_1/V_2 = 0{,}50 \times 100/200 = 0{,}25\) mol/L.</p></details>
+  </section>
+
+  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Dessin conventionnel :</strong> les rayons et les couleurs des atomes sont des conventions, les nuages d’électrons sont des schémas, pas des densités calculées.</li>
+    <li><strong>Courbe de Morse :</strong> une forme ajustée dont les paramètres (\(D_e\), \(r_e\), \(a\)) viennent de la spectroscopie. Elle décrit bien le creux près du fond, moins bien les grandes distances.</li>
+    <li><strong>Temps ralenti :</strong> à l’étape 1, la vibration est ralentie environ 10<sup>14</sup> fois. Une vraie liaison H–H fait un aller-retour en 8 fs.</li>
+    <li><strong>Seuils de Δχ :</strong> 0,4 et 1,8 sont conventionnels (les manuels placent la seconde frontière entre 1,7 et 2,0). La charge partielle affichée, \(1 - \mathrm e^{-\Delta\chi^2/4}\), est une indication, pas une mesure.</li>
+    <li><strong>VSEPR :</strong> c’est une règle, simulée ici par des points qui se repoussent en \(1/d\) sur une sphère. Un doublet libre repousse 1,25 fois plus fort qu’une liaison : ce coefficient est ajusté (NH₃ 106,7°, H₂O 104,4° ; mesurés 106,7° et 104,5°).</li>
+    <li><strong>Quatre domaines au plus :</strong> les molécules à octet étendu, comme SF₄ ou XeF₄, sont hors champ : une répulsion aussi simple ne retrouve pas leurs formes.</li>
+    <li><strong>Étape 4 :</strong> un modèle en deux dimensions, avec des disques de Lennard-Jones et des sites collants entre donneur et accepteur, 40 molécules par boîte, sans gravité. Les températures sont réduites ; leur correspondance en kelvins (× 485) est seulement indicative.</li>
+    <li><strong>Masses atomiques :</strong> valeurs standard, moyennes sur les isotopes naturels.</li>
+    <li><strong>Solutions :</strong> le volume du soluté est négligé, et les ions du sel sont comptés comme un seul soluté, la dissociation n’étant que mentionnée.</li>
+    <li><strong>Réactions :</strong> totales, sans vitesse ni équilibre (module 30).</li>
+    <li><strong>Une mole de choses visibles n’existe pas :</strong> une mole de grains de riz de 25 mg pèserait \(6{,}022 \times 10^{23} \times 25\) mg \(\approx 1{,}5 \times 10^{19}\) kg, soit 2,5 millionièmes de la masse de la Terre (5,97 × 10²⁴ kg), la masse d’un astéroïde de bonne taille. En vrac, ces grains couvriraient le Québec (environ 1,5 million de km²) sur une douzaine de kilomètres d’épaisseur.</li>
+  </ul>
+
+  <h2><span>4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>6,022 × 10²³ mol⁻¹</b><span>constante d’Avogadro, exactement 6,022&nbsp;140&nbsp;76 × 10²³ depuis 2019.</span></div>
+    <div><b>18,015 g/mol</b><span>masse molaire de l’eau : une mole occupe environ 18 mL (un peu plus qu’une cuillère à soupe) ; un litre en contient près de 55,5 mol.</span></div>
+    <div><b>74 pm · 436 kJ/mol</b><span>longueur et énergie de la liaison H–H.</span></div>
+    <div><b>104,5° · 1,85 D</b><span>angle H–O–H et moment dipolaire de l’eau.</span></div>
+    <div><b>≈ 20 contre ≈ 460 kJ/mol</b><span>une liaison hydrogène entre molécules d’eau, contre la liaison O–H à l’intérieur d’une molécule.</span></div>
+  </div>
+
+  <h2><span>5</span>Seulement introduit ici</h2>
+  <p>Ces notions ne sont qu’effleurées et méritent leur propre étude : les <strong>orbitales moléculaires</strong>, l’<strong>hybridation</strong>, la <strong>liaison métallique</strong>, la <strong>résonance</strong>, les <strong>forces de London</strong> en détail, la <strong>solubilité</strong>, l’<strong>octet étendu</strong> (SF₄, XeF₄) et le <strong>bilan énergétique d’une réaction</strong> par les liaisons rompues et formées.</p>
+
+  <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,2090 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Le cyan pâle (--accent) est la couleur du compteur : la règle des pH va du gris au cyan, jamais d'arc-en-ciel d'indicateur, parce que le pH n'a pas de couleur ; les protons restent orange (--positif) et les OH⁻ bleus (--negatif), comme partout dans LABO.
+  2. Le mouvement ne sert qu'à signifier : un index qui glisse sur la règle par un ressort amorti, des points qui s'ajoutent et s'effacent en fondu quand l'échelle change, une goutte qui tombe et une conversion de molécule quand le tampon encaisse un proton.
+  3. Le moteur Elc (verrouillé, testé) résout le bilan de charge exactement ; la page dessine, interpole et compte. Les particules sont toujours en nombre réduit et la règle d'échelle le dit.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protons et électrons qui passent — LABO</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="Acide-base, puis redox : le pH compte des protons libres en puissances de dix, un tampon encaisse les ajouts d'acide et de base, et une pile oblige les électrons à passer par un fil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9ef0f0;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 352px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:600px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation;cursor:default}
+#cv.hand{cursor:pointer}
+
+.head{text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond);position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;isolation:isolate}
+.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
+h1{font:400 clamp(28px,3.8vw,44px)/1 var(--serif);margin:0;letter-spacing:-.005em}
+h1 em{color:var(--accent);font-style:italic}
+.head::before{content:"";position:absolute;inset:-40px -120px -40px -60px;pointer-events:none;z-index:-1;opacity:.6;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 52%,rgba(10,13,18,0) 100%)}
+.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
+.back:hover{color:var(--texte)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:270px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:30}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:18px 24px 20px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.panel > *{flex-shrink:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.eyebrow b{color:var(--accent);font-weight:500}
+h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
+#stepText{margin:0;color:var(--texte);opacity:.9;font-size:14.5px}
+.status{margin:10px 0 0;font:400 12px/1.5 var(--mono);color:var(--accent);min-height:50px}
+.cle{margin:0;padding:9px 12px;border-left:2px solid var(--accent);background:var(--fond);font-size:14px;line-height:1.5}
+.swap{animation:swap .55s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{flex-wrap:wrap;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 14px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:30px}
+.scopeBox{border:1px solid var(--trait);background:var(--fond);margin-top:2px;position:relative}
+.scopeBox[hidden]{display:none}
+#scope{display:block;width:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 11px var(--mono);color:var(--texte-2);margin:8px 0 0}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg[hidden],.eyebrow[hidden]{display:none}
+.leg svg{width:20px;height:8px;overflow:visible}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.note a{color:var(--texte)}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+.cards{display:grid;gap:8px}
+.cards[hidden]{display:none}
+.card{border:1px solid var(--trait);padding:10px 12px;font-size:13.5px;line-height:1.45}
+.card b{display:block;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.card small{display:block;margin-top:5px;font:400 11px var(--mono);color:var(--texte-2)}
+.card a{color:var(--texte-2)}
+.liens{margin-top:auto;display:flex;flex-direction:column;gap:6px;background:var(--fond-2);padding-top:6px}
+.comprendre{display:inline-flex;justify-content:space-between;align-items:center;text-decoration:none;font:500 14px var(--sans);padding:12px 14px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
+.comprendre:hover{background:var(--accent);color:var(--fond)}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:10px 22px;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp[hidden]{display:none}
+.gl{font:400 11px var(--mono);letter-spacing:.04em;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn[hidden]{display:none}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.go{border-color:var(--accent);color:var(--accent)}
+.btn.go:hover{background:var(--accent);color:var(--fond)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+.btn.sm{padding:7px 9px}
+
+.stepper{display:flex;gap:16px;flex:1 1 460px;min-width:0}
+.sg{display:flex;flex-direction:column;min-width:0;flex:1 1 0}
+.sgl{font:400 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2);margin-bottom:5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgl .short{display:none}
+.sgs{display:flex;gap:4px;min-width:0}
+.seg{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
+.seg b{font-weight:500;margin-right:6px}
+.seg span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
+.seg:hover{color:var(--texte);border-top-color:var(--texte-2)}
+.seg[aria-current="step"]{border-top-color:var(--accent);color:var(--texte)}
+.seg[aria-current="step"] b{color:var(--accent)}
+
+.tools{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;padding-top:8px;border-top:1px solid var(--trait)}
+.tools:empty{display:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:150px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]:disabled{opacity:.35;cursor:default}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:56px}
+.rv.wide{min-width:128px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:640px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  .head{left:16px;top:14px}
+  .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
+  .stepper{flex:1 0 100%;order:5}
+  input[type=range]{width:120px}
+}
+@media (max-width:640px){
+  .seg span{display:none}
+  .seg b{margin:0;font-size:13px}
+  .sgl .long{display:none}.sgl .short{display:inline}
+  .stepper{gap:10px}
+  .rv{min-width:46px}
+  .rv.wide{min-width:112px}
+}
+@media (hover:none) and (pointer:coarse){ .kbd{display:none} }
+@media (prefers-reduced-motion:reduce){
+  .swap{animation:none}
+  .tip,.btn,.comprendre,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Paillasse d'acide-base : règle des pH, bécher et loupe sur les ions, puis béchers d'eau pure et de tampon qui reçoivent la même goutte, avec la courbe de titrage tracée en direct."></canvas>
+    <header class="head">
+      <p class="serie">LABO · Fondations 31</p>
+      <h1>Protons et <em>électrons</em> qui passent</h1>
+      <a class="back" href="../../labo/index.html">&larr; LABO</a>
+    </header>
+  </main>
+  <div class="tip" id="tip" role="tooltip"></div>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
+      <h2 id="stepTitle">Le pH, un compteur de protons</h2>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
+    </section>
+
+    <p class="cle" id="cle"></p>
+
+    <section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="mNote"></p>
+    </section>
+
+    <section>
+      <p class="eyebrow" id="rEye">Enregistreur</p>
+      <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : pH et pOH en barre empilée, historique des pH, ou pH des deux béchers en fonction des gouttes ajoutées."></canvas></div>
+      <p class="leg" id="leg"></p>
+    </section>
+
+    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+      <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
+      <div class="card"><b>Cellule</b>Une membrane qui sépare des ions de concentrations différentes, est-ce une pile ?<small><a href="../fondations-cellule-membrane/index.html">Modules 32 · 33 · Cellule, membrane et transport</a></small></div>
+      <div class="card"><b>Vivant</b>La respiration est-elle une pile ? D’où viennent ses électrons, où vont-ils ?<small>Module 34 (à venir) · <a href="../02-respiration/index.html">planche Respiration</a></small></div>
+      <div class="card"><b>Énergie</b>Pourquoi certaines batteries se rechargent et d’autres non ?<small>Seulement introduit : électrochimie réversible</small></div>
+    </section>
+
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser l'étape</li>
+        <li><kbd>D</kbd> diluer dix fois (étape 1) · <kbd>A</kbd> goutte d'acide · <kbd>B</kbd> goutte de base (étape 2)</li>
+        <li><kbd>P</kbd> plonger (étape 3) · <kbd>S</kbd> retirer ou remettre le pont salin (étape 4)</li>
+      </ul>
+    </section>
+
+    <nav class="liens">
+      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bPrev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace). Avec « réduire les animations », le mouvement est ralenti, jamais figé : l'agitation des ions est le phénomène." aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bNext" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
+    </div>
+
+    <div class="stepper" id="stepper" role="group" aria-label="Les quatre étapes">
+      <div class="sg"><span class="sgl"><span class="long">Module 31 · Acide-base et redox</span><span class="short">31</span></span><div class="sgs">
+        <button class="seg" data-a="0" title="Étape 1 — Le pH, un compteur de protons"><b>1</b><span>Le pH</span></button>
+        <button class="seg" data-a="1" title="Étape 2 — Acides faibles et tampons"><b>2</b><span>Tampons</span></button>
+        <button class="seg" data-a="2" title="Étape 3 — Passer des électrons : le redox"><b>3</b><span>Redox</span></button>
+        <button class="seg" data-a="3" title="Étape 4 — La pile et l'électrolyse"><b>4</b><span>La pile</span></button>
+      </div></div>
+    </div>
+
+    <div class="tools" id="tools">
+      <!-- étape 1 -->
+      <div class="grp" data-acts="0"><span class="gl">Substance</span><button class="btn" id="bHCl" aria-pressed="true" title="Acide chlorhydrique : un acide fort, entièrement ionisé dans l'eau">HCl</button><button class="btn" id="bNaOH" aria-pressed="false" title="Hydroxyde de sodium : une base forte">NaOH</button></div>
+      <div class="grp" data-acts="0"><span class="gl">Concentration</span><input type="range" id="rC" min="-9" max="0" step="0.01" value="-1" aria-label="Concentration versée, échelle logarithmique de 10⁻⁹ à 1 mol/L"><span class="rv wide" id="vC"></span></div>
+      <div class="grp" data-acts="0"><button class="btn go" id="bDil" title="Diluer dix fois (touche D)">Diluer dix fois</button><button class="btn" id="bPure" aria-pressed="false"><span class="dot"></span>L'eau pure</button></div>
+      <!-- étape 2 -->
+      <div class="grp" data-acts="1" data-m2="gouttes"><button class="btn go" id="bDropA" title="Une goutte d'acide chlorhydrique, 0,05 mL à 1,0 mol/L. Maintenir : une goutte toutes les 0,12 s (touche A)">1 goutte d'acide</button><button class="btn go" id="bDropB" title="Une goutte de soude, 0,05 mL à 1,0 mol/L. Maintenir : une goutte toutes les 0,12 s (touche B)">1 goutte de base</button></div>
+      <div class="grp" data-acts="1"><span class="gl">Acide faible</span><button class="btn" data-acid="acetique" aria-pressed="true" title="Acide acétique CH₃COOH / CH₃COO⁻, pKa 4,76">acétique</button><button class="btn" data-acid="ammonium" aria-pressed="false" title="Ion ammonium NH₄⁺ / NH₃, pKa 9,25">ammonium</button><button class="btn" data-acid="phosphate" aria-pressed="false" title="Ion dihydrogénophosphate H₂PO₄⁻ / HPO₄²⁻, pKa 7,21">phosphate</button></div>
+      <div class="grp" data-acts="1" data-m2="gouttes"><span class="gl" id="glRat">[A⁻]/[HA]</span><input type="range" id="rRat" min="-1" max="1" step="0.01" value="0" aria-label="Rapport base conjuguée sur acide du tampon, échelle logarithmique de 0,1 à 10"><span class="rv" id="vRat"></span></div>
+      <div class="grp" data-acts="1" data-m2="titrage"><span class="gl">V_base</span><input type="range" id="rVb" min="0" max="50" step="0.1" value="12.5" aria-label="Volume de soude versé, de 0 à 50 millilitres"><span class="rv" id="vVb"></span></div>
+      <div class="grp" data-acts="1"><button class="btn" id="bTit" aria-pressed="false"><span class="dot"></span>Titrage complet</button><button class="btn" id="bClr" title="Vider les béchers et recommencer (touche R)">Vider</button></div>
+      <!-- étape 3 -->
+      <div class="grp" data-acts="2"><span class="gl">Métal</span><button class="btn sm" data-metal="Zn" aria-pressed="true" title="Lame de zinc">Zn</button><button class="btn sm" data-metal="Fe" aria-pressed="false" title="Lame de fer">Fe</button><button class="btn sm" data-metal="Pb" aria-pressed="false" title="Lame de plomb">Pb</button><button class="btn sm" data-metal="Cu" aria-pressed="false" title="Lame de cuivre">Cu</button><button class="btn sm" data-metal="Ag" aria-pressed="false" title="Lame d'argent">Ag</button></div>
+      <div class="grp" data-acts="2"><span class="gl">Solution</span><button class="btn sm" data-ion="Zn" aria-pressed="false" title="Ions zinc Zn²⁺, 0,10 mol/L">Zn²⁺</button><button class="btn sm" data-ion="Fe" aria-pressed="false" title="Ions fer Fe²⁺, 0,10 mol/L">Fe²⁺</button><button class="btn sm" data-ion="Pb" aria-pressed="false" title="Ions plomb Pb²⁺, 0,10 mol/L">Pb²⁺</button><button class="btn sm" data-ion="Cu" aria-pressed="true" title="Ions cuivre Cu²⁺, 0,10 mol/L">Cu²⁺</button><button class="btn sm" data-ion="Ag" aria-pressed="false" title="Ions argent Ag⁺, 0,10 mol/L">Ag⁺</button></div>
+      <div class="grp" data-acts="2"><button class="btn" id="bPred" aria-pressed="false"><span class="dot"></span>Je prédis</button><button class="btn" id="bPredY" aria-pressed="false" hidden>Il va se passer quelque chose</button><button class="btn" id="bPredN" aria-pressed="false" hidden>Rien ne va se passer</button></div>
+      <div class="grp" data-acts="2"><button class="btn go" id="bDip" title="Plonger la lame (touche P)">Plonger</button></div>
+      <!-- étape 4 -->
+      <div class="grp" data-acts="3"><span class="gl">Couples</span><button class="btn" data-cell="Zn,Cu" aria-pressed="true" title="Pile Daniell : zinc et cuivre, 1,10 V">Zn/Cu</button><button class="btn" data-cell="Fe,Cu" aria-pressed="false" title="Fer et cuivre, 0,78 V">Fe/Cu</button><button class="btn" data-cell="Zn,Ag" aria-pressed="false" title="Zinc et argent, 1,56 V">Zn/Ag</button></div>
+      <div class="grp" data-acts="3"><span class="gl">R</span><input type="range" id="rR" min="0" max="3" step="0.01" value="1" aria-label="Résistance de charge, échelle logarithmique de 1 à 1000 ohms"><span class="rv" id="vR"></span></div>
+      <div class="grp" data-acts="3"><button class="btn" id="bGen" aria-pressed="false"><span class="dot"></span>Générateur</button><input type="range" id="rU" min="0" max="2" step="0.01" value="1.3" aria-label="Tension du générateur, de 0 à 2 volts"><span class="rv" id="vU"></span></div>
+      <div class="grp" data-acts="3"><button class="btn" id="bBridge" title="Retirer ou remettre le pont salin (touche S)">Retirer le pont salin</button></div>
+      <div class="grp" data-acts="3"><span class="gl">Temps</span><button class="btn sm" data-speed="60" aria-pressed="false" title="1 s affichée = 1 min simulée">×60</button><button class="btn sm" data-speed="3600" aria-pressed="true" title="1 s affichée = 1 h simulée">×3600</button><button class="btn sm" data-speed="36000" aria-pressed="false" title="1 s affichée = 10 h simulées">×36 000</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ELC-BEGIN */
+const Elc = (function () {
+  'use strict';
+  const LN10 = Math.LN10;
+  const KW = 1.0e-14;                 // produit ionique de l'eau à 25 °C
+  const F = 96485.332;                // constante de Faraday, C/mol
+  const R = 8.314462618;              // constante des gaz, J/(mol·K)
+  const T = 298.15;                   // 25 °C
+  const NA = 6.02214076e23;           // nombre d'Avogadro
+  const NERNST = R * T * LN10 / F;    // ≈ 0,05916 V (« 0,0592 / n »)
+
+  // Couples acide/base faibles, traités comme monoacides (une seule acidité).
+  // zA = charge de la forme acide ; la forme basique porte zA − 1.
+  // Sources : CRC Handbook of Chemistry and Physics, « Dissociation constants of
+  // organic acids / inorganic acids and bases in aqueous solution », 25 °C ;
+  // H₂CO₃ : pKa apparent (CO₂ dissous + H₂CO₃), première acidité seulement ;
+  // H₂PO₄⁻ : deuxième acidité de l'acide phosphorique, seule retenue.
+  const ACIDS = {
+    HCl:        { name: 'acide chlorhydrique', acid: 'HCl', base: 'Cl⁻', strong: true, src: 'acide fort : entièrement ionisé dans l’eau' },
+    acetique:   { name: 'acide acétique', acid: 'CH₃COOH', base: 'CH₃COO⁻', pKa: 4.76, zA: 0, acidSalt: 'CH3COOH', baseSalt: 'CH3COONa', src: 'CRC Handbook, 25 °C' },
+    ammonium:   { name: 'ion ammonium', acid: 'NH₄⁺', base: 'NH₃', pKa: 9.25, zA: 1, acidSalt: 'NH4Cl', baseSalt: 'NH3', src: 'CRC Handbook, 25 °C' },
+    phosphate:  { name: 'ion dihydrogénophosphate', acid: 'H₂PO₄⁻', base: 'HPO₄²⁻', pKa: 7.21, zA: -1, acidSalt: 'NaH2PO4', baseSalt: 'Na2HPO4', src: 'CRC Handbook, 25 °C (pKa₂ de H₃PO₄)' },
+    carbonique: { name: 'acide carbonique', acid: 'H₂CO₃', base: 'HCO₃⁻', pKa: 6.35, zA: 0, acidSalt: 'H2CO3', baseSalt: 'NaHCO3', src: 'CRC Handbook, 25 °C (pKa₁ apparent)' }
+  };
+  // Composés qu'on dissout : ce que chacun apporte par mole.
+  const COMPOUNDS = {
+    HCl: { Cl: 1 }, NaOH: { Na: 1 }, NaCl: { Na: 1, Cl: 1 },
+    CH3COOH: { T: 'acetique' }, CH3COONa: { Na: 1, T: 'acetique' },
+    NH4Cl: { Cl: 1, T: 'ammonium' }, NH3: { T: 'ammonium' },
+    NaH2PO4: { Na: 1, T: 'phosphate' }, Na2HPO4: { Na: 2, T: 'phosphate' },
+    H2CO3: { T: 'carbonique' }, NaHCO3: { Na: 1, T: 'carbonique' }
+  };
+  const Ka = key => Math.pow(10, -ACIDS[key].pKa);
+
+  // ---------- Solutions ----------
+  function beaker(V, list) {
+    let b = { V: V, Na: 0, Cl: 0, T: {} };
+    for (const [k, C] of (list || [])) b = addMol(b, k, C * V);
+    return b;
+  }
+  function addMol(b, compound, n) {
+    const c = COMPOUNDS[compound];
+    if (!c) throw new Error('composé inconnu : ' + compound);
+    const o = { V: b.V, Na: b.Na + (c.Na || 0) * n, Cl: b.Cl + (c.Cl || 0) * n, T: Object.assign({}, b.T) };
+    if (c.T) o.T[c.T] = (o.T[c.T] || 0) + n;
+    return o;
+  }
+  // Ajouter un volume Vadd (L) d'une solution de compound à C (mol/L).
+  function add(b, compound, C, Vadd) {
+    const o = addMol(b, compound, C * Vadd);
+    o.V = b.V + Vadd;
+    return o;
+  }
+  function mix(a, b) {
+    const o = { V: a.V + b.V, Na: a.Na + b.Na, Cl: a.Cl + b.Cl, T: Object.assign({}, a.T) };
+    for (const k in b.T) o.T[k] = (o.T[k] || 0) + b.T[k];
+    return o;
+  }
+  const water = (V) => beaker(V || 1, []);
+  const strongAcid = (C, V) => beaker(V || 1, [['HCl', C]]);
+  const strongBase = (C, V) => beaker(V || 1, [['NaOH', C]]);
+  const weakAcid = (key, C, V) => beaker(V || 1, [[ACIDS[key].acidSalt, C]]);
+  const weakBase = (key, C, V) => beaker(V || 1, [[ACIDS[key].baseSalt, C]]);
+  const buffer = (key, Cacid, Cbase, V) => beaker(V || 1, [[ACIDS[key].acidSalt, Cacid], [ACIDS[key].baseSalt, Cbase]]);
+  // Tampon de concentration totale C, rapport base/acide = ratio.
+  const bufferRatio = (key, C, ratio, V) => buffer(key, C / (1 + ratio), C * ratio / (1 + ratio), V);
+
+  // Charge nette par litre (mol/L) pour h = [H₃O⁺], à concentrations c.
+  function chargeAt(h, c) {
+    let q = h - KW / h + c.Na - c.Cl;
+    for (const k in c.T) { const K = Ka(k), CT = c.T[k]; q += CT * (ACIDS[k].zA - K / (h + K)); }
+    return q;
+  }
+  function conc(b) {
+    const c = { Na: b.Na / b.V, Cl: b.Cl / b.V, T: {} };
+    for (const k in b.T) if (b.T[k] > 0) c.T[k] = b.T[k] / b.V;
+    return c;
+  }
+  // Résolution exacte du bilan de charge : chargeAt est strictement croissante en h.
+  function solve(b) {
+    const c = conc(b);
+    let lo = Math.log(1e-20), hi = Math.log(1e2);
+    for (let i = 0; i < 200; i++) {
+      const mid = 0.5 * (lo + hi);
+      if (chargeAt(Math.exp(mid), c) > 0) hi = mid; else lo = mid;
+      if (hi - lo < 1e-15) break;
+    }
+    const h = Math.exp(0.5 * (lo + hi)), oh = KW / h;
+    const pairs = {};
+    let charge = h - oh + c.Na - c.Cl;
+    for (const k in c.T) {
+      const K = Ka(k), CT = c.T[k], A = CT * K / (h + K), HA = CT - A, z = ACIDS[k].zA;
+      pairs[k] = { HA, A, CT, ratio: A / HA, zA: z };
+      charge += z * HA + (z - 1) * A;
+    }
+    const pH = -Math.log10(h);
+    return { pH, pOH: -Math.log10(oh), h, oh, Kw: h * oh, V: b.V,
+             species: { H3O: h, OH: oh, Na: c.Na, Cl: c.Cl, pairs }, charge };
+  }
+  const pH = b => solve(b).pH;
+
+  // ---------- Titrage ----------
+  // acid : clé de ACIDS ou composé ; base : composé (NaOH par défaut). Volumes en L.
+  const salt = k => (ACIDS[k] ? (ACIDS[k].strong ? k : ACIDS[k].acidSalt) : k);
+  function titrate(acid, Ca, Va, base, Cb, Vb) {
+    return solve(add(beaker(Va, [[salt(acid), Ca]]), base || 'NaOH', Cb, Vb)).pH;
+  }
+  function titrationCurve(acid, Ca, Va, base, Cb, Vmax, n) {
+    const out = [];
+    n = n || 200;
+    for (let i = 0; i <= n; i++) { const Vb = Vmax * i / n; out.push({ Vb, pH: titrate(acid, Ca, Va, base, Cb, Vb) }); }
+    return out;
+  }
+  function equivalence(acid, Ca, Va, base, Cb) {
+    const Veq = Ca * Va / Cb, Vhalf = Veq / 2;
+    const A = ACIDS[acid];
+    return { Veq, Vhalf, pHeq: titrate(acid, Ca, Va, base, Cb, Veq), pHhalf: titrate(acid, Ca, Va, base, Cb, Vhalf),
+             pKa: A && !A.strong ? A.pKa : null };
+  }
+
+  // ---------- Vue particulaire ----------
+  // Nombre réel d'ions H₃O⁺ et OH⁻ dans un volume V (L) au pH donné, et ce qu'on en dessine :
+  // un point = 10^k ions, k choisi pour qu'il y ait au plus maxDraw points de l'espèce majoritaire.
+  function sampleIons(pHv, V, maxDraw) {
+    maxDraw = maxDraw || 200;
+    const h = Math.pow(10, -pHv), oh = KW / h;
+    const nH = h * NA * V, nOH = oh * NA * V, nMax = Math.max(nH, nOH);
+    const k = Math.max(0, Math.ceil(Math.log10(nMax / maxDraw) - 1e-12));
+    const scale = Math.pow(10, k);
+    return { V, nH, nOH, scale, k, drawH: Math.round(nH / scale), drawOH: Math.round(nOH / scale),
+             rule: k === 0 ? '1 point = 1 ion' : '1 point = 10^' + k + ' ions' };
+  }
+  // Générateur pseudo-aléatoire à graine (mulberry32), valeurs dans [0, 1).
+  function rng(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- Redox ----------
+  // Couples Mⁿ⁺/M : potentiel standard (V), électrons échangés, masse molaire du métal (g/mol).
+  // Source : CRC Handbook, « Electrochemical series », 25 °C, arrondis du programme.
+  const E0 = { Zn: -0.76, Fe: -0.44, Pb: -0.13, H: 0.00, Cu: 0.34, Ag: 0.80 };
+  const COUPLES = {
+    Zn: { E0: -0.76, n: 2, M: 65.38,  metal: 'Zn', ion: 'Zn²⁺', name: 'zinc' },
+    Fe: { E0: -0.44, n: 2, M: 55.845, metal: 'Fe', ion: 'Fe²⁺', name: 'fer' },
+    Pb: { E0: -0.13, n: 2, M: 207.2,  metal: 'Pb', ion: 'Pb²⁺', name: 'plomb' },
+    H:  { E0: 0.00,  n: 2, M: 2.016,  metal: 'H₂', ion: 'H⁺', name: 'hydrogène', gas: true, nIon: 2 },
+    Cu: { E0: 0.34,  n: 2, M: 63.546, metal: 'Cu', ion: 'Cu²⁺', name: 'cuivre' },
+    Ag: { E0: 0.80,  n: 1, M: 107.868, metal: 'Ag', ion: 'Ag⁺', name: 'argent' }
+  };
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const coef = (k, s) => (k === 1 ? s : k + ' ' + s);
+  // Demi-réaction de réduction écrite pour une mole de réducteur (métal ou H₂).
+  function halfRed(k) {
+    const c = COUPLES[k];
+    return c.gas ? '2 H⁺ + 2 e⁻ → H₂' : c.ion + ' + ' + coef(c.n, 'e⁻') + ' → ' + c.metal;
+  }
+  function halfOx(k) {
+    const c = COUPLES[k];
+    return c.gas ? 'H₂ → 2 H⁺ + 2 e⁻' : c.metal + ' → ' + c.ion + ' + ' + coef(c.n, 'e⁻');
+  }
+  // Potentiel d'électrode (Nernst) : E = E° + (0,0592/n) log [ion]^(ν) (métal pur, p(H₂) = 1 bar).
+  function electrode(k, c) {
+    const C = COUPLES[k];
+    const nu = C.gas ? 2 : 1;
+    return C.E0 + NERNST / C.n * nu * Math.log10(c);
+  }
+  // Un métal plongé dans une solution d'un ion : y a-t-il réaction (conditions standard) ?
+  function spontaneous(metal, ion) {
+    const a = COUPLES[metal], b = COUPLES[ion];
+    if (metal === ion) return { spont: false, same: true, dE: 0, n: 0, K: 1, ox: halfOx(metal), red: halfRed(ion), eq: 'aucune réaction : même couple' };
+    const dE = b.E0 - a.E0;
+    const n = a.n * b.n / gcd(a.n, b.n);          // électrons échangés par « tour » de réaction
+    const pM = n / a.n, pI = n / b.n;               // moles de métal oxydé, d'ion réduit
+    const ionCoef = b.gas ? 2 * pI : pI, redProd = b.gas ? 'H₂' : b.metal;
+    const eq = coef(pM, a.metal) + ' + ' + coef(ionCoef, b.ion) + ' → ' + coef(pM, a.ion) + ' + ' + coef(pI, redProd);
+    return { spont: dE > 0, same: false, dE, n, K: Math.pow(10, n * dE / NERNST), ox: halfOx(metal), red: halfRed(ion),
+             eq, metalPerTurn: pM, ionPerTurn: ionCoef, depositPerTurn: pI };
+  }
+  // Réaction de déplacement dans un volume V : métal en excès, ion à c0, avancement x (0 → 1)
+  // mesuré en fraction de l'ion consommé. Renvoie quantités et masses.
+  function displacement(metal, ion, c0, V, x) {
+    const s = spontaneous(metal, ion), b = COUPLES[ion], a = COUPLES[metal];
+    if (!s.spont) return { s, x: 0, cIon: c0, cMetalIon: 0, nE: 0, mDeposit: 0, mDissolved: 0 };
+    const nIon0 = c0 * V, nIon = nIon0 * x;                 // ions réduits
+    const turns = nIon / s.ionPerTurn, nE = turns * s.n;
+    const nMet = turns * s.metalPerTurn, nDep = turns * s.depositPerTurn;
+    return { s, x, cIon: (nIon0 - nIon) / V, cMetalIon: nMet / V, nE, Q: nE * F,
+             mDeposit: b.gas ? 0 : nDep * b.M, nGas: b.gas ? nDep : 0, mDissolved: nMet * a.M };
+  }
+  // Avancement d'équilibre (fraction d'ion consommé) : les deux électrodes au même potentiel.
+  function displacementEq(metal, ion, c0) {
+    const s = spontaneous(metal, ion);
+    if (!s.spont) return 0;
+    // f(y) = E_ion(reste) − E_métal(formé), y = ln(reste/c0) ≤ 0 : f(0) = +∞, f décroît quand on avance.
+    const f = y => {
+      const d = displacement(metal, ion, c0, 1, -Math.expm1(y));
+      return electrode(ion, c0 * Math.exp(y)) - electrode(metal, Math.max(d.cMetalIon, 1e-300));
+    };
+    let lo = -700, hi = 0;
+    for (let i = 0; i < 200; i++) { const m = 0.5 * (lo + hi); if (f(m) > 0) hi = m; else lo = m; }
+    return -Math.expm1(0.5 * (lo + hi));
+  }
+
+  // ---------- Pile ----------
+  // cell : { anode, cathode, cA, cC (mol/L), VA, VC (L), mA, mC (g), Rint (Ω), bridge, Q (C), t (s) }
+  function cell(o) {
+    return Object.assign({ anode: 'Zn', cathode: 'Cu', cA: 1, cC: 1, VA: 0.1, VC: 0.1, mA: 20, mC: 20, Rint: 2, bridge: true, Q: 0, t: 0, I: 0 }, o || {});
+  }
+  // f.é.m. (Nernst) : E = E_cathode − E_anode. conc = { cathode, anode } en mol/L (1 par défaut).
+  function cellEMF(cathode, anode, conc) {
+    conc = conc || {};
+    const cC = conc.cathode != null ? conc.cathode : 1, cA = conc.anode != null ? conc.anode : 1;
+    return electrode(cathode, cC) - electrode(anode, cA);
+  }
+  const emfOf = c => cellEMF(c.cathode, c.anode, { cathode: c.cC, anode: c.cA });
+  // Courant instantané dans le circuit : charge R (Ω) et générateur U_ext (V) en opposition.
+  function current(c, R, Uext) {
+    if (c.bridge === false) return 0;
+    return (emfOf(c) - (Uext || 0)) / (c.Rint + R);
+  }
+  // État après le passage d'une charge dq (C) ; dq > 0 : décharge, dq < 0 : électrolyse.
+  function pass(c, dq) {
+    const A = COUPLES[c.anode], C = COUPLES[c.cathode];
+    const o = Object.assign({}, c);
+    o.cC = c.cC - dq / (C.n * F * c.VC);
+    o.cA = c.cA + dq / (A.n * F * c.VA);
+    o.mC = c.mC + dq / (C.n * F) * C.M;
+    o.mA = c.mA - dq / (A.n * F) * A.M;
+    o.Q = c.Q + dq;
+    return o;
+  }
+  // État après une charge |dq| qui ramène l'ion consommé à c0·e^y exactement
+  // (y ≤ 0 ; pas de soustraction qui perdrait les très faibles concentrations).
+  function passLog(c, dis, y) {
+    const k = dis ? 'cC' : 'cA', V = dis ? c.VC : c.VA, n = COUPLES[dis ? c.cathode : c.anode].n;
+    const c0 = c[k], dq = (dis ? 1 : -1) * c0 * -Math.expm1(y) * n * F * V;
+    const o = pass(c, dq);
+    o[k] = c0 * Math.exp(y);
+    return o;
+  }
+  // Un pas de temps dt (s), Euler implicite : le courant est celui de l'état d'arrivée,
+  // ce qui garde les concentrations positives et la tension monotone même pour de grands pas.
+  function cellStep(c, R, dt, Uext) {
+    Uext = Uext || 0;
+    const I0 = current(c, R, Uext), Rt = c.Rint + R;
+    let o;
+    if (I0 === 0 || !(dt > 0)) { o = Object.assign({}, c); o.I = 0; }
+    else {
+      const dis = I0 > 0, sgn = dis ? 1 : -1;               // décharge ou électrolyse
+      const metal = COUPLES[dis ? c.anode : c.cathode], mMetal = dis ? c.mA : c.mC;
+      // g(y) = |dq| − dt·|I(arrivée)| : croissante quand y diminue (on consomme plus d'ions)
+      const g = y => { const s = passLog(c, dis, y); return sgn * (s.Q - c.Q) - dt * sgn * (emfOf(s) - Uext) / Rt; };
+      let lo = -700, hi = 0;
+      for (let i = 0; i < 100; i++) { const m = 0.5 * (lo + hi); if (g(m) > 0) lo = m; else hi = m; }
+      o = passLog(c, dis, 0.5 * (lo + hi));
+      const dqMetal = mMetal / metal.M * metal.n * F;        // le métal qui se dissout s'épuise
+      if (Math.abs(o.Q - c.Q) > dqMetal) o = pass(c, sgn * dqMetal);
+      o.I = (o.Q - c.Q) / dt;
+    }
+    o.t = c.t + dt;
+    o.E = emfOf(o);
+    o.U = o.E - o.I * c.Rint;                               // tension aux bornes
+    return o;
+  }
+  // Pile reliée à un générateur U (V) à travers R (Ω) : régime de fonctionnement.
+  function electrolysis(U, c, R) {
+    const E = emfOf(c), I = current(c, R || 0, U);
+    const mode = Math.abs(I) < 1e-12 ? 'équilibre' : I > 0 ? 'pile' : 'électrolyse';
+    return { E, I, mode, Uth: E, P: U * -I };
+  }
+  // Loi de Faraday : masse (g) déposée ou dissoute par une charge Q (C).
+  const faradayMass = (Q, M, n) => Q * M / (n * F);
+
+  return {
+    KW, F, R, T, NA, NERNST, ACIDS, COMPOUNDS, Ka, E0, COUPLES,
+    beaker, add, addMol, mix, water, strongAcid, strongBase, weakAcid, weakBase, buffer, bufferRatio,
+    chargeAt, solve, pH, titrate, titrationCurve, equivalence, sampleIons, rng,
+    electrode, halfOx, halfRed, spontaneous, displacement, displacementEq,
+    cell, cellEMF, emfOf, current, pass, cellStep, electrolysis, faradayMass
+  };
+})();
+/* ELC-END */
+
+/* ================= Interface ================= */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
+const sceneEl = $('#scene'), tipEl = $('#tip');
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), fond2: tok('--fond-2'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie'), mono: tok('--mono') };
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const RA = rgb(C.accent), RT = rgb(C.texte), RT2 = rgb(C.texte2), RP = rgb(C.pos), RN = rgb(C.neg), RF = rgb(C.fond), RF2 = rgb(C.fond2);
+const mono = px => `${px}px ${C.mono}`;
+const TAU = Math.PI * 2, PI = Math.PI;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const sstep = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+const lerp = (a, b, t) => a + (b - a) * t;
+const sup = n => String(n).split('').map(ch => ch === '-' ? '⁻' : '⁰¹²³⁴⁵⁶⁷⁸⁹'[+ch]).join('');
+const fmt = (n, d) => { if (!isFinite(n)) return '—'; if (Math.abs(n) < Math.pow(10, -d) / 2) n = 0; return n.toFixed(d).replace('.', ',').replace('-', '−'); };
+const fmtI = n => isFinite(n) ? String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('-', '−') : '—';
+// Notation scientifique à mantisse de d décimales : 1,0 × 10⁻¹⁴
+function sci(x, d) {
+  if (!isFinite(x)) return '—'; if (x === 0) return '0';
+  let e = Math.floor(Math.log10(Math.abs(x)) + 1e-12), m = x / Math.pow(10, e), s = m.toFixed(d);
+  if (parseFloat(s) >= 10) { m /= 10; e++; s = m.toFixed(d); }
+  return s.replace('.', ',') + ' × 10' + sup(e);
+}
+// Nombre d'ions approximatif : « 60 », « 6 × 10⁷ », « 0 »
+const approx = n => n < 0.5 ? '0' : n < 1000 ? fmtI(n) : sci(n, 0);
+
+function tagText(c, text, x, y, align, base, color) {
+  c.textAlign = align; c.textBaseline = base;
+  const w = c.measureText(text).width, hgt = 14;
+  const rx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  const ry = base === 'bottom' ? y - hgt + 1 : base === 'top' ? y - 1 : y - hgt / 2;
+  c.save(); c.fillStyle = 'rgba(10,13,18,0.72)'; c.fillRect(rx - 3, ry, w + 6, hgt); c.restore();
+  c.fillStyle = color; c.fillText(text, x, y);
+}
+// Découpe un texte en lignes qui tiennent dans maxW (police du contexte)
+function wrap(c, text, maxW) {
+  const out = []; let line = '';
+  for (const w of text.split(' ')) {
+    const t = line ? line + ' ' + w : w;
+    if (line && c.measureText(t).width > maxW) { out.push(line); line = w; } else line = t;
+  }
+  if (line) out.push(line); return out;
+}
+function paragraph(c, text, x, y, maxW, lh, color, align) {
+  const L = wrap(c, text, maxW); c.fillStyle = color; c.textAlign = align || 'left'; c.textBaseline = 'alphabetic';
+  L.forEach((l, i) => c.fillText(l, x, y + i * lh)); return L.length;
+}
+function rrect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.arcTo(x + w, y, x + w, y + r, r); c.lineTo(x + w, y + h - r); c.arcTo(x + w, y + h, x + w - r, y + h, r); c.lineTo(x + r, y + h); c.arcTo(x, y + h, x, y + h - r, r); c.lineTo(x, y + r); c.arcTo(x, y, x + r, y, r); c.closePath(); }
+
+// Ressort amorti vers une cible (pas fixe h)
+function spring(o, tgt, h) {
+  const k = reduce ? 22 : 80, cd = 2 * Math.sqrt(k) * 0.82;
+  o.v += (k * (tgt - o.x) - cd * o.v) * h; o.x += o.v * h;
+  if (Math.abs(tgt - o.x) < 1e-5 && Math.abs(o.v) < 1e-4) { o.x = tgt; o.v = 0; }
+}
+const AG = reduce ? 0.35 : 1;            // facteur d'agitation (jamais 0 : l'agitation est le phénomène)
+const tintA = pH => 0.05 + 0.22 * (1 - clamp(pH, 0, 14) / 14);   // teinte du liquide : plus de protons, plus de cyan
+
+/* ---------------- État commun ---------------- */
+let W = 800, H = 560, dpr = 1;
+let step = 0, pendingStep = -1, pendingRestart = false, fade = 0, sceneA = 1, playing = true, uiStep = 0;
+const NS = 4;
+
+/* ---------------- Zones de survol ---------------- */
+let zones = [];
+function zone(x0, y0, x1, y1, key, name, role) { zones.push({ x0: Math.min(x0, x1), y0: Math.min(y0, y1), x1: Math.max(x0, x1), y1: Math.max(y0, y1), key, name, role }); }
+function zoneF(fn, key, name, role) { zones.push({ fn, key, name, role }); }
+function zcirc(cx, cy, r, key, name, role) { zoneF((x, y) => Math.hypot(x - cx, y - cy) <= r, key, name, role); }
+let tipKey = '', tipTimer = 0;
+function showTip(key, name, role, cx, cy) {
+  if (key !== tipKey) { tipEl.innerHTML = `<b>${name}</b><span>${role}</span>`; tipKey = key; }
+  const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let tx = cx + 14, ty = cy + 16;
+  if (tx + tw > innerWidth - 6) tx = cx - tw - 12; if (ty + th > innerHeight - 6) ty = cy - th - 12;
+  tipEl.style.left = Math.max(4, tx) + 'px'; tipEl.style.top = Math.max(4, ty) + 'px'; tipEl.classList.add('on');
+}
+function hideTip() { tipEl.classList.remove('on'); tipKey = ''; clearTimeout(tipTimer); }
+function hitZone(list, x, y) { for (let i = list.length - 1; i >= 0; i--) { const z = list[i]; if (z.fn ? z.fn(x, y) : (x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1)) return z; } return null; }
+
+/* ---------------- Dessins communs ---------------- */
+// Bécher : (x, y) coin haut gauche, lv = niveau 0..1, tint = alpha du cyan, rip = amplitude des rides.
+function beakerPath(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + h - r); c.arcTo(x, y + h, x + r, y + h, r); c.lineTo(x + w - r, y + h); c.arcTo(x + w, y + h, x + w, y + h - r, r); c.lineTo(x + w, y); }
+function drawBeaker(c, x, y, w, h, lv, tint, rip, t) {
+  const r = Math.min(8, w * 0.1), ys = y + h * (1 - lv);
+  c.save();
+  c.beginPath(); c.moveTo(x, ys); 
+  const n = 16; for (let i = 0; i <= n; i++) { const xx = x + w * i / n; c.lineTo(xx, ys + (rip ? Math.sin(i * 1.1 + t * 9) * rip * (1 - Math.abs(i / n - 0.5) * 1.2) : 0)); }
+  c.lineTo(x + w, y + h - r); c.arcTo(x + w, y + h, x + w - r, y + h, r); c.lineTo(x + r, y + h); c.arcTo(x, y + h, x, y + h - r, r); c.closePath();
+  c.fillStyle = rgba(RA, tint); c.fill();
+  c.strokeStyle = rgba(RA, Math.min(0.9, tint + 0.35)); c.lineWidth = 1; c.beginPath(); c.moveTo(x + 1, ys); c.lineTo(x + w - 1, ys); c.stroke();
+  c.restore();
+  c.save(); c.strokeStyle = rgba(RT, 0.82); c.lineWidth = 1.4; c.lineJoin = 'round';
+  beakerPath(c, x, y, w, h, r); c.stroke();
+  c.beginPath(); c.moveTo(x - 4, y); c.lineTo(x, y); c.moveTo(x + w, y); c.lineTo(x + w + 4, y); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; c.beginPath();
+  for (let i = 1; i <= 4; i++) { const yy = y + h * (1 - i * 0.2) ; c.moveTo(x + w - (i % 2 ? 9 : 14), yy); c.lineTo(x + w, yy); } c.stroke();
+  c.restore();
+  return { ys, r };
+}
+
+/* Tracé générique (axes, graduations, bandes, courbes, points) : courbe de titrage et enregistreur.
+   b = {x, y, w, h} boîte extérieure ; o = {x0, x1, y0, y1, xt, yt, fx, fy, fs, padL, padR, padT, padB, xl, yl, bands, vlines, hlines, lines, dots} */
+function plotArea(c, b, o) {
+  const fs = o.fs || 10.5, padL = o.padL != null ? o.padL : 30, padR = o.padR != null ? o.padR : 10, padT = o.padT != null ? o.padT : 8, padB = o.padB != null ? o.padB : 24;
+  const px = b.x + padL, py = b.y + padT, pw = b.w - padL - padR, ph = b.h - padT - padB;
+  const X = v => px + (v - o.x0) / (o.x1 - o.x0) * pw, Y = v => py + ph * (1 - (v - o.y0) / (o.y1 - o.y0));
+  c.save(); c.font = mono(fs);
+  for (const bd of o.bands || []) { c.fillStyle = bd.col; c.fillRect(px, Y(bd.y1), pw, Y(bd.y0) - Y(bd.y1)); }
+  c.strokeStyle = C.trait; c.lineWidth = 1;
+  for (const v of o.yt || []) { c.beginPath(); c.moveTo(px, Math.round(Y(v)) + 0.5); c.lineTo(px + pw, Math.round(Y(v)) + 0.5); c.stroke(); }
+  c.strokeStyle = rgba(RT2, 0.55); c.strokeRect(px + 0.5, py + 0.5, pw, ph);
+  c.fillStyle = C.texte2; c.textBaseline = 'middle'; c.textAlign = 'right';
+  for (const v of o.yt || []) c.fillText((o.fy || (q => fmt(q, 0)))(v), px - 4, Y(v));
+  c.textBaseline = 'top'; c.textAlign = 'center';
+  for (const v of o.xt || []) { const xx = X(v); c.strokeStyle = rgba(RT2, 0.55); c.beginPath(); c.moveTo(xx + 0.5, py + ph); c.lineTo(xx + 0.5, py + ph + 3); c.stroke(); c.fillText((o.fx || (q => fmt(q, 0)))(v), xx, py + ph + 4); }
+  c.save(); c.beginPath(); c.rect(px, py, pw, ph); c.clip();
+  for (const hl of o.hlines || []) { c.strokeStyle = hl.col; c.setLineDash(hl.dash || [4, 3]); c.lineWidth = hl.lw || 1; c.beginPath(); c.moveTo(px, Y(hl.v)); c.lineTo(px + pw, Y(hl.v)); c.stroke(); }
+  for (const vl of o.vlines || []) { c.strokeStyle = vl.col; c.setLineDash(vl.dash || [4, 3]); c.lineWidth = vl.lw || 1; c.beginPath(); c.moveTo(X(vl.v), py); c.lineTo(X(vl.v), py + ph); c.stroke(); }
+  c.setLineDash([]);
+  for (const ln of o.lines || []) {
+    c.strokeStyle = ln.col; c.lineWidth = ln.lw || 1.4; c.setLineDash(ln.dash || []); c.beginPath(); let first = true;
+    for (const p of ln.pts) { const xx = X(p[0]), yy = Y(p[1]); first ? c.moveTo(xx, yy) : c.lineTo(xx, yy); first = false; } c.stroke();
+  }
+  c.setLineDash([]);
+  for (const d of o.dots || []) for (const p of d.pts) { c.beginPath(); c.fillStyle = d.col; c.arc(X(p[0]), Y(p[1]), d.r || 3, 0, TAU); c.fill(); if (d.ring) { c.strokeStyle = d.ring; c.lineWidth = 1.2; c.stroke(); } }
+  c.restore();
+  c.fillStyle = C.texte2; c.textBaseline = 'alphabetic';
+  if (o.xl) { c.textAlign = 'center'; c.fillText(o.xl, px + pw / 2, b.y + b.h - 2); }
+  if (o.yl) { c.save(); c.translate(b.x + 9, py + ph / 2); c.rotate(-PI / 2); c.textAlign = 'center'; c.fillText(o.yl, 0, 0); c.restore(); }
+  c.restore();
+  return { X, Y, px, py, pw, ph };
+}
+
+/* ---------------- Enregistreur (panneau) ---------------- */
+function sizeCanvas(c, cssH) {
+  c.style.height = cssH + 'px';
+  const r = c.getBoundingClientRect();
+  c.width = Math.max(10, Math.round(r.width * dpr)); c.height = Math.max(10, Math.round(cssH * dpr));
+}
+function scopeSetup() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); return { w, h }; }
+function sizePanelCanvases() { updatePanelRec(); sizeCanvas(scopeC, Math.round(clamp(innerHeight * 0.2, 110, 170))); }
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(240, Math.round(r.width)), nh = Math.max(280, Math.round(r.height));
+  const dp = Math.min(window.devicePixelRatio || 1, 2);
+  if (nw === W && nh === H && dp === dpr && cv.width) { sizePanelCanvases(); return; }
+  W = nw; H = nh; dpr = dp;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  sizePanelCanvases();
+}
+
+/* ---------------- Boucle à pas fixe ---------------- */
+const H60 = 1 / 60;
+let acc = 0;
+function stepFixed() { STEPS[step].adv(H60); }
+function advance(dt) {
+  acc += dt; let n = 0;
+  while (acc >= H60 && n++ < 12) { stepFixed(); acc -= H60; }
+  if (acc > 0.25) acc = 0;
+}
+
+/* ================= Étape 1 : le pH, un compteur de protons ================= */
+const NW_LOUPE = 55.5 * Elc.NA * 1e-15;      // molécules d'eau dans 1 µm³ (55,5 mol/L)
+const P1 = { kind: 'HCl', C: 0.1, pure: false, dil: 0, last: 'init' };
+const K1 = { sp: { x: 1, v: 0 }, rng: null, Hs: [], Os: [], hist: [], histT: -9, dil: null, flash: 0, k: -1, t: 0 };
+let S1 = null;
+function sol1() {
+  const b = P1.pure ? Elc.water() : P1.kind === 'HCl' ? Elc.strongAcid(P1.C) : Elc.strongBase(P1.C);
+  return Elc.solve(b);
+}
+function resetP1() { Object.assign(P1, { kind: 'HCl', C: 0.1, pure: false, dil: 0, last: 'init' }); }
+function newPool(n, rnd, taken) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let x = 0.5, y = 0.5;
+    for (let tr = 0; tr < 40; tr++) {
+      x = 0.05 + rnd() * 0.9; y = 0.05 + rnd() * 0.9;
+      if (!taken.some(p => Math.hypot(p.x - x, p.y - y) < 0.036)) break;
+    }
+    const p = { x, y, a: 0 }; out.push(p); taken.push(p);
+  }
+  return out;
+}
+function initPools1() {
+  K1.rng = Elc.rng((Math.random() * 4294967296) >>> 0);    // nouvelle graine : seul usage de Math.random
+  const taken = [];
+  K1.Hs = newPool(200, K1.rng, taken); K1.Os = newPool(200, K1.rng, taken);
+}
+function computeS1() { S1 = sol1(); K1.ion = Elc.sampleIons(S1.pH, 1e-15, 200); }
+function p1Changed(last) {
+  P1.last = last; const oldk = K1.k; computeS1();
+  if (oldk !== -1 && K1.ion.k !== oldk) K1.flash = 1;
+  K1.k = K1.ion.k;
+  // historique : les changements rapprochés d'un curseur se confondent en un seul point
+  const rec = K1.hist, last2 = rec.length ? rec[rec.length - 1] : null;
+  if (last === 'slider' && last2 && K1.t - K1.histT < 0.5) last2.pH = S1.pH; else { rec.push({ pH: S1.pH }); if (rec.length > 12) rec.shift(); }
+  K1.histT = K1.t;
+  syncTools();
+}
+function enter1(restart) {
+  if (restart) resetP1();
+  initPools1(); K1.dil = null; K1.flash = 0; K1.t = 0; K1.histT = -9;
+  computeS1(); K1.k = K1.ion.k;
+  if (restart) { K1.hist = [{ pH: S1.pH }]; K1.sp = { x: S1.pH, v: 0 }; }
+  syncTools();
+}
+function adv1(h) {
+  K1.t += h;
+  spring(K1.sp, S1.pH, h);
+  const io = K1.ion;
+  for (let i = 0; i < 2; i++) {
+    const pool = i ? K1.Os : K1.Hs, want = i ? io.drawOH : io.drawH;
+    pool.forEach((p, idx) => {
+      const tgt = idx < want ? 1 : 0, d = tgt - p.a, r = 2.6 * h; p.a += Math.abs(d) <= r ? d : Math.sign(d) * r;
+      p.x += (K1.rng() - 0.5) * 0.0075 * AG; p.y += (K1.rng() - 0.5) * 0.0075 * AG;
+      if (p.x < 0.04) p.x = 0.08 - p.x; if (p.x > 0.96) p.x = 1.92 - p.x;
+      if (p.y < 0.04) p.y = 0.08 - p.y; if (p.y > 0.96) p.y = 1.92 - p.y;
+    });
+  }
+  if (K1.flash > 0) K1.flash = Math.max(0, K1.flash - h / 1.3);
+  if (K1.dil) { K1.dil.t += h * (reduce ? 0.6 : 1); if (K1.dil.t > 2.4) K1.dil = null; }
+}
+const MARKS = [
+  { pH: 2, long: 'jus de citron ≈ 2', short: 'citron 2', name: 'Jus de citron · pH ≈ 2', role: 'Environ 10⁻² mol/L de H₃O⁺ : cent mille fois plus de protons libres que dans l’eau pure.' },
+  { pH: 5, long: 'café ≈ 5', short: 'café 5', name: 'Café · pH ≈ 5', role: 'Environ 10⁻⁵ mol/L de H₃O⁺ : cent fois plus de protons libres que dans l’eau pure.' },
+  { pH: 7, long: 'eau pure 7', short: 'eau pure 7', name: 'Eau pure · pH 7', role: '10⁻⁷ mol/L de H₃O⁺ et autant de OH⁻ : neutre à 25 °C.' },
+  { pH: 7.4, long: 'sang 7,4', short: 'sang 7,4', name: 'Sang · pH 7,4', role: 'Un peu basique : environ 4 × 10⁻⁸ mol/L de H₃O⁺, maintenu par des tampons.' },
+  { pH: 8.1, long: 'eau de mer ≈ 8,1', short: 'mer 8,1', name: 'Eau de mer · pH ≈ 8,1', role: 'Environ 8 × 10⁻⁹ mol/L de H₃O⁺ : un peu plus basique que le sang.' },
+  { pH: 12.5, long: 'eau de Javel ≈ 12,5', short: 'Javel 12,5', name: 'Eau de Javel · pH ≈ 12,5', role: 'Environ 3 × 10⁻¹³ mol/L de H₃O⁺ : très peu de protons libres, beaucoup de OH⁻.' }
+];
+function geo1() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const ry0 = top + 50, ry1 = H - bot, u = (ry1 - ry0) / 14;
+  const cx0 = nar ? 6 : 22, cR = cx0 + (nar ? 34 : 36), nR = cR + (nar ? 20 : 22), bx = nR + 4, bw = nar ? 12 : 14;
+  const pillX = bx + bw, tickX = pillX + (nar ? 50 : 56), labX = tickX + 8, rulerR = labX + (nar ? 68 : 130);
+  let bk, ls, lx, ly;
+  if (!nar) {
+    const rx0 = rulerR + 24, rw = W - rx0 - 24, bkW = clamp(rw * 0.26, 110, 190), gap = clamp(rw * 0.14, 56, 100);
+    ls = Math.max(120, Math.min(rw - bkW - gap, H - top - bot - 78));
+    const x0 = rx0 + Math.max(0, (rw - (bkW + gap + ls)) / 2);
+    ly = top + 8; lx = x0 + bkW + gap;
+    const bkH = clamp(ls * 0.66, 110, 250);
+    bk = { x: x0, y: ly + ls / 2 - bkH / 2 + 12, w: bkW, h: bkH };
+  } else {
+    const rx0 = rulerR + 8, rw = W - rx0 - 8; ls = Math.min(rw, 170);
+    const bkW = Math.min(rw * 0.62, 100), bkH = 108;
+    bk = { x: rx0 + (rw - bkW) / 2, y: top + 24, w: bkW, h: bkH };
+    lx = rx0 + (rw - ls) / 2; ly = bk.y + bkH + 30;
+  }
+  return { nar, top, bot, ry0, ry1, u, cx0, cR, nR, bx, bw, pillX, tickX, labX, rulerR, bk, ls, lx, ly };
+}
+function drawIon(c, x, y, r, col, mark, a, withMark) {
+  c.globalAlpha = a; c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+  if (withMark) { c.fillStyle = C.fond; c.font = '500 ' + Math.round(r * 1.7) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(mark, x, y + 0.5); }
+  c.globalAlpha = 1;
+}
+function draw1() {
+  const c = ctx, g = geo1(), s = S1, io = K1.ion, pHd = clamp(K1.sp.x, 0, 14), tint = tintA(pHd);
+  const yOf = p => g.ry0 + g.u * p, nar = g.nar;
+  const fsL = 11;
+  // ---- règle des pH
+  c.font = mono(fsL); c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  c.fillText('[H₃O⁺]', g.cx0, g.ry0 - 24); c.fillText('mol/L', g.cx0, g.ry0 - 11);
+  c.textAlign = 'right'; c.fillText('pH', g.nR, g.ry0 - 11);
+  const gr = c.createLinearGradient(0, g.ry0, 0, g.ry1); gr.addColorStop(0, rgba(RA, 0.95)); gr.addColorStop(1, rgba(RT2, 0.5));
+  c.fillStyle = gr; c.fillRect(g.bx, g.ry0, g.bw, g.ry1 - g.ry0);
+  c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; c.strokeRect(g.bx + 0.5, g.ry0 + 0.5, g.bw - 1, g.ry1 - g.ry0 - 1);
+  for (let n = 0; n <= 14; n++) {
+    const y = yOf(n), yy = Math.round(y) + 0.5;
+    c.strokeStyle = 'rgba(10,13,18,.55)'; c.beginPath(); c.moveTo(g.bx, yy); c.lineTo(g.bx + g.bw, yy); c.stroke();
+    c.strokeStyle = rgba(RT2, 0.8); c.beginPath(); c.moveTo(g.bx - 3, yy); c.lineTo(g.bx, yy); c.stroke();
+    c.font = mono(fsL); c.textBaseline = 'middle'; c.textAlign = 'right';
+    c.fillStyle = n === 7 ? C.texte : C.texte2; c.fillText(String(n), g.nR, y);
+    c.fillStyle = n === 7 ? C.texte : C.texte2; c.fillText(n === 0 ? '1' : '10' + sup(-n), g.cR, y);
+  }
+  zone(g.cx0 - 2, g.ry0 - 4, g.bx + g.bw + 3, g.ry1 + 4, 'regle', 'Règle des pH · pH = −log[H₃O⁺]', 'Chaque cran vers le bas divise par dix la concentration de protons libres : c’est la même graduation, lue en pH ou en mol/L.');
+  // repères du quotidien
+  const mk = MARKS.map(m => ({ m, y: yOf(m.pH) })).sort((a, b) => a.y - b.y);
+  let prev = -1e9; for (const o of mk) { o.ly = Math.max(o.y, prev + 14); prev = o.ly; }
+  c.font = mono(fsL); c.textBaseline = 'middle'; c.textAlign = 'left';
+  for (const o of mk) {
+    const txt = nar ? o.m.short : o.m.long;
+    c.strokeStyle = rgba(RT2, 0.22); c.beginPath(); c.moveTo(g.pillX, o.y); c.lineTo(g.tickX - 2, o.y); c.stroke();
+    c.strokeStyle = rgba(RT2, 0.9); c.beginPath(); c.moveTo(g.tickX - 2, o.y); c.lineTo(g.tickX + 3, o.y); if (Math.abs(o.ly - o.y) > 1.5) c.lineTo(g.labX - 3, o.ly); c.stroke();
+    c.fillStyle = C.texte2; c.beginPath(); c.arc(g.bx + g.bw + 1, o.y, 1.8, 0, TAU); c.fill();
+    c.fillStyle = o.m.pH === 7 ? C.texte : C.texte2; c.fillText(txt, g.labX, o.ly);
+    zone(g.tickX - 4, o.ly - 8, g.labX + c.measureText(txt).width + 4, o.ly + 8, 'mk' + o.m.pH, o.m.name, o.m.role);
+  }
+  // index (triangle + valeur) : glisse par un ressort amorti
+  const yi = yOf(pHd);
+  c.strokeStyle = C.accent; c.lineWidth = 1.6; c.beginPath(); c.moveTo(g.bx - 4, yi); c.lineTo(g.bx + g.bw + 3, yi); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.moveTo(g.bx + g.bw + 2, yi); c.lineTo(g.bx + g.bw + 10, yi - 5.5); c.lineTo(g.bx + g.bw + 10, yi + 5.5); c.closePath(); c.fill();
+  const pw = nar ? 38 : 44;
+  c.fillStyle = C.fond2; c.strokeStyle = C.accent; c.lineWidth = 1; rrect(c, g.bx + g.bw + 10.5, yi - 9.5, pw, 19, 3); c.fill(); c.stroke();
+  c.font = '500 12px ' + C.mono; c.fillStyle = C.accent; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(fmt(pHd, 2), g.bx + g.bw + 10.5 + pw / 2, yi + 0.5);
+  zone(g.bx - 6, yi - 10, g.bx + g.bw + 12 + pw, yi + 10, 'index', 'Index · pH courant', 'Il glisse vers la nouvelle valeur du pH comme un objet amorti : le pH change de façon continue, pas par sauts.');
+
+  // ---- bécher
+  const bk = g.bk, dil = K1.dil;
+  let lv = 0.52;
+  if (dil) { const t = dil.t; lv = t < 0.9 ? lerp(0.52, 0.92, sstep(t / 0.9)) : t < 1.4 ? 0.92 : lerp(0.92, 0.52, sstep((t - 1.4) / 0.8)); }
+  const bd = drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, tint, dil && dil.t < 1.2 ? 1.6 : 0, K1.t);
+  if (dil && dil.t < 0.95) {
+    const sx = bk.x + bk.w / 2; c.fillStyle = rgba(RT2, 0.7); c.fillRect(sx - 2, bk.y - 26, 4, bd.ys - (bk.y - 26) + 2);
+    c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText('+ 9 volumes d’eau', sx, bk.y - 30);
+  } else if (dil && dil.t < 2.2) { c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.globalAlpha = dil.t < 1.9 ? 1 : 1 - (dil.t - 1.9) / 0.3; c.fillStyle = C.texte2; c.fillText('on garde un volume', bk.x + bk.w / 2, bk.y - 14); c.globalAlpha = 1; }
+  zoneF((x, y) => x >= bk.x && x <= bk.x + bk.w && y >= bk.y && y <= bk.y + bk.h, 'bk1', 'Bécher · ' + (P1.pure ? 'eau pure' : (P1.kind === 'HCl' ? 'acide chlorhydrique' : 'soude') + ' à ' + sci(P1.C, 1) + ' mol/L'), 'La solution. Le petit carré sur le liquide est le volume observé dans la loupe.');
+  c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2;
+  const lab1 = P1.pure ? 'eau pure' : (P1.kind === 'HCl' ? 'HCl ' : 'NaOH ') + sci(P1.C, 1) + ' mol/L';
+  c.fillText(lab1, bk.x + bk.w / 2, bk.y + bk.h + 17);
+  // carré observé et traits vers la loupe
+  const sq = 16, sqx = bk.x + bk.w * 0.56, sqy = bd.ys + (bk.y + bk.h - bd.ys) * 0.38;
+  c.strokeStyle = rgba(RA, 0.9); c.lineWidth = 1.2; c.strokeRect(sqx + 0.5, sqy + 0.5, sq, sq); c.fillStyle = rgba(RA, 0.15); c.fillRect(sqx + 0.5, sqy + 0.5, sq, sq);
+  zone(sqx - 3, sqy - 3, sqx + sq + 3, sqy + sq + 3, 'sq', 'Volume observé · 1 µm³', 'Un cube de 1 micromètre de côté (10⁻¹⁵ L), agrandi dans la loupe : un milliard de fois plus petit que 1 mm³.');
+  c.save(); c.strokeStyle = rgba(RA, 0.5); c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath();
+  if (!nar) { c.moveTo(sqx + sq, sqy); c.lineTo(g.lx, g.ly); c.moveTo(sqx + sq, sqy + sq); c.lineTo(g.lx, g.ly + g.ls); }
+  else { c.moveTo(sqx, sqy + sq); c.lineTo(g.lx, g.ly); c.moveTo(sqx + sq, sqy + sq); c.lineTo(g.lx + g.ls, g.ly); }
+  c.stroke(); c.restore();
+
+  // ---- loupe
+  const L = g.ls; c.save(); rrect(c, g.lx, g.ly, L, L, 8); c.fillStyle = C.fond2; c.fill(); c.fillStyle = rgba(RA, tint * 0.55); c.fill(); c.clip();
+  const rp = clamp(L * 0.0145, 3.2, 6.5), withMark = rp >= 4.6, inner = L - 12;
+  for (const p of K1.Hs) if (p.a > 0.02) drawIon(c, g.lx + 6 + p.x * inner, g.ly + 6 + p.y * inner, rp, C.pos, '+', p.a * 0.95, withMark);
+  for (const p of K1.Os) if (p.a > 0.02) drawIon(c, g.lx + 6 + p.x * inner, g.ly + 6 + p.y * inner, rp, C.neg, '−', p.a * 0.95, withMark);
+  c.restore();
+  c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.3; rrect(c, g.lx + 0.5, g.ly + 0.5, L - 1, L - 1, 8); c.stroke();
+  zone(g.lx, g.ly, g.lx + L, g.ly + L, 'loupe1', 'Loupe · 1 µm³ = 10⁻¹⁵ L', 'Un tout petit volume du bécher. Les points sont des ions, en nombre réduit : la règle d’échelle dessous dit combien d’ions vaut un point.');
+  zoneF((x, y) => { for (const p of K1.Hs) if (p.a > 0.3 && Math.hypot(x - (g.lx + 6 + p.x * inner), y - (g.ly + 6 + p.y * inner)) < rp + 3) return true; return false; }, 'H3O', 'H₃O⁺ · ion hydronium', 'Un proton porté par une molécule d’eau.');
+  zoneF((x, y) => { for (const p of K1.Os) if (p.a > 0.3 && Math.hypot(x - (g.lx + 6 + p.x * inner), y - (g.ly + 6 + p.y * inner)) < rp + 3) return true; return false; }, 'OH', 'OH⁻ · ion hydroxyde', 'Une molécule d’eau qui a perdu un proton.');
+  // légendes sous la loupe
+  const cx = g.lx, w = L; let y = g.ly + L + 17; c.font = mono(11); c.textBaseline = 'alphabetic';
+  const rule = io.k === 0 ? '1 point = 1 ion' : '1 point = 10' + sup(io.k) + ' ions';
+  if (K1.flash > 0) { c.fillStyle = rgba(RA, 0.22 * K1.flash); c.fillRect(cx - 4, y - 13, w + 8, nar ? 31 : 17); }
+  c.fillStyle = K1.flash > 0.05 ? C.accent : C.texte2; c.textAlign = 'left';
+  if (!nar) { c.fillText('loupe : 1 µm³ · ' + rule, cx, y); y += 17; }
+  else { c.fillText('loupe : 1 µm³', cx, y); y += 14; c.fillText(rule, cx, y); y += 17; }
+  zone(cx, g.ly + L + 4, cx + w, y - 6, 'echelle', 'Règle d’échelle', 'Un point ne vaut pas un ion : il en représente 10ᵏ, pour que la loupe reste lisible. Le nombre réel est donné juste dessous.');
+  const sH = '≈ ' + approx(io.nH) + ' H₃O⁺', sO = '≈ ' + approx(io.nOH) + ' OH⁻', sep = ' · ';
+  const wH = c.measureText(sH).width, wS = c.measureText(sep).width, wO = c.measureText(sO).width;
+  if (wH + wS + wO <= w + 2) { c.fillStyle = C.pos; c.fillText(sH, cx, y); c.fillStyle = C.texte2; c.fillText(sep, cx + wH, y); c.fillStyle = C.neg; c.fillText(sO, cx + wH + wS, y); y += 15; }
+  else { c.fillStyle = C.pos; c.fillText(sH, cx, y); y += 14; c.fillStyle = C.neg; c.fillText(sO, cx, y); y += 15; }
+  const n = paragraph(c, '≈ ' + sci(NW_LOUPE, 0) + ' molécules d’eau, non dessinées', cx, y, w, 14, rgba(RT2, 0.8));
+}
+function scope1() {
+  const { w, h } = scopeSetup(), c = sctx, pH = clamp(K1.sp.x, 0, 14);
+  const y0 = 24, y1 = h - 36, hh = y1 - y0, bxx = 14, bww = 34;
+  c.font = mono(11); c.textBaseline = 'alphabetic';
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText('pH + pOH', bxx, 14);
+  const hp = hh * pH / 14;
+  c.fillStyle = rgba(RA, 0.85); c.fillRect(bxx, y0, bww, hp);
+  c.fillStyle = rgba(RN, 0.85); c.fillRect(bxx, y0 + hp, bww, hh - hp);
+  c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; c.strokeRect(bxx + 0.5, y0 + 0.5, bww, hh);
+  c.fillStyle = C.accent; c.textBaseline = 'middle'; c.fillText('pH ' + fmt(pH, 2), bxx + bww + 8, y0 + Math.max(8, hp / 2));
+  c.fillStyle = C.neg; c.fillText('pOH ' + fmt(14 - pH, 2), bxx + bww + 8, y0 + hp + Math.min(hh - hp - 8, Math.max(8, (hh - hp) / 2)));
+  c.fillStyle = C.texte; c.textBaseline = 'alphabetic'; c.fillText('pH + pOH = 14', bxx, h - 12);
+  // historique des pH
+  const hx0 = 150, hx1 = w - 12;
+  const b = plotArea(c, { x: hx0 - 26, y: 6, w: hx1 - hx0 + 26, h: h - 12 }, { x0: 0, x1: 11, y0: 14, y1: 0, yt: [0, 7, 14], padL: 24, padR: 4, padT: 12, padB: 14, fs: 10 });
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.font = mono(10); c.fillText('derniers pH', b.px + 2, 9);
+  const rec = K1.hist, off = Math.max(0, 12 - rec.length), pts = rec.map((r, i) => [i + off - 0.5, r.pH]);
+  c.strokeStyle = rgba(RA, 0.4); c.lineWidth = 1; c.beginPath(); pts.forEach((p, i) => { const xx = b.X(p[0] + 0.5 - 0.5), yy = b.Y(p[1]); i ? c.lineTo(xx, yy) : c.moveTo(xx, yy); }); c.stroke();
+  pts.forEach((p, i) => { c.fillStyle = i === pts.length - 1 ? C.accent : rgba(RA, 0.55); c.beginPath(); c.arc(b.X(p[0]), b.Y(p[1]), i === pts.length - 1 ? 3.4 : 2.4, 0, TAU); c.fill(); });
+}
+function state1() {
+  const s = S1, io = K1.ion;
+  return { step: 0, kind: P1.pure ? 'eau' : P1.kind, C: P1.pure ? 0 : P1.C, pH: s.pH, pOH: s.pOH, h: s.h, oh: s.oh, Kw: s.Kw,
+           nH: io.nH, nOH: io.nOH, drawH: io.drawH, drawOH: io.drawOH, scale: io.scale, k: io.k, dilutions: P1.dil, pHshown: K1.sp.x };
+}
+function status1() {
+  if (P1.pure) return 'Même dans l’eau pure, quelques molécules échangent un proton : autant de H₃O⁺ que de OH⁻, 10⁻⁷ mol/L chacun.';
+  if (P1.last === 'dilute') {
+    if (P1.kind === 'HCl' && P1.C >= 1e-6) return 'Dix fois moins de protons par litre : une seule unité de pH.';
+    if (P1.kind === 'HCl') return 'On ne peut pas rendre l’eau basique en y versant de l’acide : à cette dilution, ce sont les protons de l’eau qui dominent.';
+    if (P1.kind === 'NaOH' && P1.C >= 1e-6) return 'Dix fois moins de OH⁻ par litre : une seule unité de pH, dans l’autre sens.';
+  }
+  if (P1.kind === 'HCl' && P1.C <= 1.0000001e-7) return 'On ne peut pas rendre l’eau basique en y versant de l’acide : à cette dilution, ce sont les protons de l’eau qui dominent.';
+  if (P1.kind === 'NaOH') return 'Une base capte des protons : [OH⁻] monte, [H₃O⁺] baisse, et leur produit reste 10⁻¹⁴.';
+  if (P1.last === 'init' && P1.dil === 0) return 'Essaie « Diluer dix fois » : de combien le pH change-t-il ?';
+  return 'Un acide cède des protons à l’eau : [H₃O⁺] monte, [OH⁻] baisse, et leur produit reste 10⁻¹⁴.';
+}
+function readouts1() {
+  const s = S1;
+  setM('h', sci(s.h, 2)); setM('oh', sci(s.oh, 2)); setM('pH', fmt(s.pH, 2)); setM('pOH', fmt(s.pOH, 2)); setM('kw', sci(s.Kw, 1));
+  setM('C', P1.pure ? '0' : sci(P1.C, 1));
+}
+// ---- commandes de l'étape 1
+function setAcid1(kind, Cv) {
+  P1.kind = (kind === 'NaOH' || kind === 'base') ? 'NaOH' : 'HCl'; P1.C = clamp(Cv, 1e-12, 10); P1.pure = false; P1.dil = 0; p1Changed('set');
+}
+function dilute1() { if (P1.pure) return; P1.C = Math.max(1e-12, P1.C / 10); P1.dil++; K1.dil = { t: 0 }; p1Changed('dilute'); }
+function pure1(on) { P1.pure = !!on; if (!on) P1.last = 'set'; p1Changed(on ? 'pure' : 'set'); }
+
+/* ================= Étape 2 : acides faibles et tampons ================= */
+const DROP_V = 5e-5, DROP_MMOL = 0.05, NMOL = 24, VIS_MAX = 6, VOL_TIT = 0.025, CONC_TIT = 0.1;
+const P2 = { mode: 'gouttes', acid: 'acetique', ratio: 1, nA: 0, nB: 0, vb: 0.0125, seq: 0, pts: [], last: 'init', lastKind: null, btnA: false, btnB: false, keyA: false, keyB: false, holdT: 0 };
+const K2 = { t: 0, sw: { x: 7, v: 0 }, sb: { x: 4.76, v: 0 }, st: { x: 2.9, v: 0 }, dispW: 7, dispB: 4.76, queue: [], falls: [], rip: { w: 0, b: 0, t: 0 }, mols: [], anim: [], water: [], rng: null, baseHA: 12, cool: 0, convCool: 0, curveKey: '', cw: [], cb: [], tkey: '', ct: [], eq: null, lastVb: 0.0125, vbAcc: 0, tipGlow: 0, evt: 'none', back: false };
+let S2 = null;
+const ACID_LABEL = { acetique: 'tampon acétique', ammonium: 'tampon ammonium', phosphate: 'tampon phosphate' };
+const ratioLabel = k => { const z = Elc.ACIDS[k].zA; return z === 0 ? '[A⁻]/[HA]' : z > 0 ? '[A]/[HA⁺]' : '[A²⁻]/[HA⁻]'; };
+const chargeTxt = z => z === 0 ? '' : z === 1 ? '+' : z === -1 ? '−' : z > 0 ? z + '+' : Math.abs(z) + '−';
+
+function dropsBeaker(b, nA, nB) { return Elc.add(Elc.add(b, 'HCl', 1.0, nA * DROP_V), 'NaOH', 1.0, nB * DROP_V); }
+function chemAt(nA, nB) {
+  return { w: Elc.solve(dropsBeaker(Elc.water(0.1), nA, nB)), b: Elc.solve(dropsBeaker(Elc.bufferRatio(P2.acid, 0.2, P2.ratio, 0.1), nA, nB)) };
+}
+function titBeaker(Vb) { return Elc.add(Elc.weakAcid(P2.acid, CONC_TIT, VOL_TIT), 'NaOH', CONC_TIT, Vb); }
+function computeS2() {
+  const ch = chemAt(P2.nA, P2.nB), tit = Elc.solve(titBeaker(P2.vb));
+  S2 = { w: ch.w, b: ch.b, tit, pHtit: Elc.titrate(P2.acid, CONC_TIT, VOL_TIT, 'NaOH', CONC_TIT, P2.vb), eq: Elc.equivalence(P2.acid, CONC_TIT, VOL_TIT, 'NaOH', CONC_TIT) };
+}
+const pairNow = () => (P2.mode === 'titrage' ? S2.tit : S2.b).species.pairs[P2.acid];
+const targetHA = () => { const p = pairNow(); return Math.round(NMOL * p.HA / (p.HA + p.A)); };
+function curves2() {
+  const key = P2.acid + '|' + P2.ratio.toFixed(4);
+  if (K2.curveKey !== key) {
+    K2.curveKey = key;
+    const xs = new Set(); for (let x = 0; x <= 20.001; x += 0.5) xs.add(+x.toFixed(3)); [0.02, 0.05, 0.1, 0.2, 0.35].forEach(v => xs.add(v));
+    const ax = [...xs].sort((a, b) => a - b), all = [...ax.slice(1).map(v => -v).reverse(), 0, ...ax.slice(1)];
+    K2.cw = []; K2.cb = [];
+    for (const x of all) {
+      const V = Math.abs(x) * 1e-3, comp = x < 0 ? 'HCl' : 'NaOH';
+      K2.cw.push([x, Elc.solve(Elc.add(Elc.water(0.1), comp, 1.0, V)).pH]);
+      K2.cb.push([x, Elc.solve(Elc.add(Elc.bufferRatio(P2.acid, 0.2, P2.ratio, 0.1), comp, 1.0, V)).pH]);
+    }
+  }
+  if (K2.tkey !== P2.acid) { K2.tkey = P2.acid; K2.ct = Elc.titrationCurve(P2.acid, CONC_TIT, VOL_TIT, 'NaOH', CONC_TIT, 0.05, 200).map(p => [p.Vb * 1000, p.pH]); }
+}
+function recPoint(nA, nB) {
+  const ch = chemAt(nA, nB), p = ch.b.species.pairs[P2.acid];
+  return { x: (nB - nA) * DROP_MMOL, pw: ch.w.pH, pb: ch.b.pH, nHA: Math.round(NMOL * p.HA / (p.HA + p.A)) };
+}
+// ---- molécules de la loupe
+function initMols2() {
+  K2.rng = Elc.rng((Math.random() * 4294967296) >>> 0);
+  const taken = [], out = [];
+  for (let i = 0; i < NMOL; i++) {
+    let x = 0.5, y = 0.5;
+    for (let tr = 0; tr < 60; tr++) { x = 0.1 + K2.rng() * 0.8; y = 0.1 + K2.rng() * 0.8; if (!taken.some(p => Math.hypot(p.x - x, p.y - y) < 0.15)) break; }
+    taken.push({ x, y }); out.push({ x, y, ang: K2.rng() * TAU, state: 'A', busy: false, flash: 0 });
+  }
+  const nHA = targetHA(); K2.baseHA = nHA;
+  // les premiers du tirage sont HA : mélange sans motif
+  const order = out.map((m, i) => i).sort(() => K2.rng() - 0.5);
+  order.forEach((idx, k) => { out[idx].state = k < nHA ? 'HA' : 'A'; });
+  K2.mols = out; K2.anim = []; K2.water = [];
+}
+function pickMol(state) {
+  const c = K2.mols.map((m, i) => i).filter(i => K2.mols[i].state === state && !K2.mols[i].busy);
+  return c.length ? c[Math.floor(K2.rng() * c.length)] : -1;
+}
+// conversion animée : un ion arrive, la molécule change d'état à l'arrivée
+function convert(kind, delay, transient) {
+  const to = kind === 'H' ? 'HA' : 'A', i = pickMol(kind === 'H' ? 'A' : 'HA');
+  if (i < 0) return false;
+  K2.mols[i].busy = true;
+  const side = Math.floor(K2.rng() * 4), u = K2.rng();
+  K2.anim.push({ type: 'ion', kind, mol: i, to, t: -delay, dur: 0.8, sx: side === 0 ? -0.05 : side === 1 ? 1.05 : u, sy: side === 2 ? -0.05 : side === 3 ? 1.05 : u, transient: !!transient });
+  return true;
+}
+function applyConv(rec) {
+  const c = rec.nHA - K2.baseHA;
+  if (c > 0) { for (let i = 0; i < c; i++) convert('H', i * 0.25); K2.baseHA = rec.nHA; }
+  else if (c < 0) { for (let i = 0; i < -c; i++) convert('OH', i * 0.25); K2.baseHA = rec.nHA; }
+  else convert(rec.kind === 'acide' ? 'H' : 'OH', 0, true);
+}
+function settleMols() {            // fin immédiate de toutes les animations, états alignés sur le calcul
+  K2.anim = []; K2.water = []; K2.mols.forEach(m => { m.busy = false; m.flash = 0; });
+  const nHA = targetHA(); let have = K2.mols.filter(m => m.state === 'HA').length;
+  for (const m of K2.mols) { if (have > nHA && m.state === 'HA') { m.state = 'A'; have--; } }
+  for (const m of K2.mols) { if (have < nHA && m.state === 'A') { m.state = 'HA'; have++; } }
+  K2.baseHA = nHA;
+}
+// ---- gouttes
+function landed(rec) {
+  K2.dispW = rec.pw; K2.dispB = rec.pb;
+  P2.pts.push({ seq: rec.seq, x: rec.x, pw: rec.pw, pb: rec.pb });
+  if (P2.pts.length > 800) P2.pts.shift();
+  K2.rip = { w: 1, b: 1, t: 0 }; K2.evt = rec.kind;
+  applyConv(rec);
+}
+function addDrops(kind, n) {
+  kind = (kind === 'base' || kind === 'NaOH') ? 'base' : 'acide';
+  if (P2.mode !== 'gouttes') { P2.mode = 'gouttes'; modeChanged2(); }
+  n = Math.max(0, Math.round(n));
+  const recs = [];
+  for (let i = 0; i < n; i++) {
+    if (kind === 'acide') P2.nA++; else P2.nB++;
+    P2.seq++;
+    const r = recPoint(P2.nA, P2.nB); r.seq = P2.seq; r.kind = kind; recs.push(r);
+  }
+  P2.last = 'drop'; P2.lastKind = kind;
+  const silentN = K2.queue.length ? 0 : Math.max(0, n - VIS_MAX);
+  recs.forEach((r, i) => {
+    if (i < silentN) { P2.pts.push({ seq: r.seq, x: r.x, pw: r.pw, pb: r.pb }); K2.dispW = r.pw; K2.dispB = r.pb; K2.baseHA = r.nHA; }
+    else K2.queue.push(r);
+  });
+  if (silentN) { settleSilent(recs[silentN - 1]); }
+  while (K2.queue.length > 24) landed(K2.queue.shift());
+  computeS2(); syncTools();
+}
+function settleSilent(r) { K2.mols.forEach(m => { m.busy = false; }); K2.anim = []; let have = K2.mols.filter(m => m.state === 'HA').length; for (const m of K2.mols) { if (have > r.nHA && m.state === 'HA') { m.state = 'A'; have--; } if (have < r.nHA && m.state === 'A') { m.state = 'HA'; have++; } } K2.baseHA = r.nHA; }
+function clearDrops2() {
+  P2.nA = 0; P2.nB = 0; P2.seq = 0; P2.pts = []; K2.queue = []; K2.falls = []; K2.rip = { w: 0, b: 0, t: 0 }; K2.evt = 'none';
+  computeS2(); K2.dispW = S2.w.pH; K2.dispB = S2.b.pH; K2.sw.x = K2.dispW; K2.sb.x = K2.dispB; K2.sw.v = K2.sb.v = 0; settleMols();
+}
+function modeChanged2() {
+  K2.queue = []; K2.falls = []; computeS2(); K2.dispW = S2.w.pH; K2.dispB = S2.b.pH; K2.st.x = S2.pHtit; K2.st.v = 0; K2.lastVb = P2.vb; K2.vbAcc = 0; settleMols();
+  buildMeas(1); updateText(); syncTools();
+}
+function resetP2() { Object.assign(P2, { mode: 'gouttes', acid: 'acetique', ratio: 1, nA: 0, nB: 0, vb: 0.0125, seq: 0, pts: [], last: 'init', lastKind: null, btnA: false, btnB: false, keyA: false, keyB: false, holdT: 0 }); }
+function enter2(restart) {
+  if (restart) resetP2();
+  K2.queue = []; K2.falls = []; K2.rip = { w: 0, b: 0, t: 0 }; K2.t = 0; K2.curveKey = ''; K2.tkey = '';
+  K2.evt = P2.nA + P2.nB > 0 ? (P2.lastKind || 'none') : 'none'; K2.back = false;
+  computeS2(); curves2(); initMols2();
+  K2.dispW = S2.w.pH; K2.dispB = S2.b.pH; K2.sw = { x: K2.dispW, v: 0 }; K2.sb = { x: K2.dispB, v: 0 }; K2.st = { x: S2.pHtit, v: 0 }; K2.lastVb = P2.vb; K2.vbAcc = 0;
+  if (P2.pts.length === 0) P2.seq = 0;
+  syncTools();
+}
+function adv2(h) {
+  K2.t += h;
+  // gouttes maintenues : une toutes les 0,12 s
+  if (P2.mode === 'gouttes' && ((P2.btnA || P2.keyA) || (P2.btnB || P2.keyB))) {
+    P2.holdT -= h;
+    if (P2.holdT <= 0) { addDrops((P2.btnB || P2.keyB) && !(P2.btnA || P2.keyA) ? 'base' : 'acide', 1); P2.holdT = 0.12; }
+  } else P2.holdT = 0;
+  // file des gouttes : une chute visible toutes les 0,12 s
+  K2.cool -= h;
+  if (K2.queue.length && K2.cool <= 0) { K2.falls.push({ rec: K2.queue.shift(), t: 0 }); K2.cool = 0.12; }
+  for (const f of K2.falls) f.t += h;
+  while (K2.falls.length && K2.falls[0].t >= FALL_T) { const f = K2.falls.shift(); if (f.rec) landed(f.rec); else K2.rip = { w: 0, b: 1, t: 0 }; }
+  K2.rip.t += h;
+  // mode titrage : la goutte visible suit le curseur
+  if (P2.mode === 'titrage') {
+    const dv = P2.vb - K2.lastVb; K2.lastVb = P2.vb;
+    if (dv > 0) { K2.back = false; K2.vbAcc += dv; if (K2.vbAcc >= 0.0006 && K2.falls.length < 3) { K2.falls.push({ rec: null, t: 0 }); K2.vbAcc = 0; } } else if (dv < 0) { K2.vbAcc = 0; K2.back = true; }
+    K2.convCool -= h;
+    const tgt = targetHA();
+    if (K2.baseHA !== tgt && K2.convCool <= 0) {
+      if (tgt < K2.baseHA) { if (convert('OH', 0)) K2.baseHA--; }
+      else { const i = pickMol('A'); if (i >= 0) { K2.mols[i].state = 'HA'; K2.mols[i].flash = 1; K2.baseHA++; } }   // retour en arrière : bascule sans ion qui arrive
+      K2.convCool = 0.09;
+    }
+    spring(K2.st, S2.pHtit, h);
+  } else { spring(K2.sw, K2.dispW, h); spring(K2.sb, K2.dispB, h); }
+  // agitation des molécules
+  const ms = K2.mols;
+  for (const m of ms) {
+    m.x += (K2.rng() - 0.5) * 0.0065 * AG; m.y += (K2.rng() - 0.5) * 0.0065 * AG; m.ang += (K2.rng() - 0.5) * 0.09 * AG;
+    if (m.flash > 0) m.flash = Math.max(0, m.flash - h / 0.8);
+  }
+  for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) {
+    const dx = ms[j].x - ms[i].x, dy = ms[j].y - ms[i].y, d = Math.hypot(dx, dy);
+    if (d < 0.12 && d > 1e-6) { const f = (0.12 - d) * 0.15 / d; ms[i].x -= dx * f; ms[i].y -= dy * f; ms[j].x += dx * f; ms[j].y += dy * f; }
+  }
+  for (const m of ms) { m.x = clamp(m.x, 0.08, 0.92); m.y = clamp(m.y, 0.08, 0.92); }
+  // animations d'ions et de réversion
+  for (let i = K2.anim.length - 1; i >= 0; i--) {
+    const a = K2.anim[i]; a.t += h;
+    if (a.type === 'ion' && a.t >= a.dur) {
+      const m = K2.mols[a.mol]; m.state = a.to; m.flash = 1; m.busy = false;
+      if (a.kind === 'OH') K2.water.push({ x: m.x, y: m.y, t: 0 });
+      if (a.transient) { m.busy = true; K2.anim.push({ type: 'revert', mol: a.mol, to: a.to === 'HA' ? 'A' : 'HA', t: -1.5, dur: 0 }); }
+      K2.anim.splice(i, 1);
+    } else if (a.type === 'revert' && a.t >= 0) {
+      const m = K2.mols[a.mol]; m.state = a.to; m.busy = false; m.flash = 0.6;
+      K2.anim.push({ type: 'fly', x: m.x, y: m.y, dir: a.to === 'A' ? 'out' : 'in', t: 0, dur: 0.9 });
+      K2.anim.splice(i, 1);
+    } else if (a.type === 'fly' && a.t >= a.dur) K2.anim.splice(i, 1);
+  }
+  for (let i = K2.water.length - 1; i >= 0; i--) { K2.water[i].t += h; if (K2.water[i].t > 1.3) K2.water.splice(i, 1); }
+}
+const FALL_T = 0.44;
+
+/* ---- géométrie de la scène ---- */
+function geo2() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const ah = nar ? 232 : clamp(H * 0.4, 214, 290);
+  const sw = nar ? clamp((W - 16) * 0.29, 88, 112) : clamp(W * 0.2, 120, 220);
+  const x0 = nar ? 8 : 24, tit = P2.mode === 'titrage';
+  const bu = Math.round(ah * 0.3), bh = Math.round(ah * 0.44), bkW = Math.round(sw * (tit ? 0.7 : 0.66)), yB = top + bu + 14;
+  const cxW = tit ? x0 + sw : x0 + sw / 2, cxB = x0 + sw * 1.5;
+  const lx = x0 + 2 * sw + (nar ? 8 : 40), cap = nar ? 28 : 32;
+  const ls = nar ? Math.max(100, Math.min(W - lx - 8, ah - cap + 10)) : clamp(ah - cap, 140, 250);
+  const ly = top + cap;
+  const curve = { x: nar ? 4 : 12, y: top + ah + 12, w: W - (nar ? 8 : 24), h: H - bot - (top + ah + 12) + 6 };
+  return { nar, top, bot, ah, sw, x0, bu, bh, bkW, yB, cxW, cxB, lx, ly, ls, curve, tit, legend: !nar && W - lx - ls - 24 >= 170 };
+}
+function drawBurette(c, cx, yTop, yTip, level, kind, zoneKey, label) {
+  const w = 14, x = cx - w / 2, yv = yTip - 16;
+  const col = kind === 'base' ? RN : RP;
+  c.save();
+  c.fillStyle = rgba(col, 0.28); const lh = (yv - yTop - 4) * clamp(level, 0, 1); c.fillRect(x + 1, yv - lh, w - 2, lh);
+  c.strokeStyle = rgba(RT, 0.82); c.lineWidth = 1.3; c.beginPath(); c.moveTo(x, yTop); c.lineTo(x, yv); c.lineTo(cx - 2.5, yTip); c.lineTo(cx + 2.5, yTip); c.lineTo(x + w, yv); c.lineTo(x + w, yTop); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.55); c.lineWidth = 1; c.beginPath(); for (let i = 1; i < 10; i++) { const yy = yTop + (yv - yTop) * i / 10; c.moveTo(x + w - (i % 5 ? 4 : 7), yy); c.lineTo(x + w, yy); } c.stroke();
+  c.fillStyle = rgba(RT, 0.7); c.fillRect(x - 4, yv - 4, w + 8, 3);
+  c.restore();
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  c.fillStyle = kind === 'base' ? C.neg : C.pos; c.fillText(label[0], cx + 12, yTop + 12); c.fillStyle = C.texte2; c.fillText(label[1], cx + 12, yTop + 26);
+  zone(x - 4, yTop, x + w + 4, yTip, zoneKey, 'Burette · ' + label[0] + ' ' + label[1], 'Chaque goutte vaut 0,05 mL, soit 0,05 mmol de ' + (kind === 'base' ? 'OH⁻' : 'H₃O⁺') + '. Les deux béchers reçoivent la même goutte au même instant.');
+}
+function drawFall(c, x, y0, y1, t, kind) {
+  const u = clamp(t / FALL_T, 0, 1), y = y0 + (y1 - y0) * u * u;
+  c.fillStyle = kind === 'base' ? C.neg : C.pos; c.beginPath(); c.arc(x, y, 3.2, 0, TAU); c.fill();
+  c.beginPath(); c.moveTo(x - 2.6, y - 1); c.lineTo(x, y - 8); c.lineTo(x + 2.6, y - 1); c.fill();
+}
+function drawRipple(c, x, ys, w, amp, t) {
+  if (amp <= 0 || t > 0.9) return; const u = t / 0.9, rx = 5 + (w * 0.4) * u;
+  c.strokeStyle = rgba(RT, 0.7 * (1 - u)); c.lineWidth = 1; c.beginPath(); c.ellipse(x, ys, rx, rx * 0.16, 0, 0, TAU); c.stroke();
+}
+function pHBox(c, cx, y, v, col, key, name, role) {
+  const w = 82; c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; rrect(c, cx - w / 2 + 0.5, y + 0.5, w, 23, 3); c.fill(); c.stroke();
+  c.font = '500 14px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = col; c.fillText('pH ' + fmt(v, 2), cx, y + 12.5);
+  zone(cx - w / 2, y, cx + w / 2, y + 24, key, name, role);
+}
+function drawMol(c, x, y, ang, s, state, z, flash, glow) {
+  c.save(); c.translate(x, y); c.rotate(ang); c.scale(s, s);
+  if (flash > 0) { c.fillStyle = rgba(RA, 0.28 * flash); c.beginPath(); c.arc(0, 0, 17, 0, TAU); c.fill(); }
+  c.strokeStyle = rgba(RT, 0.6); c.lineWidth = 1.2 / s; c.beginPath(); c.moveTo(0, 0); c.lineTo(-6.5, -5.2); c.moveTo(0, 0); c.lineTo(-6.5, 5.2);
+  if (state === 'HA') { c.moveTo(0, 0); c.lineTo(9.8, 0); } c.stroke();
+  c.strokeStyle = C.texte; c.fillStyle = rgba(RT, 0.1); c.lineWidth = 1.3 / s;
+  c.beginPath(); c.arc(0, 0, 5.5, 0, TAU); c.fill(); c.stroke();
+  for (const sy of [-5.2, 5.2]) { c.beginPath(); c.arc(-6.5, sy, 3.2, 0, TAU); c.fill(); c.stroke(); }
+  if (state === 'HA') { c.fillStyle = C.pos; c.beginPath(); c.arc(9.8, 0, 3.9, 0, TAU); c.fill(); }
+  c.restore();
+  const zc = state === 'HA' ? z : z - 1, t = chargeTxt(zc);
+  if (t) { c.font = '500 ' + Math.max(10, Math.round(11 * s)) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = zc > 0 ? C.pos : C.neg; c.fillText(t, x, y - 13 * s - 2); }
+}
+function drawProtonFly(c, x, y, a, g) {
+  const edgeX = x < 0.5 ? -0.05 : 1.05, u = a.dir === 'out' ? sstep(a.t / a.dur) : 1 - sstep(a.t / a.dur), al = a.dir === 'out' ? 1 - a.t / a.dur : a.t / a.dur;
+  const px = g.lx + (lerp(a.x, edgeX, u)) * g.ls, py = g.ly + (lerp(a.y, a.y, u)) * g.ls;
+  c.globalAlpha = clamp(al, 0, 1); c.fillStyle = C.pos; c.beginPath(); c.arc(px, py, 3.6, 0, TAU); c.fill(); c.globalAlpha = 1;
+}
+
+function draw2() {
+  const c = ctx, g = geo2(), tit = g.tit;
+  const nar = g.nar, label = k => [k === 'base' ? 'NaOH' : 'HCl', '1,0 mol/L'];
+  const kindNow = P2.lastKind === 'base' ? 'base' : 'acide';
+  const ripAmp = (K2.rip.t < 0.9) ? 1.4 * (1 - K2.rip.t / 0.9) : 0;
+  const tipY = g.top + g.bu;
+  if (!tit) {
+    // deux béchers
+    const sides = [{ cx: g.cxW, v: K2.sw.x, name: 'Bécher d’eau pure · 100 mL', role: 'Rien n’y retient les protons ajoutés : le pH plonge dès la première goutte.', lab: 'eau pure', col: C.texte, side: 'w', rip: K2.rip.w },
+                   { cx: g.cxB, v: K2.sb.x, name: 'Tampon · 100 mL · ' + Elc.ACIDS[P2.acid].acid + ' / ' + Elc.ACIDS[P2.acid].base, role: 'Acide faible (' + fmt(0.2 / (1 + P2.ratio), 3) + ' mol/L) et sa base conjuguée (' + fmt(0.2 * P2.ratio / (1 + P2.ratio), 3) + ' mol/L) : de quoi capter et de quoi céder des protons.', lab: ACID_LABEL[P2.acid], col: C.accent, side: 'b', rip: K2.rip.b }];
+    for (const s of sides) {
+      drawBurette(c, s.cx, g.top, tipY, 0.82, kindNow, 'bur' + s.side, label(kindNow));
+      const bx = s.cx - g.bkW / 2, bd = drawBeaker(c, bx, g.yB, g.bkW, g.bh, 0.58, tintA(s.v), 0, K2.t);
+      if (s.rip) drawRipple(c, s.cx, bd.ys, g.bkW, ripAmp, K2.rip.t);
+      zone(bx, g.yB, bx + g.bkW, g.yB + g.bh, 'bk2' + s.side, s.name, s.role);
+      pHBox(c, s.cx, g.yB + g.bh + 10, s.v, s.col, 'ph2' + s.side, 'Afficheur de pH · ' + s.lab, 'Il glisse vers la nouvelle valeur après chaque goutte.');
+      c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText(s.lab, s.cx, g.yB + g.bh + 52);
+      g._s = g._s || {}; g._s[s.side] = { bd, bx };
+    }
+    for (const f of K2.falls) for (const s of sides) drawFall(c, s.cx, tipY, g._s[s.side].bd.ys, f.t, f.rec ? f.rec.kind : kindNow);
+    // carré observé sur le tampon et traits vers la loupe
+    const bd = g._s.b.bd, bx = g._s.b.bx, sq = 14, sqx = bx + g.bkW * 0.5, sqy = bd.ys + (g.yB + g.bh - bd.ys) * 0.32;
+    c.strokeStyle = rgba(RA, 0.9); c.lineWidth = 1.2; c.strokeRect(sqx + 0.5, sqy + 0.5, sq, sq); c.fillStyle = rgba(RA, 0.15); c.fillRect(sqx + 0.5, sqy + 0.5, sq, sq);
+    c.save(); c.strokeStyle = rgba(RA, 0.5); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(sqx + sq, sqy); c.lineTo(g.lx, g.ly); c.moveTo(sqx + sq, sqy + sq); c.lineTo(g.lx, g.ly + g.ls); c.stroke(); c.restore();
+  } else {
+    const cx = g.cxW, lvB = 0.42 + 0.3 * clamp(P2.vb / 0.05, 0, 1), bx = cx - g.bkW / 2;
+    drawBurette(c, cx, g.top, tipY, 1 - P2.vb / 0.05, 'base', 'burT', ['NaOH', '0,10 mol/L']);
+    const bd = drawBeaker(c, bx, g.yB, g.bkW, g.bh, lvB, tintA(K2.st.x), 0, K2.t);
+    if (K2.rip.b) drawRipple(c, cx, bd.ys, g.bkW, ripAmp, K2.rip.t);
+    zone(bx, g.yB, bx + g.bkW, g.yB + g.bh, 'bkT', 'Bécher · 25 mL de ' + Elc.ACIDS[P2.acid].acid + ' à 0,10 mol/L', 'On y verse de la soude à 0,10 mol/L, de 0 à 50 mL : le double du volume d’équivalence.');
+    pHBox(c, cx, g.yB + g.bh + 10, K2.st.x, C.accent, 'phT', 'Afficheur de pH', 'Il glisse vers la nouvelle valeur quand le volume versé change.');
+    c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2; c.fillText('25 mL d’acide faible', cx, g.yB + g.bh + 52);
+    for (const f of K2.falls) drawFall(c, cx, tipY, bd.ys, f.t, 'base');
+    const sq = 14, sqx = bx + g.bkW * 0.5, sqy = bd.ys + (g.yB + g.bh - bd.ys) * 0.32;
+    c.strokeStyle = rgba(RA, 0.9); c.lineWidth = 1.2; c.strokeRect(sqx + 0.5, sqy + 0.5, sq, sq); c.fillStyle = rgba(RA, 0.15); c.fillRect(sqx + 0.5, sqy + 0.5, sq, sq);
+    c.save(); c.strokeStyle = rgba(RA, 0.5); c.setLineDash([3, 3]); c.beginPath(); c.moveTo(sqx + sq, sqy); c.lineTo(g.lx, g.ly); c.moveTo(sqx + sq, sqy + sq); c.lineTo(g.lx, g.ly + g.ls); c.stroke(); c.restore();
+  }
+  loupe2(c, g);
+  curve2(c, g);
+}
+function loupe2(c, g) {
+  const A = Elc.ACIDS[P2.acid], L = g.ls, pr = pairNow(), tint = tintA(P2.mode === 'titrage' ? K2.st.x : K2.sb.x);
+  c.font = mono(11); c.textBaseline = 'alphabetic';
+  const cap = P2.mode === 'titrage' ? 'loupe sur le bécher · ' + NMOL + ' molécules dessinées' : 'loupe sur le tampon · ' + NMOL + ' molécules dessinées';
+  paragraph(c, g.nar ? 'loupe · ' + NMOL + ' molécules' : cap, g.lx, g.top + 12, L + 10, 14, C.texte2);
+  c.save(); rrect(c, g.lx, g.ly, L, L, 8); c.fillStyle = C.fond2; c.fill(); c.fillStyle = rgba(RA, tint * 0.55); c.fill(); c.clip();
+  const s = clamp(L / 200, 0.7, 1.25), inner = L;
+  for (const w of K2.water) {
+    const a = 1 - w.t / 1.3; c.globalAlpha = Math.max(0, a); c.strokeStyle = C.texte2; c.setLineDash([2, 2]); c.beginPath(); c.arc(g.lx + w.x * inner, g.ly + w.y * inner + 14 * s, 8 * s, 0, TAU); c.stroke(); c.setLineDash([]);
+    c.fillStyle = C.texte2; c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('H₂O', g.lx + w.x * inner, g.ly + w.y * inner + 14 * s); c.globalAlpha = 1;
+  }
+  K2.mols.forEach(m => drawMol(c, g.lx + m.x * inner, g.ly + m.y * inner, m.ang, s, m.state, A.zA, m.flash));
+  for (const a of K2.anim) {
+    if (a.type === 'ion' && a.t >= 0) {
+      const m = K2.mols[a.mol], u = sstep(a.t / a.dur), x = lerp(a.sx, m.x, u), y = lerp(a.sy, m.y, u), col = a.kind === 'H' ? C.pos : C.neg;
+      c.fillStyle = col; c.beginPath(); c.arc(g.lx + x * inner, g.ly + y * inner, 5.2 * Math.max(s, 0.85), 0, TAU); c.fill();
+      c.fillStyle = C.fond; c.font = '500 ' + Math.round(9 * Math.max(s, 0.9)) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(a.kind === 'H' ? '+' : '−', g.lx + x * inner, g.ly + y * inner + 0.5);
+    } else if (a.type === 'fly') drawProtonFly(c, a.x, a.y, a, g);
+  }
+  if (!g.legend && W >= 640) {
+    const yy = g.ly + L - 12; c.fillStyle = 'rgba(10,13,18,.6)'; c.fillRect(g.lx, yy - 12, L, 24);
+    drawMol(c, g.lx + 22, yy, 0, 0.9, 'HA', A.zA, 0); c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('HA', g.lx + 38, yy);
+    drawMol(c, g.lx + L / 2 + 12, yy, 0, 0.9, 'A', A.zA, 0); c.fillStyle = C.texte; c.fillText('A', g.lx + L / 2 + 28, yy);
+  }
+  c.restore();
+  c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.3; rrect(c, g.lx + 0.5, g.ly + 0.5, L - 1, L - 1, 8); c.stroke();
+  zone(g.lx, g.ly, g.lx + L, g.ly + L, 'loupe2', 'Loupe · tampon', 'Vingt-quatre molécules représentent les ~' + sci(Elc.NA * 0.02, 0) + ' du bécher. Le rapport HA / A est celui du calcul, arrondi.');
+  zoneF((x, y) => K2.mols.some(m => m.state === 'HA' && Math.hypot(x - (g.lx + m.x * inner), y - (g.ly + m.y * inner)) < 14 * s), 'HA', 'Acide faible (HA) · ' + A.acid, 'Il porte un proton, qu’il peut céder à l’eau ou à une base.');
+  zoneF((x, y) => K2.mols.some(m => m.state === 'A' && Math.hypot(x - (g.lx + m.x * inner), y - (g.ly + m.y * inner)) < 14 * s), 'A', 'Base conjuguée (A) · ' + A.base, 'Ce qui reste de l’acide quand il a cédé son proton ; elle peut le reprendre.');
+  if (g.legend) {
+    const x = g.lx + L + 22, w = W - x - 20; let y = g.ly + 18;
+    c.font = mono(11);
+    drawMol(c, x + 14, y - 4, 0, 1, 'HA', A.zA, 0); c.textAlign = 'left'; c.fillStyle = C.texte; c.textBaseline = 'alphabetic'; c.fillText('HA · ' + A.acid, x + 38, y); y += 14; y += paragraph(c, 'acide faible : il porte un proton à céder', x + 38, y, w - 38, 14, C.texte2) * 14 + 14;
+    drawMol(c, x + 14, y - 4, 0, 1, 'A', A.zA, 0); c.fillStyle = C.texte; c.fillText('A · ' + A.base, x + 38, y); y += 14; y += paragraph(c, 'base conjuguée : elle peut le reprendre', x + 38, y, w - 38, 14, C.texte2) * 14 + 14;
+    const nHA = K2.mols.filter(m => m.state === 'HA').length;
+    c.fillStyle = C.texte2; c.fillText('dans la loupe : ' + nHA + ' HA · ' + (NMOL - nHA) + ' A', x, y); y += 14;
+    c.fillText('dans le bécher : [A]/[HA] = ' + fmt(pr.ratio, 2), x, y); y += 18;
+    paragraph(c, loupeNote2(), x, y, w, 14, rgba(RT2, 0.8));
+  }
+}
+function loupeNote2() {
+  if (P2.mode === 'titrage') {
+    if (K2.back) return 'Le curseur recule : la courbe se relit à l’envers, sans nouvelle réaction.';
+    return P2.vb > 0.00005 ? 'Un OH⁻ arrive : il prend le proton d’un acide faible, qui devient base conjuguée ; une molécule d’eau se forme.' : 'Rien n’est encore ajouté : HA et A coexistent dans le rapport choisi.';
+  }
+  if (K2.evt === 'acide') return 'Un proton arrive : il se fixe sur une base conjuguée, qui redevient acide faible.';
+  if (K2.evt === 'base') return 'Un OH⁻ arrive : il prend le proton d’un acide faible, qui devient base conjuguée ; une molécule d’eau se forme.';
+  return 'Rien n’est encore ajouté : HA et A coexistent dans le rapport choisi.';
+}
+function curve2(c, g) {
+  const cb = g.curve, A = Elc.ACIDS[P2.acid], pKa = A.pKa, band = [{ y0: pKa - 1, y1: pKa + 1, col: rgba(RA, 0.14) }];
+  const yt = [0, 2, 4, 6, 8, 10, 12, 14];
+  let o, P;
+  if (P2.mode === 'gouttes') {
+    const last = P2.pts.length ? P2.pts[P2.pts.length - 1] : null, xc = last ? last.x : 0;
+    const pw = P2.pts.map(p => [p.x, p.pw]), pb = P2.pts.map(p => [p.x, p.pb]);
+    o = { x0: -20, x1: 20, y0: 0, y1: 14, xt: [-20, -10, 0, 10, 20], yt, fx: q => (q > 0 ? '+' : '') + fmt(q, 0), xl: 'ajouté (mmol) : acide ← 0 → base', yl: 'pH', padL: 36, padB: 36, bands: band,
+          vlines: [{ v: 0, col: rgba(RT2, 0.35), dash: [2, 4] }], hlines: [{ v: pKa, col: rgba(RA, 0.45), dash: [3, 4] }],
+          lines: [{ pts: K2.cw, col: rgba(RT2, 0.7), lw: 1, dash: [4, 3] }, { pts: K2.cb, col: rgba(RA, 0.7), lw: 1.3 }],
+          dots: [{ pts: pw, col: C.texte2, r: 2.4 }, { pts: pb, col: C.accent, r: 2.8 }, { pts: [[xc, K2.dispW]], col: C.texte2, r: 4.6, ring: C.texte }, { pts: [[xc, K2.dispB]], col: C.accent, r: 4.8, ring: C.texte }] };
+  } else {
+    const eq = S2.eq, Veq = eq.Veq * 1000;
+    o = { x0: 0, x1: 50, y0: 0, y1: 14, xt: [0, 10, 20, 30, 40, 50], yt, fx: q => fmt(q, 0), xl: 'V_base versé (mL)', yl: 'pH', padL: 36, padB: 36, bands: band,
+          vlines: [{ v: Veq / 2, col: rgba(RT2, 0.5) }, { v: Veq, col: rgba(RT2, 0.5) }], hlines: [{ v: pKa, col: rgba(RA, 0.45), dash: [3, 4] }],
+          lines: [{ pts: K2.ct, col: C.accent, lw: 1.6 }],
+          dots: [{ pts: [[Veq / 2, eq.pHhalf], [Veq, eq.pHeq]], col: C.fond, r: 4, ring: C.texte }, { pts: [[P2.vb * 1000, S2.pHtit]], col: C.accent, r: 5.2, ring: C.texte }] };
+  }
+  P = plotArea(c, cb, o);
+  c.font = mono(11); c.textBaseline = 'alphabetic';
+  // bande tampon : étiquette
+  tagText(c, g.nar ? 'zone tampon' : 'zone tampon : pKa ' + fmt(pKa, 2) + ' ± 1', P.px + P.pw - 6, P.Y(pKa + 1) + 12, 'right', 'middle', C.accent);
+  if (P2.mode === 'gouttes') {
+    // légende en haut à gauche
+    c.textAlign = 'left'; const lx = P.px + 8, ly = P.py + 14;
+    c.strokeStyle = rgba(RT2, 0.9); c.setLineDash([4, 3]); c.beginPath(); c.moveTo(lx, ly - 4); c.lineTo(lx + 18, ly - 4); c.stroke(); c.setLineDash([]); c.fillStyle = C.texte2; c.fillText('eau pure', lx + 24, ly);
+    c.strokeStyle = C.accent; c.beginPath(); c.moveTo(lx + 100, ly - 4); c.lineTo(lx + 118, ly - 4); c.stroke(); c.fillStyle = C.accent; c.fillText(ACID_LABEL[P2.acid], lx + 124, ly);
+  } else {
+    const eq = S2.eq, Veq = eq.Veq * 1000;
+    c.textAlign = 'left'; c.fillStyle = C.texte; 
+    const xh = P.X(Veq / 2), xe = P.X(Veq);
+    c.fillText('½ équivalence : pH = pKa', xh + 8, P.Y(eq.pHhalf) + 20);
+    c.fillText('équivalence : pH ' + fmt(eq.pHeq, 2), xe + 8, P.Y(eq.pHeq) + 20);
+    zone(xh - 6, P.Y(eq.pHhalf) - 6, xh + 6, P.Y(eq.pHhalf) + 6, 'half', 'Demi-équivalence', 'La moitié de l’acide est neutralisée : autant d’acide que de base conjuguée, donc pH = pKa.');
+    zone(xe - 6, P.Y(eq.pHeq) - 6, xe + 6, P.Y(eq.pHeq) + 6, 'eqv', 'Équivalence', 'Tout l’acide a été neutralisé : le pH saute en quelques gouttes de base.');
+  }
+  zone(P.px, P.py, P.px + P.pw, P.py + P.ph, 'courbe', 'Courbe de titrage', 'pH en fonction de ce qui a été versé. Trait fin : calcul complet du moteur ; points : ce qui a vraiment été ajouté.');
+  zone(P.px, P.Y(pKa + 1), P.px + P.pw, P.Y(pKa - 1), 'bande', 'Bande tampon · pKa ± 1', 'Là, la courbe est presque plate : l’acide faible et sa base conjuguée sont en quantités comparables et encaissent ce qu’on ajoute.');
+}
+function scope2() {
+  const { w, h } = scopeSetup(), c = sctx;
+  if (P2.mode === 'gouttes') {
+    const pts = [{ seq: 0, pw: 7, pb: chemAt(0, 0).b.pH }, ...P2.pts], n = Math.max(10, P2.seq);
+    const b = plotArea(c, { x: 0, y: 4, w, h: h - 4 }, { x0: 0, x1: n, y0: 0, y1: 14, yt: [0, 7, 14], xt: [0, n], fx: q => fmtI(q), xl: 'gouttes ajoutées (' + fmtI(P2.nA) + ' d’acide · ' + fmtI(P2.nB) + ' de base)', padL: 24, padB: 34, fs: 10,
+      lines: [{ pts: pts.map(p => [p.seq, p.pw]), col: C.texte2, lw: 1.4, dash: [4, 3] }, { pts: pts.map(p => [p.seq, p.pb]), col: C.accent, lw: 1.8 }] });
+  } else {
+    plotArea(c, { x: 0, y: 4, w, h: h - 4 }, { x0: 0, x1: 50, y0: 0, y1: 14, yt: [0, 7, 14], xt: [0, 25, 50], fx: q => fmt(q, 0), xl: 'V_base versé (mL)', padL: 24, padB: 34, fs: 10,
+      bands: [{ y0: Elc.ACIDS[P2.acid].pKa - 1, y1: Elc.ACIDS[P2.acid].pKa + 1, col: rgba(RA, 0.14) }],
+      lines: [{ pts: K2.ct, col: rgba(RA, 0.6), lw: 1.2 }], dots: [{ pts: [[P2.vb * 1000, S2.pHtit]], col: C.accent, r: 4, ring: C.texte }] });
+  }
+}
+function state2() {
+  const p = pairNow(), A = Elc.ACIDS[P2.acid];
+  return { step: 1, mode: P2.mode, acid: P2.acid, ratio: P2.ratio, nAcid: P2.nA, nBase: P2.nB, pHwater: S2.w.pH, pHbuffer: S2.b.pH, AHA: S2.b.species.pairs[P2.acid].ratio, AHAtit: S2.tit.species.pairs[P2.acid].ratio, pKa: A.pKa,
+           Vb: P2.vb, pHtit: S2.pHtit, Veq: S2.eq.Veq, pHeq: S2.eq.pHeq, pHhalf: S2.eq.pHhalf, nHAdrawn: K2.mols.filter(m => m.state === 'HA').length, nMol: K2.mols.length };
+}
+function status2() {
+  const A = Elc.ACIDS[P2.acid];
+  if (P2.mode === 'titrage') {
+    const Vb = P2.vb * 1000, Veq = S2.eq.Veq * 1000;
+    if (Math.abs(Vb - Veq) <= 0.6) return 'Équivalence : tout l’acide a été neutralisé, le pH saute.';
+    if (Math.abs(Vb - Veq / 2) <= 0.6) return 'Ici, autant d’acide que de base conjuguée : pH = pKa.';
+    if (Vb < 0.05) return 'Seul l’acide faible est là, et il n’a cédé qu’une petite partie de ses protons : pH ' + fmt(S2.pHtit, 2) + '.';
+    if (Vb < Veq) return 'Avant l’équivalence : l’acide faible et sa base conjuguée coexistent, c’est un tampon : le pH monte lentement.';
+    return 'Après l’équivalence : la base forte versée en excès fixe le pH.';
+  }
+  if (P2.last === 'ratio' || P2.last === 'acid') {
+    if (P2.nA + P2.nB === 0) {
+      if (P2.last === 'acid') return 'Nouveau couple : ' + A.acid + ' / ' + A.base + ', pKa ' + fmt(A.pKa, 2) + '. Le tampon se centre sur son pKa.';
+      return P2.ratio > 1.001 ? 'Plus de base conjuguée, pH plus haut : pH = pKa + log([A⁻]/[HA]).' : P2.ratio < 0.999 ? 'Moins de base conjuguée, pH plus bas : pH = pKa + log([A⁻]/[HA]).' : 'Autant de base conjuguée que d’acide : log 1 = 0, donc pH = pKa.';
+    }
+  }
+  if (P2.nA + P2.nB === 0) return 'Même goutte pour les deux béchers : ajoute une goutte d’acide ou de base.';
+  const aha = S2.b.species.pairs[P2.acid].ratio;
+  if (aha < 0.1 && P2.nA > 0) return 'Le tampon est épuisé : il ne reste presque plus de quoi capter les protons. Son pH chute à son tour.';
+  if (aha > 10 && P2.nB > 0) return 'Le tampon est épuisé : il ne reste presque plus d’acide pour capter les OH⁻. Son pH monte à son tour.';
+  return P2.lastKind === 'base' ? 'Même goutte, deux réactions : l’eau pure grimpe de plusieurs unités, le tampon bouge à peine.' : 'Même goutte, deux réactions : l’eau pure plonge de plusieurs unités, le tampon bouge à peine.';
+}
+function readouts2() {
+  const A = Elc.ACIDS[P2.acid], p = pairNow();
+  if (P2.mode === 'titrage') {
+    setM('vb', fmt(P2.vb * 1000, 1)); setM('pht', fmt(S2.pHtit, 2)); setM('veq', fmt(S2.eq.Veq * 1000, 1)); setM('pheq', fmt(S2.eq.pHeq, 2)); setM('aha', p.ratio < 1000 ? fmt(p.ratio, 3) : sci(p.ratio, 1)); setM('pka', fmt(A.pKa, 2));
+  } else {
+    setM('pHw', fmt(S2.w.pH, 2)); setM('pHb', fmt(S2.b.pH, 3)); setM('aha', p.ratio < 1000 ? fmt(p.ratio, 3) : sci(p.ratio, 1)); setM('pka', fmt(A.pKa, 2)); setM('nA', fmtI(P2.nA)); setM('nB', fmtI(P2.nB));
+  }
+}
+
+/* ================= Étape 3 : passer des électrons, le redox ================= */
+const COUPLE_ORDER = ['Zn', 'Fe', 'Pb', 'H', 'Cu', 'Ag'];
+const METAL_COL = { Zn: '#9aa3ad', Fe: '#7b8088', Pb: '#6b7178', Cu: '#c8763a', Ag: '#d9dde0' };
+const DEP_COL = { Zn: '#9aa3ad', Fe: '#555a62', Pb: '#4f555c', Cu: '#c8763a', Ag: '#cfd3d6' };
+const ION_TINT = { Cu: { col: '#4f8fd8', max: 0.55 }, Fe: { col: '#9fc79a', max: 0.24 } };
+const TAU3 = 8, C0_3 = 0.1, V0_3 = 0.1, NGR = 240, DEP_SLOTS = 14;
+const P3 = { metal: 'Zn', ion: 'Cu', dipped: false, t: 0, pm: false, pred: null };
+const K3 = { t: 0, dip: { x: 0, v: 0 }, rng: null, atoms: [], ions: [], dep: [], prods: [], evs: [], elec: [], evAcc: 0, grains: [], rec: [], recT: 0, eqKey: '', xEq: 0 };
+let S3 = null;
+const cname = k => Elc.COUPLES[k];
+const kExp = () => (S3.s.spont ? Math.round(Math.log10(S3.s.K)) : 0);
+function calc3() {
+  const key = P3.metal + '|' + P3.ion;
+  const s = Elc.spontaneous(P3.metal, P3.ion);
+  if (K3.eqKey !== key) { K3.eqKey = key; K3.xEq = s.spont ? Elc.displacementEq(P3.metal, P3.ion, C0_3) : 0; }
+  const x = s.spont && P3.dipped ? K3.xEq * (1 - Math.exp(-P3.t / TAU3)) : 0;
+  S3 = { s, x, xEq: K3.xEq, d: Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, x) };
+}
+function initLoupe3() {
+  K3.rng = Elc.rng((Math.random() * 4294967296) >>> 0);
+  K3.atoms = []; for (let col = 0; col < 4; col++) for (let j = -3; j <= 3; j++) K3.atoms.push({ col, j, alive: true, rs: 0, ph: K3.rng() * 6.28, a: 1 });
+  K3.ions = []; for (let i = 0; i < 9; i++) K3.ions.push({ x: 0.35 + K3.rng() * 0.5, y: (K3.rng() - 0.5) * 1.3, a: 0, busy: false });
+  K3.dep = []; K3.prods = []; K3.evs = []; K3.elec = []; K3.evAcc = 0;
+  K3.grains = []; for (let i = 0; i < NGR; i++) K3.grains.push({ u: K3.rng() * 2 - 1, v: K3.rng(), r: 0.9 + K3.rng() * 1.5, al: 0.55 + K3.rng() * 0.45 });
+}
+function resetP3(full) { Object.assign(P3, { dipped: false, t: 0, pred: null }); if (full) Object.assign(P3, { metal: 'Zn', ion: 'Cu', pm: false }); K3.rec = []; K3.recT = 0; }
+function enter3(restart) {
+  if (restart) resetP3(true);
+  K3.t = 0; K3.dip = { x: P3.dipped ? 1 : 0, v: 0 }; initLoupe3(); calc3(); syncTools();
+}
+function setMetal3(m) { P3.metal = m; resetP3(false); initLoupe3(); calc3(); syncTools(); }
+function setIon3(i) { P3.ion = i; resetP3(false); initLoupe3(); calc3(); syncTools(); }
+function dip3(on) { const want = on == null ? true : !!on; if (want && !P3.dipped) { P3.t = 0; K3.rec = []; K3.recT = 0; } P3.dipped = want; if (!want) { P3.t = 0; } calc3(); syncTools(); }
+function predict3(b) { P3.pm = true; P3.pred = b == null ? null : !!b; syncTools(); }
+function spawnEv3() {
+  const s = S3.s, nI = s.depositPerTurn || 1, free = K3.ions.map((q, i) => i).filter(i => K3.ions[i].a > 0.5 && !K3.ions[i].busy);
+  const don = K3.atoms.map((q, i) => i).filter(i => K3.atoms[i].col === 0 && K3.atoms[i].alive && !K3.evs.some(e => e.donor === i));
+  if (free.length < nI || !don.length) return false;
+  free.sort((a, b) => K3.ions[a].x - K3.ions[b].x);
+  const donor = don[Math.floor(K3.rng() * don.length)], picks = free.slice(0, nI);
+  picks.forEach(i => { K3.ions[i].busy = true; });
+  K3.evs.push({ t: 0, donor, ions: picks.map(i => ({ i, x0: K3.ions[i].x, y0: K3.ions[i].y })), eN: cname(P3.ion).n, done: false });
+  return true;
+}
+const atomPos = a => ({ x: -0.1 - (a.col + 0.5) * 0.2, y: a.j * 0.2 });
+function adv3(h) {
+  K3.t += h; spring(K3.dip, P3.dipped ? 1 : 0, h);
+  if (P3.dipped) P3.t += h;
+  calc3();
+  const s = S3.s, frac = clamp(S3.d.cIon / C0_3, 0, 1), nSol = Math.round(9 * frac);
+  K3.ions.forEach((q, idx) => {
+    if (!q.busy) {
+      const tgt = idx < nSol ? 1 : 0, d = tgt - q.a, r = 1.6 * h; q.a += Math.abs(d) <= r ? d : Math.sign(d) * r;
+      q.x += (K3.rng() - 0.5) * 0.02 * AG; q.y += (K3.rng() - 0.5) * 0.02 * AG;
+      q.x = clamp(q.x, 0.34, 0.86); q.y = clamp(q.y, -0.78, 0.78); const rr = Math.hypot(q.x, q.y); if (rr > 0.92) { q.x *= 0.92 / rr; q.y *= 0.92 / rr; }
+    }
+  });
+  for (const a of K3.atoms) if (!a.alive) { a.rs -= h; if (a.rs <= 0) { a.alive = true; a.a = 0; } } else a.a = Math.min(1, a.a + h * 1.5);
+  for (const p of K3.prods) { p.x += p.vx * h * AG; p.y += p.vy * h * AG; p.vx += (K3.rng() - 0.5) * 0.05; p.vy += (K3.rng() - 0.5) * 0.05; p.vx = clamp(p.vx, -0.05, 0.08); p.x = clamp(p.x, 0.3, 0.88); p.y = clamp(p.y, -0.8, 0.8); }
+  // échanges d'électrons : fréquence ∝ dx/dt, au moins un toutes les 1,5 s tant que la réaction avance
+  const running = P3.dipped && s.spont && S3.x < S3.xEq * 0.995 && K3.dip.x > 0.9;
+  if (running) { K3.evAcc += (0.67 + 3.3 * Math.exp(-P3.t / TAU3)) * h; if (K3.evAcc >= 1 && K3.evs.length < 3) { if (spawnEv3()) K3.evAcc -= 1; else K3.evAcc = 1; } }
+  for (let k = K3.evs.length - 1; k >= 0; k--) {
+    const e = K3.evs[k]; e.t += h;
+    const ne = e.ions.length * e.eN;
+    if (e.t >= 0.8 + 0.1 * (ne - 1) + 0.5 && !e.done) {
+      e.done = true; const dp = atomPos(K3.atoms[e.donor]);
+      for (const it of e.ions) {
+        const q = K3.ions[it.i];
+        if (K3.dep.length < DEP_SLOTS) K3.dep.push({ slot: K3.dep.length, x0: q.x, y0: q.y, t: 0 });
+        q.busy = false; q.a = 0; q.x = 0.4 + K3.rng() * 0.45; q.y = (K3.rng() - 0.5) * 1.3;
+      }
+      const at = K3.atoms[e.donor]; at.alive = false; at.rs = 1.8;
+      K3.prods.push({ x: Math.max(0.35, dp.x + 0.5), y: dp.y, vx: 0.05, vy: (K3.rng() - 0.5) * 0.04 }); if (K3.prods.length > 8) K3.prods.shift();
+      K3.evs.splice(k, 1);
+    }
+  }
+  for (const d of K3.dep) d.t += h;
+  // enregistreur
+  K3.recT += h;
+  if (P3.dipped && K3.recT >= 0.25) { K3.recT = 0; K3.rec.push({ t: P3.t, c: S3.d.cIon, m: S3.d.mDeposit }); if (K3.rec.length > 400) K3.rec.shift(); }
+}
+const depSlotPos = i => { const rows = [-3, 0, 3, -2, 1, 2, -1]; return { x: -0.1 + (Math.floor(i / 7) + 0.5) * 0.2, y: rows[i % 7] * 0.2 }; };
+function geo3() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const ry0 = top + 54, ry1 = H - bot - 6, sx0 = nar ? 6 : 22, tx = sx0 + (nar ? 36 : 40), right = tx + 86;
+  let bk, ls, lx, ly, bladeL = nar ? 120 : 140;
+  if (!nar) {
+    const rx0 = right + 30, rw = W - rx0 - 24, bkW = clamp(rw * 0.28, 120, 180), gap = clamp(rw * 0.1, 50, 90);
+    ls = clamp(Math.min(rw - bkW - gap, H - top - bot - 60), 140, 400);
+    const x0 = rx0 + Math.max(0, (rw - (bkW + gap + ls)) / 2);
+    const bkH = clamp(H * 0.26, 130, 190);
+    bk = { x: x0, y: top + 24 + bladeL, w: bkW, h: bkH }; lx = x0 + bkW + gap; ly = top + 10;
+  } else {
+    const rx0 = right + 6, rw = W - rx0 - 6, bkW = Math.min(rw * 0.6, 106), bkH = 112;
+    bk = { x: rx0 + (rw - bkW) / 2, y: top + 8 + bladeL, w: bkW, h: bkH }; ls = Math.min(rw, 176); lx = rx0 + (rw - ls) / 2; ly = bk.y + bkH + 34;
+  }
+  let rec = null;
+  if (!nar) { const x = Math.max(right + 30, bk.x - 30), w = lx - 24 - x, y = bk.y + bk.h + 32, h = H - 10 - y; if (w >= 150 && h >= 90) rec = { x, y, w, h }; }
+  return { nar, top, bot, ry0, ry1, sx0, tx, right, bk, ls, lx, ly, bladeL, rec };
+}
+function drawScale3(c, g) {
+  const yE = E => g.ry0 + (0.9 - E) / 1.8 * (g.ry1 - g.ry0), s = S3.s;
+  c.font = mono(11); c.textBaseline = 'alphabetic'; c.textAlign = 'left'; c.fillStyle = C.texte2;
+  c.fillText('échelle des couples', g.sx0, g.ry0 - 26); c.fillText('E° (V), ion | métal', g.sx0, g.ry0 - 12);
+  c.strokeStyle = rgba(RT2, 0.7); c.lineWidth = 1; c.beginPath(); c.moveTo(g.tx + 0.5, g.ry0 - 4); c.lineTo(g.tx + 0.5, g.ry1 + 4); c.stroke();
+  c.strokeStyle = rgba(RT2, 0.25); for (const E of [-0.6, -0.3, 0.3, 0.6]) { c.beginPath(); c.moveTo(g.tx - 3, yE(E)); c.lineTo(g.tx + 3, yE(E)); c.stroke(); }
+  const pos = {};
+  for (const k of COUPLE_ORDER) {
+    const cp = Elc.COUPLES[k], E = cp.E0, y = yE(E), sel = k === P3.metal || k === P3.ion, ref = k === 'H';
+    pos[k] = y;
+    if (sel) { c.fillStyle = rgba(RA, 0.13); c.fillRect(g.sx0 - 4, y - 9, g.right - g.sx0 + 4, 18); }
+    c.strokeStyle = sel ? C.accent : ref ? rgba(RT2, 0.8) : rgba(RT, 0.8); c.lineWidth = sel ? 1.8 : 1.2; c.beginPath(); c.moveTo(g.tx - 6, y); c.lineTo(g.tx + 6, y); c.stroke();
+    c.font = mono(11); c.textBaseline = 'middle'; c.fillStyle = sel ? C.accent : ref ? C.texte2 : C.texte;
+    c.textAlign = 'right'; c.fillText(cp.ion, g.tx - 9, y); c.textAlign = 'left'; c.fillText(cp.metal, g.tx + 9, y);
+    c.fillStyle = sel ? C.accent : C.texte2; c.fillText((E > 0 ? '+' : E < 0 ? '−' : '') + fmt(Math.abs(E), 2) + ' V', g.tx + 30, y);
+    zone(g.sx0 - 4, y - 9, g.right, y + 9, 'cp' + k, cp.ion + ' / ' + cp.metal + ' · E° = ' + (E > 0 ? '+' : E < 0 ? '−' : '') + fmt(Math.abs(E), 2) + ' V' + (ref ? ' (référence)' : ''),
+      ref ? 'Couple de référence, fixé à 0 V : les autres potentiels se mesurent par rapport à lui.' : 'Plus E° est haut, plus l’ion capte facilement des électrons ; plus il est bas, plus le métal peut en céder.');
+  }
+  // flèche des électrons : du métal du couple du bas vers l'ion du couple du haut
+  if (s.spont && P3.metal !== P3.ion) {
+    const yl = pos[P3.metal], yu = pos[P3.ion], xT = g.tx, dy = yl - yu;
+    const p0 = [xT + 4, yl - 8], p1 = [xT + 8, yl - dy * 0.35], p2 = [xT - 8, yu + dy * 0.35], p3 = [xT - 4, yu + 8];
+    c.save(); c.strokeStyle = C.neg; c.fillStyle = C.neg; c.lineWidth = 1.8; c.setLineDash([5, 4]); c.lineDashOffset = P3.dipped ? -K3.t * 26 : 0;
+    c.beginPath(); c.moveTo(p0[0], p0[1]); c.bezierCurveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]); c.stroke(); c.setLineDash([]);
+    const ux = 0, uy = -1;
+    c.beginPath(); c.moveTo(p3[0] + 1, p3[1] - 4); c.lineTo(p3[0] - 4.5, p3[1] + 5); c.lineTo(p3[0] + 5.5, p3[1] + 5); c.closePath(); c.fill();
+    // « e⁻ » : au milieu, décalé s'il tombe sur la ligne d'un couple
+    let my = (yl + yu) / 2; const rows = COUPLE_ORDER.map(k => pos[k]);
+    for (let k = 0; k < 40 && rows.some(r => Math.abs(r - my) < 10); k++) my += (k % 2 ? 1 : -1) * (k + 1) * 3;
+    c.font = mono(11); tagText(c, 'e⁻', xT, my, 'center', 'middle', C.neg); c.restore();
+    zone(xT - 40, Math.min(yl, yu), xT + 40, Math.max(yl, yu), 'earrow', 'Passage des électrons', 'L’ion du couple du haut capte les électrons du métal du couple du bas : l’échange a lieu dans ce sens parce que E° de l’ion est plus haut que celui du métal.');
+  }
+}
+function drawBlade3(c, g, ys, dipK) {
+  const bk = g.bk, w = 20, cx = bk.x + bk.w / 2 - 14;
+  const yOut = bk.y - 14, yIn = bk.y + bk.h - 22, bot = lerp(yOut, yIn, dipK), top = bot - g.bladeL;
+  const thin = clamp(S3.d.mDissolved / 2, 0, 0.35), wE = w * (1 - thin), col = METAL_COL[P3.metal], dcol = DEP_COL[P3.ion];
+  // tige et support
+  c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 2; c.beginPath(); c.moveTo(cx, top - 26); c.lineTo(cx, top); c.stroke();
+  c.fillStyle = rgba(RT2, 0.8); c.fillRect(cx - 12, top - 28, 24, 3);
+  // lame
+  c.fillStyle = col; c.fillRect(cx - wE / 2, top, wE, bot - top);
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(cx - wE / 2, top, wE * 0.3, bot - top);
+  c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.strokeRect(cx - wE / 2 + 0.5, top + 0.5, wE - 1, bot - top - 1);
+  // dépôt granuleux sur la partie immergée
+  const imLen = Math.max(0, bot - ys);
+  if (S3.x > 0.001 && imLen > 0 && S3.d.mDeposit > 0) {
+    const coat = 4.5 * (S3.x / Math.max(S3.xEq, 1e-9)) * 0.9 + 0.3;
+    c.fillStyle = rgba(rgb(dcol), 0.55); c.fillRect(cx - wE / 2 - coat, ys, coat, imLen); c.fillRect(cx + wE / 2, ys, coat, imLen);
+    const nvis = Math.floor(NGR * clamp(S3.x / Math.max(S3.xEq, 1e-9), 0, 1));
+    for (let i = 0; i < nvis; i++) { const gr = K3.grains[i]; c.fillStyle = rgba(rgb(dcol), gr.al); c.beginPath(); c.arc(cx + gr.u * (wE / 2 + coat), bot - 2 - gr.v * (imLen - 3), gr.r, 0, TAU); c.fill(); }
+  }
+  zone(cx - w / 2 - 6, top, cx + w / 2 + 6, bot, 'lame', 'Lame de ' + cname(P3.metal).name + ' · ' + cname(P3.metal).metal, 'Le métal de la lame : ses atomes peuvent céder des électrons à des ions du bain.');
+  if (S3.x > 0.001 && imLen > 0) zone(cx - w / 2 - 6, ys, cx + w / 2 + 6, bot, 'depot', 'Dépôt de ' + cname(P3.ion).name, 'Des atomes de ' + cname(P3.ion).name + ' formés quand les ions ont capté des électrons : ils restent collés à la lame.');
+  return { cx, bot, top, imLen };
+}
+function drawIonDisc(c, x, y, r, kind, label, a) {
+  c.globalAlpha = a; const k = kind;
+  const tint = ION_TINT[k];
+  if (tint) { c.fillStyle = rgba(rgb(tint.col), k === 'Cu' ? 1 : 0.55); c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); c.fillStyle = k === 'Cu' ? C.fond : C.texte; }
+  else { c.strokeStyle = rgba(RT2, 1); c.lineWidth = 1.3; c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke(); c.fillStyle = C.texte2; }
+  c.font = '500 ' + Math.max(8, Math.round(r * 0.95)) + 'px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, x, y + 0.5); c.globalAlpha = 1;
+}
+const chargeOf = k => { const n = Elc.COUPLES[k].n; return n === 1 ? '+' : n + '+'; };
+function draw3() {
+  const c = ctx, g = geo3(), s = S3.s, bk = g.bk, d = S3.d, nar = g.nar;
+  drawScale3(c, g);
+  // ---- bécher : solution d'ions
+  const lv = 0.62, dipK = K3.dip.x;
+  const bd = drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
+  c.fillStyle = 'rgba(232,228,220,0.06)'; c.fillRect(bk.x + 1, bd.ys, bk.w - 2, bk.y + bk.h - bd.ys - 1);
+  const layers = [[P3.ion, d.cIon], [P3.metal, d.cMetalIon]];
+  for (const [k, cc] of layers) { const t = ION_TINT[k]; if (!t || !(cc > 0)) continue; c.save(); c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / C0_3, 0, 1) * (k === P3.ion ? 1 : 1)); c.fillRect(bk.x + 1, bd.ys, bk.w - 2, bk.y + bk.h - bd.ys - 1); c.restore(); }
+  drawBeaker(c, bk.x, bk.y, bk.w, bk.h, lv, 0, 0, K3.t);
+  zoneF((x, y) => x >= bk.x && x <= bk.x + bk.w && y >= bd.ys && y <= bk.y + bk.h, 'sol3', 'Solution d’ions ' + cname(P3.ion).ion + ' · 0,10 mol/L', 'Les ions sont dispersés dans l’eau ; ' + (ION_TINT[P3.ion] ? 'ils donnent leur teinte à la solution, d’autant plus pâle qu’il en reste peu.' : 'incolores, on ne les voit qu’à la loupe.'));
+  const bl = drawBlade3(c, g, bd.ys, dipK);
+  c.font = mono(11); c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.fillStyle = C.texte2;
+  c.fillText('[' + cname(P3.ion).ion + '] = ' + fmt(d.cIon, d.cIon < 0.01 ? 4 : 3) + ' mol/L', bk.x + bk.w / 2, bk.y + bk.h + 17);
+  // petit cercle d'observation et traits
+  const ox = bl.cx + 11, oy = bd.ys + Math.max(14, (bk.y + bk.h - bd.ys) * 0.45), oR = 6;
+  c.strokeStyle = rgba(RA, 0.9); c.lineWidth = 1.2; c.beginPath(); c.arc(ox, oy, oR, 0, TAU); c.stroke();
+  zcirc(ox, oy, oR + 3, 'obs3', 'Surface immergée', 'La petite zone de la lame observée dans la loupe.');
+  const L = g.ls, R = L / 2, cx = g.lx + R, cy = g.ly + R;
+  c.save(); c.strokeStyle = rgba(RA, 0.5); c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath();
+  if (!nar) { c.moveTo(ox + oR, oy - 2); c.lineTo(g.lx + R * 0.1, g.ly + R * 0.14); c.moveTo(ox + oR, oy + 2); c.lineTo(g.lx + R * 0.1, g.ly + L - R * 0.14); }
+  else { c.moveTo(ox - 2, oy + oR); c.lineTo(g.lx + R * 0.35, g.ly + R * 0.1); c.moveTo(ox + 2, oy + oR); c.lineTo(g.lx + L - R * 0.35, g.ly + R * 0.1); }
+  c.stroke(); c.restore();
+  // ---- loupe
+  c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fillStyle = C.fond2; c.fill();
+  const t1 = ION_TINT[P3.ion]; if (t1) { c.fillStyle = rgba(rgb(t1.col), t1.max * 0.5 * clamp(d.cIon / C0_3, 0.05, 1)); c.fill(); }
+  c.clip(); c.globalAlpha = P3.dipped ? 1 : 0.55;
+  const rA = 0.088 * R, rI = 0.072 * R, X = u => cx + u * R, Y = v => cy + v * R, tt = K3.t;
+  // surface du métal
+  c.strokeStyle = rgba(RT2, 0.5); c.setLineDash([4, 4]); c.beginPath(); c.moveTo(X(-0.1), cy - R); c.lineTo(X(-0.1), cy + R); c.stroke(); c.setLineDash([]);
+  const mcol = METAL_COL[P3.metal];
+  K3.atoms.forEach(a => {
+    if (!a.alive && a.a < 0.02) return; const p = atomPos(a), ex = Math.sin(tt * 3 + a.ph) * 0.012, ey = Math.cos(tt * 2.6 + a.ph) * 0.012;
+    c.globalAlpha = (P3.dipped ? 1 : 0.55) * (a.alive ? a.a : 0); c.fillStyle = mcol; c.beginPath(); c.arc(X(p.x + ex), Y(p.y + ey), rA, 0, TAU); c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = 1; c.stroke();
+  });
+  c.globalAlpha = P3.dipped ? 1 : 0.55;
+  for (const dp of K3.dep) { const sp = depSlotPos(dp.slot), u = sstep(dp.t / 0.35), ex = lerp(dp.x0, sp.x, u), ey = lerp(dp.y0, sp.y, u); c.fillStyle = DEP_COL[P3.ion]; c.beginPath(); c.arc(X(ex), Y(ey), rA, 0, TAU); c.fill(); c.strokeStyle = 'rgba(0,0,0,.25)'; c.stroke(); }
+  for (const q of K3.ions) {
+    if (q.a < 0.02) continue; let px = q.x, py = q.y;
+    const e = K3.evs.find(ev => ev.ions.some(it => it.i === K3.ions.indexOf(q)));
+    if (e) { const idx = e.ions.findIndex(it => it.i === K3.ions.indexOf(q)), dpos = atomPos(K3.atoms[e.donor]), tx = -0.1 + 0.12, ty = dpos.y + (idx ? 0.2 : (e.ions.length > 1 ? -0.2 : 0)), u = sstep(e.t / 0.8); px = lerp(e.ions[idx].x0, tx, u); py = lerp(e.ions[idx].y0, ty, u); }
+    drawIonDisc(c, X(px), Y(py), rI * 1.15, P3.ion, e && e.t > 0.8 + 0.1 * (e.ions.length * e.eN - 1) ? '' : chargeOf(P3.ion), P3.dipped ? q.a : q.a * 0.55);
+  }
+  for (const p of K3.prods) drawIonDisc(c, X(p.x), Y(p.y), rI * 1.15, P3.metal, chargeOf(P3.metal), 0.95);
+  // électrons en vol
+  c.globalAlpha = 1;
+  for (const e of K3.evs) {
+    let k = 0; const dpos = atomPos(K3.atoms[e.donor]);
+    e.ions.forEach((it, idx) => {
+      const tx = -0.1 + 0.12, ty = dpos.y + (idx ? 0.2 : (e.ions.length > 1 ? -0.2 : 0));
+      for (let m = 0; m < e.eN; m++, k++) {
+        const t0 = 0.8 + 0.1 * k, u = (e.t - t0) / 0.45; if (u < 0 || u > 1) continue;
+        const ex = lerp(dpos.x, tx, sstep(u)), ey = lerp(dpos.y, ty, sstep(u)) - Math.sin(u * PI) * 0.06;
+        c.fillStyle = C.neg; c.shadowColor = C.neg; c.shadowBlur = 8; c.beginPath(); c.arc(X(ex), Y(ey), Math.max(2.6, R * 0.026), 0, TAU); c.fill(); c.shadowBlur = 0;
+        c.strokeStyle = '#fff'; c.lineWidth = 0.8; c.stroke();
+      }
+    });
+  }
+  c.restore();
+  c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.3; c.beginPath(); c.arc(cx, cy, R - 0.5, 0, TAU); c.stroke();
+  c.font = mono(11); c.textBaseline = 'alphabetic'; c.textAlign = 'center';
+  if (!P3.dipped) tagText(c, 'lame hors de la solution', cx, cy + R * 0.85, 'center', 'middle', C.texte2);
+  // légendes de la loupe
+  c.fillStyle = C.texte2; c.textAlign = 'left'; let yy = g.ly + L + 17;
+  c.fillText('loupe sur la surface immergée', g.lx, yy);
+  zcirc(cx, cy, R, 'loupe3', 'Loupe · surface de la lame', 'Atomes du métal à gauche, ions de la solution à droite. Le dessin montre quelques particules : la réaction réelle en met des milliards de milliards en jeu.');
+  const nm = cname(P3.metal), ni = cname(P3.ion), rr = 0.088 * R;
+  zoneF((x, y) => K3.atoms.some(a => a.alive && Math.hypot(x - X(atomPos(a).x), y - Y(atomPos(a).y)) < rr), 'atome', 'Atome de ' + nm.name + ' · ' + nm.metal, 'Un atome du réseau du métal : il peut céder des électrons à un ion qui touche la surface.');
+  zoneF((x, y) => K3.dep.some(dp => { const sp = depSlotPos(dp.slot); return Math.hypot(x - X(sp.x), y - Y(sp.y)) < rr; }), 'depatom', 'Atome de ' + ni.name + ' déposé', 'Un ion qui a capté ses électrons est devenu un atome ; il reste collé à la surface.');
+  zoneF((x, y) => K3.ions.some(q => q.a > 0.3 && Math.hypot(x - X(q.x), y - Y(q.y)) < rI * 1.5), 'ion3', ni.ion + ' · ion en solution', 'Un atome de ' + ni.name + ' privé de ' + ni.n + ' électron' + (ni.n > 1 ? 's' : '') + ' : il peut en capter à la surface du métal.');
+  zoneF((x, y) => K3.prods.some(q => Math.hypot(x - X(q.x), y - Y(q.y)) < rI * 1.5), 'prod3', nm.ion + ' · ion formé', 'Un atome de ' + nm.name + ' qui a cédé ses électrons : il quitte le métal et passe en solution.');
+  zoneF((x, y) => K3.evs.some(e => { const dpos = atomPos(K3.atoms[e.donor]); return e.t > 0.7 && Math.hypot(x - X(lerp(dpos.x, 0.02, 0.5)), y - Y(dpos.y)) < R * 0.2; }), 'e3', 'Électron · e⁻', 'Charge négative : il passe d’un atome du métal à un ion qui touche la surface.');
+  // état de la dernière ligne
+  c.fillStyle = C.texte2; c.textAlign = 'left'; yy += 15;
+  const msg = s.same ? 'même couple : aucun échange net' : s.spont ? 'électrons échangés : ' + fmt(S3.d.nE * 1000, 2) + ' mmol' : 'aucun électron ne passe';
+  paragraph(c, msg, g.lx, yy, L, 14, C.texte2);
+  scene3Rec(c, g);
+}
+function plot3(c, box, fs, top) {
+  const rec = K3.rec, t1 = Math.max(30, P3.t * 1.05), mMax = S3.s.spont ? Elc.displacement(P3.metal, P3.ion, C0_3, V0_3, K3.xEq).mDeposit : 0;
+  const b = plotArea(c, box, { x0: 0, x1: t1, y0: 0, y1: C0_3, yt: [0, C0_3 / 2, C0_3], fy: q => fmt(q, 2), xt: [0, Math.round(t1)], fx: q => fmt(q, 0), xl: 't (s, temps d’affichage)', padL: 32, padR: 44, padT: top, padB: fs + 20, fs,
+    lines: [{ pts: rec.map(r => [r.t, r.c]), col: C.neg, lw: 1.8 }, { pts: rec.map(r => [r.t, mMax > 0 ? r.m / mMax * C0_3 : 0]), col: C.ener, lw: 1.6, dash: [4, 3] }] });
+  c.font = mono(fs); c.fillStyle = C.ener; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(fmt(mMax, 2) + ' g', b.px + b.pw + 4, b.py + 5); c.fillText('0', b.px + b.pw + 4, b.py + b.ph);
+  return b;
+}
+function scene3Rec(c, g) {
+  if (!g.rec) return;
+  const b = plot3(c, g.rec, 11, 20);
+  c.font = mono(11); c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.strokeStyle = C.neg; c.lineWidth = 2; c.beginPath(); c.moveTo(b.px, g.rec.y + 9); c.lineTo(b.px + 14, g.rec.y + 9); c.stroke(); const ltxt = '[' + cname(P3.ion).ion + ']'; c.fillStyle = C.neg; c.fillText(ltxt, b.px + 19, g.rec.y + 9);
+  const x2 = b.px + 19 + c.measureText(ltxt).width + 16; c.strokeStyle = C.ener; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x2, g.rec.y + 9); c.lineTo(x2 + 14, g.rec.y + 9); c.stroke(); c.setLineDash([]); c.fillStyle = C.ener; c.fillText('masse déposée', x2 + 19, g.rec.y + 9);
+  zone(b.px, b.py, b.px + b.pw, b.py + b.ph, 'rec3', 'Enregistreur · [ion] et masse déposée', 'Les ions diminuent et la masse déposée augmente ensemble : l’un vient de l’autre. Vitesse illustrative.');
+}
+function scope3() {
+  const g = geo3(); if (g.rec) return;
+  const { w, h } = scopeSetup(); plot3(sctx, { x: 0, y: 2, w, h: h - 2 }, 10, 8);
+}
+function state3() {
+  const s = S3.s, d = S3.d;
+  return { step: 2, metal: P3.metal, ion: P3.ion, predicted: P3.pred, dipped: P3.dipped, spont: s.spont, x: S3.x, xEq: S3.xEq, mDeposit: d.mDeposit, mDissolved: d.mDissolved, cIon: d.cIon, cMetalIon: d.cMetalIon,
+           nE: d.nE, dE: s.dE, K: s.K, t: P3.t, eq: s.eq, ox: s.ox, red: s.red, predMode: P3.pm };
+}
+function verdict3() {
+  if (P3.pred == null || !P3.dipped || P3.t < 1.5) return '';
+  const s = S3.s;
+  if (P3.pred === (s.spont)) return 'Prédiction juste : ' + (s.spont ? 'les ions ' + cname(P3.ion).ion + ' captent les électrons du ' + cname(P3.metal).name + '.' : s.same ? 'même couple, aucun échange.' : 'rien ne se passe.') + ' ';
+  return 'Ce n’est pas ce qui arrive : regarde l’échelle des couples. ';
+}
+function status3() {
+  const s = S3.s, nm = cname(P3.metal), ni = cname(P3.ion), v = verdict3();
+  if (P3.pm && P3.pred == null && !P3.dipped) return 'Avant de plonger : va-t-il se passer quelque chose ? Regarde l’échelle des couples, puis choisis.';
+  if (!P3.dipped) return 'Choisis un métal et une solution, puis plonge la lame. Sur l’échelle, les couples choisis sont surlignés.';
+  if (s.same) return v + 'Même couple de part et d’autre : aucun échange net.';
+  if (!s.spont) return v + 'Le ' + nm.name + ' ne cède pas ses électrons aux ions ' + ni.name + ' : sur l’échelle, le couple du ' + nm.name + ' est au-dessus de celui du ' + ni.name + '.';
+  if (S3.x >= S3.xEq * 0.995) return v + 'La solution a perdu ' + (ION_TINT[P3.ion] && P3.ion === 'Cu' ? 'sa couleur' : 'presque tous ses ions') + ' : presque tous les ions ' + ni.name + ' sont devenus du ' + ni.name + ' métal (K ≈ 10' + sup(kExp()) + ').';
+  return v + 'Le ' + nm.name + ' s’oxyde et passe en solution ; les ions ' + ni.name + ' se réduisent et se déposent. ' + (ni.n === 2 ? 'Deux électrons par ion' : 'Un électron par ion') + ', passés directement d’un atome à l’autre.';
+}
+function readouts3() {
+  const s = S3.s, d = S3.d;
+  setM('ox', s.same ? '—' : s.ox); setM('red', s.same ? '—' : s.red); setM('eq', s.same ? '—' : s.spont ? s.eq : s.eq + ' : n’a pas lieu');
+  setM('dE', s.same ? '0,00' : (s.dE > 0 ? '+' : '−') + fmt(Math.abs(s.dE), 2)); setM('nE', fmt(d.nE * 1000, 2)); setM('mdep', fmt(d.mDeposit * 1000, 0)); setM('mdis', fmt(d.mDissolved * 1000, 0));
+  setM('cion', fmt(d.cIon, d.cIon < 0.01 ? 4 : 3)); setM('K', s.same ? '—' : s.spont ? '≈ 10' + sup(kExp()) : '≈ 10' + sup(Math.round(Math.log10(s.K))));
+}
+
+/* ================= Étape 4 : la pile et l'électrolyse ================= */
+const CELLS = [['Zn', 'Cu'], ['Fe', 'Cu'], ['Zn', 'Ag']];
+const P4 = { anode: 'Zn', cathode: 'Cu', R: 10, gen: false, U: 1.3, bridge: true, speed: 3600 };
+const K4 = { cell: null, rec: [], rc: 0, ph: 0, bph: 0, lift: { x: 0, v: 0 }, E0: 1.1, t: 0 };
+const fmtR = r => (r >= 100 ? fmt(Math.round(r), 0) : r >= 10 ? fmt(r, 1) : fmt(r, 2)).replace(/,0$/, '').replace(/,00$/, '');
+function newCell4() {
+  K4.cell = Elc.cell({ anode: P4.anode, cathode: P4.cathode, cA: 1, cC: 1, VA: 0.1, VC: 0.1, mA: 20, mC: 20, Rint: 2 });
+  K4.cell.bridge = P4.bridge; K4.E0 = Elc.cellEMF(P4.cathode, P4.anode); K4.rec = []; K4.rc = 0; K4.cell.E = Elc.emfOf(K4.cell);
+}
+const Reff4 = () => (P4.gen ? 1 : P4.R), Uext4 = () => (P4.gen ? P4.U : 0);
+function live4() {
+  const c = K4.cell, E = Elc.emfOf(c), I = P4.bridge ? Elc.current(Object.assign({}, c, { bridge: true }), Reff4(), Uext4()) : 0;
+  const mode = !P4.bridge ? 'ouvert' : Math.abs(I) < 1e-12 ? 'équilibre' : I > 0 ? 'pile' : 'électrolyse';
+  // Sans pont, aucun courant ; le voltmètre, en parallèle sur la charge, lit 0 avec la résistance, U imposée avec le générateur.
+  const U = P4.gen ? P4.U : !P4.bridge ? 0 : E - I * c.Rint;
+  return { E, I, U, mode };
+}
+function enter4(restart) {
+  if (restart) Object.assign(P4, { anode: 'Zn', cathode: 'Cu', R: 10, gen: false, U: 1.3, bridge: true, speed: 3600 });
+  if (restart || !K4.cell) newCell4();
+  K4.lift = { x: P4.bridge ? 0 : 1, v: 0 }; K4.t = 0; syncTools();
+}
+function adv4(h) {
+  K4.t += h; spring(K4.lift, P4.bridge ? 0 : 1, h);
+  K4.cell.bridge = P4.bridge;
+  const o = Elc.cellStep(K4.cell, Reff4(), P4.speed * h, Uext4()); o.bridge = P4.bridge; K4.cell = o;
+  const L = live4(), I = L.I;
+  const v = clamp(Math.abs(I) * 1100, 0, 260) * (reduce ? 0.7 : 1), sg = I > 0 ? 1 : I < 0 ? -1 : 0;
+  K4.ph += sg * v * h; K4.bph += sg * v * 0.5 * h;
+  if (++K4.rc % 6 === 0) { K4.rec.push({ t: o.t / 3600, E: L.E, U: P4.bridge || P4.gen ? L.U : null }); if (K4.rec.length > 1600) K4.rec = K4.rec.filter((r, i) => i % 2 === 0); }
+}
+function geo4() {
+  const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
+  const spacing = nar ? W * 0.62 : clamp(W * 0.38, 220, 400), bw = nar ? Math.min(140, spacing * 0.6) : Math.min(190, spacing * 0.62);
+  const cxA = W / 2 - spacing / 2, cxC = W / 2 + spacing / 2;
+  const yV = nar ? top + 24 : top + 14, yR = yV + (nar ? 30 : 32), yB = nar ? top + 176 : top + 160, bh = nar ? 130 : clamp(H * 0.22, 120, 190);
+  const ry = yB + bh + 58, rec = { x: nar ? 6 : cxA - bw / 2, y: ry, w: nar ? W - 12 : cxC - cxA + bw, h: H - 8 - ry };
+  return { rec, nar, top, bot, spacing, bw, cxA, cxC, yV, yR, yB, bh, exA: cxA - bw / 2 + 32, exC: cxC + bw / 2 - 32, legA: cxA + bw / 2 - 20, legC: cxC - bw / 2 + 20, ys: yB + bh * 0.3, xm: W / 2 };
+}
+function tintLiquid(c, x, w, ys, yb, key, cc) {
+  c.fillStyle = 'rgba(232,228,220,0.06)'; c.fillRect(x + 1, ys, w - 2, yb - ys - 1);
+  const t = ION_TINT[key]; if (!t || !(cc > 0)) return;
+  c.fillStyle = rgba(rgb(t.col), t.max * clamp(cc / 1, 0, 1.25)); c.fillRect(x + 1, ys, w - 2, yb - ys - 1);
+}
+function pathPoint(pts, s) {
+  let rem = s; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (rem <= l) return [a[0] + (b[0] - a[0]) * rem / l, a[1] + (b[1] - a[1]) * rem / l]; rem -= l; }
+  return pts[pts.length - 1];
+}
+const pathLen = pts => { let L = 0; for (let i = 0; i < pts.length - 1; i++) L += Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]); return L; };
+function draw4() {
+  const c = ctx, g = geo4(), cell = K4.cell, L = live4(), A = P4.anode, Ca = P4.cathode, cA = cname(A), cC = cname(Ca), electro = L.mode === 'électrolyse';
+  const lift = K4.lift.x, plateTop = g.yB + 8, plateBot = g.yB + g.bh - 14;
+  // ---- béchers
+  const beakers = [{ cx: g.cxA, key: A, cc: cell.cA, m: cell.mA, ex: g.exA, side: 'A' }, { cx: g.cxC, key: Ca, cc: cell.cC, m: cell.mC, ex: g.exC, side: 'C' }];
+  for (const b of beakers) {
+    const x = b.cx - g.bw / 2, bd = drawBeaker(c, x, g.yB, g.bw, g.bh, 0.7, 0, 0, K4.t);
+    tintLiquid(c, x, g.bw, bd.ys, g.yB + g.bh, b.key, b.cc); drawBeaker(c, x, g.yB, g.bw, g.bh, 0.7, 0, 0, K4.t);
+    const cp = cname(b.key), role = (b.side === 'A') !== electro ? 'anode' : 'cathode';
+    zoneF((xx, yy) => xx >= x && xx <= x + g.bw && yy >= bd.ys && yy <= g.yB + g.bh, 'sol4' + b.side, 'Solution de ' + cp.ion + ' · ' + fmt(b.cc, 2) + ' mol/L', ION_TINT[b.key] ? 'Les ions colorent la solution : plus pâle quand il en reste moins.' : 'Ions incolores : on ne voit leur quantité que par le calcul.');
+    // plaque
+    const th = clamp(16 * b.m / 20, 4, 30), col = METAL_COL[b.key];
+    c.fillStyle = col; c.fillRect(b.ex - th / 2, plateTop, th, plateBot - plateTop); c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(b.ex - th / 2, plateTop, th * 0.3, plateBot - plateTop);
+    c.strokeStyle = rgba(RT, 0.5); c.lineWidth = 1; c.strokeRect(b.ex - th / 2 + 0.5, plateTop + 0.5, th - 1, plateBot - plateTop - 1);
+    zone(b.ex - th / 2 - 4, plateTop, b.ex + th / 2 + 4, plateBot, 'el' + b.side, 'Électrode de ' + cp.name + ' · ' + role, role === 'anode' ? 'Siège de l’oxydation : les atomes du métal cèdent des électrons et passent en solution.' : 'Siège de la réduction : les ions de la solution captent des électrons et se déposent.');
+    // étiquettes
+    const isAnode = role === 'anode';
+    c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.font = mono(11);
+    let y = g.yB + g.bh + 17; c.fillStyle = C.texte; c.fillText(isAnode ? 'anode · oxydation' : 'cathode · réduction', b.cx, y);
+    zone(b.cx - g.bw / 2, y - 12, b.cx + g.bw / 2, y + 4, 'role' + b.side, isAnode ? 'Anode' : 'Cathode', isAnode ? 'L’électrode où a lieu l’oxydation, quel que soit le sens du courant.' : 'L’électrode où a lieu la réduction, quel que soit le sens du courant.');
+    y += 15; c.fillStyle = C.accent; c.fillText(isAnode ? Elc.halfOx(b.key) : Elc.halfRed(b.key), b.cx, y);
+    y += 15; c.fillStyle = C.texte2; c.fillText('[' + cp.ion + '] = ' + fmt(b.cc, 2) + ' mol/L', b.cx, y);
+  }
+  // ---- pont salin
+  const S = 64 * lift, yArch = g.yB - 24 - S, yLeg = g.ys + 34 - S, bpts = [[g.legA, yLeg], [g.legA, yArch], [g.legC, yArch], [g.legC, yLeg]], Lb = pathLen(bpts);
+  c.save(); c.lineJoin = 'round'; c.lineCap = 'butt';
+  c.strokeStyle = rgba(RT, lift > 0.5 ? 0.25 : 0.5); c.lineWidth = 16; c.setLineDash(lift > 0.5 ? [5, 4] : []); c.beginPath(); bpts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke();
+  c.setLineDash([]); c.strokeStyle = C.fond; c.lineWidth = 13; c.beginPath(); bpts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.stroke();
+  c.strokeStyle = rgba(RA, 0.07); c.lineWidth = 13; c.stroke(); c.restore();
+  const nI = 7, ions = [];
+  for (let i = 0; i < nI; i++) {
+    const sK = (((K4.bph + i * Lb / nI) % Lb) + Lb) % Lb, sN = (((-K4.bph + (i + 0.5) * Lb / nI) % Lb) + Lb) % Lb;
+    ions.push({ p: pathPoint(bpts, sK), k: 'K' }, { p: pathPoint(bpts, sN), k: 'N' });
+  }
+  c.globalAlpha = lift > 0.5 ? 0.35 : 1;
+  for (const q of ions) { c.fillStyle = q.k === 'K' ? C.pos : C.neg; c.beginPath(); c.arc(q.p[0], q.p[1], 3.6, 0, TAU); c.fill(); c.fillStyle = C.fond; c.font = '500 9px ' + C.mono; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(q.k === 'K' ? '+' : '−', q.p[0], q.p[1] + 0.5); }
+  c.globalAlpha = 1;
+  zoneF((x, y) => ions.some(q => Math.hypot(x - q.p[0], y - q.p[1]) < 7), 'bion', 'Ions du pont · K⁺ et NO₃⁻', 'Les cations vont vers la cathode, les anions vers l’anode : chaque bécher reste neutre. Plus le courant est grand, plus ils se déplacent vite.');
+  zoneF((x, y) => { const inx = x >= g.legA - 9 && x <= g.legC + 9; return (inx && Math.abs(y - yArch) <= 9) || ((Math.abs(x - g.legA) <= 9 || Math.abs(x - g.legC) <= 9) && y >= yArch && y <= yLeg); }, 'pont', 'Pont salin' + (P4.bridge ? '' : ' (retiré)'), 'Il laisse passer des ions entre les béchers pour qu’aucun ne se charge ; sans lui, le courant s’arrête.');
+  // ---- circuit extérieur
+  const wire = rgba(RT, 0.8), xm = g.xm;
+  c.strokeStyle = wire; c.lineWidth = 1.8; c.lineCap = 'round';
+  c.beginPath(); c.moveTo(g.exA, plateTop); c.lineTo(g.exA, g.yV); c.moveTo(g.exC, plateTop); c.lineTo(g.exC, g.yV); c.stroke();
+  // branche du voltmètre
+  const vx = xm - 46, bx0 = xm - 26, bW = 84;
+  c.beginPath(); c.moveTo(g.exA, g.yV); c.lineTo(vx - 14, g.yV); c.moveTo(vx + 14, g.yV); c.lineTo(bx0, g.yV); c.moveTo(bx0 + bW, g.yV); c.lineTo(g.exC, g.yV); c.stroke();
+  c.fillStyle = C.fond; c.strokeStyle = C.ener; c.lineWidth = 1.6; c.beginPath(); c.arc(vx, g.yV, 14, 0, TAU); c.fill(); c.stroke();
+  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('V', vx, g.yV + 0.5);
+  c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; rrect(c, bx0 + 0.5, g.yV - 12.5, bW, 25, 3); c.fill(); c.stroke();
+  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.fillText(P4.bridge || P4.gen ? fmt(L.U, 2) + ' V' : '— V', bx0 + bW / 2, g.yV + 1);
+  zone(vx - 15, g.yV - 15, bx0 + bW, g.yV + 15, 'volt', 'Voltmètre · tension entre les électrodes', P4.bridge ? 'Il mesure l’écart de potentiel entre les deux électrodes : la tension de la pile.' : P4.gen ? 'Pont retiré : aucun courant, il lit la tension imposée par le générateur, branché en parallèle.' : 'Circuit ouvert : sans pont, la pile ne ferme aucun circuit et rien ne passe dans le voltmètre, il affiche « — ».');
+  // branche principale : résistance ou générateur
+  c.strokeStyle = wire; c.lineWidth = 1.8; c.beginPath(); c.moveTo(g.exA, g.yR); c.lineTo(xm - 38, g.yR); c.moveTo(xm + 38, g.yR); c.lineTo(g.exC, g.yR); c.stroke();
+  if (!P4.gen) {
+    c.strokeStyle = C.texte; c.lineWidth = 1.8; c.beginPath(); c.moveTo(xm - 38, g.yR);
+    for (let i = 0; i < 8; i++) c.lineTo(xm - 38 + 76 * (i + 0.5) / 8, g.yR + (i % 2 ? 8 : -8)); c.lineTo(xm + 38, g.yR); c.stroke();
+    c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte; c.fillText('R = ' + fmtR(P4.R) + ' Ω', xm + 62, g.yR - 14);
+    zone(xm - 40, g.yR - 11, xm + 62 + 60, g.yR + 11, 'res', 'Résistance de charge · R = ' + fmtR(P4.R) + ' Ω', 'Elle limite le courant : plus R est grande, moins la pile débite.');
+  } else {
+    c.strokeStyle = C.ener; c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm - 38, g.yR); c.lineTo(xm - 8, g.yR); c.moveTo(xm + 8, g.yR); c.lineTo(xm + 38, g.yR); c.stroke();
+    c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm - 8, g.yR - 7); c.lineTo(xm - 8, g.yR + 7); c.stroke(); c.lineWidth = 2.4; c.beginPath(); c.moveTo(xm + 8, g.yR - 13); c.lineTo(xm + 8, g.yR + 13); c.stroke();
+    c.font = '500 12px ' + C.mono; c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('−', xm - 20, g.yR - 12); c.fillText('+', xm + 20, g.yR - 12);
+    c.textAlign = 'left'; c.font = mono(11); c.fillText('U = ' + fmt(P4.U, 2) + ' V', xm + 62, g.yR - 14);
+    zone(xm - 40, g.yR - 15, xm + 44 + 70, g.yR + 15, 'genr', 'Générateur · U = ' + fmt(P4.U, 2) + ' V', 'Source de tension réglable : si U dépasse la f.é.m. de la pile, il impose le sens du courant et fait marcher la réaction à l’envers.');
+  }
+  for (const [x, y] of [[g.exA, g.yV], [g.exA, g.yR], [g.exC, g.yV], [g.exC, g.yR]]) { c.fillStyle = wire; c.beginPath(); c.arc(x, y, 2.6, 0, TAU); c.fill(); }
+  zone(g.exA - 5, g.yV, g.exA + 5, plateTop, 'filA', 'Fil de cuivre', 'Les électrons peuvent y circuler librement ; c’est le chemin extérieur du circuit.');
+  zone(g.exC - 5, g.yV, g.exC + 5, plateTop, 'filC', 'Fil de cuivre', 'Les électrons peuvent y circuler librement ; c’est le chemin extérieur du circuit.');
+  // ---- électrons dans le fil
+  const wp = [[g.exA, plateTop], [g.exA, g.yR], [g.exC, g.yR], [g.exC, plateTop]], Lw = pathLen(wp), sp = 30, ne = Math.floor(Lw / sp), els = [];
+  if (Math.abs(L.I) > 1e-5) for (let i = 0; i < ne; i++) els.push(pathPoint(wp, (((K4.ph + i * sp) % Lw) + Lw) % Lw));
+  for (const p of els) { c.fillStyle = C.neg; c.shadowColor = C.neg; c.shadowBlur = 8; c.beginPath(); c.arc(p[0], p[1], 3.1, 0, TAU); c.fill(); c.shadowBlur = 0; }
+  zoneF((x, y) => els.some(p => Math.hypot(x - p[0], y - p[1]) < 8), 'elec4', 'Électron · e⁻', 'Il circule dans le fil de l’anode vers la cathode pendant la décharge (sens inverse en électrolyse) ; la solution, elle, est parcourue par des ions.');
+  recorder4(c, g, L);
+}
+function recorder4(c, g, L) {
+  const b = g.rec, rec = K4.rec, ymax = (P4.gen || K4.E0 > 1.4) ? 2.1 : 1.6, tmax = rec.length ? rec[rec.length - 1].t : 0, t1 = Math.max(10, Math.ceil(tmax * 1.1 / 10) * 10);
+  if (b.h < 60) return;
+  const segs = []; let cur = []; for (const r of rec) { if (r.U == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([r.t, r.U]); } if (cur.length) segs.push(cur);
+  const tn = tmax, dots = [{ pts: [[tn, L.E]], col: C.texte2, r: 3.6, ring: C.texte }]; if (P4.bridge) dots.push({ pts: [[tn, L.U]], col: C.ener, r: 4.2, ring: C.texte });
+  const P = plotArea(c, b, { x0: 0, x1: t1, y0: 0, y1: ymax, yt: ymax > 2 ? [0, 0.5, 1, 1.5, 2] : [0, 0.5, 1, 1.5], fy: q => fmt(q, 1), xt: [0, t1 / 2, t1], fx: q => fmt(q, 0), xl: 'temps simulé (h)', padL: 34, padR: 12, padT: 20, padB: 32, fs: 11,
+    lines: [{ pts: rec.map(r => [r.t, r.E]), col: rgba(RT2, 0.95), lw: 1.4, dash: [4, 3] }, ...segs.map(s => ({ pts: s, col: C.ener, lw: 2 }))], dots });
+  c.font = mono(11); c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.strokeStyle = C.ener; c.lineWidth = 2; c.beginPath(); c.moveTo(P.px, b.y + 9); c.lineTo(P.px + 16, b.y + 9); c.stroke();
+  c.fillStyle = C.ener; c.fillText('U ' + (P4.bridge || P4.gen ? fmt(L.U, 2) + ' V' : '—'), P.px + 21, b.y + 9);
+  const x2 = P.px + (g.nar ? 98 : 120);
+  c.strokeStyle = C.texte2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x2, b.y + 9); c.lineTo(x2 + 16, b.y + 9); c.stroke(); c.setLineDash([]);
+  c.fillStyle = C.texte2; c.fillText('E ' + fmt(L.E, 2) + ' V', x2 + 21, b.y + 9);
+  zone(P.px, P.py, P.px + P.pw, P.py + P.ph, 'rec4', 'Enregistreur · U et E en fonction du temps', 'Tension aux bornes U et f.é.m. E : plateau, puis effondrement quand les ions du couple qui se réduit viennent à manquer. En électrolyse, E remonte.');
+}
+function scope4() { scopeSetup(); }
+function state4() {
+  const c = K4.cell, L = live4();
+  return { step: 3, anode: P4.anode, cathode: P4.cathode, R: P4.R, gen: P4.gen, Ugen: P4.U, bridge: P4.bridge, E: L.E, U: L.U, I: L.I, Q: c.Q, t: c.t, tH: c.t / 3600, cA: c.cA, cC: c.cC, mA: c.mA, mC: c.mC, mode: L.mode, speed: P4.speed };
+}
+function status4() {
+  const L = live4(), E0 = K4.E0;
+  if (!P4.bridge) return 'Les béchers se chargeraient : le courant s’arrête.';
+  if (P4.gen) {
+    if (L.U > L.E + 0.005) return 'On paie de l’énergie électrique pour faire marcher la réaction à l’envers : ' + cname(P4.anode).name + ' se redépose, ' + cname(P4.cathode).name + ' se dissout. C’est une électrolyse, une recharge.';
+    if (Math.abs(L.U - L.E) <= 0.005) return 'Tensions égales : aucun courant.';
+    return 'Le générateur s’oppose à la pile, mais moins fort qu’elle : la pile débite encore.';
+  }
+  if (L.E < 0.05) return 'Pile vide : il ne reste presque plus d’ions ' + cname(P4.cathode).name + '. Rien ne s’est « vidé » d’électricité : ce sont les réactifs qui manquent.';
+  if (L.E < E0 - 0.05) return 'La pile s’use : [' + cname(P4.cathode).ion + '] baisse, [' + cname(P4.anode).ion + '] monte, et la tension baisse avec elles (Nernst).';
+  return 'Les électrons passent par le fil, du ' + cname(P4.anode).name + ' vers le ' + cname(P4.cathode).name + '. Dans les béchers et le pont salin, ce sont des ions qui se déplacent.';
+}
+function readouts4() {
+  const c = K4.cell, L = live4(), A = cname(P4.anode), Cc = cname(P4.cathode);
+  setM('E', fmt(L.E, 3)); setM('U', P4.bridge || P4.gen ? fmt(L.U, 3) : '—'); setM('I', fmt(L.I * 1000, 1)); setM('Q', fmtI(c.Q)); setM('th', fmt(c.t / 3600, 2));
+  const dC = c.mC - 20, dA = 20 - c.mA;
+  setLab('dmC', Cc.name + (dC >= -5e-4 ? ' déposé' : ' dissous')); setLab('dmA', A.name + (dA >= -5e-4 ? ' dissous' : ' déposé'));
+  setM('dmC', fmt(Math.abs(dC), 3)); setM('dmA', fmt(Math.abs(dA), 3)); setM('cA', fmt(c.cA, 3)); setM('cC', fmt(c.cC, c.cC < 0.01 ? 4 : 3));
+}
+
+/* Un tableau de fonctions par étape. */
+const STEPS = [
+  { enter: enter1, adv: adv1, draw: draw1, scope: scope1, state: state1, status: status1, readouts: readouts1 },
+  { enter: enter2, adv: adv2, draw: draw2, scope: scope2, state: state2, status: status2, readouts: readouts2 },
+  { enter: enter3, adv: adv3, draw: draw3, scope: scope3, state: state3, status: status3, readouts: readouts3 },
+  { enter: enter4, adv: adv4, draw: draw4, scope: scope4, state: state4, status: status4, readouts: readouts4 }
+];
+
+/* ---------------- Textes, légendes, mesures ---------------- */
+function INFO(n) {
+  if (n === 0) return {
+    t: 'Le pH, un compteur de protons',
+    x: 'Verse de l’acide chlorhydrique dans l’eau : des protons se libèrent, chacun porté par une molécule d’eau (H₃O⁺). Le pH les compte sur une règle où chaque cran vaut un facteur dix. Dilue la solution et regarde l’index.',
+    cle: 'Un acide cède des protons, une base en capte. Le pH compte les protons libres en puissances de dix : pH = −log[H₃O⁺].',
+    note: 'Activités assimilées aux concentrations ; 25 °C ; loupe : nombre de points réduit selon l’échelle affichée.',
+    eye: 'Enregistreur · barre et historique'
+  };
+  if (n === 1) return {
+    t: 'Acides faibles et tampons',
+    x: P2.mode === 'titrage'
+      ? 'De la soude est versée dans 25 mL d’acide faible. Le pH monte lentement tant que l’acide et sa base conjuguée coexistent, puis saute quand tout l’acide a été neutralisé. Glisse V_base pour parcourir la courbe.'
+      : 'La même goutte d’acide tombe dans l’eau pure et dans un mélange d’acide faible et de sa base conjuguée. L’eau plonge de plusieurs unités ; le mélange bouge à peine, parce qu’il contient de quoi capter des protons et de quoi en céder.',
+    cle: 'Un acide faible ne cède qu’une partie de ses protons. Avec sa base conjuguée, il forme un tampon : il encaisse l’acide et la base ajoutés, et le pH bouge à peine.',
+    note: (P2.mode === 'titrage' ? 'Phosphate traité comme un seul couple (pKa 7,21) ; activités = concentrations ; 25 °C. ' : '24 molécules dessinées pour ~10²² : une conversion est montrée à chaque goutte même si l’arrondi ne bouge pas. ')
+      + 'Le sang est tamponné (bicarbonate, protéines) autour de 7,4. Gradient de protons : planche <a href="../02-respiration/index.html">Respiration</a>.',
+    eye: P2.mode === 'titrage' ? 'Enregistreur · titrage' : 'Enregistreur · deux béchers'
+  };
+  if (n === 2) return {
+    t: 'Passer des électrons : le redox',
+    x: 'Une lame de métal est plongée dans une solution d’ions d’un autre métal. Prédis d’abord ce qui va se passer, puis plonge : si la réaction a lieu, des électrons passent directement d’un atome de la lame à un ion de la solution.',
+    cle: 'Une oxydation cède des électrons, une réduction en capte ; l’une ne va pas sans l’autre. Sur l’échelle des potentiels, l’ion du couple du haut capte les électrons du métal du couple du bas.',
+    note: 'Potentiels standards à 25 °C ; vitesse du dépôt illustrative (en vrai, de quelques minutes à quelques heures).',
+    eye: 'Enregistreur · [ion] et masse déposée'
+  };
+  return {
+    t: 'La pile et l’électrolyse',
+    x: 'Les mêmes électrons passent par un fil : deux demi-réactions dans deux béchers, reliées par ce fil et un pont salin. Le voltmètre donne la tension, la résistance règle le courant ; le générateur peut tout inverser.',
+    cle: 'Une pile sépare l’oxydation et la réduction et oblige les électrons à passer par un fil : la tension est l’écart entre les deux couples. Imposer une tension plus grande inverse la réaction.',
+    note: 'Résistance interne constante (2 Ω) ; temps accéléré ; électrons et ions dessinés à une échelle fixe ; surtensions ignorées.',
+    eye: 'Enregistreur · U et E en fonction du temps'
+  };
+}
+const lg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const ln = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const bx = (col, op) => `<rect x="0" y="0" width="20" height="8" fill="${col}" fill-opacity="${op || 1}"/>`;
+function LEG(n) {
+  if (n === 0) return lg(bx('#9ef0f0', .85), 'pH') + lg(bx('#5bb8ff', .85), 'pOH') + lg('<circle cx="10" cy="4" r="3" fill="#9ef0f0"/>', 'pH après chaque changement');
+  if (n === 1) return P2.mode === 'titrage' ? lg(ln('#9ef0f0', 1.8), 'pH du bécher') + lg(bx('#9ef0f0', .2), 'zone tampon') : lg(ln('#8a93a0', 1.6, 1), 'eau pure') + lg(ln('#9ef0f0', 2), ratioName());
+  if (n === 2) return lg(ln('#5bb8ff', 1.8), '[ion]') + lg(ln('#ffd166', 1.8, 1), 'masse déposée');
+  return lg(ln('#ffd166', 2), 'U (aux bornes)') + lg(ln('#8a93a0', 1.4, 1), 'E (f.é.m.)');
+}
+const ratioName = () => ACID_LABEL[P2.acid];
+function MEAS(n) {
+  if (n === 0) return [['[H₃O⁺]', [['h', 'mol/L']]], ['[OH⁻]', [['oh', 'mol/L']]], ['pH', [['pH', '']]], ['pOH', [['pOH', '']]], ['[H₃O⁺]·[OH⁻]', [['kw', 'mol²/L²']]], ['concentration versée', [['C', 'mol/L']]]];
+  if (n === 1) return P2.mode === 'titrage'
+    ? [['V_base', [['vb', 'mL']]], ['pH', [['pht', '']]], ['V_éq', [['veq', 'mL']]], ['pH à l’équivalence', [['pheq', '']]], [ratioLabel(P2.acid), [['aha', '']]], ['pKa', [['pka', '']]]]
+    : [['pH eau pure', [['pHw', '']]], ['pH tampon', [['pHb', '']]], [ratioLabel(P2.acid), [['aha', '']]], ['pKa', [['pka', '']]], ['gouttes acide · base', [['nA', ''], ['nB', '']]]];
+  if (n === 2) return [['oxydation', [['ox', '']]], ['réduction', [['red', '']]], ['bilan', [['eq', '']]], ['ΔE°', [['dE', 'V']]], ['électrons échangés', [['nE', 'mmol']]], ['métal déposé', [['mdep', 'mg']]], ['métal dissous', [['mdis', 'mg']]], ['[ion] restant', [['cion', 'mol/L']]], ['constante K', [['K', '']]]];
+  const A = cname(P4.anode), Cc = cname(P4.cathode);
+  return [['f.é.m. E', [['E', 'V']]], ['tension U aux bornes', [['U', 'V']]], ['courant I', [['I', 'mA']]], ['charge écoulée Q', [['Q', 'C']]], ['temps simulé', [['th', 'h']]],
+          [Cc.name + ' déposé', [['dmC', 'g']]], [A.name + ' dissous', [['dmA', 'g']]], ['[' + A.ion + ']', [['cA', 'mol/L']]], ['[' + Cc.ion + ']', [['cC', 'mol/L']]]];
+}
+const mEls = {};
+function buildMeas(n) {
+  const m = $('#meas'); m.innerHTML = ''; for (const k in mEls) delete mEls[k]; for (const k in lEls) delete lEls[k];
+  for (const [lab, vals] of MEAS(n)) {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<span class="lab">${lab}</span><span style="display:flex;gap:12px">` + vals.map(v => `<span class="val"><b>—</b><i>${v[1]}</i></span>`).join('') + '</span>';
+    m.appendChild(r); vals.forEach((v, i) => { mEls[v[0]] = r.querySelectorAll('b')[i]; }); lEls[vals[0][0]] = r.querySelector('.lab');
+  }
+  const I = INFO(n);
+  $('#mNote').innerHTML = I.note; $('#rEye').textContent = I.eye; $('#leg').innerHTML = LEG(n);
+  $('#cards').hidden = n !== 3; updatePanelRec();
+}
+function updatePanelRec() {
+  const hide = step === 3 || (step === 2 && !!geo3().rec);
+  $('#scope').parentElement.hidden = hide; $('#rEye').hidden = hide; $('#leg').hidden = hide;
+}
+const lEls = {};
+function setLab(k, s) { const e = lEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function setM(k, s) { const e = mEls[k]; if (e && e.textContent !== s) e.textContent = s; }
+function updateText() {
+  const I = INFO(uiStep); $('#stepText').textContent = I.x;
+  const cle = $('#cle'); cle.textContent = I.cle; cle.hidden = !I.cle;
+  $('#mNote').innerHTML = I.note; $('#rEye').textContent = I.eye; $('#leg').innerHTML = LEG(uiStep);
+}
+function statusNow() { const t = STEPS[step].status(), el = $('#status'); if (el.textContent !== t) el.textContent = t; }
+
+/* ---------------- Commandes et état des outils ---------------- */
+const snap = v => (Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v) : v);
+function syncTools() {
+  const set = (id, p) => $('#' + id).setAttribute('aria-pressed', p ? 'true' : 'false');
+  set('bHCl', P1.kind === 'HCl'); set('bNaOH', P1.kind === 'NaOH'); set('bPure', P1.pure);
+  const lc = Math.log10(P1.C); $('#rC').value = clamp(lc, -9, 0); $('#vC').textContent = sci(P1.C, 1) + ' mol/L';
+  $('#rC').disabled = P1.pure; $('#bHCl').disabled = P1.pure; $('#bNaOH').disabled = P1.pure; $('#bDil').disabled = P1.pure;
+  document.querySelectorAll('[data-acid]').forEach(b => b.setAttribute('aria-pressed', b.dataset.acid === P2.acid ? 'true' : 'false'));
+  $('#rRat').value = Math.log10(P2.ratio); $('#vRat').textContent = fmt(P2.ratio, 1); $('#glRat').textContent = ratioLabel(P2.acid) + ' =';
+  $('#rVb').value = P2.vb * 1000; $('#vVb').textContent = fmt(P2.vb * 1000, 1) + ' mL';
+  set('bTit', P2.mode === 'titrage');
+  document.querySelectorAll('[data-metal]').forEach(b => b.setAttribute('aria-pressed', b.dataset.metal === P3.metal ? 'true' : 'false'));
+  document.querySelectorAll('[data-ion]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ion === P3.ion ? 'true' : 'false'));
+  set('bPred', P3.pm); set('bPredY', P3.pred === true); set('bPredN', P3.pred === false);
+  $('#bPredY').hidden = !P3.pm; $('#bPredN').hidden = !P3.pm;
+  $('#bDip').textContent = P3.dipped ? 'Ressortir' : 'Plonger'; $('#bDip').disabled = P3.pm && P3.pred == null && !P3.dipped;
+  $('#bDip').title = $('#bDip').disabled ? 'Fais d’abord ta prédiction' : (P3.dipped ? 'Ressortir la lame (touche P)' : 'Plonger la lame (touche P)');
+  document.querySelectorAll('[data-cell]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cell === P4.anode + ',' + P4.cathode ? 'true' : 'false'));
+  document.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.speed === P4.speed ? 'true' : 'false'));
+  $('#rR').value = Math.log10(P4.R); $('#vR').textContent = fmtR(P4.R) + ' Ω'; $('#rR').disabled = P4.gen;
+  $('#rU').value = P4.U; $('#vU').textContent = fmt(P4.U, 2) + ' V'; $('#rU').disabled = !P4.gen; set('bGen', P4.gen);
+  $('#bBridge').textContent = P4.bridge ? 'Retirer le pont salin' : 'Remettre le pont salin';
+  document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => {
+    gp.hidden = !gp.dataset.acts.split(' ').includes(String(uiStep)) || (gp.dataset.m2 && gp.dataset.m2 !== P2.mode);
+  });
+}
+function updateUI(n) {
+  uiStep = n;
+  document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Étape <b>${n + 1}</b> sur ${NS}`;
+  $('#stepTitle').textContent = INFO(n).t; updateText();
+  for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NS - 1;
+  syncTools();
+}
+function enterStep(n, restart) {
+  step = n; hideTip(); P2.btnA = P2.btnB = P2.keyA = P2.keyB = false; acc = 0;
+  STEPS[n].enter(restart);
+  buildMeas(n); sizePanelCanvases(); syncTools();
+  if (restart) setPlay(true);
+}
+function flush() { if (pendingStep >= 0) { enterStep(pendingStep, pendingRestart); pendingStep = -1; } fade = 0; sceneA = 1; }
+function goAnim(n, restart) {
+  n = clamp(n, 0, NS - 1);
+  if (n === step && !restart && pendingStep < 0) return;
+  pendingStep = n; pendingRestart = !!restart; updateUI(n);
+  if (reduce) flush(); else fade = -1;
+}
+function goStep(n, restart) { goAnim(n, restart); flush(); return STEPS[step].state(); }
+const ensure = n => { if (step !== n || pendingStep >= 0) { if (step === n && pendingStep < 0) return; goStep(n, false); } };
+function setPlay(p) {
+  playing = p;
+  $('#icPause').style.display = p ? '' : 'none'; $('#icPlay').style.display = p ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', p ? 'Pause' : 'Lecture');
+}
+const userAct = () => { if (!playing) setPlay(true); };
+$('#bPlay').addEventListener('click', () => setPlay(!playing));
+$('#bPrev').addEventListener('click', e => { goAnim(step - 1); e.currentTarget.blur(); });
+$('#bNext').addEventListener('click', e => { goAnim(step + 1); e.currentTarget.blur(); });
+$('#bReset').addEventListener('click', e => { goAnim(step, true); e.currentTarget.blur(); });
+document.querySelectorAll('.seg').forEach(s => s.addEventListener('click', e => { goAnim(+s.dataset.a); e.currentTarget.blur(); }));
+
+// étape 1
+$('#bHCl').addEventListener('click', e => { userAct(); P1.kind = 'HCl'; P1.dil = 0; p1Changed('kind'); e.currentTarget.blur(); });
+$('#bNaOH').addEventListener('click', e => { userAct(); P1.kind = 'NaOH'; P1.dil = 0; p1Changed('kind'); e.currentTarget.blur(); });
+$('#rC').addEventListener('input', e => { userAct(); const v = snap(+e.target.value); P1.C = Math.pow(10, v); P1.dil = 0; p1Changed('slider'); });
+$('#bDil').addEventListener('click', e => { userAct(); dilute1(); e.currentTarget.blur(); });
+$('#bPure').addEventListener('click', e => { userAct(); pure1(!P1.pure); e.currentTarget.blur(); });
+// étape 2
+function holdButton(id, kind, flagKey) {
+  const el = $('#' + id), off = () => { P2[flagKey] = false; el.classList.remove('on'); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); userAct(); if (P2.mode === 'gouttes') { addDrops(kind, 1); P2.holdT = 0.12; } P2[flagKey] = true; el.classList.add('on'); try { el.setPointerCapture(e.pointerId); } catch (_) {} });
+  el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('lostpointercapture', off);
+  el.addEventListener('click', e => { if (e.detail === 0) { userAct(); addDrops(kind, 1); } });
+}
+holdButton('bDropA', 'acide', 'btnA'); holdButton('bDropB', 'base', 'btnB');
+document.querySelectorAll('[data-acid]').forEach(b => b.addEventListener('click', e => { userAct(); setAcid2(b.dataset.acid); e.currentTarget.blur(); }));
+$('#rRat').addEventListener('input', e => { userAct(); setRatio2(Math.pow(10, snap(+e.target.value * 10) / 10)); });
+$('#rVb').addEventListener('input', e => { userAct(); P2.vb = clamp(+e.target.value / 1000, 0, 0.05); P2.last = 'vb'; computeS2(); syncTools(); });
+$('#bTit').addEventListener('click', e => { userAct(); P2.mode = P2.mode === 'titrage' ? 'gouttes' : 'titrage'; P2.last = 'tit'; modeChanged2(); e.currentTarget.blur(); });
+$('#bClr').addEventListener('click', e => { goAnim(1, true); e.currentTarget.blur(); });
+// étape 3
+document.querySelectorAll('[data-metal]').forEach(b => b.addEventListener('click', e => { userAct(); setMetal3(b.dataset.metal); e.currentTarget.blur(); }));
+document.querySelectorAll('[data-ion]').forEach(b => b.addEventListener('click', e => { userAct(); setIon3(b.dataset.ion); e.currentTarget.blur(); }));
+$('#bPred').addEventListener('click', e => { P3.pm = !P3.pm; if (!P3.pm) P3.pred = null; syncTools(); e.currentTarget.blur(); });
+$('#bPredY').addEventListener('click', e => { predict3(true); e.currentTarget.blur(); });
+$('#bPredN').addEventListener('click', e => { predict3(false); e.currentTarget.blur(); });
+$('#bDip').addEventListener('click', e => { userAct(); dip3(!P3.dipped); e.currentTarget.blur(); });
+// étape 4
+document.querySelectorAll('[data-cell]').forEach(b => b.addEventListener('click', e => { userAct(); setCell4(...b.dataset.cell.split(',')); e.currentTarget.blur(); }));
+$('#rR').addEventListener('input', e => { userAct(); P4.R = Math.pow(10, snap(+e.target.value * 4) / 4); P4.R = clamp(P4.R, 1, 1000); $('#vR').textContent = fmtR(P4.R) + ' Ω'; });
+$('#rU').addEventListener('input', e => { userAct(); P4.U = +e.target.value; $('#vU').textContent = fmt(P4.U, 2) + ' V'; });
+$('#bGen').addEventListener('click', e => { userAct(); P4.gen = !P4.gen; syncTools(); e.currentTarget.blur(); });
+$('#bBridge').addEventListener('click', e => { userAct(); P4.bridge = !P4.bridge; syncTools(); e.currentTarget.blur(); });
+document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', e => { P4.speed = +b.dataset.speed; syncTools(); e.currentTarget.blur(); }));
+function setCell4(a, c) { P4.anode = a; P4.cathode = c; newCell4(); buildMeas(3); syncTools(); }
+function setAcid2(k) { P2.acid = k; P2.last = 'acid'; clearDrops2(); K2.curveKey = ''; K2.tkey = ''; computeS2(); curves2(); initMols2(); buildMeas(1); updateText(); syncTools(); }
+function setRatio2(r) { P2.ratio = clamp(r, 0.1, 10); P2.last = 'ratio'; clearDrops2(); curves2(); computeS2(); syncTools(); }
+
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const tag = e.target && e.target.tagName, isRange = tag === 'INPUT';
+  if (e.key === ' ' || e.code === 'Space') {
+    if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
+    e.preventDefault(); setPlay(!playing); return;
+  }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAnim(step + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'r' || e.key === 'R') && !isRange) { goAnim(step, true); return; }
+  if (/^[1-4]$/.test(e.key) && !isRange) { goAnim(+e.key - 1); return; }
+  if (isRange) return;
+  const k = e.key.toLowerCase();
+  if (k === 'd' && step === 0 && !e.repeat) { userAct(); dilute1(); }
+  else if (step === 1 && (k === 'a' || k === 'b') && !e.repeat && P2.mode === 'gouttes') {
+    userAct(); addDrops(k === 'a' ? 'acide' : 'base', 1); P2.holdT = 0.12; if (k === 'a') P2.keyA = true; else P2.keyB = true;
+  }
+  else if (k === 'p' && step === 2 && !e.repeat) { if (!$('#bDip').disabled) { userAct(); dip3(!P3.dipped); } }
+  else if (k === 's' && step === 3 && !e.repeat) { userAct(); P4.bridge = !P4.bridge; syncTools(); }
+});
+addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k === 'a') P2.keyA = false; if (k === 'b') P2.keyB = false; });
+addEventListener('blur', () => { P2.keyA = P2.keyB = P2.btnA = P2.btnB = false; });
+document.addEventListener('visibilitychange', () => { last = 0; });
+
+/* ---------------- Pointeur : survol et toucher ---------------- */
+cv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch') return;
+  const r = cv.getBoundingClientRect(), z = hitZone(zones, e.clientX - r.left, e.clientY - r.top);
+  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+});
+cv.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+  const r = cv.getBoundingClientRect(), z = hitZone(zones, e.clientX - r.left, e.clientY - r.top);
+  clearTimeout(tipTimer);
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY - 40); tipTimer = setTimeout(hideTip, 3500); } else hideTip();
+});
+cv.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') hideTip(); });
+new ResizeObserver(() => resize()).observe(sceneEl);
+addEventListener('resize', resize);
+
+/* ---------------- Boucle d'affichage ---------------- */
+let last = 0, lastRead = 0;
+function frame(now) { requestAnimationFrame(frame); if (document.hidden) { last = 0; return; } loop(now); }
+function loop(now) {
+  const dt = last ? clamp((now - last) / 1000, 0, 0.05) : 0.016; last = now;
+  if (fade !== 0) {
+    if (fade < 0) { sceneA -= dt / 0.2; if (sceneA <= 0.2) { sceneA = 0.2; if (pendingStep >= 0) { enterStep(pendingStep, pendingRestart); pendingStep = -1; } fade = 1; } }
+    else { sceneA += dt / 0.5; if (sceneA >= 1) { sceneA = 1; fade = 0; } }
+  }
+  if (playing && fade <= 0) advance(dt);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+  zones = [];
+  ctx.save(); ctx.globalAlpha = sceneA; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+  STEPS[step].draw(); ctx.restore();
+  STEPS[step].scope();
+  if (now - lastRead > 100) { STEPS[step].readouts(); statusNow(); lastRead = now; }
+}
+
+/* ---------------- Crochets de test ---------------- */
+const stateNow = () => STEPS[step].state();
+const normKind = k => (k === 'NaOH' || k === 'base') ? 'base' : 'acide';
+window.__labo = {
+  moteur: Elc, Elc,
+  get step() { return step; },
+  goStep,
+  state: stateNow,
+  tick(n) { if (pendingStep >= 0) flush(); for (let i = 0; i < n; i++) stepFixed(); return stateNow(); },
+  setPlay,
+  // étape 1
+  setAcid(kind, Cv) { ensure(0); setAcid1(kind, Cv); return stateNow(); },
+  dilute10() { ensure(0); dilute1(); return stateNow(); },
+  pureWater(on) { ensure(0); pure1(on); return stateNow(); },
+  // étape 2
+  drop(kind, n) { ensure(1); addDrops(kind, n == null ? 1 : n); return stateNow(); },
+  setBuffer(acid, ratio) { ensure(1); if (acid) { P2.acid = acid; } if (ratio != null) P2.ratio = clamp(ratio, 0.1, 10); P2.last = 'ratio'; clearDrops2(); K2.curveKey = ''; K2.tkey = ''; computeS2(); curves2(); initMols2(); buildMeas(1); updateText(); syncTools(); return stateNow(); },
+  titrate(Vb) { ensure(1); if (P2.mode !== 'titrage') { P2.mode = 'titrage'; P2.last = 'tit'; modeChanged2(); } P2.vb = clamp(Vb, 0, 0.05); P2.last = 'vb'; computeS2(); syncTools(); return stateNow(); },
+  // étape 3
+  setMetal(m) { ensure(2); setMetal3(m); return stateNow(); }, setIon(i) { ensure(2); setIon3(i); return stateNow(); }, dip(on) { ensure(2); dip3(on); return stateNow(); }, predict(b) { ensure(2); predict3(b); return stateNow(); },
+  // étape 4
+  setCell(anode, cathode) { ensure(3); setCell4(anode, cathode); return stateNow(); }, setLoad(R) { ensure(3); P4.R = clamp(R, 1, 1000); syncTools(); return stateNow(); },
+  generator(on, U) { ensure(3); P4.gen = !!on; if (U != null) P4.U = clamp(U, 0, 2); syncTools(); return stateNow(); }, saltBridge(on) { ensure(3); P4.bridge = on == null ? true : !!on; syncTools(); return stateNow(); }
+};
+
+resize();
+enterStep(0, true); updateUI(0);
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -15,8 +15,9 @@ NOTE DE DESIGN
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#7ee0b5;
@@ -151,14 +152,50 @@ button{font:inherit;color:inherit}
   *{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+.labo-etapes .app{grid-template-areas:"stage panel" "controls panel"}
+.labo-etapes .controls{grid-column:1;position:static;gap:12px;grid-template-columns:auto minmax(0,1fr) auto auto}
+.labo-etapes .scrub .segs{position:absolute;top:12px}
+.labo-etapes .frise-seg{position:relative;background:var(--filet);height:3px}
+.labo-etapes .frise-seg.on{background:var(--encre-3)}
+.labo-etapes .frise-seg i{position:absolute;left:0;top:0;bottom:0;background:var(--encre);width:0}
+.labo-etapes .real,.labo-etapes .follow,.labo-etapes .hint,.labo-etapes .key,.labo-etapes .h3,.labo-etapes .step,.labo-etapes .marks>span,.labo-etapes .meas dt{color:var(--encre-3)}
+.labo-etapes #phTxt,.labo-etapes .count,.labo-etapes .meas dd,.labo-etapes .follow b,.labo-etapes .foot a{color:var(--encre)}
+.labo-etapes .count,.labo-etapes .real,.labo-etapes .foot,.labo-etapes .chip,.labo-etapes .speed,.labo-etapes .speed button{border-color:var(--filet)}
+.labo-etapes .speed button{color:var(--encre-2)}
+.labo-etapes .speed button[aria-checked=true]{background:var(--encre);color:var(--papier)}
+.labo-etapes .step b{color:var(--encre)}
+.labo-etapes #play{color:var(--encre);border-color:var(--encre)}
+@media(max-width:900px){.labo-etapes .app{height:auto;margin:0}.labo-etapes .controls{grid-template-columns:auto minmax(0,1fr);padding:10px var(--gouttiere)}}
+
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .barre p.pos{margin:0}
+.labo-etapes .titre{position:static;max-width:none;pointer-events:auto;left:auto;right:auto;top:auto}
+.labo-etapes .titre::before{display:none}
+.labo-etapes .chap .segs{position:static;height:auto}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou"><a class="marque" href="../../labo/index.html">LABO</a><a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a></div>
+  <div class="droite"><p class="pos">L’invisible en mouvement</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>La mitose</h1><p class="lead">Une cellule partage ses chromosomes et devient deux cellules filles.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~20 µm</dd><dt>Temps</dt><dd>~1 heure</dd><dt>Modèle</dt><dd>cellule animale, 2n = 4</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>La mitose</p><div class="segs"><button class="seg" data-a="0" title="1 — Interphase"><b>1</b><span>Interphase</span></button><button class="seg" data-a="1" title="2 — Prophase"><b>2</b><span>Prophase</span></button><button class="seg" data-a="2" title="3 — Prométaphase"><b>3</b><span>Prométaphase</span></button><button class="seg" data-a="3" title="4 — Métaphase"><b>4</b><span>Métaphase</span></button><button class="seg" data-a="4" title="5 — Anaphase"><b>5</b><span>Anaphase</span></button><button class="seg" data-a="5" title="6 — Télophase"><b>6</b><span>Télophase</span></button><button class="seg" data-a="6" title="7 — Cytocinèse"><b>7</b><span>Cytocinèse</span></button></div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder le phénomène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes, les mesures et les repères apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire ce qui se passe et ouvrir l’explication du phénomène."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
-  <main class="stage" id="stage">
-    <header class="title">
-      <div class="serie">LABO · L’invisible en mouvement</div>
-      <h1>La <em>mitose</em></h1>
-    </header>
+  <main class="stage scene" id="stage">
     <canvas id="cv" aria-label="Simulation de la mitose d'une cellule animale (2n = 4). Les étapes sont décrites dans le panneau de lecture." role="img"></canvas>
     <div class="tip" id="tip" role="tooltip"><b></b><span></span></div>
   </main>
@@ -187,10 +224,10 @@ button{font:inherit;color:inherit}
   <aside class="panel" id="panel">
     <div class="step mono">Étape <b id="stepN">1</b> / 7</div>
     <h2 class="swap" id="phName">Interphase</h2>
-    <p class="swap" id="phTxt"></p>
-    <p class="real swap" id="phReal"></p>
-    <div class="count mono" id="count"></div>
-    <dl class="meas">
+    <p class="couche-comp swap" id="phTxt"></p>
+    <p class="couche-comp real swap" id="phReal"></p>
+    <div class="count mono couche-lire" id="count"></div>
+    <dl class="meas couche-lire">
       <dt>Condensation de l'ADN</dt><dd id="mCond">0 %</dd>
       <dt>Longueur de la cellule</dt><dd id="mLen">22 µm</dd>
       <dt>Distance entre les pôles</dt><dd id="mPole">1 µm</dd>
@@ -198,19 +235,19 @@ button{font:inherit;color:inherit}
       <dt>Tension (relative)</dt><dd id="mTen">0</dd>
       <div class="bar en" aria-hidden="true"><i id="bTen"></i></div>
     </dl>
-    <h3 class="h3">Suivre un chromosome</h3>
-    <div class="chips" id="chips"></div>
-    <p class="follow" id="follow">Clique sur un chromosome dans la scène, ou choisis-en un ici, pour suivre ses deux chromatides jusqu'aux cellules filles.</p>
-    <h3 class="h3">Repères</h3>
-    <dl class="key">
+    <h3 class="h3 couche-lire">Suivre un chromosome</h3>
+    <div class="chips couche-lire" id="chips"></div>
+    <p class="follow couche-lire" id="follow">Clique sur un chromosome dans la scène, ou choisis-en un ici, pour suivre ses deux chromatides jusqu'aux cellules filles.</p>
+    <h3 class="h3 couche-lire">Repères</h3>
+    <dl class="key couche-lire">
       <i style="background:var(--accent)"></i><span>ADN : chromatides sœurs (une teinte par chromosome)</span>
       <i style="background:rgba(126,224,181,.45)"></i><span>Fuseau : microtubules, fins</span>
       <i style="background:var(--texte)"></i><span>Kinétochores et centrioles</span>
       <i style="background:var(--energie)"></i><span>Énergie : cohésine coupée, anneau</span>
     </dl>
-    <p class="hint">Survole une structure pour l'identifier. <kbd>Espace</kbd> lecture, <kbd>←</kbd> <kbd>→</kbd> pas, <kbd>R</kbd> départ, <kbd>1</kbd>–<kbd>7</kbd> étapes. Échelle : 5 µm en bas à gauche.</p>
+    <p class="hint couche-lire">Survole une structure pour l'identifier. <kbd>Espace</kbd> lecture, <kbd>←</kbd> <kbd>→</kbd> pas, <kbd>R</kbd> départ, <kbd>1</kbd>–<kbd>7</kbd> étapes. Échelle : 5 µm en bas à gauche.</p>
     <nav class="foot">
-      <a href="explication.html">Comprendre ce qui se passe</a>
+      <a href="explication.html" class="comprendre couche-comp">Comprendre ce qui se passe</a>
       <a class="sub" href="../../labo/index.html">LABO</a>
     </nav>
   </aside>
@@ -292,11 +329,12 @@ function resize() {
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
   cv.style.width = W + 'px'; cv.style.height = H + 'px';
   const small = W < 640;
-  const topPad = small ? 52 : 0;
+  const topPad = small ? 20 : 0;
   S = Math.min(W / 3.2, (H - topPad) / 2.42);
   CX = W / 2; CY = topPad + (H - topPad) / 2 - (small ? 6 : 8);
 }
 window.addEventListener('resize', resize);
+new ResizeObserver(resize).observe(stage);
 const X = x => CX + S * x, Y = y => CY + S * y;
 
 /* ---------- modele : tout est fonction de t ---------- */
@@ -451,7 +489,8 @@ function setPhase(i) {
   if (first || reduced) apply();
   else { [el.phName, el.phTxt, el.phReal].forEach(n => n.classList.add('out')); setTimeout(apply, 170); }
   el.live.textContent = 'Étape ' + (i + 1) + ' sur 7 : ' + P.name;
-  document.querySelectorAll('.seg').forEach((s, n) => s.classList.toggle('on', n === i));
+  document.querySelectorAll('.frise-seg').forEach((s, n) => s.classList.toggle('on', n === i));
+  document.querySelectorAll('.chap .seg').forEach((b, n) => { if (n === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
   document.querySelectorAll('.marks > span').forEach((s, n) => s.classList.toggle('on', n === i));
 }
 function updatePanel(M, chs, cell) {
@@ -893,12 +932,14 @@ function select(k, fromCanvas) {
   [...chipsBox.children].forEach((b, i) => b.setAttribute('aria-pressed', i === k ? 'true' : 'false'));
 }
 
+document.querySelectorAll('.chap .seg').forEach(b => b.addEventListener('click', () => { st.t = PHASES[+b.dataset.a].t0 + .002; }));
+
 /* scrubber */
 const segsBox = $('segs'), marksBox = $('marks');
 const segFill = [];
 PHASES.forEach((P, i) => {
   const w = (Math.min(P.t1, 1) - P.t0) * 100;
-  const s = document.createElement('div'); s.className = 'seg'; s.style.width = 'calc(' + w + '% - 3px)'; s.style.flex = 'none';
+  const s = document.createElement('div'); s.className = 'frise-seg'; s.style.width = 'calc(' + w + '% - 3px)'; s.style.flex = 'none';
   const f = document.createElement('i'); s.appendChild(f); segsBox.appendChild(s); segFill.push(f);
   const m = document.createElement('span'); m.style.left = ((P.t0 + Math.min(P.t1, 1)) / 2 * 100) + '%';
   m.innerHTML = '<span class="t">' + P.short + '</span><span class="n">' + P.n + '</span>';
@@ -956,5 +997,6 @@ requestAnimationFrame(loop);
 window.__mitose = { st, render, resize };
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

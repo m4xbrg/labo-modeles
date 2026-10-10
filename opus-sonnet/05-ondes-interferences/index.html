@@ -15,8 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#b9c6ff;
@@ -129,17 +130,47 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.strip,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+.labo-etapes .liens{position:static;margin-bottom:0;padding-bottom:0}
+.labo-etapes .gleg,.labo-etapes .hints{color:var(--encre-3)}
+
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .barre p.pos{margin:0}
+.labo-etapes .titre{position:static;max-width:none;pointer-events:auto;left:auto;right:auto;top:auto}
+.labo-etapes .titre::before{display:none}
+.labo-etapes .chap .segs{position:static;height:auto}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou"><a class="marque" href="../../labo/index.html">LABO</a><a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a></div>
+  <div class="droite"><p class="pos">Phénomènes</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Ondes et interférences</h1><p class="lead">Deux sources agitent la même eau : leurs ondes se renforcent ou s’annulent.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~1 m</dd><dt>Temps</dt><dd>~1 seconde</dd><dt>Modèle</dt><dd>ondes linéaires</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>Ondes et interférences</p>    <div class="segs">
+      <button class="seg" data-a="0" title="Acte I — Une source"><b>I</b><span>Une source</span></button>
+      <button class="seg" data-a="1" title="Acte II — Deux impulsions"><b>II</b><span>Impulsions</span></button>
+      <button class="seg" data-a="2" title="Acte III — Renforcement et annulation"><b>III</b><span>Annulation</span></button>
+      <button class="seg" data-a="3" title="Acte IV — Où va l'énergie ?"><b>IV</b><span>Énergie</span></button>
+      <button class="seg" data-a="4" title="Acte V — Onde stationnaire"><b>V</b><span>Stationnaire</span></button>
+      <button class="seg" data-a="5" title="Acte VI — À toi"><b>VI</b><span>À toi</span></button>
+    </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder le phénomène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes, les mesures et les repères apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire ce qui se passe et ouvrir l’explication du phénomène."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Cuve à ondes vue de dessus : deux sources ponctuelles émettent des ondes circulaires qui s'additionnent. Les crêtes sont orange, les creux bleus."></canvas>
     <div class="strip" id="strip"><canvas id="stCv" aria-hidden="true"></canvas></div>
-    <header class="head">
-      <p class="serie">LABO · Phénomènes</p>
-      <h1>Ondes et <em>interférences</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
@@ -147,10 +178,10 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VI</p>
       <h2 id="stepTitle">Une source</h2>
-      <p id="stepText" aria-live="polite"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow" id="mEye">Mesures · sonde <b id="mName">R</b></p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Oscilloscope : déplacement de l'eau à la sonde en fonction du temps, onde 1, onde 2 et leur somme."></canvas></div>
       <p class="leg">
@@ -160,8 +191,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </p>
     </section>
 
-    <section>
-      <div class="meas">
+    <section class="couche-lire">
+      <div class="meas couche-lire">
         <div class="row small"><span class="lab">Différence de marche Δ</span><span class="val"><b id="mD">—</b><i>λ</i></span></div>
         <div class="row small"><span class="lab">Déphasage à l'arrivée</span><span class="val"><b id="mPh">—</b><i>°</i></span></div>
         <div class="row small"><span class="lab">Amplitude de la somme</span><span class="val"><b id="mA">—</b><i>0–2</i></span></div>
@@ -170,7 +201,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note" id="mNote">Échelle verticale fixe : ±2 A. Δ = r₂ − r₁, distances de la sonde aux deux sources.</p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>6</kbd> aller à l'acte</li>
@@ -179,7 +210,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="couche-comp comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -191,14 +222,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les six actes">
-      <button class="seg" data-a="0" title="Acte I — Une source"><b>I</b><span>Une source</span></button>
-      <button class="seg" data-a="1" title="Acte II — Deux impulsions"><b>II</b><span>Impulsions</span></button>
-      <button class="seg" data-a="2" title="Acte III — Renforcement et annulation"><b>III</b><span>Annulation</span></button>
-      <button class="seg" data-a="3" title="Acte IV — Où va l'énergie ?"><b>IV</b><span>Énergie</span></button>
-      <button class="seg" data-a="4" title="Acte V — Onde stationnaire"><b>V</b><span>Stationnaire</span></button>
-      <button class="seg" data-a="5" title="Acte VI — À toi"><b>VI</b><span>À toi</span></button>
-    </div>
+
 
     <div class="tools" id="tools" hidden>
       <div class="grp">
@@ -243,7 +267,6 @@ const cv = $('#cv'), ctx = cv.getContext('2d');
 const off = document.createElement('canvas'), octx = off.getContext('2d');
 const scopeC = $('#scope'), sctx = scopeC.getContext('2d');
 const stCv = $('#stCv'), stx = stCv.getContext('2d');
-const headEl = document.querySelector('.head');
 const sceneEl = $('#scene'), tipEl = $('#tip'), stripEl = $('#strip');
 
 const rootCS = getComputedStyle(document.documentElement);
@@ -331,7 +354,7 @@ let defD = 192, defCx = 0, defY = 150;
 function layoutDefaults() {
   defD = Math.min(4 * lam, W * 0.56);
   defCx = W / 2;
-  defY = Math.max(130, H * 0.25);
+  defY = Math.max(32, H * 0.18);
   yS = H - STRIP_H - 24;
   // Q : même distance à l'axe que P, sur la ligne nodale Δ = 1,5 λ (m = 1). Résolution numérique ;
   // on descend les deux sondes si l'écart P–Q est inférieur à 90 px.
@@ -949,6 +972,7 @@ addEventListener('keydown', e => {
 });
 document.addEventListener('visibilitychange', () => { last = 0; });
 new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => { sizeScope(uiAct); dirty = true; }).observe(scopeC);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -975,7 +999,6 @@ function frame(now) {
   if (Math.abs(wantN - nodalA) > 0.005) { nodalA += (wantN - nodalA) * (reduce ? 1 : 1 - Math.exp(-dt * 2.5)); dirty = true; } else nodalA = wantN;
   const wantV = (act === 3 || (act === 5 && mixT > 0.5)) ? 1 : 0;
   if (Math.abs(wantV - ventA) > 0.005) { ventA += (wantV - ventA) * (reduce ? 1 : 1 - Math.exp(-dt * 2.5)); dirty = true; } else ventA = wantV;
-  headEl.style.setProperty('--vo', (0.6 + 0.4 * mix).toFixed(2));
   const sw = stripWanted(); if (sw !== stripOn) { stripOn = sw; stripEl.classList.toggle('on', sw); dirty = true; }
 
   if (playing) {
@@ -1010,5 +1033,6 @@ enterAct(0, true); updateUI(0); syncTools();
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
