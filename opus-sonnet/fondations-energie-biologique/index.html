@@ -694,7 +694,7 @@ const S1 = (() => {
     const y0 = top + 50 * k, axisX = nar ? 34 : 66;
     const xUp = axisX + (nar ? 52 : 100), dl = nar ? 22 : 32, xAtp = xUp + dl, xTot = xAtp + (nar ? 52 : 98);
     const wW = nar ? 56 : 172, wx = W - (nar ? 6 : 22) - wW;
-    const cx0 = xTot + (nar ? 46 : 84), cx1 = wx - (nar ? 6 : 24);
+    const cx0 = xTot + (nar ? 58 : 84), cx1 = wx - (nar ? 6 : 24);
     const bw = nar ? 28 : 46, bx0 = wx + (nar ? 14 : 64), by0 = top + (nar ? 66 : 92), by1 = top + ph - (nar ? 30 : 46);
     return { nar, top, bot, ph, yb: top + ph, k, y0, axisX, xUp, dl, xAtp, xTot, wW, wx, cx0, cx1, bw, bx0, by0, by1, tapX: bx0 + bw / 2, tapY: by0 - (nar ? 22 : 24) };
   }
@@ -1489,12 +1489,12 @@ const S2 = (() => {
     c.restore();
     // survol
     for (const e of sim.E) {
-      zcirc(bx + e.x * s, by + e.y * s, eR + 2, 'enz' + (e.x * 997 | 0), 'Enzyme', 'Une protéine immobile ici ; elle accélère une seule réaction. Le croissant porte le site actif, qui ressort intacte de chaque réaction.');
+      zcirc(bx + e.x * s, by + e.y * s, eR + 2, 'enz' + (e.x * 997 | 0), 'Enzyme', 'Une protéine immobile ici ; elle accélère une seule réaction et ressort intacte de chacune. Le croissant porte le site actif.');
       zcirc(bx + e.sx * s, by + e.sy * s, sr + 4, 'site' + (e.sx * 997 | 0), 'Site actif', e.st === 'ES' ? 'Occupé par un substrat : il réagit ou repart ; un produit est libéré à la fin.' : e.st === 'EI' ? 'Occupé par un inhibiteur : il ressemble au substrat, mais ne réagit pas ; le site est bloqué un instant.' : 'Libre : un substrat qui passe dans ce disque peut s’y lier.');
     }
     zoneF((x, y) => { for (const m of sim.S) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 3) * (sr + 3)) return true; } return false; }, 'sub', 'Substrat', 'Molécule lilas qui diffuse au hasard dans le bain ; celle qui entre dans un site peut être transformée en produit.');
     if (sim.I.length) zoneF((x, y) => { for (const m of sim.I) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 3) * (sr + 3)) return true; } return false; }, 'inh', 'Inhibiteur compétitif', 'Anneau sable qui ressemble au substrat : il occupe un site actif sans réagir, puis repart.');
-    zoneF((x, y) => { for (const m of sim.prod) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 4) * (sr + 4)) return true; } return false; }, 'prod', 'Produit', 'Molécule ambre libérée par un site ; elle s’éloigne et s’estompe de l’écran, le bain restant à concentration constante.');
+    zoneF((x, y) => { for (const m of sim.prod) { const dx = bx + m.x * s - x, dy = by + m.y * s - y; if (dx * dx + dy * dy < (sr + 4) * (sr + 4)) return true; } return false; }, 'prod', 'Produit', 'Molécule ambre libérée par un site ; elle s’éloigne et s’estompe ; le bain reste à concentration constante.');
     // échelle de concentration
     c.font = mono(Ly.nar ? 10 : 11); c.fillStyle = C.texte2; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
     c.fillText('[S] = ' + st.S + ' molécules libres par boîte' + (Ieff() ? ' · [I] = ' + Ieff() : ''), bx + s / 2, by + s + 18);
@@ -1643,7 +1643,7 @@ const S2 = (() => {
       <div class="grp"><span class="gl">Enzymes</span><input type="range" id="s2E" min="2" max="16" step="1" value="8" aria-label="Nombre d’enzymes dans la boîte"><span class="rv" id="s2Ev"></span></div>
       <div class="grp"><button class="btn" id="s2Inh" aria-pressed="false" title="Inhibiteur compétitif (I)"><span class="dot"></span>Inhibiteur compétitif</button><span class="gl" id="s2Il" hidden>[I]</span><input type="range" id="s2I" min="0" max="90" step="5" value="30" hidden aria-label="Concentration en inhibiteur, en molécules libres par boîte"><span class="rv" id="s2Iv" hidden></span></div>
       <div class="grp"><button class="btn go" id="s2Sweep" title="Six paliers de [S] en accéléré (×${SPD}), un point par palier (B)">Balayer [S]</button><button class="btn" id="s2Clear">Effacer les points</button></div>`,
-    mesures: [['Vitesse (5 s)', 'v5', 's⁻¹'], ['Vitesse sur la fenêtre', 'vw', 's⁻¹'], ['Enzymes occupées', 'occN', ''], ['Occupation moyenne', 'occM', '%'], ['Km', 'km', 'molécules'], ['Vmax = kcat × nE', 'vmax', 's⁻¹'], ['[S] / Km', 'ratio', '']],
+    mesures: [['Vitesse (5 s)', 'v5', 's⁻¹'], ['Vitesse (fenêtre)', 'vw', 's⁻¹'], ['Enzymes occupées', 'occN', ''], ['Occupation moyenne', 'occM', '%'], ['Km', 'km', 'molécules'], ['Vmax = kcat × nE', 'vmax', 's⁻¹'], ['[S] / Km', 'ratio', '']],
     cartes: false, touches: '<kbd>I</kbd> inhibiteur · <kbd>B</kbd> balayer [S]',
     init, reset, adv, draw, graph, valeurs, statut, etat, sync,
     keys: { i: () => inhibitor(!st.inhib), b: () => { if (!st.sweep) sweep(); } },
@@ -1791,7 +1791,6 @@ document.addEventListener('visibilitychange', () => { last = 0; });
 const CVTITLE = reduce ? 'Mouvement réduit : les animations sont ralenties (facteur 0,4), jamais figées.' : 'Les animations ralentissent (facteur 0,4) si le système demande moins de mouvement.';
 cv.title = CVTITLE;
 let dragging = false;
-cv.addEventListener('pointerenter', () => cv.removeAttribute('title'));
 cv.addEventListener('pointerleave', () => { if (!dragging) { hideTip(); cv.className = ''; } cv.title = CVTITLE; });
 cv.addEventListener('pointerdown', e => {
   const s = STEPS[cur]; if (!s.pointer || fade !== 0) return;
@@ -1803,7 +1802,7 @@ cv.addEventListener('pointermove', e => {
   if (dragging) { s.pointer.move(x, y, e); return; }
   if (e.pointerType === 'touch') return;
   const z = hitZone(x, y);
-  if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+  if (z) { showTip(z.key, z.name, z.role, e.clientX, e.clientY); cv.removeAttribute('title'); } else { hideTip(); cv.title = CVTITLE; }
   cv.className = (s.pointer && s.pointer.hover && s.pointer.hover(x, y)) || '';
 });
 const endPtr = e => { if (dragging) { STEPS[cur].pointer.up(e); dragging = false; try { cv.releasePointerCapture(e.pointerId); } catch (_) {} } cv.className = ''; };
