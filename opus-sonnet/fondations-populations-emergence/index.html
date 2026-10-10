@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="fr"><head>
+<!-- Les huit expériences partagent un seul écran d'instrument ; la couleur représente une grandeur, jamais un effet décoratif.
+Les positions individuelles ne sont pas des mesures : seuls les calculs du moteur alimentent les courbes et les indicateurs.
+La transition continue, le pas fixe et les trois couches protègent la lecture des phénomènes à plusieurs échelles. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Du local au collectif — LABO</title><meta name="description" content="Populations, réseaux, épidémies, essaims et émergence : huit expériences interactives de fondations scientifiques.">
+<link rel="icon" href="data:,"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#cbd67a;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--lilas:#b9a3ff;--sable:#dcc29a;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 var(--sans)}button,input{font:inherit}[hidden]{display:none!important}.app{display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr) auto}.scene{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--fond);color:var(--texte);display:flex;flex-direction:column}#cv{display:block;width:100%;height:100%;flex:1 1 0;min-height:0;touch-action:none}.scene-meta{position:absolute;left:18px;top:12px;right:18px;display:flex;justify-content:space-between;gap:16px;pointer-events:none;font:11px var(--mono);color:var(--texte-2)}.scene-meta b{color:var(--accent);font-weight:400}.objects{display:flex;gap:4px;flex-wrap:wrap;align-items:center;padding:5px 12px;background:var(--fond-2);min-height:36px}.object{padding:3px 7px;color:var(--texte-2);font:10px var(--mono);border:1px solid var(--trait);background:transparent;cursor:help;min-height:24px}.object:hover,.object:focus-visible{border-color:var(--accent);color:var(--accent)}.panel{min-width:0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px}.panel section{min-width:0}.eyebrow{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0 0 5px}.panel h2{font-size:24px;line-height:1.2;margin:0 0 7px}.panel p{margin:0}.status{font:12px/1.55 var(--mono);min-height:36px;color:var(--encre-2)}.scopeBox{border:1px solid var(--filet);background:var(--fond);min-height:110px}.scopeBox canvas{display:block;width:100%;height:104px}.leg{font:10px var(--mono);margin-top:5px!important;color:var(--encre-3)}.row{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--filet)}.lab{font:11px var(--mono);color:var(--encre-3)}.val{font:12px var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}.cle{border-left:2px solid var(--encre);padding-left:11px;font:13px/1.55 var(--sans)}.note{font:11px/1.55 var(--mono);color:var(--encre-3)}.liens{margin-top:auto;display:grid;gap:7px}.comprendre{border:1px solid var(--encre);padding:9px 10px;font-size:13px;text-decoration:none}.questions{display:grid;gap:8px}.questions a{font-size:12px;line-height:1.5;text-decoration:none;border-top:1px solid var(--filet);padding-top:5px}.questions b{display:block;font:500 12px var(--mono)}.hint{font:10px/1.5 var(--mono);color:var(--encre-3)}.controls{grid-column:1/-1;padding:10px 16px;display:flex;flex-wrap:wrap;gap:7px 16px}.grp{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--filet);padding:6px 10px;font:11px var(--mono);min-height:33px;background:transparent;cursor:pointer}.btn:hover,.btn:focus-visible{border-color:var(--encre)}.btn[aria-pressed=true],.btn.active{border-color:var(--encre);background:var(--papier-2)}.tools{width:100%;border-top:1px solid var(--filet);padding-top:7px;display:flex;flex-wrap:wrap;gap:8px 16px}.tools>div{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.range{display:inline-flex;gap:5px;align-items:center;flex-wrap:wrap;font:11px var(--mono)}input[type=range]{width:88px;accent-color:var(--encre)}.rv{min-width:30px;color:var(--encre);font:11px var(--mono)}.gl{font:11px var(--mono);color:var(--encre-2)}.tip{position:fixed;z-index:50;background:var(--fond-2);color:var(--texte);border:1px solid var(--trait);padding:9px 12px;max-width:260px;font:11px/1.5 var(--mono);pointer-events:none;box-shadow:0 10px 30px #0008}.tip b{display:block;color:var(--accent)}.tip span{color:var(--texte-2)}.serie{font:10px var(--mono)}.labo-etapes .titre h1{font:400 clamp(32px,4.8vh,52px)/1 var(--serif);letter-spacing:-.02em}.labo-etapes .titre h1 em{font-style:italic}.labo-etapes .cle{color:var(--encre-2)}.labo-etapes .status{color:var(--encre-2)}.labo-etapes .scopeBox{background:var(--fond)}.labo-etapes .objects{color:var(--texte)}.labo-etapes .app{min-height:450px}.labo-etapes .panel{padding-bottom:12px}.labo-etapes .scene{background:var(--fond)}.labo-etapes .controls{border-top:1px solid var(--filet)}.labo-etapes .questions a{color:var(--encre-2)}.labo-etapes .questions a:hover{color:var(--encre)}#mobileView{display:none}
+@media(max-width:860px){.app{display:flex;flex-direction:column}.labo-etapes .app{height:auto;min-height:0}.scene{height:465px;flex:none;order:1}.controls{order:2;padding:10px 14px}.panel{order:3;overflow:visible;border-top:1px solid var(--filet)}.labo-etapes .panel{padding:18px var(--gouttiere)}.scopeBox canvas{height:90px}#mobileView{display:inline-flex}.labo-etapes .titre{gap:14px}.labo-etapes .sig dd{white-space:normal}}
+@media(max-width:430px){.scene{height:500px}.scene-meta{font-size:9px}.objects{min-height:47px}.object{font-size:9px;min-height:22px}.tools{gap:10px}.range{width:100%;justify-content:space-between}.range input{flex:1;width:auto;min-width:40px}.btn{font-size:10px;padding:6px 8px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 41 · 42</p><button class="bascule-theme" id="theme" title="Changer le thème">Thème auto</button></div></header>
+<div class="titre"><div><h1>Du local au <em>collectif</em></h1><p class="lead">Aucune règle ne décrit le résultat d'ensemble. Pourtant les cycles, les vagues et les formes apparaissent.</p></div><dl class="sig"><dt>Échelle</dt><dd>individu → population</dd><dt>Temps</dt><dd>jours → générations · illustratifs</dd><dt>Modèle</dt><dd>SIR · réseaux · automates</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Huit expériences, deux modules">
+<div class="chap"><p class="chap-t"><b>41</b> Module 41 · Populations et propagation</p><div class="segs">
+<button class="seg" data-step="0" title="Croître et se concurrencer"><b>1</b><span>Compétition</span></button>
+<button class="seg" data-step="1" title="Proies et prédateurs"><b>2</b><span>Cycles</span></button>
+<button class="seg" data-step="2" title="Une épidémie"><b>3</b><span>Épidémie</span></button>
+<button class="seg" data-step="3" title="Réseaux et cascades"><b>4</b><span>Réseaux</span></button>
+</div></div><div class="chap"><p class="chap-t"><b>42</b> Module 42 · Émergence</p><div class="segs">
+<button class="seg" data-step="4" title="Le jeu de la vie"><b>5</b><span>Cellules</span></button>
+<button class="seg" data-step="5" title="L’essaim"><b>6</b><span>Essaim</span></button>
+<button class="seg" data-step="6" title="Le tas de sable"><b>7</b><span>Avalanches</span></button>
+<button class="seg" data-step="7" title="Les bouchons fantômes"><b>8</b><span>Trafic</span></button>
+</div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches d'exploration"><button role="tab" data-m="observer" aria-selected="true" data-indice="Regarde les règles faire naître un phénomène."><span>O</span>Observer</button><button role="tab" data-m="manipuler" aria-selected="false" data-indice="Change une variable et compare les réponses."><span>M</span>Manipuler</button><button role="tab" data-m="comprendre" aria-selected="false" data-indice="Lis la relation, examine les limites et suis vers la théorie."><span>C</span>Comprendre</button></div><p class="indice" id="indice">Regarde les règles faire naître un phénomène.</p></div>
+<div class="app">
+<main class="scene" id="scene" aria-label="Simulation scientifique en cours"><canvas id="cv" role="img" aria-label="Scène scientifique animée représentant l'expérience sélectionnée"></canvas><div class="scene-meta"><span id="sceneName">41.1 · PARTAGER UNE RESSOURCE</span><b id="clock"></b></div><div class="objects" id="objects" aria-label="Termes à découvrir"></div></main>
+<aside class="panel" aria-label="Lecture de l'expérience">
+<section><p class="eyebrow" id="eyebrow">MODULE 41 · 01 / 08</p><h2 id="stepTitle">Croître et se concurrencer</h2><p id="stepText" class="couche-comp"></p><p class="status" id="status" aria-live="off"></p></section>
+<section class="couche-lire"><p class="eyebrow" id="scopeTitle">ENREGISTREUR</p><div class="scopeBox"><canvas id="scope" role="img" aria-label="Graphique de la grandeur au cours de la simulation"></canvas></div><p class="leg" id="scopeLegend"></p></section>
+<section class="couche-lire"><div id="meas" aria-label="Mesures numériques"></div></section>
+<p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p>
+<div class="questions couche-comp" id="questions" hidden><a href="../../labo/index.html#fondations"><b>08 · Chaos</b>Ces systèmes sont-ils prévisibles à long terme ?</a><a href="../fondations-evolution-populations/index.html"><b>40 · Évolution</b>La sélection agit-elle sur les comportements collectifs ?</a><a href="../../labo/index.html#fondations"><b>18 · Physique · Ising (Atlas)</b>L’aimantation est-elle aussi un phénomène collectif ?</a></div>
+<nav class="liens"><a id="theory" class="comprendre couche-comp" href="explication.html#m41">Théorie du module 41 →</a><p class="hint couche-lire">Espace : pause · ← → : étape · 1–8 : accès · R : recommencer · O M C : couches · I : infos</p></nav>
+</aside>
+<div class="controls" role="toolbar" aria-label="Commandes scientifiques"><div class="grp"><button class="btn" id="prev" title="Étape précédente">←</button><button class="btn" id="play" title="Pause ou reprendre (Espace)">Pause</button><button class="btn" id="next" title="Étape suivante">→</button><button class="btn" id="reset">Recommencer</button><button class="btn" id="mobileView" aria-pressed="false">Voir les graphes →</button></div>
+<div class="tools" id="tools">
+<div data-act="0"><label class="range">Compétition 1 ← 2 <input id="a12" type="range" min="0.1" max="2" step=".05" value=".55"><output class="rv" id="a12v"></output></label><label class="range">Compétition 2 ← 1 <input id="a21" type="range" min="0.1" max="2" step=".05" value=".45"><output class="rv" id="a21v"></output></label><label class="range">K₁/K₂ <input id="kr" type="range" min=".5" max="2" step=".05" value="1.2"><output class="rv" id="krv"></output></label></div>
+<div data-act="1"><label class="range">Croissance des proies <input id="lva" type="range" min=".3" max="1.3" step=".05" value=".7"><output class="rv" id="lvav"></output></label><label class="range">Prédation <input id="lvb" type="range" min=".07" max=".25" step=".01" value=".14"><output class="rv" id="lvbv"></output></label><button class="btn" id="capacity" aria-pressed="false">Capacité limite : non</button><button class="btn" id="historical" aria-pressed="false">Données historiques : non</button></div>
+<div data-act="2"><label class="range">R₀ <input id="r0" type="range" min=".5" max="6" step=".1" value="2.5"><output class="rv" id="r0v"></output></label><label class="range">Durée infectieuse <input id="duration" type="range" min="2" max="14" step=".5" value="5"><output class="rv" id="durationv"></output></label><label class="range">Vaccinés <input id="vacc" type="range" min="0" max="1" step=".05" value="0"><output class="rv" id="vaccv"></output></label><button class="btn" id="seednew">Nouveau départ</button><button class="btn" id="ode" aria-pressed="false">Courbes des équations</button></div>
+<div data-act="3"><span class="gl">Réseau</span><button class="btn" data-net="regular">Régulier</button><button class="btn" data-net="small">Petit monde</button><button class="btn" data-net="scale">Sans échelle</button><label class="range">Raccourcis <input id="rewire" type="range" min="0" max=".3" step=".01" value=".07"><output class="rv" id="rewirev"></output></label><button class="btn" data-vax="random">10 % au hasard</button><button class="btn" data-vax="hubs">10 % hubs</button><button class="btn" id="seednode">Nouveau foyer</button></div>
+<div data-act="4"><button class="btn" data-pattern="planeur">Planeur</button><button class="btn" data-pattern="clignotant">Clignotant</button><button class="btn" data-pattern="canon">Canon</button><button class="btn" data-pattern="random">Aléatoire 30 %</button><button class="btn" id="lifeone">Un pas</button><label class="range">Vitesse <input id="liferate" type="range" min="1" max="20" step="1" value="6"><output class="rv" id="liferatev"></output></label><button class="btn" id="clearcells">Effacer</button></div>
+<div data-act="5"><label class="range">Séparation <input id="sep" type="range" min="0" max="1" step=".05" value=".22"><output class="rv" id="sepv"></output></label><label class="range">Alignement <input id="ali" type="range" min="0" max="3" step=".1" value="1.5"><output class="rv" id="aliv"></output></label><label class="range">Cohésion <input id="coh" type="range" min="0" max="1" step=".05" value=".16"><output class="rv" id="cohv"></output></label><button class="btn" data-radius="wide">Vision étendue</button><button class="btn" data-radius="short">Vision locale</button><button class="btn" id="resetbirds">Nouveaux oiseaux</button></div>
+<div data-act="6"><label class="range">Grains par pas <input id="grainrate" type="range" min="1" max="200" step="1" value="70"><output class="rv" id="grainratev"></output></label><button class="btn" data-place="random">Au hasard</button><button class="btn" data-place="centre">Au centre</button><button class="btn" id="grain10k">10 000 grains d'un coup</button></div>
+<div data-act="7"><label class="range">Voitures <input id="cars" type="range" min="5" max="190" step="5" value="65"><output class="rv" id="carsv"></output></label><label class="range">Freinage aléatoire <input id="brake" type="range" min="0" max=".6" step=".05" value=".3"><output class="rv" id="brakev"></output></label><label class="range">Vitesse max. <input id="vmax" type="range" min="1" max="7" step="1" value="5"><output class="rv" id="vmaxv"></output></label></div>
+</div></div></div><div class="tip" id="tip" role="tooltip" hidden></div>
+<script>
+/* EMG-BEGIN */
+const Emg = (() => {
+  'use strict';
+  // Les temps ODE et SIR sont des jours illustratifs ; les tailles sont des individus.
+  // Les automates sont sans dimensions physiques : une itération est un pas de règle.
+  const borne = (x, a, b) => Math.max(a, Math.min(b, x));
+  function mulberry32(graine = 1) {
+    let a = graine >>> 0;
+    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function rk4(y, dt, derivee) {
+    const addition = (v, w, f) => v.map((x, i) => x + f * w[i]);
+    const k1 = derivee(y), k2 = derivee(addition(y, k1, dt / 2));
+    const k3 = derivee(addition(y, k2, dt / 2)), k4 = derivee(addition(y, k3, dt));
+    return y.map((x, i) => Math.max(0, x + dt * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]) / 6));
+  }
+  function logistic(N, { r = 0.5, K = 100 } = {}, dt = 0.1) {
+    return rk4([N], dt, ([n]) => [r * n * (1 - n / K)])[0];
+  }
+  function competition({ r1 = 0.7, r2 = 0.5, K1 = 120, K2 = 100, a12 = 0.5, a21 = 0.5 } = {}) {
+    return (etat, dt = 0.05) => rk4(etat, dt, ([x, y]) => [r1 * x * (1 - (x + a12 * y) / K1), r2 * y * (1 - (y + a21 * x) / K2)]);
+  }
+  function competitionIssue({ K1 = 120, K2 = 100, a12 = .5, a21 = .5 } = {}) {
+    const p = 1 - a12 * a21;
+    const x = p ? (K1 - a12 * K2) / p : NaN;
+    const y = p ? (K2 - a21 * K1) / p : NaN;
+    if (a12 < K1 / K2 && a21 < K2 / K1) return { issue: 'coexistence', N1: x, N2: y };
+    if (a12 > K1 / K2 && a21 > K2 / K1) return { issue: 'priorité initiale', N1: x, N2: y };
+    return { issue: a12 >= K1 / K2 ? 'espèce 2' : 'espèce 1', N1: x, N2: y };
+  }
+  function lotkaVolterra({ a = 0.7, b = 0.14, c = 0.08, d = 0.45, K = Infinity } = {}) {
+    return (etat, dt = 0.02) => rk4(etat, dt, ([x, y]) => [a * x * (1 - x / K) - b * x * y, c * x * y - d * y]);
+  }
+  function lvIntegrale(x, y, { a = .7, b = .14, c = .08, d = .45 } = {}) {
+    return c * x - d * Math.log(x) + b * y - a * Math.log(y);
+  }
+  function sir({ beta = 0.45, gamma = 0.2, N = 1000, vacc = 0 } = {}) {
+    // Les vaccinés sont comptés dans R sans avoir été malades.
+    return (etat, dt = 0.05) => rk4(etat, dt, ([S, I]) => [-beta * S * I / N, beta * S * I / N - gamma * I, gamma * I]);
+  }
+  function initialSIR(N = 1000, vacc = 0, infectes = 1) {
+    const V = Math.floor(borne(vacc, 0, 1) * N), I = Math.min(infectes, N - V);
+    return [N - V - I, I, V];
+  }
+  function finalSize(R0, vacc = 0) {
+    const s0 = 1 - borne(vacc, 0, 1);
+    if (R0 * s0 <= 1) return 0;
+    // Racine NON NULLE de z=s0(1-exp(-R0*z)), en fraction de la population entière.
+    let lo = 1e-14, hi = s0;
+    for (let i = 0; i < 90; i++) {
+      const z = (lo + hi) / 2;
+      if (s0 * (-Math.expm1(-R0 * z)) > z) lo = z; else hi = z;
+    }
+    return (lo + hi) / 2;
+  }
+  function peakS(R0, N = 1) { return N / R0; }
+  function binomiale(n, p, hasard) {
+    if (n < 1 || p <= 0) return 0;
+    if (p >= 1) return n;
+    // Simulation de Bernoulli exacte à petite échelle ; approximation normale
+    // à grande échelle pour garder les essais de 10 000 individus réactifs.
+    if (n <= 300 || n * Math.min(p, 1 - p) < 16) {
+      if (p > .5) return n - binomiale(n, 1 - p, hasard);
+      let resultat = 0;
+      for (let i = 0; i < n; i++) if (hasard() < p) resultat++;
+      return resultat;
+    }
+    const z = Math.sqrt(-2 * Math.log(Math.max(1e-12, hasard()))) * Math.cos(2 * Math.PI * hasard());
+    return borne(Math.round(n * p + Math.sqrt(n * p * (1 - p)) * z), 0, n);
+  }
+  function agentsSIR({ N = 400, contacts = 8, beta = .5, gamma = .2, vacc = 0, infectes = 1 } = {}, hasard = mulberry32(1)) {
+    const V = Math.floor(N * borne(vacc, 0, 1)), I0 = Math.min(infectes, N - V);
+    const agent = N <= 2000 ? new Uint8Array(N) : null;
+    if (agent) {
+      const indices = [...Array(N).keys()];
+      for (let j = indices.length - 1; j > 0; j--) { const k = Math.floor(hasard() * (j + 1)); [indices[j], indices[k]] = [indices[k], indices[j]]; }
+      for (let j = 0; j < V; j++) agent[indices[j]] = 3;
+      for (let j = V; j < V + I0; j++) agent[indices[j]] = 1;
+    }
+    const e = { N, contacts, beta, gamma, vacc, S: N - V - I0, I: I0, R: V, V, casGueris: 0, temps: 0, agents: agent };
+    e.step = (dt = .2) => {
+      // Le taux beta est le taux EFFECTIF de contacts infectants par jour ;
+      // 'contacts' décrit le nombre de contacts candidats, beta/contacts leur risque.
+      const pI = -Math.expm1(-contacts * (1 - Math.exp(-beta / contacts * e.I / N)) * dt);
+      const pR = -Math.expm1(-gamma * dt);
+      let nouveaux = 0, gueris = 0;
+      if (agent) {
+        const changements = [];
+        for (let i = 0; i < N; i++) {
+          if (agent[i] === 0 && hasard() < pI) { changements.push(i); nouveaux++; }
+          else if (agent[i] === 1 && hasard() < pR) { agent[i] = 2; gueris++; }
+        }
+        for (const i of changements) agent[i] = 1;
+      } else {
+        nouveaux = binomiale(e.S, pI, hasard);
+        gueris = binomiale(e.I, pR, hasard);
+      }
+      e.S -= nouveaux; e.I += nouveaux - gueris; e.R += gueris;
+      e.casGueris += gueris; e.temps += dt;
+      return e;
+    };
+    return e;
+  }
+  function graphe(n) { return { n, adj: Array.from({ length: n }, () => new Set()) }; }
+  function relier(g, i, j) { if (i !== j) { g.adj[i].add(j); g.adj[j].add(i); } }
+  function delier(g, i, j) { g.adj[i].delete(j); g.adj[j].delete(i); }
+  function lattice(n = 300, k = 6) {
+    if (k % 2 || n <= k || k < 2) throw new RangeError('k doit être pair et inférieur à n');
+    const g = graphe(n);
+    for (let i = 0; i < n; i++) for (let d = 1; d <= k / 2; d++) relier(g, i, (i + d) % n);
+    return g;
+  }
+  function smallWorld(n = 300, k = 6, p = .08, hasard = mulberry32(12)) {
+    const g = lattice(n, k);
+    for (let i = 0; i < n; i++) for (let d = 1; d <= k / 2; d++) {
+      const j = (i + d) % n;
+      if (hasard() >= p) continue;
+      // Conserver le nombre de liens, jamais de boucle ni de doublon.
+      const candidats = [];
+      for (let x = 0; x < n; x++) if (x !== i && !g.adj[i].has(x)) candidats.push(x);
+      if (!candidats.length) continue;
+      delier(g, i, j); relier(g, i, candidats[Math.floor(hasard() * candidats.length)]);
+    }
+    return g;
+  }
+  function scaleFree(n = 300, m = 3, hasard = mulberry32(3)) {
+    if (!Number.isInteger(m) || m < 1 || n <= m) throw new RangeError('Paramètres Barabási–Albert invalides');
+    const g = graphe(n), urne = [];
+    for (let i = 0; i <= m; i++) for (let j = i + 1; j <= m; j++) { relier(g, i, j); urne.push(i, j); }
+    for (let i = m + 1; i < n; i++) {
+      const choix = new Set();
+      while (choix.size < m) choix.add(urne[Math.floor(hasard() * urne.length)]);
+      for (const j of choix) { relier(g, i, j); urne.push(i, j); }
+    }
+    return g;
+  }
+  function degreeDistribution(g) {
+    const comptes = new Map();
+    for (const voisins of g.adj) comptes.set(voisins.size, (comptes.get(voisins.size) || 0) + 1);
+    return [...comptes].sort((a, b) => a[0] - b[0]).map(([degree, count]) => ({ degree, count, probability: count / g.n }));
+  }
+  function pathLength(g, echantillon = 60) {
+    // BFS exact pour n<=400, échantillon déterministe de racines au-delà.
+    const n = g.n, nb = n <= 400 ? n : Math.min(n, echantillon);
+    let somme = 0, paires = 0;
+    for (let t = 0; t < nb; t++) {
+      const origine = n <= 400 ? t : Math.floor((t + .5) * n / nb);
+      const dist = new Int32Array(n).fill(-1), queue = new Int32Array(n);
+      let tete = 0, fin = 1; queue[0] = origine; dist[origine] = 0;
+      while (tete < fin) {
+        const x = queue[tete++];
+        for (const y of g.adj[x]) if (dist[y] === -1) { dist[y] = dist[x] + 1; queue[fin++] = y; }
+      }
+      for (let i = 0; i < n; i++) if (dist[i] > 0) { somme += dist[i]; paires++; }
+    }
+    return paires ? somme / paires : 0;
+  }
+  function clustering(g) {
+    let somme = 0;
+    for (let i = 0; i < g.n; i++) {
+      const v = [...g.adj[i]], k = v.length;
+      if (k < 2) continue;
+      let triangles = 0;
+      for (let a = 0; a < k; a++) for (let b = a + 1; b < k; b++) if (g.adj[v[a]].has(v[b])) triangles++;
+      somme += triangles / (k * (k - 1) / 2);
+    }
+    return somme / g.n;
+  }
+  function vaccinate(g, fraction = .1, strategy = 'random', hasard = mulberry32(13)) {
+    const ordre = Array.from({ length: g.n }, (_, i) => i), compte = Math.floor(g.n * borne(fraction, 0, 1));
+    if (strategy === 'hubs') ordre.sort((a, b) => g.adj[b].size - g.adj[a].size || a - b);
+    else if (strategy === 'random') for (let i = ordre.length - 1; i > 0; i--) { const j = Math.floor(hasard() * (i + 1)); [ordre[i], ordre[j]] = [ordre[j], ordre[i]]; }
+    else throw new RangeError('Stratégie de vaccination inconnue');
+    return ordre.slice(0, compte);
+  }
+  function sirOnNetwork(g, { beta = .28, gamma = .12, seeds = [0], vaccinated = [] } = {}, hasard = mulberry32(15)) {
+    const etats = new Uint8Array(g.n); // 0 susceptible, 1 infecté, 2 guéri, 3 vacciné.
+    for (const i of vaccinated) if (i >= 0 && i < g.n) etats[i] = 3;
+    let infectes = 0, V = 0;
+    for (const i of seeds) if (i >= 0 && i < g.n && etats[i] === 0) { etats[i] = 1; infectes++; }
+    for (const x of etats) if (x === 3) V++;
+    const e = { status: etats, S: g.n - V - infectes, I: infectes, R: V, V, gueris: 0, t: 0, vitesse: 0 };
+    e.step = (dt = 1) => {
+      const nouveau = new Set(), pEdge = -Math.expm1(-beta * dt), pR = -Math.expm1(-gamma * dt);
+      let sorties = 0;
+      for (let i = 0; i < g.n; i++) if (etats[i] === 1) {
+        for (const j of g.adj[i]) if (etats[j] === 0 && hasard() < pEdge) nouveau.add(j);
+        if (hasard() < pR) { etats[i] = 2; sorties++; }
+      }
+      for (const j of nouveau) etats[j] = 1;
+      e.S -= nouveau.size; e.I += nouveau.size - sorties; e.R += sorties;
+      e.gueris += sorties; e.vitesse = nouveau.size / dt; e.t += dt;
+      return e;
+    };
+    return e;
+  }
+  const PATRONS = {
+    planeur: [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]],
+    clignotant: [[0, 0], [1, 0], [2, 0]],
+    canon: [[24, 0], [22, 1], [24, 1], [12, 2], [13, 2], [20, 2], [21, 2], [34, 2], [35, 2],
+      [11, 3], [15, 3], [20, 3], [21, 3], [34, 3], [35, 3], [0, 4], [1, 4], [10, 4], [16, 4], [20, 4], [21, 4],
+      [0, 5], [1, 5], [10, 5], [14, 5], [16, 5], [17, 5], [22, 5], [24, 5], [10, 6], [16, 6], [24, 6],
+      [11, 7], [15, 7], [12, 8], [13, 8]]
+  };
+  function life(grid, W, H) {
+    const suivant = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      let v = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (dx || dy) v += grid[((y + dy + H) % H) * W + (x + dx + W) % W] ? 1 : 0;
+      }
+      const i = y * W + x;
+      suivant[i] = +(v === 3 || (grid[i] && v === 2));
+    }
+    return suivant;
+  }
+  function poserPatron(nom, W = 48, H = 34, x0 = 4, y0 = 6) {
+    const tableau = new Uint8Array(W * H);
+    for (const [x, y] of PATRONS[nom] || []) tableau[((y + y0 + H) % H) * W + (x + x0 + W) % W] = 1;
+    return tableau;
+  }
+  function ordreMoyen(boids) {
+    if (!boids.length) return 0;
+    const s = boids.reduce((acc, b) => { const z = Math.hypot(b.vx, b.vy) || 1; acc[0] += b.vx / z; acc[1] += b.vy / z; return acc; }, [0, 0]);
+    return Math.hypot(...s) / boids.length;
+  }
+  function boidsStep(boids, { sep = .22, ali = 1.5, coh = .16, radius = .37, vmax = .11, predator = null } = {}, dt = .12) {
+    const delta = (a, b) => { let d = b - a; if (d > .5) d--; if (d < -.5) d++; return d; };
+    const futur = boids.map((b, i) => {
+      let sx = 0, sy = 0, ax = 0, ay = 0, cx = 0, cy = 0, n = 0;
+      for (let j = 0; j < boids.length; j++) if (i !== j) {
+        const o = boids[j], dx = delta(b.x, o.x), dy = delta(b.y, o.y), d2 = dx * dx + dy * dy;
+        if (d2 > 1e-8 && d2 < radius * radius) {
+          n++; ax += o.vx / (Math.hypot(o.vx, o.vy) || 1); ay += o.vy / (Math.hypot(o.vx, o.vy) || 1);
+          cx += dx; cy += dy;
+          if (d2 < (radius * .23) ** 2) { sx -= dx / d2; sy -= dy / d2; }
+        }
+      }
+      const norme = (x, y) => { const l = Math.hypot(x, y); return l ? [x / l, y / l] : [0, 0]; };
+      const [nsx, nsy] = norme(sx, sy), [nax, nay] = norme(ax, ay), [ncx, ncy] = norme(cx, cy);
+      let fx = sep * nsx + ali * nax + coh * ncx, fy = sep * nsy + ali * nay + coh * ncy;
+      if (predator) { const dx = delta(predator.x, b.x), dy = delta(predator.y, b.y), d = Math.hypot(dx, dy); if (d < .23 && d > 1e-5) { fx += 3 * dx / d; fy += 3 * dy / d; } }
+      // Interpolation vers une direction désirée, sans chef ni force globale.
+      const vitesse = Math.hypot(b.vx, b.vy) || vmax;
+      const [ux, uy] = norme((b.vx / vitesse) * .3 + fx, (b.vy / vitesse) * .3 + fy);
+      const omega = borne(dt * .2, 0, 1), [vx, vy] = norme((1 - omega) * b.vx / vitesse + omega * ux, (1 - omega) * b.vy / vitesse + omega * uy);
+      return { x: (b.x + vx * vmax * dt + 1) % 1, y: (b.y + vy * vmax * dt + 1) % 1, vx: vx * vmax, vy: vy * vmax };
+    });
+    return futur;
+  }
+  function initBoids(n = 200, hasard = mulberry32(21)) {
+    return Array.from({ length: n }, () => { const a = 2 * Math.PI * hasard(); return { x: .5 + .22 * (hasard() - .5), y: .5 + .22 * (hasard() - .5), vx: .11 * Math.cos(a), vy: .11 * Math.sin(a) }; });
+  }
+  function sandpileGrid(W = 36, H = 36) { return { W, H, cells: new Uint32Array(W * H), lost: 0, added: 0 }; }
+  function sandpileAdd(grid, i, j) {
+    const { W, H, cells } = grid, stack = [], touches = new Set();
+    i = borne(Math.floor(i), 0, W - 1); j = borne(Math.floor(j), 0, H - 1);
+    const k = j * W + i; cells[k]++; grid.added++;
+    if (cells[k] >= 4) stack.push(k);
+    let size = 0, lost = 0;
+    while (stack.length) {
+      const id = stack.pop(), n = Math.floor(cells[id] / 4);
+      if (!n) continue;
+      cells[id] -= n * 4; size += n; touches.add(id);
+      const x = id % W, y = Math.floor(id / W);
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || xx >= W || yy < 0 || yy >= H) { lost += n; continue; }
+        const adj = yy * W + xx; cells[adj] += n;
+        if (cells[adj] >= 4) stack.push(adj);
+      }
+    }
+    grid.lost += lost;
+    return { size, lost, sites: touches.size, touched: [...touches] };
+  }
+  function avalancheStats(sizes) {
+    const compte = new Map();
+    for (const s of sizes) if (s > 0) { const b = Math.floor(Math.log2(s)); compte.set(b, (compte.get(b) || 0) + 1); }
+    const nombre = [...compte.values()].reduce((a, b) => a + b, 0);
+    const bins = [...compte].sort((a, b) => a[0] - b[0]).map(([b, count]) => ({ size: Math.pow(2, b + .5), count, density: count / (nombre * Math.pow(2, b)) }));
+    // Le tout dernier compartiment est souvent coupé par la taille finie de la grille.
+    const candidats = bins.filter((b, i) => b.count >= 8 && i < bins.length - 1);
+    const xs = candidats.map(b => Math.log10(b.size)), ys = candidats.map(b => Math.log10(b.density));
+    const xm = xs.reduce((a, b) => a + b, 0) / (xs.length || 1), ym = ys.reduce((a, b) => a + b, 0) / (ys.length || 1);
+    const den = xs.reduce((a, x) => a + (x - xm) ** 2, 0);
+    const slope = den ? xs.reduce((a, x, i) => a + (x - xm) * (ys[i] - ym), 0) / den : null;
+    const variance = ys.reduce((s, y) => s + (y - ym) ** 2, 0);
+    const residu = slope === null ? variance : ys.reduce((s, y, i) => s + (y - ym - slope * (xs[i] - xm)) ** 2, 0);
+    const r2 = variance > 0 ? 1 - residu / variance : null;
+    return { bins, slope, r2, decades: xs.length > 1 ? Math.max(...xs) - Math.min(...xs) : 0, samples: nombre };
+  }
+  function initRoad(L = 240, voitures = 45, vmax = 5) {
+    const v = new Int16Array(L).fill(-1), nb = borne(Math.floor(voitures), 0, L);
+    for (let i = 0; i < nb; i++) v[Math.floor(i * L / nb)] = vmax;
+    return v;
+  }
+  function nagelSchreckenberg(road, { vmax = 5, p = .3 } = {}, hasard = mulberry32(32)) {
+    const L = road.length, voitures = [], nouveau = new Int16Array(L).fill(-1);
+    for (let i = 0; i < L; i++) if (road[i] >= 0) voitures.push({ pos: i, vitesse: road[i] });
+    let total = 0, arrets = 0;
+    for (let j = 0; j < voitures.length; j++) {
+      const a = voitures[j], prochain = voitures[(j + 1) % voitures.length];
+      const espace = (prochain.pos - a.pos + L) % L - 1;
+      let v = Math.min(a.vitesse + 1, vmax, voitures.length === 1 ? L - 1 : espace);
+      if (v > 0 && hasard() < p) v--;
+      nouveau[(a.pos + v) % L] = v;
+      total += v; if (v <= 1) arrets++;
+    }
+    // Un bouchon est ici un groupe d’au moins deux voitures lentes séparées
+    // d’au plus deux cellules vides ; cette définition discrète est indicative.
+    const ralenties = [];
+    for (let i = 0; i < L; i++) if (nouveau[i] >= 0 && nouveau[i] <= 1) ralenties.push(i);
+    let groupes = 0;
+    if (ralenties.length > 1) {
+      const ruptures = [];
+      for (let i = 0; i < ralenties.length; i++) {
+        const j = (i + 1) % ralenties.length;
+        if ((ralenties[j] - ralenties[i] + L) % L > 3) ruptures.push(i);
+      }
+      if (!ruptures.length) groupes = 1;
+      else {
+        for (let k = 0; k < ruptures.length; k++) {
+          const precedent = ruptures[(k - 1 + ruptures.length) % ruptures.length];
+          const taille = (ruptures[k] - precedent + ralenties.length) % ralenties.length || ralenties.length;
+          if (taille >= 2) groupes++;
+        }
+      }
+    }
+    return { road: nouveau, flow: total / L, speed: voitures.length ? total / voitures.length : 0, jams: arrets, jamGroups: groupes, density: voitures.length / L };
+  }
+  function fundamentalDiagram(densities, { L = 200, vmax = 5, p = .3, steps = 210, burn = 70, seed = 71 } = {}) {
+    return densities.map((density, i) => {
+      let route = initRoad(L, Math.round(borne(density, 0, 1) * L), vmax), debit = 0, vitesse = 0, nb = 0;
+      const rng = mulberry32(seed + i);
+      for (let t = 0; t < steps; t++) {
+        const r = nagelSchreckenberg(route, { vmax, p }, rng); route = r.road;
+        if (t >= burn) { debit += r.flow; vitesse += r.speed; nb++; }
+      }
+      return { density: (route.filter(v => v >= 0).length / L), flow: debit / nb, speed: vitesse / nb };
+    });
+  }
+  return { borne, mulberry32, rk4, logistic, competition, competitionIssue, lotkaVolterra, lvIntegrale, sir, initialSIR, finalSize, peakS, agentsSIR, lattice, smallWorld, scaleFree, degreeDistribution, pathLength, clustering, sirOnNetwork, vaccinate, life, PATRONS, poserPatron, boidsStep, initBoids, ordreMoyen, sandpileGrid, sandpileAdd, avalancheStats, initRoad, nagelSchreckenberg, fundamentalDiagram };
+})();
+/* EMG-END */
+'use strict';
+const $ = q => document.querySelector(q), $$ = q => [...document.querySelectorAll(q)];
+const C={fond:'#0a0d12',surface:'#11161e',trait:'#1f2833',texte:'#e8e4dc',muet:'#8a93a0',olive:'#cbd67a',orange:'#ff8a5b',bleu:'#5bb8ff',or:'#ffd166',sable:'#dcc29a',lilas:'#b9a3ff'};
+const NOMS=[
+  'Croître et se concurrencer','Proies et prédateurs','Une épidémie','Réseaux et cascades',
+  'Le jeu de la vie','L’essaim','Le tas de sable','Les bouchons fantômes'];
+const SCENES=['41.1 · COMPÉTITION','41.2 · PROIES ET PRÉDATEURS','41.3 · PROPAGATION SIR','41.4 · RÉSEAUX ET CASCADES','42.1 · JEU DE LA VIE','42.2 · ESSAIM DE REYNOLDS','42.3 · TAS DE SABLE','42.4 · BOUCHONS FANTÔMES'];
+const DESCRIPTIONS=[
+  'Deux espèces utilisent une même ressource. Leurs effectifs suivent la compétition entre croissance et limitation.',
+  'Quand les proies augmentent, les prédateurs peuvent se multiplier. Leur hausse réduit ensuite les proies : le cycle se ferme.',
+  'Un cas initial se propage dans une population de 400. La fraction encore susceptible commande la croissance de la vague.',
+  'Le même nombre de contacts peut mener à des parcours très différents selon qui est relié à qui.',
+  'Chaque cellule dépend uniquement de ses huit voisines. Une forme peut pourtant traverser la grille.',
+  'Chaque individu réagit aux voisins proches. Une direction collective apparaît sans meneur désigné.',
+  'Un grain supplémentaire peut ne rien provoquer, ou produire une longue suite de basculements.',
+  'Les voitures avancent sur une boucle. Des ondes de ralentissement peuvent remonter le flux.'
+];
+const CLES=[
+  'Deux espèces coexistent si chacune se limite davantage elle-même qu’elle ne limite l’autre.',
+  'Les proies augmentent, puis les prédateurs, puis les proies diminuent, puis les prédateurs.',
+  'Une épidémie croît tant que R effectif dépasse 1 ; la vaccination peut empêcher son amplification.',
+  'La structure des contacts compte autant que leur nombre : des raccourcis et des hubs changent les cascades.',
+  'Des règles locales produisent des structures mobiles sans règle de déplacement.',
+  'L’ordre collectif émerge de trois règles locales : séparation, alignement et cohésion.',
+  'Un petit ajout peut déclencher une avalanche de toute taille dans un système près de la criticité.',
+  'Un bouchon peut naître d’un freinage ordinaire et reculer alors que chaque voiture avance.'
+];
+const NOTES=[
+  'Compétition homogène de Lotka–Volterra ; les points figurent les effectifs, pas des individus suivis.',
+  'Lotka–Volterra sans espace, climat ni végétation ; les archives de fourrures restent une illustration.',
+  'Mélange homogène et immunité durable ; le seuil prédit l’absence de vague soutenue, pas zéro transmission isolée.',
+  'Graphes synthétiques, pas un réseau social réel ; le devenir d’une épidémie reste aléatoire.',
+  'Automate B3/S23 à bords toriques ; aucune biologie réelle n’est inférée.',
+  'Modèle 2D de Reynolds ; direction, vitesse et rayon sont sans unité naturelle.',
+  'Modèle BTW discret à bords ouverts ; la pente estimée dépend de la taille et de l’échantillon.',
+  'Route circulaire à une voie, cellules et pas de temps abstraits ; aucune vitesse en km/h.'
+];
+const DECOUVERTES={
+ individu:['Individu','Une unité visible ; sa quantité reflète le nombre calculé.'],isocline:['Isocline','Ensemble des états où une population cesse instantanément de croître.'],phase:['Trajectoire de phase','Évolution conjointe des deux populations, point après point.'],
+ lievre:['Lièvre','Proie dont la croissance alimente les prédateurs.'],lynx:['Lynx','Prédateur dont l’effectif suit la disponibilité des proies.'],
+ S:['Susceptibles · S','Personnes non immunisées pouvant être infectées.'],I:['Infectés · I','Personnes infectieuses, capables de transmettre.'],R:['Retirés · R','Personnes guéries ou vaccinées, supposées protégées durablement.'],Reff:['R effectif','R₀ multiplié par la fraction encore susceptible.'],seuil:['Seuil de pic','Le pic des infectés arrive quand S = N / R₀.'],
+ noeud:['Nœud','Personne ou site d’un réseau de contacts.'],lien:['Lien','Contact possible entre deux nœuds.'],hub:['Nœud très connecté','Contact possédant beaucoup plus de liens que les autres.'],raccourci:['Raccourci','Lien lointain qui réduit la longueur de certains parcours.'],
+ cellule:['Cellule','Case vivante ou morte selon ses huit voisines.'],planeur:['Planeur','Configuration qui se translate après quatre générations.'],canon:['Canon de Gosper','Motif périodique qui émet des planeurs.'],
+ boid:['Boid','Agent réagissant aux voisins, sans chef commun.'],predateur:['Prédateur','Position du curseur qui ajoute une répulsion locale.'],
+ grain:['Grain','Un entier ajouté à une case du tas.'],avalanche:['Avalanche','Ensemble des basculements provoqués par un seul ajout.'],
+ voiture:['Voiture','Agent de l’automate qui accélère, freine et avance.'],bouchon:['Bouchon','Groupe de voitures ralenties, onde qui peut remonter le flux.'],fondamental:['Diagramme fondamental','Débit moyen mesuré en fonction de la densité.']
+};
+const OBJETS=[['individu','isocline','phase'],['lievre','lynx','phase'],['S','I','R','Reff','seuil'],['noeud','lien','hub','raccourci'],['cellule','planeur','canon'],['boid','predateur'],['grain','avalanche'],['voiture','bouchon','fondamental']];
+const TPS=[.09,.045,.16,1,1,.12,1,1], CADENCE=[24,26,15,7,6,27,15,13];
+let step=0, playing=true, accumulator=0, previous=0, latestUI=0, temps=0, pas=0, mobilePane=false;
+let seedValue=424, zone=[], view={x:0,y:0,k:1}, dragging=false, positionPredateur=null, recentContacts=[];
+let history=[], track=[], comp, populations, compParams={r1:.7,r2:.6,K1:120,K2:100,a12:.55,a21:.45};
+let lv, proies, lvParams={a:.7,b:.014,c:.008,d:.45,K:Infinity}, hasCapacity=false, showHistorical=false;
+let agents, ode, odeFn, vacc=.0, r0=2.5, duration=5, showOde=false, peak={val:1,t:0}, firstEnd=null, agentPositions=[];
+let reseau, networkState, networkPositions=[], networkMetrics={}, networkKind='small', rewire=.07, vaxStrategy='random', chosenSeed=180, vaccinatedNodes=[];
+let gridLife, birthsLife=new Set(), vieGeneration=0, lifePeriod='—', avantVie=null, vieAvant2=null, lifePattern='planeur', lifeRate=6;
+let boids=[], boidParams={sep:.22,ali:1.5,coh:.16,radius:.37,vmax:.11};
+let sable, avalanches=[], dernierSable={size:0,sites:0,touched:[]}, statsSable=null, lieuSable='random', debitSable=70, lastFlash=0;
+let route, cars=65, brake=.3, vmax=5, traffic, diagramme=[], routeHistory=[];
+let actualRng=Emg.mulberry32(seedValue);
+const enfiler=(arr,val,max=360)=>{arr.push(val);if(arr.length>max)arr.shift();};
+const fmt=(n,d=1)=>Number(n).toLocaleString('fr-CA',{maximumFractionDigits:d,minimumFractionDigits:0});
+function nouveauHasard(){seedValue=(Math.imul(seedValue,1664525)+1013904223)>>>0;return seedValue;}
+function chargerOde(){const beta=r0/duration,gamma=1/duration;odeFn=Emg.sir({N:400,beta,gamma,vacc});ode=Emg.initialSIR(400,vacc,1);
+  agents=Emg.agentsSIR({N:400,contacts:8,beta,gamma,vacc,infectes:1},Emg.mulberry32(seedValue));
+  const rng=Emg.mulberry32(51); agentPositions=Array.from({length:400},()=>[.04+.92*rng(),.08+.75*rng()]);
+  peak={val:agents.I,t:0};recentContacts=[];firstEnd=null;}
+function creerGraphe(){
+  const r=Emg.mulberry32(701);
+  reseau=networkKind==='regular'?Emg.lattice(300,6):networkKind==='small'?Emg.smallWorld(300,6,rewire,r):Emg.scaleFree(300,3,r);
+  networkMetrics={mean:reseau.adj.reduce((n,v)=>n+v.size,0)/reseau.n,L:Emg.pathLength(reseau),C:Emg.clustering(reseau),dist:Emg.degreeDistribution(reseau)};
+  networkPositions=positionsGraphe(reseau);
+  demarrerReseau();
+}
+function demarrerReseau(){
+  const r=Emg.mulberry32(seedValue),v=Emg.vaccinate(reseau,.1,vaxStrategy,Emg.mulberry32(seedValue+71));vaccinatedNodes=v;
+  let depart=chosenSeed%reseau.n;
+  if(v.includes(depart))depart=[...Array(reseau.n).keys()].find(i=>!v.includes(i)) ?? 0;
+  networkState=Emg.sirOnNetwork(reseau,{beta:.22,gamma:.22,seeds:[depart],vaccinated:v},r);
+}
+function positionsGraphe(g){
+  const rand=Emg.mulberry32(912),p=Array.from({length:g.n},(_,i)=>{const a=2*Math.PI*i/g.n,rad=.38+rand()*.12;return {x:.5+Math.cos(a)*rad,y:.5+Math.sin(a)*rad};});
+  for(let t=0;t<55;t++){
+    const dx=new Float32Array(g.n),dy=new Float32Array(g.n);
+    for(let i=0;i<g.n;i++)for(let j=i+1;j<g.n;j++){
+      const x=p[i].x-p[j].x,y=p[i].y-p[j].y,d2=x*x+y*y+.0004,rep=.000022/d2;
+      dx[i]+=x*rep;dy[i]+=y*rep;dx[j]-=x*rep;dy[j]-=y*rep;
+    }
+    for(let i=0;i<g.n;i++)for(const j of g.adj[i])if(j>i){
+      const x=p[j].x-p[i].x,y=p[j].y-p[i].y,d=Math.hypot(x,y)||1,f=.012*(d-.09);
+      dx[i]+=x/d*f;dy[i]+=y/d*f;dx[j]-=x/d*f;dy[j]-=y/d*f;
+    }
+    for(let i=0;i<g.n;i++){p[i].x=Emg.borne(p[i].x+dx[i]+(.5-p[i].x)*.001,.02,.98);p[i].y=Emg.borne(p[i].y+dy[i]+(.5-p[i].y)*.001,.02,.98);}
+  }
+  return p;
+}
+function initialiser(etape=step){
+  temps=0;pas=0;history=[];track=[];accumulator=0;actualRng=Emg.mulberry32(seedValue);
+  if(etape===0){comp=Emg.competition(compParams);populations=[30,25];}
+  if(etape===1){lv=Emg.lotkaVolterra(lvParams);proies=[61,46];}
+  if(etape===2)chargerOde();
+  if(etape===3)creerGraphe();
+  if(etape===4){gridLife=Emg.poserPatron(lifePattern==='random'?'planeur':lifePattern,60,40,11,11);
+    if(lifePattern==='random'){gridLife=new Uint8Array(60*40);for(let i=0;i<gridLife.length;i++)gridLife[i]=+(actualRng()<.3);}
+    vieGeneration=0;lifePeriod='—';avantVie=null;vieAvant2=null;birthsLife=new Set();}
+  if(etape===5){boids=Emg.initBoids(200,actualRng);positionPredateur=null;}
+  if(etape===6){sable=Emg.sandpileGrid(36,36);avalanches=[];statsSable=null;dernierSable={size:0,sites:0,touched:[]};lastFlash=0;}
+  if(etape===7){route=Emg.initRoad(240,cars,vmax);traffic={road:route,flow:0,speed:0,jams:0,density:cars/240};routeHistory=[];diagramme=Emg.fundamentalDiagram([.02,.05,.09,.13,.18,.23,.29,.36,.44,.55,.7,.86],{p:brake,vmax});}
+  enregistrer();
+}
+function enregistrer(){
+  if(step===0)enfiler(history,{a:populations[0],b:populations[1],t:temps});
+  else if(step===1)enfiler(history,{a:proies[0],b:proies[1],t:temps});
+  else if(step===2)enfiler(history,{a:agents.S/400,b:agents.I/400,c:agents.R/400,os:ode[0]/400,oi:ode[1]/400,or:ode[2]/400,t:temps});
+  else if(step===3)enfiler(history,{a:networkState.S/300,b:networkState.I/300,c:networkState.R/300,t:temps});
+  else if(step===4)enfiler(history,{a:gridLife.reduce((s,v)=>s+v,0),t:temps});
+  else if(step===5)enfiler(history,{a:Emg.ordreMoyen(boids),t:temps});
+  else if(step===6)enfiler(history,{a:dernierSable.size,t:temps});
+  else if(step===7)enfiler(history,{a:traffic.flow,b:traffic.density,c:traffic.speed/vmax,t:temps});
+}
+function fixed(){
+  const dt=TPS[step];pas++;
+  if(step===0){populations=comp(populations,dt);enfiler(track,[...populations],700);}
+  if(step===1){proies=lv(proies,dt);enfiler(track,[...proies],800);}
+  if(step===2){
+    const ancienne=agents.agents.slice(),infectieux=[];
+    for(let i=0;i<400;i++)if(ancienne[i]===1)infectieux.push(i);
+    agents.step(dt);ode=odeFn(ode,dt);
+    const rng=Emg.mulberry32(seedValue+pas*17);
+    if(infectieux.length)for(let i=0;i<400;i++)if(ancienne[i]===0&&agents.agents[i]===1)recentContacts.push({a:infectieux[Math.floor(rng()*infectieux.length)],b:i,age:0});
+    recentContacts=recentContacts.filter(x=>x.age<2.5);for(const x of recentContacts)x.age+=dt;
+    if(agents.I>peak.val){peak={val:agents.I,t:temps+dt};}
+    if(agents.I===0&&firstEnd===null)firstEnd=temps+dt;
+  }
+  if(step===3&&networkState.I>0)networkState.step(dt);
+  if(step===4){vieAvant2=avantVie;avantVie=gridLife;gridLife=Emg.life(gridLife,60,40);vieGeneration++;
+    birthsLife=new Set();for(let i=0;i<gridLife.length;i++)if(gridLife[i]&&!avantVie[i])birthsLife.add(i);
+    if(vieAvant2&&gridLife.every((v,i)=>v===vieAvant2[i]))lifePeriod='2';
+  }
+  if(step===5)boids=Emg.boidsStep(boids,{...boidParams,predator:positionPredateur},dt);
+  if(step===6)ajouterSable(debitSable,lieuSable);
+  if(step===7){traffic=Emg.nagelSchreckenberg(route,{vmax,p:brake},actualRng);route=traffic.road;
+    enfiler(routeHistory,Int16Array.from(route),95);}
+  temps+=dt;
+  if(pas%2===0||step===3||step===4||step===7)enregistrer();
+}
+function ajouterSable(nombre,lieu=lieuSable){
+  if(!sable)return;
+  let derniereGrande = null;
+  for(let k=0;k<nombre;k++){
+    const x=lieu==='centre'?Math.floor(sable.W/2):Math.floor(actualRng()*sable.W);
+    const y=lieu==='centre'?Math.floor(sable.H/2):Math.floor(actualRng()*sable.H);
+    const e=Emg.sandpileAdd(sable,x,y);
+    if(e.size){enfiler(avalanches,e.size,30000);if(!derniereGrande||e.size>derniereGrande.size)derniereGrande=e;}
+  }
+  if(derniereGrande){dernierSable=derniereGrande;lastFlash=pas;}
+  if(nombre>=1000 || pas%8===0)statsSable=Emg.avalancheStats(avalanches);
+}
+function goStep(i){
+  mobilePane=false;$("#mobileView").textContent="Voir les graphes →";$("#mobileView").setAttribute("aria-pressed","false");
+  step=Emg.borne(Math.floor(Number(i)||0),0,7);
+  initialiser(step);
+  $$('[data-step]').forEach(b=>b.setAttribute('aria-current',String(+b.dataset.step===step?'step':'false')));
+  $$('[data-act]').forEach(b=>b.hidden=Number(b.dataset.act)!==step);
+  $('#eyebrow').textContent=`MODULE ${step<4?'41':'42'} · ${String(step+1).padStart(2,'0')} / 08`;
+  $('#stepTitle').textContent=NOMS[step];$('#stepText').textContent=DESCRIPTIONS[step];$('#sceneName').textContent=SCENES[step];
+  $('#key').textContent=CLES[step];$('#honesty').textContent=NOTES[step];
+  $('#questions').hidden=step!==7;$('#theory').href=`explication.html#m${step<4?'41':'42'}`;$('#theory').textContent=`Théorie du module ${step<4?'41':'42'} →`;
+  $('#cv').setAttribute('aria-label',DESCRIPTIONS[step]);
+  const objets=$('#objects');objets.replaceChildren();
+  for(const k of OBJETS[step]){
+    const b=document.createElement('button');b.type='button';b.className='object';b.textContent=DECOUVERTES[k][0];
+    b.addEventListener('pointerenter',e=>tip(k,e));b.addEventListener('pointerleave',hideTip);
+    b.addEventListener('focus',e=>tip(k,e));b.addEventListener('blur',hideTip);
+    b.addEventListener('click',e=>tip(k,e));objets.append(b);
+  }
+  syncControls();update();draw();
+}
+function restart(){initialiser(step);syncControls();update();draw();}
+function setPlay(oui){playing=!!oui;$('#play').textContent=playing?'Pause':'Reprendre';$('#play').setAttribute('aria-pressed',String(!playing));}
+function tick(n=1){for(let i=0;i<Math.min(100000,Math.max(0,Math.floor(n)));i++)fixed();update();return state();}
+function setCompetition(a12,a21,kRatio){compParams={...compParams,a12:Number(a12),a21:Number(a21),K1:100*Number(kRatio)};if(step===0)restart();syncControls();}
+function setLV(p){lvParams={...lvParams,...p};if(step===1)restart();syncControls();}
+function capacity(on){hasCapacity=!!on;lvParams.K=hasCapacity?160:Infinity;if(step===1)restart();syncControls();}
+function historical(on){showHistorical=!!on;syncControls();update();draw();}
+function setR0(r){r0=Emg.borne(+r,.5,6);if(step===2)restart();syncControls();}
+function setDuration(d){duration=Emg.borne(+d,2,14);if(step===2)restart();syncControls();}
+function setVacc(c){vacc=Emg.borne(+c,0,1);if(step===2)restart();syncControls();}
+function odeOverlay(on){showOde=!!on;syncControls();draw();}
+function setNetwork(kind,p=rewire){networkKind=({lattice:'regular',regular:'regular',smallWorld:'small',small:'small',scaleFree:'scale',scale:'scale'})[kind]||'small';rewire=Emg.borne(+p,0,.3);if(step===3)restart();syncControls();}
+function vaccinate(strategy){vaxStrategy=strategy;if(step===3){temps=0;pas=0;history=[];demarrerReseau();enregistrer();}syncControls();}
+function seed(i){chosenSeed=Emg.borne(Math.floor(Number(i)),0,299);if(step===3){demarrerReseau();temps=0;pas=0;history=[];enregistrer();}}
+function setCells(list){gridLife=new Uint8Array(60*40);for(const p of list){const x=Array.isArray(p)?p[0]:p.x,y=Array.isArray(p)?p[1]:p.y;if(Number.isInteger(x)&&Number.isInteger(y)&&x>=0&&x<60&&y>=0&&y<40)gridLife[y*60+x]=1;}vieGeneration=0;lifePeriod='—';birthsLife=new Set();history=[];enregistrer();}
+function pattern(nom){lifePattern=({glider:'planeur',blinker:'clignotant',gosper:'canon',random:'random'})[nom]||nom;if(step===4)restart();syncControls();}
+function stepLife(n=1){if(step!==4)return;if(n>0)for(let i=0;i<Math.min(10000,n);i++)fixed();draw();update();}
+function setWeights(s,a,c){boidParams.sep=+s;boidParams.ali=+a;boidParams.coh=+c;syncControls();}
+function predator(x,y){positionPredateur=Number.isFinite(x)&&Number.isFinite(y)?{x:Emg.borne(x,0,1),y:Emg.borne(y,0,1)}:null;}
+function addGrains(n,where=lieuSable){if(step===6){ajouterSable(Math.min(100000,Math.max(0,Math.floor(n))),where);update();draw();}}
+function setCars(n){cars=Emg.borne(Math.floor(n),5,190);if(step===7)restart();syncControls();}
+function setBrake(p){brake=Emg.borne(+p,0,.6);if(step===7)restart();syncControls();}
+function setVmax(v){vmax=Emg.borne(Math.floor(v),1,7);if(step===7)restart();syncControls();}
+function state(){
+  const commun={step,module:step<4?41:42,temps,pas,playing};
+  switch(step){
+    case 0:return {...commun,N1:populations[0],N2:populations[1],issue:Emg.competitionIssue(compParams).issue};
+    case 1:return {...commun,proies:proies[0],predateurs:proies[1],integrale:hasCapacity?null:Emg.lvIntegrale(...proies,lvParams)};
+    case 2:return {...commun,S:agents.S,I:agents.I,R:agents.R,vaccines:agents.V,Reff:r0*agents.S/400,pic:peak.val,datePic:peak.t,attaques:(400-agents.S-agents.V)/400,seuil:Math.max(0,1-1/r0)};
+    case 3:return {...commun,S:networkState.S,I:networkState.I,R:networkState.R,vaccines:networkState.V,taille:networkState.gueris+networkState.I,vitesse:networkState.vitesse,...networkMetrics};
+    case 4:return {...commun,generation:vieGeneration,vivantes:gridLife.reduce((a,b)=>a+b,0),periode:lifePeriod};
+    case 5:return {...commun,ordre:Emg.ordreMoyen(boids),groupes:groupesBoids(),rayon:boidParams.radius};
+    case 6:return {...commun,grains:sable.cells.reduce((a,b)=>a+b,0),perdus:sable.lost,avalanche:dernierSable.size,pente:statsSable?.slope??null};
+    default:return {...commun,densite:traffic.density,debit:traffic.flow,vitesse:traffic.speed,bouchons:traffic.jamGroups,ralenties:traffic.jams};
+  }
+}
+function groupesBoids(){
+  const marque=new Uint8Array(boids.length);let groupes=0;
+  for(let i=0;i<boids.length;i++)if(!marque[i]){
+    groupes++;const pile=[i];marque[i]=1;
+    while(pile.length){const j=pile.pop();for(let k=0;k<boids.length;k++)if(!marque[k]){
+      const x=Math.abs(boids[j].x-boids[k].x),y=Math.abs(boids[j].y-boids[k].y);
+      if(Math.hypot(Math.min(x,1-x),Math.min(y,1-y))<boidParams.radius*.4){marque[k]=1;pile.push(k);}
+    }}
+  }
+  return groupes;
+}
+function syncControls(){
+  const valeurs={a12:compParams.a12,a21:compParams.a21,kr:compParams.K1/compParams.K2,lva:lvParams.a,lvb:lvParams.b*10,r0,duration,vacc,rewire,liferate:lifeRate,sep:boidParams.sep,ali:boidParams.ali,coh:boidParams.coh,grainrate:debitSable,cars,brake,vmax};
+  for(const [k,v] of Object.entries(valeurs)){
+    const control=$('#'+k),o=$('#'+k+'v');if(!control)continue;
+    control.value=v; if(o)o.textContent=k==='vacc'?`${Math.round(v*100)} %`:k==='brake'||k==='rewire'?fmt(v,2):fmt(v,k==='lvb'?2:2);
+  }
+  $('#capacity').textContent='Capacité limite : '+(hasCapacity?'oui':'non');$('#capacity').setAttribute('aria-pressed',String(hasCapacity));
+  $('#historical').textContent='Données historiques : '+(showHistorical?'oui':'non');$('#historical').setAttribute('aria-pressed',String(showHistorical));
+  $('#ode').setAttribute('aria-pressed',String(showOde));$('#ode').textContent=showOde?'Masquer les équations':'Courbes des équations';
+  $$('[data-net]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.net===networkKind)));
+  $$('[data-vax]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.vax===vaxStrategy)));
+  $$('[data-pattern]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pattern===lifePattern)));
+  $$('[data-radius]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.radius==='short')===(boidParams.radius<.2))));
+  $$('[data-place]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.place===lieuSable)));
+  $('#rewire').disabled=networkKind!=='small';
+}
+function update(){
+  const s=state();$('#clock').textContent=step===4?`génération ${s.generation}`:step===5?`${pas} pas · ordre ${fmt(s.ordre,2)}`:step===6?`${fmt(sable.added,0)} grains ajoutés`:step===7?`${pas} pas de trafic`:`t = ${fmt(temps,1)} ${step<3?'jours':'pas'}`;
+  let statut='',mesures=[];
+  if(step===0){const issue=s.issue;statut=issue==='coexistence'?'Chaque espèce se gêne davantage elle-même : coexistence stable.':issue==='priorité initiale'?'L’issue dépend de la population initialement dominante.':`La compétition mène vers l’exclusion de l’${issue}.`;
+    mesures=[['Population 1',fmt(s.N1,1)+' u.'],['Population 2',fmt(s.N2,1)+' u.'],['Issue prévue',issue],['Issue observée',s.N1<1?'espèce 2':s.N2<1?'espèce 1':temps<30?'en cours':'coexistence']];}
+  if(step===1){statut=hasCapacity?'La capacité limite amortit les oscillations vers un équilibre.':'Les prédateurs culminent après les proies, avec un retard proche d’un quart de période.';
+    if(showHistorical)statut='Illustration inspirée du commerce historique des fourrures : cycle d’environ 10 ans, données non mesurées ici.';
+    mesures=[['Lièvres',fmt(s.proies,1)+' u.'],['Lynx',fmt(s.predateurs,1)+' u.'],['Période locale estimée',fmt(2*Math.PI/Math.sqrt(lvParams.a*lvParams.d),1)+' j'],['Décalage attendu',fmt(Math.PI/(2*Math.sqrt(lvParams.a*lvParams.d)),1)+' j']];}
+  if(step===2){const seuil=s.seuil;statut=s.I===0?'Il reste des personnes non infectées : la chaîne de transmission s’est éteinte.':r0*(1-vacc)<=1?'Au-dessus du seuil, aucun départ de vague soutenue dans le modèle moyen.':s.Reff>1?'Chaque cas engendre en moyenne plus d’un nouveau cas : la vague peut croître.':'Les susceptibles se raréfient : R effectif est passé sous 1.';
+    mesures=[['R₀',fmt(r0,2)],['R effectif',fmt(s.Reff,2)],['Pic observé',`${fmt(s.pic,0)} · jour ${fmt(s.datePic,1)}`],['Déjà infectés',fmt(100*s.attaques,1)+' %'],['Seuil vaccinal',fmt(100*seuil,1)+' %'],['S au pic théorique',fmt(400/r0,0)+' personnes']];}
+  if(step===3){statut=vaxStrategy==='hubs'?'Même nombre de doses : protéger les nœuds très connectés coupe plusieurs voies de transmission.':networkKind==='small'?'Quelques raccourcis raccourcissent les chemins tout en gardant des groupes serrés.':networkKind==='scale'?'Quelques nœuds très connectés concentrent beaucoup de contacts.':'Un réseau régulier laisse la transmission progresser de proche en proche.';
+    mesures=[['Degré moyen',fmt(s.mean,2)+' liens'],['Distance moyenne',fmt(s.L,2)+' liens'],['Agrégation',fmt(s.C,3)],['Personnes infectées',fmt(s.taille,0)+' / 300'],['Nouvelles infections/pas',fmt(s.vitesse,1)]];}
+  if(step===4){statut=lifePattern==='planeur'?'Aucune règle ne décrit le mouvement, pourtant le planeur avance d’une case par diagonale tous les quatre pas.':lifePattern==='canon'?'Un motif local périodique émet des planeurs à intervalles réguliers.':'La configuration résulte de règles identiques appliquées à toutes les cases.';
+    mesures=[['Génération',fmt(s.generation,0)],['Cellules vivantes',fmt(s.vivantes,0)],['Période exacte détectée',s.periode==='—'?'—':s.periode+' générations'],['Règle','B3 / S23']];}
+  if(step===5){statut=boidParams.ali<.05?'Sans alignement, le groupe ne synchronise pas durablement ses directions.':s.ordre>.8?'Personne ne mène le groupe : chacun suit les voisins et une direction collective émerge.':'Les directions locales se réorganisent ; observe l’alignement moyen.';
+    mesures=[['Alignement moyen',fmt(s.ordre,3)+' / 1'],['Groupes (estimés)',fmt(s.groupes,0)],['Rayon de perception',fmt(s.rayon,2)+' unité'],['Nombre d’agents',boids.length+'']];}
+  if(step===6){statut=sable.added<5000?'Le tas se charge ; seules quelques cases peuvent basculer.':'Les petits événements sont nombreux, les grands plus rares. La distribution s’étend sur plusieurs échelles.';
+    mesures=[['Grains sur la grille',fmt(s.grains,0)],['Grains sortis',fmt(s.perdus,0)],['Dernière avalanche',fmt(s.avalanche,0)+' basculements'],['Pente log-log estimée',s.pente===null?'—':fmt(s.pente,2)],['Avalanches non nulles',fmt(avalanches.length,0)]];}
+  if(step===7){statut=brake===0&&s.densite<.12?'Sans hésitation, aucun bouchon à faible densité.':s.densite>.45?'Plus de voitures peut signifier moins de débit.':'Un ralentissement se propage en sens opposé aux voitures, sans accident ni obstacle.';
+    mesures=[['Densité',fmt(s.densite,3)+' voit./case'],['Débit moyen instantané',fmt(s.debit,3)+' voit./pas'],['Vitesse moyenne',fmt(s.vitesse,2)+' cases/pas'],['Bouchons (groupes lents)',fmt(s.bouchons,0)],['Voitures ralenties (v ≤ 1)',fmt(s.ralenties,0)]];}
+  $('#status').textContent=statut;$('#meas').innerHTML=mesures.map(([a,b])=>`<div class="row"><span class="lab">${a}</span><span class="val">${b}</span></div>`).join('');
+  $('#scopeTitle').textContent=['Effectifs · évolution','Effectifs · oscillations','Épidémie · S, I, R','Propagation · S, I, R','Cellules · N(g)','Alignement · A(t)','Basculements · taille','Débit · q(t)'][step];
+  $('#scopeLegend').textContent=['Olive : espèce 1 · lilas : espèce 2','Sable : proies · orange : prédateurs','Gris : S · orange : I · bleu : R · traits fins : ODE','Gris : S · orange : I · bleu : R','Cellules vivantes par génération','Longueur du vecteur vitesse moyen, entre 0 et 1','Basculements par ajout ; la pente se lit dans la scène','Olive : débit · bleu : densité · orange : vitesse / vmax'][step];
+  drawScope();
+}
+const canvas=$('#cv'),ctx=canvas.getContext('2d');
+function ligne(x1,y1,x2,y2,c=C.trait,w=1){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function cercle(x,y,r,c,stroke=null){ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);if(c){ctx.fillStyle=c;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.2;ctx.stroke();}}
+function texte(s,x,y,c=C.muet,taille=12,align='left'){ctx.fillStyle=c;ctx.textAlign=align;ctx.font=`${taille}px "IBM Plex Mono",monospace`;ctx.fillText(String(s),x,y);ctx.textAlign='left';}
+function cadre(x,y,w,h,c=C.trait){ctx.strokeStyle=c;ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);}
+function trace(points,color=C.olive,l=2,pointille=false){if(points.length<2)return;ctx.save();ctx.strokeStyle=color;ctx.lineWidth=l;if(pointille)ctx.setLineDash([6,5]);ctx.beginPath();for(let i=0;i<points.length;i++){const [x,y]=points[i];if(!Number.isFinite(x)||!Number.isFinite(y))continue;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();ctx.restore();}
+function fleche(x1,y1,x2,y2,c=C.olive){ligne(x1,y1,x2,y2,c,1.5);const a=Math.atan2(y2-y1,x2-x1);trace([[x2-6*Math.cos(a-.7),y2-6*Math.sin(a-.7)],[x2,y2],[x2-6*Math.cos(a+.7),y2-6*Math.sin(a+.7)]],c,1.5);}
+function cadreGraphe(x,y,w,h,xTitre,yTitre){
+  ctx.fillStyle=C.surface;ctx.fillRect(x,y,w,h);cadre(x,y,w,h);
+  for(let i=1;i<=3;i++){const yp=y+i*h/4,xp=x+i*w/4;ligne(x,yp,x+w,yp,C.trait);ligne(xp,y,xp,y+h,C.trait);}
+  texte(xTitre,x+w/2,y+h+23,C.muet,11,'center');texte(yTitre,x,y-12,C.muet,11);
+}
+function peindreGraphique(data,serie,x,y,w,h,{minY=0,maxY=null,maxX=null}={}){
+  const valeurs=data.flatMap(p=>serie.map(s=>p[s.key]).filter(Number.isFinite));
+  const haut=maxY ?? Math.max(1,...valeurs)*1.08;
+  const t0=data.length?data[0].t||0:0,t1=maxX??Math.max(t0+1,data.at(-1)?.t||1);
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  for(const s of serie){const points=data.map((p,i)=>[x+w*((p.t??i)-t0)/Math.max(.001,t1-t0), y+h-(p[s.key]-minY)/Math.max(.001,haut-minY)*h]);
+    trace(points,s.color,s.width||2,s.dash);}
+  ctx.restore();
+  return haut;
+}
+function zoneAjouter(nom,x,y,w,h){zone.push({nom,x,y,w,h});}
+function fond(){
+  ctx.fillStyle=C.fond;ctx.fillRect(0,0,1000,600);
+  ctx.strokeStyle='#172029';ctx.lineWidth=.5;
+  for(let x=0;x<=1000;x+=50)ligne(x,0,x,600,'#152029',.55);
+  for(let y=0;y<=600;y+=50)ligne(0,y,1000,y,'#152029',.55);
+}
+function dessinerPopulation(){
+  texte('TERRITOIRE · DENSITÉS PROPORTIONNELLES',42,78,C.muet,12);
+  ctx.fillStyle='#141c19';ctx.fillRect(40,95,415,415);cadre(40,95,415,415);
+  for(let i=0;i<60;i++){const x=58+(i*83%385),y=115+(i*127%385);ligne(x,y,x+4,y-7,'#273c32');}
+  const p1=populations[0],p2=populations[1];
+  for(const [indice,n,c] of [[0,p1,C.olive],[1,p2,C.lilas]]){
+    for(let i=0;i<Math.min(150,Math.round(n));i++){
+      const x=59+(Math.sin(i*44.21+indice*14.9)*174.23-Math.floor(Math.sin(i*44.21+indice*14.9)*174.23))*380;
+      const y=113+(Math.sin(i*57.13+indice*82)*152.21-Math.floor(Math.sin(i*57.13+indice*82)*152.21))*378;
+      cercle(x,y,indice===0?3.5:3.1,c);
+    }
+  }
+  texte(`ESPÈCE 1 · ${fmt(p1,0)}`,54,536,C.olive,12);texte(`ESPÈCE 2 · ${fmt(p2,0)}`,267,536,C.lilas,12);
+  texte('PLAN DE PHASE · N₁ / N₂',524,78,C.muet,12);
+  const X=550,Y=123,W=390,H=359,Mx=200,My=200;
+  cadreGraphe(X,Y,W,H,'N₁ →','N₂ ↑');
+  const coord=(x,y)=>[X+Emg.borne(x/Mx,0,1)*W,Y+H-Emg.borne(y/My,0,1)*H];
+  ctx.save();ctx.beginPath();ctx.rect(X,Y,W,H);ctx.clip();
+  trace([coord(0,compParams.K1/compParams.a12),coord(compParams.K1,0)],C.olive,1.5,true);
+  trace([coord(0,compParams.K2),coord(compParams.K2/compParams.a21,0)],C.lilas,1.5,true);
+  trace([[30,25],...track,populations].map(([a,b])=>coord(a,b)),C.or,2);
+  ctx.restore();
+  const [px,py]=coord(...populations);cercle(px,py,5,C.or);
+  texte('··· isocline 1',552,519,C.olive,11);texte('··· isocline 2',752,519,C.lilas,11);
+  zoneAjouter('individu',80,112,345,380);zoneAjouter('isocline',560,130,370,350);zoneAjouter('phase',X,Y,W,H);
+}
+function dessinerCycles(){
+  texte('TERRITOIRE · PROIES / PRÉDATEURS',42,79,C.muet,12);
+  ctx.fillStyle='#151b18';ctx.fillRect(41,91,410,282);cadre(41,91,410,282);
+  const L=Math.round(proies[0]),P=Math.round(proies[1]);
+  for(const [nombre,c,type] of [[L,C.sable,0],[P,C.orange,1]])for(let i=0;i<Math.min(120,nombre);i++){
+    const a=(i*2.39996+type*4),r=Math.sqrt((i+.5)/(Math.max(1,nombre)+.5));
+    const x=246+194*r*Math.cos(a),y=234+126*r*Math.sin(a);
+    if(type===0){cercle(x,y,3.2,c);ligne(x-2,y-3,x-3,y-7,c,1);ligne(x+2,y-3,x+1,y-7,c,1);}
+    else{cercle(x,y,4.3,c);cercle(x-2,y-1,.6,C.fond);cercle(x+2,y-1,.6,C.fond);}
+  }
+  texte('LIÈVRES',55,398,C.sable,12);texte('LYNX',256,398,C.orange,12);
+  texte('PLAN DE PHASE',531,78,C.muet,12);
+  const X=546,Y=103,W=402,H=285;cadreGraphe(X,Y,W,H,'proies →','prédateurs ↑');
+  const points=track.map(v=>[X+v[0]/150*W,Y+H-v[1]/110*H]);
+  ctx.save();ctx.beginPath();ctx.rect(X,Y,W,H);ctx.clip();trace(points,C.or,2);ctx.restore();
+  const x=X+proies[0]/150*W,y=Y+H-proies[1]/110*H;cercle(x,y,5,C.olive);
+  texte(showHistorical?'ILLUSTRATION · FOURRURES · CYCLE ≈ 10 ANS':'COURBES · MODÈLE · JOURS',42,444,showHistorical?C.or:C.muet,11);
+  const LX=58,LY=463,LW=883,LH=107;cadreGraphe(LX,LY,LW,LH,'temps →','effectifs');
+  if(showHistorical){const tab=Array.from({length:150},(_,i)=>{const t=i/149*30;return {t,a:75+24*Math.cos(t*Math.PI/5),b:52+17*Math.sin(t*Math.PI/5)};});
+    peindreGraphique(tab,[{key:'a',color:C.sable},{key:'b',color:C.orange}],LX,LY,LW,LH,{maxY:120});
+  }else peindreGraphique(history,[{key:'a',color:C.sable},{key:'b',color:C.orange}],LX,LY,LW,LH,{maxY:120,maxX:Math.max(14,history.at(-1)?.t||0)});
+  zoneAjouter('lievre',56,105,380,255);zoneAjouter('lynx',220,124,200,250);zoneAjouter('phase',LX,LY,LW,LH);
+}
+function dessinerEpidemie(){
+  const X=48,Y=100,W=570,H=264;
+  ctx.fillStyle=C.surface;ctx.fillRect(X,Y,W,H);cadre(X,Y,W,H);
+  texte('400 PERSONNES · MÉLANGE HOMOGÈNE',52,81,C.muet,12);
+  const cos=temps*.13;
+  const xy=i=>{const [u,v]=agentPositions[i];return [X+10+((u+.018*Math.sin(cos+i*3.71)+1)%1)*(W-20),Y+12+((v+.018*Math.cos(cos+i*6.2)+1)%1)*(H-24)];};
+  for(const p of recentContacts){if(p.age>=2.5)continue;const a=xy(p.a),b=xy(p.b);ctx.globalAlpha=(1-p.age/2.5)*.55;ligne(...a,...b,C.orange,1.4);ctx.globalAlpha=1;}
+  for(let i=0;i<agents.agents.length;i++){
+    const stat=agents.agents[i],pos=xy(i);
+    cercle(...pos,stat===0?2.5:stat===1?3.7:2.7,stat===0?C.muet:stat===1?C.orange:stat===2?C.bleu:C.fond,stat===3?C.bleu:null);
+  }
+  texte('S susceptibles',56,388,C.muet,11);texte('I infectés',251,388,C.orange,11);texte('R protégés',436,388,C.bleu,11);
+  texte('TAUX DE REPRODUCTION EFFECTIF',668,80,C.muet,12);
+  const reff=r0*agents.S/400,barY=130;
+  ligne(670,barY,940,barY,C.trait,11);ligne(670,barY,670+Math.min(1,reff/6)*270,barY,reff>=1?C.orange:C.olive,11);
+  const xSeuil=670+270/6;ligne(xSeuil,barY-22,xSeuil,barY+24,C.or,1.5);texte('1',xSeuil,barY+39,C.or,11,'center');
+  texte(`R eff. = ${fmt(reff,2)}`,670,194,reff>1?C.orange:C.olive,23);
+  texte('Croissance si R eff. > 1',670,223,C.muet,11);
+  texte(`Vaccination ${fmt(vacc*100,0)} %`,670,268,C.bleu,13);
+  texte(`Seuil collectif ${fmt(Math.max(0,1-1/r0)*100,1)} %`,670,299,C.or,13);
+  texte('SUSCEPTIBLES, INFECTÉS, PROTÉGÉS · FRACTION',47,422,C.muet,12);
+  const G={x:55,y:440,w:888,h:128};cadreGraphe(G.x,G.y,G.w,G.h,'jours →','population');
+  const tMax=Math.max(8,history.at(-1)?.t||0);let data=history;
+  peindreGraphique(data,[{key:'a',color:C.muet},{key:'b',color:C.orange},{key:'c',color:C.bleu}],G.x,G.y,G.w,G.h,{maxY:1,maxX:tMax});
+  if(showOde)peindreGraphique(data,[{key:'os',color:C.muet,width:1,dash:true},{key:'oi',color:C.orange,width:1,dash:true},{key:'or',color:C.bleu,width:1,dash:true}],G.x,G.y,G.w,G.h,{maxY:1,maxX:tMax});
+  const threshold=1/r0,y=G.y+G.h-G.h*threshold;
+  ctx.save();ctx.setLineDash([5,4]);ligne(G.x,y,G.x+G.w,y,C.or,1.2);ctx.restore();texte('S=N/R₀',G.x+G.w-6,y-6,C.or,10,'right');
+  zoneAjouter('S',60,120,175,220);zoneAjouter('I',255,120,180,220);zoneAjouter('R',445,120,175,220);zoneAjouter('Reff',665,116,290,220);zoneAjouter('seuil',G.x,G.y,G.w,G.h);
+}
+function dessinerReseau(){
+  texte('STRUCTURE DES CONTACTS · 300 NŒUDS',42,78,C.muet,12);
+  ctx.fillStyle=C.surface;ctx.fillRect(40,92,662,447);cadre(40,92,662,447);
+  const pos=i=>[70+networkPositions[i].x*607,105+networkPositions[i].y*404];
+  for(let i=0;i<reseau.n;i++)for(const j of reseau.adj[i])if(j>i){
+    const a=pos(i),b=pos(j);ligne(...a,...b,'#39424b',.7);
+  }
+  const maxDegree=Math.max(...reseau.adj.map(s=>s.size)),limite=networkMetrics.mean*2.8;
+  for(let i=0;i<reseau.n;i++){
+    const p=pos(i),etat=networkState.status[i],grand=reseau.adj[i].size>limite,r=2.2+Math.sqrt(reseau.adj[i].size/maxDegree)*5;
+    cercle(...p,grand?r+2:r,etat===1?C.orange:etat===2?C.bleu:etat===3?C.fond:grand?C.olive:C.texte,etat===3?C.bleu:null);
+  }
+  texte(`INFECTÉS ${fmt(networkState.I,0)}   GUÉRIS ${fmt(networkState.gueris,0)}   VACCINÉS ${fmt(networkState.V,0)}`,47,559,C.muet,11);
+  texte('DISTRIBUTION DES DEGRÉS',734,79,C.muet,12);
+  const X=739,Y=120,W=213,H=340;cadreGraphe(X,Y,W,H,'degré →','effectif');
+  const dist=networkMetrics.dist,max=dist.reduce((m,o)=>Math.max(m,o.count),1),maxX=Math.max(...dist.map(d=>d.degree));
+  for(const v of dist){const xx=X+v.degree/maxX*W,barW=Math.max(2,W/maxX*.65),bh=v.count/max*H;
+    ctx.fillStyle=v.degree>limite?C.olive:C.muet;ctx.fillRect(xx,Y+H-bh,barW,bh);}
+  texte(`max. ${maxDegree} liens`,740,505,C.olive,12);
+  zoneAjouter('noeud',70,110,600,410);zoneAjouter('lien',85,130,560,350);zoneAjouter('hub',X,Y,W,H);zoneAjouter('raccourci',40,92,662,447);
+}
+function dessinerVie(){
+  const X=91,Y=84,CW=13.4,CH=11.6,W=60,H=40;
+  ctx.fillStyle=C.surface;ctx.fillRect(X,Y,CW*W,CH*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,px=X+x*CW,py=Y+y*CH;
+    if(gridLife[i]){ctx.fillStyle=birthsLife.has(i)?C.or:C.olive;ctx.fillRect(px+.8,py+.7,CW-1.6,CH-1.4);}else if((x+y)%2===0){ctx.fillStyle='#1a2426';ctx.fillRect(px+.5,py+.5,CW-1,CH-1);}
+  }
+  cadre(X,Y,CW*W,CH*H);texte('B3 / S23 · 8 voisines · bord torique',X,73,C.muet,11);
+  texte('Naissance : 3 voisines  ·  Survie : 2 ou 3',X,571,C.olive,12);
+  zoneAjouter('cellule',X,Y,CW*W,CH*H);zoneAjouter('planeur',X+120,Y+110,125,130);zoneAjouter('canon',X+10,Y+10,490,170);
+}
+function dessinerEssaim(){
+  ctx.fillStyle=C.surface;ctx.fillRect(38,82,925,453);cadre(38,82,925,453);
+  const coord=b=>[40+b.x*920,83+b.y*452];
+  for(const b of boids){const [x,y]=coord(b),a=Math.atan2(b.vy,b.vx),l=10,w=4;
+    ctx.fillStyle=C.texte;ctx.beginPath();ctx.moveTo(x+l*Math.cos(a),y+l*Math.sin(a));ctx.lineTo(x-l*.6*Math.cos(a)+w*Math.cos(a+Math.PI/2),y-l*.6*Math.sin(a)+w*Math.sin(a+Math.PI/2));ctx.lineTo(x-l*.6*Math.cos(a)-w*Math.cos(a+Math.PI/2),y-l*.6*Math.sin(a)-w*Math.sin(a+Math.PI/2));ctx.closePath();ctx.fill();}
+  if(positionPredateur){const x=40+positionPredateur.x*920,y=83+positionPredateur.y*452;cercle(x,y,20,null,C.orange);cercle(x,y,4,C.orange);cercle(x,y,.23*450,null,C.orange);}
+  const o=Emg.ordreMoyen(boids);
+  ctx.fillStyle=C.fond;ctx.fillRect(760,105,190,76);cadre(760,105,190,76);
+  texte('ORDRE COLLECTIF',773,128,C.muet,11);texte(fmt(o,3),773,162,C.olive,23);
+  texte('EN MANIPULER : LE CURSEUR SIMULE UN PRÉDATEUR',40,563,C.muet,11);
+  zoneAjouter('boid',38,82,925,453);zoneAjouter('predateur',760,105,190,76);
+}
+function dessinerSable(){
+  texte('HAUTEUR DU TAS · BORDS OUVERTS',41,77,C.muet,12);
+  const X=58,Y=93,Z=13.1,W=sable.W,H=sable.H;
+  const lum=['#152029','#566253','#879a71',C.olive];
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=y*W+x,c=sable.cells[i];ctx.fillStyle=lum[c]||C.or;ctx.fillRect(X+x*Z,Y+y*Z,Z-.8,Z-.8);
+  }
+  if(dernierSable.size>0&&pas-lastFlash<=1){ctx.fillStyle=C.or;for(const id of dernierSable.touched)ctx.fillRect(X+(id%W)*Z+3,Y+Math.floor(id/W)*Z+3,Z-6,Z-6);}
+  cadre(X,Y,W*Z,H*Z);texte('0',50,589,C.muet,11);texte('3 grains',X+W*Z-3,589,C.olive,11,'right');
+  texte('TAILLES DES AVALANCHES · LOG-LOG',585,77,C.muet,12);
+  const GX=602,GY=108,GW=337,GH=378;cadreGraphe(GX,GY,GW,GH,'log₁₀(taille) →','log₁₀(densité)');
+  const S=statsSable||Emg.avalancheStats(avalanches),bins=S.bins;
+  const maxX=Math.max(3,Math.log10(Math.max(1,...bins.map(b=>b.size)))),minY=-6,maxY=0;
+  for(const b of bins){const x=GX+Math.log10(b.size)/maxX*GW,y=GY+(maxY-Math.log10(b.density))/(maxY-minY)*GH;
+    if(y>=GY&&y<=GY+GH)cercle(x,y,3,C.or);}
+  const points=bins.filter(b=>b.density>0).map(b=>[GX+Math.log10(b.size)/maxX*GW,GY+(maxY-Math.log10(b.density))/(maxY-minY)*GH]);
+  ctx.save();ctx.beginPath();ctx.rect(GX,GY,GW,GH);ctx.clip();trace(points,C.olive,1.3);ctx.restore();
+  texte(`pente = ${S.slope===null?'—':fmt(S.slope,2)}`,606,533,C.olive,13);
+  texte(`plage ajustée = ${fmt(S.decades,1)} décades`,606,561,C.muet,11);
+  zoneAjouter('grain',X,Y,W*Z,H*Z);zoneAjouter('avalanche',GX,GY,GW,GH);
+}
+function dessinerTrafic(){
+  texte('ROUTE CIRCULAIRE · VOITURES DANS LE SENS HORAIRE',41,77,C.muet,12);
+  const ox=295,oy=257,R=155;
+  ctx.beginPath();ctx.arc(ox,oy,R,0,2*Math.PI);ctx.strokeStyle='#293640';ctx.lineWidth=34;ctx.stroke();
+  ctx.beginPath();ctx.arc(ox,oy,R,0,2*Math.PI);ctx.strokeStyle=C.muet;ctx.lineWidth=1;ctx.setLineDash([7,8]);ctx.stroke();ctx.setLineDash([]);
+  for(let i=0;i<route.length;i++)if(route[i]>=0){const a=-Math.PI/2+i/240*2*Math.PI,x=ox+R*Math.cos(a),y=oy+R*Math.sin(a);
+    ctx.save();ctx.translate(x,y);ctx.rotate(a+Math.PI/2);ctx.fillStyle=route[i]<=1?C.orange:C.texte;ctx.fillRect(-5,-3,10,6);ctx.restore();}
+  texte('QUAND LES VOITURES RALENTISSENT',47,453,C.muet,10);
+  texte('ESPACE / TEMPS · NOUVELLES LIGNES EN BAS',47,476,C.muet,11);
+  const sx=59,sy=493,sw=500,sh=78;ctx.fillStyle=C.surface;ctx.fillRect(sx,sy,sw,sh);cadre(sx,sy,sw,sh);
+  for(let t=0;t<routeHistory.length;t++){const row=routeHistory[t],yy=sy+sh*(t/95);
+    for(let i=0;i<row.length;i++)if(row[i]>=0){ctx.fillStyle=row[i]<=1?C.orange:'#81909b';ctx.fillRect(sx+i/240*sw,yy,Math.max(1,sw/240),1);}}
+  texte('DÉBIT CONTRE DENSITÉ · DIAGRAMME FONDAMENTAL',604,77,C.muet,12);
+  const GX=630,GY=115,GW=326,GH=368;cadreGraphe(GX,GY,GW,GH,'densité ρ →','débit q ↑');
+  const Qmax=Math.max(.15,...diagramme.map(r=>r.flow))*1.1;
+  const pts=diagramme.map(r=>[GX+Emg.borne(r.density,0,1)*GW,GY+GH-r.flow/Qmax*GH]);trace(pts,C.olive,2);
+  for(const xy of pts)cercle(...xy,2.6,C.olive);
+  const actuel=[GX+traffic.density*GW,GY+GH-traffic.flow/Qmax*GH];cercle(...actuel,7,C.orange,C.fond);
+  texte(`ρ = ${fmt(traffic.density,2)}    q = ${fmt(traffic.flow,2)}`,635,522,C.or,13);
+  texte('cellules / pas : unités du modèle',635,554,C.muet,11);
+  zoneAjouter('voiture',140,103,340,328);zoneAjouter('bouchon',sx,sy,sw,sh);zoneAjouter('fondamental',GX,GY,GW,GH);
+}
+function draw(){
+  const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.ceil(r.width*dpr),h=Math.ceil(r.height*dpr);
+  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+  const mobile=r.width<620, largeur=mobile?540:1000, decalage=mobile&&mobilePane?460:0;
+  const ratio=Math.min(r.width/largeur,r.height/600);view={x:(r.width-largeur*ratio)/2,y:(r.height-600*ratio)/2,k:ratio,decalage};
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=C.fond;ctx.fillRect(0,0,r.width,r.height);
+  ctx.setTransform(dpr*ratio,0,0,dpr*ratio,dpr*(view.x-decalage*ratio),dpr*view.y);
+  zone=[];fond();
+  if(step===0)dessinerPopulation();if(step===1)dessinerCycles();if(step===2)dessinerEpidemie();if(step===3)dessinerReseau();
+  if(step===4)dessinerVie();if(step===5)dessinerEssaim();if(step===6)dessinerSable();if(step===7)dessinerTrafic();
+}
+function drawScope(){
+  const c=$('#scope'),r=c.getBoundingClientRect();if(!r.width)return;
+  const ratio=Math.min(2,devicePixelRatio||1);
+  c.width=Math.round(r.width*ratio);c.height=Math.round(r.height*ratio);
+  const g=c.getContext('2d');g.setTransform(ratio,0,0,ratio,0,0);
+  g.fillStyle=C.fond;g.fillRect(0,0,r.width,r.height);
+  const marge={x:12,y:12,w:r.width-24,h:r.height-25};
+  g.strokeStyle=C.trait;g.lineWidth=.8;
+  for(let j=1;j<=3;j++){g.beginPath();g.moveTo(marge.x,marge.y+j*marge.h/4);g.lineTo(marge.x+marge.w,marge.y+j*marge.h/4);g.stroke();}
+  const serie=step===0?[['a',C.olive],['b',C.lilas]]:step===1?[['a',C.sable],['b',C.orange]]:step===2||step===3?[['a',C.muet],['b',C.orange],['c',C.bleu]]:step===7?[['a',C.olive],['b',C.bleu],['c',C.orange]]:[['a',C.olive]];
+  const maxi=(step===2||step===3||step===5||step===7)?1:Math.max(1,...history.flatMap(p=>serie.map(([k])=>p[k]||0)))*1.1;
+  for(const [key,col] of serie){g.beginPath();g.strokeStyle=col;g.lineWidth=1.5;
+    history.forEach((p,i)=>{const x=marge.x+i/Math.max(1,history.length-1)*marge.w,y=marge.y+marge.h-(p[key]/maxi)*marge.h;
+      if(i)g.lineTo(x,y);else g.moveTo(x,y);});g.stroke();}
+}
+function hideTip(){$('#tip').hidden=true;}
+function tip(k,e){const d=DECOUVERTES[k];if(!d)return;
+  const t=$('#tip');t.replaceChildren();const b=document.createElement('b'),p=document.createElement('span');b.textContent=d[0];p.textContent=d[1];t.append(b,p);t.hidden=false;
+  const rc=e?.target?.getBoundingClientRect?.(),x=e?.clientX??rc?.left??20,y=e?.clientY??rc?.top??140;
+  t.style.left=Math.max(8,Math.min(innerWidth-t.offsetWidth-8,x+13))+'px';
+  t.style.top=Math.max(8,Math.min(innerHeight-t.offsetHeight-8,y-t.offsetHeight-12))+'px';
+}
+function local(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left-view.x)/view.k+view.decalage,y:(e.clientY-r.top-view.y)/view.k};}
+function modifierCellule(e){if(step!==4)return;const v=local(e),x=Math.floor((v.x-91)/13.4),y=Math.floor((v.y-84)/11.6);
+  if(x>=0&&x<60&&y>=0&&y<40){gridLife[y*60+x]=1;draw();update();}}
+canvas.addEventListener('pointerdown',e=>{
+  if(step===4){dragging=true;canvas.setPointerCapture(e.pointerId);modifierCellule(e);}
+  else if(step===5&&document.body.dataset.mode!=='observer'){const p=local(e);predator((p.x-40)/920,(p.y-83)/452);}
+  else if(step===3){const p=local(e);let nearest=-1,best=Infinity;
+    for(let i=0;i<networkPositions.length;i++){const a=networkPositions[i],d=Math.hypot((70+a.x*607)-p.x,(105+a.y*404)-p.y);
+      if(d<best){best=d;nearest=i;}}
+    if(best<18&&nearest>=0)seed(nearest);
+  }
+  const p=local(e),z=[...zone].reverse().find(z=>p.x>=z.x&&p.x<=z.x+z.w&&p.y>=z.y&&p.y<=z.y+z.h);
+  if(z)tip(z.nom,e);
+});
+canvas.addEventListener('pointermove',e=>{
+  if(dragging){modifierCellule(e);return;}
+  const p=local(e);
+  if(step===5&&document.body.dataset.mode!=='observer'&&p.x>40&&p.x<960&&p.y>83&&p.y<535){predator((p.x-40)/920,(p.y-83)/452);canvas.style.cursor='crosshair';return;}
+  const z=[...zone].reverse().find(z=>p.x>=z.x&&p.x<=z.x+z.w&&p.y>=z.y&&p.y<=z.y+z.h);
+  if(z){canvas.style.cursor=step===3?'pointer':'help';tip(z.nom,e);}else{canvas.style.cursor='default';hideTip();}
+});
+canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);
+canvas.addEventListener('pointerleave',()=>{dragging=false;if(step===5)predator(null,null);hideTip();canvas.style.cursor='default';});
+$$('[data-step]').forEach(b=>b.addEventListener('click',()=>goStep(Number(b.dataset.step))));
+$('#prev').onclick=()=>goStep(step-1);$('#next').onclick=()=>goStep(step+1);
+$('#play').onclick=()=>setPlay(!playing);$('#reset').onclick=restart;
+$('#mobileView').onclick=()=>{mobilePane=!mobilePane;$('#mobileView').textContent=mobilePane?'← Voir le phénomène':'Voir les graphes →';$('#mobileView').setAttribute('aria-pressed',String(mobilePane));draw();};
+for(const id of ['a12','a21','kr'])$('#'+id).addEventListener('input',()=>setCompetition(+$(`#a12`).value,+$(`#a21`).value,+$(`#kr`).value));
+$('#lva').oninput=e=>setLV({a:+e.target.value});$('#lvb').oninput=e=>setLV({b:+e.target.value/10});
+$('#capacity').onclick=()=>capacity(!hasCapacity);$('#historical').onclick=()=>historical(!showHistorical);
+$('#r0').oninput=e=>setR0(e.target.value);$('#duration').oninput=e=>setDuration(e.target.value);
+$('#vacc').oninput=e=>setVacc(e.target.value);$('#ode').onclick=()=>odeOverlay(!showOde);
+$('#seednew').onclick=()=>{nouveauHasard();restart();};
+$$('[data-net]').forEach(b=>b.onclick=()=>setNetwork(b.dataset.net,rewire));
+$('#rewire').oninput=e=>setNetwork(networkKind,+e.target.value);
+$$('[data-vax]').forEach(b=>b.onclick=()=>vaccinate(b.dataset.vax));
+$('#seednode').onclick=()=>{seed((chosenSeed+83)%300);nouveauHasard();demarrerReseau();};
+$$('[data-pattern]').forEach(b=>b.onclick=()=>pattern(b.dataset.pattern));
+$('#lifeone').onclick=()=>{setPlay(false);stepLife(1);};
+$('#clearcells').onclick=()=>setCells([]);$('#liferate').oninput=e=>{lifeRate=+e.target.value;syncControls();};
+for(const id of ['sep','ali','coh'])$('#'+id).oninput=()=>setWeights(+$(`#sep`).value,+$(`#ali`).value,+$(`#coh`).value);
+$$('[data-radius]').forEach(b=>b.onclick=()=>{boidParams.radius=b.dataset.radius==='wide'?.37:.14;syncControls();});
+$('#resetbirds').onclick=()=>{nouveauHasard();restart();};
+$('#grainrate').oninput=e=>{debitSable=+e.target.value;syncControls();};
+$$('[data-place]').forEach(b=>b.onclick=()=>{lieuSable=b.dataset.place;syncControls();});
+$('#grain10k').onclick=()=>addGrains(10000,lieuSable);
+$('#cars').oninput=e=>setCars(e.target.value);$('#brake').oninput=e=>setBrake(e.target.value);
+$('#vmax').oninput=e=>setVmax(e.target.value);
+let themeIndex=0;
+$('#theme').onclick=()=>{themeIndex=(themeIndex+1)%3;const theme=['auto','light','dark'][themeIndex];
+  if(theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme;
+  $('#theme').textContent='Thème '+({auto:'auto',light:'clair',dark:'sombre'})[theme];};
+addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select')||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  if(k===' '&&!e.target.closest('button,a')){e.preventDefault();setPlay(!playing);}
+  if(k==='arrowleft'&&!e.target.closest('[role=tablist]')){e.preventDefault();goStep(step-1);}
+  if(k==='arrowright'&&!e.target.closest('[role=tablist]')){e.preventDefault();goStep(step+1);}
+  if(/^[1-8]$/.test(k))goStep(+k-1);
+  if(k==='r')restart();if(k==='escape')hideTip();
+});
+window.__labo={moteur:Emg,get step(){return step;},goStep,state,tick,setPlay,
+  setCompetition,setLV,capacity,historical,setR0,setDuration,setVacc,restart,odeOverlay,
+  setNetwork,vaccinate,seed,setCells,pattern,stepLife,setWeights,predator,addGrains,setCars,setBrake,setVmax};
+const mouvementReduit=matchMedia('(prefers-reduced-motion: reduce)');
+function frame(t){
+  if(!previous)previous=t;
+  const dt=Math.min(.06,(t-previous)/1000);previous=t;
+  if(playing){
+    accumulator+=dt*(step===4?lifeRate:CADENCE[step])*(mouvementReduit.matches?.4:1);
+    let nb=0;while(accumulator>=1&&nb<55){fixed();accumulator--;nb++;}
+    if(nb>0&&t-latestUI>120){update();latestUI=t;}
+  }
+  draw();requestAnimationFrame(frame);
+}
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>{draw();drawScope();}).observe($('#scene'));
+setPlay(true);goStep(0);requestAnimationFrame(frame);
+
+</script>
+<script src="../../labo/planche.js"></script>
+</body></html>

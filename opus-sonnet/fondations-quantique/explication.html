@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>Comprendre les fondations quantiques — LABO</title>
+<meta name="description" content="Module 48 : amplitudes, particules individuelles, information de chemin, fonction d'onde et incertitude.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#a99cf0;--energie:#ffd166;--positif:#ff8a5b;--negatif:#5bb8ff;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Instrument Serif',Georgia,serif}
+*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.73 var(--sans);overflow-x:hidden}
+a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.wrap{max-width:770px;margin:0 auto;padding:34px 22px 84px}.top{display:flex;gap:15px;justify-content:space-between;flex-wrap:wrap;margin-bottom:62px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.top a:hover{color:var(--texte)}
+.serie{font:11px var(--mono);letter-spacing:.12em;color:var(--accent)}h1{font:400 clamp(38px,7vw,63px)/1.13 var(--serif);margin:14px 0 22px;letter-spacing:-.016em}h1 em{font-style:italic;color:var(--accent)}
+.lede{font-size:19px;line-height:1.55;color:var(--texte)}h2{font:400 clamp(26px,5vw,34px)/1.2 var(--serif);margin:66px 0 22px;padding-top:23px;border-top:1px solid var(--trait)}h2 span{display:block;margin-bottom:9px;font:11px var(--mono);color:var(--texte-2)}
+p{margin:0 0 15px}ul,ol{padding-left:22px}li{margin:0 0 9px}.acc{color:var(--accent)}.energy{color:var(--energie)}
+.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(140px,210px) 1fr;gap:14px;padding:13px 0;border-bottom:1px solid var(--trait)}.chiffres b{font:500 15px var(--mono);color:var(--energie)}
+.module details{background:var(--fond-2);border:1px solid var(--trait);margin:12px 0}.module summary{padding:14px 16px;cursor:pointer;font-weight:500}.module details p{padding:0 16px 15px 20px;margin:0}
+.sources{font:12px/1.65 var(--mono);color:var(--texte-2)}.sources a{color:var(--texte-2)}.cta{display:inline-block;margin-top:36px;padding:11px 16px;border:1px solid var(--accent);text-decoration:none;font-size:14px}
+@media(max-width:560px){.wrap{padding:24px 17px 65px}.chiffres>div{grid-template-columns:1fr;gap:5px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">&larr; Retour &agrave; la simulation</a><a href="../../labo/index.html">&larr; LABO</a></nav>
+<p class="serie">LABO &middot; Fondations 48</p>
+<h1>Comprendre les <em>amplitudes</em></h1>
+<p class="lede">Un impact est toujours localis&eacute;. Une amplitude ne l'est pas n&eacute;cessairement. La m&eacute;canique quantique relie ces deux faits par une r&egrave;gle de calcul pr&eacute;cise, sans exiger qu'une particule ait emprunt&eacute; un chemin d&eacute;termin&eacute;.</p>
+<h2><span>01 / OBSERVER</span>Ce que tu vois</h2>
+<p>Dans la premi&egrave;re sc&egrave;ne, un canon envoie des &eacute;lectrons isol&eacute;s vers deux fentes et un &eacute;cran sensible. Le point lumineux marque une d&eacute;tection individuelle, non une petite bille dont on aurait film&eacute; la trajectoire. Apr&egrave;s assez de points, le diagramme du bas laisse appara&icirc;tre des maxima et des minima. La ligne en tirets est la pr&eacute;diction : elle peut &ecirc;tre cach&eacute;e pour regarder &eacute;merger la structure.</p>
+<p>Le deuxi&egrave;me montage remplace les fentes par deux bras optiques et deux d&eacute;tecteurs. Les fl&egrave;ches sont des <strong>phaseurs</strong> : elles s'additionnent bout &agrave; bout. La troisi&egrave;me sc&egrave;ne rend les chemins plus ou moins distinguables et garde la trace des impacts pr&eacute;c&eacute;dents. La derni&egrave;re d&eacute;ploie un paquet d'ondes, son module, sa partie r&eacute;elle, sa probabilit&eacute; de position et sa distribution en quantit&eacute; de mouvement.</p>
+<h2><span>02 / APPRENDRE</span>La th&eacute;orie, module par module</h2>
+<ul class="sommaire"><li><a href="#m48"><b>48</b>Fondations quantiques</a></li></ul>
+<section class="module" id="m48">
+<header><p class="num">Module 48</p><h3>Une probabilit&eacute; faite d'amplitudes</h3><p class="etapes">Sur la planche : 1 Impacts &middot; 2 Amplitudes &middot; 3 Information de chemin &middot; 4 Paquet libre</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Imagine un &eacute;cran qui enregistre un point par &eacute;lectron. On ne peut pas d&eacute;duire le point suivant du dernier, mais on peut pr&eacute;dire la forme statistique d'un grand nombre d'arriv&eacute;es. Pour calculer cette forme, la th&eacute;orie attribue &agrave; chaque chemin possible une amplitude avec une longueur et une phase. Deux amplitudes de m&ecirc;me longueur peuvent se renforcer ou s'annuler selon leur angle. L'&eacute;lectron n'a pas besoin d'&ecirc;tre d&eacute;crit comme une bille traversant simultan&eacute;ment deux ouvertures : avant une mesure appropri&eacute;e, aucun chemin individuel ne peut lui &ecirc;tre attribu&eacute; par ce mod&egrave;le. Lorsqu'une information sur le chemin devient disponible, les conditions de l'addition changent. Un paquet d'ondes d&eacute;crit ensuite comment une pr&eacute;paration localis&eacute;e &eacute;volue en l'absence de force.</p>
+<h4 data-n="2">D&eacute;finitions</h4>
+<dl class="defs">
+<div><dt>Amplitude \(\psi\)<span class="u">m\(^{-1/2}\) en 1D</span></dt><dd>Nombre complexe dont le module au carr&eacute; fournit une densit&eacute; de probabilit&eacute;.</dd></div>
+<div><dt>Phase \(\varphi\)<span class="u">rad</span></dt><dd>Angle d'une amplitude complexe, dessin&eacute; par l'orientation d'un phaseur.</dd></div>
+<div><dt>Position \(x\)<span class="u">m</span></dt><dd>Coordonn&eacute;e o&ugrave; l'on peut relever un impact ou &eacute;valuer la fonction d'onde.</dd></div>
+<div><dt>Longueur d'onde \(\lambda\)<span class="u">m</span></dt><dd>P&eacute;riode spatiale de phase reli&eacute;e &agrave; une quantit&eacute; de mouvement d&eacute;finie.</dd></div>
+<div><dt>Quantit&eacute; de mouvement \(p\)<span class="u">kg&middot;m/s</span></dt><dd>Grandeur m&eacute;canique associ&eacute;e au nombre d'onde \(k=p/\hbar\).</dd></div>
+<div><dt>Constantes \(h,\hbar\)<span class="u">J&middot;s</span></dt><dd>Constante de Planck et constante r&eacute;duite \(\hbar=h/(2\pi)\).</dd></div>
+<div><dt>G&eacute;om&eacute;trie \(d,w,L\)<span class="u">m</span></dt><dd>S&eacute;paration des fentes, largeur d'une fente et distance jusqu'&agrave; l'&eacute;cran.</dd></div>
+<div><dt>Visibilit&eacute; \(\eta\)<span class="u">sans unit&eacute;</span></dt><dd>Facteur de coh&eacute;rence allant de 1, interf&eacute;rence enti&egrave;re, &agrave; 0, aucune frange.</dd></div>
+<div><dt>Largeurs \(\Delta x,\Delta p\)<span class="u">m ; kg&middot;m/s</span></dt><dd>&Eacute;carts-types des distributions de position et de quantit&eacute; de mouvement.</dd></div>
+<div><dt>Largeur initiale \(\sigma_0\)<span class="u">m</span></dt><dd>&Eacute;cart-type initial en position du paquet gaussien pr&eacute;par&eacute;.</dd></div>
+<div><dt>Masse \(m\), temps \(t\)<span class="u">kg ; s</span></dt><dd>Masse de la particule libre et dur&eacute;e physique &eacute;coul&eacute;e.</dd></div>
+<div><dt>Impacts \(N\)<span class="u">comptage</span></dt><dd>Nombre entier d'&eacute;v&eacute;nements relev&eacute;s, distinct de la probabilit&eacute; attendue.</dd></div>
+</dl>
+<h4 data-n="3">Relations cl&eacute;s</h4>
+<div class="relation">\[\lambda=\frac{h}{p},\qquad p=\hbar k\]
+<p>De Broglie relie une longueur d'onde &agrave; l'impulsion. Pour un &eacute;lectron acc&eacute;l&eacute;r&eacute; &agrave; une tension &eacute;lev&eacute;e, on calcule son impulsion relativiste plut&ocirc;t que de prendre automatiquement \(mv\).</p></div>
+<div class="relation">\[P(x)=|\psi(x)|^2,\qquad \int_{-\infty}^{+\infty}|\psi(x)|^2\,\dd x=1\]
+<p>La r&egrave;gle de Born donne une <em>densit&eacute;</em>, et non la chance de toucher exactement un point math&eacute;matique. La probabilit&eacute; d'une zone est son aire sous la courbe.</p></div>
+<div class="relation">\[\psi=\psi_1+\psi_2,\quad |\psi|^2=|\psi_1|^2+|\psi_2|^2+2\,\operatorname{Re}(\psi_1^*\psi_2)\]
+<p>Le dernier terme distingue l'interf&eacute;rence de la simple somme des probabilit&eacute;s. Une information partielle de chemin est illustr&eacute;e en le multipliant par \(\eta\).</p></div>
+<div class="relation">\[e^{i\varphi}=\cos\varphi+i\sin\varphi,\qquad P(D_1)=\cos^2\!\frac{\varphi}{2},\quad P(D_2)=\sin^2\!\frac{\varphi}{2}\]
+<p>Une fl&egrave;che tournante suffit &agrave; repr&eacute;senter la phase. Dans le Mach-Zehnder id&eacute;al, changer le d&eacute;phasage change la sortie du photon, pas le nombre de photons entrants.</p></div>
+<div class="relation">\[\Delta x\,\Delta p\geq\frac{\hbar}{2},\qquad \Delta p_0=\frac{\hbar}{2\sigma_0}\]
+<p>Ce n'est pas une limitation des instruments : une onde fortement localis&eacute;e exige une gamme plus large d'impulsions. Le paquet gaussien initial sature cette in&eacute;galit&eacute;.</p></div>
+<div class="relation">\[\sigma(t)=\sigma_0\sqrt{1+\left(\frac{\hbar t}{2m\sigma_0^2}\right)^2},\qquad \langle x\rangle_t=x_0+\frac{\hbar k_0}{m}t\]
+<p>Un paquet libre s'&eacute;tale tout en avan&ccedil;ant &agrave; la vitesse de groupe. Sa distribution d'impulsions reste inchang&eacute;e, m&ecirc;me quand sa largeur en position augmente.</p></div>
+<h4 data-n="4">Exemple chiffr&eacute;</h4>
+<div class="exemple"><p>Pr&eacute;voyons l'interfrange d'&eacute;lectrons acc&eacute;l&eacute;r&eacute;s par 50 kV avec deux fentes s&eacute;par&eacute;es de 1 &micro;m et un &eacute;cran &agrave; 1 m. Dans cet exemple, la diffraction d'une fente module les hauteurs des franges, mais pas leur espacement local id&eacute;alis&eacute;.</p>
+<ol>
+<li>L'&eacute;nergie cin&eacute;tique d'acc&eacute;l&eacute;ration est \(K=eV=50\,000\ \mathrm{eV}\). Les constantes utilis&eacute;es sont \(h=6{,}626\,070\,15\times10^{-34}\ \mathrm{J\,s}\), \(e=1{,}602\,176\,634\times10^{-19}\ \mathrm C\), et \(m_e=9{,}109\,383\,7139\times10^{-31}\ \mathrm{kg}\).</li>
+<li>La relation relativiste donne \(pc=\sqrt{K(K+2m_ec^2)}\), donc \(\lambda=hc/\sqrt{K(K+2m_ec^2)}=5{,}3553\ \mathrm{pm}\).</li>
+<li>Les fentes donnent \(\Delta x_{\mathrm{frange}}=\lambda L/d=5{,}3553\times10^{-6}\ \mathrm m\), soit <strong>5,36 &micro;m</strong> entre deux maxima successifs.</li>
+<li>Sans correction relativiste, on obtiendrait 5,4847 pm puis 5,48 &micro;m : l'erreur est d'environ 2,4 % &agrave; cette &eacute;nergie. &Agrave; 100 eV, la longueur d'onde relativiste descend &agrave; environ 0,123 nm.</li>
+</ol>
+<p>Ce calcul pr&eacute;dit une distance entre franges, jamais l'adresse du prochain &eacute;lectron. On doit encore tirer ses arriv&eacute;es selon la densit&eacute; de probabilit&eacute; normalis&eacute;e.</p></div>
+<h4 data-n="5">Pi&egrave;ges fr&eacute;quents</h4>
+<ul class="pieges">
+<li><strong>&laquo; L'&eacute;lectron est une bille qui traverse les deux fentes. &raquo;</strong> On additionne deux amplitudes ; cette image ne permet pas d'attribuer une trajectoire unique sans nouvelle mesure.</li>
+<li><strong>&laquo; Il suffit d'ajouter les probabilit&eacute;s de chaque fente. &raquo;</strong> Cela supprime le terme crois&eacute; et, par cons&eacute;quent, les franges.</li>
+<li><strong>&laquo; Un observateur conscient d&eacute;truit les franges. &raquo;</strong> La disponibilit&eacute; physique de l'information de chemin est pertinente ; personne n'a besoin de regarder l'appareil.</li>
+<li><strong>&laquo; Le d&eacute;tecteur bouscule la particule, voil&agrave; tout. &raquo;</strong> Un recul m&eacute;canique peut accompagner la mesure, mais la distinction des chemins explique plus g&eacute;n&eacute;ralement la perte de coh&eacute;rence.</li>
+<li><strong>&laquo; L'incertitude vient d'une mauvaise pr&eacute;cision. &raquo;</strong> M&ecirc;me un paquet id&eacute;al satisfait une largeur minimale de position et d'impulsion.</li>
+<li><strong>&laquo; La fonction d'onde est une vague mat&eacute;rielle directement visible. &raquo;</strong> Elle est un outil de calcul complexe ; le dispositif mesure des r&eacute;sultats, pas une photographie de \(\psi\).</li>
+</ul>
+<h4 data-n="6">O&ugrave; &ccedil;a resservira</h4>
+<ul class="resert">
+<li><b>06</b><span><a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a> : les phaseurs sont les m&ecirc;mes fl&egrave;ches tournantes que dans cette page.</span></li>
+<li><b>07 / 05</b><span><a href="../fondations-systemes-hasard/index.html">Probabilit&eacute;s</a> et <a href="../05-ondes-interferences/index.html">interf&eacute;rences</a> : histogrammes et fronts d'onde, prolong&eacute;s ici jusqu'aux impacts individuels.</span></li>
+<li><b>27 / 28</b><span><a href="../../labo/index.html#fondations">Photons et orbitales</a> : la quantification et les distributions spatiales.</span></li>
+<li><b>49</b><span><a href="../../labo/index.html#fondations">Potentiels et barri&egrave;res</a> : &eacute;tats li&eacute;s, niveaux d'&eacute;nergie et effet tunnel.</span></li>
+<li><b>50</b><span><a href="../../labo/index.html#fondations">Spin et intrication</a> : probabilit&eacute;s issues d'amplitudes pour des syst&egrave;mes &agrave; plusieurs parties.</span></li>
+<li><b>44</b><span><a href="../../labo/index.html#fondations">Mati&egrave;re d&eacute;g&eacute;n&eacute;r&eacute;e</a> : l'incertitude contribue aux propri&eacute;t&eacute;s des &eacute;toiles compactes.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Deux amplitudes de m&ecirc;me longueur pointent en sens oppos&eacute;. Quelle est la probabilit&eacute; de la sortie correspondante ?</summary><p>Leur somme vectorielle est nulle. Le carr&eacute; de son module vaut z&eacute;ro : cette sortie est interdite par une interf&eacute;rence destructive, dans les conditions id&eacute;ales pr&eacute;vues.</p></details>
+<details><summary>Des &eacute;lectrons ont \(\lambda=0{,}10\ \mathrm{nm}\), les fentes sont distantes de 2 &micro;m et l'&eacute;cran de 0,5 m. Quel interfrange pr&eacute;voir ?</summary><p>On calcule \(\lambda L/d=(10^{-10}\ \mathrm m)(0{,}5\ \mathrm m)/(2\times10^{-6}\ \mathrm m)=2{,}5\times10^{-5}\ \mathrm m\), soit 25 &micro;m.</p></details>
+<details><summary>Pourquoi une mesure de chemin parfaite fait-elle dispara&icirc;tre les franges sans r&eacute;&eacute;crire les impacts d&eacute;j&agrave; enregistr&eacute;s ?</summary><p>La mesure change les conditions de probabilit&eacute; pour les nouvelles arriv&eacute;es : le terme d'interf&eacute;rence devient nul. Les impacts pass&eacute;s restent des faits enregistr&eacute;s ; seule la distribution des &eacute;v&eacute;nements futurs est modifi&eacute;e.</p></details>
+</section>
+<h2><span>03 / LIMITES</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Deux fentes id&eacute;ales.</strong> La figure emploie la diffraction paraxiale de Fraunhofer avec ouvertures rectangulaires identiques. Les amplitudes sont calcul&eacute;es avant la probabilit&eacute; ; les positions sont tir&eacute;es par inversion de la fonction de r&eacute;partition. La densit&eacute; est normalis&eacute;e <em>sur la partie visible de l'&eacute;cran</em> : le programme conditionne les d&eacute;tections &agrave; cette fen&ecirc;tre.</li>
+<li><strong>Une histoire exp&eacute;rimentale voisine, pas identique.</strong> Tonomura et ses coll&egrave;gues ont publi&eacute; en 1989 l'accumulation de points d'&eacute;lectrons isol&eacute;s avec un <em>biprisme &eacute;lectronique</em>, pas avec les deux ouvertures rectangulaires dessin&eacute;es ici. Le principe des interf&eacute;rences d'une arriv&eacute;e &agrave; la fois est commun.</li>
+<li><strong>Mach-Zehnder.</strong> Les deux s&eacute;paratrices sont id&eacute;ales, sans pertes quand les bras sont ouverts. Bloquer un bras absorbe la moiti&eacute; des photons &agrave; l'entr&eacute;e ; le reste se r&eacute;partit &agrave; parts &eacute;gales entre les sorties. Les phases globales ont &eacute;t&eacute; &eacute;cart&eacute;es.</li>
+<li><strong>Information de chemin.</strong> Un seul param&egrave;tre \(\eta\) traduit toute la perte de coh&eacute;rence. Le mod&egrave;le ne calcule ni les &eacute;tats internes du d&eacute;tecteur ni l'environnement. Lorsqu'on change plusieurs fois les r&eacute;glages, le groupe &laquo; avant &raquo; peut m&eacute;langer d'anciennes conditions.</li>
+<li><strong>Paquet libre.</strong> Il est gaussien, en une dimension, sans potentiel, avec une dispersion exacte dans ce cadre. Le bouton de mesure choisit une position puis impose un nouveau paquet &eacute;troit : il ne constitue pas une th&eacute;orie compl&egrave;te de la mesure. Les horloges sont agrandies ou compress&eacute;es suivant l'esp&egrave;ce choisie.</li>
+<li><strong>Dessin.</strong> Canons, fentes, miroirs, paquets, tailles, faisceaux et dur&eacute;es sont &agrave; des &eacute;chelles arbitraires pour &ecirc;tre discernables ; aucune ligne ne doit &ecirc;tre lue comme la trajectoire mesur&eacute;e d'une particule.</li>
+</ul>
+<h2><span>04 / ORDRES DE GRANDEUR</span>Les chiffres &agrave; retenir</h2>
+<div class="chiffres">
+<div><b>0,12264 nm</b><span>Longueur d'onde d'un &eacute;lectron acc&eacute;l&eacute;r&eacute; &agrave; 100 V, avec l'expression relativiste.</span></div>
+<div><b>5,3553 pm</b><span>Longueur d'onde &agrave; 50 kV, contre 5,4847 pm sans correction relativiste.</span></div>
+<div><b>5,36 &micro;m</b><span>Interfrange &agrave; 50 kV, pour une s&eacute;paration de 1 &micro;m et un &eacute;cran &agrave; 1 m.</span></div>
+<div><b>29,92 fs</b><span>Temps pour doubler la largeur d'un paquet d'&eacute;lectron initialement large de 1 nm.</span></div>
+<div><b>\(\hbar/2\)</b><span>Produit initial \(\Delta x\,\Delta p\) d'un paquet gaussien minimal : environ \(5{,}27\times10^{-35}\ \mathrm{J\,s}\).</span></div>
+</div>
+<h2><span>05 / FRONTI&Egrave;RE</span>Seulement introduit ici</h2>
+<p>L'&eacute;quation de Schr&ouml;dinger intervient uniquement &agrave; travers la solution libre d'un paquet gaussien ; on ne d&eacute;veloppe pas encore les op&eacute;rateurs, l'interpr&eacute;tation des &eacute;tats li&eacute;s, la d&eacute;coh&eacute;rence microscopique, les exp&eacute;riences de gomme quantique ou les diff&eacute;rentes interpr&eacute;tations de la mesure. Le formalisme de Dirac, les champs quantiques et l'informatique quantique restent hors de ce chapitre. La page 49 poursuivra les potentiels et les barri&egrave;res ; la page 50 abordera spin, corr&eacute;lations et intrication.</p>
+<p class="sources">Rep&egrave;res scientifiques : <a href="https://physics.nist.gov/cuu/Constants/">NIST / CODATA 2022, constantes fondamentales</a> ; A. Tonomura et coll., <em>American Journal of Physics</em> 57, 117&ndash;120 (1989), <a href="https://doi.org/10.1119/1.16104">doi:10.1119/1.16104</a>.</p>
+<a class="cta" href="index.html">Retour &agrave; la simulation &rarr;</a>
+</main>
+</body>
+</html>

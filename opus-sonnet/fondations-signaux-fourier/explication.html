@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="icon" href="data:,">
+<title>Comprendre les signaux et Fourier — LABO</title>
+<meta name="description" content="Module 09 : séries de Fourier, timbres, FFT, Nyquist, repliement, filtrage et circuit RC.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#80d8a0;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html{background:var(--fond);scroll-behavior:smooth}body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.68 var(--sans)}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.wrap{max-width:800px;margin:auto;padding:34px 24px 90px}.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-bottom:58px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}.serie{font:11px var(--mono);letter-spacing:.12em;color:var(--texte-2)}h1{font:400 clamp(40px,6vw,64px)/1.08 var(--serif);letter-spacing:-.012em;margin:14px 0 22px}h1 em{color:var(--accent)}.lede{font-size:18px;color:var(--texte)}h2{font:400 33px/1.18 var(--serif);margin:62px 0 17px;padding-top:25px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:9px}p{margin:0 0 16px}ul,ol{padding-left:24px}li{margin-bottom:10px}strong{font-weight:600}.acc{color:var(--accent)}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:170px 1fr;gap:16px;padding:13px 0;border-bottom:1px solid var(--trait)}.chiffres b{font:500 16px var(--mono);color:var(--energie)}details{margin:11px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{cursor:pointer;padding:13px 15px;font-weight:500}details p{padding:0 16px 15px;margin:0}.cta{display:inline-block;margin-top:32px;padding:11px 18px;text-decoration:none;border:1px solid var(--accent)}.fin{font:12px var(--mono);color:var(--texte-2);margin-top:38px}@media(max-width:560px){.wrap{padding-inline:18px}.chiffres>div{grid-template-columns:1fr;gap:3px}h2{font-size:28px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css">
+<script src="../../labo/theorie.js" defer></script>
+</head>
+<body><main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">← Retour à la planche</a><a class="back" href="../../labo/index.html">← LABO</a></nav>
+<p class="serie">LABO · Fondations 09</p>
+<h1>Comprendre les <em>signaux et Fourier</em></h1>
+<p class="lede">La même onde possède deux descriptions : son évolution au cours du temps et la répartition de ses fréquences. Aucune n'est plus « réelle » que l'autre ; elles rendent visibles des propriétés différentes.</p>
+
+<h2><span>1</span>Ce que tu vois</h2>
+<p><strong>Construire.</strong> La courbe claire est une somme de sinusoïdes ; les traces vertes sont ses composantes et les barres à droite leurs amplitudes. La courbe orange en pointillés est la cible idéale. Déplacer une barre change la somme : la forme temporelle et le spectre sont deux lectures liées, pas deux expériences indépendantes.</p>
+<p><strong>Écouter.</strong> Des instruments synthétiques jouent une fondamentale identique, avec des harmoniques de force différente. Des modes stylisés suggèrent le lien avec les cordes et les tuyaux du module 15. Retirer la fondamentale laisse parfois une hauteur perceptible grâce aux autres harmoniques.</p>
+<p><strong>Échantillonner et filtrer.</strong> Les points jaunes sont les mesures prises à cadence régulière ; la ligne colorée est la reconstruction. La roue n'est redessinée qu'aux instants où la caméra prend une image. Enfin, le spectre montre les fréquences qu'un filtre atténue, pendant que les deux oscilloscopes montrent le résultat avant et après.</p>
+
+<h2><span>2</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m09"><b>09</b>Signaux et Fourier</a></li></ul>
+<section class="module" id="m09">
+<header><p class="num">Module 09</p><h3>Une forme, plusieurs fréquences</h3><p class="etapes">Sur la planche : 1 Construire · 2 Timbre · 3 Échantillonner · 4 Filtrer</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Une sinusoïde est une oscillation régulière. Si plusieurs oscillations se superposent, leurs valeurs s'additionnent à chaque instant et créent une forme nouvelle. Certaines contributions dessinent les grandes variations ; d'autres ajoutent les détails les plus rapides. Un signal presque carré peut ainsi venir d'une somme entièrement constituée de courbes douces. On peut regarder le résultat en fonction du temps, comme sur un oscilloscope, ou dresser l'inventaire des fréquences et de leurs amplitudes : c'est le spectre. Celui-ci ne découpe pas matériellement le son en morceaux distincts présents dans l'air ; il représente mathématiquement le même mouvement de pression. L'échantillonnage transforme ensuite ce mouvement continu en valeurs discrètes, à condition de mesurer assez souvent. Le filtrage, enfin, change l'importance et le décalage de certaines composantes. En temps, l'onde se transforme ; en fréquences, on comprend immédiatement pourquoi.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Signal \(x(t)\)<span class="u">unité relative ici</span></dt><dd>Valeur de la grandeur mesurée au temps \(t\), exprimé en secondes (s).</dd></div>
+<div><dt>Fondamentale \(f_0\)<span class="u">Hz</span></dt><dd>Fréquence correspondant à la période de répétition de la forme périodique.</dd></div>
+<div><dt>Harmonique \(n\)<span class="u">entier, sans unité</span></dt><dd>Composante de fréquence \(nf_0\) ; \(n=1\) est la fondamentale.</dd></div>
+<div><dt>Amplitude \(A_n\), moyenne \(a_0\)<span class="u">unité du signal</span></dt><dd>Poids de la sinusoïde numéro \(n\) et niveau constant moyen de la série.</dd></div>
+<div><dt>Phase \(\varphi_n\)<span class="u">rad</span></dt><dd>Décalage d'une oscillation par rapport à l'origine du temps.</dd></div>
+<div><dt>Échantillonnage \(f_s\)<span class="u">Hz</span></dt><dd>Nombre de mesures acquises par seconde ; \(f_s/2\) est la fréquence de Nyquist.</dd></div>
+<div><dt>Fréquences \(f,f_{\max},f_{\text{replié}}\)<span class="u">Hz</span></dt><dd>Fréquence analysée, plus haute fréquence du signal utile et fréquence apparente repliée.</dd></div>
+<div><dt>FFT \(X_k\), \(N\), \(k\)<span class="u">amplitude, entiers</span></dt><dd>Coefficient complexe de la case \(k\), calculé sur \(N\) échantillons ; \(k\) numérote les cases.</dd></div>
+<div><dt>Résolution \(\Delta f\)<span class="u">Hz</span></dt><dd>Écart entre deux cases successives du spectre discret.</dd></div>
+<div><dt>Résistance \(R\), capacité \(C\)<span class="u">Ω, F</span></dt><dd>Paramètres physiques fixant la constante de temps du circuit RC.</dd></div>
+<div><dt>Coupure \(f_c\), réponse \(H(f)\)<span class="u">Hz, sans unité</span></dt><dd>Fréquence où le RC passe-bas vaut \(1/\sqrt{2}\) en amplitude ; gain complexe et phase du filtre.</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[x(t)=a_0+\sum_{n\ge1}A_n\sin(2\pi nf_0t+\varphi_n)\]<p>Cette écriture rassemble les fréquences multiples d'une fondamentale. Deux coefficients de même amplitude mais de phases différentes peuvent produire des formes temporelles différentes. Il s'agit ici de signaux périodiques satisfaisant les conditions usuelles de convergence.</p></div>
+<div class="relation">\[x_{\text{carré}}(t)=\frac4\pi\sum_{\substack{n\ge1\\n\,\mathrm{impair}}}\frac{\sin(2\pi nf_0t)}{n}\]<p>Les harmoniques paires sont absentes d'un carré symétrique. Près du saut, les sommes partielles oscillent : le dépassement de Gibbs approche 8,95 % de la hauteur totale du saut, même si sa largeur rétrécit.</p></div>
+<div class="relation">\[X_k=\sum_{j=0}^{N-1}x_j\,e^{-2\pi i jk/N},\qquad \Delta f=\frac{f_s}{N}\]<p>La transformée de Fourier discrète transforme une fenêtre de mesures en cases de fréquences. La FFT est un algorithme rapide pour ce même calcul. Une fenêtre finie peut étaler une fréquence entre plusieurs cases : c'est la fuite spectrale.</p></div>
+<div class="relation">\[f_s\gt 2f_{\max},\qquad f_{\text{replié}}=\left|f-kf_s\right|\]<p>Choisir l'entier \(k\) qui rend la différence la plus petite. Une fréquence au-dessus de Nyquist devient impossible à distinguer d'une fréquence plus basse à partir de ces seuls échantillons. L'égalité stricte ne garantit pas la reconstruction de toutes les phases.</p></div>
+<div class="relation">\[f_c=\frac{1}{2\pi RC},\qquad |H(f)|=\frac{1}{\sqrt{1+(f/f_c)^2}},\qquad \arg H=-\arctan(f/f_c)\]<p>Un RC passe-bas atténue de plus en plus les fréquences élevées et retarde leur phase. À la coupure, son gain vaut environ 0,707, soit −3,01 dB en amplitude, et son déphasage vaut −45°.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p>Un son contient une composante de 25 000 Hz. On l'échantillonne à la cadence audio de 44 100 mesures par seconde, sans filtre préalable. Puis on examine un circuit RC avec une résistance de 1 000 Ω et une capacité de 0,50 µF.</p>
+<ol>
+<li>La limite de Nyquist vaut \(44\,100/2=22\,050\) Hz. Puisque 25 000 Hz dépasse cette limite, la composante ne peut pas être correctement distinguée.</li>
+<li>La case équivalente est \(|25\,000-44\,100|=19\,100\) Hz. Le faux signal est donc situé à 19,1 kHz. Une fois les données enregistrées, on ne peut plus savoir par elles seules laquelle des deux fréquences était présente.</li>
+<li>Pour le RC, \(C=0{,}50\times10^{-6}\) F ; ainsi \(RC=0{,}0005\) s et \(f_c=1/(2\pi\times0{,}0005)\approx318{,}31\) Hz.</li>
+<li>À 440 Hz, \(|H|=1/\sqrt{1+(440/318{,}31)^2}\approx0{,}586\), soit environ −4,64 dB. Le circuit atténue cette note et déplace aussi sa phase d'environ −54,1°.</li>
+</ol>
+<p>Pour compléter : un la de 440 Hz a ses cinq premières harmoniques à 440, 880, 1 320, 1 760 et 2 200 Hz. Dans une bande téléphonique illustrée de 300 à 3 400 Hz, elles passent toutes, mais la huitième, à 3 520 Hz, sort de cette bande. La bande passante n’impose pas un gain uniforme.</p></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« Il y a des petits sons séparés à l'intérieur de l'air. »</strong> Non : à chaque endroit, la pression fluctue en une seule histoire temporelle. Le spectre est une représentation de ce signal par des fonctions de base.</li>
+<li><strong>« Un carré n'a qu'une fréquence. »</strong> Sa répétition a une fondamentale ; ses côtés abrupts demandent en plus de nombreuses harmoniques impaires. Le dépassement de Gibbs persiste.</li>
+<li><strong>« Exactement deux mesures par période suffisent toujours. »</strong> Non : à Nyquist, des phases deviennent indiscernables. On demande strictement plus de deux mesures par cycle de la plus haute fréquence utile.</li>
+<li><strong>« Le repliement se répare par logiciel. »</strong> Non, pas sans information externe. Il faut filtrer avant la conversion analogique-numérique.</li>
+<li><strong>« Un filtre change seulement l'amplitude. »</strong> Les RC déphasent aussi les composantes.</li>
+<li><strong>« La fenêtre de Hann supprime toute erreur. »</strong> Elle réduit les lobes latéraux, mais élargit le lobe principal ; choisir une fenêtre suppose un compromis entre fuite et séparation des fréquences proches.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>06 · 15</b><span><a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a> : phases, modes propres, superpositions, résonance d'une corde et timbres.</span></li>
+<li><b>22</b><span><a href="../06-courant-circuits/index.html">Courant et circuits</a> : constante de temps, condensateur et réponse d'un circuit RC.</span></li>
+<li><b>24 · 27</b><span><a href="../../labo/index.html#fondations">Lumière et spectres</a> : fréquences de rayonnement, raies et spectres lumineux, qui n'utilisent pas le son comme support.</span></li>
+<li><b>48</b><span><a href="../../labo/index.html#fondations">Paquets d'ondes</a> : une durée très brève exige une large distribution de fréquences ; lien introductif avec les incertitudes.</span></li>
+<li><b>08</b><span><a href="../../labo/index.html#fondations">Systèmes et chaos</a> : comparer les signatures spectrales des comportements réguliers et chaotiques.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Un signal de 7 kHz est échantillonné à 10 kHz : quelle fréquence apparaît ?</summary><p>Nyquist vaut 5 kHz. La différence \(|7-10|\) vaut 3 kHz : la sinusoïde est observée comme une fréquence repliée de 3 kHz. Sans filtre préalable, on ne peut pas déduire la fréquence originelle à partir des seules mesures.</p></details>
+<details><summary>Pourquoi une flûte et une clarinette jouant toutes deux 440 Hz ne sonnent-elles pas pareil ?</summary><p>Elles ont la même hauteur fondamentale, mais leurs amplitudes harmoniques et leurs transitoires diffèrent. Ici, le timbre est modélisé uniquement par les amplitudes de sinusoïdes : c'est volontairement simplifié.</p></details>
+<details><summary>Pourquoi le dépassement au bord d'un carré ne diminue-t-il pas jusqu'à zéro en ajoutant des harmoniques ?</summary><p>La série converge vers les plateaux, mais au voisinage de chaque discontinuité, la transition comporte une oscillation dont la hauteur limite reste proche de 17,9 % au-dessus du plateau +1 pour un saut de −1 à +1. Sa largeur diminue : la région gênante devient de plus en plus étroite.</p></details>
+</section>
+
+<h2><span>3</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Séries et formes.</strong> Toutes les traces sont des sommes finies de 1 à 50 termes. Les discontinuités idéales ne sont pas produites réellement ; le carré est une cible mathématique. La « forme libre » modifie les amplitudes, avec des phases de 0 ou π plutôt qu'un éditeur complet des phases.</li>
+<li><strong>Transformée.</strong> La FFT emploie des longueurs puissances de deux et une fenêtre finie rectangulaire ou de Hann. Les tracés de fréquence ne sont pas des raies de précision infinie. Les amplitudes sont relatives, non des pressions acoustiques étalonnées.</li>
+<li><strong>Timbres.</strong> Six spectres synthétiques donnent des traits caractéristiques mais pas les résonances et bruits instrumentaux réels. Les voyelles utilisent deux formants gaussiens fixes ; pas de prononciation, de phonétique dynamique ni de simulation complète du conduit vocal. Le phénomène de fondamentale manquante n'est ici qu'introduit.</li>
+<li><strong>Échantillonnage.</strong> Les mesures sont ponctuelles et régulièrement espacées ; la reconstruction emploie une sinc tronquée et fenêtrée, donc approximative, même en dessous de Nyquist. Aucune quantification, gigue temporelle ou vraie caméra n'est simulée.</li>
+<li><strong>Roue.</strong> Huit rayons identiques et une cadence fixe de 24 images par seconde ; seules des orientations discrètes sont montrées. Des roues réelles présentent du flou de mouvement, de l'obturation et des détails qui peuvent rompre la symétrie.</li>
+<li><strong>Filtres.</strong> Les RC sont des réponses linéaires idéales du premier ordre ; le coupe-bande à 60 Hz est un modèle fréquentiel idéal de qualité Q = 12, non un RC simple. La FFT filtre une fenêtre périodisée et fait une convolution circulaire ; les effets aux bords d'un véritable enregistrement diffèrent. Le souffle est pseudoaléatoire avec une graine fixe.</li>
+</ul>
+<h2><span>4</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>≈ 1,179</b><span>Maximum asymptotique d'une série carrée ±1 près d'un saut : dépassement de 0,179 au-dessus de +1.</span></div>
+<div><b>440 Hz</b><span>Fondamentale d'un la de référence dans l'exemple ; les harmoniques ont les fréquences 880, 1 320, 1 760 Hz…</span></div>
+<div><b>44,1 kHz</b><span>Cadence audio du CD ; limite de Nyquist à 22,05 kHz, avant marges de filtrage.</span></div>
+<div><b>−5 tr/min</b><span>Rotation apparente d'une roue à huit rayons tournant vraiment à 175 tr/min, filmée à 24 images par seconde.</span></div>
+<div><b>−3,01 dB</b><span>Gain en amplitude d'un RC passe-bas à sa fréquence de coupure : 0,707, phase −45°.</span></div>
+</div>
+<h2><span>5</span>Seulement introduit ici</h2>
+<p>La transformée de Fourier continue, la convolution, les filtres numériques récursifs, la compression MP3 ou JPEG, les échelles logarithmiques et les décibels détaillés, ainsi que les ondelettes, demanderaient d'autres outils. De même, la relation qualitative entre durée et largeur du spectre, parfois notée \(\Delta t\,\Delta f\gtrsim1\) selon les définitions, n'est pas ici une formule quantitative universelle : sa constante dépend des conventions de largeur. Elle prépare l'étude des paquets d'ondes, pas une démonstration des incertitudes quantiques.</p>
+<a class="cta" href="index.html">Retour à la planche →</a>
+<p class="fin">Références de cadrage : Oppenheim et Schafer, <i>Discrete-Time Signal Processing</i> (transformée et fenêtres) ; ISO 16:1975 (la 440 Hz) ; IEC 60908 (CD audio) ; analyse classique des circuits RC. Les paramètres des timbres et du bruit sont des choix pédagogiques, pas des mesures.</p>
+</main></body></html>

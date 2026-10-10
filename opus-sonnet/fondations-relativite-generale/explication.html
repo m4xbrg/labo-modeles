@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<link rel="icon" href="data:,"><title>Comprendre la relativité générale — LABO</title>
+<meta name="description" content="Module 47 de LABO : équivalence, dilatation gravitationnelle, géodésiques, déviation lumineuse, précession de Mercure et horizon.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#a8b8d8;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+*{box-sizing:border-box}html,body{margin:0;background:var(--fond);color:var(--texte)}body{font:16px/1.72 var(--sans);overflow-x:hidden}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:780px;margin:auto;padding:36px 24px 85px}.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;margin-bottom:52px;font:12px var(--mono)}.top a{text-decoration:none;color:var(--texte-2)}.serie{font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--texte-2)}h1{font:400 clamp(39px,7vw,63px)/1.12 var(--serif);margin:13px 0 22px}h1 em{color:var(--accent)}.lede{font-size:19px;line-height:1.5}h2{font:400 32px/1.18 var(--serif);margin:60px 0 20px;padding-top:24px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:10px}p{margin:0 0 16px}ul,ol{padding-left:22px}li{margin-bottom:9px}strong{font-weight:600}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(155px,230px) 1fr;gap:17px;padding:13px 0;border-bottom:1px solid var(--trait)}.chiffres b{font:500 15px var(--mono);color:var(--energie)}details{border:1px solid var(--trait);background:var(--fond-2);margin:12px 0}summary{cursor:pointer;padding:14px 16px;font-weight:500}details p{margin:0 15px 15px}.cta{display:inline-block;padding:12px 18px;border:1px solid var(--accent);margin-top:32px;text-decoration:none}.cta:hover{background:var(--accent);color:var(--fond)}.aside{color:var(--texte-2);font-size:14px}.acc{color:var(--accent)}.energie{color:var(--energie)}
+@media(max-width:560px){.wrap{padding:25px 18px 65px}.chiffres>div{grid-template-columns:1fr;gap:4px}.top{margin-bottom:35px}h2{font-size:29px}}
+</style>
+<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+</head>
+<body><main class="wrap">
+<nav class="top" aria-label="Retour"><a href="index.html">← Retour à la simulation</a><a href="../../labo/index.html">← LABO</a></nav>
+<p class="serie">LABO · Fondations 47</p>
+<h1>La gravité comme <em>géométrie</em></h1>
+<p class="lede">Une cabine fermée ne reconnaît pas une accélération, les horloges de deux altitudes ne battent pas au même rythme, et une lumière qui longe le Soleil change de direction. Ces trois faits sont des manifestations d'un même espace-temps.</p>
+<h2><span>01</span>Ce que tu vois</h2>
+<p><strong>Les cabines.</strong> Avant d'ouvrir les fenêtres, deux laboratoires peuvent produire la même chute et la même infime déviation du laser. La scène grossit énormément ce dernier effet ; son amplitude réelle apparaît dans les mesures. En chute libre, la balle flotte par rapport à l'habitacle.</p>
+<p><strong>Les horloges.</strong> Les aiguilles aux différentes altitudes accélèrent leur divergence apparente. Le budget fixe du GPS sépare gravitation et vitesse. La « dérive en kilomètres » représente un biais de distance équivalent, et non un calcul complet de position.</p>
+<p><strong>Les trajectoires.</strong> Le rayon lumineux contourne une masse ; une orbite elliptique montre une avance de périhélie grossie. Une bascule présente la surface de Flamm avec son avertissement explicite. <strong>L'horizon.</strong> La même chute se lit de deux façons : le temps vécu par la sonde et la coordonnée de temps de Schwarzschild d'un observateur lointain.</p>
+<h2><span>02</span>La théorie, module par module</h2>
+<ul class="sommaire"><li><a href="#m47"><b>47</b>Relativité générale</a></li></ul>
+<section class="module" id="m47">
+<header><p class="num">Module 47</p><h3>La gravité, une propriété de l'espace-temps</h3><p class="etapes">Sur la planche : 1 Cabines · 2 Horloges · 3 Géodésiques · 4 Horizon</p></header>
+<h4 data-n="1">Intuition</h4>
+<p>Imagine un ascenseur sans fenêtre. Sur Terre, tu te sens pressé contre le plancher ; une fusée accélérée loin des astres produirait la même sensation. Si l'ascenseur tombe librement, les objets flottent autour de toi : la sensation de poids disparaît, bien que le champ gravitationnel existe toujours. C'est une équivalence locale : une grande cabine révèle les forces de marée. Einstein en tire une idée nouvelle. Les corps libres suivent les chemins naturels de l'espace-temps courbé par la matière. Le temps participe à cette géométrie : deux horloges à différentes altitudes divergent. C'est pourquoi les orbites, la lumière et les mesures du GPS appartiennent à une seule histoire.</p>
+<h4 data-n="2">Définitions</h4>
+<dl class="defs">
+<div><dt>Gravitation et masse <span class="u">\(M\) · kg</span></dt><dd>Source sphérique immobile et non chargée de courbure spatio-temporelle.</dd></div>
+<div><dt>Constantes <span class="u">\(G,c\)</span></dt><dd>Constante de gravitation universelle (m³/(kg·s²)) et vitesse de la lumière dans le vide (m/s).</dd></div>
+<div><dt>Rayons <span class="u">\(r,r_s,b\) · m</span></dt><dd>Coordonnée radiale, rayon de l'horizon et impact mesuré loin de la masse.</dd></div>
+<div><dt>Temps <span class="u">\(t,\tau\) · s</span></dt><dd>Temps coordonné à l'infini et temps propre d'une horloge embarquée.</dd></div>
+<div><dt>Altitude et champ <span class="u">\(h,g\) · m, m/s²</span></dt><dd>Différence de hauteur locale et accélération gravitationnelle dans l'approximation du champ faible.</dd></div>
+<div><dt>Fréquence <span class="u">\(f,\Delta f\) · Hz</span></dt><dd>Oscillations par seconde et différence entre deux lieux ; \(\Delta f/f\) est sans unité.</dd></div>
+<div><dt>Déviation <span class="u">\(\delta\) · rad</span></dt><dd>Angle de déviation d'un rayon ; 1 rad ≈ 206 265″.</dd></div>
+<div><dt>Orbite <span class="u">\(a,e,\Delta\varphi\)</span></dt><dd>Demi-grand axe (m), excentricité (sans unité), avance du périhélie (rad/tour).</dd></div>
+<div><dt>Vitesse <span class="u">\(v\) · m/s</span></dt><dd>Vitesse locale du satellite en orbite ; elle produit une contribution cinématique au rythme de l'horloge.</dd></div>
+<div><dt>Moment orbital <span class="u">\(L\) · m²/s</span></dt><dd>Moment cinétique par unité de masse pour une orbite massive, utilisé dans le potentiel effectif.</dd></div>
+<div><dt>Marée <span class="u">\(\Delta g,\ell\) · m/s², m</span></dt><dd>Différence d'accélération sur une sonde de longueur \(\ell\).</dd></div>
+</dl>
+<h4 data-n="3">Relations clés</h4>
+<div class="relation">\[r_s=\frac{2GM}{c^2}\]<p>Ce rayon fixe l'horizon d'un trou noir non rotatif. Il croît avec la masse ; à l'intérieur, la lumière ne ressort pas.</p></div>
+<div class="relation">\[\frac{\dd\tau}{\dd t}=\sqrt{1-\frac{r_s}{r}}\simeq 1-\frac{GM}{rc^2}\]<p>Cette relation concerne une horloge <strong>statique</strong>. Une sonde en chute possède un autre temps propre ; localement, son horloge reste normale.</p></div>
+<div class="relation">\[\frac{\Delta f}{f}\simeq \frac{gh}{c^2}\]<p>En champ uniforme, l'horloge la plus haute bat plus vite. Pound et Rebka ont mesuré cet effet.</p></div>
+<div class="relation">\[\delta\simeq \frac{4GM}{c^2b}\]<p>Un rayon lumineux lointain est dévié d'un angle inversement proportionnel à son impact. En champ faible, c'est le double de l'estimation newtonienne.</p></div>
+<div class="relation">\[\Delta\varphi\simeq \frac{6\pi GM}{c^2a(1-e^2)}\]<p>Le périhélie avance à chaque tour. Cette formule donne la première correction relativiste en champ faible.</p></div>
+<h4 data-n="4">Exemple chiffré</h4>
+<div class="exemple"><p><strong>Pourquoi les horloges GPS doivent-elles être corrigées ?</strong> Prenons une Terre sphérique de rayon 6 371 km et une orbite circulaire GPS de rayon 26 560 km, soit 20 189 km d'altitude, en négligeant la rotation terrestre.</p>
+<ol>
+<li>Calculons la gravitation à chaque rayon avec le facteur \(\sqrt{1-r_s/r}\). Le satellite bénéficie d'un rythme légèrement plus rapide : <strong>+45,717 µs par jour</strong> par rapport au sol.</li>
+<li>Sa vitesse est approximativement \(v=\sqrt{GM/r}=3\,874\ \text{m/s}\). Sa dilatation cinématique ajoute <strong>−7,214 µs par jour</strong> au budget de comparaison.</li>
+<li>Le bilan devient <strong>+38,503 µs par jour</strong>. L'équivalent d'erreur de distance sur une liaison de synchronisation vaut \(c\Delta t\), soit <strong>11,543 km par jour</strong> si le biais s'accumule sans correction.</li>
+</ol><p>Il ne faut pas lire ce dernier nombre comme une erreur de position géographique inévitable et exacte : un récepteur combine plusieurs satellites, des retards atmosphériques et des corrections. Elle montre pourquoi les microsecondes comptent. Sur Terre, à 22,5 m de différence de hauteur, la relation de champ faible donne seulement \(2{,}455\times 10^{-15}\) de décalage relatif de fréquence.</p></div>
+<h4 data-n="5">Pièges fréquents</h4>
+<ul class="pieges">
+<li><strong>« En orbite, il n'y a plus de gravité. »</strong> La gravité fournit l'orbite ; la station et ses passagers tombent ensemble.</li>
+<li><strong>« Un trou noir aspire tout à grande distance. »</strong> À masse égale, l'attraction lointaine reste la même. L'horizon est une frontière causale.</li>
+<li><strong>« Le drap en caoutchouc explique la gravité. »</strong> Elle utilise déjà la gravité, ne montre que l'espace et cache le rôle du temps.</li>
+<li><strong>« Le ralentissement des horloges n'est qu'une illusion visuelle. »</strong> Des horloges réunies après deux parcours peuvent indiquer des durées différentes.</li>
+<li><strong>« Une sonde se fige réellement à l'horizon. »</strong> Le temps de Schwarzschild diverge, mais le temps propre reste fini ; les images dépendent aussi de la lumière reçue.</li>
+<li><strong>« Une géodésique est toujours la plus courte courbe en distance spatiale. »</strong> C'est une trajectoire sans accélération propre, pas une simple ligne sur une carte.</li>
+</ul>
+<h4 data-n="6">Où ça resservira</h4>
+<ul class="resert">
+<li><b>13</b><span><a href="../fondations-rotation-gravitation/index.html">Rotation, gravitation et orbites</a> : retrouver la mécanique de Newton quand les champs sont faibles.</span></li>
+<li><b>46</b><span><a href="../fondations-relativite-restreinte/index.html">Relativité restreinte</a> : temps propre, lignes d'univers et dilatation due à la vitesse.</span></li>
+<li><b>25</b><span><a href="../../labo/index.html#fondations">Optique et lentilles</a> : distinguer une lentille matérielle d'une lentille gravitationnelle.</span></li>
+<li><b>44</b><span><a href="../../labo/index.html#fondations">Étoiles compactes</a> : matière dense, rayon et structure d'étoiles à neutrons.</span></li>
+<li><b>45</b><span><a href="../../labo/index.html#fondations">Cosmologie</a> : passer d'un espace-temps statique à l'expansion cosmique.</span></li>
+<li><b>Atlas</b><span><a href="../../labo/index.html#phenomenes">Trous noirs et binaires compactes</a> : disques d'accrétion, lentilles et ondes gravitationnelles.</span></li>
+</ul>
+<h4 data-n="7">Teste-toi</h4>
+<details><summary>Une cabine accélère à 9,81 m/s². Quelle est la déviation locale d'un laser sur 3 m ?</summary><p>Le temps vaut \(\Delta t=3/c\), environ 10 ns. Ainsi \(y=g\Delta t^2/2=4{,}91\times10^{-16}\) m. Le dessin est amplifié.</p></details>
+<details><summary>Pourquoi un satellite GPS gagne-t-il du temps en altitude tout en en perdant à cause de sa vitesse ?</summary><p>L'altitude apporte +45,7 µs/j ; la vitesse apporte −7,2 µs/j. Le bilan vaut +38,5 µs/j.</p></details>
+<details><summary>Une sonde qui tombe franchit-elle l'horizon, et pourquoi ne la voit-on pas le traverser de loin ?</summary><p>Son temps propre jusqu'à \(r_s\) est fini, mais la coordonnée \(t\) diverge logarithmiquement. Les impulsions reçues se raréfient et rougissent : aucune contradiction.</p></details>
+</section>
+<h2><span>03</span>Ce que la simulation simplifie</h2>
+<ul>
+<li><strong>Équivalence locale.</strong> Le champ des cabines est uniforme. Les forces de marée, qui distingueraient une chute réelle d'une accélération uniforme sur un volume assez grand, sont absentes. Le rayon visible est déformé de façon schématique ; seule sa flèche chiffrée est physique.</li>
+<li><strong>Horloges et GPS.</strong> Terre sphérique, immobile, orbites circulaires, sans rotation ni corrections ionosphériques, troposphériques, de Sagnac ou d'éphémérides. Les aiguilles illustrent une amplification pédagogique des décalages. La dérive présentée est une erreur de distance équivalente, pas la sortie d'un solveur GPS.</li>
+<li><strong>Géodésiques.</strong> Le moteur intègre l'équation orbitale de Schwarzschild par pas angulaire RK4 pour les corps massifs, et l'équation nulle pour les photons. Le trait graphique suit une reconstruction amplifiée de la déviation, pas une projection métrique exacte. La précession affichée de Mercure est calculée ; sa rotation à l'écran est artificiellement accélérée. La lentille est un croquis, pas un calcul de formation d'images.</li>
+<li><strong>Surface de Flamm.</strong> Une coupe spatiale équatoriale statique, sans le temps : elle utilise une profondeur fictive et peut donner une intuition trompeuse de la gravité.</li>
+<li><strong>Horizon.</strong> Trou noir de Schwarzschild isolé, sans charge ni rotation, sans rayonnement de Hawking et sans disque d'accrétion. Une sonde est lâchée au repos radial à un rayon choisi. Son parcours propre est exact dans ce modèle ; sa position dessinée est non linéaire, les deux vues se parcourent avec des échelles temporelles pédagogiques distinctes. Le temps lointain est une coordonnée et non une simulation optique complète d'une caméra.</li>
+</ul>
+<h2><span>04</span>Les chiffres à retenir</h2>
+<div class="chiffres">
+<div><b>2,953 km</b><span>Rayon de Schwarzschild du Soleil ; celui de la Terre serait de 8,87 mm.</span></div>
+<div><b>≈ 4,91 × 10⁻¹⁶ m</b><span>Flèche d'un laser horizontal de 3 m dans une cabine à 1 g.</span></div>
+<div><b>+38,5 µs/jour</b><span>Bilan relatif de l'horloge GPS : +45,7 dus à la gravitation, −7,2 à la vitesse.</span></div>
+<div><b>1,75″</b><span>Déviation relativiste de la lumière près du bord solaire.</span></div>
+<div><b>≈ 43″/siècle</b><span>Excès de précession du périhélie de Mercure expliqué par la relativité générale.</span></div>
+</div>
+<h2><span>05</span>Seulement introduit ici</h2>
+<p>Les équations d'Einstein donnent la relation mathématique entre courbure et matière, mais le calcul des tenseurs n'est pas présenté ici. Les trous noirs en rotation exigent la métrique de Kerr ; les ondes gravitationnelles apparaissent dans les binaires compactes ; le rayonnement de Hawking appartient au dialogue encore incomplet entre relativité et mécanique quantique. La cosmologie, l'évolution des étoiles compactes et les tests de très haute précision auront leurs propres modèles.</p>
+<p class="aside">Constantes de calcul : \(G=6{,}67430\times10^{-11}\) m³/(kg·s²) (CODATA, NIST) ; \(c=299\,792\,458\) m/s (SI exact) ; \(M_\odot=1{,}98847\times10^{30}\) kg ; \(R_\odot=6{,}957\times10^8\) m. Les comparaisons GPS prennent \(GM_\oplus=3{,}986004418\times10^{14}\) m³/s².</p>
+<a class="cta" href="index.html">Retour à la planche →</a>
+</main></body></html>

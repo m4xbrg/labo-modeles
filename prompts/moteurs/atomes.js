@@ -454,6 +454,22 @@ const Atom = (function () {
     return rate * frac * 1.602176634e-19;
   }
 
+
+  /* Extensions du module 27 : lecture rigoureuse des spectres et de la droite photoélectrique.
+     Ces fonctions ne changent ni les constantes ni les fonctions préexistantes. */
+  function observedLines(gases, absorptionMode, hydrogenExcited) {
+    return gases.flatMap(g => (LINES[g] || []).filter(l => !absorptionMode || l.g || (g === 'H' && hydrogenExcited && l.lo === 2))
+      .map(l => ({ ...l, gas: g, photon_eV: HC / l.nm })));
+  }
+  function photoAtFrequency(f, metal) {
+    const W = WORK[metal], K = H_EVS * f - W;
+    return { f, W, f0: W / H_EVS, emits: K > 0, Kmax: Math.max(0, K), Vstop: Math.max(0, K) };
+  }
+  function hTransitions(n) {
+    if (!(n > 1 && n <= 6)) return [];
+    return Object.keys(HA[n]).map(m => ({ to: +m, from: n, taux: HA[n][m], line: hLine(+m, n) }));
+  }
+
   return {
     // constantes
     KE2, U_MEV, M_ALPHA, M_N_U, M_H_U, H_EVS, HC, C, RY_H, R_H, R_AU, B_DISPLAY, YEAR, METHANE_J_PER_KG, QE,
@@ -468,7 +484,7 @@ const Atom = (function () {
     // 4
     airIndex, vacToAir, hLevel, hLine, H_LEVELS, absorb, HA, hDecay, LINES, GASES, GAS_NAMES, mystery, visibleColor,
     // 5
-    WORK, METAL_NAMES, photo, ejectionRate, current
+    WORK, METAL_NAMES, photo, ejectionRate, current, observedLines, photoAtFrequency, hTransitions
   };
 })();
 /* ATOM-END */

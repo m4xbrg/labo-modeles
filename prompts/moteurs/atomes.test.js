@@ -231,5 +231,26 @@ chk('238U', 'a', 4.47e9 * YEAR, 0.01, '²³⁸U α 4,47 × 10⁹ a');
   nearAbs(Atom.photo(1, 'Cu').lambda0, 263.8, 0.2, 'seuil du cuivre ≈ 264 nm');
 }
 
+// ---------- 10. Extensions : les fonctions ajoutées ne changent pas la partie nucléaire.
+{
+  const balmer = Atom.observedLines(['H'], false, false);
+  ok(balmer.length === 4 && balmer.every(l => l.gas === 'H' && l.photon_eV > 0), 'spectre H : quatre raies de Balmer émises');
+  ok(Atom.observedLines(['H'], true, false).length === 0, 'H au fondamental : pas de Balmer en absorption visible');
+  ok(Atom.observedLines(['H'], true, true).length === 4, 'hydrogène n = 2 peuplé : Balmer absorbée');
+  ok(Atom.observedLines(['Na'], true, false).length === 2, 'sodium froid : absorption du doublet D seulement');
+  const mix = Atom.observedLines(['Hg','Ne'], false, false);
+  ok(mix.length === Atom.LINES.Hg.length+Atom.LINES.Ne.length, 'mélange : superposition des raies');
+  nearAbs(Atom.hTransitions(3).reduce((s,r)=>s+r.taux,0), 9.9852e7, 1, 'taux A pour le niveau 3');
+  ok(Atom.hTransitions(1).length === 0 && Atom.hTransitions(6).length === 5, 'transitions descendantes du modèle 1–6');
+  const na0 = Atom.photoAtFrequency(2.28 / Atom.H_EVS,'Na');
+  nearAbs(na0.Vstop, 0, 1e-12, 'seuil Na : tension arrêt nulle');
+  ok(!na0.emits && !Atom.photoAtFrequency(4e14,'Na').emits, 'au seuil et en dessous : pas d’émission');
+  const f1=7e14,f2=9e14;
+  const A=Atom.photoAtFrequency(f1,'Na'),B=Atom.photoAtFrequency(f2,'Na');
+  near((B.Vstop-A.Vstop)/(f2-f1),Atom.H_EVS,1e-12,'pente photoélectrique sodium h/e');
+  near(Atom.photoAtFrequency(f2,'Cu').Vstop,0,1e-12,'cuivre à 9e14 Hz : pas d’émission');
+  near(Atom.photo(400,'Na').Kmax,Atom.photoAtFrequency(Atom.photo(400,'Na').f,'Na').Kmax,1e-9,'courbes et photographie cohérentes');
+}
+
 console.log(`${pass} réussis, ${fail} échoués`);
 process.exit(fail ? 1 : 0);

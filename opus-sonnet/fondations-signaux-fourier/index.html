@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- Les tracés privilégient l'identité temps/fréquence : une seule lumière verte relie l'onde aux raies. -->
+<!-- L'écran noir est un instrument, non une interface décorative ; la grille et les graduations portent les mesures. -->
+<!-- La roue avance par images réellement échantillonnées ; tout mouvement visible traduit un changement mesurable. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Un signal, des fréquences — LABO</title>
+<meta name="description" content="Construire une onde par ses harmoniques, comparer les timbres, comprendre le repliement et filtrer un signal.">
+<link rel="icon" href="data:,"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#80d8a0;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:15px/1.5 var(--sans)}button,input{font:inherit}button{cursor:pointer}a{color:inherit}[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr) auto;overflow:hidden}.scene{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--fond);color:var(--texte)}#cv{display:block;width:100%;height:100%;min-height:0;touch-action:none}.scene-meta{position:absolute;top:14px;left:18px;right:18px;pointer-events:none;display:flex;justify-content:space-between;gap:8px;font:10px var(--mono);letter-spacing:.09em;color:var(--texte-2)}.scene-meta b{font-weight:400;color:var(--accent)}
+.panel{min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:13px}.panel section,.panel p{margin:0}.eyebrow{font:10px var(--mono);letter-spacing:.1em;color:var(--encre-3);text-transform:uppercase;margin-bottom:6px!important}.panel h2{margin:0 0 8px;font:500 23px/1.16 var(--sans);letter-spacing:-.03em}.lead-step{font:14px/1.58 var(--sans);color:var(--encre-2)}.status{margin-top:10px!important;padding-left:10px;border-left:2px solid var(--accent);font:12px/1.58 var(--mono);color:var(--encre);min-height:40px}.meas{border-top:1px solid var(--filet)}.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--filet)}.lab{font:11px/1.35 var(--mono);color:var(--encre-3)}.val{font:12px var(--mono);text-align:right;white-space:nowrap;color:var(--encre)}.measure-mini{margin-top:9px!important;font:11px/1.55 var(--mono);color:var(--encre-2);word-break:break-word}.cle{padding:1px 0 1px 12px;border-left:2px solid var(--encre);font-size:13px;line-height:1.48}.note{font:10.5px/1.5 var(--mono);color:var(--encre-3)}.liens{margin-top:auto;display:grid;gap:8px}.comprendre{display:block;border:1px solid var(--filet);text-decoration:none;padding:10px 12px;font-size:13px}.comprendre:hover{border-color:var(--encre)}.hint{font:10px/1.5 var(--mono);color:var(--encre-3)}.questions{display:grid;gap:6px}.questions a{text-decoration:none;border-top:1px solid var(--filet);padding-top:7px;font-size:12px;color:var(--encre-2)}.questions b{display:block;font:11px var(--mono);color:var(--encre);margin-bottom:3px}
+.controls{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;min-width:0}.grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}.btn{font:11px var(--mono);border:1px solid var(--filet);background:transparent;min-height:34px;padding:7px 10px;white-space:nowrap}.btn:hover{border-color:var(--encre);color:var(--encre)}.btn[aria-pressed=true],.btn.on{border-color:var(--encre);background:var(--papier-2)}.btn.ecoute[aria-pressed=true]{border-color:var(--vivant);color:var(--vivant)}.tools{width:100%;border-top:1px solid var(--filet);padding-top:9px;display:flex;gap:9px 22px;flex-wrap:wrap;align-items:center}.toolset{display:flex;align-items:center;gap:7px;flex-wrap:wrap;max-width:100%}.sep{width:1px;height:24px;background:var(--filet);margin:0 3px}.select-label{font:11px var(--mono);color:var(--encre-2)}.range{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font:11px var(--mono);white-space:nowrap}.range input{width:102px;max-width:22vw;accent-color:var(--encre)}.rv{font:11px var(--mono);color:var(--encre);min-width:45px}.hint-control{font:10px var(--mono);color:var(--encre-3)}.serie{font:10px var(--mono);letter-spacing:.06em}.gl{font:11px var(--mono);color:var(--encre-2)}
+.objects{position:absolute;bottom:10px;left:14px;right:14px;display:flex;gap:5px;flex-wrap:wrap;pointer-events:none}.object{pointer-events:auto;min-height:24px;padding:3px 7px;border:1px solid #334239;background:#0b1111db;color:#99b2a4;font:10px var(--mono)}.object:hover,.object:focus-visible{border-color:var(--accent);color:var(--texte)}.tip{position:fixed;z-index:25;pointer-events:none;max-width:275px;background:#111b1b;color:#e8e4dc;border:1px solid #345040;padding:10px 12px;font:11px/1.5 var(--mono);box-shadow:0 16px 36px #0008}.tip b{display:block;margin-bottom:4px;color:var(--accent)}.tip span{color:#b4c2b9}
+.labo-etapes .panel{gap:13px}.labo-etapes .panel .status{color:var(--encre)}.labo-etapes .cle{color:var(--encre-2)}.labo-etapes .titre h1{font:400 clamp(34px,4.8vh,54px)/1 var(--serif);letter-spacing:-.012em}.labo-etapes .titre h1 em{font-style:italic;color:var(--encre)}.labo-etapes .titre{padding-top:12px}.labo-etapes .app{min-height:440px}.labo-etapes .modes{padding-top:8px}.labo-etapes .sig{gap:4px 18px}
+@media(max-width:860px){.app{display:flex;flex-direction:column;overflow:visible}.scene{height:510px;flex:none;order:1}.controls{order:2;padding:12px 16px!important}.panel{order:3;border-top:1px solid var(--filet);overflow:visible}.labo-etapes .app{min-height:0}.labo-etapes .panel{padding:18px var(--gouttiere)}.objects{left:9px;right:9px;bottom:8px}.object{font-size:9px}.scene-meta{left:12px;font-size:9px}.range input{max-width:140px}}
+@media(max-width:540px){.scene{height:570px}.tools{gap:10px}.toolset{gap:5px}.btn{font-size:10px;padding:7px 8px}.range input{max-width:115px}.hint-control{width:100%}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.object,.btn{transition:none!important}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 09</p><button type="button" class="bascule-theme" id="theme" aria-label="Changer le thème">Thème auto</button></div></header>
+<div class="titre"><div><h1>Un signal, des <em>fréquences</em></h1><p class="lead">Une onde, mille formes. Les mêmes informations, vues sous deux angles.</p></div><dl class="sig"><dt>Échelle</dt><dd>Hz · temps / spectre</dd><dt>Temps</dt><dd>ms → s · ralenti</dd><dt>Modèle</dt><dd>Fourier · Nyquist · RC</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Module 09, quatre étapes"><div class="chap"><p class="chap-t"><b>09</b>Module 09 · Signaux et Fourier</p><div class="segs"><button type="button" class="seg" data-step="0" title="Construire un signal avec ses harmoniques"><b>1</b><span>Construire</span></button><button type="button" class="seg" data-step="1" title="Le spectre d'un son et le timbre"><b>2</b><span>Timbre</span></button><button type="button" class="seg" data-step="2" title="Échantillonner, repliement et roue de chariot"><b>3</b><span>Échantillonner</span></button><button type="button" class="seg" data-step="3" title="Filtrer, bruit et circuit RC"><b>4</b><span>Filtrer</span></button></div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche"><button type="button" role="tab" data-m="observer" aria-selected="true" data-indice="Regarde la forme changer sans réglages."><span>O</span>Observer</button><button type="button" role="tab" data-m="manipuler" aria-selected="false" data-indice="Change une valeur, compare les deux lectures."><span>M</span>Manipuler</button><button type="button" role="tab" data-m="comprendre" aria-selected="false" data-indice="Relie l'expérience, les mesures et les formules."><span>C</span>Comprendre</button></div><p class="indice" id="indice">Regarde la forme changer sans réglages.</p></div>
+<div class="app">
+<main class="scene" id="scene"><canvas id="cv" role="img" aria-label="Écran scientifique : le tracé du signal et son spectre sont recalculés à chaque étape."></canvas><div class="scene-meta"><span id="sceneName">SOMME DE SINUSOÏDES · DOMAINE TEMPOREL</span><b id="clock">t = 0,00 s</b></div><div class="objects" id="objects" aria-label="Objets de découverte interactifs"></div></main>
+<aside class="panel" aria-label="Lecture de l'expérience"><section><p class="eyebrow" id="eyebrow">MODULE 09 · 01/04</p><h2 id="stepTitle">Construire un signal</h2><p id="stepText" class="lead-step couche-comp"></p><p id="status" class="status" aria-live="polite"></p></section><section class="couche-lire"><p class="eyebrow" id="measTitle">Mesures</p><div class="meas" id="meas"></div><p id="detail" class="measure-mini"></p></section><p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p><div class="questions couche-comp" id="questions" hidden><a href="../../labo/index.html#fondations"><b>Lumière · modules 24, 25, 27</b>Un prisme fait-il une transformée de Fourier de la lumière ?</a><a href="../../labo/index.html#fondations"><b>Quantique · module 48</b>Pourquoi un signal très bref a-t-il forcément un spectre très large ?</a><a href="../../labo/index.html#fondations"><b>Chaos · module 08</b>À quoi ressemble le spectre d'un signal chaotique ?</a></div><nav class="liens"><a class="comprendre couche-comp" href="explication.html#m09">Théorie du module 09 →</a><p class="hint couche-lire">Espace : pause · ← → : étapes · 1–4 : accéder · R : réinitialiser · O M C : couches · I : infos</p></nav></aside>
+<div class="controls" role="toolbar" aria-label="Commandes de l'expérience"><div class="grp"><button type="button" class="btn" id="prev" aria-label="Étape précédente">←</button><button type="button" class="btn" id="play">Pause</button><button type="button" class="btn" id="next" aria-label="Étape suivante">→</button><button type="button" class="btn" id="reset">Recommencer</button></div><div class="tools" id="tools">
+  <div class="toolset" data-act="0"><span class="select-label">Forme</span><button type="button" class="btn" data-shape="square">Carré</button><button type="button" class="btn" data-shape="sawtooth">Dent de scie</button><button type="button" class="btn" data-shape="triangle">Triangle</button><button type="button" class="btn" data-shape="libre">Libre</button><label class="range">Harmoniques <input id="harmonics" type="range" min="1" max="50" step="1" value="7"><output class="rv" id="harmonicsVal">7</output></label><label class="range">Raie <output id="selectedN">1</output> <input id="coefficient" type="range" min="-1.5" max="1.5" step=".01" value="1.27"><output class="rv" id="coefficientVal">1,27</output></label><button type="button" class="btn" id="showTarget" aria-pressed="true">Cible visible</button><span class="hint-control">Glisser une barre pour ajuster son amplitude</span></div>
+  <div class="toolset" data-act="1" hidden><span class="select-label">Instrument</span><button type="button" class="btn" data-instrument="diapason">Diapason</button><button type="button" class="btn" data-instrument="flute">Flûte</button><button type="button" class="btn" data-instrument="clarinette">Clarinette</button><button type="button" class="btn" data-instrument="violon">Violon</button><button type="button" class="btn" data-instrument="voix-a">Voix : a</button><button type="button" class="btn" data-instrument="voix-i">Voix : i</button><label class="range">Note <input id="note" type="range" min="110" max="880" step="10" value="440"><output class="rv" id="noteVal">440 Hz</output></label><label class="range">Volume <input id="volume" type="range" min="0" max="100" step="5" value="20"><output class="rv" id="volumeVal">20 %</output></label><button type="button" class="btn" id="compare" aria-pressed="false">Même note, autre instrument</button><button type="button" class="btn" id="remove" aria-pressed="false">Retirer la fondamentale</button><button type="button" class="btn ecoute" id="listen" aria-pressed="false">Écouter</button></div>
+  <div class="toolset" data-act="2" hidden><label class="range">Signal f <input id="frequency" type="range" min="1" max="54" step="1" value="7"><output class="rv" id="frequencyVal">7 Hz</output></label><label class="range">Échantillonnage fs <input id="sampling" type="range" min="12" max="104" step="2" value="40"><output class="rv" id="samplingVal">40 Hz</output></label><label class="range">Roue <input id="wheel" type="range" min="0" max="360" step="1" value="175"><output class="rv" id="wheelVal">175 tr/min</output></label><span class="hint-control">Caméra : 24 images/s · 8 rayons</span></div>
+  <div class="toolset" data-act="3" hidden><span class="select-label">Filtre</span><button type="button" class="btn" data-filter="low">Passe-bas RC</button><button type="button" class="btn" data-filter="high">Passe-haut RC</button><button type="button" class="btn" data-filter="notch">Coupe-bande 60 Hz</button><label class="range">R <input id="resistance" type="range" min="100" max="10000" step="100" value="1000"><output class="rv" id="resistanceVal">1 000 Ω</output></label><label class="range">C <input id="capacitance" type="range" min="0.02" max="10" step=".02" value=".5"><output class="rv" id="capacitanceVal">0,50 µF</output></label><button type="button" class="btn ecoute" id="before" aria-pressed="false">Écouter avant</button><button type="button" class="btn ecoute" id="after" aria-pressed="false">Écouter après</button></div>
+</div></div></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<script>
+/* FOURIER-BEGIN */
+const Fourier = (() => {
+  'use strict';
+  const PI = Math.PI, TAU = 2 * PI;
+  const entier = n => Number.isInteger(n) && n >= 0;
+  const borne = (v, a, b) => Math.max(a, Math.min(b, v));
+  const puissance2 = n => entier(n) && n > 0 && (n & (n - 1)) === 0;
+  const coeff = (n, signe) => ({n, amplitude: Math.abs(signe), phase: signe < 0 ? PI : 0, sin: signe});
+
+  function serie(n, forme) {
+    if (!entier(n) || n > 4096) throw new RangeError('Nombre d’harmoniques entier entre 0 et 4096');
+    const resultat = [];
+    for (let k = 1; k <= n; k++) {
+      let b = 0;
+      if (forme === 'square') b = k % 2 ? 4 / (PI * k) : 0;
+      if (forme === 'sawtooth') b = (k % 2 ? 1 : -1) * 2 / (PI * k);
+      if (forme === 'triangle') b = k % 2 ? 8 / (PI * PI * k * k) * ((k - 1) % 4 ? -1 : 1) : 0;
+      resultat.push(coeff(k, b));
+    }
+    return resultat;
+  }
+  const square = n => serie(n, 'square');
+  const sawtooth = n => serie(n, 'sawtooth');
+  const triangle = n => serie(n, 'triangle');
+  function synth(coeffs, f0, t) {
+    if (!Array.isArray(coeffs) || !(f0 > 0) || !Number.isFinite(t)) throw new RangeError('Coefficients, fréquence et temps valides requis');
+    let somme = 0;
+    for (const c of coeffs) somme += c.amplitude * Math.sin(TAU * c.n * f0 * t + (c.phase || 0));
+    return somme;
+  }
+  function cible(forme, cycles) {
+    const p = ((cycles + .5) % 1 + 1) % 1 - .5;
+    if (forme === 'square') return Math.abs(p) < 1e-12 || Math.abs(Math.abs(p) - .5) < 1e-12 ? 0 : (p > 0 ? 1 : -1);
+    if (forme === 'sawtooth') return 2 * p;
+    if (forme === 'triangle') return (2 / PI) * Math.asin(Math.sin(TAU * cycles));
+    return 0;
+  }
+  function gibbsOvershoot(n) {
+    if (!entier(n) || n < 1) throw new RangeError('Au moins une harmonique');
+    const cs = square(n), intervalle = Math.min(.25, 2 / n);
+    let maximum = -Infinity, position = 0;
+    for (let i = 1; i <= 4096; i++) {
+      const x = intervalle * i / 4096, y = synth(cs, 1, x);
+      if (y > maximum) { maximum = y; position = x; }
+    }
+    return {maximum, depassement: maximum - 1, fractionDuSaut: (maximum - 1) / 2, position};
+  }
+  function transforme(re, im, inverse) {
+    const N = re.length;
+    if (!puissance2(N) || !im || im.length !== N) throw new RangeError('FFT : parties réelles et imaginaires de même longueur, puissance de 2');
+    for (let i = 1, j = 0; i < N; i++) {
+      let bit = N >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) { const a = re[i]; re[i] = re[j]; re[j] = a; const b = im[i]; im[i] = im[j]; im[j] = b; }
+    }
+    for (let largeur = 2; largeur <= N; largeur *= 2) {
+      const angle = (inverse ? TAU : -TAU) / largeur;
+      const wr = Math.cos(angle), wi = Math.sin(angle);
+      for (let debut = 0; debut < N; debut += largeur) {
+        let ur = 1, ui = 0;
+        for (let j = 0; j < largeur / 2; j++) {
+          const a = debut + j, b = a + largeur / 2;
+          const tr = ur * re[b] - ui * im[b], ti = ur * im[b] + ui * re[b];
+          re[b] = re[a] - tr; im[b] = im[a] - ti;
+          re[a] += tr; im[a] += ti;
+          const prochainR = ur * wr - ui * wi;
+          ui = ur * wi + ui * wr; ur = prochainR;
+        }
+      }
+    }
+    if (inverse) for (let i = 0; i < N; i++) { re[i] /= N; im[i] /= N; }
+    return {re, im};
+  }
+  const fft = (re, im) => transforme(re, im, false);
+  const ifft = (re, im) => transforme(re, im, true);
+  function freqAxis(N, fs) {
+    if (!puissance2(N) || !(fs > 0)) throw new RangeError('Taille puissance de 2 et fréquence positive requises');
+    return Array.from({length: N / 2 + 1}, (_, k) => k * fs / N);
+  }
+  function spectrum(signal, fs, window = 'rectangulaire') {
+    const N = signal.length;
+    if (!puissance2(N) || !(fs > 0)) throw new RangeError('Spectre : N puissance de 2 et fs positive');
+    const hann = /hann/i.test(window);
+    if (!hann && !/^(rectangulaire|rectangular|rect|aucune)$/i.test(window)) throw new RangeError('Fenêtre rectangulaire ou Hann');
+    const re = new Float64Array(N), im = new Float64Array(N);
+    let poids = 0;
+    for (let i = 0; i < N; i++) {
+      const w = hann ? .5 * (1 - Math.cos(TAU * i / N)) : 1;
+      re[i] = signal[i] * w; poids += w;
+    }
+    fft(re, im);
+    const frequences = freqAxis(N, fs), amplitudes = [], db = [];
+    for (let k = 0; k <= N / 2; k++) {
+      const A = Math.hypot(re[k], im[k]) / poids * (k === 0 || k === N / 2 ? 1 : 2);
+      amplitudes.push(A); db.push(20 * Math.log10(Math.max(A, 1e-15)));
+    }
+    return {frequences, amplitudes, db, window: hann ? 'Hann' : 'rectangulaire', re, im, fs, N};
+  }
+  function parseval(signal) {
+    const N = signal.length, re = Float64Array.from(signal), im = new Float64Array(N);
+    fft(re, im);
+    let temps = 0, frequence = 0;
+    for (let i = 0; i < N; i++) { temps += signal[i] ** 2; frequence += re[i] ** 2 + im[i] ** 2; }
+    frequence /= N;
+    return {temps, frequence, ecart: Math.abs(temps - frequence)};
+  }
+
+  // Timbres spectraux stylisés : ni enregistrements, ni modèles complets d'instruments.
+  const TIMBRES = {
+    diapason: {nom: 'Diapason', description: 'Presque une seule raie', enveloppe: {attaque: .015, relache: .09}, harmoniques: f0 => Array.from({length: 16}, (_, i) => i === 0 ? 1 : (i === 1 ? .018 : .002 / (i + 1)))},
+    flute: {nom: 'Flûte', description: 'Fondamentale dominante et harmoniques faibles', enveloppe: {attaque: .045, relache: .10}, harmoniques: f0 => Array.from({length: 16}, (_, i) => Math.exp(-i * .95) * (i % 2 ? .8 : 1))},
+    clarinette: {nom: 'Clarinette', description: 'Harmoniques impaires dominantes, idéalisation d’un tuyau fermé', enveloppe: {attaque: .035, relache: .10}, harmoniques: f0 => Array.from({length: 16}, (_, i) => (i % 2 ? .045 : 1) / Math.pow(i + 1, .85))},
+    violon: {nom: 'Violon', description: 'Spectre riche, sans bruit d’archet réaliste', enveloppe: {attaque: .055, relache: .12}, harmoniques: f0 => Array.from({length: 16}, (_, i) => Math.exp(-i * .16) / Math.pow(i + 1, .18))},
+    'voix-a': {nom: 'Voix : a', description: 'Formants fictifs autour de 800 et 1200 Hz', enveloppe: {attaque: .065, relache: .11}, formants: [800, 1200], harmoniques: f0 => formants(f0, [800, 1200])},
+    'voix-i': {nom: 'Voix : i', description: 'Formants fictifs autour de 300 et 2300 Hz', enveloppe: {attaque: .065, relache: .11}, formants: [300, 2300], harmoniques: f0 => formants(f0, [300, 2300])}
+  };
+  function formants(f0, centres) {
+    return Array.from({length: 20}, (_, i) => {
+      const f = (i + 1) * f0;
+      const pic = centres.reduce((s, c, k) => s + (k ? 1.0 : 1.6) * Math.exp(-.5 * ((f - c) / (k ? 250 : 160)) ** 2), 0);
+      return (.12 + pic) / Math.pow(i + 1, .55);
+    });
+  }
+  function timbreCoeffs(nom, f0, sansFondamentale = false) {
+    if (!TIMBRES[nom] || !(f0 > 0)) throw new RangeError('Timbre inconnu ou note invalide');
+    return TIMBRES[nom].harmoniques(f0).map((a, i) => coeff(i + 1, (sansFondamentale && i === 0) ? 0 : a));
+  }
+  function play(timbre, f0, ctx, options = {}) {
+    if (!ctx || typeof ctx.createOscillator !== 'function') throw new TypeError('Contexte Web Audio requis');
+    const nom = typeof timbre === 'string' ? timbre : timbre.nom;
+    const cle = TIMBRES[nom] ? nom : Object.keys(TIMBRES).find(k => TIMBRES[k] === timbre);
+    if (!cle) throw new RangeError('Timbre inconnu');
+    const cs = timbreCoeffs(cle, f0, !!options.sansFondamentale);
+    const volume = borne(Number(options.volume ?? .2), 0, 1);
+    const total = cs.reduce((s, c) => s + c.amplitude, 0) || 1;
+    const master = ctx.createGain(), debut = ctx.currentTime;
+    master.gain.setValueAtTime(0, debut);
+    master.gain.linearRampToValueAtTime(.12 * volume, debut + Math.max(.03, TIMBRES[cle].enveloppe.attaque));
+    master.connect(ctx.destination);
+    const sources = [];
+    cs.forEach(c => {
+      if (c.amplitude < 1e-8 || c.n * f0 >= ctx.sampleRate / 2) return;
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(c.n * f0, debut);
+      gain.gain.value = c.amplitude / total;
+      osc.connect(gain); gain.connect(master); osc.start(debut); sources.push({osc, gain});
+    });
+    let fini = false;
+    return {gain: master, sources, stop() {
+      if (fini) return; fini = true;
+      const t = ctx.currentTime, fin = t + Math.max(.05, TIMBRES[cle].enveloppe.relache);
+      master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t);
+      master.gain.linearRampToValueAtTime(0, fin);
+      sources.forEach(({osc}) => { osc.stop(fin + .01); });
+    }};
+  }
+
+  function sample(signal, fs, duration) {
+    if (typeof signal !== 'function' || !(fs > 0) || !(duration > 0)) throw new RangeError('Signal(t), fs et durée positifs requis');
+    const N = Math.floor(fs * duration) + 1;
+    if (N > 1000000) throw new RangeError('Trop d’échantillons');
+    const times = new Float64Array(N), values = new Float64Array(N);
+    for (let i = 0; i < N; i++) { times[i] = i / fs; values[i] = signal(times[i]); }
+    return {times, values, fs, duration};
+  }
+  const aliasFrequency = (f, fs) => { if (!(fs > 0)) throw new RangeError('fs doit être positive'); return Math.abs(f - fs * Math.round(f / fs)); };
+  function sinc(x) { return Math.abs(x) < 1e-12 ? 1 : Math.sin(PI * x) / (PI * x); }
+  function reconstruct(samples, fs, t) {
+    const v = samples.values || samples;
+    if (!(fs > 0) || !v || !v.length) throw new RangeError('Échantillons et fs valides requis');
+    const u = t * fs, m = 72, a = Math.max(0, Math.ceil(u - m)), b = Math.min(v.length - 1, Math.floor(u + m));
+    let somme = 0;
+    for (let i = a; i <= b; i++) { const d = u - i; somme += v[i] * sinc(d) * sinc(d / m); }
+    return somme;
+  }
+  function wheel(rpm, spokes = 8, fps = 24) {
+    if (!(spokes >= 1) || !(fps > 0) || !(rpm >= 0)) throw new RangeError('Rayons, cadence et vitesse valides requis');
+    const rotations = rpm / 60, periodeRayons = fps / spokes;
+    const replie = rotations - Math.round(rotations / periodeRayons) * periodeRayons;
+    return {rpmReel: rpm, rpmApparent: 60 * replie, sens: Math.abs(replie) < 1e-10 ? 'immobile' : replie < 0 ? 'inverse' : 'direct', cadenceImages: fps, rayons: spokes};
+  }
+
+  function rcLowpass(fc) {
+    if (!(fc > 0)) throw new RangeError('Fréquence de coupure positive requise');
+    return f => {
+      const x = f / fc, d = 1 + x * x, re = 1 / d, im = -x / d;
+      return {re, im, gain: 1 / Math.sqrt(d), phase: -Math.atan(x)};
+    };
+  }
+  function rcHighpass(fc) {
+    if (!(fc > 0)) throw new RangeError('Fréquence de coupure positive requise');
+    return f => {
+      const x = f / fc, d = 1 + x * x, re = x * x / d, im = x / d;
+      return {re, im, gain: Math.abs(x) / Math.sqrt(d), phase: Math.atan2(im, re)};
+    };
+  }
+  function notch(f0 = 60, Q = 12) {
+    if (!(f0 > 0) || !(Q > 0)) throw new RangeError('f0 et Q positifs requis');
+    return f => {
+      const x = f / f0, a = 1 - x * x, b = x / Q, d = a * a + b * b;
+      if (d < 1e-30) return {re: 0, im: 0, gain: 0, phase: 0};
+      const re = a * a / d, im = -a * b / d;
+      return {re, im, gain: Math.hypot(re, im), phase: Math.atan2(im, re)};
+    };
+  }
+  function applyFilter(signal, fs, response) {
+    if (!puissance2(signal.length) || !(fs > 0) || typeof response !== 'function') throw new RangeError('Signal puissance de 2, fs et réponse requis');
+    const N = signal.length, re = Float64Array.from(signal), im = new Float64Array(N);
+    fft(re, im);
+    for (let k = 0; k < N; k++) {
+      const f = k <= N / 2 ? k * fs / N : (k - N) * fs / N;
+      const H = response(f), hr = H.re, hi = H.im;
+      const r = re[k], a = im[k];
+      re[k] = r * hr - a * hi; im[k] = r * hi + a * hr;
+    }
+    ifft(re, im);
+    return re;
+  }
+  function mulberry32(seed = 1) {
+    let a = seed >>> 0;
+    return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t ^= t + Math.imul(t ^ t >>> 7, 61 | t); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  function noise(rng) { if (typeof rng !== 'function') throw new TypeError('Générateur à graine requis'); return 2 * rng() - 1; }
+  const hum = (f = 60) => t => Math.sin(TAU * f * t);
+  return {square, sawtooth, triangle, cible, synth, gibbsOvershoot, fft, ifft, spectrum, freqAxis, parseval, TIMBRES, timbreCoeffs, play, sample, aliasFrequency, reconstruct, wheel, rcLowpass, rcHighpass, notch, applyFilter, mulberry32, noise, hum};
+})();
+/* FOURIER-END */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const TAU = 2 * Math.PI, PI = Math.PI;
+const COULEUR = {fond:'#0a0d12',fond2:'#11161e',grille:'#26333a',texte:'#e8e4dc',muted:'#8a93a0',vert:'#80d8a0',or:'#ffd166',orange:'#ff8a5b',bleu:'#5bb8ff'};
+const francais = (v, dec = 1) => Number(v).toLocaleString('fr-CA', {maximumFractionDigits:dec,minimumFractionDigits:dec});
+const limite = (v,a,b) => Math.max(a, Math.min(b,v));
+const etapes = [
+  {titre:'Construire un signal',scene:'SOMME DE SINUSOÏDES · TEMPS ↔ FRÉQUENCES',texte:'Ajoute des sinusoïdes de fréquences multiples : les arrondis deviennent des angles, sans jamais former un coin parfait avec un nombre fini de termes.',cle:'Tout signal périodique convenable se représente par des sinusoïdes à des multiples de sa fréquence fondamentale. Les coins vifs exigent des harmoniques élevées.',note:'Sommes partielles finies ; la discontinuité idéale n’est jamais dessinée parfaitement.'},
+  {titre:'Le spectre d’un son',scene:'MÊME HAUTEUR · SPECTRES DIFFÉRENTS',texte:'Joue la même note sur des instruments synthétiques : la répétition fondamentale reste, mais les hauteurs relatives des raies changent.',cle:'Deux sons de même hauteur peuvent avoir des timbres différents : le spectre donne les amplitudes de leurs harmoniques.',note:'Timbres additifs stylisés ; formants simplifiés, sans enregistrement ni attaque instrumentale fidèle.'},
+  {titre:'Échantillonner',scene:'TEMPS CONTINU · POINTS · REPLIEMENT',texte:'La caméra et l’échantillonneur ne voient que certains instants. Deux mouvements différents peuvent donner la même suite de points.',cle:'Pour un signal limité en fréquence, il faut fs > 2 fmax. Sinon, certaines hautes fréquences paraissent plus basses : c’est le repliement.',note:'Instants réguliers et reconstruction sinc tronquée ; aucune erreur d’horloge ni quantification.'},
+  {titre:'Filtrer',scene:'SIGNAL UTILE · SOUFFLE · BOURDONNEMENT',texte:'Compare le signal avant et après passage dans un filtre. Le gain et le déphasage appliqués à chaque fréquence changent la forme temporelle.',cle:'Filtrer, c’est modifier l’amplitude ET la phase selon la fréquence. Un circuit RC est un exemple de passe-bas.',note:'Réponses RC idéales du premier ordre et filtrage FFT circulaire sur un signal périodisé.'}
+];
+const definitions = [
+  [['Oscilloscope','L’écran représente l’amplitude du signal en fonction du temps.'],['Harmonique','Sinusoïde à une fréquence égale à n fois la fondamentale.'],['Cadran de phase','L’angle repère le décalage horizontal d’une harmonique.'],['Barre du spectre','Sa hauteur mesure l’amplitude mathématique d’une composante.']],
+  [['Fondamentale','La plus petite fréquence d’une famille harmonique ; elle détermine souvent la hauteur perçue.'],['Formant','Région renforcée du spectre vocal par la résonance du conduit vocal.'],['Harmonique','Raie à 2, 3, 4… fois la fréquence de base.']],
+  [['Échantillon','Mesure du signal à un instant précis.'],['Fréquence de Nyquist','La moitié de la fréquence d’échantillonnage fs.'],['Fréquence repliée','Fréquence apparente indiscernable du signal original à la cadence donnée.'],['Roue de chariot','Ses rayons identiques rendent certaines rotations impossibles à distinguer image par image.']],
+  [['Filtre','Système dont le gain et la phase dépendent de la fréquence.'],['Fréquence de coupure','Pour un RC, fréquence où la puissance est divisée par deux (−3,01 dB).'],['Résistance','Composant qui, avec C, fixe la constante de temps RC.'],['Condensateur','Composant qui stocke une charge et introduit un temps de réponse.'],['Bourdonnement','Perturbation périodique à 60 Hz ajoutée au signal utile.']]
+];
+const cv=$('cv'), ctx=cv.getContext('2d',{alpha:false});
+let page={etape:0,lecture:true,temps:0,forme:'square',reference:'square',harmoniques:7,coeffs:Fourier.square(50),selection:1,cible:true,instrument:'flute',note:440,volume:.2,compare:false,sansFondamentale:false,f:7,fs:40,roue:175,filtre:'low',R:1000,C:0.5e-6,sons:null,sonContexte:null,sonMode:null,signalFiltre:null,echantillons:null,reconstruction:null,survol:null,glisse:false};
+let disposition={W:1060,H:640,mobile:false}, zonesBarres=[], animationDerniere=0, accumulateur=0;
+const cacheGibbs=new Map();
+function gibbs(n){if(!cacheGibbs.has(n))cacheGibbs.set(n,Fourier.gibbsOvershoot(n));return cacheGibbs.get(n);}
+const dt=1/120;
+
+function setTheme() {
+  const actuel=document.documentElement.dataset.theme || 'auto';
+  const suivant=actuel==='auto'?'dark':actuel==='dark'?'light':'auto';
+  if(suivant==='auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.dataset.theme=suivant;
+  $('theme').textContent='Thème '+({auto:'auto',dark:'sombre',light:'clair'}[suivant]);
+}
+$('theme').addEventListener('click',setTheme);
+
+function responseFiltre(){
+  const fc=1/(TAU*page.R*page.C);
+  return page.filtre==='high'?Fourier.rcHighpass(fc):page.filtre==='notch'?Fourier.notch(60,12):Fourier.rcLowpass(fc);
+}
+function construireFiltre(){
+  const fs=4096,N=4096, alea=Fourier.mulberry32(9302), source=new Float64Array(N), perturbation=new Float64Array(N);
+  const bourdonnement=Fourier.hum(60);
+  for(let i=0;i<N;i++) {
+    const t=i/fs, utile=.54*Math.sin(TAU*440*t)+.20*Math.sin(TAU*660*t);
+    perturbation[i]=.18*Fourier.noise(alea)+.28*bourdonnement(t);
+    source[i]=utile+perturbation[i];
+  }
+  const H=responseFiltre(), resultat=Fourier.applyFilter(source,fs,H), sortieBruit=Fourier.applyFilter(perturbation,fs,H);
+  const puissance=a=>a.reduce((s,v)=>s+v*v,0)/a.length;
+  page.signalFiltre={source,resultat,perturbation,avantBruit:puissance(perturbation),apresBruit:puissance(sortieBruit),spectreAvant:Fourier.spectrum(source,fs,'Hann'),spectreApres:Fourier.spectrum(resultat,fs,'Hann'),fc:1/(TAU*page.R*page.C),fs};
+}
+function construireEchantillons(){
+  page.echantillons=Fourier.sample(t=>Math.sin(TAU*page.f*t),page.fs,2);
+  const start=.54, duree=.62, N=490;
+  page.reconstruction=Array.from({length:N},(_,i)=>Fourier.reconstruct(page.echantillons,page.fs,start+duree*i/(N-1)));
+}
+function miseAJourCalculs(){
+  if(page.etape===2) construireEchantillons();
+  if(page.etape===3) construireFiltre();
+}
+function formatLigne(nom,valeur){return `<div class="row"><span class="lab">${nom}</span><span class="val">${valeur}</span></div>`;}
+function nomNote(f) {
+  const notes=['do','do♯','ré','ré♯','mi','fa','fa♯','sol','sol♯','la','la♯','si'];
+  const midi=Math.round(69+12*Math.log2(f/440));
+  return notes[((midi%12)+12)%12]+(Math.floor(midi/12)-1)+(Math.abs(440*Math.pow(2,(midi-69)/12)-f)<.1?'':' ≈');
+}
+function indicateurs(){
+  if(page.etape===0){
+    const coeffs=page.coeffs.slice(0,page.harmoniques), ref=page.reference;
+    let erreur=0;const echant=480;
+    for(let i=0;i<echant;i++) {const t=(i+.5)/echant, val=Fourier.synth(coeffs,1,t)-Fourier.cible(ref,t);erreur+=val*val;}
+    const racine=Math.sqrt(erreur/echant), g=ref==='square'?gibbs(page.harmoniques):null;
+    return {rms:racine,gibbs:g,coefs:coeffs,ref};
+  }
+  if(page.etape===1){
+    const cs=Fourier.timbreCoeffs(page.instrument,page.note,page.sansFondamentale), pics=cs.filter(c=>c.amplitude>.05).sort((a,b)=>b.amplitude-a.amplitude).slice(0,4);
+    return {cs,pics,nom:nomNote(page.note)};
+  }
+  if(page.etape===2){const w=Fourier.wheel(page.roue,8,24);return {alias:Fourier.aliasFrequency(page.f,page.fs),nyquist:page.fs/2,...w};}
+  const h=responseFiltre(), f=page.signalFiltre||{};
+  return {fc:1/(TAU*page.R*page.C),db60:20*Math.log10(Math.max(h(60).gain,1e-15)),db440:20*Math.log10(Math.max(h(440).gain,1e-15)),Pavant:f.avantBruit||0,Papres:f.apresBruit||0};
+}
+function mesures(){
+  const m=indicateurs();
+  if(page.etape===0){
+    const gibbs=m.gibbs ? francais(100*m.gibbs.depassement,1)+' %' : '—';
+    const statut=page.harmoniques===1?'Une sinusoïde seule : la fondamentale.':page.reference==='square' && page.harmoniques===50?'Les coins se dessinent ; le petit dépassement reste, mais se resserre (Gibbs).':page.forme==='libre'?'Tu modifies les raies : le signal change immédiatement.':page.reference==='square'?'Ajouter des harmoniques affine les bords ; le dépassement ne s’évanouit pas.':'Les hautes harmoniques corrigent progressivement la forme.';
+    return {statut,mes:formatLigne('Fondamentale','1 Hz')+formatLigne('Harmoniques',page.harmoniques)+formatLigne('Erreur quadratique (RMS)',francais(m.rms,3))+formatLigne('Pic au bord (carré)',gibbs),detail:'A₁…A₈ : '+Array.from({length:8},(_,i)=>`${i+1}=${francais(i<page.harmoniques ? m.coefs[i].sin : 0,2)}`).join(' · ')};
+  }
+  if(page.etape===1){
+    const inst=page.instrument;
+    const statut=page.sansFondamentale?'La fondamentale est absente du spectre ; la périodicité des harmoniques peut encore faire percevoir sa hauteur.':page.compare?'Même fréquence de départ, autre distribution de raies : compare les formes et les timbres.':inst==='diapason'?'Presque une seule raie : un son presque pur.':inst==='clarinette'?'Surtout des harmoniques impaires : rappel d’un tuyau fermé à un bout.':inst.startsWith('voix')?'Les bosses du spectre sont des formants : elles distinguent la voyelle, pas la note.':'La richesse des harmoniques change la couleur sonore.';
+    return {statut,mes:formatLigne('Fondamentale',francais(page.note,0)+' Hz')+formatLigne('Note approchée',m.nom)+formatLigne('Harmonique 2 / 1',m.cs[0].amplitude?francais(m.cs[1].amplitude/m.cs[0].amplitude,2):'non définie')+formatLigne('Écoute',page.sonMode==='timbre'?'Active':'Coupée'),detail:'Raies dominantes : '+m.pics.map(c=>c.n+' × '+francais(page.note,0)+' Hz').join(' · ')};
+  }
+  if(page.etape===2){
+    const repli=page.f>m.nyquist;
+    const statut=repli?'Au-dessus de Nyquist : les échantillons décrivent une fausse fréquence.':page.f===m.nyquist?'Au seuil exact de Nyquist, la phase peut rendre l’échantillonnage ambigu.':m.sens==='inverse'?'Sous Nyquist pour le signal ; la roue semble tourner à l’envers, car ses rayons se ressemblent.':'Sous Nyquist, une reconstruction idéale serait possible pour ce signal limité en fréquence.';
+    return {statut,mes:formatLigne('Fréquence vraie',francais(page.f,0)+' Hz')+formatLigne('Échantillonnage fs',francais(page.fs,0)+' Hz')+formatLigne('Nyquist · fs/2',francais(m.nyquist,0)+' Hz')+formatLigne('Fréquence apparente',francais(m.alias,0)+' Hz')+formatLigne('Roue apparente',(m.rpmApparent>0?'+':'')+francais(m.rpmApparent,1)+' tr/min'),detail:'À 44,1 kHz (CD audio), Nyquist est à 22,05 kHz ; un filtre analogique protège des fréquences au-delà.'};
+  }
+  const statut=page.filtre==='notch'?'Coupe-bande : le bourdonnement secteur à 60 Hz est supprimé, la note de 440 Hz reste.':page.filtre==='low'?'Le RC atténue les fréquences élevées : loin au-delà de fc, environ −20 dB par décade.':'Le passe-haut retire les basses fréquences et atténue fortement le bourdonnement.';
+  return {statut,mes:formatLigne('Coupure du RC',francais(m.fc,1)+' Hz')+formatLigne('Gain à 60 Hz',francais(m.db60,1)+' dB')+formatLigne('Gain à 440 Hz',francais(m.db440,1)+' dB')+formatLigne('Bruit avant',francais(1000*m.Pavant,2)+' ×10⁻³')+formatLigne('Bruit après',francais(1000*m.Papres,2)+' ×10⁻³'),detail:'Puissance moyenne du bruit : unités relatives² ; mêmes échantillons avant et après.'};
+}
+function afficherPanneau(){
+  const d=etapes[page.etape], infos=mesures();
+  $('sceneName').textContent=d.scene;
+  $('eyebrow').textContent='MODULE 09 · 0'+(page.etape+1)+'/04';
+  $('stepTitle').textContent=d.titre; $('stepText').textContent=d.texte;
+  $('status').textContent=infos.statut; $('meas').innerHTML=infos.mes;
+  $('detail').textContent=infos.detail; $('key').textContent=d.cle; $('honesty').textContent='MODÈLE · '+d.note;
+  $('questions').hidden=page.etape!==3;
+  document.querySelectorAll('.seg[data-step]').forEach((b,i)=>b.setAttribute('aria-current',i===page.etape?'step':'false'));
+  document.querySelectorAll('[data-act]').forEach(el=>el.hidden=Number(el.dataset.act)!==page.etape);
+  $('harmonics').value=page.harmoniques;$('harmonicsVal').textContent=page.harmoniques;
+  $('selectedN').textContent=page.selection;
+  const sel=page.coeffs[page.selection-1];
+  $('coefficient').value=sel.sin.toFixed(2);$('coefficientVal').textContent=francais(sel.sin,2);
+  document.querySelectorAll('[data-shape]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.shape===page.forme)));
+  $('showTarget').setAttribute('aria-pressed',String(page.cible));$('showTarget').textContent=page.cible?'Cible visible':'Cible masquée';
+  document.querySelectorAll('[data-instrument]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.instrument===page.instrument)));
+  $('note').value=page.note;$('note').disabled=page.compare;$('noteVal').textContent=page.note+' Hz';
+  $('volume').value=page.volume*100;$('volumeVal').textContent=Math.round(page.volume*100)+' %';
+  $('compare').setAttribute('aria-pressed',String(page.compare));$('remove').setAttribute('aria-pressed',String(page.sansFondamentale));
+  $('frequency').value=page.f;$('frequencyVal').textContent=page.f+' Hz';
+  $('sampling').value=page.fs;$('samplingVal').textContent=page.fs+' Hz';
+  $('wheel').value=page.roue;$('wheelVal').textContent=page.roue+' tr/min';
+  document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===page.filtre)));
+  $('resistance').value=page.R;$('resistanceVal').textContent=francais(page.R,0)+' Ω';
+  $('capacitance').value=page.C*1e6;$('capacitanceVal').textContent=francais(page.C*1e6,2)+' µF';
+  $('listen').setAttribute('aria-pressed',String(page.sonMode==='timbre'));
+  $('before').setAttribute('aria-pressed',String(page.sonMode==='avant'));
+  $('after').setAttribute('aria-pressed',String(page.sonMode==='apres'));
+  $('listen').textContent=page.sonMode==='timbre'?'Arrêter':'Écouter';
+  $('play').textContent=page.lecture?'Pause':'Reprendre';
+  afficherObjets();
+}
+function afficherObjets(){
+  $('objects').replaceChildren();
+  for(const [titre,description] of definitions[page.etape]){
+    const b=document.createElement('button');b.type='button';b.className='object';b.textContent=titre;
+    b.setAttribute('aria-label',titre+' : '+description);
+    const montre=e=>infobulle(titre,description,e.clientX,e.clientY,b);
+    b.addEventListener('mouseenter',montre);b.addEventListener('mousemove',montre);
+    b.addEventListener('focus',()=>{const r=b.getBoundingClientRect();infobulle(titre,description,r.left,r.top,b);});
+    b.addEventListener('mouseleave',cacherInfobulle);b.addEventListener('blur',cacherInfobulle);
+    b.addEventListener('click',()=>{const r=b.getBoundingClientRect();infobulle(titre,description,r.left,r.top,b);});
+    $('objects').append(b);
+  }
+}
+function infobulle(titre,description,x,y,source){
+  $('tip').replaceChildren();const h=document.createElement('b'),p=document.createElement('span');
+  h.textContent=titre;p.textContent=description;$('tip').append(h,p);$('tip').hidden=false;
+  const left=limite(x+12,8,window.innerWidth-283),top=limite(y-70,8,window.innerHeight-96);
+  $('tip').style.left=left+'px';$('tip').style.top=top+'px';
+}
+function cacherInfobulle(){ $('tip').hidden=true; }
+function arreterSon(){
+  if(page.sons) { try {page.sons.stop();} catch(e) {console.warn('Arrêt du son :',e);} }
+  page.sons=null;page.sonMode=null;
+  $('listen').setAttribute('aria-pressed','false');$('before').setAttribute('aria-pressed','false');$('after').setAttribute('aria-pressed','false');
+}
+function obtenirAudio(){
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C){$('status').textContent='Web Audio n’est pas disponible sur ce navigateur.';return null;}
+  if(!page.sonContexte) page.sonContexte=new C();
+  if(page.sonContexte.state==='suspended') page.sonContexte.resume().catch(()=>{});
+  return page.sonContexte;
+}
+function ecouterTimbre(on){
+  arreterSon();
+  if(!on){afficherPanneau();return;}
+  const audio=obtenirAudio();if(!audio)return;
+  try {page.sons=Fourier.play(page.instrument,page.note,audio,{volume:page.volume,sansFondamentale:page.sansFondamentale});page.sonMode='timbre';}
+  catch(e) { $('status').textContent='Son indisponible : '+e.message; }
+  afficherPanneau();
+}
+function ecouterFiltre(mode){
+  arreterSon();if(!mode){afficherPanneau();return;}
+  const audio=obtenirAudio();if(!audio)return;
+  if(!page.signalFiltre) construireFiltre();
+  const x=mode==='avant'?page.signalFiltre.source:page.signalFiltre.resultat;
+  const tampon=audio.createBuffer(1,x.length,page.signalFiltre.fs);
+  const canal=tampon.getChannelData(0);
+  for(let i=0;i<canal.length;i++)canal[i]=x[i];
+  const source=audio.createBufferSource(),gain=audio.createGain(),debut=audio.currentTime;
+  source.buffer=tampon;source.loop=true;source.connect(gain);gain.connect(audio.destination);
+  gain.gain.setValueAtTime(0,debut);gain.gain.linearRampToValueAtTime(.09,debut+.065);
+  source.start(debut);
+  page.sons={stop(){const t=audio.currentTime;gain.gain.cancelScheduledValues(t);gain.gain.setValueAtTime(gain.gain.value,t);gain.gain.linearRampToValueAtTime(0,t+.065);source.stop(t+.07);}};
+  page.sonMode=mode;afficherPanneau();
+}
+function actualiser(calculs=true){
+  if(calculs) miseAJourCalculs();
+  afficherPanneau();dessiner();
+}
+function choisirEtape(i){
+  if(!Number.isInteger(i)||i<0||i>3)return;
+  arreterSon();page.etape=i;page.temps=0;accumulateur=0;
+  actualiser();cacherInfobulle();
+}
+function reinitialiser(){
+  const e=page.etape;arreterSon();page.temps=0;
+  if(e===0){page.forme='square';page.reference='square';page.harmoniques=7;page.coeffs=Fourier.square(50);page.selection=1;page.cible=true;}
+  if(e===1){page.instrument='flute';page.note=440;page.volume=.2;page.compare=false;page.sansFondamentale=false;}
+  if(e===2){page.f=7;page.fs=40;page.roue=175;}
+  if(e===3){page.filtre='low';page.R=1000;page.C=.5e-6;}
+  actualiser();
+}
+function changerForme(forme){
+  if(!['square','sawtooth','triangle','libre'].includes(forme))return;
+  page.forme=forme;
+  if(forme!=='libre'){page.reference=forme;page.coeffs=Fourier[forme](50);}
+  actualiser(false);
+}
+function changerCoefficient(k,a){
+  k=Number(k);a=Number(a);
+  if(!Number.isInteger(k)||k<1||k>50||!Number.isFinite(a))return;
+  a=limite(a,-1.5,1.5);
+  page.selection=k;
+  page.coeffs[k-1]={n:k,amplitude:Math.abs(a),phase:a<0?PI:0,sin:a};
+  page.forme='libre';actualiser(false);
+}
+function choisirInstrument(i){
+  if(!Fourier.TIMBRES[i])return;
+  arreterSon();page.instrument=i;actualiser(false);
+}
+function changerNote(f){
+  if(page.compare)return;
+  page.note=limite(Number(f)||440,60,1100);arreterSon();actualiser(false);
+}
+function changerFiltre(kind,fc){
+  const aliases={'passe-bas':'low','passe-haut':'high','coupe-bande':'notch','lowpass':'low','highpass':'high'};
+  kind=aliases[kind]||kind;
+  if(!['low','high','notch'].includes(kind))return;
+  page.filtre=kind;
+  if(fc!==undefined && Number(fc)>0) page.C=limite(1/(TAU*page.R*Number(fc)),.02e-6,10e-6);
+  arreterSon();actualiser(true);
+}
+function changerRC(R,C){
+  if(!(R>0)||!(C>0))return;
+  page.R=limite(Number(R),100,10000);page.C=limite(Number(C),.02e-6,10e-6);
+  arreterSon();actualiser(true);
+}
+function avancer(n){
+  if(!Number.isInteger(n)||n<0||n>1000000)return;
+  page.temps+=n*dt;dessiner();return etat();
+}
+function etat(){
+  const m=indicateurs();return {etape:page.etape,temps:page.temps,lecture:page.lecture,forme:page.forme,harmoniques:page.harmoniques,instrument:page.instrument,note:page.note,f:page.f,fs:page.fs,roue:page.roue,filtre:page.filtre,R:page.R,C:page.C,mesures:m,sonActif:!!page.sons};
+}
+function lecture(on){page.lecture=!!on;if(!page.lecture)arreterSon();$('play').textContent=page.lecture?'Pause':'Reprendre';}
+
+// Crochets de test stables ; n'agit jamais sur le dépôt ou le corpus.
+window.__labo={moteur:Fourier,get step(){return page.etape;},goStep:choisirEtape,state:etat,tick:avancer,setPlay:lecture,
+ setShape:changerForme,setHarmonics:n=>{page.harmoniques=limite(Math.round(n),1,50);page.selection=Math.min(page.selection,page.harmoniques);actualiser(false);},setCoef:changerCoefficient,
+ setInstrument:choisirInstrument,setNote:changerNote,removeFundamental:on=>{page.sansFondamentale=!!on;arreterSon();actualiser(false);},listen:ecouterTimbre,
+ setF:f=>{page.f=limite(Number(f)||1,1,54);actualiser(true);},setFs:fs=>{page.fs=limite(Number(fs)||12,12,104);actualiser(true);},setWheel:rpm=>{page.roue=limite(Number(rpm)||0,0,360);actualiser(false);},
+ setFilter:changerFiltre,setRC:changerRC,listenFiltered:on=>ecouterFiltre(on===true?'apres':on===false?false:on)};
+
+$('prev').addEventListener('click',()=>choisirEtape(limite(page.etape-1,0,3)));
+$('next').addEventListener('click',()=>choisirEtape(limite(page.etape+1,0,3)));
+$('play').addEventListener('click',()=>lecture(!page.lecture));
+$('reset').addEventListener('click',reinitialiser);
+document.querySelectorAll('.seg[data-step]').forEach(b=>b.addEventListener('click',()=>choisirEtape(Number(b.dataset.step))));
+document.querySelectorAll('[data-shape]').forEach(b=>b.addEventListener('click',()=>changerForme(b.dataset.shape)));
+$('harmonics').addEventListener('input',e=>window.__labo.setHarmonics(+e.target.value));
+$('coefficient').addEventListener('input',e=>changerCoefficient(page.selection,+e.target.value));
+$('showTarget').addEventListener('click',()=>{page.cible=!page.cible;actualiser(false);});
+document.querySelectorAll('[data-instrument]').forEach(b=>b.addEventListener('click',()=>choisirInstrument(b.dataset.instrument)));
+$('note').addEventListener('input',e=>changerNote(+e.target.value));
+$('volume').addEventListener('input',e=>{page.volume=Number(e.target.value)/100;arreterSon();actualiser(false);});
+$('compare').addEventListener('click',()=>{page.compare=!page.compare;if(page.compare)page.note=440;arreterSon();actualiser(false);});
+$('remove').addEventListener('click',()=>window.__labo.removeFundamental(!page.sansFondamentale));
+$('listen').addEventListener('click',()=>ecouterTimbre(page.sonMode!=='timbre'));
+$('frequency').addEventListener('input',e=>window.__labo.setF(+e.target.value));
+$('sampling').addEventListener('input',e=>window.__labo.setFs(+e.target.value));
+$('wheel').addEventListener('input',e=>window.__labo.setWheel(+e.target.value));
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>changerFiltre(b.dataset.filter)));
+$('resistance').addEventListener('input',e=>changerRC(+e.target.value,page.C));
+$('capacitance').addEventListener('input',e=>changerRC(page.R,+e.target.value*1e-6));
+$('before').addEventListener('click',()=>ecouterFiltre(page.sonMode==='avant'?false:'avant'));
+$('after').addEventListener('click',()=>ecouterFiltre(page.sonMode==='apres'?false:'apres'));
+window.addEventListener('keydown',e=>{
+  if(e.target.closest('input,textarea,select')||e.altKey||e.ctrlKey||e.metaKey)return;
+  if(e.key===' '){e.preventDefault();lecture(!page.lecture);}
+  if(e.key==='ArrowRight' && e.target.getAttribute('role')!=='tab'){e.preventDefault();choisirEtape(limite(page.etape+1,0,3));}
+  if(e.key==='ArrowLeft' && e.target.getAttribute('role')!=='tab'){e.preventDefault();choisirEtape(limite(page.etape-1,0,3));}
+  if(/^[1-4]$/.test(e.key))choisirEtape(Number(e.key)-1);
+  if(e.key==='r'||e.key==='R')reinitialiser();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)arreterSon();});
+window.addEventListener('pagehide',arreterSon);
+
+function preparerCanvas(){
+  const r=cv.getBoundingClientRect(), dpr=Math.min(window.devicePixelRatio||1,2), px=Math.max(1,Math.round(r.width*dpr)),py=Math.max(1,Math.round(r.height*dpr));
+  if(cv.width!==px||cv.height!==py){cv.width=px;cv.height=py;}
+  const mobile=r.width<600;
+  disposition={W:mobile?460:1060,H:mobile?700:640,mobile};
+  ctx.setTransform(px/disposition.W,0,0,py/disposition.H,0,0);
+  ctx.clearRect(0,0,disposition.W,disposition.H);
+  ctx.fillStyle=COULEUR.fond;ctx.fillRect(0,0,disposition.W,disposition.H);
+}
+function libelle(texte,x,y,taille=12,couleur=COULEUR.muted,align='left',police='mono'){
+  ctx.fillStyle=couleur;ctx.textAlign=align;ctx.textBaseline='middle';ctx.font=`${taille}px ${police==='sans'?"'IBM Plex Sans',sans-serif":"'IBM Plex Mono',monospace"}`;
+  ctx.fillText(String(texte),x,y);
+}
+function titre(texte,x,y){libelle(texte,x,y,12,COULEUR.texte,'left');}
+function segment(x0,y0,x1,y1,couleur=COULEUR.grille,epaisseur=1){ctx.strokeStyle=couleur;ctx.lineWidth=epaisseur;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();}
+function boite({x,y,w,h},nom,sousTitre=''){
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#293c3b';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  titre(nom,x+12,y+17);
+  if(sousTitre)libelle(sousTitre,x+w-12,y+17,10,COULEUR.muted,'right');
+  ctx.save();ctx.globalAlpha=.5;
+  for(let i=1;i<5;i++)segment(x+10,y+30+(h-48)*i/5,x+w-10,y+30+(h-48)*i/5,'#30413f');
+  for(let i=1;i<9;i++)segment(x+10+(w-20)*i/9,y+32,x+10+(w-20)*i/9,y+h-14,'#253530');
+  ctx.restore();
+}
+function onde(box,fn,options={}){
+  const {x,y,w,h}=box, a=options.amplitude||1.6;
+  const g={x:x+10,y:y+37,w:w-20,h:h-59};
+  ctx.save();ctx.beginPath();ctx.rect(g.x,g.y,g.w,g.h);ctx.clip();
+  if(options.zero!==false)segment(g.x,g.y+g.h/2,g.x+g.w,g.y+g.h/2,'#627a71');
+  if(options.fill){ctx.fillStyle=options.fill;ctx.fillRect(g.x,g.y,g.w,g.h);}
+  ctx.strokeStyle=options.couleur||COULEUR.texte;ctx.lineWidth=options.epaisseur||2;
+  ctx.setLineDash(options.tirets||[]);ctx.globalAlpha=options.opacite||1;
+  ctx.beginPath();const N=options.N||460;
+  for(let i=0;i<=N;i++){
+    const q=i/N, valeur=fn(q), yp=g.y+g.h/2-limite(valeur,-a,a)*g.h/(2*a);
+    if(i===0)ctx.moveTo(g.x,yp);else ctx.lineTo(g.x+q*g.w,yp);
+  }
+  ctx.stroke();ctx.restore();return g;
+}
+function cadran(cx,cy,k,phase,rayon=17){
+  ctx.beginPath();ctx.arc(cx,cy,rayon,0,TAU);ctx.strokeStyle='#557566';ctx.lineWidth=1;ctx.stroke();
+  const angle=phase+TAU*k*page.temps*.7;
+  segment(cx,cy,cx+Math.cos(angle)*rayon*.9,cy-Math.sin(angle)*rayon*.9,COULEUR.vert,1.5);
+  ctx.beginPath();ctx.arc(cx+Math.cos(angle)*rayon*.9,cy-Math.sin(angle)*rayon*.9,2.5,0,TAU);ctx.fillStyle=COULEUR.or;ctx.fill();
+}
+function spectreBarres(zone,coeffs,maxB=1.5,compare=null,mesuresEnHz=false){
+  const {x,y,w,h}=zone, vtop=y+38, bottom=y+h-53, haut=bottom-vtop;
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#293c3b';ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  titre(mesuresEnHz?'SPECTRE · FRÉQUENCE (Hz)':'SPECTRE · HARMONIQUE n',x+12,y+18);
+  const n=coeffs.length, aireW=w-28, marche=aireW/n;
+  segment(x+14,bottom,x+w-14,bottom,'#617769');
+  ctx.save();ctx.beginPath();ctx.rect(x+13,vtop-1,aireW+2,haut+1);ctx.clip();
+  for(let i=0;i<n;i++){
+    const c=coeffs[i], A=c.amplitude ?? Math.abs(c.sin), hauteur=limite(A/maxB,0,1)*haut;
+    const xx=x+14+marche*(i+.5), largeur=Math.max(2,marche*.53);
+    ctx.fillStyle=i===0?COULEUR.or:COULEUR.vert;
+    ctx.globalAlpha=i===page.selection-1&&page.etape===0?1:.55+.45/(1+i*.045);
+    ctx.fillRect(xx-largeur/2,bottom-hauteur,largeur,hauteur);
+    if(page.etape===0)zonesBarres.push({x0:xx-marche/2,x1:xx+marche/2,y0:vtop,y1:bottom,max:maxB,k:i+1,bas:bottom,haut});
+    if(compare){
+      const B=compare[i]?.amplitude||0;
+      ctx.globalAlpha=.52;ctx.fillStyle=COULEUR.orange;
+      ctx.fillRect(xx-largeur/2+largeur*.52,bottom-limite(B/maxB,0,1)*haut,Math.max(1,largeur*.48),limite(B/maxB,0,1)*haut);
+    }
+  }
+  ctx.restore();ctx.globalAlpha=1;
+  const labels=[1,Math.max(2,Math.round(n*.25)),Math.round(n*.5),Math.round(n*.75),n];
+  for(const k of [...new Set(labels)]){const xx=x+14+marche*(k-.5);libelle(mesuresEnHz?francais(k*page.note,0):k,xx,bottom+13,9,COULEUR.muted,'center');}
+  libelle('amplitude',x+12,vtop+4,10,COULEUR.muted);
+}
+function tracerFormeEtape1(){
+  const mob=disposition.mobile, params=mob?{onde:{x:26,y:73,w:407,h:198},harm:{x:27,y:289,w:407,h:105},bar:{x:27,y:411,w:407,h:198}}:{onde:{x:43,y:75,w:653,h:235},harm:{x:43,y:331,w:653,h:251},bar:{x:724,y:75,w:296,h:507}};
+  const cs=page.coeffs.slice(0,page.harmoniques), {onde:o,harm:h,bar:b}=params;
+  boite(o,'OSCILLOSCOPE · x(t)','2 périodes · temps normalisé');
+  const offset=page.temps*.21;
+  if(page.cible){onde(o,q=>Fourier.cible(page.reference,2*q+offset),{couleur:COULEUR.orange,tirets:[5,5],epaisseur:1.3,opacite:.7});}
+  const g=onde(o,q=>Fourier.synth(cs,1,2*q+offset),{couleur:COULEUR.texte,epaisseur:2.3,amplitude:1.55});
+  segment(g.x,g.y+g.h/2,g.x+g.w,g.y+g.h/2,'#70867e');
+  libelle('−1',g.x+3,g.y+g.h-4,9,COULEUR.muted);libelle('+1',g.x+3,g.y+10,9,COULEUR.muted);
+  if(page.cible)libelle('— somme    - - cible',o.x+16,o.y+o.h-10,10,COULEUR.texte);
+  // Chacune des premières composantes reste lisible séparément.
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(h.x,h.y,h.w,h.h);ctx.strokeStyle='#293c3b';ctx.strokeRect(h.x+.5,h.y+.5,h.w-1,h.h-1);
+  titre('LES HARMONIQUES · INDIVIDUELLES',h.x+12,h.y+17);
+  const nrows=mob?2:3, rowH=(h.h-32)/nrows;
+  for(let i=0;i<nrows;i++){
+    const k=i+1, c=page.coeffs[i], yy=h.y+33+i*rowH, milieu=yy+rowH/2;
+    libelle(k+' f₀',h.x+14,milieu,11,i===0?COULEUR.or:COULEUR.vert);
+    cadran(h.x+80,milieu,k,c.phase,Math.min(16,rowH*.3));
+    const x0=h.x+109,x1=h.x+h.w-18;
+    segment(x0,milieu,x1,milieu,'#34463e');
+    const n=200;ctx.beginPath();ctx.lineWidth=1.15;ctx.strokeStyle=COULEUR.vert;ctx.globalAlpha=1-i*.22;
+    for(let j=0;j<=n;j++){const q=j/n, y=milieu-Math.min(1,c.amplitude)*rowH*.28*Math.sin(TAU*k*(q*2+offset)+c.phase);if(j===0)ctx.moveTo(x0,y);else ctx.lineTo(x0+q*(x1-x0),y);}ctx.stroke();ctx.globalAlpha=1;
+    if(i<nrows-1)segment(h.x+12,yy+rowH,h.x+h.w-12,yy+rowH,'#25332e');
+  }
+  const maxB=1.5;
+  spectreBarres(b,cs,maxB);
+  if(page.reference==='square'){
+    const g=gibbs(page.harmoniques);
+    libelle('Gibbs · pic '+francais(g.maximum,3),b.x+13,b.y+b.h-13,10,COULEUR.orange);
+  }
+}
+function tracerFormeEtape2(){
+  const mob=disposition.mobile;
+  const ondeBox=mob?{x:27,y:75,w:407,h:189}:{x:42,y:74,w:609,h:285};
+  const barBox=mob?{x:27,y:284,w:407,h:226}:{x:681,y:74,w:339,h:285};
+  const modeBox=mob?{x:27,y:529,w:407,h:93}:{x:42,y:389,w:978,h:193};
+  const cs=Fourier.timbreCoeffs(page.instrument,page.note,page.sansFondamentale);
+  const autre=page.instrument==='flute'?'clarinette':'flute';
+  const csAutre=page.compare?Fourier.timbreCoeffs(autre,page.note,page.sansFondamentale):null;
+  boite(ondeBox,'OSCILLOSCOPE · MÊME NOTE',page.note+' Hz');
+  const echantillons=5.2, phase=page.temps*.08, aMax=cs.reduce((s,c)=>s+c.amplitude,0)||1;
+  onde(ondeBox,q=>Fourier.synth(cs,1,q*echantillons+phase)/Math.max(1,aMax*.75),{couleur:COULEUR.texte,amplitude:1.15,epaisseur:2});
+  if(csAutre){
+    const maxB=csAutre.reduce((s,c)=>s+c.amplitude,0)||1;
+    onde(ondeBox,q=>Fourier.synth(csAutre,1,q*echantillons+phase)/Math.max(1,maxB*.75),{couleur:COULEUR.orange,amplitude:1.15,epaisseur:1.6,opacite:.82});
+  }
+  const max=Math.max(1,...cs.map(c=>c.amplitude),...(csAutre||[]).map(c=>c.amplitude));
+  spectreBarres(barBox,cs,max,csAutre,true);
+  if(page.instrument.startsWith('voix')){
+    const formants=Fourier.TIMBRES[page.instrument].formants;
+    libelle('Formants ≈ '+formants.join(' et ')+' Hz',barBox.x+12,barBox.y+barBox.h-12,10,COULEUR.vert);
+  }else libelle('Harmoniques : multiples de '+page.note+' Hz',barBox.x+12,barBox.y+barBox.h-12,10,COULEUR.vert);
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(modeBox.x,modeBox.y,modeBox.w,modeBox.h);ctx.strokeStyle='#293c3b';ctx.strokeRect(modeBox.x+.5,modeBox.y+.5,modeBox.w-1,modeBox.h-1);
+  titre('MODES D’UNE CORDE / D’UN TUYAU · FONDATION 15',modeBox.x+12,modeBox.y+17);
+  const debut=modeBox.x+24,fin=modeBox.x+modeBox.w-24;
+  const nb=mob?2:3, colW=(fin-debut)/nb;
+  for(let k=1;k<=nb;k++){
+    const x0=debut+(k-1)*colW+8,x1=x0+colW-20,cy=modeBox.y+modeBox.h*.66;
+    segment(x0,cy,x1,cy,'#385047',1);
+    ctx.strokeStyle=k===1?COULEUR.or:COULEUR.vert;ctx.lineWidth=1.8;ctx.beginPath();
+    for(let j=0;j<=100;j++){const q=j/100, yy=cy-17*Math.sin(k*PI*q)*Math.cos(page.temps*1.8);if(!j)ctx.moveTo(x0,yy);else ctx.lineTo(x0+q*(x1-x0),yy);}ctx.stroke();
+    libelle(k+' × f₀',x0,modeBox.y+35,10,k===1?COULEUR.or:COULEUR.vert);
+  }
+}
+function roueDessinee(cx,cy,rayon,angle,couleur,alpha=1){
+  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=couleur;ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(cx,cy,rayon,0,TAU);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,rayon*.14,0,TAU);ctx.stroke();
+  for(let i=0;i<8;i++){const t=angle+i*TAU/8;segment(cx,cy,cx+rayon*.93*Math.cos(t),cy+rayon*.93*Math.sin(t),couleur,1.6);}
+  ctx.restore();
+}
+function tracerFormeEtape3(){
+  const mob=disposition.mobile;
+  const ondeBox=mob?{x:27,y:76,w:407,h:280}:{x:43,y:75,w:651,h:488};
+  const roueBox=mob?{x:27,y:377,w:407,h:245}:{x:725,y:75,w:297,h:488};
+  const info=Fourier.wheel(page.roue,8,24), replie=Fourier.aliasFrequency(page.f,page.fs), mauvais=page.f>page.fs/2;
+  boite(ondeBox,'CONTINU · ÉCHANTILLONS · RECONSTRUCTION',`fs = ${page.fs} Hz`);
+  const t0=.54,duree=.62;
+  const vrai=onde(ondeBox,q=>Math.sin(TAU*page.f*(t0+duree*q)),{couleur:COULEUR.texte,epaisseur:1.65,amplitude:1.3});
+  if(page.reconstruction){
+    const courbe=onde(ondeBox,q=>page.reconstruction[Math.min(page.reconstruction.length-1,Math.round(q*(page.reconstruction.length-1)))],{couleur:mauvais?COULEUR.orange:COULEUR.vert,epaisseur:2.4,amplitude:1.3});
+  }
+  const g={x:ondeBox.x+10,y:ondeBox.y+37,w:ondeBox.w-20,h:ondeBox.h-59};
+  const values=page.echantillons?.values||[];
+  for(let i=Math.ceil(t0*page.fs);i<Math.min(values.length,(t0+duree)*page.fs+1);i++){
+    const t=i/page.fs,q=(t-t0)/duree;
+    if(q<0||q>1)continue;
+    const xx=g.x+q*g.w, yy=g.y+g.h/2-values[i]*g.h/(2*1.3);
+    ctx.fillStyle=COULEUR.or;ctx.beginPath();ctx.arc(xx,yy,mob?3:4,0,TAU);ctx.fill();
+  }
+  libelle('blanc : vrai   • : mesures   '+(mauvais?'orange : replié':'vert : interpolé'),ondeBox.x+12,ondeBox.y+ondeBox.h-13,10,COULEUR.muted);
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(roueBox.x,roueBox.y,roueBox.w,roueBox.h);
+  ctx.strokeStyle='#293c3b';ctx.strokeRect(roueBox.x+.5,roueBox.y+.5,roueBox.w-1,roueBox.h-1);
+  titre('ROUE FILMÉE · 24 IMAGES/S',roueBox.x+12,roueBox.y+18);
+  const cx=roueBox.x+roueBox.w/2,cy=roueBox.y+roueBox.h*(mob?.52:.42),rayon=mob?76:97;
+  const image=Math.floor(page.temps*24), moment=image/24;
+  // Les huit rayons identiques rendent des angles différant de 45 degrés indistinguables.
+  roueDessinee(cx,cy,rayon,page.roue/60*TAU*moment,COULEUR.vert,1);
+  ctx.beginPath();ctx.arc(cx,cy,rayon+7,0,TAU);ctx.strokeStyle='#3b5b4e';ctx.lineWidth=.75;ctx.stroke();
+  libelle('Rotation vraie : '+page.roue+' tr/min',roueBox.x+roueBox.w/2,roueBox.y+roueBox.h-(mob?42:135),mob?12:11,COULEUR.texte,'center');
+  libelle('Apparence : '+(info.rpmApparent>0?'+':'')+francais(info.rpmApparent,1)+' tr/min',roueBox.x+roueBox.w/2,roueBox.y+roueBox.h-(mob?21:112),mob?12:13,info.rpmApparent<0?COULEUR.orange:COULEUR.vert,'center');
+  if(!mob){
+    segment(roueBox.x+25,roueBox.y+roueBox.h-83,roueBox.x+roueBox.w-25,roueBox.y+roueBox.h-83,'#314a40');
+    libelle('À 180 tr/min : rayons au même angle',roueBox.x+19,roueBox.y+roueBox.h-55,11,COULEUR.muted);
+    libelle('à chaque image : immobilité apparente.',roueBox.x+19,roueBox.y+roueBox.h-39,11,COULEUR.muted);
+  }
+  libelle('Nyquist = '+francais(page.fs/2,0)+' Hz · Repliement = '+francais(replie,0)+' Hz',ondeBox.x+12,ondeBox.y+45,10,mauvais?COULEUR.orange:COULEUR.vert);
+}
+function traceTableauSignal(box,signal,label,couleur,offset){
+  boite(box,label,'échelle relative');
+  onde(box,q=>{
+    const n=signal.length, position=(offset+q*104)%n, a=Math.floor(position), frac=position-a;
+    return signal[a]*(1-frac)+signal[(a+1)%n]*frac;
+  },{couleur,epaisseur:1.7,amplitude:1.35,N:350});
+}
+function spectreEtFiltre(zone){
+  const {x,y,w,h}=zone;
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='#293c3b';ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  titre('SPECTRE ET GAIN DU FILTRE',x+12,y+18);
+  const x0=x+25,x1=x+w-12,y0=y+48,y1=y+h-69;
+  for(const f of [0,200,400,600,800,1000]){
+    const xx=x0+(x1-x0)*f/1000;segment(xx,y0,xx,y1,'#27392f',.9);libelle(f,xx,y1+17,10,COULEUR.muted,'center');
+  }
+  for(const f of [60,440,660]){
+    const xx=x0+(x1-x0)*f/1000;ctx.globalAlpha=.6;segment(xx,y0,xx,y1,f===60?COULEUR.orange:COULEUR.vert,.7);ctx.globalAlpha=1;
+    libelle(f+' Hz',xx+2,y0+12,10,f===60?COULEUR.orange:COULEUR.vert);
+  }
+  const sa=page.signalFiltre.spectreAvant,sb=page.signalFiltre.spectreApres;
+  const N=Math.floor(1000/(sa.fs/sa.N));
+  const maxA=Math.max(.13,...sa.amplitudes.slice(0,N));
+  for(let i=0;i<=N;i+=2){
+    const xx=x0+i/1000*(x1-x0), hauteur=limite(sa.amplitudes[i]/maxA,0,1)*(y1-y0)*.78;
+    const fin=limite(sb.amplitudes[i]/maxA,0,1)*(y1-y0)*.78;
+    ctx.globalAlpha=.32;ctx.fillStyle=COULEUR.texte;ctx.fillRect(xx,y1-hauteur,1.2,hauteur);
+    ctx.globalAlpha=.8;ctx.fillStyle=COULEUR.vert;ctx.fillRect(xx+1.1,y1-fin,1.6,fin);
+  }
+  const rep=responseFiltre();ctx.globalAlpha=1;
+  ctx.beginPath();ctx.strokeStyle=COULEUR.bleu;ctx.lineWidth=2;
+  for(let j=0;j<=250;j++){
+    const f=j*4, amp=rep(f).gain, xx=x0+(x1-x0)*f/1000, yy=y1-(y1-y0)*.93*amp;
+    if(j===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }ctx.stroke();
+  libelle('blanc : avant  vert : après',x+12,y+h-15,10,COULEUR.muted);
+  libelle('bleu : |H(f)|',x+w-12,y+h-15,10,COULEUR.bleu,'right');
+}
+function circuit(zone){
+  const {x,y,w,h}=zone;
+  ctx.fillStyle=COULEUR.fond2;ctx.fillRect(x,y,w,h);ctx.strokeStyle='#293c3b';ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  titre(page.filtre==='notch'?'COUPE-BANDE · NOTCH IDÉAL':'CIRCUIT RC · COUPURE',x+12,y+18);
+  const mid=y+h*.39,left=x+24,right=x+w-23,rStart=x+w*.32,rEnd=x+w*.6;
+  segment(left,mid,rStart,mid,COULEUR.texte,1.5);
+  if(page.filtre==='notch'){
+    ctx.strokeStyle=COULEUR.bleu;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rStart,mid);ctx.lineTo(rStart+20,mid-15);ctx.lineTo(rStart+45,mid+15);ctx.lineTo(rEnd,mid);ctx.stroke();
+    libelle('60 Hz supprimé · Q = 12',x+12,y+h-16,11,COULEUR.bleu);
+  }else{
+    ctx.strokeStyle=COULEUR.or;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(rStart,mid);
+    const pas=(rEnd-rStart)/10;for(let i=1;i<=9;i++)ctx.lineTo(rStart+i*pas,mid+(i%2?-9:9));ctx.lineTo(rEnd,mid);ctx.stroke();
+    libelle('R = '+francais(page.R,0)+' Ω',rStart,mid-20,11,COULEUR.or);
+    segment(rEnd,mid,right,mid,COULEUR.texte,1.5);
+    segment(right-15,mid,right-15,mid+25,COULEUR.texte,1.3);
+    segment(right-30,mid+25,right,mid+25,COULEUR.vert,2);
+    segment(right-30,mid+34,right,mid+34,COULEUR.vert,2);
+    segment(right-15,mid+34,right-15,mid+48,COULEUR.texte,1.3);
+    libelle('C = '+francais(page.C*1e6,2)+' µF',x+12,y+h-16,11,COULEUR.vert);
+    libelle('fc = '+francais(1/(TAU*page.R*page.C),1)+' Hz',x+w-12,y+h-16,11,COULEUR.texte,'right');
+  }
+}
+function tracerFormeEtape4(){
+  if(!page.signalFiltre)construireFiltre();
+  const mob=disposition.mobile;
+  const avant=mob?{x:27,y:75,w:407,h:128}:{x:43,y:74,w:600,h:205};
+  const apres=mob?{x:27,y:217,w:407,h:128}:{x:43,y:293,w:600,h:205};
+  const spect=mob?{x:27,y:365,w:407,h:197}:{x:672,y:74,w:347,h:359};
+  const rc=mob?{x:27,y:571,w:407,h:71}:{x:672,y:447,w:347,h:136};
+  const depart=Math.floor(page.temps*1700)%page.signalFiltre.source.length;
+  traceTableauSignal(avant,page.signalFiltre.source,'AVANT · NOTE + SOUFFLE + 60 Hz',COULEUR.texte,depart);
+  traceTableauSignal(apres,page.signalFiltre.resultat,'APRÈS · SIGNAL FILTRÉ',COULEUR.vert,depart);
+  spectreEtFiltre(spect);
+  if(mob){
+    // La représentation du circuit est réduite à ses mesures pour rester lisible sur téléphone.
+    ctx.fillStyle=COULEUR.fond2;ctx.fillRect(rc.x,rc.y,rc.w,rc.h);ctx.strokeStyle='#293c3b';ctx.strokeRect(rc.x+.5,rc.y+.5,rc.w-1,rc.h-1);
+    titre('R = '+francais(page.R,0)+' Ω · C = '+francais(page.C*1e6,2)+' µF',rc.x+12,rc.y+21);
+    libelle(page.filtre==='notch'?'Coupe-bande : centre à 60 Hz, Q = 12':'RC : fc = '+francais(1/(TAU*page.R*page.C),1)+' Hz',rc.x+12,rc.y+47,12,COULEUR.vert);
+  }else circuit(rc);
+}
+function dessiner(){
+  if(!ctx)return;
+  preparerCanvas();zonesBarres=[];
+  if(page.etape===0)tracerFormeEtape1();
+  if(page.etape===1)tracerFormeEtape2();
+  if(page.etape===2)tracerFormeEtape3();
+  if(page.etape===3)tracerFormeEtape4();
+  $('clock').textContent='t = '+francais(page.temps,2)+' s';
+}
+function localisation(e){
+  const r=cv.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*disposition.W/r.width,y:(e.clientY-r.top)*disposition.H/r.height};
+}
+function modifierBarre(e,selectionner=false){
+  if(page.etape!==0)return;
+  const {x,y}=localisation(e);
+  const zone=zonesBarres.find(z=>x>=z.x0&&x<=z.x1&&y>=z.y0-6&&y<=z.y1+8);
+  if(!zone)return;
+  if(selectionner)page.selection=zone.k;
+  const amplitude=limite((zone.bas-y)/zone.haut*zone.max,0,1.5);
+  changerCoefficient(zone.k,Math.round(amplitude*100)/100);
+}
+cv.addEventListener('pointerdown',e=>{
+  if(page.etape!==0 || document.body.dataset.mode==='observer')return;
+  const {x,y}=localisation(e);
+  if(zonesBarres.some(z=>x>=z.x0&&x<=z.x1&&y>=z.y0-6&&y<=z.y1+8)){
+    page.glisse=true;cv.setPointerCapture(e.pointerId);modifierBarre(e,true);
+  }
+});
+cv.addEventListener('pointermove',e=>{if(page.glisse)modifierBarre(e,false);});
+cv.addEventListener('pointerup',()=>{page.glisse=false;});
+cv.addEventListener('pointercancel',()=>{page.glisse=false;});
+function boucle(now){
+  if(animationDerniere){
+    const delta=Math.min(.06,(now-animationDerniere)/1000), reduire=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if(page.lecture){
+      accumulateur+=delta*(reduire?.45:1);
+      let n=0;
+      while(accumulateur>=dt && n<16){page.temps+=dt;accumulateur-=dt;n++;}
+    }
+  }
+  animationDerniere=now;
+  dessiner();requestAnimationFrame(boucle);
+}
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>dessiner()).observe(cv);
+window.addEventListener('resize',dessiner);
+miseAJourCalculs();afficherPanneau();requestAnimationFrame(boucle);
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

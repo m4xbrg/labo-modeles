@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!-- La figure place le mécanisme avant la mesure : filaments visibles, cœur en coupe, arbre et alvéole. -->
+<!-- Le rose sang marque le travail transmis ; l'ocre marque exclusivement l'ATP et le travail. -->
+<!-- Chaque mouvement traduit une grandeur du moteur, avec facteurs d'échelle indiqués sans prétention clinique. -->
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><link rel="icon" href="data:,">
+<title>Muscle, cœur et échanges — LABO</title>
+<meta name="description" content="Module 38 : filaments glissants, pompe cardiaque, répartition du débit et diffusion pulmonaire.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root,:root[data-theme],:root:not([data-theme]){--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#e88a8a;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--sang:#e0565b;--veine:#7a4fa0;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 var(--sans)}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}[hidden]{display:none!important}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 348px;grid-template-rows:minmax(0,1fr) auto;min-height:450px}
+.scene{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--fond);color:var(--texte)}
+#cv{display:block;width:100%;height:100%;min-height:0;touch-action:pan-y;cursor:crosshair}
+.scene-meta{position:absolute;top:11px;left:16px;right:16px;display:flex;gap:12px;justify-content:space-between;pointer-events:none;font:10px var(--mono);letter-spacing:.07em;color:var(--texte-2)}.scene-meta strong{color:var(--accent);font-weight:400}
+.panel{overflow:auto;display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+.eyebrow{font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin:0 0 6px}.panel h2{margin:0 0 9px;font:500 22px/1.14 var(--sans)}.panel p{margin:0}#stepText{font-size:13px;line-height:1.48;color:var(--encre-2)}
+.status{font:12px/1.55 var(--mono);color:var(--encre-2);border-left:2px solid var(--accent);padding-left:9px;margin-top:12px!important;min-height:39px}
+.meas{border-top:1px solid var(--filet);padding-top:7px}.row{display:flex;justify-content:space-between;gap:9px;padding:4px 0;border-bottom:1px solid var(--filet);align-items:baseline}.lab{font:11px var(--mono);color:var(--encre-3)}.val{font:12px var(--mono);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--encre)}.val b{font-weight:500}.val i{font-style:normal;color:var(--encre-3);font-size:10px}
+.scopeBox{border:1px solid var(--filet);background:var(--fond)}#scope{height:120px;width:100%;display:block}.scopeLabel{font:10px var(--mono);letter-spacing:.08em;color:var(--encre-3);margin-bottom:5px!important}.note,.leg{font:11px/1.48 var(--mono);color:var(--encre-3)}.cle{border-left:2px solid var(--encre);padding-left:10px;font-size:12px;line-height:1.5;color:var(--encre-2)}
+.liens{margin-top:auto;display:grid;gap:7px}.comprendre{font-size:13px;padding:9px;border:1px solid var(--encre);text-decoration:none;text-align:center}.questions{display:grid;gap:6px}.questions a{border-top:1px solid var(--filet);padding-top:6px;font-size:12px;text-decoration:none;color:var(--encre-2)}.questions a b{display:block;color:var(--encre);font-weight:500}
+.controls{grid-column:1/-1;padding:8px 16px;display:flex;gap:8px 12px;flex-wrap:wrap;align-items:center}.grp{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.btn{border:1px solid var(--filet);padding:6px 10px;min-height:32px;font:11px var(--mono);color:var(--encre);background:transparent}.btn.on,.btn[aria-pressed=true]{border-color:var(--accent);color:var(--encre)}.btn:hover{border-color:var(--encre)}#actionMain{border-color:var(--accent);min-width:112px}.tools{width:100%;border-top:1px solid var(--filet);padding-top:8px;display:flex;gap:10px 17px;flex-wrap:wrap;align-items:center}.gl,.rv{font:11px var(--mono);color:var(--encre-2)}.range{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px}.range input{width:105px;accent-color:var(--accent)}.range output{min-width:45px}.tools select{font:12px var(--mono);padding:6px 9px;border:1px solid var(--filet);color:var(--encre);background:var(--papier);max-width:210px}.objects{display:flex;gap:5px;flex-wrap:wrap;padding:3px 0}.object{background:transparent;color:var(--encre-3);border:1px solid var(--filet);font:10px var(--mono);padding:3px 7px;min-height:24px}.object:hover,.object:focus-visible{color:var(--encre);border-color:var(--accent)}.tip{position:fixed;z-index:100;max-width:260px;padding:9px 11px;background:#11161e;color:#e8e4dc;border:1px solid #354151;box-shadow:0 12px 30px #0009;pointer-events:none;font:11px/1.45 var(--mono)}.tip b{display:block;color:var(--accent)}.tip span{color:#acb6c3}
+.detail{font:11px/1.4 var(--mono);color:var(--encre-3)}.hint{font:10px var(--mono);color:var(--encre-3)}
+@media(max-width:860px){.app{display:flex;flex-direction:column}.scene{height:440px;flex:none;order:1}.controls{order:2;padding:12px 16px!important}.panel{order:3;border-top:1px solid var(--filet);overflow:visible}.scene-meta{left:12px;right:12px}.tools{gap:8px 13px}.range input{width:90px}.tip{max-width:220px}}
+@media(max-width:480px){.scene{height:385px}.controls{gap:6px}.btn{padding:6px 7px}.panel{gap:10px}.lab{font-size:10px}.val{font-size:11px}.objects{gap:3px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition-duration:0s!important}}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+.labo-etapes .app{min-height:0}.labo-etapes .scene{min-width:0}.labo-etapes .panel{gap:12px}.labo-etapes .panel .status{color:var(--encre-2)}.labo-etapes .cle{color:var(--encre-2)}.labo-etapes .panel .row{border-bottom-color:var(--filet)}.labo-etapes .meas{border-top-color:var(--filet)}.labo-etapes .titre h1{font:400 clamp(32px,5vh,55px)/1.02 var(--serif);letter-spacing:-.025em}.labo-etapes .titre h1 em{font-style:italic;color:var(--accent)}.labo-etapes .titre{padding-top:12px}.labo-etapes .barre{padding-top:12px}.labo-etapes .seg span{font-size:12px}.labo-etapes .controls{border-top:1px solid var(--filet)}
+@media(max-width:860px){.labo-etapes .app{min-height:0}.labo-etapes .scene{height:440px}.labo-etapes .panel{padding:18px var(--gouttiere)}.labo-etapes .controls{padding:12px 16px}}@media(max-width:480px){.labo-etapes .scene{height:385px}}
+</style>
+</head>
+<body class="labo-etapes" data-mode="observer" data-touches="omc" data-module="38">
+<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 38</p><button type="button" class="bascule-theme" data-theme-bascule title="Alterner les thèmes">Thème auto</button></div></header>
+<div class="titre"><div><h1>Muscle, cœur et <em>échanges</em></h1><p class="lead">Un fil qui tire, une pompe qui propulse, un réseau qui répartit et une paroi qui laisse passer.</p></div><dl class="sig"><dt>Échelle</dt><dd>nm → m</dd><dt>Temps</dt><dd>ms → s · ralentis</dd><dt>Modèle</dt><dd>Têtes · élastance · flux · Hill</dd></dl></div>
+<nav class="chapitres" id="stepper" aria-label="Module 38, quatre étapes"><div class="chap"><p class="chap-t"><b>38</b>Module 38 · Physiologie</p><div class="segs"><button type="button" class="seg" data-step="0" title="Le sarcomère : glissement des filaments"><b>1</b><span>Sarcomère</span></button><button type="button" class="seg" data-step="1" title="Le cœur : une pompe à quatre temps"><b>2</b><span>Pompe</span></button><button type="button" class="seg" data-step="2" title="Le réseau : rayons, débits et résistances"><b>3</b><span>Réseau</span></button><button type="button" class="seg" data-step="3" title="L'alvéole : diffusion et hémoglobine"><b>4</b><span>Échanges</span></button></div></div></nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche"><button role="tab" aria-selected="true" data-m="observer" data-indice="Observer : suis les mouvements physiques."><span>O</span>Observer</button><button role="tab" aria-selected="false" data-m="manipuler" data-indice="Manipuler : change les grandeurs et examine les mesures."><span>M</span>Manipuler</button><button role="tab" aria-selected="false" data-m="comprendre" data-indice="Comprendre : lis les lois associées et les limites du modèle."><span>C</span>Comprendre</button></div><p class="indice" id="indice">Observer : suis les mouvements physiques.</p></div>
+<div class="app">
+<main class="scene" id="scene"><canvas id="cv" role="img" aria-label="Simulation scientifique : sarcomère, cœur, réseau circulatoire et échanges gazeux." title="Si la réduction des animations est activée, les mouvements sont ralentis mais pas figés."></canvas><div class="scene-meta"><span id="sceneName">SARCOMÈRE · ÉCHELLE MOLÉCULAIRE</span><strong id="clock">t = 0,0 s</strong></div></main>
+<aside class="panel" aria-label="Lecture du phénomène"><section><p class="eyebrow" id="eyebrow">38.1 · Muscle</p><h2 id="stepTitle">Le sarcomère</h2><p id="stepText" class="couche-comp"></p><p class="status" id="status" aria-live="polite"></p></section>
+<section class="couche-lire"><p class="scopeLabel" id="scopeTitle">COUCHE · FORCE-LONGUEUR</p><div class="scopeBox"><canvas id="scope" role="img" aria-label="Graphique scientifique de l'étape"></canvas></div><p class="leg" id="scopeLegend"></p></section>
+<section class="couche-lire"><div class="meas" id="meas"></div><p class="detail" id="measureNote"></p></section>
+<p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p>
+<section class="couche-lire"><p class="scopeLabel">OBJETS À DÉCOUVRIR · SURVOL OU CLIC</p><div class="objects" id="objects"></div></section>
+<div class="questions couche-comp" id="questions" hidden><a href="../../labo/index.html#fondations"><b>Régulation · 37</b>Qui augmente la fréquence cardiaque et ouvre les artérioles pendant l’effort ?</a><a href="../../labo/index.html#fondations"><b>Défense · 39</b>Que se passe-t-il quand un vaisseau est percé ?</a><a href="../../labo/index.html#fondations"><b>Rythme · 33</b>D’où vient le battement régulier du cœur ?</a></div>
+<nav class="liens"><a class="comprendre couche-comp" id="theoryLink" href="explication.html#m38">Théorie du module 38 →</a><p class="hint couche-lire">Espace : pause · ← → : étape · 1–4 : étape · R : réinitialiser · O M C : couches · I : infos</p></nav>
+</aside>
+<div class="controls" role="toolbar" aria-label="Commandes de la simulation"><div class="grp"><button class="btn" id="prev" aria-label="Étape précédente">←</button><button class="btn" id="play">Pause</button><button class="btn" id="next" aria-label="Étape suivante">→</button><button class="btn" id="reset">Recommencer</button><button class="btn" id="actionMain" aria-pressed="false" title="Démarrer ou relâcher la stimulation musculaire">Stimuler</button></div>
+<div class="tools" id="tools">
+<div class="grp" data-act="0"><label class="range">Longueur <input id="sarL" type="range" min="1.4" max="3.8" step=".05" value="2.35"><output id="sarLv" class="rv">2,35 µm</output></label><label class="range">Charge <input id="sarLoad" type="range" min="0" max=".9" step=".05" value=".10"><output id="sarLoadv" class="rv">0,10 nN</output></label><button class="btn" id="sarATP" aria-pressed="true" title="Couper l'apport d'ATP pour figer les ponts">ATP disponible</button></div>
+<div class="grp" data-act="1"><label class="range">Fréquence <input id="hr" type="range" min="40" max="180" step="5" value="70"><output id="hrv" class="rv">70 /min</output></label><label class="range">Contractilité <input id="emax" type="range" min="1.6" max="4.4" step=".1" value="3"><output id="emaxv" class="rv">3,0</output></label><label class="range">Précharge <input id="preload" type="range" min="7.5" max="12.5" step=".25" value="9"><output id="preloadv" class="rv">9,0 mmHg</output></label></div>
+<div class="grp" data-act="2"><label class="range">Rayon musculaire <input id="arter" type="range" min=".6" max="1.4" step=".01" value="1"><output id="arterv" class="rv">100 %</output></label><label class="range">Débit initial <input id="co" type="range" min="3" max="9" step=".25" value="5"><output id="cov" class="rv">5 L/min</output></label><label class="range">Hématocrite <input id="hct" type="range" min=".25" max=".65" step=".01" value=".45"><output id="hctv" class="rv">45 %</output></label></div>
+<div class="grp" data-act="3"><label for="preset" class="gl">Situation</label><select id="preset"><option value="repos">Repos</option><option value="effort">Effort</option><option value="altitude">Altitude · 4 000 m</option><option value="epaisse">Paroi épaissie + effort</option></select><button class="btn" id="bohr" aria-pressed="false" title="Abaisser l'affinité de l'hémoglobine pour O₂">Sang plus acide</button></div>
+</div></div></div><div class="tip" id="tip" role="tooltip" hidden></div>
+<script>
+/* PHYSIO-BEGIN */
+const Physio = (() => {
+  'use strict';
+  // Toutes les variables physiques sont en SI ; seules les aides mmHg sont destinées à l'interface.
+  const MMHG = 133.322, ML = 1e-6, UM = 1e-6, MIN = 60;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const mm = x => x * MMHG;
+  const ml = x => x * ML;
+  const mulberry32 = seed => {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t ^= t + Math.imul(t ^ t >>> 7, 61 | t); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  };
+
+  // Courbe pédagogique de Gordon-Huxley-Julian (1966) : plateau 2,00–2,25 µm,
+  // épaule courte au-dessous de 1,67 µm et perte de recouvrement à 3,65 µm.
+  function overlap(L) {
+    const u = L / UM;
+    if (u <= 1.3 || u >= 3.65) return 0;
+    if (u < 1.67) return (u - 1.3) / 0.37 * 0.65;
+    if (u < 2) return 0.65 + (u - 1.67) / 0.33 * 0.35;
+    if (u <= 2.25) return 1;
+    return (3.65 - u) / 1.4;
+  }
+  function crossBridgeSim(s, dt = 0) {
+    if (!s.states) {
+      const n = Math.max(1, Math.floor(s.nHeads ?? 300));
+      s = {nHeads:n, Ca:s.Ca ?? 0, ATP:s.ATP ?? true, L:s.L ?? 2.3e-6,
+        load:s.load ?? 0, seed:s.seed ?? 7, states:new Uint8Array(n), t:0,
+        atpUsed:0, strokes:0, force:0, attached:0, rateATP:0, moved:0,
+        random:mulberry32(s.seed ?? 7)};
+    }
+    if (!(dt > 0)) return s;
+    const ca = clamp(s.Ca, 0, 1), ov = overlap(s.L);
+    const pa = 1 - Math.exp(-34 * ca * dt);
+    const pp = 1 - Math.exp(-37 * dt);
+    const pd = s.ATP ? 1 - Math.exp(-27 * dt) : 0;
+    let strokes = 0, used = 0, attached = 0;
+    for (let k = 0; k < s.states.length; k++) {
+      let v = s.states[k];
+      if (v === 0 && (k + 0.5) / s.nHeads < ov && s.random() < pa) v = 1;
+      else if (v === 1 && s.random() < pp) { v = 2; strokes++; }
+      else if (v === 2 && s.random() < pd) { v = 0; used++; }
+      s.states[k] = v;
+      if (v > 0) attached++;
+    }
+    s.attached = attached;
+    s.force = 2e-12 * attached;
+    s.atpUsed += used;
+    s.strokes += strokes;
+    s.rateATP = used / dt;
+    if (s.ATP && ca > 0 && s.force > s.load && s.load >= 0) {
+      // Pas collectif de 10 nm par cycle complet, moyenné sur les têtes disponibles.
+      const dx = 1e-8 * strokes / s.nHeads * (1 - s.load / Math.max(s.force, 1e-30));
+      s.L = Math.max(1.3e-6, s.L - dx);
+      s.moved += dx;
+    }
+    s.t += dt;
+    return s;
+  }
+
+  function heartParams(p = {}) {
+    return {HR:p.HR ?? 70, Emax:p.Emax ?? (3.0 * MMHG / ML), Emin:p.Emin ?? (0.065 * MMHG / ML),
+      V0:p.V0 ?? ml(10), preload:p.preload ?? mm(9.1),
+      R:p.R ?? (1.18 * MMHG / ML), C:p.C ?? (1.55 * ML / MMHG),
+      Rmitral:p.Rmitral ?? (0.025 * MMHG / ML), Raortic:p.Raortic ?? (0.065 * MMHG / ML)};
+  }
+  function elastance(t, p) {
+    const T = MIN / p.HR, u = ((t % T) + T) % T / T;
+    // Activation ventriculaire concentrée dans la systole ; pas de contraction atriale explicite.
+    const a = u < 0.43 ? Math.sin(Math.PI * u / 0.43) ** 2 : 0;
+    return p.Emin + (p.Emax - p.Emin) * a;
+  }
+  function heartInit(p = {}) {
+    const q = heartParams(p);
+    return {t:0, V:ml(120), Pa:mm(86), P:0, E:q.Emin, phase:'remplissage', mitral:false, aortic:false,
+      Qm:0, Qa:0, history:[], completed:[], beat:0, params:q};
+  }
+  function heartStep(s, overrides = {}, dt = 0.001) {
+    const p = heartParams({...s.params, ...overrides}); s.params = p;
+    if (!(dt > 0)) return s;
+    // Une valve idéale conduit dans un seul sens ; sa résistance ouverte limite le flux.
+    const P = elastance(s.t, p) * Math.max(s.V - p.V0, 0);
+    const Qm = Math.max(0, (p.preload - P) / p.Rmitral);
+    const Qa = Math.max(0, (P - s.Pa) / p.Raortic);
+    const Vnext = clamp(s.V + dt * (Qm - Qa), ml(12), ml(220));
+    const Panext = Math.max(0, s.Pa + dt * (Qa - s.Pa / p.R) / p.C);
+    const period = MIN / p.HR;
+    const phase = Qa > 1e-10 ? 'éjection' : Qm > 1e-10 ? 'remplissage'
+      : elastance(s.t+1e-5,p) > elastance(s.t,p) ? 'contraction isovolumique' : 'relaxation isovolumique';
+    s.t += dt; s.V = Vnext; s.Pa = Panext; s.P = elastance(s.t, p) * (s.V - p.V0);
+    s.E = elastance(s.t, p); s.mitral = Qm > 0; s.aortic = Qa > 0;
+    s.Qm = Qm; s.Qa = Qa; s.phase = phase;
+    s.history.push({t:s.t, V:s.V, P:s.P, Pa:s.Pa, Qm, Qa, phase});
+    if (s.history.length > 8000) s.history.shift();
+    if (Math.floor((s.t - dt) / period) < Math.floor(s.t / period)) {
+      s.completed = s.history.filter(x => x.t > s.t - period - dt);
+      s.beat++;
+    }
+    return s;
+  }
+  function loop(s) {
+    // Les échantillons du dernier cycle complet sont préférés aux états transitoires.
+    const pts = s.completed.length > 10 ? s.completed : s.history;
+    return pts.map(x => ({V:x.V, P:x.P, t:x.t}));
+  }
+  function strokeWork(pts) {
+    if (pts.length < 3) return 0;
+    let sum = 0;
+    for (let i=0; i<pts.length; i++) {
+      const a=pts[i], b=pts[(i+1)%pts.length];
+      sum += (a.P + b.P) * (b.V - a.V) / 2;
+    }
+    return Math.abs(sum);
+  }
+  function metrics(s) {
+    const pts = s.completed.length > 10 ? s.completed : s.history;
+    if (!pts.length) return {VTD:s.V, VTS:s.V, VES:0, FE:0, debit:0, PaSys:s.Pa, PaDia:s.Pa, W:0, puissance:0};
+    const VTD = Math.max(...pts.map(x=>x.V)), VTS=Math.min(...pts.map(x=>x.V));
+    const VES = VTD - VTS, FE = VES / VTD, debit = VES*s.params.HR / MIN;
+    const PaSys=Math.max(...pts.map(x=>x.Pa)), PaDia=Math.min(...pts.map(x=>x.Pa));
+    const W=strokeWork(loop(s));
+    return {VTD,VTS,VES,FE,debit,PaSys,PaDia,W,puissance:W*s.params.HR/MIN};
+  }
+
+  function poiseuilleR(r, L, eta = 0.0035) {
+    if (!(r > 0 && L > 0 && eta > 0)) throw new RangeError('Rayon, longueur et viscosité positifs');
+    return 8 * eta * L / (Math.PI * r**4);
+  }
+  function section(segment) {return Math.PI * segment.r**2 * (segment.n ?? 1);}
+  function velocity(segment) {return (segment.Q ?? 0) / section(segment);}
+  function network(tree = null) {
+    const mk=(nom,r,L,n=1) => ({nom,r,L,n});
+    const base = {
+      common:[mk('Aorte', Math.sqrt(4e-4/Math.PI),.4), mk('Artères communes',.00305/Math.pow(100,.25),.23,100)],
+      branches:{
+        cerveau:[mk('Artères',.0028/Math.pow(20,.25),.16,20),mk('Artérioles',16e-6,.0012,720000),mk('Capillaires',4e-6,.00065,1.65e9),mk('Veinules',40e-6,.002,100000),mk('Veines',.004/Math.pow(20,.25),.18,20)],
+        muscles:[mk('Artères',.0034/Math.pow(20,.25),.22,20),mk('Artérioles',16e-6,.00125,810000),mk('Capillaires',4e-6,.00065,1.75e9),mk('Veinules',40e-6,.002,103333),mk('Veines',.004/Math.pow(20,.25),.20,20)],
+        intestin:[mk('Artères',.0025/Math.pow(20,.25),.2,20),mk('Artérioles',16e-6,.00135,680000),mk('Capillaires',4e-6,.00065,1.57e9),mk('Veinules',40e-6,.002,86667),mk('Veines',.0035/Math.pow(20,.25),.2,20)]
+      }
+    };
+    return structuredClone(typeof tree === 'object' && tree ? tree : base);
+  }
+  function solve(net, Pin = mm(100), Pout = mm(5), eta = 0.0035) {
+    const n=network(net);
+    const resist = s => poiseuilleR(s.r,s.L,eta) / (s.n ?? 1);
+    const r0=n.common.reduce((a,s)=>a+resist(s),0);
+    const sums=Object.fromEntries(Object.entries(n.branches).map(([k,ss])=>[k,ss.reduce((a,s)=>a+resist(s),0)]));
+    const rPar=1/Object.values(sums).reduce((a,r)=>a+1/r,0);
+    const Q=(Pin-Pout)/(r0+rPar);
+    let p=Pin;
+    n.common.forEach(s=>{s.R=resist(s);s.Pin=p;s.Q=Q;p-=Q*s.R;s.Pout=p;s.v=velocity(s);});
+    const join=p, branches={};
+    for (const [key, segs] of Object.entries(n.branches)) {
+      const q=(join-Pout)/sums[key]; let pr=join;
+      segs.forEach(s=>{s.R=resist(s);s.Pin=pr;s.Q=q;pr-=q*s.R;s.Pout=pr;s.v=velocity(s);});
+      branches[key]={Q:q,R:sums[key],segments:segs};
+    }
+    return {Q,R:r0+rPar,Pin,Pout,jonction:join,common:n.common,branches,eta};
+  }
+
+  function hbSat(PO2, opts={}) {
+    const P50=(opts.P50 ?? 26.8)*MMHG, n=opts.n ?? 2.7;
+    const P=Math.max(0,PO2);
+    return P===0 ? 0 : 1/(1+(P50/P)**n);
+  }
+  function o2Content(PO2,Hb=150,opts={}) {
+    // Hb en g/L ; concentration retournée en m³ O2(STPD)/m³ de sang, égale numériquement à mL/dL / 100.
+    const Hbgdl=Hb/10, po=PO2/MMHG;
+    const mlDL=1.34*Hbgdl*hbSat(PO2,opts)+.003*po;
+    return mlDL/100;
+  }
+  function capillaryTransit(o={},dt=.001) {
+    const PA=o.PA ?? mm(100), Pv=o.Pv ?? mm(40),
+      D=o.D ?? 1, thickness=o.thickness ?? 0.5e-6,
+      transit=o.transit ?? 0.75, Hb=o.Hb ?? 150, P50=o.P50 ?? 26.8;
+    if (!(dt > 0 && transit > 0 && thickness > 0 && D > 0)) throw new RangeError('Transit et diffusion positifs');
+    // Conductance effective en équivalent O2. La dérivée du contenu en O2 apporte
+    // la capacité tampon Hb ; les paramètres géométriques restent illustratifs.
+    const conductance = 0.020 * D * (0.5e-6/thickness); // en s^-1 par gain normalisé.
+    let P=Pv, t=0, equil=null;
+    const pts=[{t:0,P,Sat:hbSat(P,{P50}),C:o2Content(P,Hb,{P50})}];
+    while(t < transit - 1e-12) {
+      const h=Math.min(dt, transit-t), midpoint=Math.max(P,1);
+      const dPdP=(o2Content(midpoint+mm(.05),Hb,{P50})-o2Content(midpoint-mm(.05),Hb,{P50}))/(mm(.1));
+      const buffer=1 + dPdP / (0.003/100/MMHG) * .012;
+      const k=conductance/buffer;
+      P=PA+(P-PA)*Math.exp(-k*h*1000);
+      t+=h;
+      if (equil===null && Math.abs(P-PA) <= .01*Math.abs(Pv-PA)) equil=t;
+      pts.push({t,P,Sat:hbSat(P,{P50}),C:o2Content(P,Hb,{P50})});
+    }
+    return {points:pts, PO2:P, Sat:hbSat(P,{P50}), C:o2Content(P,Hb,{P50}),
+      equilibrium:equil, PA,Pv,transit,thickness,D};
+  }
+  return {MMHG, ML, UM, mm, ml, mulberry32, overlap, crossBridgeSim, heartParams,
+    elastance, heartInit, heartStep, loop, strokeWork, metrics,
+    poiseuilleR,section,velocity,network,solve,hbSat,o2Content,capillaryTransit};
+})();
+/* PHYSIO-END */
+</script>
+<script>
+(() => {
+'use strict';
+const $ = x => document.querySelector(x), $$ = x => [...document.querySelectorAll(x)];
+const M = Physio.MMHG, u = Physio.UM, ml=Physio.ML, fmt=(n,d=1)=>Number.isFinite(n)?n.toFixed(d).replace('.',','):'—';
+const cv=$('#cv'), ctx=cv.getContext('2d'), scope=$('#scope'), sc=scope.getContext('2d'), tip=$('#tip');
+const INFOS = [
+  [{n:'Disque Z',d:'Limite de chaque sarcomère ; les filaments fins y sont ancrés.'},{n:'Actine',d:'Filament fin qui coulisse vers le centre sans raccourcir.'},{n:'Myosine',d:'Filament épais central portant les têtes motrices.'},{n:'Tête de myosine',d:'Se fixe, pivote et se détache en hydrolysant un ATP.'},{n:'Ca²⁺',d:'Libère les sites de fixation de la myosine sur l’actine.'},{n:'ATP',d:'Permet de détacher puis de réarmer les têtes motrices.'}],
+  [{n:'Ventricule',d:'Cavité musculaire gauche dont la pression dépend du volume et de l’activation.'},{n:'Valve mitrale',d:'Passage à sens unique de l’oreillette vers le ventricule.'},{n:'Valve aortique',d:'Passage à sens unique du ventricule vers l’aorte.'},{n:'Boucle pression-volume',d:'L’aire du cycle correspond au travail net d’un battement.'}],
+  [{n:'Aorte',d:'Grosse artère de départ ; sa section est modeste par rapport au réseau capillaire.'},{n:'Artériole',d:'Petit segment de haute résistance : R varie en 1/r⁴.'},{n:'Capillaire',d:'Vaisseau d’échanges ; des milliards offrent une section totale immense.'},{n:'Veine',d:'Segment de retour à pression bien plus faible.'},{n:'Globule rouge',d:'Cellule qui transporte l’oxygène grâce à l’hémoglobine.'}],
+  [{n:'Alvéole',d:'Sac pulmonaire dont l’air présente une pression partielle en O₂.'},{n:'Paroi alvéolo-capillaire',d:'Très mince séparation que traversent les gaz par diffusion.'},{n:'Hémoglobine',d:'Protéine à quatre sites qui lie la majeure partie de l’O₂ transporté.'},{n:'O₂',d:'Diffuse du compartiment à PO₂ élevée vers le compartiment à PO₂ basse.'},{n:'CO₂',d:'Diffuse en sens opposé ; son transport complet n’est pas calculé ici.'}]
+];
+const steps=[
+  {ey:'38.1 · Moteur moléculaire',title:'Les filaments glissent',text:'Regarde les disques Z se rapprocher. Les filaments gardent leur longueur : les têtes de myosine tirent sur l’actine, puis se détachent grâce à l’ATP.',key:'Les filaments ne raccourcissent pas : ils glissent. Une tête tire, se détache grâce à un ATP et recommence ; le recouvrement limite la force.',note:'Un sarcomère illustratif, 480 têtes et une courbe active simplifiée issue de fibres de grenouille.',scene:'SARCOMÈRE · GLISSEMENT DES FILAMENTS',scope:'FORCE ACTIVE / LONGUEUR'},
+  {ey:'38.2 · Pompe',title:'Une pompe à quatre temps',text:'La cavité se remplit, se contracte à volume presque constant, éjecte le sang, puis se relâche. Les valves fixent le sens du passage ; la boucle enferme le travail.',key:'Le débit vaut la fréquence multipliée par le volume éjecté. L’aire de la boucle pression-volume donne le travail net de chaque battement.',note:'Ventricule gauche à élastance variable ; oreillette à pression fixée et artères représentées par un circuit RC.',scene:'VENTRICULE GAUCHE · PRESSION × VOLUME',scope:'PRESSION / VOLUME'},
+  {ey:'38.3 · Réseau',title:'Le rayon répartit les débits',text:'Une petite variation de rayon transforme fortement la résistance artériolaire. La pression chute surtout dans ces segments et la section capillaire cumulée ralentit le sang.',key:'R ∝ 1/r⁴ : les artérioles modulent les débits. Q = A × v : une immense section totale ralentit la circulation dans les capillaires.',note:'Arbre équivalent en régime laminaire newtonien ; répartition moyenne sans onde de pression.',scene:'ARTÈRES → ORGANES → VEINES',scope:'RAYON / RÉSISTANCE'},
+  {ey:'38.4 · Poumon',title:'Diffusion et saturation',text:'L’O₂ traverse la membrane selon le gradient de pression partielle. L’hémoglobine le fixe sur quatre sites ; sa saturation croît selon une courbe en S.',key:'L’oxygène diffuse du haut vers le bas de pression partielle. La courbe en S permet une forte charge pulmonaire et un déchargement tissulaire.',note:'Capillaire unidimensionnel et cinétique effective calibrée ; CO₂ figuré, non simulé quantitativement.',scene:'ALVÉOLE · GRADIENT DE PO₂',scope:'SATURATION EN O₂'}
+];
+const ratiosArterioles={cerveau:1,muscles:1,intestin:1};
+const prefs={L:2.35e-6,load:.1e-9,ATP:true,HR:70,Emax:3,preload:9.1,arter:1,CO:5,hct:.45,preset:'repos',bohr:false};
+let stage=0,playing=true,simTime=0,accumulator=0,last=null,pressed=false,seed=18;
+let muscle=null,heart=null,vessels=null,gas=null,hot=[];
+const DT=.005; const point=(x,y)=>({x,y});
+const T={sang:'#e0565b',veine:'#7a4fa0',accent:'#e88a8a',energie:'#ffd166',negatif:'#5bb8ff',positif:'#ff8a5b',texte:'#e8e4dc',muted:'#8a93a0',trait:'#283441'};
+function initialiserMuscle(){muscle=Physio.crossBridgeSim({nHeads:480,Ca:pressed?1:0,ATP:prefs.ATP,L:prefs.L,load:prefs.load,seed:seed++},0);}
+function initialiserCoeur(){heart=Physio.heartInit({HR:prefs.HR,Emax:prefs.Emax*M/ml,preload:prefs.preload*M});const n=Math.round(10*60/prefs.HR/.0005);for(let i=0;i<n;i++)Physio.heartStep(heart,{},.0005);}
+function initialiserReseau(){const n=Physio.network();for(const org of Object.keys(ratiosArterioles))n.branches[org][1].r=16e-6*ratiosArterioles[org];const eta=.0035*Math.exp(2.4*(prefs.hct-.45));const ref=Physio.solve(Physio.network(),Physio.mm(100),Physio.mm(5),eta);const q=prefs.CO/60000;const pin=Physio.mm(5)+q*ref.R;vessels=Physio.solve(n,pin,Physio.mm(5),eta);vessels.ratio=prefs.arter;vessels.pinNominal=pin;vessels.qNominal=q;}
+function initialiserGaz(){const p={repos:{PA:100,Pv:40,transit:.75,thickness:.5e-6},effort:{PA:100,Pv:35,transit:.25,thickness:.5e-6},altitude:{PA:65,Pv:35,transit:.75,thickness:.5e-6},epaisse:{PA:100,Pv:40,transit:.25,thickness:1.5e-6}}[prefs.preset];gas=Physio.capillaryTransit({PA:Physio.mm(p.PA),Pv:Physio.mm(p.Pv),transit:p.transit,thickness:p.thickness,P50:prefs.bohr?30:26.8},.001);}
+function preparer(i){if(i===0)initialiserMuscle();if(i===1)initialiserCoeur();if(i===2)initialiserReseau();if(i===3)initialiserGaz();}
+function goStep(i){stage=Math.max(0,Math.min(3,Math.floor(i)));simTime=0;accumulator=0;last=null;preparer(stage);
+  $$('.seg').forEach(b=>b.setAttribute('aria-current',+b.dataset.step===stage?'step':'false'));
+  $$('#tools [data-act]').forEach(b=>b.hidden=+b.dataset.act!==stage);
+  const d=steps[stage];$('#eyebrow').textContent=d.ey;$('#stepTitle').textContent=d.title;$('#stepText').textContent=d.text;$('#key').textContent=d.key;$('#honesty').textContent=d.note;$('#sceneName').textContent=d.scene;$('#scopeTitle').textContent=d.scope;
+  $('#actionMain').hidden=stage!==0;$('#actionMain').setAttribute('aria-pressed',String(pressed));$('#actionMain').textContent=pressed?'Relâcher':'Stimuler';
+  $('#questions').hidden=stage!==3;$('#objects').replaceChildren(...INFOS[stage].map((info,j)=>{const b=document.createElement('button');b.className='object';b.textContent=info.n;b.type='button';b.addEventListener('pointerenter',e=>tipShow(e.clientX,e.clientY,info));b.addEventListener('focus',()=>tipShow(b.getBoundingClientRect().left,b.getBoundingClientRect().bottom,info));b.addEventListener('pointerleave',tipHide);b.addEventListener('blur',tipHide);b.addEventListener('click',e=>{tipShow(e.clientX,e.clientY,info);setTimeout(tipHide,2200);});return b;}));
+  const C=cv.getAttribute('aria-label');cv.setAttribute('aria-label',d.title+'. '+C.split('. ')[0]); render();}
+function tickOne(){if(stage===0){muscle.Ca=pressed?1:0;muscle.ATP=prefs.ATP;muscle.load=prefs.load;Physio.crossBridgeSim(muscle,DT);}if(stage===1)for(let j=0;j<10;j++)Physio.heartStep(heart,{},DT/10);simTime+=DT;}
+function tick(n){for(let k=0;k<Math.max(0,Math.floor(n));k++)tickOne();render();return state();}
+function setPlay(b){playing=!!b;$('#play').textContent=playing?'Pause':'Lire';}
+function state(){if(stage===0)return {length:muscle.L,recouvrement:Physio.overlap(muscle.L),force:muscle.force,ATPparSeconde:muscle.rateATP,tetesAttachees:muscle.attached,atpTotal:muscle.atpUsed};if(stage===1)return {...Physio.metrics(heart),pression:heart.P,pressionAorte:heart.Pa,phase:heart.phase,valveMitrale:heart.mitral,valveAortique:heart.aortic};if(stage===2)return {Q:vessels.Q,Pin:vessels.Pin,viscosite:vessels.eta,branches:vessels.branches,vAorte:vessels.common[0].v,vCapillaire:vessels.Q/Object.values(vessels.branches).reduce((a,b)=>a+Physio.section(b.segments.find(z=>z.nom==='Capillaires')),0)};return {PO2Alveole:gas.PA,PO2Sang:gas.PO2,saturation:gas.Sat,contenu:gas.C,transit:gas.transit,equilibre:gas.equilibrium,bohr:prefs.bohr};}
+function setLength(x){prefs.L=Math.max(1.4e-6,Math.min(3.8e-6,x));initialiserMuscle();$('#sarL').value=prefs.L/u;render();}
+function stimulate(x){pressed=!!x;if(muscle)muscle.Ca=pressed?1:0;$('#actionMain').setAttribute('aria-pressed',String(pressed));$('#actionMain').textContent=pressed?'Relâcher':'Stimuler';render();}
+function atp(x){prefs.ATP=!!x;if(muscle)muscle.ATP=prefs.ATP;$('#sarATP').setAttribute('aria-pressed',String(prefs.ATP));$('#sarATP').textContent=prefs.ATP?'ATP disponible':'Plus d’ATP';render();}
+function setLoad(x){prefs.load=Math.max(0,x);if(muscle)muscle.load=prefs.load;render();}
+function setHR(x){prefs.HR=Math.max(40,Math.min(180,x));initialiserCoeur();render();}
+function setContractility(x){prefs.Emax=Math.max(1.6,Math.min(4.4,x*ml/M));initialiserCoeur();render();}
+function setPreload(x){prefs.preload=Math.max(7.5,Math.min(12.5,x/M));initialiserCoeur();render();}
+function setArteriole(organ,r){if(!(organ in ratiosArterioles))return;
+  ratiosArterioles[organ]=Math.max(.6,Math.min(1.4,r/16e-6));if(organ==='muscles')prefs.arter=ratiosArterioles[organ];initialiserReseau();render();}
+function setCO(x){prefs.CO=Math.max(3,Math.min(9,x*60000));initialiserReseau();render();}
+function setHct(x){prefs.hct=Math.max(.25,Math.min(.65,x));initialiserReseau();render();}
+function preset(x){if(!['repos','effort','altitude','epaisse'].includes(x))return;prefs.preset=x;$('#preset').value=x;initialiserGaz();render();}
+function bohr(x){prefs.bohr=!!x;$('#bohr').setAttribute('aria-pressed',String(prefs.bohr));initialiserGaz();render();}
+function val(e,v){$(e).textContent=v;}
+function changed(){val('#sarLv',fmt(prefs.L/u,2)+' µm');val('#sarLoadv',fmt(prefs.load*1e9,2)+' nN');val('#hrv',fmt(prefs.HR,0)+' /min');val('#emaxv',fmt(prefs.Emax,1)+' mmHg/mL');val('#preloadv',fmt(prefs.preload,2)+' mmHg');val('#arterv',fmt(prefs.arter*100,0)+' %');val('#cov',fmt(prefs.CO,2)+' L/min');val('#hctv',fmt(prefs.hct*100,0)+' %');}
+const label=(x,v,u='')=>`<span class="val"><b>${v}</b> <i>${u}</i></span>`;
+function affichage(){changed();let arr=[],status='',leg='';const s=state();
+  if(stage===0){arr=[['Longueur',fmt(s.length/1e-6,2),'µm'],['Recouvrement',fmt(s.recouvrement*100,1),'%'],['Force instantanée',fmt(s.force*1e9,3),'nN'],['Têtes attachées',fmt(s.tetesAttachees,0),'/ 480'],['ATP consommés',fmt(s.ATPparSeconde,0),'s⁻¹']];
+    status=!prefs.ATP?'Sans ATP, une tête attachée ne se détache plus : rigidité après stimulation.':!pressed?'Stimuler : le Ca²⁺ libère les sites de liaison.':s.length>3.55e-6?'Presque plus de recouvrement : presque aucune tête ne peut tirer.':s.force<=prefs.load?'La charge dépasse la force : pas de raccourcissement.':'Les têtes tirent ; l’actine glisse, les disques Z se rapprochent.';
+    leg='La courbe donne la force active relative, pas la force totale d’un muscle.';
+  } else if(stage===1){arr=[['VTD',fmt(s.VTD/ml,1),'mL'],['VTS',fmt(s.VTS/ml,1),'mL'],['Volume éjecté',fmt(s.VES/ml,1),'mL'],['Fraction éjectée',fmt(s.FE*100,1),'%'],['Débit',fmt(s.debit*60000,2),'L/min'],['Aorte',fmt(s.PaSys/M,0)+' / '+fmt(s.PaDia/M,0),'mmHg'],['Travail',fmt(s.W,2),'J/bat.'],['Puissance',fmt(s.puissance,2),'W']];
+    status=prefs.HR>145?'La diastole raccourcit : le remplissage devient limité.':prefs.preload>10.2?'Plus de remplissage produit un volume éjecté supérieur : Frank-Starling.':prefs.Emax<2.3?'Contractilité réduite : la boucle et le volume éjecté diminuent.':s.phase+' · '+(s.valveAortique?'valve aortique ouverte':s.valveMitrale?'valve mitrale ouverte':'valves fermées');
+    leg='Le sens du parcours de la boucle est antihoraire en coordonnées d’affichage inversées (P vers le haut).';
+  } else if(stage===2){const b=s.branches, R=v=>fmt(v*ml/M,3);arr=[['Muscles : R',R(b.muscles.R),'mmHg·s/mL'],['Muscles : débit',fmt(b.muscles.Q*60000,2),'L/min'],['Muscles : part',fmt(b.muscles.Q/s.Q*100,1),'%'],['Cerveau : R / Q',R(b.cerveau.R)+' / '+fmt(b.cerveau.Q*60000,2),'· / L/min'],['Intestin : R / Q',R(b.intestin.R)+' / '+fmt(b.intestin.Q*60000,2),'· / L/min'],['Aorte : vitesse',fmt(s.vAorte*100,1),'cm/s'],['Capillaires : v',fmt(s.vCapillaire*1000,2),'mm/s'],['Entrée capillaires',fmt(b.muscles.segments[2].Pin/M,1),'mmHg'],['Pression amont',fmt(s.Pin/M,1),'mmHg'],['Viscosité',fmt(s.viscosite*1000,2),'mPa·s']];
+    status=prefs.arter>1.16?'Rayon +19 % ≈ résistance artériolaire ÷ 2 ; le débit augmente moins que ×2 à cause des autres segments.':prefs.arter<.85?'Artérioles musculaires resserrées : le débit diminue ; d’autres branches reçoivent un peu plus.':'Les capillaires, collectivement très nombreux, offrent une vaste section : le sang y ralentit.';
+    leg='Rouge : sang artériel ; violet : sang veineux (le sang veineux n’est pas bleu).';
+  } else {arr=[['Alvéole : PO₂',fmt(s.PO2Alveole/M,1),'mmHg'],['Sang sortant : PO₂',fmt(s.PO2Sang/M,1),'mmHg'],['Saturation Hb',fmt(s.saturation*100,1),'%'],['O₂ contenu',fmt(s.contenu*100,2),'mL/dL'],['Temps de transit',fmt(s.transit,2),'s'],['Équilibre à 99 %',s.equilibre===null?'non atteint':fmt(s.equilibre,3),'s']];
+    status=prefs.bohr?'Sang plus acide : à même PO₂, l’hémoglobine libère davantage d’oxygène.':prefs.preset==='epaisse'?'Paroi épaissie et transit court : l’équilibre est inachevé.':s.equilibre!==null&&s.equilibre<s.transit/2?'Le sang se charge tôt : la suite du trajet fournit une réserve de temps.':'Le gradient entraîne toujours l’O₂ vers le sang, mais le transit limite la charge.';
+    leg='Le modèle de Hill est empirique ; CO₂ et perfusion ne sont pas couplés.';
+  }
+  $('#meas').innerHTML=arr.map(x=>`<div class="row"><span class="lab">${x[0]}</span>${label(x[0],x[1],x[2])}</div>`).join('');$('#status').textContent=status;$('#scopeLegend').textContent=leg;
+  $('#clock').textContent='t = '+fmt(simTime,2)+' s';
+}
+const line=(c,x1,y1,x2,y2,color,width=1)=>{c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();};
+const txt=(c,s,x,y,size=15,color=T.texte,align='left')=>{c.fillStyle=color;c.font=`${size}px "IBM Plex Mono", monospace`;c.textAlign=align;c.fillText(s,x,y);c.textAlign='left';};
+const round=(c,x,y,r,fill)=>{c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=fill;c.fill();};
+const rect=(c,x,y,w,h,fill)=>{c.fillStyle=fill;c.fillRect(x,y,w,h);};
+const bez=(c,points,col,lw=2)=>{c.strokeStyle=col;c.lineWidth=lw;c.beginPath();c.moveTo(points[0][0],points[0][1]);for(let i=1;i<points.length;i++)c.lineTo(points[i][0],points[i][1]);c.stroke();};
+function grid(c,w=1000,h=600){rect(c,0,0,w,h,'#0a0d12');c.strokeStyle='#1b252e';c.lineWidth=.7;for(let x=30;x<w;x+=40)line(c,x,0,x,h,'#152029',.6);for(let y=30;y<h;y+=40)line(c,0,y,w,y,'#152029',.6);}
+function hotspot(n,x,y,w,h){let i=INFOS[stage].find(z=>z.n===n);if(i)hot.push({...i,x,y,w,h});}
+function drawSarcomere(c){const L=muscle.L/u, ov=Physio.overlap(muscle.L), left=500-L/3.8*370, right=1000-left, zY=265;
+  txt(c,'01 / LE GLISSEMENT',40,62,15,T.muted);txt(c,'DISQUE Z',left-10,112,14,T.muted,'center');txt(c,'DISQUE Z',right+10,112,14,T.muted,'center');
+  rect(c,left-6,139,12,265,T.texte);rect(c,right-6,139,12,265,T.texte);
+  for(let y=162;y<=385;y+=42){line(c,left,y,left+215,y,'#aeb6be',4);line(c,right,y,right-215,y,'#aeb6be',4);}
+  // La myosine reste de longueur constante pendant toute la contraction.
+  rect(c,365,240,270,48,'#56616d');rect(c,480,233,40,62,'#6e7883');
+  for(let i=0;i<12;i++){const x=384+(i%6)*44,y=i<6?240:288;let phase=muscle.states[Math.floor(i*muscle.nHeads/12)]||0;
+    line(c,x,y,x+(phase?17:7),y+(i<6?-24:24),phase?T.accent:'#c28c91',2.4);round(c,x+(phase?17:7),y+(i<6?-24:24),4,phase?T.accent:T.muted);
+  }
+  txt(c,'FILAMENT ÉPAIS · MYOSINE',500,332,13,T.muted,'center');
+  txt(c,'FILAMENTS FINS · ACTINE',500,439,13,T.muted,'center');
+  line(c,left,454,right,454,T.trait,1.4);line(c,left,445,left,465,T.trait,2);line(c,right,445,right,465,T.trait,2);
+  txt(c,fmt(L,2)+' µm',500,481,20,T.accent,'center');
+  txt(c,'RECOUVREMENT ACTIF',45,524,12,T.muted);rect(c,45,538,360,8,T.trait);rect(c,45,538,360*ov,8,T.accent);
+  txt(c,fmt(ov*100,1)+' %',420,546,14,T.accent);
+  // Loupe du cycle molecular : un geste n'est pas un filament qui rapetisse.
+  rect(c,690,60,268,138,'#101922');c.strokeStyle='#394650';c.strokeRect(690,60,268,138);
+  txt(c,'UNE TÊTE · CYCLE',707,82,12,T.muted);line(c,720,150,928,150,'#b3b7bd',4);
+  for(let j=0;j<3;j++){const x=741+j*80;line(c,x,145,x+13,117,j===0?T.muted:j===1?T.accent:T.energie,3);round(c,x+13,117,8,j===0?T.muted:j===1?T.accent:T.energie);txt(c,['1 · ATTACHE','2 · TIRE','3 · ATP'][j],x-22,178,9,T.muted);}
+  if(pressed){for(let i=0;i<19;i++){let x=120+(i*41)%750,y=180+Math.sin(i*2.4+simTime*1.1)*100;round(c,x,y,2.8,T.positif);}}
+  hotspot('Disque Z',left-15,138,30,270);hotspot('Actine',left+30,165,160,220);hotspot('Myosine',405,238,175,60);hotspot('Tête de myosine',367,202,266,100);hotspot('Ca²⁺',120,150,120,70);hotspot('ATP',842,85,120,95);
+}
+function drawHeart(c){const s=heart,m=Physio.metrics(heart);txt(c,'02 / QUATRE TEMPS',39,63,15,T.muted);
+  const ratio=Math.max(.30,Math.min(1.25,(s.V/ml-45)/85)),grow=Math.sqrt(ratio);
+  // Coupe stylisée, pression et volume correspondent au moteur, non aux dimensions anatomiques.
+  c.save();c.translate(268,314);c.scale(grow,grow);
+  c.beginPath();c.moveTo(-75,-140);c.bezierCurveTo(-150,-146,-170,-20,-110,101);c.bezierCurveTo(-15,225,110,175,132,45);c.bezierCurveTo(157,-50,87,-146,25,-140);c.closePath();c.fillStyle='#2a141b';c.fill();c.strokeStyle=T.accent;c.lineWidth=16;c.stroke();
+  c.beginPath();c.moveTo(-55,-105);c.bezierCurveTo(-120,-100,-92,42,-55,91);c.bezierCurveTo(17,178,101,102,98,20);c.bezierCurveTo(105,-65,63,-105,-4,-110);c.closePath();c.fillStyle='#772b38';c.fill();c.restore();
+  txt(c,'VENTRICULE GAUCHE',235,552,14,T.texte,'center');
+  c.strokeStyle='#56616d';c.lineWidth=18;c.beginPath();c.moveTo(119,140);c.lineTo(120,91);c.lineTo(218,91);c.lineTo(219,178);c.stroke();
+  c.strokeStyle=T.sang;c.lineWidth=18;c.beginPath();c.moveTo(317,160);c.lineTo(317,90);c.quadraticCurveTo(415,90,415,164);c.stroke();
+  line(c,187,151,215,s.mitral?189:243,s.mitral?'#ffd166':T.texte,6);
+  line(c,289,165,s.aortic?300:336,143,s.aortic?'#ffd166':T.texte,6);
+  txt(c,'MITRALE',102,75,11,T.muted);txt(c,'AORTE',408,188,11,T.muted);
+  txt(c,fmt(s.P/M,0)+' mmHg',265,342,21,T.texte,'center');txt(c,fmt(s.V/ml,1)+' mL',265,374,17,T.accent,'center');
+  rect(c,478,56,2,494,T.trait);
+  const chart={x:572,y:125,w:350,h:360},xmin=38,xmax=160,ymin=0,ymax=185;
+  const X=v=>chart.x+(v/ml-xmin)/(xmax-xmin)*chart.w,Y=p=>chart.y+chart.h-(p/M-ymin)/(ymax-ymin)*chart.h;
+  txt(c,'PRESSION–VOLUME',570,92,14,T.muted);
+  for(let v=40;v<=160;v+=30){let x=X(v*ml);line(c,x,chart.y,x,chart.y+chart.h,T.trait,1);txt(c,String(v),x,chart.y+chart.h+20,10,T.muted,'center');}
+  for(let p=0;p<=180;p+=40){let y=Y(p*M);line(c,chart.x,y,chart.x+chart.w,y,T.trait,1);txt(c,String(p),chart.x-10,y+5,10,T.muted,'right');}
+  const pts=Physio.loop(heart);
+  if(pts.length>4){c.beginPath();pts.forEach((p,i)=>{if(i===0)c.moveTo(X(p.V),Y(p.P));else c.lineTo(X(p.V),Y(p.P));});c.closePath();c.fillStyle='rgba(255,209,102,.13)';c.fill();c.strokeStyle=T.accent;c.lineWidth=3;c.stroke();}
+  round(c,X(s.V),Y(s.P),7,T.energie);
+  txt(c,'V (mL)',chart.x+chart.w-8,chart.y+chart.h+43,12,T.muted,'right');txt(c,'P (mmHg)',chart.x-5,chart.y-14,12,T.muted);
+  txt(c,'REMPLISSAGE → CONTRACTION → ÉJECTION → RELAXATION',508,560,11,T.muted);
+  hotspot('Ventricule',136,190,260,330);hotspot('Valve mitrale',174,128,85,95);hotspot('Valve aortique',285,133,95,85);hotspot('Boucle pression-volume',550,100,380,420);
+}
+function drawNetwork(c){const sol=vessels,b=sol.branches;txt(c,'03 / RÉSISTANCE ET CONTINUITÉ',40,62,15,T.muted);
+  const yo=[155,243,330],ids=['cerveau','muscles','intestin'],names=['CERVEAU','MUSCLES','INTESTIN'];
+  // Chemin partagé, bifurcation puis regroupement vers une veine symbolique.
+  const epaisseur=r=>Math.max(2,Math.min(21,2+1650*r));
+  line(c,64,233,188,233,T.sang,epaisseur(sol.common[0].r));line(c,188,155,188,330,T.sang,epaisseur(sol.common[1].r));line(c,783,155,783,330,T.veine,13);line(c,783,242,918,242,T.veine,epaisseur(b.muscles.segments[4].r));
+  txt(c,'AORTE',67,205,12,T.muted);txt(c,'VEINES',845,218,12,T.muted);
+  ids.forEach((key,j)=>{const q=b[key].Q/sol.Q;const y=yo[j];const radius=key==='muscles'?prefs.arter:1;
+    line(c,188,y,347,y,T.sang,epaisseur(b[key].segments[0].r));line(c,347,y,480,y,T.sang,epaisseur(b[key].segments[1].r));line(c,480,y,621,y,'#b56585',epaisseur(b[key].segments[2].r));
+    line(c,621,y,783,y,T.veine,epaisseur(b[key].segments[4].r));
+    const portions=[[201,344,0],[353,475,1],[484,617,2],[629,777,4]];
+    portions.forEach(([a,z,idx])=>{const speed=b[key].segments[idx].v;const vis=Math.max(4,Math.min(65,10+13*Math.log10(1+speed*1000)));for(let k=0;k<3;k++){const x=a+((simTime*vis+k*(z-a)/3)%(z-a));round(c,x,y,idx===2?3.4:4.4,key==='muscles'?T.sang:'#b65c75');}});
+    txt(c,names[j],490,y-24,12,T.texte,'center');txt(c,fmt(b[key].Q*60000,2)+' L/min',487,y+29,11,T.muted,'center');
+  });
+  txt(c,'ARTÈRES',220,107,11,T.muted);txt(c,'ARTÉRIOLES',359,107,11,T.muted);txt(c,'CAPILLAIRES',500,107,11,T.muted);txt(c,'VEINULES',658,107,11,T.muted);
+  line(c,35,376,960,376,T.trait,1.5);
+  // Profils alignés de pression et de vitesse, puis sections parallèles en échelle logarithmique.
+  const mus=b.muscles.segments;
+  const cols=[75,212,349,486,623,760,897];
+  const noms=['aorte','tronc','artères','artérioles','capillaires','veinules','veines'];
+  const press=[sol.common[0].Pin,sol.common[1].Pout,...mus.map(x=>x.Pout)];
+  const vv=[sol.common[0].v,sol.common[1].v,mus[0].v,mus[1].v,
+    sol.Q/Object.values(b).reduce((a,z)=>a+Physio.section(z.segments[2]),0),mus[3].v,mus[4].v];
+  const sections=[Physio.section(sol.common[0]),Physio.section(sol.common[1]),
+    Physio.section(mus[0]),Physio.section(mus[1]),Object.values(b).reduce((a,z)=>a+Physio.section(z.segments[2]),0),
+    Physio.section(mus[3]),Physio.section(mus[4])];
+  txt(c,'P(x) · BRANCHE MUSCULAIRE · mmHg',42,395,11,T.muted);
+  const yPress=p=>449-34*(p/M)/Math.max(100,sol.Pin/M);
+  bez(c,cols.map((x,i)=>[x,yPress(press[i])]),T.accent,2.2);
+  txt(c,fmt(sol.Pin/M,0),52,427,10,T.accent);
+  line(c,35,459,960,459,T.trait,1);
+  txt(c,'v(x) · VITESSE MOYENNE · ÉCHELLE LOG',42,476,11,T.muted);
+  const yVit=v=>513-26*(Math.log10(Math.max(v,1e-5))+5)/5;
+  bez(c,cols.map((x,i)=>[x,yVit(vv[i])]),'#91bbd6',2.1);
+  line(c,35,521,960,521,T.trait,1);
+  txt(c,'A(x) · SECTION TOTALE EN PARALLÈLE · ÉCHELLE LOG',42,538,11,T.muted);
+  sections.forEach((A,i)=>{const hh=Math.max(3,25*(Math.log10(Math.max(A,1e-7))+7)/7);
+    rect(c,cols[i]-15,569-hh,30,hh,i===4?T.energie:'#647989');
+    txt(c,noms[i],cols[i],589,9,T.muted,'center');});
+  hotspot('Aorte',65,217,120,35);hotspot('Artériole',355,140,135,185);hotspot('Capillaire',496,138,143,190);hotspot('Veine',808,218,110,44);hotspot('Globule rouge',218,132,126,210);
+}
+function drawGas(c){const p=gas,progress=(simTime%Math.max(p.transit,.001))/p.transit;txt(c,'04 / DIFFUSION',40,62,15,T.muted);
+  // L'alvéole est en contact avec la paroi du vaisseau, sans contact direct des deux fluides.
+  c.beginPath();c.ellipse(310,233,218,138,-.1,0,Math.PI*2);c.strokeStyle='#84a9c4';c.lineWidth=4;c.stroke();c.fillStyle='rgba(91,184,255,.05)';c.fill();
+  txt(c,'AIR ALVÉOLAIRE',296,150,13,T.muted,'center');txt(c,fmt(p.PA/M,0)+' mmHg O₂',289,209,20,T.negatif,'center');
+  c.beginPath();c.moveTo(94,354);c.quadraticCurveTo(313,322,548,354);c.lineTo(947,354);c.lineTo(947,419);c.lineTo(94,419);c.closePath();c.fillStyle='#441d32';c.fill();
+  line(c,94,347,947,347,'#748f9f',7);txt(c,'PAROI · '+fmt(p.thickness/1e-6,2)+' µm',106,319,12,T.muted);
+  for(let j=0;j<8;j++){const x=154+j*75, y=270+Math.sin(j*1.6+simTime)*18;round(c,x,y,7,T.negatif);c.strokeStyle=T.negatif;c.lineWidth=1.6;c.beginPath();c.arc(x,y,10,0,Math.PI*2);c.stroke();if(j%2===0){line(c,x+2,282,x+12,343,T.negatif,1.5);}}
+  for(let j=0;j<3;j++){let x=185+j*170;round(c,x,384,4,'#a3a6aa');}
+  for(let j=0;j<4;j++){const x=188+(((simTime/p.transit+j/4)%1)*680), y=380;
+    c.save();c.translate(x,y);c.scale(1,.68);round(c,0,0,26,T.sang);round(c,0,0,12,'#8c2c3c');c.restore();
+    if(j===1){for(let k=0;k<4;k++)round(c,x+15*Math.cos(k*Math.PI/2),y+15*Math.sin(k*Math.PI/2),3.5,T.negatif);}
+  }
+  txt(c,'SANG ENTRANT',95,444,12,T.veine);txt(c,'SANG SORTANT',945,444,12,T.sang,'right');
+  txt(c,'PO₂ SANGUINE LE LONG DU CAPILLAIRE',41,490,11,T.muted);const x0=64,y0=554,w=526,h=52;
+  line(c,x0,506,x0,571,T.trait,1);line(c,x0,571,x0+w,571,T.trait,1);line(c,x0,517,x0+w,517,'#597a9a',1);
+  const points=p.points;let max=0;c.beginPath();points.forEach((o,i)=>{const x=x0+(o.t/p.transit)*w, y=y0-((o.P/M-30)/85)*h;if(!i)c.moveTo(x,y);else c.lineTo(x,y);});c.strokeStyle=T.accent;c.lineWidth=2.5;c.stroke();
+  const xmid=x0+progress*w, ix=Math.min(points.length-1,Math.floor(progress*(points.length-1)));round(c,xmid,y0-((points[ix].P/M-30)/85)*h,5,T.energie);
+  txt(c,'Hb · SATURATION',678,493,11,T.muted);const gx=700,gy=552,gW=250,gH=66;
+  line(c,gx,gy-gH,gx,gy,T.trait,1);line(c,gx,gy,gx+gW,gy,T.trait,1);
+  c.beginPath();for(let i=0;i<=100;i++){const x=gx+i/100*gW,y=gy-Physio.hbSat(Physio.mm(i*1.15),{P50:prefs.bohr?30:26.8})*gH;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.strokeStyle=T.negatif;c.lineWidth=2.5;c.stroke();
+  const hx=gx+Math.min(1,p.PO2/M/115)*gW,hy=gy-Physio.hbSat(p.PO2,{P50:prefs.bohr?30:26.8})*gH;round(c,hx,hy,5,T.energie);
+  txt(c,'0',gx,568,10,T.muted);txt(c,'115 mmHg',gx+gW,568,10,T.muted,'right');
+  hotspot('Alvéole',120,115,365,170);hotspot('Paroi alvéolo-capillaire',170,336,350,32);hotspot('Hémoglobine',710,480,250,80);hotspot('O₂',225,244,160,88);hotspot('CO₂',185,367,355,44);
+}
+function mini(){let w=scope.clientWidth||300,h=scope.clientHeight||120,ratio=Math.min(devicePixelRatio||1,2);scope.width=Math.round(w*ratio);scope.height=Math.round(h*ratio);sc.setTransform(ratio,0,0,ratio,0,0);rect(sc,0,0,w,h,'#0a0d12');line(sc,24,h-22,w-15,h-22,'#34404b',1);line(sc,24,15,24,h-22,'#34404b',1);sc.strokeStyle=T.accent;sc.lineWidth=1.8;sc.beginPath();
+  if(stage===0){for(let i=0;i<=160;i++){const x=24+(w-42)*i/160;const y=h-23-Physio.overlap((1.2+i/160*2.6)*u)*(h-42);i?sc.lineTo(x,y):sc.moveTo(x,y);}sc.stroke();const x=24+(w-42)*(muscle.L/u-1.2)/2.6;round(sc,x,h-23-Physio.overlap(muscle.L)*(h-42),4,T.energie);txt(sc,'1,3',27,h-7,9,T.muted);txt(sc,'3,65 µm',w-9,h-7,9,T.muted,'right');}
+  if(stage===1){const pts=Physio.loop(heart);pts.forEach((pt,i)=>{const x=24+(w-38)*(pt.V/ml-35)/135,y=h-22-(pt.P/M)/190*(h-39);i?sc.lineTo(x,y):sc.moveTo(x,y);});sc.closePath();sc.stroke();txt(sc,'V',w-12,h-6,9,T.muted,'right');}
+  if(stage===2){for(let i=0;i<=140;i++){const x=24+(w-41)*i/140,y=h-23-(1/(.5+i/140*1.1)**4)/16*(h-45);i?sc.lineTo(x,y):sc.moveTo(x,y);}sc.stroke();const x=24+(w-41)*(prefs.arter-.5)/1.1;round(sc,x,h-23-(1/prefs.arter**4)/16*(h-45),4,T.energie);txt(sc,'r ↗  ·  R ↘',w-9,17,9,T.muted,'right');}
+  if(stage===3){for(let i=0;i<=140;i++){const p=Physio.mm(i/140*110),x=24+(w-42)*i/140,y=h-22-Physio.hbSat(p,{P50:prefs.bohr?30:26.8})*(h-40);i?sc.lineTo(x,y):sc.moveTo(x,y);}sc.stroke();const x=24+(w-42)*gas.PO2/M/110, y=h-22-gas.Sat*(h-40);round(sc,x,y,4,T.energie);txt(sc,'PO₂',w-7,h-6,9,T.muted,'right');}
+}
+function draw(){let w=cv.clientWidth||700,h=cv.clientHeight||500,ratio=Math.min(devicePixelRatio||1,2);if(cv.width!==Math.round(w*ratio)||cv.height!==Math.round(h*ratio)){cv.width=Math.round(w*ratio);cv.height=Math.round(h*ratio);}ctx.setTransform(ratio*w/1000,0,0,ratio*h/600,0,0);hot=[];grid(ctx);if(stage===0)drawSarcomere(ctx);else if(stage===1)drawHeart(ctx);else if(stage===2)drawNetwork(ctx);else drawGas(ctx);}
+function render(){if(!muscle||!heart||!vessels||!gas){/* Les étapes sont initialisées paresseusement, sans laisser de cases vides. */}
+  affichage();draw();mini();}
+function tipShow(x,y,item){tip.hidden=false;tip.innerHTML='<b>'+item.n+'</b><span>'+item.d+'</span>';tip.style.left=Math.max(8,Math.min(x+9,innerWidth-270))+'px';tip.style.top=Math.max(8,Math.min(y+14,innerHeight-100))+'px';}
+function tipHide(){tip.hidden=true;}
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*1000,y=(e.clientY-r.top)/r.height*600;const item=hot.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);if(item){tipShow(e.clientX,e.clientY,item);cv.style.cursor='help';}else{tipHide();cv.style.cursor='crosshair';}});
+cv.addEventListener('pointerleave',tipHide);cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*1000,y=(e.clientY-r.top)/r.height*600;const item=hot.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h);if(item){tipShow(e.clientX,e.clientY,item);setTimeout(tipHide,2100);}});
+$$('.seg').forEach(x=>x.addEventListener('click',()=>goStep(+x.dataset.step)));
+$('#prev').addEventListener('click',()=>goStep(stage-1));$('#next').addEventListener('click',()=>goStep(stage+1));$('#play').addEventListener('click',()=>setPlay(!playing));$('#reset').addEventListener('click',()=>{if(stage===0)pressed=false;goStep(stage);});$('#actionMain').addEventListener('click',()=>stimulate(!pressed));$('#sarATP').addEventListener('click',()=>atp(!prefs.ATP));
+$('#sarL').addEventListener('input',e=>setLength(+e.target.value*u));$('#sarLoad').addEventListener('input',e=>setLoad(+e.target.value*1e-9));
+$('#hr').addEventListener('input',e=>setHR(+e.target.value));$('#emax').addEventListener('input',e=>setContractility(+e.target.value*M/ml));$('#preload').addEventListener('input',e=>setPreload(+e.target.value*M));
+$('#arter').addEventListener('input',e=>setArteriole('muscles',+e.target.value*16e-6));$('#co').addEventListener('input',e=>setCO(+e.target.value/60000));$('#hct').addEventListener('input',e=>setHct(+e.target.value));
+$('#preset').addEventListener('change',e=>preset(e.target.value));$('#bohr').addEventListener('click',()=>bohr(!prefs.bohr));
+addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select')||e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.closest('[role=tablist]')&&e.key.startsWith('Arrow'))return;const k=e.key.toLowerCase();if(e.key===' '){e.preventDefault();setPlay(!playing);}else if(e.key==='ArrowRight'){e.preventDefault();goStep(stage+1);}else if(e.key==='ArrowLeft'){e.preventDefault();goStep(stage-1);}else if(k==='r')goStep(stage);else if('1234'.includes(k))goStep(+k-1);});
+const themeButton=$('[data-theme-bascule]');themeButton.addEventListener('click',()=>{const root=document.documentElement,next=({none:'dark',dark:'light',light:'none'})[root.dataset.theme||'none'];if(next==='none')root.removeAttribute('data-theme');else root.dataset.theme=next;themeButton.textContent=next==='none'?'Thème auto':next==='dark'?'Thème sombre':'Thème clair';});
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+function frame(t){if(last===null)last=t;let dt=Math.min(.05,Math.max(0,(t-last)/1000));last=t;if(playing){accumulator+=dt*(reduced.matches?.35:1);let guard=0;while(accumulator>=DT&&guard++<20){tickOne();accumulator-=DT;}}if(playing)render();requestAnimationFrame(frame);}
+addEventListener('resize',()=>render());
+preparer(0);preparer(1);preparer(2);preparer(3);goStep(0);setPlay(true);requestAnimationFrame(frame);
+window.__labo={moteur:Physio,get step(){return stage;},goStep,state,tick,setPlay,setLength,stimulate,atp,setLoad,setHR,setContractility,setPreload,setArteriole,setCO,setHct,preset,bohr};
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>
