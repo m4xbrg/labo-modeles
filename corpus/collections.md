@@ -34,7 +34,6 @@ Le 2026-10-04, elle est resserrée à ses **showcases** : des phénomènes suivi
 | [Courant et circuits](../opus-sonnet/06-courant-circuits/index.html) | 06 | page de fondations (22) |
 | [Matière, chaleur et transport](../opus-sonnet/07-matiere-chaleur/index.html) | 07 | page de fondations (17·18·19) |
 
-Les planches affichent encore « L'invisible en mouvement — 0N » dans leur en-tête, y compris les quatre sorties de la collection. Ce libellé changera avec la migration des planches vers le gabarit LABO ; il n'a pas été modifié page par page.
 
 ## Fondations n'est pas une collection
 

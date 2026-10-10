@@ -15,8 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#ff5e62;
@@ -122,16 +123,48 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
   .tip,.btn,.comprendre,.seg,.gsec{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+.labo-etapes .liens{position:static;margin-bottom:0;padding-bottom:0}
+.labo-etapes .gleg,.labo-etapes .hints{color:var(--encre-3)}
+
+/* La lecture et la frise restent visibles en Observer (forme plein écran, 2026-10-07). */
+.labo-etapes .barre p.pos{margin:0}
+.labo-etapes .titre{position:static;max-width:none;pointer-events:auto;left:auto;right:auto;top:auto}
+.labo-etapes .titre::before{display:none}
+.labo-etapes .chap .segs{position:static;height:auto}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou"><a class="marque" href="../../labo/index.html">LABO</a><a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a></div>
+  <div class="droite"><p class="pos">L’invisible en mouvement</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Supernova par effondrement du cœur</h1><p class="lead">Du cœur de fer au rebond, suivre le choc qui éjecte l’étoile.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~10 km à 10⁹ km</dd><dt>Temps</dt><dd>ms à millions d’années</dd><dt>Modèle</dt><dd>étoile de 15 à 20 M☉</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>Supernova par effondrement du cœur</p>    <div class="segs">
+      <button class="seg" data-a="0" title="Acte I — Supergéante"><b>I</b><span>Supergéante</span></button>
+      <button class="seg" data-a="1" title="Acte II — En couches"><b>II</b><span>En couches</span></button>
+      <button class="seg" data-a="2" title="Acte III — Cœur de fer"><b>III</b><span>Cœur de fer</span></button>
+      <button class="seg" data-a="3" title="Acte IV — Effondrement"><b>IV</b><span>Effondrement</span></button>
+      <button class="seg" data-a="4" title="Acte V — Rebond"><b>V</b><span>Rebond</span></button>
+      <button class="seg" data-a="5" title="Acte VI — Le choc cale"><b>VI</b><span>Le choc cale</span></button>
+      <button class="seg" data-a="6" title="Acte VII — Explosion"><b>VII</b><span>Explosion</span></button>
+      <button class="seg" data-a="7" title="Acte VIII — Résidu"><b>VIII</b><span>Résidu</span></button>
+    </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder le phénomène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes, les mesures et les repères apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire ce qui se passe et ouvrir l’explication du phénomène."><span>C</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Supergéante rouge vue en entier."></canvas>
-    <header class="head">
-      <p class="serie">LABO · L’invisible en mouvement</p>
-      <h1>Supernova par <em>effondrement du cœur</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
@@ -139,12 +172,12 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
     <section>
       <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur VIII</p>
       <h2 id="stepTitle">Supergéante rouge</h2>
-      <p id="stepText" aria-live="polite"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow">Mesures en direct</p>
-      <div class="meas">
+      <div class="meas couche-lire">
         <div class="row"><span class="lab">Temps</span><span class="val"><b id="mT">—</b></span></div>
         <div class="row"><span class="lab" id="mRcL">Rayon du cœur</span><span class="val"><b id="mRc">—</b><i>km</i></span></div>
         <div class="row"><span class="lab">Densité centrale</span><span class="val"><b id="mRho">—</b><i>g/cm³</i></span></div>
@@ -154,14 +187,14 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
       <p class="note">Ordres de grandeur pour une étoile de 15 à 20 masses solaires. « — » : sans objet à cet instant.</p>
     </section>
 
-    <section class="gsec" id="gSec" aria-label="Bilan d'énergie">
+    <section class="gsec couche-lire" id="gSec" aria-label="Bilan d'énergie">
       <p class="eyebrow">Où va l’énergie ?</p>
       <div class="gbar" aria-hidden="true"><i class="g1"><u id="g1"></u></i><i class="g2"><u id="g2"></u></i><i class="g3"><u id="g3"></u></i></div>
       <p class="gleg"><span><s style="background:var(--texte-2)"></s>99 % neutrinos</span><span><s style="background:var(--energie)"></s>1 % mouvement</span><span><s style="background:var(--texte)"></s>0,01 % lumière</span></p>
       <p class="note">Les deux petites tranches sont élargies pour rester visibles.</p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>8</kbd> aller à l'acte</li>
@@ -170,7 +203,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="couche-comp comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -184,16 +217,7 @@ h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
 
     <div class="timeline" id="tlBox" role="slider" tabindex="0" aria-label="Frise du temps réel, échelle logarithmique" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><canvas id="tl" aria-hidden="true"></canvas></div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les huit actes">
-      <button class="seg" data-a="0" title="Acte I — Supergéante"><b>I</b><span>Supergéante</span></button>
-      <button class="seg" data-a="1" title="Acte II — En couches"><b>II</b><span>En couches</span></button>
-      <button class="seg" data-a="2" title="Acte III — Cœur de fer"><b>III</b><span>Cœur de fer</span></button>
-      <button class="seg" data-a="3" title="Acte IV — Effondrement"><b>IV</b><span>Effondrement</span></button>
-      <button class="seg" data-a="4" title="Acte V — Rebond"><b>V</b><span>Rebond</span></button>
-      <button class="seg" data-a="5" title="Acte VI — Le choc cale"><b>VI</b><span>Le choc cale</span></button>
-      <button class="seg" data-a="6" title="Acte VII — Explosion"><b>VII</b><span>Explosion</span></button>
-      <button class="seg" data-a="7" title="Acte VIII — Résidu"><b>VIII</b><span>Résidu</span></button>
-    </div>
+
   </div>
 </div>
 
@@ -1085,5 +1109,6 @@ updateUI(0); readouts(); setPlay(true);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

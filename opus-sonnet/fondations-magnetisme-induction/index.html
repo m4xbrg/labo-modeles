@@ -15,8 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#45c9a0;
@@ -144,16 +145,47 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* Coque LABO ; l’écran conserve sa palette d’origine. */
+/* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
+.labo-etapes .status,.labo-etapes .cle,.labo-etapes .real{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes select{background:var(--papier);color:var(--encre);border-color:var(--filet)}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omk">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 23</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Magnétisme et induction</h1><p class="lead">Un champ dévie une charge ; un flux qui varie produit un courant et freine le mouvement.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>~1 cm à ~1 m</dd><dt>Temps</dt><dd>mouvement et transitoire</dd><dt>Modèle</dt><dd>champs et induction</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+  <div class="chap" data-g="23"><p class="chap-t"><b>23</b>Magnétisme et induction</p><div class="segs">
+    <button class="seg" data-a="0" title="Acte I — D’où vient le champ"><b>23.1</b><span>Le champ</span></button>
+    <button class="seg" data-a="1" title="Acte II — Une force qui dévie"><b>23.2</b><span>La force</span></button>
+    <button class="seg" data-a="2" title="Acte III — Faire varier le flux"><b>23.3</b><span>Le flux</span></button>
+    <button class="seg" data-a="3" title="Acte IV — L’induction freine"><b>23.4</b><span>Le freinage</span></button>
+  </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>O</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>K</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Paillasse de magnétisme : aimants, fils, spires et bobines avec leurs lignes de champ et des boussoles ; particules chargées qui tournent dans un champ ; aimant et bobine reliés à un galvanomètre ; rails, tige et tubes où l'induction freine le mouvement."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 23</p>
-      <h1>Magnétisme et <em>induction</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
@@ -161,11 +193,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur IV</p>
       <h2 id="stepTitle">D’où vient le champ</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps, ou du champ en fonction de la distance."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -174,18 +206,18 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </section>
 
     <section>
-      <div class="meas" id="meas"></div>
-      <p class="note" id="mNote"></p>
+      <div class="meas couche-lire" id="meas"></div>
+      <p class="note couche-comp" id="mNote"></p>
     </section>
 
-    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
-      <div class="card"><b>Lumière</b>Un champ magnétique qui varie fait naître un champ électrique. Un champ électrique qui varie fait-il naître un champ magnétique ?<small>Module 24 · onde électromagnétique (à venir)</small></div>
+      <div class="card"><b>Lumière</b>Un champ magnétique qui varie fait naître un champ électrique. Un champ électrique qui varie fait-il naître un champ magnétique ?<small><a href="../fondations-onde-electromagnetique/index.html">Module 24 · L’onde électromagnétique</a></small></div>
       <div class="card"><b>Inductance</b>Une bobine sent son propre champ. Que se passe-t-il quand son courant change ?<small><a href="../06-courant-circuits/index.html">Planche Courant et circuits, acte IV</a></small></div>
       <div class="card"><b>Matière</b>D’où vient le champ d’un aimant, sans pile ni fil ?<small>Module 50 · spin (à venir)</small></div>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>4</kbd> aller à l'acte · <kbd>R</kbd> réinitialiser</li>
@@ -193,8 +225,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </ul>
     </section>
 
-    <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    <nav class="liens couche-comp">
+      <a class="comprendre" id="lienTheorie" href="explication.html#m23"><span>Lire la théorie · module <b id="numTheorie">23</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -206,16 +238,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'acte (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les quatre actes">
-      <div class="sg"><span class="sgl"><span class="long">Paillasse B · champ et force</span><span class="short">B</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Acte I — D’où vient le champ"><b>I</b><span>Le champ</span></button>
-        <button class="seg" data-a="1" title="Acte II — Une force qui dévie"><b>II</b><span>La force</span></button>
-      </div></div>
-      <div class="sg"><span class="sgl"><span class="long">Paillasse I · induction</span><span class="short">I</span></span><div class="sgs">
-        <button class="seg" data-a="2" title="Acte III — Faire varier le flux"><b>III</b><span>Le flux</span></button>
-        <button class="seg" data-a="3" title="Acte IV — L’induction freine"><b>IV</b><span>Le freinage</span></button>
-      </div></div>
-    </div>
+
 
     <div class="tools" id="tools">
       <!-- I -->
@@ -831,7 +854,7 @@ function posRange(rec, f, min) { let m = min; for (const r of rec) { const v = f
 /* ================= Acte I : d'où vient le champ ================= */
 const MAG_A = 0.006, MAG_L = 0.024;
 const A1 = { key: '', lines: [], layer: document.createElement('canvas'), tFine: 0, needFine: false, gap: 0, comp: [], probe: { x: 0.05, y: 0.012 }, drag: false, S: null, view: null, scr: [] };
-function view1() { const top = 104, bot = 16, ah = Math.max(120, H - top - bot), s = Math.min((W - 40) / 0.24, ah / 0.14); return { cx: W / 2, cy: top + ah / 2, s }; }
+function view1() { const top = 24, bot = 16, ah = Math.max(120, H - top - bot), s = Math.min((W - 40) / 0.24, ah / 0.14); return { cx: W / 2, cy: top + ah / 2, s }; }
 const X1 = x => A1.view.cx + x * A1.view.s, Y1 = y => A1.view.cy - y * A1.view.s;
 function sources1() {
   const own = [];
@@ -1054,7 +1077,7 @@ function launch2() {
   if (!K2.view) K2.view = Object.assign({}, K2.tv);
 }
 function geo2() {
-  const top = 146, bot = 18, side = 20, aw = W - 2 * side - 54, ah = Math.max(120, H - top - bot), v = K2.view;
+  const top = 36, bot = 18, side = 20, aw = W - 2 * side - 54, ah = Math.max(120, H - top - bot), v = K2.view;
   const s = Math.min(aw / (2 * v.hw), ah / (2 * v.hh));
   return { s, cx: side + aw / 2 - v.xc * s, cy: top + ah / 2 + v.yc * s };
 }
@@ -1161,7 +1184,7 @@ function drawCharge() {
   }
   c.font = mono(11); tagText(c, 'ralenti : 1 s à l’écran = ' + si(slow2() * (reduce ? 0.5 : 1), 's', 2).join(' '), 16, 124, 'left', 'top', C.texte2);
 }
-function geoSwing() { const top = 110, ah = Math.max(140, H - top - 30), s = Math.min(ah / 0.26, (W - 80) / 0.4); return { s, px: W / 2, py: top + 0.035 * s }; }
+function geoSwing() { const top = 24, ah = Math.max(140, H - top - 30), s = Math.min(ah / 0.26, (W - 80) / 0.4); return { s, px: W / 2, py: top + 0.035 * s }; }
 function drawSwing() {
   const c = ctx, g = geoSwing(), s = g.s, ell = 0.15, th = K2.sw.th;
   const rx = g.px + Math.sin(th) * ell * s, ry = g.py + Math.cos(th) * ell * s;
@@ -1225,7 +1248,7 @@ const K3 = {
 };
 const mag3 = () => ({ kind: 'aimant', Br: 1.2, a: MAG_A, L: MAG_L, x: K3.xm, y: 0, dir: prm.dir3 });
 const coil3 = () => ({ N: prm.N3, b: COIL3.b, x: 0, y: 0, L: COIL3.L });
-function geo3() { const top = 110, bot = 20, ah = Math.max(140, H - top - bot), s = Math.min((W - 40) / (W < 640 ? 0.2 : 0.30), ah / 0.17); return { s, cx: W / 2, cy: top + ah * 0.42 }; }
+function geo3() { const top = 24, bot = 20, ah = Math.max(140, H - top - bot), s = Math.min((W - 40) / (W < 640 ? 0.2 : 0.30), ah / 0.17); return { s, cx: W / 2, cy: top + ah * 0.42 }; }
 function reset3() {
   K3.xm = -0.1; K3.vm = 0; K3.mode = 'rest'; K3.rec = []; K3.t = 0; K3.tRest = 0; K3.side = -1; K3.crossed = false; K3.fluxShown = false; K3.tFlux = -10; K3.needle = { th: 0, w: 0 };
   prm.shuttle = false;
@@ -1333,7 +1356,7 @@ function drawPoles(c, x, y, w, h, letter) {
   c.font = mono(13); c.fillStyle = C.texte; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letter, x + w / 2, y + h / 2);
 }
 function drawRotor() {
-  const c = ctx, top = 110, ah = Math.max(160, H - top - 30), s = Math.min((W - 40) / 0.44, ah / 0.27), cx = W / 2, cy = top + ah * 0.40;
+  const c = ctx, top = 24, ah = Math.max(160, H - top - 30), s = Math.min((W - 40) / 0.44, ah / 0.27), cx = W / 2, cy = top + ah * 0.40;
   const R = K3.rot, g = R.g || Mag.generator({ N: 200, B: 0.2, A: 0.01, omega: TAU * prm.tps }, 0), th = TAU * prm.tps * R.t;
   const P = (x, y, z) => [cx + (x - 0.38 * z) * s, cy - (y - 0.2 * z) * s];
   // pôles et champ uniforme
@@ -1470,7 +1493,7 @@ function adv4(dt) {
 }
 function draw4() { if (prm.seg4 === 'rails') drawRails(); else drawTube(); }
 function drawRails() {
-  const c = ctx, top = 112, ah = Math.max(140, H - top - 40), s = Math.min((W - 40) / 1.1, ah / 0.42), cy = top + ah * 0.48;
+  const c = ctx, top = 24, ah = Math.max(140, H - top - 40), s = Math.min((W - 40) / 1.1, ah / 0.42), cy = top + ah * 0.48;
   const rodX = RAIL.x0 + K4.s.x; K4.cam += (Math.max(0.5, rodX) - K4.cam) * 0.25;
   const X = x => W / 2 + (x - K4.cam) * s, Y = y => cy - y * s, hw = W / 2 / s;
   // champ ⊗ (grille fixe dans le monde)
@@ -1511,7 +1534,7 @@ function drawRails() {
   if (K4.capped) { c.font = mono(12); tagText(c, 'la tige s’emballe : vitesse plafonnée à 10 m/s', W / 2, top + 6, 'center', 'top', C.texte2); }
 }
 function drawTube() {
-  const c = ctx, T = K4.tube, top = 112, ah = Math.max(160, H - top - 64), s = ah / 1.04, y0 = top + 4, ex = 4;
+  const c = ctx, T = K4.tube, top = 24, ah = Math.max(160, H - top - 64), s = ah / 1.04, y0 = top + 4, ex = 4;
   const Y = d => y0 + d * s, tw = (TUBE.b + TUBE.w) * 2 * s * ex, tin = TUBE.b * 2 * s * ex;
   const xs = [W * 0.28, W * 0.46];
   const mats = [prm.mat, 'plastique'], names = { plastique: 'plastique', aluminium: 'aluminium', cuivre: 'cuivre', fendu: 'cuivre fendu' };
@@ -1745,7 +1768,7 @@ function enterAct(n, restart) {
 }
 function updateUI(n) {
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Acte <b>${ROM[n]}</b> sur IV`;
+  $('#eyebrow').innerHTML = `Module 23 · étape <b>23.${n + 1}</b>`;
   $('#stepTitle').textContent = ACTS[n].t; $('#stepText').textContent = ACTS[n].x;
   for (const id of ['#stepTitle', '#stepText']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NA - 1;
@@ -1866,6 +1889,8 @@ function resize() {
   sizePanelCanvases();
 }
 new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizePanelCanvases()).observe(scopeC.parentElement);
+new ResizeObserver(() => sizePanelCanvases()).observe(barsC.parentElement);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -1939,5 +1964,6 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

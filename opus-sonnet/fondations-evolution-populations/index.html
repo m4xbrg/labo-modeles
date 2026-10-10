@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -136,52 +137,90 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 40</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Évolution et génétique des populations</h1>
+    <p class="lead">Aucun individu n’évolue : la composition d’une population change, sous l’effet de la sélection et du hasard.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>~10 à ~1000 individus</dd>
+    <dt>Temps</dt><dd>~10 à ~200 générations</dd>
+    <dt>Modèle</dt><dd>générations discrètes, simulation stochastique</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Étapes du module 40">
+  <div class="chap"><p class="chap-t"><b>40</b>Évolution et génétique des populations</p><div class="segs">
+    <button class="seg" data-a="0" data-scenes="0 1 2" title="40.1 — Sélection et hérédité : composition, génotype et phénotype, fitness"><b>40.1</b><span>Sélection, hérédité</span></button>
+    <button class="seg" data-a="3" data-scenes="3 4" title="40.2 — Fréquences et Hardy-Weinberg : deux allèles, sélection sur un allèle"><b>40.2</b><span>Fréquences</span></button>
+    <button class="seg" data-a="5" data-scenes="5 6" title="40.3 — Dérive : le hasard de la reproduction, seul ou avec la sélection"><b>40.3</b><span>Dérive</span></button>
+    <button class="seg" data-a="7" data-scenes="7 8 9 10" title="40.4 — Fondateurs, goulots, mutation et migration, puis l’espace"><b>40.4</b><span>Fondateurs, mutation</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer de scène."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change une valeur, relance un tirage."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 40."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène en cours : arène d'individus, histogrammes, courbes de fréquences, nuages de copies du gène, généalogies ou grilles, selon l'étape."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 40</p>
-      <h1>Évolution et génétique des <em>populations</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
     <section>
-      <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 11</p>
+      <p class="eyebrow" id="eyebrow">Module <b>40</b> · étape 1 sur 4</p>
       <h2 id="stepTitle"></h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="cle" id="stepKey"></p>
-      <p class="eq" id="eq"></p>
+      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p class="cle couche-comp" id="stepKey"></p>
+      <p class="eq couche-lire" id="eq"></p>
     </section>
 
-    <section>
+    <section class="couche-lire">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
       <p class="note" id="mNote2"></p>
     </section>
 
-    <section id="extra" hidden></section>
+    <section id="extra" class="couche-comp" hidden></section>
 
-    <section id="secBox" hidden>
+    <section id="secBox" class="couche-lire" hidden>
       <p class="eyebrow" id="secEye"></p>
       <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe secondaire de l'étape."></canvas></div>
       <p class="leg" id="secLeg"></p>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd> aller à l'étape</li>
-        <li><kbd>G</kbd> une génération · <kbd>R</kbd> réinitialiser l'étape</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> scène · <kbd>1</kbd>–<kbd>9</kbd> aller à la scène</li>
+        <li><kbd>G</kbd> une génération · <kbd>R</kbd> réinitialiser la scène · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m40"><span>Théorie du module <b id="numTheorie">40</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -199,7 +238,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <span class="seed" id="seedLbl">graine 48213</span>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les onze étapes, en sept chapitres"></div>
+    <div class="grp" id="scenes" hidden></div>
 
     <div class="tools" id="tools"></div>
   </div>
@@ -568,7 +607,7 @@ const spotR = (x, y, w, h, name, role) => spots.push({ k: 1, x, y, w, h, name, r
 function spotP(pts, tol, name, role) { for (let i = 1; i < pts.length; i++) spots.push({ k: 2, x: pts[i-1][0], y: pts[i-1][1], x2: pts[i][0], y2: pts[i][1], r: tol, name, role }); }
 let G = {};
 const stackMode = () => W < 700;
-const headH = () => W <= 520 ? 132 : W <= 860 ? 112 : 134;
+const headH = () => 16;   // le titre est sorti de la scène (coque LABO)
 const padX = () => W < 600 ? 14 : 26;
 const area = () => { const x = padX(); return { x, y: headH(), w: W - 2 * x, h: H - headH() - 8 }; };
 
@@ -1391,9 +1430,12 @@ ST[10] = {
 /* ================= Interface ================= */
 const NSTEP = ST.length;
 const stepper = $('#stepper');
-ST.forEach((s, i) => { const b = document.createElement('button'); b.className = 'seg' + (i === 0 || s.c !== ST[i - 1].c ? ' ch0' : ''); b.dataset.a = i; b.title = s.c + (ST.slice(0, i).filter(q => q.c === s.c).length + 1) + ' — ' + s.t;
-  b.innerHTML = `<b>${s.c}${ST.slice(0, i).filter(q => q.c === s.c).length + 1}</b><span>${s.n}</span>`; stepper.appendChild(b); });
-const segs = [...stepper.children];
+const segs = [...stepper.querySelectorAll('.seg')];
+/* les 4 étapes du module regroupent les scènes d'origine (ST) : data-scenes liste les scènes de chaque étape */
+const SEGSC = segs.map(b => b.dataset.scenes.split(' ').map(Number));
+const stepOf = n => SEGSC.findIndex(l => l.includes(n));
+const SCN = ['Composition', 'Hérédité', 'Fitness', 'Fréquences', 'Sélection', 'Dérive', 'Sélection + dérive', 'Fondateur', 'Goulot', 'Mutation et flux', 'Espace'];
+const scenesEl = $('#scenes');
 
 /* mesures */
 const mEl = $('#meas'); let rowEls = [], eqLast = '', noteLast = '', legLast = '';
@@ -1450,8 +1492,11 @@ function sizeSec() {
 function updateUI(n) {
   const ae = document.activeElement; if (ae && ae.closest && ae.closest('#tools')) ae.blur();
   const s = ST[n];
-  segs.forEach((b, i) => { if (i === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
-  $('#eyebrow').innerHTML = `Chapitre <b>${s.c}</b> · étape ${n + 1} sur ${NSTEP}`;
+  const k = stepOf(n);
+  segs.forEach((b, i) => { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#eyebrow').innerHTML = `Module <b>40</b> · étape ${k + 1} sur ${segs.length}`;
+  const sc = SEGSC[k]; scenesEl.hidden = sc.length < 2; scenesEl.innerHTML = '<span class="gl">Scène</span>';
+  sc.forEach(j => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = SCN[j]; b.setAttribute('aria-pressed', String(j === n)); b.addEventListener('click', e => { if (j !== idx) goStep(j); e.currentTarget.blur(); }); scenesEl.appendChild(b); });
   $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#stepKey').textContent = '« ' + s.k + ' »';
   for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === NSTEP - 1; setText($('#bOnce'), s.onceLabel || 'Une génération'); $('#bTen').hidden = !!s.noTen;
@@ -1517,7 +1562,7 @@ $('#bOnce').addEventListener('click', e => { doOnce(); blur(e); });
 $('#bTen').addEventListener('click', e => { ST[idx].gen(10); readouts(); blur(e); });
 $('#bNew').addEventListener('click', e => { newSeed(); blur(e); });
 $('#bReplay').addEventListener('click', e => { restart(); blur(e); });
-segs.forEach(b => b.addEventListener('click', e => { goStep(+b.dataset.a); blur(e); }));
+segs.forEach((b, i) => b.addEventListener('click', e => { if (stepOf(idx) !== i) goStep(+b.dataset.a); blur(e); }));
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const tg = e.target && e.target.tagName, isRange = tg === 'INPUT';
@@ -1570,5 +1615,6 @@ window.__evo = {
 syncSeed(); resize(); initStep(0); requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>

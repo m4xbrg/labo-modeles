@@ -17,6 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root{
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
@@ -39,13 +40,8 @@ a{color:inherit}
 #stage{position:absolute;inset:0}
 #stage canvas{display:block}
 
-.head{position:absolute;left:26px;top:20px;pointer-events:none;max-width:70%;z-index:2;isolation:isolate;text-shadow:0 0 14px var(--fond),0 0 6px var(--fond),0 0 2px var(--fond)}
-.head::before{content:"";position:absolute;inset:-36px -110px -36px -60px;pointer-events:none;z-index:-1;opacity:.75;background:radial-gradient(ellipse farthest-side at 28% 48%,rgba(10,13,18,.96) 0%,rgba(10,13,18,.88) 52%,rgba(10,13,18,0) 100%)}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 8px}
 h1{font:400 clamp(30px,4.2vw,48px)/1 var(--serif);margin:0;letter-spacing:-.005em}
 h1 em{color:var(--accent);font-style:italic}
-.back{pointer-events:auto;display:inline-block;margin-top:10px;font:400 12px var(--mono);color:var(--texte-2);text-decoration:none;letter-spacing:.02em;transition:color .3s var(--ease)}
-.back:hover{color:var(--texte)}
 
 .tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:260px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
 .tip.on{opacity:1;transform:none}
@@ -93,13 +89,6 @@ h1 em{color:var(--accent);font-style:italic}
 .dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
 .btn[aria-pressed="true"] .dot{background:currentColor}
 
-.tabs{display:flex;gap:4px;flex:1 0 100%;min-width:0;padding-bottom:8px;border-bottom:1px solid var(--trait)}
-.tab{flex:1 1 0;min-width:0;min-height:40px;background:transparent;border:0;border-top:3px solid var(--trait);padding:8px 4px 2px 0;text-align:left;cursor:pointer;font:400 11.5px/1.25 var(--mono);color:var(--texte-2);transition:border-color .35s var(--ease),color .35s var(--ease)}
-.tab b{font-weight:500;margin-right:6px}
-.tab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:calc(100% - 28px);vertical-align:bottom}
-.tab:hover{color:var(--texte);border-top-color:var(--texte-2)}
-.tab[aria-selected="true"]{border-top-color:var(--accent);color:var(--texte)}
-.tab[aria-selected="true"] b{color:var(--accent)}
 
 input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
@@ -108,55 +97,107 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;heigh
 input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
 .rv{font:500 12px var(--mono);min-width:56px}
 
+/* Couches LABO : le panneau des laboratoires est reconstruit par chaque toy, on cible donc ses éléments plutôt que de les marquer un à un. */
+#toyPanel .eyebrow{display:none}   /* le surtitre « Module NN · étape k sur n » est dans #eyebrow */
+body.labo-etapes[data-mode=observer] .controls,
+body.labo-etapes[data-mode=observer] #toyPanel .txt,
+body.labo-etapes[data-mode=manipuler] #toyPanel .txt,
+body.labo-etapes[data-mode=observer] #toyPanel .meas,
+body.labo-etapes[data-mode=observer] #toyPanel .eq,
+body.labo-etapes[data-mode=observer] #toyPanel .note,
+body.labo-etapes[data-mode=observer] #toyPanel .ec-pre,
+body.labo-etapes[data-mode=observer] #toyPanel #vBarsWrap,
+body.labo-etapes[data-mode=observer] #toyPanel #vEq,
+body.labo-etapes[data-mode=observer] #toyPanel #mEq{display:none!important}
+
 @media (max-width:860px){
   .app{display:flex;flex-direction:column;height:auto}
   .scene{order:1;height:62vh;height:62svh;min-height:400px;flex:none}
   .controls{order:2;padding:10px 16px}
   .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
-  .head{left:16px;top:14px}
   .liens{margin-top:0;position:static;padding:0;margin-bottom:0}
   input[type=range]{width:110px}
-}
-@media (max-width:640px){
-  .tab span{display:none}
-  .tab b{margin:0;font-size:13px}
-  .tab[aria-selected="true"] span{display:inline-block}
-  .tab[aria-selected="true"] b{margin-right:6px}
 }
 @media (hover:none) and (pointer:coarse){ .kbd{display:none} }
 @media (prefers-reduced-motion:reduce){
   .swap{animation:none}
-  .tip,.btn,.comprendre,.tab{transition:none}
+  .tip,.btn,.comprendre{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 01 · 02 · 03</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Langage scientifique</h1>
+    <p class="lead">Un zoom de dix en dix, un réservoir qui se remplit, une flèche qu’on saisit, un chariot décrit par trois graphes.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>10⁻¹⁰ à 10¹³ m</dd>
+    <dt>Temps</dt><dd>~0 à 10 s</dd>
+    <dt>Modèle</dt><dd>1D et 2D, accélération constante par morceaux</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
+  <div class="chap"><p class="chap-t"><b>01</b>Mesure, échelles et représentation scientifique</p><div class="segs">
+    <button class="seg" data-a="0" data-b="1" title="01.1 — Puissances de dix (zoom, ou axe linéaire et logarithmique)"><b>01.1</b><span>Échelles</span></button>
+    <button class="seg" data-a="2" title="01.2 — Mesurer et dire la précision"><b>01.2</b><span>Précision</span></button>
+    <button class="seg" data-a="3" data-b="4" title="01.3 — Un graphique, une droite (proportionnalité ou pente)"><b>01.3</b><span>Graphique</span></button>
+    <button class="seg" data-a="5" data-b="6" title="01.4 — L’aire sous la courbe, ou une courbe non linéaire"><b>01.4</b><span>Aire</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>02</b>Vecteurs et géométrie des quantités</p><div class="segs">
+    <button class="seg" data-a="7" data-b="8" title="02.1 — Une flèche, pas un nombre (scalaire ou vecteur, composantes)"><b>02.1</b><span>Flèche</span></button>
+    <button class="seg" data-a="9" data-b="10" title="02.2 — Addition et projection"><b>02.2</b><span>Addition</span></button>
+  </div></div>
+  <div class="chap"><p class="chap-t"><b>03</b>Changement et accumulation</p><div class="segs">
+    <button class="seg" data-a="11" title="03.1 — Trois graphes, un mouvement : la pente"><b>03.1</b><span>Pente</span></button>
+    <button class="seg" data-a="12" title="03.2 — Trois graphes, un mouvement : l’aire"><b>03.2</b><span>Aire</span></button>
+  </div></div>
+</nav>
+
+<div class="modes">
+  <div role="tablist" aria-label="Couches de la planche">
+    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène seule. Les touches 1 à 8 changent d’étape."><span>O</span>Observer</button>
+    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : saisis une flèche, change une valeur, bascule la scène."><span>M</span>Manipuler</button>
+    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
+  </div>
+  <p class="indice" id="indice"></p>
+</div>
+
 <div class="app">
   <main class="scene" id="scene">
     <div id="stage"></div>
-    <header class="head" id="head">
-      <p class="serie" id="serie">LABO · Fondations 01 · 02 · 03</p>
-      <h1 id="titre">Puissances <em>de dix</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
     <div class="tip" id="tip"></div>
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
+    <section><p class="eyebrow" id="eyebrow">Module <b>01</b> · étape 1 sur 4</p></section>
     <div id="toyPanel"></div>
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints" id="hints">
-        <li><kbd>1</kbd>–<kbd>4</kbd> changer de laboratoire</li>
+        <li><kbd>1</kbd>–<kbd>8</kbd> aller à l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
       </ul>
     </section>
     <nav class="liens">
-      <a class="comprendre" id="lienComprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre couche-comp" id="lienComprendre" href="explication.html#m01"><span>Théorie du module <b id="numTheorie">01</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
   <div class="controls" role="toolbar" aria-label="Contrôles">
-    <div class="tabs" role="tablist" aria-label="Les quatre laboratoires" id="tabs"></div>
     <div id="toyControls"></div>
   </div>
 </div>
@@ -290,15 +331,12 @@ const FX = (() => {
     tipEl.style.transform = 'none';
     tipEl.style.left = Math.max(8, x) + 'px'; tipEl.style.top = Math.max(8, y) + 'px';
   }
-  /** Rectangle occupé par l'en-tête, en coordonnées du #stage (pour ne rien y placer d'important) */
-  function headRect() {
-    const s = document.getElementById('stage').getBoundingClientRect(), h = document.getElementById('head').getBoundingClientRect();
-    return { x: h.left - s.left, y: h.top - s.top, w: h.width, h: h.height, bottom: h.bottom - s.top, right: h.right - s.left };
-  }
+  /** Réserve en haut de la scène (le titre est sorti de l'écran, dans la coque LABO) : un simple filet, en coordonnées du #stage */
+  function headRect() { return { x: 0, y: 0, w: 0, h: 0, bottom: 16, right: 0 }; }
   /** Boutons segmentés de modes : FX.modes(parent, [{id,label,title}], actif, onChange) → { set(id) } */
   function modes(parent, list, active, onChange, signal) {
-    const g = document.createElement('div'); g.className = 'grp'; g.setAttribute('role', 'group');
-    g.innerHTML = `<span class="gl">Mode</span>` + list.map(m => `<button class="btn" data-m="${m.id}" title="${m.title || m.label}" aria-pressed="false">${m.label}</button>`).join('');
+    const g = document.createElement('div'); g.className = 'grp fx-modes'; g.setAttribute('role', 'group');
+    g.innerHTML = `<span class="gl">Scène</span>` + list.map(m => `<button class="btn" data-m="${m.id}" title="${m.title || m.label}" aria-pressed="false">${m.label}</button>`).join('');
     parent.appendChild(g);
     const set = id => { g.querySelectorAll('.btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === id))); };
     g.addEventListener('click', e => { const b = e.target.closest('.btn'); if (b) { set(b.dataset.m); onChange(b.dataset.m); } }, { signal });
@@ -2833,47 +2871,92 @@ const FX = (() => {
 </script>
 
 <script>
-/* ============ Coquille : onglets, montage et démontage des toys ============ */
+/* ============ Coquille : étapes, montage et démontage des toys ============ */
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
-  const tabsEl = $('#tabs'), stage = $('#stage'), panel = $('#toyPanel'), controls = $('#toyControls');
+  const stage = $('#stage'), panel = $('#toyPanel'), controls = $('#toyControls');
   const ordre = ['echelles', 'graphiques', 'vecteurs', 'mouvement'];
   const toys = ordre.map(id => FX.toys.find(t => t.id === id)).filter(Boolean);
-  let cur = null, ctrl = null;
 
-  tabsEl.innerHTML = toys.map((t, i) =>
-    `<button class="tab" role="tab" data-i="${i}" aria-selected="false" title="${t.num} · ${t.titre} (${i + 1})"><b>${t.num}</b><span>${t.titre}</span></button>`).join('');
+  /* Les scènes (une par mode d'un laboratoire). Un bouton d'étape en désigne une ou deux (data-a, data-b) ;
+     quand il en désigne deux, la bascule « Scène » du toy (FX.modes) ne laisse voir que ces deux modes. */
+  const SC = [
+    { toy: 'echelles',   mode: 'zoom',        mod: 1, rang: 1, nb: 4, ens: [0, 1] },
+    { toy: 'echelles',   mode: 'loglin',      mod: 1, rang: 1, nb: 4, ens: [0, 1] },
+    { toy: 'echelles',   mode: 'prec',        mod: 1, rang: 2, nb: 4, ens: [2] },
+    { toy: 'graphiques', mode: 'prop',        mod: 1, rang: 3, nb: 4, ens: [3, 4] },
+    { toy: 'graphiques', mode: 'pente',       mod: 1, rang: 3, nb: 4, ens: [3, 4] },
+    { toy: 'graphiques', mode: 'aire',        mod: 1, rang: 4, nb: 4, ens: [5, 6] },
+    { toy: 'graphiques', mode: 'non',         mod: 1, rang: 4, nb: 4, ens: [5, 6] },
+    { toy: 'vecteurs',   mode: 'scalaire',    mod: 2, rang: 1, nb: 2, ens: [7, 8] },
+    { toy: 'vecteurs',   mode: 'composantes', mod: 2, rang: 1, nb: 2, ens: [7, 8] },
+    { toy: 'vecteurs',   mode: 'addition',    mod: 2, rang: 2, nb: 2, ens: [9, 10] },
+    { toy: 'vecteurs',   mode: 'projection',  mod: 2, rang: 2, nb: 2, ens: [9, 10] },
+    { toy: 'mouvement',  regard: 'pente',      mod: 3, rang: 1, nb: 2, ens: [11] },
+    { toy: 'mouvement',  regard: 'aire',       mod: 3, rang: 2, nb: 2, ens: [12] },
+  ];
+  let cur = null, ctrl = null, idx = -1;
 
-  function show(i, push = true) {
-    const t = toys[i]; if (!t || t === cur) return;
+  /* Monte le toy s'il n'est pas déjà celui de l'écran. */
+  function mount(t) {
+    if (t === cur) return;
     if (ctrl) ctrl.abort();
     if (cur && cur.unmount) { try { cur.unmount(); } catch (e) { console.error(e); } }
     FX.tip(null);
     stage.innerHTML = ''; panel.innerHTML = ''; controls.innerHTML = '';
     document.querySelectorAll('.extra-hint').forEach(n => n.remove());
     ctrl = new AbortController(); cur = t;
-    tabsEl.querySelectorAll('.tab').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
-    $('#serie').textContent = `LABO · Fondations 01 · 02 · 03 — ${t.num} · ${t.titre}`;
-    $('#titre').innerHTML = t.titreHtml || t.titre;
-    $('#lienComprendre').href = `explication.html#${t.id}`;
-    document.title = `${t.titre} — LABO`;
     if (t.hints) $('#hints').insertAdjacentHTML('beforeend', t.hints.map(h => `<li class="extra-hint">${h}</li>`).join(''));
     t.mount({ scene: stage, panel, controls, signal: ctrl.signal });
     FX.tex(panel); FX.tex(controls);
     panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
+  }
+
+  function go(n, push = true) {
+    const s = SC[n]; if (!s) return;
+    const t = toys.find(x => x.id === s.toy); if (!t) return;
+    mount(t);
+    idx = n;
+    if (s.mode) {
+      // la bascule « Scène » ne montre que les modes de l'étape ; on ouvre celui de la scène choisie
+      const g = controls.querySelector('.fx-modes');
+      if (g) {
+        const permis = SC.filter((x, i) => s.ens.includes(i) && x.toy === s.toy).map(x => x.mode);
+        g.querySelectorAll('.btn').forEach(b => { b.style.display = permis.includes(b.dataset.m) ? '' : 'none'; });
+        g.style.display = permis.length < 2 ? 'none' : '';
+        const b = g.querySelector(`.btn[data-m="${s.mode}"]`);
+        if (b && b.getAttribute('aria-pressed') !== 'true') b.click();
+      }
+    } else if (s.regard) {
+      // le chariot : la pente ou l'aire, par les boutons « Regard » du toy
+      [['#bPente', 'pente'], ['#bAire', 'aire']].forEach(([sel, r]) => {
+        const b = controls.querySelector(sel); if (b && (b.getAttribute('aria-pressed') === 'true') !== (r === s.regard)) b.click();
+      });
+    }
+    document.querySelectorAll('#stepper .seg').forEach(b => {
+      if (+b.dataset.a === n || +b.dataset.b === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+    const m2 = String(s.mod).padStart(2, '0');
+    $('#eyebrow').innerHTML = `Module <b>${m2}</b> · étape ${s.rang} sur ${s.nb}`;
+    $('#lienComprendre').href = `explication.html#m${m2}`; $('#numTheorie').textContent = m2;
     if (push) history.replaceState(null, '', '#' + t.id);
   }
 
-  tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) show(+b.dataset.i); });
+  document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => {
+    const a = +b.dataset.a, n = b.dataset.b !== undefined && (idx === a || idx === +b.dataset.b) ? idx : a;   // un clic sur l'étape déjà ouverte garde la scène en cours
+    go(n); e.currentTarget.blur();
+  }));
+  const etapes = [...document.querySelectorAll('#stepper .seg')].map(b => +b.dataset.a);
   addEventListener('keydown', e => {
     if (FX.typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
-    const k = +e.key; if (k >= 1 && k <= toys.length) { show(k - 1); e.preventDefault(); }
+    const k = +e.key; if (k >= 1 && k <= etapes.length) { go(etapes[k - 1]); e.preventDefault(); }
   });
-  addEventListener('hashchange', () => { const i = toys.findIndex(t => '#' + t.id === location.hash); if (i >= 0) show(i, false); });
-  const i0 = toys.findIndex(t => '#' + t.id === location.hash);
-  show(i0 >= 0 ? i0 : 0, false);
+  addEventListener('hashchange', () => { const n = SC.findIndex(s => '#' + s.toy === location.hash); if (n >= 0) go(n, false); });
+  const n0 = SC.findIndex(s => '#' + s.toy === location.hash);
+  go(n0 >= 0 ? n0 : 0, false);
 })();
 </script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
