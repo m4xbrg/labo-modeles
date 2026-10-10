@@ -191,6 +191,8 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
         <li data-steps="0"><kbd>F</kbd> fronts d'onde · <kbd>I</kbd> inverser · <kbd>B</kbd> fibre optique</li>
         <li data-steps="1"><kbd>V</kbd> rayons réels / modèle idéal · <kbd>P</kbd> préréglage suivant</li>
         <!-- CLAVIER-3-4 -->
+        <li data-steps="2"><kbd>U</kbd> une seule couleur · <kbd>P</kbd> deuxième prisme · <kbd>G</kbd> goutte d'eau · <kbd>V</kbd> verre BK7 / flint</li>
+        <li data-steps="3"><kbd>T</kbd> troisième polariseur · <kbd>V</kbd> reflet sur une vitre · <kbd>B</kbd> angle de Brewster (reflet)</li>
         <!-- CLAVIER-3-4-FIN -->
       </ul>
     </section>
@@ -233,6 +235,18 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" data-steps="1" data-mode="real"><button class="btn go" id="bIdeal" title="Revenir à la lentille mince (touche V)">Modèle idéal</button></div>
       <div class="grp" data-steps="1" data-mode="ideal"><button class="btn sm" data-pre="photo">Appareil photo (objet lointain)</button><button class="btn sm" data-pre="proj">Projecteur (objet juste au-delà de f)</button><button class="btn sm" data-pre="loupe">Loupe (objet entre f et la lentille)</button></div>
       <!-- OUTILS-3-4 -->
+      <!-- Étape 3 · Couleurs et dispersion -->
+      <div class="grp" data-steps="2"><span class="gl">angle du prisme</span><input type="range" id="o3Apex" min="30" max="70" step="1" value="60" aria-label="Angle au sommet du prisme, en degrés"><span class="rv" id="o3ApexV">60°</span></div>
+      <div class="grp" data-steps="2" id="o3GlassG"><span class="gl">verre</span><button class="btn" id="o3Bk7" aria-pressed="true" title="Verre crown BK7, peu dispersif">BK7</button><button class="btn" id="o3Flint" aria-pressed="false" title="Verre flint F2, plus dispersif">flint</button></div>
+      <div class="grp" data-steps="2" id="o3MonoG"><button class="btn" id="o3Mono" aria-pressed="false" title="Remplace la lumière blanche par une seule longueur d’onde"><span class="dot"></span>Une seule couleur</button></div>
+      <div class="grp" data-steps="2" id="o3LamG"><span class="gl">λ</span><input type="range" id="o3Lam" min="400" max="700" step="1" value="589" aria-label="Longueur d’onde de la lumière, en nanomètres"><span class="rv" id="o3LamV">589 nm</span></div>
+      <div class="grp" data-steps="2"><button class="btn" id="o3Sec" aria-pressed="false" title="Un second prisme identique, inversé, juste après le premier"><span class="dot"></span>Deuxième prisme</button><button class="btn" id="o3Drop" aria-pressed="false" title="Coupe d’une goutte d’eau sphérique : une réflexion à l’arrière"><span class="dot"></span>Goutte d’eau</button></div>
+      <!-- Étape 4 · Polarisation -->
+      <div class="grp" data-steps="3" id="o4G1"><span class="gl" id="o4L1">polariseur 1</span><input type="range" id="o4P1" min="0" max="180" step="1" value="0" aria-label="Angle de l’axe du polariseur 1, en degrés"><span class="rv" id="o4P1V">0°</span></div>
+      <div class="grp" data-steps="3" id="o4G2"><span class="gl">polariseur 2</span><input type="range" id="o4P2" min="0" max="180" step="1" value="0" aria-label="Angle de l’axe du polariseur 2, en degrés"><span class="rv" id="o4P2V">0°</span></div>
+      <div class="grp" data-steps="3" id="o4G3"><span class="gl">polariseur 3</span><input type="range" id="o4P3" min="0" max="180" step="1" value="45" aria-label="Angle de l’axe du polariseur 3, en degrés"><span class="rv" id="o4P3V">45°</span></div>
+      <div class="grp" data-steps="3" id="o4GI"><span class="gl">incidence</span><input type="range" id="o4Inc" min="5" max="85" step="0.5" value="40" aria-label="Angle d’incidence sur la vitre, en degrés"><span class="rv" id="o4IncV">40°</span><button class="btn sm" id="o4Brew" title="Régler l’incidence à l’angle de Brewster">θB</button></div>
+      <div class="grp" data-steps="3"><button class="btn" id="o4Third" aria-pressed="false" title="Ajoute un polariseur entre les deux autres"><span class="dot"></span>Glisser un troisième polariseur au milieu</button><button class="btn" id="o4Glare" aria-pressed="false" title="Lumière naturelle réfléchie par une vitre, vue à travers un polariseur"><span class="dot"></span>Reflet sur une vitre</button></div>
       <!-- OUTILS-3-4-FIN -->
     </div>
   </div>
@@ -1740,19 +1754,747 @@ STEPS[1] = {
 }
 
 /* ETAPES-3-4 */
-/* Étapes provisoires : le lot B remplace tout ce qui se trouve entre ces deux marqueurs. */
-function stubScope() { const w = scopeC.width / dpr, h = scopeC.height / dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h); }
-function stubDraw(txt) { view.s = 1; view.cx = W / 2; view.cy = H / 2; ctx.font = mono(13); tagText(ctx, txt, W / 2, H / 2, 'center', 'middle', C.texte2); }
+{
+/* ================= Lot B : étapes 3 (couleurs et dispersion) et 4 (polarisation) =================
+   Tout vit dans ce bloc : aucun nom n'est déclaré dans la portée de la page. */
+
+/* ---------------- Petits outils de ce lot ---------------- */
+const oEl = id => document.getElementById(id);
+const oOn = (id, ev, fn) => { const e = oEl(id); if (e) e.addEventListener(ev, fn); };
+const oPress = (id, on) => { const e = oEl(id); if (e) e.setAttribute('aria-pressed', on ? 'true' : 'false'); };
+const oTxt = (id, s) => { const e = oEl(id); if (e && e.textContent !== s) e.textContent = s; };
+const oVal = (id, v) => { const e = oEl(id); if (e && +e.value !== v) e.value = v; };
+const oShow = (id, on) => { const e = oEl(id); if (e) { const d = on ? '' : 'none'; if (e.style.display !== d) e.style.display = d; } };
+const oRowShow = (keys, on) => { for (const k of keys) { const e = mEls[k], r = e && e.closest('.row'); if (r) { const d = on ? '' : 'none'; if (r.style.display !== d) r.style.display = d; } } };
+const oInPoly = (p, x, y) => { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) if ((p[i][1] > y) !== (p[j][1] > y) && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) c = !c; return c; };
+// Remet les contrôles d'accord avec prm ; si l'étape est affichée, rafraîchit aussi outils, mesures et statut (refresh du socle).
+function oRef(n) { STEPS[n].sync(); if (typeof refresh === 'function' && step === n) refresh(); }
+// Enregistreur : titre, légende et note du panneau, par mode (aides du socle setText et setLeg si elles existent).
+const oLn = (col, w, dash) => `<line x1="0" y1="4" x2="20" y2="4" stroke="${col}" stroke-width="${w}"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+const oLg = (inner, text) => `<span><svg viewBox="0 0 20 8">${inner}</svg>${text}</span>`;
+const oDot = col => `<circle cx="10" cy="4" r="3" fill="${col}"/>`;
+function oPanel(eye, leg, note) {
+  if (typeof setText === 'function') { setText('#rEye', eye); setText('#mNote', note); }
+  if (typeof setLeg === 'function') setLeg(leg);
+}
+const oDeg = r => r / DEG;
+const oPct = (x, d) => fmt(x * 100, d == null ? 1 : d) + ' %';
+const oPastel = l => { const c = Opt.visibleColor(l).map(v => Math.round(v + (255 - v) * 0.5)); return `rgb(${c[0]},${c[1]},${c[2]})`; };
+
+/* =====================================================================
+   ÉTAPE 3 · Couleurs et dispersion
+   ===================================================================== */
+const O3 = {
+  S: 74,            // mm : côté du prisme
+  GAP: 8,           // mm : écart entre les deux prismes
+  X0: -196,         // mm : départ du faisceau (abscisse)
+  LS: 230,          // mm : trajet du dernier prisme à l'écran (à l'échelle)
+  HS: 40,           // mm : demi-longueur de l'écran
+  WB: 1.2,          // mm : largeur du faisceau fin
+  LAMS: Array.from({ length: 31 }, (_, k) => 400 + 10 * k),
+  key: '', geo: null, mk: '', mono: null, pk: '', phys: null, drop: null, wb: null, water: null
+};
+
+// Poids des 31 couleurs : leur somme donne un blanc neutre à l'écran (somme par canal = 1).
+function o3Wb() {
+  if (O3.wb) return O3.wb;
+  const cs = O3.LAMS.map(l => Opt.visibleColor(l).map(v => v / 255));
+  const w = O3.LAMS.map(() => 1 / 31);
+  for (let it = 0; it < 8000; it++) {
+    const S = [0, 0, 0];
+    for (let k = 0; k < 31; k++) for (let c = 0; c < 3; c++) S[c] += w[k] * cs[k][c];
+    const T = (S[0] + S[1] + S[2]) / 3;
+    for (let k = 0; k < 31; k++) { let g = 0; for (let c = 0; c < 3; c++) g += (S[c] - T) * cs[k][c]; g += 0.2 * (w[k] - 1 / 31); w[k] = Math.max(0.002, w[k] - 0.03 * g); }
+  }
+  const S = [0, 0, 0];
+  for (let k = 0; k < 31; k++) for (let c = 0; c < 3; c++) S[c] += w[k] * cs[k][c];
+  const T = (S[0] + S[1] + S[2]) / 3;
+  return (O3.wb = w.map(x => x / T));
+}
+
+// Surfaces (arêtes des prismes, antihoraires : l'intérieur est à gauche de p→q ; écran absorbant).
+function o3Surf(geo, n, screen) {
+  const sc = [];
+  for (const P of geo.prisms) for (let i = 0; i < 3; i++) sc.push({ type: 'line', p: P[i], q: P[(i + 1) % 3], nL: n, nR: 1 });
+  if (screen) sc.push({ type: 'line', p: screen.p, q: screen.q, nL: 1, nR: 1, absorb: true });
+  return sc;
+}
+// Une longueur d'onde : tracé réel (Opt.trace), n = Cauchy(λ).
+function o3Run(geo, lam, screen) {
+  const n = Opt.cauchy(lam, geo.glass);
+  const r = Opt.trace({ x: O3.X0, y: 0, dx: 1, dy: 0, I: 1 }, o3Surf(geo, n, screen), 16, { far: 40 });
+  const pts = [[r.segs[0].x0, r.segs[0].y0]];
+  for (const s of r.segs) pts.push([s.x1, s.y1]);
+  const L = r.segs[r.segs.length - 1];
+  return { lam, n, pts, end: r.end, ang: Math.atan2(L.y1 - L.y0, L.x1 - L.x0), hit: pts[pts.length - 1], ex: pts[pts.length - 2] };
+}
+function o3Geo() {
+  const A = prm.a3Apex, gl = prm.a3Glass, sec = !!prm.a3Sec, key = A + '|' + gl + '|' + sec;
+  if (O3.key === key) return O3.geo;
+  const a = A * DEG, s = O3.S, th1 = Opt.minDeviation(Opt.cauchy(589, gl), a).theta1, psi = a / 2 - th1;
+  const hw = s * Math.sin(a / 2), hh = s * Math.cos(a / 2), ml = [-hw / 2, hh / 2], co = Math.cos(psi), si = Math.sin(psi);
+  const rot = p => { const x = p[0] - ml[0], y = p[1] - ml[1]; return [x * co - y * si, x * si + y * co]; };
+  const P1 = [[-hw, 0], [hw, 0], [0, hh]].map(rot);            // sommets antihoraires : base gauche, base droite, sommet
+  const ex = P1[2][0] - P1[1][0], ey = P1[2][1] - P1[1][1], Lr = Math.hypot(ex, ey);
+  const mr = [(P1[1][0] + P1[2][0]) / 2, (P1[1][1] + P1[2][1]) / 2], nr = [ey / Lr, -ex / Lr];
+  const C2 = [mr[0] + nr[0] * O3.GAP / 2, mr[1] + nr[1] * O3.GAP / 2];
+  const geo = { A, glass: gl, sec, th1, prisms: [P1] };
+  if (sec) geo.prisms.push(P1.map(p => [2 * C2[0] - p[0], 2 * C2[1] - p[1]]));   // rotation de 180° : faces parallèles, tête-bêche
+  const c0 = o3Run(geo, 589, null), L = c0.pts.length;
+  const ex0 = c0.pts[L - 2], d0 = [c0.pts[L - 1][0] - ex0[0], c0.pts[L - 1][1] - ex0[1]], dl = Math.hypot(d0[0], d0[1]);
+  const d = [d0[0] / dl, d0[1] / dl], t = [-d[1], d[0]], c = [ex0[0] + O3.LS * d[0], ex0[1] + O3.LS * d[1]];
+  geo.exit = ex0; geo.dir = d; geo.tan = t;
+  geo.screen = { c, d, t, p: [c[0] - O3.HS * t[0], c[1] - O3.HS * t[1]], q: [c[0] + O3.HS * t[0], c[1] + O3.HS * t[1]] };
+  geo.rays = O3.LAMS.map(l => { const r = o3Run(geo, l, geo.screen); r.u = (r.hit[0] - c[0]) * t[0] + (r.hit[1] - c[1]) * t[1]; return r; });
+  const angs = geo.rays.map(r => r.ang), ok = geo.rays.every(r => r.end === 'absorb');
+  geo.angSpread = oDeg(Math.max(...angs) - Math.min(...angs));
+  geo.recombined = sec && ok && geo.angSpread < 0.01;
+  geo.uMid = (geo.rays[0].u + geo.rays[30].u) / 2;
+  const ph = o3Phys0(A, gl, th1);
+  geo.span = Math.max(Math.abs(ph.D400 - ph.D700) * DEG * O3.LS, 0.8);   // mm : étalement du spectre sur l'écran, sans second prisme
+  geo.K = clamp(0.8 * 31 / Math.max(1, O3.WB / (geo.span / 30)), 0.9, 16);   // gain d'affichage : le spectre reste lumineux, les couleurs superposées saturent en blanc
+  geo.centroid = [(P1[0][0] + P1[1][0] + P1[2][0]) / 3, (P1[0][1] + P1[1][1] + P1[2][1]) / 3];
+  O3.key = key; return (O3.geo = geo);
+}
+function o3Phys0(A, gl, th1) {
+  const a = A * DEG, n = l => Opt.cauchy(l, gl), D = l => oDeg(Opt.prismDeviation(n(l), a, th1).D);
+  const o = { th1, nR: n(656), nY: n(589), nB: n(486), DR: D(656), DY: D(589), DB: D(486), D400: D(400), D700: D(700) };
+  o.spread = o.DB - o.DR; return o;
+}
+function o3Phys() {
+  const key = prm.a3Apex + '|' + prm.a3Glass;
+  if (O3.pk !== key) { O3.phys = o3Phys0(prm.a3Apex, prm.a3Glass, Opt.minDeviation(Opt.cauchy(589, prm.a3Glass), prm.a3Apex * DEG).theta1); O3.pk = key; }
+  return O3.phys;
+}
+function o3MonoRay(geo, lam) {
+  const k = O3.key + '|' + lam;
+  if (O3.mk !== k) { const r = o3Run(geo, lam, geo.screen); r.u = (r.hit[0] - geo.screen.c[0]) * geo.tan[0] + (r.hit[1] - geo.screen.c[1]) * geo.tan[1]; O3.mono = r; O3.mk = k; }
+  return O3.mono;
+}
+function o3DropData() {
+  if (O3.drop) return O3.drop;
+  const cols = [{ k: 'R', lam: 656, nom: 'rouge' }, { k: 'G', lam: 530, nom: 'vert' }, { k: 'V', lam: 405, nom: 'violet' }];
+  const BS = Array.from({ length: 41 }, (_, j) => 0.03 + 0.96 * j / 40);
+  for (const c of cols) {
+    c.n = Opt.cauchy(c.lam, 'eau'); c.rb = Opt.rainbowAngle(c.n); c.bc = Math.sin(c.rb.i); c.ang = oDeg(c.rb.angle);
+    c.rays = BS.map(b => Opt.dropRay(c.n, b)); c.ray = Opt.dropRay(c.n, c.bc);
+    c.curve = Array.from({ length: 121 }, (_, j) => { const b = 0.02 + 0.975 * j / 120; return [b, oDeg(Opt.dropRay(c.n, b).angle)]; });
+  }
+  return (O3.drop = { cols, BS, nEau: Opt.cauchy(589, 'eau') });
+}
+
+const s3 = { x0: -200, sx: 30 };
+const N3 = 'Loi de Cauchy approchée ; intensités des couleurs non pondérées par la sensibilité de l’œil (poids ajustés pour un blanc neutre) ; couleurs sRGB approximatives. Distances à l’échelle : seule la loupe agrandit, du facteur indiqué.';
+const N3D = 'Loi de Cauchy approchée (eau) ; rayons d’intensité égale, sans pondération par les réflectances ; couleurs sRGB approximatives. Angles réels : rien n’est agrandi.';
+function o3Fit() {
+  const x0 = W < 700 ? -118 : -200, x1 = 314, y0 = -260, y1 = 48, top = 122, m = 12, bot = W < 700 ? 144 : m;   // en portrait, la loupe occupe le bas
+  const s = Math.min((W - 2 * m) / (x1 - x0), (H - top - bot) / (y1 - y0));
+  view.s = s; view.cx = W / 2 - s * (x0 + x1) / 2; view.cy = top + (H - top - bot - s * (y1 - y0)) / 2 + s * y1;
+  s3.x0 = x0; s3.sx = view.cx + s * x0 + 30;
+}
+const o3Px = pts => { const q = pts.map(P); q[0] = [Math.max(q[0][0], s3.sx), q[0][1]]; return q; };
+
+function o3DrawPrism() {
+  const c = ctx, geo = o3Geo(), wb = o3Wb(), isMono = !!prm.a3Mono, lam = prm.a3Lam, ph = o3Phys();
+  const lw = Math.max(1.2, O3.WB * view.s), scr = geo.screen, mr = isMono ? o3MonoRay(geo, lam) : null;
+  const sx = s3.sx, sy = Y(0);
+  c.font = mono(11);
+  // --- écran : une barre mate, avec son ombre portée en hachures
+  const sp = P(scr.p), sq = P(scr.q);
+  c.save(); c.lineCap = 'butt';
+  c.strokeStyle = rgba(RT2, 0.55); c.lineWidth = 7; c.beginPath(); c.moveTo(sp[0], sp[1]); c.lineTo(sq[0], sq[1]); c.stroke();
+  c.strokeStyle = C.fond2; c.lineWidth = 5; c.beginPath(); c.moveTo(sp[0], sp[1]); c.lineTo(sq[0], sq[1]); c.stroke();
+  c.restore();
+  zseg(sp[0], sp[1], sq[0], sq[1], 8, 'ecran', 'Écran', 'Surface mate où la lumière s’arrête : on y lit où chaque couleur arrive.');
+  // --- source : lampe et fente
+  c.save(); c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.2;
+  c.fillRect(sx - 20, sy - 13, 20, 26); c.strokeRect(sx - 20, sy - 13, 20, 26);
+  c.fillStyle = isMono ? colL(lam) : C.texte; c.fillRect(sx - 1.5, sy - 2, 3, 4);
+  c.restore();
+  zone(sx - 22, sy - 15, sx + 2, sy + 15, 'source', 'Source', isMono ? 'Lampe et fente, avec un filtre : une seule longueur d’onde sort, en faisceau fin.' : 'Lampe et fente : un faisceau fin de lumière blanche, large de ' + fmt(O3.WB, 1) + ' mm.');
+  // --- prismes
+  const nGl = ph.nY;
+  geo.prisms.forEach((Pr, i) => {
+    const sc = Pr.map(P), xs = sc.map(p => p[0]), ys = sc.map(p => p[1]);
+    const path = () => { c.beginPath(); sc.forEach((p, j) => j ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1])); c.closePath(); };
+    glassFill(c, path, nGl, { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) });
+    zoneF((x, y) => oInPoly(sc, x, y), 'prisme' + i, i ? 'Deuxième prisme' : 'Prisme', i ? 'Prisme identique, retourné : ses faces sont parallèles à celles du premier, il défait l’écart de direction.' : 'Verre taillé : un faisceau y entre par une face et en sort par l’autre, dévié d’un angle qui dépend de n.');
+  });
+  // --- faisceau blanc avant le prisme, puis rayons
+  const r0 = isMono ? mr : geo.rays[0], pts0 = o3Px(r0.pts);
+  zseg(sx, sy, pts0[1][0], pts0[1][1], 7, 'faisceau', isMono ? 'Faisceau d’une couleur' : 'Faisceau blanc', isMono ? 'Une seule longueur d’onde : même couleur avant et après le prisme.' : 'Toutes les couleurs ensemble, sur le même trajet : il contient déjà ce que le prisme va trier.');
+  if (isMono) {
+    beam(c, o3Px(mr.pts), colL(lam), 1, 1.8);
+  } else {
+    beam(c, [pts0[0], pts0[1]], C.texte, 1, 1.8);
+    c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'butt'; c.lineJoin = 'round'; c.lineWidth = lw;
+    geo.rays.forEach((r, k) => {
+      const p = o3Px(r.pts); c.strokeStyle = colLA(r.lam, Math.min(1, geo.K * wb[k])); c.beginPath();
+      for (let i = 1; i < p.length; i++) i > 1 ? c.lineTo(p[i][0], p[i][1]) : c.moveTo(p[1][0], p[1][1]);
+      c.stroke();
+    });
+    c.restore();
+  }
+  // --- tache sur l'écran
+  const hits = (isMono ? [mr] : geo.rays).map(r => ({ r, p: P(r.hit) }));
+  c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'butt';
+  const tx = geo.tan[0], ty = -geo.tan[1];                        // tangente à l'écran, en pixels (y vers le bas)
+  hits.forEach((h, k) => {
+    const half = Math.max(1.2, O3.WB * view.s) / 2;
+    c.strokeStyle = isMono ? colL(lam) : colLA(h.r.lam, Math.min(1, geo.K * wb[k]));
+    c.lineWidth = 4; c.beginPath(); c.moveTo(h.p[0] - tx * half, h.p[1] - ty * half); c.lineTo(h.p[0] + tx * half, h.p[1] + ty * half); c.stroke();
+  });
+  c.restore();
+  // zone « rayons colorés » après le dernier prisme, zone « spectre » sur l'écran
+  const ex = P(geo.exit), hc = P(scr.c);
+  zseg(ex[0], ex[1], hc[0], hc[1], 6, 'rayon', isMono ? 'Rayon coloré' : 'Rayons colorés', isMono ? 'λ = ' + fmt(lam, 0) + ' nm, n = ' + fmt(mr.n, 4) + ' : il dévie de D = ' + fmt(oDeg(Opt.prismDeviation(mr.n, geo.A * DEG, geo.th1).D), 2) + '° et ne s’étale pas.' : 'Chaque longueur d’onde sort sous son propre angle : le bleu plus dévié que le rouge.');
+  zseg(hc[0] - tx * 10, hc[1] - ty * 10, hc[0] + tx * 10, hc[1] + ty * 10, 9, 'spectre', isMono ? 'Tache colorée' : (geo.sec ? 'Faisceau recomposé' : 'Spectre'), isMono ? 'Une seule couleur : une tache étroite, à la place de cette longueur d’onde.' : geo.sec ? 'Les couleurs arrivent au même endroit : leur somme est blanche, avec de fines franges sur les bords.' : 'Les couleurs rangées par longueur d’onde : violet du côté le plus dévié, rouge du côté le moins dévié.');
+  // --- angle du prisme et déviation
+  const ap = geo.prisms[0][2], aB = geo.prisms[0][0], aC = geo.prisms[0][1];
+  const a1 = Math.atan2(aC[1] - ap[1], aC[0] - ap[0]), a2 = Math.atan2(aB[1] - ap[1], aB[0] - ap[0]);
+  let sw = a2 - a1; while (sw > PI) sw -= TAU; while (sw < -PI) sw += TAU;
+  c.save(); c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1; arcPath(c, X(ap[0]), Y(ap[1]), Math.max(12, 9 * view.s), a1, sw); c.stroke(); c.restore();
+  const am = a1 + sw / 2, ar = Math.max(12, 9 * view.s) + 6;
+  c.font = mono(11); tagText(c, fmt(geo.A, 0) + '°', X(ap[0]) + ar * 1.9 * Math.cos(am), Y(ap[1]) - ar * 1.9 * Math.sin(am) - 2, 'center', 'middle', C.texte);
+  if (!geo.sec) {
+    const ex0 = geo.exit, ang = Math.atan2(geo.dir[1], geo.dir[0]), Dd = isMono ? oDeg(Opt.prismDeviation(mr.n, geo.A * DEG, geo.th1).D) : ph.DY;
+    const rr = Math.max(34, 44 * view.s / 1.6);
+    c.save(); c.strokeStyle = rgba(RT2, 0.8); c.setLineDash([4, 4]); c.lineWidth = 1; c.beginPath(); c.moveTo(X(ex0[0]), Y(ex0[1])); c.lineTo(X(ex0[0]) + rr * 1.5, Y(ex0[1])); c.stroke(); c.setLineDash([]);
+    c.strokeStyle = rgba(RT, 0.8); arcPath(c, X(ex0[0]), Y(ex0[1]), rr, 0, ang); c.stroke(); c.restore();
+    c.font = mono(11); tagText(c, 'D = ' + fmt(Dd, 1) + '°', X(ex0[0]) + (rr + 8) * Math.cos(ang / 2), Y(ex0[1]) - (rr + 8) * Math.sin(ang / 2) + 4, 'left', 'middle', C.texte);
+  }
+  // --- étiquettes
+  c.font = mono(11);
+  tagText(c, isMono ? 'λ = ' + fmt(lam, 0) + ' nm' : 'lumière blanche', s3.sx - 18, Y(0) - 19, 'left', 'bottom', isMono ? colL(lam) : C.texte);
+  const bl = geo.prisms[0][0];
+  tagText(c, (W < 560 ? '' : 'prisme · ') + (prm.a3Glass === 'BK7' ? 'BK7' : 'flint F2'), Math.max(X(bl[0]) + 6, W < 560 ? 62 : 128), Y(bl[1]) + 9, 'right', 'top', C.texte2);
+  if (geo.sec) { const b2 = [(geo.prisms[1][0][0] + geo.prisms[1][1][0]) / 2, (geo.prisms[1][0][1] + geo.prisms[1][1][1]) / 2]; if (W >= 560) tagText(c, 'prisme inversé', X(b2[0]) + 10, Y(b2[1]) - 12, 'center', 'bottom', C.texte2); }
+  const up = sq[1] < sp[1] ? sq : sp;
+  { const right = up[0] + 52 > W; tagText(c, 'écran', up[0] + (right ? -8 : 8), up[1] - 6, right ? 'right' : 'left', 'bottom', C.texte2); }
+  o3Loupe(geo, isMono, mr);
+}
+
+// Loupe sur l'écran : la tache agrandie de N fois (le reste de la scène est à l'échelle).
+function o3Loupe(geo, mn, mr) {
+  const c = ctx, wb = o3Wb(), wl = Math.min(264, Math.max(200, W * 0.62)), hl = 118, x0 = 12, y0 = H - hl - 12;
+  const sl = 0.8 * (wl - 28) / geo.span, N = sl / view.s, xc = x0 + wl / 2, yb = y0 + 34, hb = 30;
+  c.save();
+  c.fillStyle = 'rgba(10,13,18,0.9)'; c.fillRect(x0, y0, wl, hl); c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(x0 + 0.5, y0 + 0.5, wl - 1, hl - 1);
+  c.font = mono(11); c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = C.texte2;
+  c.fillText('loupe sur l’écran ×' + fmt(N, 0), x0 + 8, y0 + 13);
+  c.beginPath(); c.rect(x0 + 1, yb - 2, wl - 2, hb + 4); c.clip();
+  c.fillStyle = 'rgba(138,147,160,0.07)'; c.fillRect(x0 + 1, yb, wl - 2, hb);
+  const bw = Math.max(1.5, O3.WB * sl);
+  if (mn) {
+    c.fillStyle = 'rgba(138,147,160,0.16)'; const a = geo.rays[0].u, b = geo.rays[30].u; c.fillRect(xc + (a - geo.uMid) * sl - bw / 2, yb + hb * 0.35, (b - a) * sl + bw, hb * 0.3);
+    c.fillStyle = colL(prm.a3Lam); c.fillRect(xc + (mr.u - geo.uMid) * sl - bw / 2, yb, bw, hb);
+  } else {
+    c.globalCompositeOperation = 'lighter';
+    for (let t = 0; t <= 120; t++) {                       // 121 longueurs d'onde : positions et poids interpolés entre les 31 tracés
+      const k = Math.min(29, t >> 2), f = (t - 4 * k) / 4, u = lerp(geo.rays[k].u, geo.rays[k + 1].u, f), w = lerp(wb[k], wb[k + 1], f) / 4;
+      c.fillStyle = colLA(400 + 2.5 * t, Math.min(1, geo.K * w)); c.fillRect(xc + (u - geo.uMid) * sl - bw / 2, yb, bw, hb);
+    }
+  }
+  c.restore();
+  c.save(); c.font = mono(10); c.textBaseline = 'middle';
+  c.fillStyle = oPastel(430); c.textAlign = 'left'; c.fillText('violet · 400 nm', x0 + 8, yb + hb + 11);
+  c.fillStyle = oPastel(680); c.textAlign = 'right'; c.fillText('rouge · 700 nm', x0 + wl - 8, yb + hb + 11);
+  const nice = [0.5, 1, 2, 5, 10].find(v => v * sl >= 36) || 10;
+  c.strokeStyle = C.texte2; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 8, y0 + hl - 12); c.lineTo(x0 + 8 + nice * sl, y0 + hl - 12); c.moveTo(x0 + 8, y0 + hl - 15); c.lineTo(x0 + 8, y0 + hl - 9); c.moveTo(x0 + 8 + nice * sl, y0 + hl - 15); c.lineTo(x0 + 8 + nice * sl, y0 + hl - 9); c.stroke();
+  c.fillStyle = C.texte2; c.textAlign = 'left'; c.fillText(fmt(nice, nice < 1 ? 1 : 0) + ' mm sur l’écran', x0 + 16 + nice * sl, y0 + hl - 12);
+  c.restore();
+  zone(x0, y0, x0 + wl, y0 + hl, 'loupe', 'Loupe sur l’écran', 'Agrandit ×' + fmt(N, 0) + ' la zone de l’écran où arrive la lumière : violet à gauche, rouge à droite. Seule cette loupe est agrandie.');
+  // repère sur l'écran : ce que la loupe agrandit
+  const hc = P(geo.screen.c);
+  c.save(); c.strokeStyle = rgba(RT2, 0.5); c.lineWidth = 1; c.setLineDash([3, 3]); c.strokeRect(hc[0] - 9, hc[1] - 9, 18, 18);
+  c.beginPath(); c.moveTo(x0 + wl, y0 + 6); c.lineTo(hc[0] - 9, hc[1] + 9 > y0 ? hc[1] : hc[1]); c.strokeStyle = rgba(RT2, 0.22); c.stroke(); c.restore();
+}
+
+// ---- Goutte d'eau (coupe) ----
+function o3DrawDrop() {
+  const c = ctx, D = o3DropData(), R = clamp(Math.min(H * 0.21, W * 0.2), 46, 150);
+  const cx = Math.min(W * 0.6, W - R - 14), cy = 128 + R + 4;
+  const gx = x => cx + R * x, gy = y => cy - R * y;
+  c.font = mono(11);
+  const drop = () => { c.beginPath(); c.arc(cx, cy, R, 0, TAU); };
+  // rayons incidents (lumière blanche, parallèles)
+  const xL = Math.max(10, cx - 4.2 * R);
+  c.save(); c.lineWidth = 1; c.strokeStyle = rgba(RT, 0.22);
+  c.beginPath(); D.BS.forEach((b, j) => { if (j % 2) return; const p = D.cols[0].rays[j].points[0]; c.moveTo(xL, gy(b)); c.lineTo(gx(p[0]), gy(p[1])); }); c.stroke(); c.restore();
+  zoneF((x, y) => x >= xL && x <= cx - R && y >= gy(1) - 4 && y <= gy(0.02), 'incident', 'Lumière blanche', 'Rayons parallèles, à des hauteurs b différentes : ils arrivent de la gauche, la source est loin.');
+  glassFill(c, drop, D.nEau, { x: cx - R, y: cy - R, w: 2 * R, h: 2 * R }, 0.9);
+  zcirc(cx, cy, R, 'goutte', 'Goutte d’eau', 'Coupe d’une goutte sphérique : chaque rayon entre, se réfléchit une fois à l’arrière et ressort.');
+  // rayons dans la goutte et à la sortie, par couleur
+  const Lout = 2.1 * R;
+  c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+  for (const col of D.cols) {
+    c.strokeStyle = colLA(col.lam, 0.3); c.lineWidth = 1; c.beginPath();
+    for (const r of col.rays) {
+      const [p0, p1, p2] = r.points;
+      c.moveTo(gx(p0[0]), gy(p0[1])); c.lineTo(gx(p1[0]), gy(p1[1])); c.lineTo(gx(p2[0]), gy(p2[1])); c.lineTo(gx(p2[0]) + Lout * r.dir[0], gy(p2[1]) - Lout * r.dir[1]);
+    }
+    c.stroke();
+    const r = col.ray, [p0, p1, p2] = r.points;                     // rayon de l'arc (minimum de déviation)
+    c.strokeStyle = colLA(col.lam, 0.95); c.lineWidth = 1.9; c.beginPath();
+    c.moveTo(gx(p0[0]), gy(p0[1])); c.lineTo(gx(p1[0]), gy(p1[1])); c.lineTo(gx(p2[0]), gy(p2[1])); c.lineTo(gx(p2[0]) + Lout * r.dir[0], gy(p2[1]) - Lout * r.dir[1]); c.stroke();
+  }
+  c.restore();
+  c.save(); c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.2; drop(); c.stroke(); c.restore();
+  for (const col of D.cols) {
+    const r = col.ray, p2 = r.points[2], x0 = gx(p2[0]), y0 = gy(p2[1]);
+    zseg(x0, y0, x0 + Lout * r.dir[0], y0 - Lout * r.dir[1], 6, 'arc' + col.k, 'Rayon de l’arc, ' + col.nom, 'Entré à la hauteur b = ' + fmt(col.bc, 2) + ' R, il ressort à ' + fmt(col.ang, 1) + '° de la direction d’où vient la lumière ; les rayons voisins ressortent presque parallèles à lui.');
+  }
+  // direction d'où vient la lumière, et angles de l'arc
+  const rL = 2.1 * R;
+  c.save(); c.setLineDash([5, 4]); c.strokeStyle = rgba(RT2, 0.9); c.lineWidth = 1; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx - rL, cy); c.stroke(); c.setLineDash([]);
+  [[D.cols[2], 1.12], [D.cols[0], 1.3]].forEach(([col, k]) => {
+    const a = col.ang * DEG;
+    c.strokeStyle = colLA(col.lam, 0.85); c.lineWidth = 1; c.setLineDash([2, 3]); c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx - rL * Math.cos(a), cy + rL * Math.sin(a)); c.stroke(); c.setLineDash([]);
+    c.lineWidth = 1.2; arcPath(c, cx, cy, k * R, PI, a); c.stroke();
+  });
+  c.restore();
+  zseg(cx - rL, cy, cx, cy, 6, 'antisol', 'Direction d’où vient la lumière', 'Référence des angles de l’arc : l’observateur la voit dans la direction du Soleil.');
+  const aR = D.cols[0].ang * DEG, aV = D.cols[2].ang * DEG, lx = rL * 0.98;
+  c.font = mono(11);
+  tagText(c, 'violet ' + fmt(D.cols[2].ang, 1) + '°', cx - lx * Math.cos(aV) - 4, cy + lx * Math.sin(aV) - 8, 'right', 'bottom', oPastel(430));
+  tagText(c, 'rouge ' + fmt(D.cols[0].ang, 1) + '°', cx - lx * Math.cos(aR) - 4, cy + lx * Math.sin(aR) + 8, 'right', 'top', oPastel(660));
+  tagText(c, 'd’où vient la lumière', cx - rL + 2, cy - 8, 'left', 'bottom', C.texte2);
+  tagText(c, 'goutte d’eau · coupe', cx + R, cy - R - 8, 'right', 'bottom', C.texte2);
+  tagText(c, W < 560 ? 'rayons concentrés près de chaque angle' : 'les rayons de chaque couleur se concentrent près de leur angle', 14, H - 12, 'left', 'bottom', C.texte);
+}
+
+function o3Scope() {
+  if (prm.a3Drop) {
+    const D = o3DropData(), curves = D.cols.map(c => ({ pts: c.curve, col: colL(c.lam), lw: 1.6 })), pts = D.cols.filter(c => c.k !== 'G').map(c => ({ x: c.bc, y: c.ang, col: colL(c.lam) }));
+    const g = plotXY({ x0: 0, x1: 1, y0: 0, y1: 48, xl: ['b = 0', 'b = R'], yl: ['0°', '48°'], curves, points: pts });
+    sctx.save(); sctx.font = mono(10); sctx.textBaseline = 'middle'; sctx.textAlign = 'left';
+    sctx.fillStyle = oPastel(660); sctx.fillText('rouge · maximum ' + fmt(D.cols[0].ang, 1) + '°', g.xs(0.5), g.ys(14));
+    sctx.fillStyle = oPastel(430); sctx.fillText('violet · maximum ' + fmt(D.cols[2].ang, 1) + '°', g.xs(0.5), g.ys(7));
+    sctx.restore();
+    return;
+  }
+  const gl = prm.a3Glass, ph = o3Phys(), lo = Opt.cauchy(750, gl), hi = Opt.cauchy(380, gl), pad = (hi - lo) * 0.08;
+  if (!O3.nc) O3.nc = {};
+  if (!O3.nc[gl]) { const cu = []; for (let l = 380; l < 750; l += 10) cu.push({ pts: [[l, Opt.cauchy(l, gl)], [Math.min(750, l + 10), Opt.cauchy(Math.min(750, l + 10), gl)]], col: colL(l + 5), lw: 2.2 }); O3.nc[gl] = cu; }
+  const curves = O3.nc[gl];
+  const pts = [[656, ph.nR], [589, ph.nY], [486, ph.nB]].map(([l, n]) => ({ x: l, y: n, col: C.texte }));
+  const vl = prm.a3Mono ? [{ x: prm.a3Lam, col: colL(prm.a3Lam) }] : [];
+  const g = plotXY({ x0: 380, x1: 750, y0: lo - pad, y1: hi + pad, xl: ['380 nm', '750 nm'], yl: [fmt(lo - pad, 3), fmt(hi + pad, 3)], curves, points: pts, vlines: vl });
+  sctx.save(); sctx.font = mono(10); sctx.textBaseline = 'middle'; sctx.textAlign = 'right'; sctx.fillStyle = C.texte2; sctx.fillText(gl === 'BK7' ? 'BK7' : 'flint F2', g.padL + g.pw - 6, g.padT + 10); sctx.restore();
+}
+
 STEPS[2] = {
-  t: 'Couleurs et dispersion', short: 'Couleurs',
-  x: 'Cette étape est en construction.', cle: 'L\'indice d\'un milieu dépend de la longueur d\'onde.', note: 'En construction.',
-  meas: [], init() {}, adv(h) {}, draw() { stubDraw('Étape 3 en construction'); }, scope: stubScope, read() {}, status() { return ''; }, sync() {}, state() { return {}; }, hooks: {}
+  t: 'Couleurs et dispersion',
+  short: 'Couleurs',
+  x: 'Un faisceau blanc traverse un prisme et ressort étalé en spectre : le bleu dévie plus que le rouge. Isole une seule couleur, ajoute un deuxième prisme inversé, ou remplace le prisme par une goutte d’eau : c’est le même tri.',
+  cle: 'L’indice d’un milieu dépend de la longueur d’onde. Un prisme ou une goutte séparent ce que la lumière blanche contient déjà.',
+  note: N3,
+  meas: [
+    ['n rouge · 656 nm', [['nR', '']]], ['n jaune · 589 nm', [['nY', '']]], ['n bleu · 486 nm', [['nB', '']]],
+    ['déviation rouge', [['DR', '°']]], ['déviation jaune', [['DY', '°']]], ['déviation bleu', [['DB', '°']]],
+    ['D bleu − D rouge', [['sp', '°'], ['spm', '′']]],
+    ['n eau · 656 · 405 nm', [['wR', ''], ['wV', '']]], ['arc rouge · 656 nm', [['aR', '°']]], ['arc violet · 405 nm', [['aV', '°']]], ['écart rouge − violet', [['ad', '°']]]
+  ],
+  scopeH: 176,
+  init() {
+    Object.assign(prm, { a3Apex: 60, a3Glass: 'BK7', a3Mono: false, a3Lam: 589, a3Sec: false, a3Drop: false });
+  },
+  adv() {},
+  draw() { o3Fit(); if (prm.a3Drop) o3DrawDrop(); else o3DrawPrism(); },
+  scope() { o3Scope(); },
+  read() {
+    const drop = !!prm.a3Drop, ph = o3Phys(), D = o3DropData();
+    oRowShow(['nR', 'nY', 'nB', 'DR', 'DY', 'DB', 'sp'], !drop); oRowShow(['wR', 'aR', 'aV', 'ad'], drop);
+    if (drop) oPanel('Enregistreur · angle de sortie', oLg(oLn(colL(656), 1.8), 'rouge 656') + oLg(oLn(colL(530), 1.8), 'vert 530') + oLg(oLn(oPastel(405), 1.8), 'violet 405') + oLg(oDot('#e8e4dc'), 'rayon de l’arc'), N3D);
+    else oPanel('Enregistreur · indice n(λ)', oLg(oLn(C.texte, 1.8), 'n(λ), couleur de chaque λ') + oLg(oDot('#e8e4dc'), '656 · 589 · 486 nm') + (prm.a3Mono ? oLg(oLn(colL(prm.a3Lam), 1.2, 1), 'λ choisie') : ''), N3);
+    setM('nR', fmt(ph.nR, 4)); setM('nY', fmt(ph.nY, 4)); setM('nB', fmt(ph.nB, 4));
+    setM('DR', fmt(ph.DR, 2)); setM('DY', fmt(ph.DY, 2)); setM('DB', fmt(ph.DB, 2));
+    setM('sp', fmt(ph.spread, 2)); setM('spm', fmt(ph.spread * 60, 0));
+    setM('wR', fmt(D.cols[0].n, 4)); setM('wV', fmt(D.cols[2].n, 4));
+    setM('aR', fmt(D.cols[0].ang, 2)); setM('aV', fmt(D.cols[2].ang, 2)); setM('ad', fmt(D.cols[0].ang - D.cols[2].ang, 2));
+  },
+  status() {
+    if (prm.a3Drop) { const D = o3DropData(); return 'Chaque couleur ressort concentrée près de son propre angle : ' + fmt(D.cols[0].ang, 1) + '° pour le rouge, ' + fmt(D.cols[2].ang, 1) + '° pour le violet. D’où l’ordre des couleurs de l’arc.'; }
+    if (prm.a3Mono) return 'Une seule couleur dévie sans s’étaler : il n’y a rien à trier.';
+    if (prm.a3Sec && o3Geo().recombined) return 'Les couleurs se recombinent en blanc : le prisme n’a rien ajouté, il a trié.';
+    return 'Le bleu dévie plus que le rouge : dans le verre, il va un peu moins vite.';
+  },
+  sync() {
+    const drop = !!prm.a3Drop, mon = !!prm.a3Mono;
+    oVal('o3Apex', prm.a3Apex); oTxt('o3ApexV', fmt(prm.a3Apex, 0) + '°'); oVal('o3Lam', prm.a3Lam); oTxt('o3LamV', fmt(prm.a3Lam, 0) + ' nm');
+    oPress('o3Bk7', prm.a3Glass === 'BK7'); oPress('o3Flint', prm.a3Glass === 'flint'); oPress('o3Mono', mon); oPress('o3Sec', !!prm.a3Sec); oPress('o3Drop', drop);
+    const apexG = oEl('o3Apex') && oEl('o3Apex').parentNode;
+    oShow('o3LamG', mon && !drop); oShow('o3GlassG', !drop); oShow('o3MonoG', !drop); oShow('o3Sec', !drop);
+    if (apexG) apexG.style.display = drop ? 'none' : '';
+  },
+  state() {
+    const ph = o3Phys(), geo = o3Geo(), D = o3DropData();
+    return {
+      apex: prm.a3Apex, glass: prm.a3Glass, nR: ph.nR, nY: ph.nY, nB: ph.nB, DR: ph.DR, DY: ph.DY, DB: ph.DB, spread: ph.spread,
+      mono: !!prm.a3Mono, lambda: prm.a3Lam, second: !!prm.a3Sec, drop: !!prm.a3Drop,
+      rainbowR: D.cols[0].ang, rainbowV: D.cols[2].ang, recombined: !!geo.recombined,
+      incidence: oDeg(geo.th1), exitSpread: geo.angSpread, screenSpan: geo.span
+    };
+  },
+  keys(e) {
+    const k = e.key.toLowerCase();
+    if (k === 'u') { prm.a3Mono = !prm.a3Mono; oRef(2); return true; }
+    if (k === 'p') { prm.a3Sec = !prm.a3Sec; oRef(2); return true; }
+    if (k === 'g') { prm.a3Drop = !prm.a3Drop; oRef(2); return true; }
+    if (k === 'v') { prm.a3Glass = prm.a3Glass === 'BK7' ? 'flint' : 'BK7'; oRef(2); return true; }
+    return false;
+  },
+  hooks: {
+    setApex(a) { prm.a3Apex = clamp(+a, 30, 70); oRef(2); },
+    setGlass(g) { prm.a3Glass = g === 'flint' ? 'flint' : 'BK7'; oRef(2); },
+    mono(on, l) { prm.a3Mono = !!on; if (l != null) prm.a3Lam = clamp(+l, 400, 700); oRef(2); },
+    drop(on) { prm.a3Drop = !!on; oRef(2); },
+    second(on) { prm.a3Sec = !!on; oRef(2); }
+  }
 };
+oOn('o3Apex', 'input', e => { prm.a3Apex = +e.target.value; oRef(2); });
+oOn('o3Bk7', 'click', e => { prm.a3Glass = 'BK7'; oRef(2); e.currentTarget.blur(); });
+oOn('o3Flint', 'click', e => { prm.a3Glass = 'flint'; oRef(2); e.currentTarget.blur(); });
+oOn('o3Mono', 'click', e => { prm.a3Mono = !prm.a3Mono; oRef(2); e.currentTarget.blur(); });
+oOn('o3Lam', 'input', e => { prm.a3Lam = +e.target.value; oRef(2); });
+oOn('o3Sec', 'click', e => { prm.a3Sec = !prm.a3Sec; oRef(2); e.currentTarget.blur(); });
+oOn('o3Drop', 'click', e => { prm.a3Drop = !prm.a3Drop; oRef(2); e.currentTarget.blur(); });
+
+/* =====================================================================
+   ÉTAPE 4 · Polarisation
+   ===================================================================== */
+const O4 = { A: 0.42, B: 0.1, NB: 1.5, TB: Opt.brewster(1, 1.5) / DEG };
+const O4C = { malus: null, glare: null };
+const N4 = 'Polariseurs idéaux ; la lumière naturelle est figurée par une vibration dont la direction change au hasard très vite.';
+const N4G = N4 + ' Reflet : flèches à l’échelle propre du reflet (longueur ∝ √I), pas à celle du faisceau incident.';
+const s4 = { sets: [], tn: 0, rng: null, p3: 0, p3v: 0, turned: 0, ph: 0, t: 0 };
+
+// Plan transverse en perspective : h = direction « profondeur » (s), v = direction « haut » (p) ;
+// u = sens de propagation à l'écran, n = perpendiculaire à u dans le plan de la page.
+const o4Pr = (cx, cy, R, u, n, h, v) => [cx + R * (h * (O4.A * u[0] + O4.B * n[0]) + v * n[0]), cy + R * (h * (O4.A * u[1] + O4.B * n[1]) + v * n[1])];
+function o4Inv(cx, cy, R, u, n, x, y) {      // pixel → (h, v)
+  const ax = R * (O4.A * u[0] + O4.B * n[0]), ay = R * (O4.A * u[1] + O4.B * n[1]), bx = R * n[0], by = R * n[1], dx = x - cx, dy = y - cy, det = ax * by - ay * bx;
+  return [(dx * by - dy * bx) / det, (ax * dy - ay * dx) / det];
+}
+const O4U = [1, 0], O4N = [0, -1];
+const o4Wrap = d => ((d % 180) + 180) % 180;
+function o4Lay() {
+  const R = clamp(Math.min(H * 0.2, W * 0.16), 30, 118);
+  return { R, yb: Math.round(H * 0.53), xs: W * 0.07, x1: W * 0.25, x3: W * 0.445, x2: W * 0.64, xd: W * 0.8 };
+}
+function o4Calc() {
+  const th = [prm.a4P1 * DEG]; if (prm.a4Third) th.push(prm.a4P3 * DEG); th.push(prm.a4P2 * DEG);
+  const I = Opt.chain(1, th, true), n = I.length;
+  const last = o4Wrap(prm.a4P2 - (prm.a4Third ? prm.a4P3 : prm.a4P1));
+  return { I1: I[0], I3: prm.a4Third ? I[1] : null, I2: I[n - 1], Iout: I[n - 1], rel: last, I };
+}
+function o4Glare() {
+  const th = prm.a4Inc * DEG, F = Opt.fresnel(1, O4.NB, th), G = Opt.glare(1, O4.NB, th, prm.a4P1 * DEG);
+  return { th, F, R: G.R, Rs: G.Rs, Rp: G.Rp, P: G.P, through: G.through, thB: O4.TB };
+}
+function o4Turn(a, b) { s4.turned += Math.abs(((b - a + 90) % 180 + 180) % 180 - 90); }
+function o4SetPol(i, deg) {
+  const key = i === 1 ? 'a4P1' : i === 2 ? 'a4P2' : 'a4P3', v = o4Wrap(deg);
+  if (prm[key] !== undefined) o4Turn(prm[key], v);
+  prm[key] = v; oRef(3);
+}
+const o4Dim = I => clamp(I, 0, 1);
+
+// Disque polariseur vu de biais, avec ses traits parallèles à l'axe (angle th, en degrés, depuis l'horizontale).
+function o4Disk(c, cx, cy, R, u, n, th, alpha) {
+  const t = th * DEG, ct = Math.cos(t), st = Math.sin(t), pr = (h, v) => o4Pr(cx, cy, R, u, n, h, v);
+  const ell = (dx, dy) => { c.beginPath(); for (let i = 0; i <= 64; i++) { const a = TAU * i / 64, p = pr(Math.cos(a), Math.sin(a)); i ? c.lineTo(p[0] + dx, p[1] + dy) : c.moveTo(p[0] + dx, p[1] + dy); } c.closePath(); };
+  c.save(); c.globalAlpha *= alpha;
+  c.fillStyle = rgba(RF2, 0.5); ell(3 * u[0], 3 * u[1]); c.fill(); c.strokeStyle = rgba(RT2, 0.45); c.lineWidth = 1; c.stroke();   // épaisseur
+  c.fillStyle = rgba(RF2, 0.62); ell(0, 0); c.fill();
+  c.save(); ell(0, 0); c.clip(); c.lineWidth = 1;
+  for (let s = -0.92; s <= 0.93; s += 0.1538) {
+    const w = Math.sqrt(Math.max(0, 1 - s * s)), a = pr(s * -st - w * ct, s * ct - w * st), b = pr(s * -st + w * ct, s * ct + w * st);
+    c.strokeStyle = Math.abs(s) < 0.08 ? rgba(RT, 0.8) : rgba(RT2, 0.5); c.lineWidth = Math.abs(s) < 0.08 ? 1.4 : 1;
+    c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+  }
+  c.restore();
+  c.strokeStyle = rgba(RT2, 0.9); c.lineWidth = 1.3; ell(0, 0); c.stroke();
+  c.restore();
+  return [pr(ct, st), pr(-ct, -st)];        // extrémités de l'axe, sur le bord
+}
+// Double flèche de vibration de E, dans le plan transverse centré en (cx, cy) ; a = amplitude (fraction de Lm), th en degrés.
+function o4Vib(c, cx, cy, Lm, u, n, th, a, alpha) {
+  if (a < 0.015) { c.save(); c.fillStyle = rgba(RA, 0.5 * alpha); c.beginPath(); c.arc(cx, cy, 2, 0, TAU); c.fill(); c.restore(); return; }
+  const t = th * DEG, p1 = o4Pr(cx, cy, Lm * a, u, n, Math.cos(t), Math.sin(t)), p2 = o4Pr(cx, cy, Lm * a, u, n, -Math.cos(t), -Math.sin(t));
+  c.save(); c.globalAlpha *= alpha;
+  arrow(c, cx, cy, p1[0], p1[1], C.accent, 1.8, null, 7); arrow(c, cx, cy, p2[0], p2[1], C.accent, 1.8, null, 7);
+  c.restore();
+}
+function o4Plane(c, cx, cy, R, u, n, alpha) {      // contour pointillé du plan transverse
+  c.save(); c.strokeStyle = rgba(RT2, alpha); c.lineWidth = 1; c.setLineDash([2, 4]); c.beginPath();
+  for (let i = 0; i <= 48; i++) { const a = TAU * i / 48, p = o4Pr(cx, cy, R, u, n, Math.cos(a), Math.sin(a)); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); }
+  c.stroke(); c.restore();
+}
+function o4Eye(c, x, y, ux, uy, sz) {      // œil au trait ; (ux, uy) : direction du regard
+  c.save(); c.translate(x, y); c.rotate(Math.atan2(uy, ux)); c.strokeStyle = rgba(RT, 0.85); c.fillStyle = rgba(RF2, 0.8); c.lineWidth = 1.3;
+  c.beginPath(); c.moveTo(-sz, 0); c.quadraticCurveTo(0, -sz * 0.9, sz, 0); c.quadraticCurveTo(0, sz * 0.9, -sz, 0); c.closePath(); c.fill(); c.stroke();
+  c.beginPath(); c.arc(sz * 0.1, 0, sz * 0.38, 0, TAU); c.stroke(); c.fillStyle = rgba(RT, 0.9); c.beginPath(); c.arc(sz * 0.1, 0, sz * 0.15, 0, TAU); c.fill();
+  c.restore();
+}
+function o4DiskHandles(cx, cy, R, u, n, ends, key, setter, name) {
+  const drag = (x, y) => { const hv = o4Inv(cx, cy, R, u, n, x, y); let d = o4Wrap(oDeg(Math.atan2(hv[1], hv[0]))); for (const sn of [0, 45, 90, 135, 180]) if (Math.abs(d - sn) < 2) d = sn % 180; setter(d); };
+  for (const e of ends) handle(e[0], e[1], 11, key, drag, name, 'Tire ce point du bord pour tourner l’axe du polariseur.');
+}
+function o4Beam(c, x0, x1, y, I, flow) {
+  if (x1 <= x0) return;
+  c.save(); c.lineCap = 'butt';
+  if (I < 0.002) { c.strokeStyle = rgba(RT2, 0.22); c.lineWidth = 1; c.setLineDash([2, 5]); c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke(); c.restore(); return; }
+  const a = o4Dim(I);
+  c.strokeStyle = rgba(RT, 0.1 + 0.12 * a); c.lineWidth = 9; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
+  c.strokeStyle = rgba(RT, 0.12 + 0.88 * a); c.lineWidth = 2.2; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
+  if (flow) { c.strokeStyle = rgba([255, 255, 255], 0.55 * a); c.lineWidth = 2.2; c.setLineDash([3, 25]); c.lineDashOffset = -flow; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke(); }
+  c.restore();
+}
+
+function o4DrawChain() {
+  const c = ctx, L = o4Lay(), { R, yb } = L, k = o4Calc(), third = !!prm.a4Third;
+  const p3 = clamp(s4.p3, 0, 1.4), p3v = s4.p3 > 0.003;
+  c.font = mono(11);
+  // intensités le long du faisceau
+  const S = [1, k.I1, third ? k.I3 : k.I1, k.Iout];
+  const xa = L.xs + 12, xb = L.x1, xc = third ? L.x3 : L.x2, xd = L.x2, xe = L.xd - 12;
+  const flow = s4.ph;
+  o4Beam(c, xa, L.x1, yb, 1, flow);
+  if (third) { o4Beam(c, L.x1, L.x3, yb, k.I1, flow); o4Beam(c, L.x3, L.x2, yb, k.I3, flow); }
+  else o4Beam(c, L.x1, L.x2, yb, k.I1, flow);
+  o4Beam(c, L.x2, xe, yb, k.Iout, flow);
+  void xb; void xc; void xd; void S;
+  // source
+  c.save(); c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.2; c.fillRect(L.xs - 16, yb - 16, 20, 32); c.strokeRect(L.xs - 16, yb - 16, 20, 32);
+  const gr = c.createRadialGradient(L.xs + 4, yb, 0, L.xs + 4, yb, 20); gr.addColorStop(0, 'rgba(232,228,220,0.55)'); gr.addColorStop(1, 'rgba(232,228,220,0)');
+  c.fillStyle = gr; c.fillRect(L.xs - 14, yb - 24, 44, 48); c.fillStyle = C.texte; c.fillRect(L.xs + 2, yb - 3, 3, 6); c.restore();
+  zone(L.xs - 18, yb - 18, L.xs + 8, yb + 18, 'source4', 'Source', 'Lampe de lumière naturelle : la direction de vibration y change au hasard, très vite.');
+  tagText(c, 'lumière naturelle', Math.max(8 + 56, (L.xs + L.x1) / 2), yb - 0.8 * R - 16, 'center', 'bottom', C.texte2);
+  // lumière naturelle : étoile de directions, avec rémanence
+  const xm0 = (L.xs + L.x1) / 2, Lm = 0.8 * R;
+  o4Plane(c, xm0, yb, 0.8 * R, O4U, O4N, 0.2);
+  s4.sets.forEach((set, j) => { const al = [1, 0.5, 0.28, 0.16, 0.09][j] || 0.05; for (const a of set) o4Vib(c, xm0, yb, Lm, O4U, O4N, oDeg(a), 1, al * 0.9); });
+  zone(L.xs + 14, yb - R, L.x1 - 14, yb + R, 'nat', 'Lumière naturelle', 'La vibration de E change de direction au hasard, très vite : une étoile de directions, toutes de même amplitude.');
+  // polariseurs : 1 puis (3) puis 2
+  const disks = [{ x: L.x1, th: prm.a4P1, i: 1, a: 1, set: a => o4SetPol(1, a), lab: 'P1' }];
+  if (third || p3v) disks.push({ x: L.x3, th: prm.a4P3, i: 3, a: clamp(p3 * 3, 0, 1), dy: -(1 - p3) * H * 0.3, set: a => o4SetPol(3, a), lab: 'P3', anim: true });
+  disks.push({ x: L.x2, th: prm.a4P2, i: 2, a: 1, set: a => o4SetPol(2, a), lab: 'P2' });
+  // emplacement du troisième : repère pointillé
+  if (!third && !p3v) { c.save(); c.strokeStyle = rgba(RT2, 0.25); c.setLineDash([3, 5]); c.beginPath(); for (let i = 0; i <= 48; i++) { const a = TAU * i / 48, p = o4Pr(L.x3, yb, R, O4U, O4N, Math.cos(a), Math.sin(a)); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); } c.stroke(); c.restore(); }
+  // vibration le long du faisceau polarisé : une flèche par tronçon
+  const secs = third
+    ? [{ a: L.x1, b: L.x3, th: prm.a4P1, I: k.I1 }, { a: L.x3, b: L.x2, th: prm.a4P3, I: k.I3 }, { a: L.x2, b: L.xd, th: prm.a4P2, I: k.Iout }]
+    : [{ a: L.x1, b: L.x2, th: prm.a4P1, I: k.I1 }, { a: L.x2, b: L.xd, th: prm.a4P2, I: k.Iout }];
+  secs.forEach((s, j) => {
+    let xm = (s.a + s.b) / 2;
+    if (third && j === 0) xm = lerp((L.x1 + L.x2) / 2, (L.x1 + L.x3) / 2, clamp(p3, 0, 1));
+    if (third && j === 1) xm = lerp(L.x2, (L.x3 + L.x2) / 2, clamp(p3, 0, 1));
+    if (!third && p3v && j === 0) xm = lerp((L.x1 + L.x2) / 2, (L.x1 + L.x3) / 2, clamp(p3, 0, 1));
+    if (!third && p3v && j === 1) xm = (L.x2 + L.xd) / 2;
+    o4Plane(c, xm, yb, 0.8 * R, O4U, O4N, 0.2);
+    o4Vib(c, xm, yb, Lm, O4U, O4N, s.th, Math.sqrt(o4Dim(s.I)), 1);
+    zone(xm - 26, yb - R * 0.85, xm + 26, yb + R * 0.85, 'polar' + j, j ? 'Faisceau polarisé' : 'Faisceau polarisé', 'La vibration reste sur une seule direction, celle de l’axe du dernier polariseur ; sa longueur est ∝ √I (l’intensité est le carré de l’amplitude).');
+  });
+  // disques (dessinés par-dessus le faisceau)
+  disks.forEach(d => {
+    const dy = d.dy || 0, cy = yb + dy, ends = o4Disk(c, d.x, cy, R, O4U, O4N, d.th, d.a);
+    c.save(); c.globalAlpha *= d.a; c.font = mono(11);
+    tagText(c, d.lab + ' · ' + fmt(d.th, 0) + '°', d.x, cy + R + 12, 'center', 'top', C.texte2); c.restore();
+    if (!d.anim || (third && s4.p3 > 0.8)) {
+      o4DiskHandles(d.x, cy, R, O4U, O4N, ends, 'pol' + d.i, d.set, 'Polariseur ' + d.i);
+      zoneF((x, y) => { const dx = (x - d.x) / (R * O4.A), dyy = (y - cy) / R; return dx * dx + dyy * dyy <= 1.15; }, 'pol' + d.i, 'Polariseur ' + d.i, 'Ne garde que la composante de la vibration parallèle à son axe (les traits fins). Axe à ' + fmt(d.th, 0) + '° de l’horizontale.');
+    }
+  });
+  // détecteur et barre d'intensité
+  const xd2 = L.xd, bw = 12, bx = xd2 + 46, ht = 1.7 * R, by0 = yb + 0.85 * R;
+  c.save(); c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.85); c.lineWidth = 1.2; c.fillRect(xd2 - 6, yb - 0.45 * R, 20, 0.9 * R); c.strokeRect(xd2 - 6, yb - 0.45 * R, 20, 0.9 * R);
+  c.fillStyle = rgba(RE, 0.12 + 0.88 * o4Dim(k.Iout)); c.fillRect(xd2 - 6, yb - 0.3 * R, 4, 0.6 * R);
+  c.strokeStyle = C.trait; c.strokeRect(bx + 0.5, by0 - ht + 0.5, bw, ht);
+  c.fillStyle = rgba(RE, 0.9); c.fillRect(bx + 1, by0 - ht * o4Dim(k.Iout), bw - 1, ht * o4Dim(k.Iout));
+  c.fillStyle = C.texte2; c.font = mono(10); c.textAlign = 'right'; c.textBaseline = 'middle';
+  [['I₀', 1], ['½', 0.5], ['0', 0]].forEach(([t, v]) => { c.fillText(t, bx - 6, by0 - ht * v); c.strokeStyle = rgba(RT2, 0.5); c.beginPath(); c.moveTo(bx - 3, by0 - ht * v); c.lineTo(bx, by0 - ht * v); c.stroke(); });
+  c.restore();
+  c.font = mono(11);
+  tagText(c, fmt(k.Iout, 3) + ' I₀', Math.min(W - 6, bx + bw + 4), by0 + 12, 'right', 'top', C.ener);
+  tagText(c, 'détecteur', Math.min(xd2 + 4, W - 40), yb + 0.45 * R + 8, 'center', 'top', C.texte2);
+  zone(xd2 - 8, yb - 0.5 * R, xd2 + 16, yb + 0.5 * R, 'detecteur', 'Détecteur', 'Mesure l’énergie reçue : ici ' + fmt(k.Iout, 3) + ' I₀, la barre en donne la fraction de l’intensité de départ.');
+  zone(bx - 4, by0 - ht - 4, bx + bw + 4, by0 + 4, 'barre', 'Barre d’intensité', 'Hauteur ∝ l’énergie reçue, de 0 à I₀.');
+}
+
+function o4DrawGlare() {
+  const c = ctx, g = o4Glare(), th = g.th, st = Math.sin(th), ct = Math.cos(th);
+  const Py = Math.round(H * 0.76), Px = W * 0.38, Lg = Math.min(H * 0.46, W * 0.4, W * 0.38 - 18), Rg = clamp(Math.min(H * 0.12, W * 0.08), 22, 66), pw = Math.max(18, H * 0.04);
+  c.font = mono(11);
+  // vitre
+  const x0 = W * 0.05, x1 = W * 0.82;
+  const slab = () => { c.beginPath(); c.rect(x0, Py, x1 - x0, pw); };
+  glassFill(c, slab, O4.NB, { x: x0, y: Py, w: x1 - x0, h: pw });
+  zone(x0, Py - 4, x1, Py + pw, 'vitre', 'Vitre', 'Verre d’indice 1,5 : elle renvoie une petite partie de la lumière, qui n’est plus naturelle.');
+  tagText(c, 'vitre · n = 1,5', x0 + 6, Py + pw + 6, 'left', 'top', C.texte2);
+  // normale
+  c.save(); c.setLineDash([4, 4]); c.strokeStyle = rgba(RT2, 0.8); c.lineWidth = 1; c.beginPath(); c.moveTo(Px, Py - Lg * 1.02); c.lineTo(Px, Py + pw); c.stroke(); c.setLineDash([]); c.restore();
+  // angle de Brewster, repère : arc pointillé et tiret
+  const tb = O4.TB * DEG, atB = Math.abs(prm.a4Inc - O4.TB) < 1.2, rb = 0.33 * Lg;
+  c.save(); c.strokeStyle = rgba(RA, atB ? 0.95 : 0.6); c.lineWidth = atB ? 1.6 : 1; c.setLineDash([2, 3]); arcPath(c, Px, Py, rb, PI / 2, tb); c.stroke(); c.setLineDash([]);
+  c.beginPath(); c.moveTo(Px - (rb - 7) * Math.sin(tb), Py - (rb - 7) * Math.cos(tb)); c.lineTo(Px - (rb + 7) * Math.sin(tb), Py - (rb + 7) * Math.cos(tb)); c.stroke(); c.restore();
+  c.font = mono(10); tagText(c, W < 560 ? 'θB' : 'θB = ' + fmt(O4.TB, 1) + '°', Px - (rb + 9) * Math.sin(tb) - 2, Py - (rb + 9) * Math.cos(tb) - 2, 'right', 'bottom', C.accent);
+  zcirc(Px - rb * Math.sin(tb), Py - rb * Math.cos(tb), 11, 'brew', 'Angle de Brewster', 'θB = ' + fmt(O4.TB, 1) + '° pour n = 1,5 : le reflet n’a plus de composante dans le plan d’incidence.');
+  // rayon incident (naturelle)
+  const S = [Px - Lg * st, Py - Lg * ct], Q = [Px + Lg * st, Py - Lg * ct];
+  const ui = [st, ct], ni = [ct, -st], ur = [st, -ct], nr = [-ct, -st];
+  const refl = clamp(0.1 + 1.6 * g.R, 0.1, 1), thr = clamp(0.1 + 1.6 * g.through, 0.08, 1), dL = 0.6 * Lg;
+  c.save(); c.lineCap = 'butt';
+  c.strokeStyle = rgba(RT, 0.9); c.lineWidth = 2; c.beginPath(); c.moveTo(S[0], S[1]); c.lineTo(Px, Py); c.stroke();
+  // réfracté (dans la vitre) : opacité ∝ T
+  const tt = Math.asin(Math.sin(th) / O4.NB), T = 1 - g.R;
+  c.strokeStyle = rgba(RT, 0.12 + 0.6 * T * 0.9); c.lineWidth = 1.6; c.beginPath(); c.moveTo(Px, Py); c.lineTo(Px + pw * Math.tan(tt), Py + pw); c.stroke();
+  // reflet : avant puis après le polariseur
+  c.strokeStyle = rgba(RT, refl); c.lineWidth = 2; c.beginPath(); c.moveTo(Px, Py); c.lineTo(Px + dL * st, Py - dL * ct); c.stroke();
+  c.strokeStyle = rgba(RT, thr); c.beginPath(); c.moveTo(Px + dL * st, Py - dL * ct); c.lineTo(Q[0], Q[1]); c.stroke();
+  c.restore();
+  zseg(S[0], S[1], Px, Py, 7, 'inc', 'Lumière naturelle', 'Lumière non polarisée qui arrive sur la vitre sous l’angle d’incidence θ, mesuré depuis la normale (tiretée).');
+  zseg(Px, Py, Px + dL * st, Py - dL * ct, 7, 'reflet', 'Reflet', 'Part vers l’œil avec R = ' + fmt(g.R * 100, 1) + ' % de l’intensité : il vibre plus souvent parallèlement à la vitre que dans le plan d’incidence.');
+  zseg(Px + dL * st, Py - dL * ct, Q[0], Q[1], 7, 'reflet2', 'Reflet, après le polariseur', 'Ce qui traverse les lunettes : ' + fmt(g.through * 100, 2) + ' % de l’intensité de départ.');
+  // arcs d'incidence
+  c.save(); c.strokeStyle = rgba(RT, 0.7); c.lineWidth = 1; const ra = 0.22 * Lg;
+  arcPath(c, Px, Py, ra, PI / 2, th); c.stroke(); arcPath(c, Px, Py, ra * 0.85, PI / 2, -th); c.stroke(); c.restore();
+  c.font = mono(11); tagText(c, 'θ = ' + fmt(prm.a4Inc, 1) + '°', S[0] + 14, S[1] - 2, 'left', 'middle', C.texte);
+  // vibrations : naturelle (incidente), reflet partiel, après le polariseur
+  const mi = [Px - 0.74 * Lg * st, Py - 0.74 * Lg * ct], Lm = 0.72 * Rg, mr = [Px + 0.3 * Lg * st, Py - 0.3 * Lg * ct], ml = [Px + (0.6 + 0.2) * Lg * st, Py - 0.8 * Lg * ct];
+  o4Plane(c, mi[0], mi[1], 0.72 * Rg, ui, ni, 0.2);
+  s4.sets.forEach((set, j) => { const al = [1, 0.5, 0.28, 0.16, 0.09][j] || 0.05; for (const a of set) o4Vib(c, mi[0], mi[1], Lm, ui, ni, oDeg(a), 1, al * 0.9); });
+  // reflet : chaque direction naturelle φ donne E_s = √Rs cos φ, E_p = √Rp sin φ (amplitudes de Fresnel)
+  const Rn = Math.max(1e-9, (g.F.Rs + g.F.Rp) / 2), rs = Math.sqrt(g.F.Rs), rp = Math.sqrt(g.F.Rp);
+  o4Plane(c, mr[0], mr[1], 0.72 * Rg, ur, nr, 0.2);
+  s4.sets.forEach((set, j) => { const al = [1, 0.5, 0.28, 0.16, 0.09][j] || 0.05; for (const a of set) { const es = rs * Math.cos(a), ep = rp * Math.sin(a), m = Math.hypot(es, ep); if (m > 1e-9) o4Vib(c, mr[0], mr[1], Lm, ur, nr, oDeg(Math.atan2(ep, es)), clamp(m / Math.sqrt(Rn), 0, 1.25), al * 0.9); } });
+  zone(mr[0] - 28, mr[1] - 28, mr[0] + 28, mr[1] + 28, 'refvib', 'Reflet : vibration', 'Chaque direction de la lumière naturelle est réfléchie avec un facteur propre à s et à p : les flèches se rangent près de la direction s (parallèle à la vitre).');
+  // polariseur (lunettes) et œil
+  const dc = [Px + dL * st, Py - dL * ct], ends = o4Disk(c, dc[0], dc[1], Rg, ur, nr, prm.a4P1, 1);
+  c.font = mono(11); tagText(c, 'lunettes · ' + fmt(prm.a4P1, 0) + '°', dc[0] + Rg * 0.5 + 12, dc[1] + 0.3 * Rg, 'left', 'middle', C.texte2);
+  o4DiskHandles(dc[0], dc[1], Rg, ur, nr, ends, 'pol1', a => o4SetPol(1, a), 'Polariseur (lunettes)');
+  zoneF((x, y) => { const hv = o4Inv(dc[0], dc[1], Rg, ur, nr, x, y); return hv[0] * hv[0] + hv[1] * hv[1] <= 1.15; }, 'pol1', 'Polariseur (lunettes)', 'Ne laisse passer que la composante de la vibration parallèle à son axe, à ' + fmt(prm.a4P1, 0) + '° de la direction s (horizontale).');
+  o4Plane(c, ml[0], ml[1], 0.72 * Rg, ur, nr, 0.2);
+  o4Vib(c, ml[0], ml[1], Lm, ur, nr, prm.a4P1, Math.min(1.25, Math.sqrt(g.through / Rn)), 1);
+  o4Eye(c, Q[0] + 12 * st, Q[1] - 12 * ct, -st, ct, 13);
+  zcirc(Q[0] + 12 * st, Q[1] - 12 * ct, 18, 'oeil', 'Œil (ou caméra)', 'Reçoit ce qui traverse le polariseur : ' + fmt(g.through * 100, 2) + ' % de l’intensité de départ.');
+  c.font = mono(11); tagText(c, 'œil · ' + fmt(g.through * 100, 2) + ' %', Q[0] + 12 * st, Q[1] - 12 * ct - 22, 'center', 'bottom', C.ener);
+  // poignée d'incidence au bout du rayon incident
+  handle(S[0], S[1], 11, 'inc', (x, y) => { prm.a4Inc = clamp(Math.round(oDeg(Math.atan2(Px - x, Py - y)) * 2) / 2, 5, 85); if (Math.abs(prm.a4Inc - O4.TB) < 0.8) prm.a4Inc = Math.round(O4.TB * 10) / 10; oRef(3); }, 'Angle d’incidence', 'Tire ce point pour changer l’angle sous lequel la lumière arrive sur la vitre.');
+}
+
+function o4Scope() {
+  const k = o4Calc();
+  if (prm.a4Glare) {
+    const g = o4Glare();
+    if (!O4C.glare) { O4C.glare = { cs: [], cp: [] }; for (let a = 0; a <= 90.01; a += 1.5) { const G = Opt.glare(1, O4.NB, Math.min(a, 89.9) * DEG, 0); O4C.glare.cs.push([a, G.Rs]); O4C.glare.cp.push([a, G.Rp]); } }
+    const cs = O4C.glare.cs, cp = O4C.glare.cp;
+    const r = plotXY({ x0: 0, x1: 90, y0: 0, y1: 0.5, xl: ['0°', '90°'], yl: ['0', '0,5'], curves: [{ pts: cs, col: C.accent, lw: 1.8 }, { pts: cp, col: C.texte, lw: 1.8 }],
+      vlines: [{ x: O4.TB, col: C.accent }], points: [{ x: prm.a4Inc, y: g.Rs, col: C.accent }, { x: prm.a4Inc, y: g.Rp, col: C.texte }] });
+    sctx.save(); sctx.font = mono(10); sctx.textBaseline = 'middle'; sctx.textAlign = 'left'; sctx.fillStyle = C.texte2; sctx.fillStyle = C.accent; sctx.fillText('Rs', r.xs(72), r.ys(0.30)); sctx.fillStyle = C.texte; sctx.fillText('Rp', r.xs(72), r.ys(0.10));
+    sctx.fillStyle = C.accent; sctx.fillText('θB = ' + fmt(O4.TB, 1) + '°', r.xs(O4.TB) + 5, r.ys(0.17));
+    sctx.restore();
+    return;
+  }
+  if (!O4C.malus) { O4C.malus = []; for (let a = 0; a <= 180.01; a += 3) O4C.malus.push([a, Opt.malus(1, a * DEG)]); }
+  const cu = O4C.malus;
+  const rel = k.rel, y = Opt.malus(1, rel * DEG);
+  const g = plotXY({ x0: 0, x1: 180, y0: 0, y1: 1, xl: ['0°', '180°'], yl: ['0', '1'], curves: [{ pts: cu, col: C.texte2, lw: 1.6 }], vlines: [{ x: 90, col: C.trait }], points: [{ x: rel, y, col: C.accent, label: fmt(rel, 0) + '° · ' + fmt(y, 2) }] });
+
+}
+
 STEPS[3] = {
-  t: 'Polarisation', short: 'Polarisation',
-  x: 'Cette étape est en construction.', cle: 'Un polariseur ne garde que la projection de la vibration sur son axe.', note: 'En construction.',
-  meas: [], init() {}, adv(h) {}, draw() { stubDraw('Étape 4 en construction'); }, scope: stubScope, read() {}, status() { return ''; }, sync() {}, state() { return {}; }, hooks: {}
+  t: 'Polarisation',
+  short: 'Polarisation',
+  x: 'La lumière vibre dans une direction. Tourne les polariseurs en tirant leur bord : l’intensité mesurée au bout change. Glisse un troisième polariseur entre deux polariseurs croisés, ou regarde un reflet sur une vitre à travers un polariseur.',
+  cle: 'Le champ électrique de la lumière vibre dans une direction. Un polariseur ne garde que la projection sur son axe : I = I₀ cos² θ.',
+  note: N4,
+  meas: [
+    ['I après P1', [['i1', 'I₀'], ['i1p', '%']]], ['I après P3', [['i3', 'I₀'], ['i3p', '%']]], ['I après P2', [['i2', 'I₀'], ['i2p', '%']]],
+    ['angle P1 → P2', [['d12', '°']]], ['angle P1 → P3', [['d13', '°']]], ['angle P3 → P2', [['d32', '°']]],
+    ['incidence θ · θB', [['gi', ''], ['gb', '°']]], ['R · P (polarisation)', [['gR', '%'], ['gP', '%']]], ['Rs · Rp', [['gs', ''], ['gp', '%']]], ['à travers le polariseur', [['gt', '% de I₀']]]
+  ],
+  scopeH: 176,
+  init() {
+    Object.assign(prm, { a4P1: 0, a4P2: 0, a4P3: 45, a4Third: false, a4Glare: false, a4Inc: 40 });
+    s4.rng = Opt.mulberry32(25); s4.sets = []; s4.tn = 0; s4.p3 = 0; s4.p3v = 0; s4.turned = 0; s4.ph = 0; s4.t = 0;
+    for (let i = 0; i < 5; i++) s4.sets.push(Array.from({ length: 5 }, () => s4.rng() * PI));
+  },
+  adv(h) {
+    s4.t += h; s4.ph += h * 70; s4.tn += h;
+    while (s4.tn >= 0.07) { s4.tn -= 0.07; s4.sets.unshift(Array.from({ length: 5 }, () => s4.rng() * PI)); if (s4.sets.length > 5) s4.sets.pop(); }
+    const tgt = prm.a4Third ? 1 : 0;
+    s4.p3v += (-150 * (s4.p3 - tgt) - 14 * s4.p3v) * h; s4.p3 += s4.p3v * h;      // ressort amorti
+    if (Math.abs(s4.p3 - tgt) < 1e-4 && Math.abs(s4.p3v) < 1e-3) { s4.p3 = tgt; s4.p3v = 0; }
+  },
+  draw() { view.s = 1.28; view.cx = 0; view.cy = H; if (prm.a4Glare) o4DrawGlare(); else o4DrawChain(); },
+  scope() { o4Scope(); },
+  read() {
+    const k = o4Calc(), gl = !!prm.a4Glare, third = !!prm.a4Third, g = o4Glare();
+    if (gl) oPanel('Enregistreur · reflet selon θ', oLg(oLn(C.accent, 1.8), 'Rs : parallèle à la vitre') + oLg(oLn(C.texte, 1.8), 'Rp : dans le plan d’incidence') + oLg(oLn(C.accent, 1.2, 1), 'θB'), N4G);
+    else oPanel(s4.turned >= 25 ? 'Enregistreur · loi de Malus' : 'Enregistreur · I / I entrée selon θ', oLg(oLn(C.texte2, 1.8), 'cos² θ') + oLg(oDot('#f6c6a0'), 'angle relatif des deux derniers polariseurs'), N4);
+    oRowShow(['i1', 'i2'], !gl); oRowShow(['i3'], !gl && third); oRowShow(['d12'], !gl && !third); oRowShow(['d13', 'd32'], !gl && third); oRowShow(['gi', 'gR', 'gs', 'gt'], gl);
+    setM('i1', fmt(k.I1, 3)); setM('i1p', fmt(k.I1 * 100, 1)); setM('i2', fmt(k.I2, 3)); setM('i2p', fmt(k.I2 * 100, 1));
+    if (third) { setM('i3', fmt(k.I3, 3)); setM('i3p', fmt(k.I3 * 100, 1)); setM('d13', fmt(o4Wrap(prm.a4P3 - prm.a4P1), 0)); setM('d32', fmt(o4Wrap(prm.a4P2 - prm.a4P3), 0)); }
+    setM('d12', fmt(o4Wrap(prm.a4P2 - prm.a4P1), 0));
+    setM('gi', fmt(prm.a4Inc, 1)); setM('gb', fmt(O4.TB, 1)); setM('gR', fmt(g.R * 100, 1)); setM('gP', fmt(g.P * 100, 0));
+    setM('gs', fmt(g.Rs * 100, 1)); setM('gp', fmt(g.Rp * 100, 1)); setM('gt', fmt(g.through * 100, 2));
+  },
+  status() {
+    const k = o4Calc();
+    if (prm.a4Glare) {
+      const g = o4Glare(), atB = Math.abs(prm.a4Inc - O4.TB) < 1.2, ext = g.through < 0.03 * g.R;
+      if (atB && ext) return 'À l’angle de Brewster, le reflet ne vibre plus que parallèlement à la vitre : un polariseur vertical l’éteint.';
+      if (atB) return 'À l’angle de Brewster, le reflet est entièrement polarisé (P = ' + fmt(g.P * 100, 0) + ' %) : tourne le polariseur à la verticale pour l’éteindre.';
+      return 'Le reflet est polarisé à ' + fmt(g.P * 100, 0) + ' % : le polariseur en retire une part qui dépend de son angle, sans l’éteindre. Cherche l’angle de Brewster.';
+    }
+    const d = o4Wrap(prm.a4P2 - prm.a4P1), cross = Math.abs(d - 90) < 1, third = !!prm.a4Third;
+    if (third && cross && k.Iout > 0.001) {
+      if (Math.abs(o4Wrap(prm.a4P3 - prm.a4P1) - 45) < 1.5) return 'En ajoutant un filtre, on fait passer plus de lumière : I₀/8. Chaque polariseur projette la vibration sur son axe.';
+      return 'En ajoutant un filtre, on fait passer plus de lumière : ' + fmt(k.Iout, 3) + ' I₀. Chaque polariseur projette la vibration sur son axe.';
+    }
+    if (k.Iout < 0.0005) return 'Rien ne passe.';
+    if (!third && (d < 0.5 || d > 179.5)) return 'Le deuxième polariseur laisse tout passer : la vibration est déjà sur son axe.';
+    const rel = k.rel, m = Math.pow(Math.cos(rel * DEG), 2);
+    if (third) return 'Trois filtres : chacun garde la projection de la vibration sur son axe. Au bout, ' + fmt(k.Iout, 3) + ' I₀.';
+    return 'Le polariseur 2, à ' + fmt(rel, 0) + '° de la vibration, garde cos² ' + fmt(rel, 0) + '° = ' + fmt(m * 100, 0) + ' % de ce qui lui arrive' + (s4.turned >= 25 ? ' : c’est la loi de Malus.' : '.');
+  },
+  sync() {
+    const gl = !!prm.a4Glare, third = !!prm.a4Third;
+    oVal('o4P1', prm.a4P1); oTxt('o4P1V', fmt(prm.a4P1, 0) + '°'); oVal('o4P2', prm.a4P2); oTxt('o4P2V', fmt(prm.a4P2, 0) + '°'); oVal('o4P3', prm.a4P3); oTxt('o4P3V', fmt(prm.a4P3, 0) + '°');
+    oVal('o4Inc', prm.a4Inc); oTxt('o4IncV', fmt(prm.a4Inc, 1) + '°'); oTxt('o4L1', gl ? 'lunettes' : 'polariseur 1');
+    oPress('o4Third', third); oPress('o4Glare', gl);
+    oShow('o4G2', !gl); oShow('o4G3', third && !gl); oShow('o4GI', gl); oShow('o4Third', !gl);
+  },
+  state() {
+    const k = o4Calc(), g = o4Glare();
+    return {
+      pol1: prm.a4P1, pol2: prm.a4P2, pol3: prm.a4P3, third: !!prm.a4Third, I1: k.I1, I2: k.I2, I3: k.I3, Iout: k.Iout,
+      glare: !!prm.a4Glare, incidence: prm.a4Inc, R: g.R, Rs: g.Rs, Rp: g.Rp, P: g.P, through: g.through, brewster: O4.TB, rel: k.rel, turned: s4.turned, thirdAnim: s4.p3
+    };
+  },
+  keys(e) {
+    const k = e.key.toLowerCase();
+    if (k === 't' && !prm.a4Glare) { prm.a4Third = !prm.a4Third; oRef(3); return true; }
+    if (k === 'v') { prm.a4Glare = !prm.a4Glare; oRef(3); return true; }
+    if (k === 'b' && prm.a4Glare) { prm.a4Inc = Math.round(O4.TB * 10) / 10; oRef(3); return true; }
+    return false;
+  },
+  hooks: {
+    setPol(i, deg) { o4SetPol(+i, +deg); },
+    third(on, deg) { prm.a4Third = !!on; if (deg != null) o4SetPol(3, +deg); else oRef(3); },
+    glare(on) { prm.a4Glare = !!on; oRef(3); },
+    setIncidence(deg) { prm.a4Inc = clamp(+deg, 0, 89.9); oRef(3); }
+  }
 };
+oOn('o4P1', 'input', e => o4SetPol(1, +e.target.value));
+oOn('o4P2', 'input', e => o4SetPol(2, +e.target.value));
+oOn('o4P3', 'input', e => o4SetPol(3, +e.target.value));
+oOn('o4Inc', 'input', e => { prm.a4Inc = +e.target.value; oRef(3); });
+oOn('o4Brew', 'click', e => { prm.a4Inc = Math.round(O4.TB * 10) / 10; oRef(3); e.currentTarget.blur(); });
+oOn('o4Third', 'click', e => { prm.a4Third = !prm.a4Third; oRef(3); e.currentTarget.blur(); });
+oOn('o4Glare', 'click', e => { prm.a4Glare = !prm.a4Glare; oRef(3); e.currentTarget.blur(); });
+}
 /* ETAPES-3-4-FIN */
 
 /* ================= Démarrage ================= */

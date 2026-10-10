@@ -235,6 +235,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Interaction** : Quatre actes en deux paillasses, chacun avec deux ou trois scènes au choix ; lignes de champ exactes et boussoles qui pivotent autour d’un aimant (qu’on coupe ou compare à une bobine), d’un fil, d’une spire ou d’une bobine, sonde glissable ; particule chargée qui tourne à énergie constante, deux protons de vitesses différentes, sélecteur de vitesse, hélice, balançoire de Laplace ; aimant glissé à la main dans une bobine avec flux et f.é.m. tracés l’un sous l’autre, génératrice et lampe, deux bobines de Faraday ; tige tirée sur des rails avec barres d’énergie et « Lenz à l’envers », aimant qui tombe dans des tubes de plastique, d’aluminium, de cuivre ou de cuivre fendu.
 - **Notes** : Première page de fondations construite au standard d’une page à un module (quatre étapes). Moteur verrouillé versionné dans `prompts/moteurs/magnetisme.js` (112 tests, aussi lancés sur la page). Sans matériaux magnétiques ; particules non relativistes ; inductance propre de la bobine réceptrice négligée. Se termine sur trois questions vers le module 24, la planche Courant et circuits et le module 50.
 
+### Optique : la lumière qui tourne
+
+- **Identifiant** : `fondations-optique` · **chemin** : [`opus-sonnet/fondations-optique/index.html`](../opus-sonnet/fondations-optique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-optique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Optique fondamentale
+- **Collection** : aucune
+- **Modules** : 25 Optique fondamentale (`full`), 15 Ondes (`supporting`), 24 Onde électromagnétique (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`)
+- **Étapes** : 1 Réfraction et réflexion totale · 2 Lentilles et images · 3 Couleurs et dispersion · 4 Polarisation
+- **Interaction** : Un chapitre de quatre étapes sur une table d’optique vue de dessus ; laser qu’on tire autour d’une interface (eau, verre, diamant), rayons réfléchi et réfracté d’opacité R et T, impulsions plus lentes dans le milieu dense, fronts d’onde qui se resserrent et pivotent, sens inverse jusqu’à la réflexion totale, tige courbée (deux rayons de courbure) jusqu’à ce qu’elle fuie ; lentille mince avec objet et écran glissés, trois rayons, tache sur l’écran, préréglages appareil photo, projecteur et loupe, lentille épaisse tracée exactement (aberration sphérique) ; prisme à l’échelle avec loupe sur l’écran, une seule couleur, deuxième prisme qui recompose le blanc, goutte d’eau et angles de l’arc-en-ciel ; polariseurs qu’on tourne, troisième polariseur glissé entre deux polariseurs croisés (I₀/8), reflet sur une vitre éteint à l’angle de Brewster.
+- **Notes** : Construite avant le module 24 : la vibration transverse de E n’y est qu’utilisée. Moteur testé hors page (objet `Opt`, 61 tests, aussi lancés sur la page). Optique géométrique seulement (ni diffraction ni couches minces) ; lentille mince idéale par défaut ; loi de Cauchy approchée ; polariseurs idéaux. Se termine sur trois questions vers les modules 15, 47, 48 et 50.
+
 ## Pages d'appui
 
 | Page | Rôle | État |
