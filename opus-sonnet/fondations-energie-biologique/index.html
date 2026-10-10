@@ -1660,37 +1660,270 @@ const S2 = (() => {
 
 
 /* ETAPES-3-4-BEGIN */
-// Greffons provisoires : l'orchestrateur remplace ce bloc à l'intégration. Ils respectent le contrat et ne plantent pas.
-const STUB = (o) => {
-  const m = { v: 0 };
-  return Object.assign({
-    legende: '', outils: '', mesures: [['Étape', 'e', '']], cartes: false, graphH: 120, graphTitre: 'Enregistreur',
-    init() {}, reset() { m.v = 0; }, adv(dt) { m.v += dt; },
-    draw() {
-      const c = ctx; c.save(); c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillStyle = C.texte2; c.font = '400 28px ' + tok('--serif'); c.fillText('Étape en construction', W / 2, H / 2 - 6);
-      c.font = mono(11); c.fillStyle = rgba(C.texte2, 0.8); c.fillText('Cette étape arrive avec l’intégration.', W / 2, H / 2 + 22); c.restore();
-    },
-    graph() { scopeSetup(); },
-    valeurs() { return { e: '—' }; }, statut() { return 'Étape en construction.'; },
-    etat() { return { enConstruction: true }; }
-  }, o);
-};
-const S3 = STUB({
-  titre: 'Du glucose à l’ATP, en bilan', mot: 'Bilan',
-  texte: 'Cette étape montrera le bilan d’une molécule de glucose, avec et sans oxygène. Elle est en construction.',
-  cle: 'La respiration fait descendre l’énergie du glucose par petites marches et en capture environ un tiers en ATP ; le reste part en chaleur. Sans oxygène au bout de la chaîne, presque tout s’arrête.',
-  note: 'Rendement en ATP par glucose selon une convention (de 30 à 32 selon les sources) ; le mécanisme est dans la planche 02.',
-  crochets: { oxygen(on) { return !!on; }, sprint() { return true; } }
-});
-const S4 = STUB({
-  titre: 'La lumière entre : la photosynthèse', mot: 'Lumière',
-  texte: 'Cette étape montrera comment la lumière, absorbée par la chlorophylle, fait monter ce que la respiration fait descendre. Elle est en construction.',
-  cle: 'La photosynthèse utilise la lumière pour faire monter ce que la respiration fait descendre. La matière tourne en cycle ; l’énergie, elle, traverse : elle entre comme lumière et sort comme chaleur.',
-  note: 'Chloroplaste schématique ; spectre de la chlorophylle approché par des gaussiennes.',
-  cartes: true,
-  crochets: { setLambda(nm) { return nm; }, white() { return true; }, setLight(I) { return I; }, setCO2(c) { return c; }, cycle(on) { return !!on; } }
-});
+// Dessins communs aux deux bilans ; les grandeurs viennent exclusivement de BioEn.
+function bilanText(text, x, y, col, size, align) {
+  ctx.font = mono(size || 12); ctx.fillStyle = col || C.texte; ctx.textAlign = align || 'left'; ctx.fillText(text, x, y);
+}
+function bilanBox(x, y, w, h, col) {
+  ctx.fillStyle = rgba(col, 0.06); ctx.strokeStyle = rgba(col, 0.5); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 12); ctx.fill(); ctx.stroke();
+}
+function bilanRibbon(x0, y0, x1, y1, width, col) {
+  const mid = (x0 + x1) / 2;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.bezierCurveTo(mid, y0, mid, y1, x1, y1);
+  ctx.lineTo(x1, y1 + width); ctx.bezierCurveTo(mid, y1 + width, mid, y0 + width, x0, y0 + width);
+  ctx.closePath(); ctx.fillStyle = rgba(col, 0.35); ctx.fill();
+}
+function bilanCurve(c, w, h, maxX, maxY, fn, col) {
+  const L = 34, R = w - 12, T = 18, B = h - 24;
+  c.strokeStyle = C.trait; c.lineWidth = 1; c.strokeRect(L, T, R - L, B - T);
+  c.beginPath(); for (let i = 0; i <= 100; i++) {
+    const x = maxX * i / 100, y = B - (B - T) * fn(x) / maxY;
+    i ? c.lineTo(L + (R - L) * i / 100, y) : c.moveTo(L, y);
+  }
+  c.strokeStyle = col; c.lineWidth = 1.8; c.stroke();
+  c.fillStyle = C.texte2; c.font = mono(10); c.textAlign = 'right';
+  c.fillText(fmt(maxY, 0), L - 4, T + 4); c.fillText('0', L - 4, B);
+  return { L, R, T, B };
+}
+
+const S3 = (() => {
+  const st = {};
+  const budget = () => BioEn.respirationBudget({ O2: st.O2 });
+  const demand = () => st.sprintLeft > 0 ? 150 : 30; // unités illustratives : ATP/s
+  const supply = () => BioEn.supply(demand(), st.O2 ? 30 : 0);
+  function sync() {
+    const root = document.querySelector('[data-step="2"]'); if (!root) return;
+    root.querySelector('#s3O2').setAttribute('aria-pressed', String(st.O2));
+    root.querySelector('#s3O2').textContent = st.O2 ? 'Avec O₂' : 'Sans O₂';
+    root.querySelector('#s3Loupe').setAttribute('aria-pressed', String(st.loupe));
+    root.querySelector('#s3Sprint').disabled = st.sprintLeft > 0;
+  }
+  function oxygen(on) { st.O2 = !!on; sync(); return st.O2; }
+  function loupe(on) { st.loupe = on == null ? !st.loupe : !!on; sync(); return st.loupe; }
+  function sprint() { st.sprintLeft = 10; sync(); return etat(); }
+  function reset() { Object.assign(st, { O2: true, loupe: false, sprintLeft: 0, t: 0, acc: 0, lactate: 0, glucose: 0, rec: [{ t: 0, l: 0 }] }); sync(); }
+  function adv(dt) {
+    st.acc += dt;
+    while (st.acc >= 1 / 60) {
+      const h = 1 / 60, q = supply(); st.acc -= h; st.t += h;
+      st.lactate += q.lactate * h; st.glucose += q.glucose * h;
+      if (st.sprintLeft > 0) { st.sprintLeft = Math.max(0, st.sprintLeft - h); if (!st.sprintLeft) sync(); }
+      if (!st.rec.length || st.t - st.rec[st.rec.length - 1].t >= 0.2) st.rec.push({ t: st.t, l: st.lactate });
+      while (st.rec.length && st.rec[0].t < st.t - 30) st.rec.shift();
+    }
+  }
+  function draw() {
+    const b = budget(), nar = W < 560, left = nar ? 24 : 50, right = W - left, top = 158, bottom = H - 42;
+    if (st.loupe) {
+      bilanText('Électrons : NADH → chaîne → O₂', W / 2, top, C.texte, nar ? 11 : 15, 'center');
+      const x0 = left + 10, dx = (right - left - 28) / 3.8, y0 = top + 54, dy = Math.min(58, (bottom - y0 - 70) / 3);
+      const names = ['NADH', 'Chaîne', 'Chaîne', 'O₂ → H₂O'];
+      for (let i = 0; i < 4; i++) {
+        const x = x0 + i * dx, y = y0 + i * dy;
+        ctx.strokeStyle = i === 3 ? C.neg : C.accent; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx * 0.7, y); ctx.stroke();
+        bilanText(names[i], x, y - 12, i === 3 ? C.neg : C.texte, nar ? 10 : 13);
+        if (i < 3) {
+          arrow(ctx, x + dx * 0.6, y + 5, x + dx, y + dy - 5, st.O2 ? C.ener : C.texte2, 2, st.O2 ? [] : [4, 4]);
+          if (st.O2) { const p = (st.t * 0.7 + i / 3) % 1; bead(ctx, x + dx * (0.6 + p * 0.4), y + p * dy, 3, C.ener, 7); }
+        }
+      }
+      bilanText(st.O2 ? 'L’énergie libre diminue à chaque transfert.' : 'Sans accepteur final, le transfert s’arrête.', W / 2, bottom - 25, st.O2 ? C.ener : C.texte2, nar ? 10 : 12, 'center');
+      bilanText('Marches schématiques ; aucune ATP synthase ici.', W / 2, bottom, C.texte2, nar ? 9 : 11, 'center');
+      zone(left, top, right, bottom, 'redox', 'Chaîne de redox', 'L’O₂ est l’accepteur final des électrons ; les marches ne sont pas à l’échelle.');
+      return;
+    }
+    bilanText('1 glucose · 2 870 kJ/mol', left, top, C.lilas, nar ? 12 : 16);
+    const stageY = top + 40, stageH = 56, gap = nar ? 12 : 28, bw = (right - left - gap) / 2;
+    bilanBox(left, stageY, bw, stageH, C.lilas);
+    bilanText('Glycolyse', left + 10, stageY + 22, C.texte, nar ? 11 : 14);
+    bilanText('Cytosol · 2 ATP', left + 10, stageY + 42, C.ener, nar ? 9 : 11);
+    arrow(ctx, left + bw, stageY + 28, left + bw + gap, stageY + 28, C.lilas, 2);
+    bilanBox(left + bw + gap, stageY, bw, stageH, st.O2 ? C.accent : C.texte2);
+    bilanText(st.O2 ? 'Mitochondrie' : 'Fermentation', left + bw + gap + 10, stageY + 22, C.texte, nar ? 11 : 14);
+    bilanText(st.O2 ? 'Krebs 2 · chaîne 26 ATP' : '2 lactates · NAD⁺ refait', left + bw + gap + 10, stageY + 42, st.O2 ? C.ener : C.lilas, nar ? 8 : 11);
+    zone(left, stageY, left + bw, stageY + stageH, 'glycolyse', 'Glycolyse', 'Deux ATP nets par glucose dans le cytosol, avec ou sans oxygène.');
+    zone(left + bw + gap, stageY, right, stageY + stageH, 'mito', st.O2 ? 'Mitochondrie' : 'Fermentation lactique', st.O2 ? 'La chaîne reçoit des électrons ; son mécanisme est dans la planche La respiration cellulaire.' : 'Le pyruvate devient lactate ; le NAD⁺ régénéré permet à la glycolyse de continuer.');
+    // Sankey : même facteur k pour chaque bande et même budget de 2 870 kJ/mol.
+    const startY = stageY + stageH + 36, span = Math.max(110, bottom - startY - 54), k = Math.min(170, span * 0.65) / 2870;
+    const x0 = left + (nar ? 12 : 32), x1 = right - (nar ? 40 : 110);
+    let sourceY = startY;
+    const branches = [{ E: b.captured, col: C.ener, lab: b.atp.total + ' ATP', y: startY },
+      { E: b.heat, col: C.sable, lab: 'Chaleur', y: startY + b.captured * k + 32 }];
+    if (b.retained) branches.push({ E: b.retained, col: C.lilas, lab: 'Lactate', y: startY + (b.captured + b.heat) * k + 64 });
+    for (const r of branches) {
+      const thick = r.E * k;
+      bilanRibbon(x0, sourceY, x1, r.y, thick, r.col);
+      const yy = r.y + thick / 2;
+      bilanText(r.lab, nar ? x1 - 4 : x1 + 10, nar ? r.y - 5 : yy, r.col, nar ? 11 : 13, nar ? 'right' : 'left');
+      bilanText(fmtI(r.E) + ' kJ/mol', nar ? x1 - 4 : x1 + 10, nar ? r.y + Math.max(12, thick / 2 + 4) : yy + 18, r.col, nar ? 9 : 11, nar ? 'right' : 'left');
+      zone(x0, r.y, right, r.y + Math.max(thick, 18), 'flux' + r.lab, r.lab, 'Épaisseur proportionnelle à l’énergie libre : ' + fmtI(r.E) + ' kJ par mole de glucose.');
+      sourceY += thick;
+    }
+    bilanText(st.O2 ? '6 O₂ consommés → 6 CO₂ + 6 H₂O' : 'L’énergie restante est dans le lactate.', left, H - 25, st.O2 ? C.neg : C.lilas, nar ? 10 : 13);
+  }
+  function graph() {
+    const { w, h } = scopeSetup(), max = Math.max(1200, st.lactate * 1.1), first = st.t - 30;
+    const g = bilanCurve(sctx, w, h, 30, max, x => {
+      const r = st.rec.find(p => p.t >= first + x); return r ? r.l : st.lactate;
+    }, C.lilas);
+    sctx.fillStyle = C.texte2; sctx.font = mono(10); sctx.textAlign = 'left'; sctx.fillText('Lactate cumulé · unités', g.L, 11);
+    sctx.fillText('−30 s', g.L, h - 6); sctx.textAlign = 'right'; sctx.fillText('maintenant', g.R, h - 6);
+  }
+  function valeurs() {
+    const b = budget(), q = supply();
+    return { atp: fmtI(b.atp.total), glucose: fmt(BioEn.glucoseFor(30, st.O2), 0), o2: fmtI(b.o2), co2: fmtI(b.co2), yield: fmt(100 * b.yield, 1), heat: fmtI(b.heat), retained: fmtI(b.retained), demand: fmtI(demand()), flow: fmt(q.glucose, 1), lactate: fmtI(st.lactate) };
+  }
+  function etat() { return Object.assign({ O2: st.O2, loupe: st.loupe, sprint: st.sprintLeft > 0, sprintLeft: st.sprintLeft, t: st.t, lactateAccumulated: st.lactate, glucoseConsumed: st.glucose, demand: demand(), supply: supply(), glucoseFor30ATP: BioEn.glucoseFor(30, st.O2) }, budget()); }
+  function statut() {
+    if (st.sprintLeft > 0) return 'Sprint : demande de 150 ATP/s, plafond aérobie de ' + (st.O2 ? '30' : '0') + '. Le complément vient de la fermentation ; le lactate s’accumule.';
+    if (!st.O2) return 'Sans O₂ : 2 ATP par glucose au lieu de 30. Pour 30 ATP, il faut 15 glucoses ; une grande part de l’énergie reste dans le lactate.';
+    return 'Avec O₂ : 2 + 2 + 26 = 30 ATP par glucose. Environ 32 % de l’énergie libre standard est capturée en ATP, le reste est dissipé.';
+  }
+  function init() {
+    $('#s3O2').addEventListener('click', () => oxygen(!st.O2)); $('#s3Sprint').addEventListener('click', sprint); $('#s3Loupe').addEventListener('click', () => loupe());
+  }
+  return {
+    titre: 'Du glucose à l’ATP, en bilan', mot: 'Bilan',
+    texte: 'Compare le bilan avec et sans O₂ : l’épaisseur des bandes représente l’énergie libre. La loupe montre les transferts d’électrons. Un sprint ajoute une demande que la respiration ne couvre pas entièrement.',
+    cle: 'La respiration capture environ un tiers de l’énergie libre du glucose en ATP. Sans O₂ au bout de la chaîne, la glycolyse peut continuer grâce à la fermentation, mais elle rapporte seulement 2 ATP par glucose.',
+    note: 'Convention de 30 ATP (30 à 32 selon la navette), ΔG°′ standard ; sprint illustratif en unités d’ATP/s, sans élimination du lactate.',
+    graphTitre: 'Enregistreur · lactate cumulé', graphH: 125, cartes: false,
+    legende: lg(bx('#ffd166', 0.4), 'ATP') + lg(bx('#dcc29a', 0.4), 'chaleur') + lg(bx('#b9a3ff', 0.4), 'énergie restante'),
+    encart: '<a href="../02-respiration/index.html">Voir le mécanisme de la chaîne respiratoire</a>. Le rendement rapporte l’ATP à l’oxydation complète du glucose ; sans O₂, l’énergie du lactate n’est pas de la chaleur.',
+    outils: '<div class="grp"><button class="btn" id="s3O2" aria-pressed="true">Avec O₂</button><button class="btn go" id="s3Sprint">Courir un sprint · 10 s</button><button class="btn" id="s3Loupe" aria-pressed="false">Loupe · redox</button></div>',
+    mesures: [['ATP par glucose', 'atp', ''], ['Glucoses pour 30 ATP', 'glucose', ''], ['O₂ par glucose', 'o2', ''], ['CO₂ par glucose', 'co2', ''], ['Rendement standard', 'yield', '%'], ['Chaleur', 'heat', 'kJ/mol'], ['Énergie dans le lactate', 'retained', 'kJ/mol'], ['Demande illustrative', 'demand', 'ATP/s'], ['Débit de glucose', 'flow', '/s'], ['Lactate cumulé', 'lactate', 'unités']],
+    init, reset, adv, draw, graph, valeurs, statut, etat, sync, crochets: { oxygen, sprint, loupe }
+  };
+})();
+
+const S4 = (() => {
+  const st = {};
+  let rateKey = '', rateCache = new Map();
+  const rate = (I) => {
+    const light = I == null ? st.I : I;
+    const key = [st.white, st.lambda, st.CO2].join(':');
+    if (key !== rateKey) { rateKey = key; rateCache.clear(); }
+    if (rateCache.has(light)) return rateCache.get(light);
+    const q = BioEn.photoRate({ lambda: st.white ? 'blanc' : st.lambda, I: light, CO2: st.CO2 });
+    // Limite nulle du modèle : éviter 0 × exp(0/0) quand lumière et CO₂ sont tous deux nuls.
+    if (light === 0 || st.CO2 === 0) q.P = 0;
+    rateCache.set(light, q);
+    return q;
+  };
+  function sync() {
+    const root = document.querySelector('[data-step="3"]'); if (!root) return;
+    for (const [id, value, label] of [['Lambda', st.lambda, ' nm'], ['Light', st.I, ' µmol/m²/s'], ['CO2', st.CO2, ' ppm']]) {
+      root.querySelector('#s4' + id).value = value; root.querySelector('#s4' + id + 'v').textContent = fmtI(value) + label;
+    }
+    root.querySelector('#s4White').setAttribute('aria-pressed', String(st.white)); root.querySelector('#s4Cycle').setAttribute('aria-pressed', String(st.cycle));
+  }
+  function setLambda(nm) { if (Number.isFinite(+nm)) { st.lambda = clamp(+nm, 400, 700); st.white = false; } sync(); return st.lambda; }
+  function white() { st.white = true; sync(); return rate(); }
+  function setLight(I) { if (Number.isFinite(+I)) st.I = clamp(+I, 0, 2000); sync(); return st.I; }
+  function setCO2(c) { if (Number.isFinite(+c)) st.CO2 = clamp(+c, 0, 1200); sync(); return st.CO2; }
+  function cycle(on) { st.cycle = !!on; sync(); return st.cycle; }
+  function reset() { Object.assign(st, { lambda: 662, white: true, I: 500, CO2: 420, cycle: false, t: 0, acc: 0, oxygen: 0 }); sync(); }
+  function adv(dt) {
+    st.acc += dt; while (st.acc >= 1 / 60) { st.acc -= 1 / 60; st.t += 1 / 60; st.oxygen += rate().P / 60; }
+  }
+  function lightColor() { return st.white ? C.texte : st.lambda < 490 ? '#7a9cff' : st.lambda < 580 ? C.chloro : st.lambda < 620 ? C.ener : C.pos; }
+  function drawCycle(top, bottom, nar) {
+    const x = W * 0.5, y1 = top + 72, y2 = bottom - 62, bw = Math.min(260, W - 70);
+    bilanBox(x - bw / 2, y1 - 28, bw, 56, C.chloro); bilanBox(x - bw / 2, y2 - 28, bw, 56, C.accent);
+    bilanText('Plante · photosynthèse', x, y1 - 3, C.chloro, nar ? 12 : 16, 'center');
+    bilanText('La plante respire aussi, jour et nuit.', x, y1 + 16, C.texte2, nar ? 9 : 11, 'center');
+    bilanText('Animal · respiration', x, y2 + 4, C.accent, nar ? 12 : 16, 'center');
+    const xl = x - bw / 2 - 12, xr = x + bw / 2 + 12, mid = (y1 + y2) / 2;
+    arrow(ctx, xl, y2 - 28, xl, y1 + 28, C.co2, 2); arrow(ctx, xr, y1 + 28, xr, y2 - 28, C.neg, 2);
+    bilanText('CO₂ + H₂O', x - 14, mid - 12, C.co2, nar ? 11 : 14, 'right');
+    bilanText('Sucre + O₂', x + 14, mid + 12, C.neg, nar ? 11 : 14);
+    arrow(ctx, x, top - 3, x, y1 - 31, C.ener, 3); bilanText('Lumière', x + 15, top + 12, C.ener, 12);
+    arrow(ctx, x, y2 + 31, x, bottom + 4, C.sable, 3); bilanText('Chaleur', x + 15, bottom, C.sable, 12);
+    zone(0, top, W, bottom + 10, 'cycle', 'Matière et énergie', 'Le carbone et l’oxygène circulent ; l’énergie traverse le système et se dissipe.');
+  }
+  function draw() {
+    const nar = W < 560, left = nar ? 22 : 46, right = W - left, top = 150, bottom = H - 32, q = rate();
+    if (st.cycle) { drawCycle(top, bottom, nar); return; }
+    const center = W / 2, leafY = top + 20, color = lightColor();
+    // Coupe simplifiée d’une feuille : cellules et chloroplastes, puis agrandissement.
+    bilanBox(center - 65, leafY - 17, 130, 34, C.chloro);
+    for (let i = 0; i < 5; i++) { ctx.strokeStyle = rgba(C.chloro, 0.4); ctx.strokeRect(center - 57 + i * 23, leafY - 10, 20, 20); bead(ctx, center - 47 + i * 23, leafY, 4, C.chloro); }
+    bilanText('Feuille en coupe', center, leafY - 26, C.chloro, 11, 'center');
+    arrow(ctx, center, leafY + 18, center, leafY + 40, C.chloro, 1, [3, 3]);
+    zone(center - 65, leafY - 17, center + 65, leafY + 17, 'feuille', 'Feuille', 'Des cellules contiennent des chloroplastes ; la coupe est schématique.');
+    const yy = leafY + 49, bh = nar ? 144 : 140, bw = right - left, split = center;
+    bilanBox(left, yy, bw, bh, C.chloro);
+    bilanText('Chloroplaste', left + 12, yy + 18, C.chloro, 12);
+    ctx.strokeStyle = C.trait; ctx.beginPath(); ctx.moveTo(split, yy + 28); ctx.lineTo(split, yy + bh - 12); ctx.stroke();
+    const a = (left + split) / 2, b = (split + right) / 2;
+    bilanText('Phase lumineuse', a, yy + 40, C.texte, nar ? 10 : 14, 'center');
+    bilanText('Fixation du carbone', b, yy + 40, C.texte, nar ? 9 : 14, 'center');
+    for (let i = 0; i < 3; i++) { bilanBox(a - 27, yy + 54 + i * 9, 54, 6, C.chloro); }
+    arrow(ctx, left + 10, yy + 55, a - 28, yy + 62, color, 2);
+    bilanText(st.white ? 'Blanc' : fmtI(st.lambda) + ' nm', left + 8, yy + 92, color, 10);
+    bilanText('H₂O → O₂', a, yy + 118, C.neg, nar ? 10 : 12, 'center');
+    arrow(ctx, a + 28, yy + 66, b - 24, yy + 66, C.ener, 1.8);
+    bilanText('ATP · NADPH', center, yy + 92, C.ener, nar ? 9 : 11, 'center');
+    ctx.beginPath(); poly(ctx, b, yy + 64, 13, 6, 0); ctx.strokeStyle = C.lilas; ctx.stroke();
+    bilanText('CO₂ → sucre', b, yy + 118, C.lilas, nar ? 10 : 12, 'center');
+    // Une bulle représente 1 µmol O₂/m² dans le compteur, le flux réel est indiqué au panneau.
+    for (let i = 0; i < 5; i++) {
+      const phase = (st.oxygen / 5 + i / 5) % 1;
+      if (q.P > 0) { ctx.strokeStyle = rgba(C.neg, 1 - phase); ctx.beginPath(); ctx.arc(a + 35, yy + 112 - phase * 60, 3 + phase * 2, 0, TAU); ctx.stroke(); }
+    }
+    zone(left, yy, split, yy + bh, 'chlorophylle', 'Chlorophylle et phase lumineuse', 'La lumière absorbée alimente la formation d’ATP et de NADPH ; l’O₂ provient de l’eau.');
+    zone(split, yy, right, yy + bh, 'fixation', 'Fixation du carbone', 'L’ATP et le NADPH servent à former des glucides à partir du CO₂ ; le sucre résume plusieurs réactions.');
+    const gy = yy + bh + 38, gh = Math.max(40, bottom - gy - 18), xL = left + 8, xR = right - 8;
+    bilanText('Absorbance relative · chlorophylles', left, gy - 13, C.texte2, nar ? 10 : 12);
+    ctx.save(); ctx.beginPath(); ctx.rect(xL, gy, xR - xL, gh); ctx.clip();
+    for (const [pig, col] of [['a', C.chloro], ['b', C.accent]]) {
+      ctx.beginPath(); for (let nm = 400; nm <= 700; nm += 2) {
+        const x = xL + (nm - 400) / 300 * (xR - xL), y = gy + gh * (1 - BioEn.chlAbs(nm, pig) / 1.1);
+        nm === 400 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      } ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.stroke();
+    }
+    if (!st.white) { const x = xL + (st.lambda - 400) / 300 * (xR - xL); ctx.strokeStyle = color; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x, gy + gh); ctx.stroke(); }
+    ctx.restore();
+    bilanText('400 · bleu', xL, gy + gh + 16, C.texte2, 10); bilanText('550 · vert', center, gy + gh + 16, C.texte2, 10, 'center'); bilanText('700 · rouge', xR, gy + gh + 16, C.texte2, 10, 'right');
+    zone(xL, gy, xR, gy + gh, 'spectre', 'Spectre d’absorption', 'Chlorophylle a en vert, b en ambre : les pics sont dans le bleu et le rouge ; le mélange absorbe moins le vert.');
+  }
+  function graph() {
+    const { w, h } = scopeSetup(), q = rate(), max = Math.max(1, q.Pmax * 1.1);
+    const g = bilanCurve(sctx, w, h, 2000, max, x => rate(x).P, C.chloro);
+    bead(sctx, g.L + (g.R - g.L) * st.I / 2000, g.B - (g.B - g.T) * q.P / max, 3, C.ener, 6);
+    sctx.font = mono(10); sctx.fillStyle = C.texte2; sctx.textAlign = 'left'; sctx.fillText('O₂ · µmol/m²/s', g.L, 11);
+    sctx.fillText('0', g.L, h - 6); sctx.textAlign = 'right'; sctx.fillText('2 000 · lumière', g.R, h - 6);
+  }
+  function etat() { const q = rate(); return Object.assign({ lambda: st.white ? 'blanc' : st.lambda, white: st.white, I: st.I, CO2: st.CO2, cycle: st.cycle, absorbance: st.white ? null : BioEn.chlAbs(st.lambda), oxygenTotal: st.oxygen, oxygenPerMinute: q.P * 60, glucoseRate: q.P / 6, t: st.t }, q); }
+  function valeurs() { const q = rate(), b = BioEn.photoBudget(); return { absorption: fmt(100 * q.f, 1), P: fmt(q.P, 2), bubbles: fmtI(q.P * 60), pmax: fmt(q.Pmax, 1), glucose: fmt(q.P / 6, 2), photons: fmtI(b.photonsPerGlucose), total: fmt(st.oxygen, 1) }; }
+  function statut() {
+    if (st.cycle) return 'La plante respire aussi. CO₂, eau, sucre et O₂ circulent ; l’énergie entre comme lumière et sort comme chaleur.';
+    if (st.I === 0) return 'Sans lumière : le modèle donne une photosynthèse brute nulle. La respiration de la plante continue ; elle n’est pas soustraite ici.';
+    if (st.CO2 === 0) return 'Sans CO₂ : aucune fixation de carbone soutenue dans ce modèle stationnaire, même si la lumière est présente.';
+    if (!st.white && st.lambda >= 500 && st.lambda <= 590) return 'La chlorophylle absorbe moins le vert : une plus grande fraction de ce faisceau traverse ou est renvoyée.';
+    if (rate().P > 0.95 * rate().Pmax) return 'Plateau : le CO₂ disponible et la capacité de fixation limitent la vitesse. Ajouter de la lumière change peu le résultat.';
+    return 'La lumière absorbée alimente la phase lumineuse ; l’ATP et le NADPH produits servent ensuite à fixer le CO₂ en glucides.';
+  }
+  function init() {
+    $('#s4Lambda').addEventListener('input', e => setLambda(+e.target.value)); $('#s4Light').addEventListener('input', e => setLight(+e.target.value)); $('#s4CO2').addEventListener('input', e => setCO2(+e.target.value));
+    $('#s4White').addEventListener('click', white); $('#s4Cycle').addEventListener('click', () => cycle(!st.cycle));
+  }
+  return {
+    titre: 'La lumière entre : la photosynthèse', mot: 'Lumière',
+    texte: 'Compare les couleurs du faisceau, puis augmente la lumière ou le CO₂. La feuille contient des chloroplastes : la phase lumineuse alimente la fixation du carbone. Ouvre le grand cycle pour suivre la matière et l’énergie.',
+    cle: 'La photosynthèse utilise la lumière pour faire monter ce que la respiration fait descendre. La matière tourne en cycle ; l’énergie traverse : elle entre comme lumière et sort comme chaleur.',
+    note: 'Chloroplaste schématique ; spectre en solution approché ; réponse et plafond de CO₂ empiriques. Photosynthèse brute, sans respiration ni photorespiration.',
+    graphTitre: 'Réponse à la lumière · modèle empirique', graphH: 130, cartes: true,
+    legende: lg(ln('#7ec27a', 2), 'photosynthèse brute') + lg(lgd('#ffd166'), 'réglage actuel'),
+    encart: 'Bulles symboliques : 1 bulle = 1 µmol O₂/m². Bilan global : 6 CO₂ + 6 H₂O → glucose + 6 O₂ ; minimum idéal de 48 photons par glucose, pas un rendement de terrain.',
+    outils: `<div class="grp"><label class="gl" for="s4Lambda">Couleur</label><input id="s4Lambda" type="range" min="400" max="700" value="662"><span class="rv" id="s4Lambdav"></span><button class="btn" id="s4White" aria-pressed="true">Lumière blanche</button></div>
+      <div class="grp"><label class="gl" for="s4Light">Lumière</label><input id="s4Light" type="range" min="0" max="2000" step="10" value="500"><span class="rv" id="s4Lightv"></span></div>
+      <div class="grp"><label class="gl" for="s4CO2">CO₂</label><input id="s4CO2" type="range" min="0" max="1200" step="10" value="420"><span class="rv" id="s4CO2v"></span><button class="btn" id="s4Cycle" aria-pressed="false">Le grand cycle</button></div>`,
+    mesures: [['Lumière absorbée', 'absorption', '%'], ['Photosynthèse brute', 'P', 'µmol/m²/s'], ['O₂ par minute', 'bubbles', 'µmol/m²'], ['Plafond à ce CO₂', 'pmax', 'µmol/m²/s'], ['Glucose équivalent', 'glucose', 'µmol/m²/s'], ['Photons par glucose', 'photons', 'min.'], ['O₂ cumulé', 'total', 'µmol/m²']],
+    init, reset, adv, draw, graph, valeurs, statut, etat, sync, crochets: { setLambda, white, setLight, setCO2, cycle }
+  };
+})();
 /* ETAPES-3-4-END */
 
 
@@ -1748,6 +1981,8 @@ function updateUI(n) {
   for (const id of ['#stepTitle', '#stepText', '#stepKey']) { const e = $(id); e.classList.remove('swap'); void e.offsetWidth; e.classList.add('swap'); }
   $('#rEye').textContent = s.graphTitre; $('#leg').innerHTML = s.legende || ''; $('#mNote').textContent = s.note; const mp = $('#mPlus'); mp.innerHTML = s.encart || ''; mp.hidden = !s.encart;
   $('#cards').hidden = !s.cartes;
+  cv.setAttribute('aria-label', ['Échelle d’énergie libre et réserve d’ATP : le couplage des réactions.', 'Bain d’enzymes, substrats et inhibiteurs ; courbe de vitesse.', 'Bilan de l’énergie du glucose avec ou sans O₂, ou escalier de redox.', 'Feuille, chloroplaste et spectre d’absorption, ou grand cycle de la matière.'][n]);
+  scopeC.setAttribute('aria-label', n === 3 ? 'Courbe empirique de photosynthèse brute en fonction de la lumière ; le point indique le réglage actuel.' : s.graphTitre + ' en fonction du temps.');
   const tk = $('#touches');
   tk.innerHTML = s.touches ? s.touches : (s.keys ? Object.keys(s.keys).map(k => '<kbd>' + k.toUpperCase() + '</kbd>').join(' ') : '');
   document.querySelectorAll('.sTools').forEach(d => { d.hidden = +d.dataset.step !== n; });
@@ -1800,8 +2035,13 @@ cv.title = CVTITLE;
 let dragging = false;
 cv.addEventListener('pointerleave', () => { if (!dragging) { hideTip(); cv.className = ''; } cv.title = CVTITLE; });
 cv.addEventListener('pointerdown', e => {
-  const s = STEPS[cur]; if (!s.pointer || fade !== 0) return;
+  const s = STEPS[cur]; if (fade !== 0) return;
   const r = cv.getBoundingClientRect();
+  if (e.pointerType === 'touch') {
+    const z = hitZone(e.clientX - r.left, e.clientY - r.top);
+    if (z) showTip(z.key, z.name, z.role, e.clientX, e.clientY); else hideTip();
+  }
+  if (!s.pointer) return;
   if (s.pointer.down(e.clientX - r.left, e.clientY - r.top, e)) { dragging = true; try { cv.setPointerCapture(e.pointerId); } catch (_) {} cv.className = 'grabbing'; hideTip(); e.preventDefault(); }
 });
 cv.addEventListener('pointermove', e => {
