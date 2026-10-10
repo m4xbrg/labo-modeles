@@ -1658,7 +1658,8 @@ const Reff4 = () => (P4.gen ? 1 : P4.R), Uext4 = () => (P4.gen ? P4.U : 0);
 function live4() {
   const c = K4.cell, E = Elc.emfOf(c), I = P4.bridge ? Elc.current(Object.assign({}, c, { bridge: true }), Reff4(), Uext4()) : 0;
   const mode = !P4.bridge ? 'ouvert' : Math.abs(I) < 1e-12 ? 'équilibre' : I > 0 ? 'pile' : 'électrolyse';
-  const U = !P4.bridge ? 0 : P4.gen ? P4.U : E - I * c.Rint;
+  // Sans pont, aucun courant ; le voltmètre, en parallèle sur la charge, lit 0 avec la résistance, U imposée avec le générateur.
+  const U = P4.gen ? P4.U : !P4.bridge ? 0 : E - I * c.Rint;
   return { E, I, U, mode };
 }
 function enter4(restart) {
@@ -1673,7 +1674,7 @@ function adv4(h) {
   const L = live4(), I = L.I;
   const v = clamp(Math.abs(I) * 1100, 0, 260) * (reduce ? 0.7 : 1), sg = I > 0 ? 1 : I < 0 ? -1 : 0;
   K4.ph += sg * v * h; K4.bph += sg * v * 0.5 * h;
-  if (++K4.rc % 6 === 0) { K4.rec.push({ t: o.t / 3600, E: L.E, U: P4.bridge ? L.U : null }); if (K4.rec.length > 1600) K4.rec = K4.rec.filter((r, i) => i % 2 === 0); }
+  if (++K4.rc % 6 === 0) { K4.rec.push({ t: o.t / 3600, E: L.E, U: P4.bridge || P4.gen ? L.U : null }); if (K4.rec.length > 1600) K4.rec = K4.rec.filter((r, i) => i % 2 === 0); }
 }
 function geo4() {
   const nar = W < 700, top = nar ? 128 : 108, bot = nar ? 22 : 28;
@@ -1742,8 +1743,8 @@ function draw4() {
   c.fillStyle = C.fond; c.strokeStyle = C.ener; c.lineWidth = 1.6; c.beginPath(); c.arc(vx, g.yV, 14, 0, TAU); c.fill(); c.stroke();
   c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('V', vx, g.yV + 0.5);
   c.fillStyle = C.fond2; c.strokeStyle = rgba(RT2, 0.6); c.lineWidth = 1; rrect(c, bx0 + 0.5, g.yV - 12.5, bW, 25, 3); c.fill(); c.stroke();
-  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.fillText(P4.bridge ? fmt(L.U, 2) + ' V' : '— V', bx0 + bW / 2, g.yV + 1);
-  zone(vx - 15, g.yV - 15, bx0 + bW, g.yV + 15, 'volt', 'Voltmètre · tension entre les électrodes', P4.bridge ? 'Il mesure l’écart de potentiel entre les deux électrodes : la tension de la pile.' : 'Circuit ouvert : aucune tension mesurable entre deux béchers isolés, il affiche « — ».');
+  c.font = '500 14px ' + C.mono; c.fillStyle = C.ener; c.fillText(P4.bridge || P4.gen ? fmt(L.U, 2) + ' V' : '— V', bx0 + bW / 2, g.yV + 1);
+  zone(vx - 15, g.yV - 15, bx0 + bW, g.yV + 15, 'volt', 'Voltmètre · tension entre les électrodes', P4.bridge ? 'Il mesure l’écart de potentiel entre les deux électrodes : la tension de la pile.' : P4.gen ? 'Pont retiré : aucun courant, il lit la tension imposée par le générateur, branché en parallèle.' : 'Circuit ouvert : sans pont, la pile ne ferme aucun circuit et rien ne passe dans le voltmètre, il affiche « — ».');
   // branche principale : résistance ou générateur
   c.strokeStyle = wire; c.lineWidth = 1.8; c.beginPath(); c.moveTo(g.exA, g.yR); c.lineTo(xm - 38, g.yR); c.moveTo(xm + 38, g.yR); c.lineTo(g.exC, g.yR); c.stroke();
   if (!P4.gen) {
@@ -1777,7 +1778,7 @@ function recorder4(c, g, L) {
     lines: [{ pts: rec.map(r => [r.t, r.E]), col: rgba(RT2, 0.95), lw: 1.4, dash: [4, 3] }, ...segs.map(s => ({ pts: s, col: C.ener, lw: 2 }))], dots });
   c.font = mono(11); c.textBaseline = 'middle'; c.textAlign = 'left';
   c.strokeStyle = C.ener; c.lineWidth = 2; c.beginPath(); c.moveTo(P.px, b.y + 9); c.lineTo(P.px + 16, b.y + 9); c.stroke();
-  c.fillStyle = C.ener; c.fillText('U ' + (P4.bridge ? fmt(L.U, 2) + ' V' : '—'), P.px + 21, b.y + 9);
+  c.fillStyle = C.ener; c.fillText('U ' + (P4.bridge || P4.gen ? fmt(L.U, 2) + ' V' : '—'), P.px + 21, b.y + 9);
   const x2 = P.px + (g.nar ? 98 : 120);
   c.strokeStyle = C.texte2; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x2, b.y + 9); c.lineTo(x2 + 16, b.y + 9); c.stroke(); c.setLineDash([]);
   c.fillStyle = C.texte2; c.fillText('E ' + fmt(L.E, 2) + ' V', x2 + 21, b.y + 9);
@@ -1802,7 +1803,7 @@ function status4() {
 }
 function readouts4() {
   const c = K4.cell, L = live4(), A = cname(P4.anode), Cc = cname(P4.cathode);
-  setM('E', fmt(L.E, 3)); setM('U', P4.bridge ? fmt(L.U, 3) : '—'); setM('I', fmt(L.I * 1000, 1)); setM('Q', fmtI(c.Q)); setM('th', fmt(c.t / 3600, 2));
+  setM('E', fmt(L.E, 3)); setM('U', P4.bridge || P4.gen ? fmt(L.U, 3) : '—'); setM('I', fmt(L.I * 1000, 1)); setM('Q', fmtI(c.Q)); setM('th', fmt(c.t / 3600, 2));
   const dC = c.mC - 20, dA = 20 - c.mA;
   setLab('dmC', Cc.name + (dC >= -5e-4 ? ' déposé' : ' dissous')); setLab('dmA', A.name + (dA >= -5e-4 ? ' dissous' : ' déposé'));
   setM('dmC', fmt(Math.abs(dC), 3)); setM('dmA', fmt(Math.abs(dA), 3)); setM('cA', fmt(c.cA, 3)); setM('cC', fmt(c.cC, c.cC < 0.01 ? 4 : 3));
