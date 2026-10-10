@@ -16,8 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#ffb36b;
@@ -145,16 +146,44 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<style>
+/* La coque suit le thème LABO ; l’écran garde ses couleurs scientifiques. */
+.labo-etapes .status,.labo-etapes .cle{color:var(--encre-2)}
+.labo-etapes .cle{border-color:var(--filet)}
+.labo-etapes .card{border-color:var(--filet);color:var(--encre-2)}
+.labo-etapes .card b{color:var(--encre)}
+.labo-etapes .card small,.labo-etapes .hints{color:var(--encre-3)}
+.labo-etapes .hints kbd{color:var(--encre);border-color:var(--filet)}
+.labo-etapes .liens{position:static;padding:0;margin-bottom:0}
+.labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
+</style>
+<script src="../../labo/theme.js"></script>
 </head>
-<body>
+<body class="labo-etapes" data-mode="observer" data-module="30" data-touches="vmk">
+<header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
+  <div class="droite"><p class="pos">Fondations · 30</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
+</header>
+<div class="titre"><div><h1>Réactions : vitesse et équilibre</h1><p class="lead">Des collisions franchissent une barrière ; à l’équilibre, deux réactions continuent à la même vitesse.</p></div>
+  <dl class="sig"><dt>Échelle</dt><dd>boîtes 2D · gaz idéal</dd><dt>Temps</dt><dd>unités réduites · secondes du modèle</dd><dt>Modèle</dt><dd>collisions · cinétique · Gillespie</dd></dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitres et étapes">
+  <div class="chap" data-g="30"><p class="chap-t"><b>30</b>Réactions chimiques</p><div class="segs">
+    <button class="seg" data-a="0" title="Étape 1 — Collisions et énergie d’activation"><b>30.1</b><span>Collisions</span></button>
+    <button class="seg" data-a="1" title="Étape 2 — Ce qui règle la vitesse"><b>30.2</b><span>Vitesse</span></button>
+    <button class="seg" data-a="2" title="Étape 3 — La catalyse"><b>30.3</b><span>Catalyse</span></button>
+    <button class="seg" data-a="3" title="Étape 4 — L’équilibre dynamique et Le Chatelier"><b>30.4</b><span>Équilibre</span></button>
+  </div></div>
+</nav>
+<div class="modes"><div role="tablist" aria-label="Couches de la planche">
+  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder les collisions, choisir une étape et mettre en pause."><span>V</span>Observer</button>
+  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Régler température, concentration et catalyse ; comparer les mesures."><span>M</span>Manipuler</button>
+  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Relier les mesures aux explications et ouvrir la théorie du module 30."><span>K</span>Comprendre</button>
+</div><p class="indice" id="indice"></p></div>
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène de l'étape : boîte de molécules A et B qui se heurtent, profil d'énergie et histogramme des énergies de collision (étape 1) ; trois boîtes miniatures, graphe de la concentration de A en fonction du temps (étape 2) ; profils d'énergie et boîtes avec et sans catalyseur (étape 3) ; piston, loupe moléculaire et compteurs de dissociation et de recombinaison (étape 4)."></canvas>
-    <header class="head">
-      <p class="serie">LABO · Fondations 30</p>
-      <h1>Réactions : vitesse et <em>équilibre</em></h1>
-      <a class="back" href="../../labo/index.html">&larr; LABO</a>
-    </header>
   </main>
   <div class="tip" id="tip" role="tooltip"></div>
 
@@ -162,12 +191,12 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
       <h2 id="stepTitle">Quels chocs réagissent ?</h2>
-      <p id="stepText" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
-      <p class="cle" id="stepKey"></p>
+      <p id="stepText" aria-live="polite" class="couche-comp"></p>
+      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p class="cle couche-comp" id="stepKey"></p>
     </section>
 
-    <section id="scopeSec">
+    <section id="scopeSec" class="couche-lire">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : fraction de chocs réactifs au fil du temps (étape 1) ; ln k en fonction de 1/T, un point par essai (étape 2)."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -176,28 +205,29 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </section>
 
     <section id="measSec">
-      <div class="meas" id="meas"></div>
-      <p class="note" id="mNote"></p>
+      <div class="meas couche-lire" id="meas"></div>
+      <p class="note couche-comp" id="mNote"></p>
     </section>
 
-    <section class="cards" id="cards" hidden aria-label="Trois questions ouvertes">
+    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
-      <div class="card"><b>Ions</b>Que se passe-t-il quand la particule échangée est un proton, ou un électron ?<small>Module 31 · acide-base et redox (à venir)</small></div>
+      <div class="card"><b>Ions</b>Que se passe-t-il quand la particule échangée est un proton, ou un électron ?<small><a href="../fondations-acide-base-redox/index.html">Module 31 · Protons et électrons qui passent</a></small></div>
       <div class="card"><b>Vivant</b>Comment une cellule fait-elle tourner des milliers de réactions à 37 °C ?<small>Module 34 · énergie biologique (à venir) · <a href="../08-replication-adn/index.html">planche 08, la polymérase</a></small></div>
       <div class="card"><b>Énergie</b>Qu’est-ce qui décide de quel côté penche K ?<small>Module 18 · <a href="../07-matiere-chaleur/index.html">Matière et chaleur</a> · <a href="explication.html">explication : énergie libre, seulement introduite</a></small></div>
     </section>
 
-    <section class="kbd">
+    <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape</li>
         <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd> orientation exigée (étape 1) · <kbd>E</kbd> essai (étape 2)</li>
-        <li><kbd>C</kbd> catalyseur (étapes 3 et 4) · <kbd>I</kbd> injecter du NO₂ (étape 4)</li>
+        <li><kbd>C</kbd> catalyseur (étapes 3 et 4) · <kbd>N</kbd> injecter du NO₂ (étape 4)</li>
+        <li><kbd>V</kbd> observer · <kbd>M</kbd> manipuler · <kbd>K</kbd> comprendre · <kbd>I</kbd> infos · <kbd>Échap</kbd> fermer</li>
       </ul>
     </section>
 
-    <nav class="liens">
-      <a class="comprendre" href="explication.html"><span>Comprendre ce qui se passe</span><span aria-hidden="true">&rarr;</span></a>
+    <nav class="liens couche-comp">
+      <a class="comprendre" href="explication.html#m30"><span>Théorie du module 30</span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -209,14 +239,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <button class="btn" id="bReset" title="Réinitialiser l'étape (R)">Réinitialiser</button>
     </div>
 
-    <div class="stepper" id="stepper" role="group" aria-label="Les quatre étapes">
-      <div class="sg"><span class="sgl"><span class="long">Module 30 · Réactions chimiques</span><span class="short">30</span></span><div class="sgs">
-        <button class="seg" data-a="0" title="Étape 1 — Collisions et énergie d'activation"><b>1</b><span>Collisions</span></button>
-        <button class="seg" data-a="1" title="Étape 2 — Ce qui règle la vitesse"><b>2</b><span>Vitesse</span></button>
-        <button class="seg" data-a="2" title="Étape 3 — La catalyse"><b>3</b><span>Catalyse</span></button>
-        <button class="seg" data-a="3" title="Étape 4 — L'équilibre dynamique et Le Chatelier"><b>4</b><span>Équilibre</span></button>
-      </div></div>
-    </div>
 
     <div class="tools" id="tools">
       <!-- 1 -->
@@ -236,7 +258,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <!-- 4 -->
       <div class="grp" data-acts="3"><span class="gl">T du bain</span><input type="range" id="rTe" min="260" max="360" step="1" value="298" aria-label="Température du bain en kelvins"><span class="rv" id="vTe"></span></div>
       <div class="grp" data-acts="3"><span class="gl">volume V</span><input type="range" id="rV4" min="0.4" max="2" step="0.05" value="1" aria-label="Volume du piston en litres"><span class="rv" id="vV4"></span></div>
-      <div class="grp" data-acts="3"><button class="btn go" id="bInj" title="Ajouter 80 molécules de NO₂ (touche I)">Injecter du NO₂</button><button class="btn" id="bCat4" aria-pressed="false" title="Catalyseur (touche C)"><span class="dot"></span>Catalyseur</button></div>
+      <div class="grp" data-acts="3"><button class="btn go" id="bInj" title="Ajouter 80 molécules de NO₂ (touche N)">Injecter du NO₂</button><button class="btn" id="bCat4" aria-pressed="false" title="Catalyseur (touche C)"><span class="dot"></span>Catalyseur</button></div>
       <!-- 2 -->
       <div class="grp" data-acts="1"><button class="btn go" id="bTrial" title="Mesurer k à la température du curseur (touche E)">Essai</button><button class="btn" id="bRelance" title="Relancer les trois boîtes">Relancer</button></div>
     </div>
@@ -766,10 +788,10 @@ function layout1() {
   const st = stacked();
   if (!st && W >= 760) {
     const colW = clamp(Math.round(W * 0.30), 250, 360), cx0 = W - colW - 16;
-    const ph = clamp(Math.round(H * 0.19), 114, 170), rw = cx0 - 32, rh = H - 118 - 18, s = Math.min(rw / 40, rh / 28), bw = 40 * s, bh = 28 * s;
-    return { s, bx: 16 + (rw - bw) / 2, by: 118 + (rh - bh) / 2, prof: { x: cx0, y: 36, w: colW, h: ph }, hist: { x: cx0, y: 36 + ph + 56, w: colW, h: clamp(H - (36 + ph + 56) - 30, 190, 360) }, wide: true };
+    const ph = clamp(Math.round(H * 0.19), 114, 170), rw = cx0 - 32, rh = H - 28 - 18, s = Math.min(rw / 40, rh / 28), bw = 40 * s, bh = 28 * s;
+    return { s, bx: 16 + (rw - bw) / 2, by: 28 + (rh - bh) / 2, prof: { x: cx0, y: 36, w: colW, h: ph }, hist: { x: cx0, y: 36 + ph + 56, w: colW, h: clamp(H - (36 + ph + 56) - 30, 190, 360) }, wide: true };
   }
-  const pw = Math.min(W - 32, 520), px = (W - pw) / 2, histH = 176, top = W < 640 ? 160 : 134;
+  const pw = Math.min(W - 32, 520), px = (W - pw) / 2, histH = 176, top = 34;
   let s = pw / 40;
   if (!st) s = Math.max(5, Math.min(s, (H - top - 100 - 34 - histH - 18) / 28));
   const bw = 40 * s, bh = 28 * s, by = top + 100, bx = (W - bw) / 2;
@@ -1104,10 +1126,10 @@ function trial2() {
 function layout2() {
   const st = stacked();
   if (!st) {
-    const m = 16, gap = 14, bw = (W - 2 * m - 2 * gap) / 3, top = 150, gh = clamp(H * 0.30, 130, 230), bh = Math.max(110, H - top - gh - 74);
+    const m = 16, gap = 14, bw = (W - 2 * m - 2 * gap) / 3, top = 40, gh = clamp(H * 0.30, 130, 230), bh = Math.max(110, H - top - gh - 74);
     return { boxes: [0, 1, 2].map(i => ({ x: m + i * (bw + gap), y: top, w: bw, h: bh })), graph: { x: m, y: top + bh + 48, w: W - 2 * m, h: gh }, short: bw < 200 };
   }
-  const m = 12, gap = 8, bw = (W - 2 * m - 2 * gap) / 3, top = W < 640 ? 178 : 150, bh = Math.round(bw * 1.12), gy = top + bh + 50, gh = 200;
+  const m = 12, gap = 8, bw = (W - 2 * m - 2 * gap) / 3, top = 48, bh = Math.round(bw * 1.12), gy = top + bh + 50, gh = 200;
   return { boxes: [0, 1, 2].map(i => ({ x: m + i * (bw + gap), y: top, w: bw, h: bh })), graph: { x: 12, y: gy, w: W - 24, h: gh }, short: bw < 200, total: gy + gh + 18 };
 }
 function draw2() {
@@ -1333,10 +1355,10 @@ function layout3() {
   if (!st && W >= 900) {
     let bh = clamp(H * 0.46, 200, 340), bw = bh * 40 / 28; if (2 * bw + 56 > W) { bw = (W - 56) / 2; bh = bw * 0.7; }
     const gap = 24, x1 = (W - 2 * bw - gap) / 2, by = H - 40 - bh, px = Math.max(600, W - 16 - 560);
-    return { prof: { x: px, y: 34, w: W - 16 - px, h: Math.max(120, by - 44 - 34 - 6) }, beaker: { x: 16, y: 130, w: 150, h: Math.max(90, by - 44 - 130 - 6) },
+    return { prof: { x: px, y: 34, w: W - 16 - px, h: Math.max(120, by - 44 - 34 - 6) }, beaker: { x: 16, y: 34, w: 150, h: Math.max(90, by - 44 - 34 - 6) },
       boxes: [{ x: x1, y: by, w: bw }, { x: x1 + bw + gap, y: by, w: bw }], wide: true };
   }
-  const top = W < 640 ? 160 : 134, pw = Math.min(W - 32, 560), px = (W - pw) / 2, profH = st ? 130 : 110, bkY = top + profH + 36, bkH = 100, by1 = bkY + bkH + 40, side = W >= 560;
+  const top = 34, pw = Math.min(W - 32, 560), px = (W - pw) / 2, profH = st ? 130 : 110, bkY = top + profH + 36, bkH = 100, by1 = bkY + bkH + 40, side = W >= 560;
   let bw = side ? Math.min((W - 32 - 16) / 2, 400) : Math.min(W - 32, 420);
   if (!st && side) bw = Math.max(150, Math.min(bw, (H - by1 - 34) / 0.7));
   const bh = bw * 0.7;
@@ -1511,10 +1533,10 @@ function dir4() { const q = Qs4(), K = Rxn.Kp(k4.s.T), l = Math.log(q / K); retu
 function layout4() {
   const st = stacked();
   if (!st && W >= 900) {
-    const VR = { x: 24, y: 128, w: 230, h: H - 128 - 24 }, cw = 230, cx = W - 16 - cw, left = VR.x + VR.w + 30, avail = cx - 20 - left, R = Math.max(80, Math.min(170, avail / 2, (H - 150) / 2));
-    return { VR, loupe: { cx: left + avail / 2, cy: 128 + (H - 152) / 2, R }, cnt: [{ x: cx, y: 150, w: cw, h: 130 }, { x: cx, y: 296, w: cw, h: 130 }], wide: true };
+    const VR = { x: 24, y: 24, w: 230, h: H - 48 }, cw = 230, cx = W - 16 - cw, left = VR.x + VR.w + 30, avail = cx - 20 - left, R = Math.max(80, Math.min(170, avail / 2, (H - 48) / 2));
+    return { VR, loupe: { cx: left + avail / 2, cy: H / 2, R }, cnt: [{ x: cx, y: 46, w: cw, h: 130 }, { x: cx, y: 192, w: cw, h: 130 }], wide: true };
   }
-  const top = W < 640 ? 160 : 134, vh = st ? 270 : Math.max(180, Math.min(270, H - top - 150)), VR = { x: 16, y: top, w: 150, h: vh }, left = VR.x + VR.w + 16, avail = W - 16 - left, R = Math.max(60, Math.min(150, avail / 2, vh / 2)), cwid = (W - 32 - 12) / 2;
+  const top = 34, vh = st ? 270 : Math.max(180, Math.min(270, H - top - 150)), VR = { x: 16, y: top, w: 150, h: vh }, left = VR.x + VR.w + 16, avail = W - 16 - left, R = Math.max(60, Math.min(150, avail / 2, vh / 2)), cwid = (W - 32 - 12) / 2;
   return { VR, loupe: { cx: left + avail / 2, cy: top + vh / 2, R }, cnt: [{ x: 16, y: top + vh + 18, w: cwid, h: 100 }, { x: 16 + cwid + 12, y: top + vh + 18, w: cwid, h: 100 }], total: top + vh + 18 + 100 + 58, wide: false };
 }
 function drawSample4(c, Lp) {
@@ -1825,13 +1847,13 @@ addEventListener('keydown', e => {
     if (tag === 'BUTTON' || isRange || tag === 'A' || tag === 'SUMMARY') return;
     e.preventDefault(); setPlay(!playing); return;
   }
-  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange && !e.target.closest('[role="tab"]')) { e.preventDefault(); goAct(act + (e.key === 'ArrowRight' ? 1 : -1)); return; }
   if ((e.key === 'r' || e.key === 'R') && !isRange) { goAct(act, true); return; }
   if (/^[1-4]$/.test(e.key) && !isRange) { goAct(+e.key - 1); return; }
   if (!isRange && !e.repeat && (e.key === 'o' || e.key === 'O') && act === 0) { setSt1(!prm.st1); syncTools(); return; }
   if (!isRange && !e.repeat && (e.key === 'e' || e.key === 'E') && act === 1) { trial2(); return; }
   if (!isRange && !e.repeat && (e.key === 'c' || e.key === 'C')) { if (act === 2) { setCat3(!prm.cat3); syncTools(); } else if (act === 3) { setCat4(!prm.cat4); syncTools(); } return; }
-  if (!isRange && !e.repeat && (e.key === 'i' || e.key === 'I') && act === 3) { inject4(); return; }
+  if (!isRange && !e.repeat && (e.key === 'n' || e.key === 'N') && act === 3) { inject4(); return; }
 });
 document.addEventListener('visibilitychange', () => { last = 0; });
 
@@ -1861,6 +1883,8 @@ scopeC.addEventListener('pointerdown', e => hover(zonesS, e, scopeC));
 scopeC.addEventListener('pointerleave', hideTip);
 
 new ResizeObserver(() => resize()).observe(sceneEl);
+new ResizeObserver(() => sizePanelCanvases()).observe(scopeC.parentElement);
+new ResizeObserver(() => sizePanelCanvases()).observe(scope2C.parentElement);
 addEventListener('resize', resize);
 
 /* ---------------- Boucle ---------------- */
@@ -1919,5 +1943,7 @@ enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+<script src="../../labo/corpus.js"></script>
+<script src="../../labo/planche.js"></script>
 </body>
 </html>
