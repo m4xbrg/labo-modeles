@@ -1703,12 +1703,13 @@ const S3 = (() => {
   function oxygen(on) { st.O2 = !!on; sync(); return st.O2; }
   function loupe(on) { st.loupe = on == null ? !st.loupe : !!on; sync(); return st.loupe; }
   function sprint() { st.sprintLeft = 10; sync(); return etat(); }
-  function reset() { Object.assign(st, { O2: true, loupe: false, sprintLeft: 0, t: 0, acc: 0, lactate: 0, glucose: 0, rec: [{ t: 0, l: 0 }] }); sync(); }
+  function reset() { Object.assign(st, { O2: true, loupe: false, sprintLeft: 0, t: 0, acc: 0, lactate: 0, glucose: 0, o2: 0, co2: 0, rec: [{ t: 0, l: 0 }] }); sync(); }
   function adv(dt) {
     st.acc += dt;
     while (st.acc >= 1 / 60) {
       const h = 1 / 60, q = supply(); st.acc -= h; st.t += h;
       st.lactate += q.lactate * h; st.glucose += q.glucose * h;
+      st.o2 += q.o2 * h; st.co2 += q.co2 * h;
       if (st.sprintLeft > 0) { st.sprintLeft = Math.max(0, st.sprintLeft - h); if (!st.sprintLeft) sync(); }
       if (!st.rec.length || st.t - st.rec[st.rec.length - 1].t >= 0.2) st.rec.push({ t: st.t, l: st.lactate });
       while (st.rec.length && st.rec[0].t < st.t - 30) st.rec.shift();
@@ -1775,7 +1776,13 @@ const S3 = (() => {
     const b = budget(), q = supply();
     return { atp: fmtI(b.atp.total), glucose: fmt(BioEn.glucoseFor(30, st.O2), 0), o2: fmtI(b.o2), co2: fmtI(b.co2), yield: fmt(100 * b.yield, 1), heat: fmtI(b.heat), retained: fmtI(b.retained), demand: fmtI(demand()), flow: fmt(q.glucose, 1), lactate: fmtI(st.lactate) };
   }
-  function etat() { return Object.assign({ O2: st.O2, loupe: st.loupe, sprint: st.sprintLeft > 0, sprintLeft: st.sprintLeft, t: st.t, lactateAccumulated: st.lactate, glucoseConsumed: st.glucose, demand: demand(), supply: supply(), glucoseFor30ATP: BioEn.glucoseFor(30, st.O2) }, budget()); }
+  function etat() {
+    const b = budget(), q = supply();
+    return Object.assign({ O2: st.O2, loupe: st.loupe, sprint: st.sprintLeft > 0, sprintLeft: st.sprintLeft, t: st.t,
+      atpPerGlucose: b.atp.total, fracAna: q.fracAna, o2Count: st.o2, co2Count: st.co2, glucoseCount: st.glucose,
+      lactateAccumulated: st.lactate, glucoseConsumed: st.glucose, demand: demand(), supply: q,
+      glucoseFor30ATP: BioEn.glucoseFor(30, st.O2) }, b);
+  }
   function statut() {
     if (st.sprintLeft > 0) return 'Sprint : demande de 150 ATP/s, plafond aérobie de ' + (st.O2 ? '30' : '0') + '. Le complément vient de la fermentation ; le lactate s’accumule.';
     if (!st.O2) return 'Sans O₂ : 2 ATP par glucose au lieu de 30. Pour 30 ATP, il faut 15 glucoses ; une grande part de l’énergie reste dans le lactate.';
@@ -1807,8 +1814,6 @@ const S4 = (() => {
     if (key !== rateKey) { rateKey = key; rateCache.clear(); }
     if (rateCache.has(light)) return rateCache.get(light);
     const q = BioEn.photoRate({ lambda: st.white ? 'blanc' : st.lambda, I: light, CO2: st.CO2 });
-    // Limite nulle du modèle : éviter 0 × exp(0/0) quand lumière et CO₂ sont tous deux nuls.
-    if (light === 0 || st.CO2 === 0) q.P = 0;
     rateCache.set(light, q);
     return q;
   };
@@ -1896,7 +1901,14 @@ const S4 = (() => {
     sctx.font = mono(10); sctx.fillStyle = C.texte2; sctx.textAlign = 'left'; sctx.fillText('O₂ · µmol/m²/s', g.L, 11);
     sctx.fillText('0', g.L, h - 6); sctx.textAlign = 'right'; sctx.fillText('2 000 · lumière', g.R, h - 6);
   }
-  function etat() { const q = rate(); return Object.assign({ lambda: st.white ? 'blanc' : st.lambda, white: st.white, I: st.I, CO2: st.CO2, cycle: st.cycle, absorbance: st.white ? null : BioEn.chlAbs(st.lambda), oxygenTotal: st.oxygen, oxygenPerMinute: q.P * 60, glucoseRate: q.P / 6, t: st.t }, q); }
+  function etat() {
+    const q = rate();
+    const limit = st.CO2 === 0 ? 'CO₂' : q.P > 0.95 * q.Pmax ? 'fixation du carbone' : 'lumière';
+    return Object.assign({ lambda: st.white ? 'blanc' : st.lambda, white: st.white, I: st.I, CO2: st.CO2, cycle: st.cycle,
+      absorbed: q.f, limit, o2Count: st.oxygen, co2Count: st.oxygen, glucoseCount: st.oxygen / 6,
+      absorbance: st.white ? null : BioEn.chlAbs(st.lambda), oxygenTotal: st.oxygen, oxygenPerMinute: q.P * 60,
+      glucoseRate: q.P / 6, t: st.t }, q);
+  }
   function valeurs() { const q = rate(), b = BioEn.photoBudget(); return { absorption: fmt(100 * q.f, 1), P: fmt(q.P, 2), bubbles: fmtI(q.P * 60), pmax: fmt(q.Pmax, 1), glucose: fmt(q.P / 6, 2), photons: fmtI(b.photonsPerGlucose), total: fmt(st.oxygen, 1) }; }
   function statut() {
     if (st.cycle) return 'La plante respire aussi. CO₂, eau, sucre et O₂ circulent ; l’énergie entre comme lumière et sort comme chaleur.';
