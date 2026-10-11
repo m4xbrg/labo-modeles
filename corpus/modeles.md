@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**28 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L'invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 19 pages de fondations, dont une `partial` (*Atomes, noyaux et lumière*). Plus trois pages d'appui (accueil, préalables, redirection racine).
+**35 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L’invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 26 pages de fondations. Plus trois pages d’appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -32,12 +32,20 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [L’onde électromagnétique](../opus-sonnet/fondations-onde-electromagnetique/index.html) | foundation | Onde électromagnétique et spectre | — | 24 | 2026-10-07 |
 | [Molécules et mole](../opus-sonnet/fondations-molecules-mole/index.html) | foundation | Liaisons, molécules, mole et stœchiométrie | — | 28, 29 | 2026-10-06 |
 | [Réactions : vitesse et équilibre](../opus-sonnet/fondations-reactions-chimiques/index.html) | foundation | Réactions chimiques | — | 30 | 2026-10-06 |
-| [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation (`partial`) | Atomes, noyaux, photons et spectres | — | 26, 27 (partial) | 2026-10-07 |
+| [Atomes, noyaux et lumière](../opus-sonnet/fondations-atomes-spectres/index.html) | foundation | Atomes, noyaux, photons et spectres | — | 26, 27 | 2026-10-07 |
 | [Signaux et équilibres du vivant](../opus-sonnet/fondations-signalisation-homeostasie/index.html) | foundation | Signalisation et homéostasie | — | 37 | 2026-10-07 |
 | [D’un gradient à une tension](../opus-sonnet/fondations-bioelectricite/index.html) | foundation | Bioélectricité et synapses | — | 33 (partial) | 2026-10-07 |
 | [Protons et électrons qui passent](../opus-sonnet/fondations-acide-base-redox/index.html) | foundation | Acide-base, redox et électrochimie | — | 31 | 2026-10-06 |
 | [Optique : la lumière qui tourne](../opus-sonnet/fondations-optique/index.html) | foundation | Optique fondamentale | — | 25 | 2026-10-06 |
 | [L’énergie du vivant](../opus-sonnet/fondations-energie-biologique/index.html) | foundation | Énergie biologique | — | 34 | 2026-10-06 |
+
+| [Stabilité, bifurcations et chaos](../opus-sonnet/fondations-chaos/index.html) | foundation | Stabilité, bifurcations et chaos | — | 8 | 2026-10-10 |
+| [Un signal, des fréquences](../opus-sonnet/fondations-signaux-fourier/index.html) | foundation | Un signal, des fréquences | — | 9 | 2026-10-10 |
+| [Du local au collectif](../opus-sonnet/fondations-populations-emergence/index.html) | foundation | Du local au collectif | — | 41, 42 | 2026-10-10 |
+| [De l’ADN à la protéine](../opus-sonnet/fondations-information-genetique/index.html) | foundation | De l’ADN à la protéine | — | 35 | 2026-10-10 |
+| [Muscle, cœur et échanges](../opus-sonnet/fondations-physiologie-circulation/index.html) | foundation | Muscle, cœur et échanges | — | 38 | 2026-10-10 |
+| [La gravité comme géométrie](../opus-sonnet/fondations-relativite-generale/index.html) | foundation | La gravité comme géométrie | — | 47 | 2026-10-10 |
+| [Une particule, des amplitudes](../opus-sonnet/fondations-quantique/index.html) | foundation | Une particule, des amplitudes | — | 48 | 2026-10-10 |
 
 Les modules marqués `supporting` (utilisés en passant) sont omis ici ; ils figurent dans les fiches.
 
@@ -289,12 +297,12 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 ### Atomes, noyaux et lumière
 
 - **Identifiant** : `fondations-atomes-spectres` · **chemin** : [`opus-sonnet/fondations-atomes-spectres/index.html`](../opus-sonnet/fondations-atomes-spectres/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-atomes-spectres/explication.html)
-- **Type** : foundation · **statut** : `partial` · **production** : Fondations · Atomes, noyaux, photons et spectres
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Atomes, noyaux, photons et spectres
 - **Collection** : aucune
-- **Modules** : 26 Architecture atomique et nucléaire (`full`), 27 Quantification, photons et spectres atomiques (`partial` : théorie dans l’explication, étapes à venir), 05 Exponentielles et logarithmes (`supporting`), 07 Hasard, probabilité et distributions (`supporting`), 11 Énergie et quantité de mouvement (`supporting`), 21 Électrostatique (`supporting`), 46 Relativité restreinte (`supporting`)
-- **Étapes** : chapitre 26 : 1 Tirer sur une feuille d’or · 2 Protons, neutrons, isotopes · 3 Énergie de liaison · 4 Radioactivité ; chapitre 27 (à venir, emplacements réservés) : 5 Une échelle d’énergies · 6 Des raies comme des empreintes · 7 Des paquets de lumière
-- **Interaction** : Tirs α de Geiger et Marsden avec bascule Thomson / Rutherford, histogramme comparé à 1/sin⁴(θ/2), loupe à l’échelle du femtomètre et zoom atome → noyau ; noyau construit nucléon par nucléon sur la carte des nucléides ; courbe B/A et balance des masses pour la fusion et la fission ; échantillon de 400 noyaux qui se désintègrent au hasard, noyau suivi, écrans papier, aluminium et plomb (chapitre 26). Prévu au chapitre 27 : échelle des niveaux de l’hydrogène, raies au prisme, effet photoélectrique.
-- **Notes** : Moteur verrouillé versionné dans `prompts/moteurs/atomes.js` (195 tests, aussi lancés sur la page) ; table des nucléides recopiée de NUBASE2020 (Z = 1 à 26, demi-vies > 1 ms) et masses AME2020. Formule semi-empirique pour la courbe continue ; fils supposés stables. Première moitié livrée le 2026-10-07 ; le chapitre 27 viendra dans une PR suivante.
+- **Modules** : 26 Architecture atomique et nucléaire (`full`), 27 Quantification, photons et spectres atomiques (`full`), 05 Exponentielles et logarithmes (`supporting`), 07 Hasard, probabilité et distributions (`supporting`), 11 Énergie et quantité de mouvement (`supporting`), 21 Électrostatique (`supporting`), 46 Relativité restreinte (`supporting`)
+- **Étapes** : chapitre 26 : 1 Tirer sur une feuille d’or · 2 Protons, neutrons, isotopes · 3 Énergie de liaison · 4 Radioactivité ; chapitre 27 : 5 Une échelle d’énergies · 6 Des raies comme des empreintes · 7 Des paquets de lumière
+- **Interaction** : Tirs α de Geiger et Marsden avec bascule Thomson / Rutherford, histogramme comparé à 1/sin⁴(θ/2), loupe à l’échelle du femtomètre et zoom atome → noyau ; noyau construit nucléon par nucléon sur la carte des nucléides ; courbe B/A et balance des masses pour la fusion et la fission ; échantillon de 400 noyaux qui se désintègrent au hasard, noyau suivi, écrans papier, aluminium et plomb (chapitre 26). Chapitre 27 : échelle des niveaux de l’hydrogène, raies au prisme, effet photoélectrique.
+- **Notes** : Moteur verrouillé versionné dans `prompts/moteurs/atomes.js` (195 tests, aussi lancés sur la page) ; table des nucléides recopiée de NUBASE2020 (Z = 1 à 26, demi-vies > 1 ms) et masses AME2020. Formule semi-empirique pour la courbe continue ; fils supposés stables. Première moitié livrée le 2026-10-07 ; le chapitre 27 a été ajouté dans la PR n° 37.
 
 ### Signaux et équilibres du vivant
 
@@ -376,3 +384,61 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - Aucune planche ni page de fondations ne renvoie vers `prealables.html` ; les renvois entre pages sont rares et souvent du texte sans lien (« planche 06 »).
 - Deux libellés de série coexistent dans les pages de fondations : « L'invisible en mouvement — Fondations 1·2·3 / 10·11 / 12·13 » (langage, forces, rotation) et « Fondations — modules 4 · 5 · 7 / 6 · 14 · 15 » ou « Fondations 16·20 » (les trois autres). Les nombres affichés sont des numéros de modules canoniques.
 - Dans l'explication de *Langage scientifique*, la rubrique « Circuits » renvoie au neurone (03) et non à *Courant et circuits* (06).
+
+## Vague 1 : pages ajoutées au catalogue le 2026-10-10
+
+### Stabilité, bifurcations et chaos
+
+- **Identifiant** : `fondations-chaos` · **chemin** : [`index.html`](../opus-sonnet/fondations-chaos/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-chaos/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 8
+- **Étapes** : 08.1 · Équilibres et espace des phases · 08.2 · Bifurcations · 08.3 · Sensibilité aux conditions initiales · 08.4 · Attracteurs étranges
+- **Interaction** : Équilibres, bifurcations, sensibilité aux conditions initiales et attracteurs étranges.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### Un signal, des fréquences
+
+- **Identifiant** : `fondations-signaux-fourier` · **chemin** : [`index.html`](../opus-sonnet/fondations-signaux-fourier/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-signaux-fourier/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 9
+- **Étapes** : Construire un signal avec ses harmoniques · Le spectre d'un son et le timbre · Échantillonner, repliement et roue de chariot · Filtrer, bruit et circuit RC
+- **Interaction** : Synthèse harmonique, spectre et timbre, échantillonnage et repliement, filtrage et circuit RC.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### Du local au collectif
+
+- **Identifiant** : `fondations-populations-emergence` · **chemin** : [`index.html`](../opus-sonnet/fondations-populations-emergence/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-populations-emergence/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 41, 42
+- **Étapes** : Croître et se concurrencer · Proies et prédateurs · Une épidémie · Réseaux et cascades · Le jeu de la vie · L’essaim · Le tas de sable · Les bouchons fantômes
+- **Interaction** : Croissance et compétition, prédation, épidémies, cascades sur réseaux ; jeu de la vie, essaim, tas de sable et bouchons.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### De l’ADN à la protéine
+
+- **Identifiant** : `fondations-information-genetique` · **chemin** : [`index.html`](../opus-sonnet/fondations-information-genetique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-information-genetique/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 35
+- **Étapes** : Un texte en quatre lettres · Transcription : une copie de travail · Traduction : changer d’alphabet · Allumer un gène
+- **Interaction** : Séquence d’ADN, transcription, traduction et régulation de l’expression d’un gène.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### Muscle, cœur et échanges
+
+- **Identifiant** : `fondations-physiologie-circulation` · **chemin** : [`index.html`](../opus-sonnet/fondations-physiologie-circulation/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-physiologie-circulation/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 38
+- **Étapes** : Le sarcomère : glissement des filaments · Le cœur : une pompe à quatre temps · Le réseau : rayons, débits et résistances · L'alvéole : diffusion et hémoglobine
+- **Interaction** : Sarcomère, pompe cardiaque, résistance des vaisseaux et échanges alvéolaires.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### La gravité comme géométrie
+
+- **Identifiant** : `fondations-relativite-generale` · **chemin** : [`index.html`](../opus-sonnet/fondations-relativite-generale/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-relativite-generale/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 47
+- **Étapes** : 47.1 · Le principe d'équivalence · 47.2 · La gravité ralentit le temps · 47.3 · Géodésiques et courbure · 47.4 · Les horizons
+- **Interaction** : Principe d’équivalence, horloges gravitationnelles, géodésiques et horizons.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
+
+### Une particule, des amplitudes
+
+- **Identifiant** : `fondations-quantique` · **chemin** : [`index.html`](../opus-sonnet/fondations-quantique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-quantique/explication.html)
+- **Type** : foundation · **statut** : built · **modules** : 48
+- **Étapes** : Une particule à la fois · Additionner les amplitudes · Savoir par où : perdre les franges · Le paquet d'onde
+- **Interaction** : Impacts individuels, addition des amplitudes, information de chemin et paquet d’onde.
+- **Notes** : Construite dans la vague 1 (PR n° 37, commit eb51013), ajoutée au catalogue le 2026-10-10 pour être essayée. Cet ajout recense la page et ses chapitres ; il ne constitue pas une validation scientifique ou visuelle.
