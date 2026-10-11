@@ -11,7 +11,7 @@ const OS = new URL('../', document.currentScript.src);   // racine du dépôt
 let promesse = null;
 function charge(){
   if (promesse) return promesse;
-  const lit = n => fetch(new URL(n + '.json', BASE)).then(r => { if (!r.ok) throw new Error(n + ' : HTTP ' + r.status); return r.json(); });
+  const lit = n => fetch(new URL(n + '.json', BASE), { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(n + ' : HTTP ' + r.status); return r.json(); });
   promesse = Promise.all(['modules', 'models', 'productions', 'collections', 'atlas'].map(lit))
     .then(([modules, models, productions, collections, atlas]) => interprete({ modules, models, productions, collections, atlas }));
   return promesse;
