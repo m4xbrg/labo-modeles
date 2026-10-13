@@ -19,7 +19,7 @@ const pages = (process.argv[2] || 'fondations-oscillations-ondes').split(',');
         return { modules: [...document.querySelectorAll('.module')].map(m => m.id), katex: document.querySelectorAll('.katex').length,
           erreurs: [...document.querySelectorAll('.katex-error')].map(e => e.title || e.textContent).slice(0, 5),
           brut: brut.length, debord: document.documentElement.scrollWidth - innerWidth,
-          mots: document.querySelector('.wrap').innerText.split(/\s+/).length,
+          mots: (document.querySelector('.wrap, .cours-texte') || document.body).innerText.split(/\s+/).length,
           sections: [...document.querySelectorAll('.module')].map(m => [m.id, m.querySelectorAll('h4').length, m.innerText.split(/\s+/).length]) };
       });
       console.log(nom, w, JSON.stringify(r), err.length ? 'CONSOLE: ' + err.join(' | ') : '');

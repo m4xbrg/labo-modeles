@@ -20,7 +20,7 @@ const captures = process.argv[3] !== 'sans-captures';
       const base = await p.evaluate(() => {
         const q = s => document.querySelector(s);
         const app = q('.app'), ctr = q('.controls');
-        return { coque: !!(q('header.barre') && q('.titre h1') && q('dl.sig') && q('nav.chapitres') && q('[role=tablist] [role=tab]')),
+        return { coque: !!(q('header.barre') && q('.titre h1') && q('dl.sig') && q('nav.chapitres') && (q('[role=tablist] [role=tab]') || document.body.classList.contains('labo-fiche') /* fiche d'étape : pas d'onglets de couches */)),
           classe: document.body.classList.contains('labo-etapes'), touches: document.body.dataset.touches,
           chapitres: [...document.querySelectorAll('.chap')].map(c => (c.querySelector('.chap-t b')?.textContent || '?') + ':' + c.querySelectorAll('.seg').length),
           debord: document.documentElement.scrollWidth - innerWidth,
@@ -29,7 +29,7 @@ const captures = process.argv[3] !== 'sans-captures';
       });
       res[nom] = base;
       if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-observer.png` });
-      await p.keyboard.press(base.touches[1]); await p.waitForTimeout(250);
+      if (base.touches) await p.keyboard.press(base.touches[1]);   // pas de couches sur une page à fiche await p.waitForTimeout(250);
       const segs = await p.$$('.chap .seg');
       res[nom].etapes = [];
       res[nom].mesuresEtapes = [];
@@ -55,7 +55,7 @@ const captures = process.argv[3] !== 'sans-captures';
         res[nom].etapes.push(`${i}→${r.cur}|${r.eye}|${r.lien}`);
         if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-e${i}.png` });
       }
-      await p.keyboard.press(base.touches[2]); await p.waitForTimeout(250);
+      if (base.touches) await p.keyboard.press(base.touches[2]);   // pas de couches sur une page à fiche await p.waitForTimeout(250);
       res[nom].comprendre = await p.evaluate(() => document.body.dataset.mode);
       res[nom].interactif = await p.evaluate(() => {
         const ctr = document.querySelector('.controls'), app = document.querySelector('.app');
