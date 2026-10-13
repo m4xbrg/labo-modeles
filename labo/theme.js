@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const v = ORDRE[(ORDRE.indexOf(lit()) + 1) % ORDRE.length]; ecrit(v); applique(v);
   }));
 });
+// un autre document du site (page parente, iframe) a changé le thème : suivre
+addEventListener('storage', e => { if (e.key === CLE) applique(lit()); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => dispatchEvent(new CustomEvent('labo-theme')));
 // Lire une couleur de thème depuis le JS (canvas, SVG générés)
 window.LaboTheme = { couleur: nom => getComputedStyle(document.documentElement).getPropertyValue(nom).trim() };

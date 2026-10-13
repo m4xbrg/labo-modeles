@@ -5,170 +5,224 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comprendre le langage scientifique — LABO</title>
-<meta name="description" content="Théorie des modules 01, 02 et 03 (mesure et échelles, vecteurs, changement et accumulation) et ce que montrent les quatre laboratoires des fondations.">
+<meta name="description" content="Théorie des modules 01, 02 et 03 (mesure et échelles, vecteurs, changement et accumulation), avec les scènes des laboratoires intégrées au texte.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
-  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
-  --texte:#e8e4dc; --texte-2:#8a93a0;
-  --accent:#6fd6c8; --acc-a:#c38bff;
-  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
-  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
-  --ease:cubic-bezier(0.22,1,0.36,1);
-}
-*{box-sizing:border-box}
-html{background:var(--fond);scroll-behavior:smooth}
-body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
-a{color:var(--accent);text-underline-offset:3px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
-.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
-.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
-.top a:hover{color:var(--texte)}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
-h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
-h1 em{color:var(--accent)}
-.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
-h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
-h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
-p{margin:0 0 16px}
-ul{padding-left:20px;margin:0 0 16px}
-li{margin-bottom:8px}
-code,.m{font-family:var(--mono);font-size:.9em}
-.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.lil{color:var(--acc-a)}.dim{color:var(--texte-2)}
-dl{margin:0 0 16px;border-top:1px solid var(--trait)}
-dt{font:500 15px var(--sans);padding-top:12px}
-dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
-.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
-.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
-.chiffres b{font:500 17px var(--mono);color:var(--energie)}
-details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
-summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
-summary::-webkit-details-marker{display:none}
-summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
-details[open] summary::before{content:"\2713"}
-details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
-.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
-.cta:hover{background:var(--accent);color:var(--fond)}
-@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
-</style>
-<link rel="stylesheet" href="../../labo/theorie.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
 <script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
 </head>
-<body>
-<div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour aux laboratoires</a><a href="../../labo/index.html">LABO</a></nav>
-  <p class="serie">LABO · Fondations 01 · 02 · 03</p>
-  <h1>Comprendre <em>les fondations</em></h1>
-  <p class="lede">Les planches de la série affichent des µm, des mV, des flèches, des courbes et des pentes sans les expliquer. Ces quatre laboratoires donnent ce vocabulaire : on y manipule les idées avant de les nommer.</p>
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← Les laboratoires</a>
+  <p class="ici">Langage scientifique <span>· le cours</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
 
-  <h2><span>1</span>Ce que tu vois</h2>
-  <dl>
-    <dt><span class="acc">A · Échelles</span></dt>
-    <dd>Un champ de vision dont on fait varier la largeur, de la taille d’un atome à l’orbite de Neptune. Les objets sont dessinés à leur vraie taille relative, tous centrés au même point. La barre d’échelle et la réglette de préfixes suivent le zoom.</dd>
-    <dt><span class="acc">B · Graphiques</span></dt>
-    <dd>Un réservoir rempli par un robinet, et le graphe du volume V (en L) en fonction du temps t (en min). Le débit Q (en L/min) est ce qu’on règle : positif, le réservoir se remplit ; négatif, il se vide.</dd>
-    <dt><span class="acc">C · Vecteurs</span></dt>
-    <dd>Des flèches sur un plan quadrillé, qu’on saisit par la pointe. Leurs composantes, leur longueur et leur angle s’affichent en direct.</dd>
-    <dt><span class="acc">D · Mouvement</span></dt>
-    <dd>Un chariot sur une piste graduée en mètres, et trois graphes alignés sur le même axe du temps : la <strong>position</strong> x(t) en m, la <span class="acc">vitesse</span> v(t) en m/s, l’<span class="lil">accélération</span> a(t) en m/s². On modèle le mouvement en saisissant les paliers de l’accélération ; la vitesse et la position se recalculent aussitôt.</dd>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire">
+  <p>Sommaire</p>
+  <ol>
+    <li><a href="#vois">Ce que tu vois</a></li>
+    <li><a href="#m01"><b>01</b>Mesure et échelles</a>
+      <ol>
+        <li><a href="#m01-intuition">Intuition</a></li>
+        <li><a href="#m01-defs">Définitions</a></li>
+        <li><a href="#m01-relations">Relations clés</a></li>
+        <li><a href="#m01-exemple">Exemple chiffré</a></li>
+        <li><a href="#m01-pieges">Pièges fréquents</a></li>
+        <li><a href="#m01-suite">Où ça resservira</a></li>
+        <li><a href="#m01-test">Teste-toi</a></li>
+      </ol></li>
+    <li><a href="#m02"><b>02</b>Vecteurs</a></li>
+    <li><a href="#m03"><b>03</b>Changement et accumulation</a></li>
+    <li><a href="#simplifie">Ce que les labos simplifient</a></li>
+    <li><a href="#chiffres">Les chiffres à retenir</a></li>
+  </ol>
+</nav>
+
+<main class="cours-texte">
+<header class="cours-tete">
+  <p class="surtitre">LABO · Fondations 01 · 02 · 03</p>
+  <h1>Comprendre le langage scientifique</h1>
+  <p class="lead">Les planches de LABO affichent des µm, des mV, des flèches, des courbes et des pentes sans les expliquer. Ce cours donne ce vocabulaire. Les scènes sont celles de la planche : on les manipule ici, au fil du texte.</p>
+  <p class="mode-emploi">Chaque module suit le même plan : l’intuition, les mots, les relations, un exemple, les pièges, puis trois questions pour te tester. Les nombres <span class="var" style="cursor:default;border-bottom-style:dashed">soulignés</span> se règlent en les faisant glisser, et les termes <a class="terme" href="#def-ordre">pointillés</a> montrent leur définition au survol.</p>
+  <div class="cartes">
+    <a class="carte" href="#m01"><b>MODULE 01</b><span>Mesure, échelles et représentation scientifique</span><small>≈ 15 min · 3 scènes</small></a>
+    <a class="carte" href="#m02"><b>MODULE 02</b><span>Vecteurs et géométrie des quantités</span><small>≈ 12 min</small></a>
+    <a class="carte" href="#m03"><b>MODULE 03</b><span>Changement et accumulation</span><small>≈ 12 min</small></a>
+  </div>
+</header>
+
+<h2 id="vois"><span class="n">1</span>Ce que tu vois</h2>
+<p>La planche réunit quatre petits laboratoires. Chacun s’ouvre directement à son étape.</p>
+<div class="cartes">
+  <a class="carte" href="index.html?etape=01.1"><b>A · ÉCHELLES</b><span>Un champ de vision qu’on fait varier de l’atome à l’orbite de Neptune, objets à leur vraie taille relative.</span><small>étapes 01.1 · 01.2</small></a>
+  <a class="carte" href="index.html?etape=01.3"><b>B · GRAPHIQUES</b><span>Un réservoir, un robinet et le graphe du volume V(t). Le débit Q se règle : positif il remplit, négatif il vide.</span><small>étapes 01.3 · 01.4</small></a>
+  <a class="carte" href="index.html?etape=02.1"><b>C · VECTEURS</b><span>Des flèches sur un plan quadrillé, saisies par la pointe, avec composantes, longueur et angle en direct.</span><small>étapes 02.1 · 02.2</small></a>
+  <a class="carte" href="index.html?etape=03.1"><b>D · MOUVEMENT</b><span>Un chariot sur une piste et trois graphes alignés : position x(t), vitesse v(t), accélération a(t).</span><small>étapes 03.1 · 03.2</small></a>
+</div>
+
+<h2 id="theorie"><span class="n">2</span>La théorie, module par module</h2>
+
+<!-- ===================== Module 01 ===================== -->
+<section class="module" id="m01">
+  <header>
+    <p class="num">Module 01</p>
+    <h3>Mesure, échelles et représentation scientifique</h3>
+    <p class="etapes">Sur la planche :
+      <a href="index.html?etape=01.1">01.1 Échelles</a><a href="index.html?etape=01.2">01.2 Précision</a><a href="index.html?etape=01.3">01.3 Graphique</a><a href="index.html?etape=01.4">01.4 Aire</a></p>
+  </header>
+
+  <h4 data-n="1" id="m01-intuition">Intuition</h4>
+  <p>Mesurer, c’est comparer à une référence : « 7,5 µm » veut dire sept fois et demie un micromètre. Un nombre sans <a class="terme" href="#def-si">unité</a> ne dit rien. Les grandeurs de la nature couvrent des écarts énormes, d’un atome à une galaxie, et le bon réflexe est de compter en facteurs de dix plutôt qu’en différences.</p>
+  <figure class="labo" data-src="index.html?embed&amp;etape=01.1" data-h="420" data-titre="Zoom de l’atome à Neptune">
+    <figcaption><span><b>01.1</b>Tous les objets sont à leur vraie taille relative. Fais trois crans de ×10 : le <a class="terme" href="#def-prefixe">préfixe</a> change, de µm à mm. Clique dans la scène pour zoomer à la molette.</span></figcaption>
+  </figure>
+  <p>Un graphe, lui, met deux grandeurs face à face et laisse l’œil lire leur lien : la <a class="terme" href="#def-pente">pente</a> dit à quelle vitesse l’une change quand l’autre avance, l’<a class="terme" href="#def-aire">aire</a> dit ce qui s’est accumulé. Enfin, toute mesure a une précision limitée, et la dire fait partie du résultat.</p>
+
+  <h4 data-n="2" id="m01-defs">Définitions</h4>
+  <dl class="defs">
+    <div id="def-grandeur"><dt>Grandeur physique</dt><dd>Propriété qu’on peut mesurer. Elle s’écrit toujours <em>nombre × unité</em>.</dd></div>
+    <div id="def-si"><dt>Unité SI</dt><dd>Référence commune : mètre (m), kilogramme (kg), seconde (s), ampère (A), kelvin (K), mole (mol), candela (cd). Les autres unités s’en déduisent (L, km/h, N).</dd></div>
+    <div id="def-prefixe"><dt>Préfixe</dt><dd>Raccourci pour une puissance de mille : n = 10⁻⁹, µ = 10⁻⁶, m = 10⁻³, k = 10³, M = 10⁶, G = 10⁹, T = 10¹².</dd></div>
+    <div id="def-notation"><dt>Notation scientifique</dt><dd>Écriture \(a \times 10^{n}\) avec \(1 \le a \lt 10\). Elle sépare les chiffres de la puissance de dix.</dd></div>
+    <div id="def-ordre"><dt>Ordre de grandeur</dt><dd>La puissance de dix la plus proche d’une valeur.</dd></div>
+    <div id="def-dimension"><dt>Dimension</dt><dd>Nature d’une grandeur, indépendante de l’unité choisie : longueur \(\mathsf{L}\), temps \(\mathsf{T}\), masse \(\mathsf{M}\). On note \([v] = \mathsf{L}\,\mathsf{T}^{-1}\).</dd></div>
+    <div id="def-incertitude"><dt>Incertitude \(\Delta x\)</dt><dd>Demi-largeur de l’intervalle où la valeur vraie se trouve probablement, dans l’unité de \(x\).</dd></div>
+    <div id="def-chiffres"><dt>Chiffres significatifs</dt><dd>Chiffres qui portent de l’information : 7,30 en a trois, 7,3 en a deux.</dd></div>
+    <div id="def-pente"><dt>Pente</dt><dd>Variation verticale divisée par variation horizontale. Son unité est celle de l’axe vertical sur celle de l’axe horizontal.</dd></div>
+    <div id="def-aire"><dt>Aire sous la courbe</dt><dd>Produit des deux axes, cumulé tranche par tranche. Elle a pour unité le produit des unités des axes.</dd></div>
+    <div id="def-proportionnalite"><dt>Proportionnalité</dt><dd>Relation \(y = k\,x\) : une droite qui passe par l’origine.</dd></div>
   </dl>
 
-  <h2><span>2</span>La théorie, module par module</h2>
-  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
-  <ul class="sommaire">
-    <li><a href="#m01"><b>01</b>Mesure, échelles et représentation scientifique</a></li>
-    <li><a href="#m02"><b>02</b>Vecteurs et géométrie des quantités</a></li>
-    <li><a href="#m03"><b>03</b>Changement et accumulation</a></li>
+  <h4 data-n="3" id="m01-relations">Relations clés</h4>
+  <div class="relation">\[ x = a\times 10^{n},\quad 1\le a\lt 10 \;\Rightarrow\; \text{ordre de grandeur} = \begin{cases} 10^{n} & \text{si } a \lt \sqrt{10}\approx 3{,}16\\[2pt] 10^{n+1} & \text{si } a \ge \sqrt{10} \end{cases} \]
+    <p>La frontière est à \(\sqrt{10}\) et non à 5 : sur une échelle logarithmique, le « milieu » entre 1 et 10 est \(\sqrt{10}\). Le rapport de deux grandeurs en crans de dix est \(\log_{10}(x_2/x_1)\).</p></div>
+  <div class="calc">
+    <p class="calc-t">À toi : fais glisser la taille</p>
+    <input type="range" data-nom="e" min="-10" max="13" step="0.01" value="-5.12" aria-label="Taille, sur une échelle logarithmique">
+    <p>Taille : <output class="fort" data-expr="sci(10**e, 3) + ' m'"></output></p>
+    <p>Mantisse \(a\) = <output data-expr="fmt(10**(e - Math.floor(e)), 2)"></output>, <output class="phrase" data-expr="e - Math.floor(e) &lt; 0.5 ? 'plus petite que √10 ≈ 3,16 : on garde la puissance' : 'au moins √10 ≈ 3,16 : on monte d’une puissance'"></output>.</p>
+    <p>Ordre de grandeur : <output class="fort" data-expr="'10' + sup(ordre(10**e)) + ' m'"></output> <span class="note">· <output class="phrase" data-expr="fmt(abs(log10(10**e / 1.7)), 1) + (e &lt; log10(1.7) ? ' crans de dix sous' : ' crans de dix au-dessus de') + ' la taille d’un humain (1,7 m)'"></output></span></p>
+  </div>
+
+  <div class="relation">\[ [\text{gauche}] = [\text{droite}], \qquad x = v\,t \;\Rightarrow\; \frac{\mathrm{m}}{\mathrm{s}}\times \mathrm{s} = \mathrm{m} \]
+    <p>Les deux membres d’une égalité ont la même <a class="terme" href="#def-dimension">dimension</a>, et on n’additionne que des grandeurs de même dimension. La formule fausse \(x = v/t\) donne des m/s², pas une longueur : l’analyse dimensionnelle la rejette sans calcul.</p></div>
+  <div class="quiz">
+    <p class="q">Avec \(v\) en m/s, \(a\) en m/s² et \(t\) en s, laquelle de ces formules peut donner une position ?</p>
+    <ul class="choix">
+      <li>\(x = v / t\)</li>
+      <li>\(x = v\,t + a\,t\)</li>
+      <li data-bon>\(x = v\,t + \tfrac12\,a\,t^{2}\)</li>
+    </ul>
+    <div class="corr"><p>\(v/t\) donne des m/s². Dans la deuxième, \(a\,t\) est en m/s : on ne peut pas l’ajouter à des mètres. Seule la troisième est homogène : m/s × s = m et m/s² × s² = m.</p></div>
+  </div>
+
+  <div class="relation">\[ \text{pente} = \frac{\Delta y}{\Delta x}, \qquad \text{aire} = \int y\,\dd x \]
+    <p>Pour un réservoir, la pente de \(V(t)\) est le débit \(Q\) (L/min), et l’aire sous \(Q(t)\) est le volume ajouté (L/min × min = L). Une aire sous l’axe compte négativement. Si la courbe n’est pas une droite, la pente change d’un point à l’autre : la tangente donne la pente à cet instant (module 03).</p></div>
+  <figure class="labo large" data-src="index.html?embed&amp;etape=01.4&amp;panneau=1" data-h="460" data-titre="L’aire sous le débit">
+    <figcaption><span><b>01.4</b>Le graphe montre le débit \(Q(t)\). Lance la lecture, puis donne un débit négatif : l’aire orange ajoute de l’eau, la bleue en retire, et le volume lu à droite suit l’aire.</span></figcaption>
+  </figure>
+
+  <div class="relation">\[ y = k\,x \quad\text{(proportionnelle)}, \qquad y = y_0 + k\,x \quad\text{(affine)} \]
+    <p>Les deux sont des droites. Seule la première passe par l’origine : doubler \(x\) double \(y\). Dans la seconde, la pente est la même, mais doubler \(x\) ne double plus \(y\).</p></div>
+  <div class="calc">
+    <p class="calc-t">À toi : règle le réservoir</p>
+    <p>Le réservoir part de \(V_0\) = <span class="var" data-nom="V0" data-val="30" data-min="0" data-max="100" data-pas="5" data-dec="0" data-unite="L" data-label="Volume initial"></span> et reçoit <span class="var" data-nom="Q" data-val="6" data-min="0.5" data-max="10" data-pas="0.5" data-dec="1" data-unite="L/min" data-label="Débit"></span>.</p>
+    <p>Après <span class="var" data-nom="t" data-val="5" data-min="1" data-max="10" data-pas="1" data-dec="0" data-unite="min" data-label="Durée"></span>, il contient <output class="fort" data-expr="fmt(V0 + Q*t, 1) + ' L'"></output>. Après le double, <output data-expr="fmt(2*t, 0) + ' min'"></output>, il contient <output class="fort" data-expr="fmt(V0 + 2*Q*t, 1) + ' L'"></output> :
+      <output class="phrase" data-expr="V0 === 0 ? '&lt;span class=&quot;verdict-oui&quot;&gt;exactement le double, la relation est proportionnelle.&lt;/span&gt;' : '&lt;span class=&quot;verdict-non&quot;&gt;pas le double (×' + fmt((V0 + 2*Q*t) / (V0 + Q*t), 2) + '), la relation est affine.&lt;/span&gt;'"></output></p>
+    <p class="note">Mets \(V_0\) à 0 pour retrouver la proportionnalité. Dans la planche : <a href="index.html?etape=01.3&amp;scene=2">étape 01.3, scène Pente</a>.</p>
+  </div>
+
+  <div class="relation">\[ x = x_{\text{mesuré}} \pm \Delta x, \qquad \delta = \frac{\Delta x}{\lvert x\rvert}, \qquad \Delta(a+b) = \Delta a + \Delta b \]
+    <p>L’<a class="terme" href="#def-incertitude">incertitude</a> relative \(\delta\) n’a pas d’unité. Pour une somme, les incertitudes absolues s’ajoutent (majorant simple) ; pour un produit, ce sont les incertitudes relatives. À la lecture d’une graduation, on prend souvent la moitié de la plus petite graduation.</p></div>
+  <div class="calc">
+    <p class="calc-t">À toi : change d’instrument</p>
+    <p>Un objet de <span class="var" data-nom="L" data-val="7.34" data-min="0.5" data-max="30" data-pas="0.01" data-dec="2" data-unite="cm" data-label="Longueur réelle"></span>, lu avec une règle graduée au <span class="var" data-nom="g" data-val="0.1" data-valeurs="1;0.1;0.01" data-noms="centimètre;millimètre;dixième de mm" data-label="Graduation"></span>.</p>
+    <p>On écrit <output class="fort" data-expr="fmt(round(L/g)*g, max(0, -round(log10(g)))) + ' ± ' + fmt(g/2, max(0, -round(log10(g))) + 1) + ' cm'"></output>, avec <output data-expr="String(fmt(round(L/g)*g, max(0, -round(log10(g)))).replace(/[^0-9]/g, '').replace(/^0+/, '').length)"></output> chiffres significatifs et une incertitude relative \(\delta\) ≈ <output data-expr="fmt(100 * (g/2) / (round(L/g)*g), 2) + ' %'"></output>.</p>
+    <p class="note">La même règle, en vrai : <a href="index.html?etape=01.2">étape 01.2 de la planche</a>, où l’on peut révéler la longueur exacte.</p>
+  </div>
+
+  <h4 data-n="4" id="m01-exemple">Exemple chiffré</h4>
+  <p>Trois calculs avec les mêmes outils. Essaie chacun avant de dérouler les étapes.</p>
+  <div class="cas">
+    <p>1. Combien de crans de dix entre un globule rouge (7,5 µm) et un humain (1,7 m) ?</p>
+    <ol class="pas-a-pas" data-montre="0">
+      <li>Rapport : \(1{,}7 / (7{,}5\times 10^{-6}) \approx 2{,}3\times 10^{5}\).</li>
+      <li>En crans de dix : \(\log_{10}(2{,}3\times 10^{5}) \approx 5{,}4\).</li>
+      <li>Ordres de grandeur : \(7{,}5 \ge 3{,}16\), donc \(10^{-5}\) m ; \(1{,}7 \lt 3{,}16\), donc \(10^{0}\) m. L’écart est bien de l’ordre de \(10^{5}\).</li>
+    </ol>
+  </div>
+  <div class="cas">
+    <p>2. Un réservoir contient 10 L et reçoit 2,5 L/min pendant 12 min. Volume final ?</p>
+    <ol class="pas-a-pas" data-montre="0">
+      <li>Aire sous \(Q\) : \(2{,}5 \times 12 = 30\) L.</li>
+      <li>Volume final : \(10 + 30 = 40\) L.</li>
+      <li>La pente de \(V(t)\) vaut 2,5 L/min, c’est le débit. La relation est affine : le volume de départ n’est pas nul.</li>
+    </ol>
+  </div>
+  <div class="cas">
+    <p>3. Une longueur lue à la règle graduée en mm : \(7{,}3 \pm 0{,}05\) cm. Incertitude relative ?</p>
+    <ol class="pas-a-pas" data-montre="0">
+      <li>\(\delta = 0{,}05 / 7{,}3 \approx 0{,}0068\).</li>
+      <li>Soit environ 0,7 % : une règle au millimètre suffit pour un objet de quelques centimètres.</li>
+    </ol>
+  </div>
+
+  <h4 data-n="5" id="m01-pieges">Pièges fréquents</h4>
+  <ul class="pieges">
+    <li>Écrire un nombre sans unité, ou mélanger des unités sans convertir : 90 km/h ne s’additionne pas à 5 m/s tant qu’on n’a pas écrit 90 km/h = 25 m/s.</li>
+    <li>Convertir une aire ou un volume comme une longueur : 1 m² vaut \(10^{4}\) cm², pas \(10^{2}\), et 1 m³ vaut \(10^{6}\) cm³.</li>
+    <li>Confondre une droite et une proportionnalité : \(V = V_0 + Q\,t\) est une droite, mais doubler \(t\) ne double pas \(V\).</li>
+    <li>Lire la hauteur d’une courbe quand la question porte sur sa pente : un graphe peut être très haut et presque plat.</li>
+    <li>Sur un axe logarithmique, lire des différences : des distances égales y signifient des facteurs égaux (×10), pas des ajouts égaux (+10).</li>
+    <li>Donner trop de chiffres significatifs : 7,30 cm affirme qu’on connaît le dixième de millimètre, 7,3 cm non.</li>
   </ul>
 
-  <!-- ===================== Module 01 ===================== -->
-  <section class="module" id="m01">
-    <header>
-      <p class="num">Module 01</p>
-      <h3>Mesure, échelles et représentation scientifique</h3>
-      <p class="etapes">Sur la planche : laboratoire A Échelles (Zoom · Linéaire ou log · Précision) · laboratoire B Graphiques (Proportionnalité · Pente · Aire · Non linéaire)</p>
-    </header>
+  <h4 data-n="6" id="m01-suite">Où ça resservira</h4>
+  <ul class="resert">
+    <li><b>03</b><span>La pente et l’aire d’un graphe deviennent la dérivée et l’intégrale (<a href="#m03">plus bas</a>).</span></li>
+    <li><b>05</b><span>Les échelles logarithmiques et les exponentielles : un facteur constant par unité de temps (planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>).</span></li>
+    <li><b>07</b><span>Mesurer plusieurs fois, c’est étudier une dispersion : l’incertitude devient statistique.</span></li>
+    <li><b>11</b><span>Le travail d’une force est l’aire sous la courbe \(F(x)\) (planche <a href="../fondations-forces-energie/index.html">Forces, énergie et conservation</a>).</span></li>
+    <li><b>33</b><span>La planche du <a href="../03-neurone/index.html">neurone</a> parle en mV et en ms : des préfixes, encore.</span></li>
+    <li><b>45</b><span>Les distances cosmiques, de l’UA aux milliards d’années-lumière, n’ont de sens qu’en notation scientifique.</span></li>
+  </ul>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Mesurer, c’est comparer à une référence : « 7,5 µm » veut dire sept fois et demie un micromètre. Un nombre sans unité ne dit rien. Les grandeurs de la nature couvrent des écarts énormes, d’un atome à une galaxie, et le bon réflexe est de compter en facteurs de dix plutôt qu’en différences. Un graphe, lui, met deux grandeurs face à face et laisse l’œil lire leur lien : la pente dit à quelle vitesse l’une change quand l’autre avance, l’aire dit ce qui s’est accumulé. Enfin, toute mesure a une précision limitée, et la dire fait partie du résultat.</p>
-
-    <h4 data-n="2">Définitions</h4>
-    <dl class="defs">
-      <div><dt>Grandeur physique</dt><dd>Propriété qu’on peut mesurer. Elle s’écrit toujours <em>nombre × unité</em>.</dd></div>
-      <div><dt>Unité SI</dt><dd>Référence commune : mètre (m), kilogramme (kg), seconde (s), ampère (A), kelvin (K), mole (mol), candela (cd). Les autres unités s’en déduisent (L, km/h, N).</dd></div>
-      <div><dt>Préfixe</dt><dd>Raccourci pour une puissance de mille : n = 10⁻⁹, µ = 10⁻⁶, m = 10⁻³, k = 10³, M = 10⁶, G = 10⁹, T = 10¹².</dd></div>
-      <div><dt>Notation scientifique</dt><dd>Écriture \(a \times 10^{n}\) avec \(1 \le a \lt 10\). Elle sépare les chiffres de la puissance de dix.</dd></div>
-      <div><dt>Ordre de grandeur</dt><dd>La puissance de dix la plus proche d’une valeur.</dd></div>
-      <div><dt>Dimension</dt><dd>Nature d’une grandeur, indépendante de l’unité choisie : longueur \(\mathsf{L}\), temps \(\mathsf{T}\), masse \(\mathsf{M}\). On note \([v] = \mathsf{L}\,\mathsf{T}^{-1}\).</dd></div>
-      <div><dt>Incertitude \(\Delta x\)</dt><dd>Demi-largeur de l’intervalle où la valeur vraie se trouve probablement, dans l’unité de \(x\).</dd></div>
-      <div><dt>Chiffres significatifs</dt><dd>Chiffres qui portent de l’information : 7,30 en a trois, 7,3 en a deux.</dd></div>
-      <div><dt>Pente</dt><dd>Variation verticale divisée par variation horizontale. Son unité est celle de l’axe vertical sur celle de l’axe horizontal.</dd></div>
-      <div><dt>Aire sous la courbe</dt><dd>Produit des deux axes, cumulé tranche par tranche. Elle a pour unité le produit des unités des axes.</dd></div>
-      <div><dt>Proportionnalité</dt><dd>Relation \(y = k\,x\) : une droite qui passe par l’origine.</dd></div>
-    </dl>
-
-    <h4 data-n="3">Relations clés</h4>
-    <div class="relation">\[ x = a\times 10^{n},\quad 1\le a\lt 10 \;\Rightarrow\; \text{ordre de grandeur} = \begin{cases} 10^{n} & \text{si } a \lt \sqrt{10}\approx 3{,}16\\[2pt] 10^{n+1} & \text{si } a \ge \sqrt{10} \end{cases} \]
-      <p>La frontière est à \(\sqrt{10}\) et non à 5 : sur une échelle logarithmique, le « milieu » entre 1 et 10 est \(\sqrt{10}\). Le rapport de deux grandeurs en crans de dix est \(\log_{10}(x_2/x_1)\).</p></div>
-    <div class="relation">\[ [\text{gauche}] = [\text{droite}], \qquad x = v\,t \;\Rightarrow\; \frac{\mathrm{m}}{\mathrm{s}}\times \mathrm{s} = \mathrm{m} \]
-      <p>Les deux membres d’une égalité ont la même dimension, et on n’additionne que des grandeurs de même dimension. La formule fausse \(x = v/t\) donne des m/s², pas une longueur : l’analyse dimensionnelle la rejette sans calcul.</p></div>
-    <div class="relation">\[ \text{pente} = \frac{\Delta y}{\Delta x}, \qquad \text{aire} = \int y\,\dd x \]
-      <p>Pour un réservoir, la pente de \(V(t)\) est le débit \(Q\) (L/min), et l’aire sous \(Q(t)\) est le volume ajouté (L/min × min = L). Une aire sous l’axe compte négativement. Si la courbe n’est pas une droite, la pente change d’un point à l’autre : la tangente donne la pente à cet instant (module 03).</p></div>
-    <div class="relation">\[ y = k\,x \quad\text{(proportionnelle)}, \qquad y = y_0 + k\,x \quad\text{(affine)} \]
-      <p>Les deux sont des droites. Seule la première passe par l’origine : doubler \(x\) double \(y\). Dans la seconde, la pente est la même, mais doubler \(x\) ne double plus \(y\).</p></div>
-    <div class="relation">\[ x = x_{\text{mesuré}} \pm \Delta x, \qquad \delta = \frac{\Delta x}{\lvert x\rvert}, \qquad \Delta(a+b) = \Delta a + \Delta b \]
-      <p>L’incertitude relative \(\delta\) n’a pas d’unité. Pour une somme, les incertitudes absolues s’ajoutent (majorant simple) ; pour un produit, ce sont les incertitudes relatives. À la lecture d’une graduation, on prend souvent la moitié de la plus petite graduation.</p></div>
-
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
-      <p>Trois calculs avec les mêmes outils.</p>
-      <ol>
-        <li>Globule rouge (7,5 µm) et humain (1,7 m). Rapport : \(1{,}7 / (7{,}5\times 10^{-6}) \approx 2{,}3\times 10^{5}\), soit \(\log_{10}(2{,}3\times 10^{5}) \approx 5{,}4\) crans de dix. Ordres de grandeur : \(7{,}5 \ge 3{,}16\), donc \(10^{-5}\) m ; \(1{,}7 \lt 3{,}16\), donc \(10^{0}\) m. L’écart est bien de l’ordre de \(10^{5}\).</li>
-        <li>Un réservoir contient 10 L au départ et reçoit 2,5 L/min pendant 12 min. Aire sous \(Q\) : \(2{,}5 \times 12 = 30\) L. Volume final : \(10 + 30 = 40\) L. La pente de \(V(t)\) vaut 2,5 L/min, c’est le débit. La relation est affine : le volume de départ n’est pas nul.</li>
-        <li>Une longueur lue à la règle graduée en mm : \(7{,}3 \pm 0{,}05\) cm. Incertitude relative : \(0{,}05 / 7{,}3 \approx 0{,}0068\), soit environ 0,7 %.</li>
-      </ol>
-    </div>
-
-    <h4 data-n="5">Pièges fréquents</h4>
-    <ul class="pieges">
-      <li>Écrire un nombre sans unité, ou mélanger des unités sans convertir : 90 km/h ne s’additionne pas à 5 m/s tant qu’on n’a pas écrit 90 km/h = 25 m/s.</li>
-      <li>Convertir une aire ou un volume comme une longueur : 1 m² vaut \(10^{4}\) cm², pas \(10^{2}\), et 1 m³ vaut \(10^{6}\) cm³.</li>
-      <li>Confondre une droite et une proportionnalité : \(V = V_0 + Q\,t\) est une droite, mais doubler \(t\) ne double pas \(V\).</li>
-      <li>Lire la hauteur d’une courbe quand la question porte sur sa pente : un graphe peut être très haut et presque plat.</li>
-      <li>Sur un axe logarithmique, lire des différences : des distances égales y signifient des facteurs égaux (×10), pas des ajouts égaux (+10).</li>
-      <li>Donner trop de chiffres significatifs : 7,30 cm affirme qu’on connaît le dixième de millimètre, 7,3 cm non.</li>
+  <h4 data-n="7" id="m01-test">Teste-toi</h4>
+  <div class="quiz" data-reponse="25" data-tol="0.1" data-unite="m/s" data-dec="0">
+    <p class="q">Convertis 90 km/h en m/s.</p>
+    <div class="corr"><p>\(90 \times 1000\ \mathrm{m} / 3600\ \mathrm{s} = 25\) m/s. On divise par 3,6 pour passer de km/h à m/s.</p></div>
+  </div>
+  <div class="quiz">
+    <p class="q">La période d’un pendule est \(T = 2\pi\sqrt{L/g}\), avec \(L\) une longueur et \(g\) une accélération. La formule est-elle cohérente ?</p>
+    <ul class="choix">
+      <li data-bon>Oui : elle donne bien un temps</li>
+      <li>Non : elle donne des mètres</li>
+      <li>On ne peut pas savoir, à cause du \(2\pi\)</li>
     </ul>
-
-    <h4 data-n="6">Où ça resservira</h4>
-    <ul class="resert">
-      <li><b>03</b><span>La pente et l’aire d’un graphe deviennent la dérivée et l’intégrale.</span></li>
-      <li><b>05</b><span>Les échelles logarithmiques et les exponentielles : un facteur constant par unité de temps.</span></li>
-      <li><b>07</b><span>Mesurer plusieurs fois, c’est étudier une dispersion : l’incertitude devient statistique.</span></li>
-      <li><b>11</b><span>Le travail d’une force est l’aire sous la courbe \(F(x)\) (planche <a href="../fondations-forces-energie/index.html">Forces, énergie et conservation</a>).</span></li>
-      <li><b>45</b><span>Les distances cosmiques, de l’UA aux milliards d’années-lumière, n’ont de sens qu’en notation scientifique.</span></li>
-      <li><b>33</b><span>La planche du <a href="../03-neurone/index.html">neurone</a> parle en mV et en ms : des préfixes, encore.</span></li>
-    </ul>
-
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Convertis 90 km/h en m/s.</summary>
-      <p>\(90 \times 1000\ \mathrm{m} / 3600\ \mathrm{s} = 25\) m/s. On divise par 3,6 pour passer de km/h à m/s.</p></details>
-    <details><summary>La période d’un pendule est donnée par \(T = 2\pi\sqrt{L/g}\), avec \(L\) une longueur et \(g\) une accélération. La formule est-elle cohérente ?</summary>
-      <p>\(L/g\) a pour unité \(\mathrm{m} / (\mathrm{m/s^2}) = \mathrm{s^2}\), et sa racine donne des secondes : c’est bien un temps. Le facteur \(2\pi\) n’a pas de dimension, l’analyse dimensionnelle ne peut pas le vérifier.</p></details>
-    <details><summary>Un réservoir de 20 L se vide à un débit constant de 1,5 L/min. Combien de temps faut-il, et que représente la pente de \(V(t)\) ?</summary>
-      <p>\(20 / 1{,}5 \approx 13{,}3\) min. La pente de \(V(t)\) vaut \(-1{,}5\) L/min : négative, puisque le volume baisse ; sa valeur absolue est le débit.</p></details>
-  </section>
+    <div class="corr"><p>\(L/g\) a pour unité \(\mathrm{m} / (\mathrm{m/s^2}) = \mathrm{s^2}\), et sa racine donne des secondes : c’est bien un temps. Le facteur \(2\pi\) n’a pas de dimension, l’analyse dimensionnelle ne peut pas le vérifier, mais elle n’en a pas besoin pour conclure.</p></div>
+  </div>
+  <div class="quiz" data-reponse="13.33" data-tol="0.15" data-unite="min" data-dec="1">
+    <p class="q">Un réservoir de 20 L se vide à un débit constant de 1,5 L/min. Combien de temps faut-il pour le vider ?</p>
+    <div class="corr"><p>\(20 / 1{,}5 \approx 13{,}3\) min. La pente de \(V(t)\) vaut \(-1{,}5\) L/min : négative, puisque le volume baisse ; sa valeur absolue est le débit.</p>
+      <a class="labo-lien" href="index.html?etape=01.3&amp;scene=2">Vérifier dans le labo : V₀ = 20 L, Q = −1,5 L/min ↗</a></div>
+  </div>
+</section>
 
   <!-- ===================== Module 02 ===================== -->
   <section class="module" id="m02">
     <header>
       <p class="num">Module 02</p>
       <h3>Vecteurs et géométrie des quantités</h3>
-      <p class="etapes">Sur la planche : laboratoire C Vecteurs (Scalaire ou vecteur · Composantes · Addition · Projection)</p>
+      <p class="etapes">Sur la planche :
+      <a href="index.html?etape=02.1">02.1 Flèche</a><a href="index.html?etape=02.1&amp;scene=2">02.1 Composantes</a><a href="index.html?etape=02.2">02.2 Addition</a><a href="index.html?etape=02.2&amp;scene=2">02.2 Projection</a></p>
     </header>
 
     <h4 data-n="1">Intuition</h4>
@@ -242,7 +296,8 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <header>
       <p class="num">Module 03</p>
       <h3>Changement et accumulation</h3>
-      <p class="etapes">Sur la planche : laboratoire D Mouvement (réglages Immobile · Vitesse constante · Départ arrêté · Freinage · Aller-retour · Ralentir, s’arrêter, repartir ; regards Pente · Aire · Pente + aire) · laboratoire B Graphiques, modes Pente et Aire</p>
+      <p class="etapes">Sur la planche :
+      <a href="index.html?etape=03.1">03.1 Pente</a><a href="index.html?etape=03.2">03.2 Aire</a><a href="index.html?etape=01.3&amp;scene=2">01.3 Pente d’un débit</a><a href="index.html?etape=01.4">01.4 Aire sous un débit</a></p>
     </header>
 
     <h4 data-n="1">Intuition</h4>
@@ -313,7 +368,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <p>Palier 1 : \(v\) passe de 3 à 0, déplacement \(\tfrac12 \times 3 \times 2 = 3\) m. Paliers 2 et 3 : arrêt. Palier 4 : \(v\) passe de 0 à 3 m/s, déplacement 3 m. Palier 5 : \(v = 3\) m/s pendant 2 s, soit 6 m. Total : \(3 + 3 + 6 = 12\) m, donc \(x = -8 + 12 = 4\) m.</p></details>
   </section>
 
-  <h2><span>3</span>Ce que les laboratoires simplifient</h2>
+  <h2 id="simplifie"><span class="n">3</span>Ce que les laboratoires simplifient</h2>
   <ul>
     <li><strong>Tailles.</strong> Les objets de l’explorateur d’échelles ont une taille typique arrondie : une bactérie, un virus ou un immeuble varient d’un facteur deux ou plus. Les silhouettes sont schématiques et centrées au même point pour la comparaison, pas placées comme dans la réalité.</li>
     <li><strong>Mesure.</strong> L’incertitude affichée est celle de la lecture seule (½ graduation). Une vraie mesure ajoute d’autres sources : instrument mal étalonné, objet mal aligné, répétabilité.</li>
@@ -322,7 +377,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <li><strong>Mouvement.</strong> Une seule dimension, et une accélération constante par morceaux : elle saute d’une valeur à l’autre instantanément, ce qu’aucun vrai véhicule ne fait (il faudrait une force qui change en un instant). En revanche, à l’intérieur du modèle, tout est exact : v et x sont calculées analytiquement, pas approchées image par image.</li>
   </ul>
 
-  <h2><span>4</span>Les chiffres à retenir</h2>
+  <h2 id="chiffres"><span class="n">4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
     <div><b>10⁻¹⁰ m</b><span>la taille d’un atome. Une cellule humaine fait de 10 à 100 µm, cent mille à un million de fois plus.</span></div>
     <div><b>1,5 × 10¹¹ m</b><span>la distance Terre–Soleil, une unité astronomique (UA). L’explorateur couvre environ 23 ordres de grandeur, de l’atome à l’orbite de Neptune.</span></div>
@@ -332,6 +387,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
   </div>
 
   <a class="cta" href="index.html"><span>Retour aux laboratoires</span><span aria-hidden="true">&rarr;</span></a>
+</main>
 </div>
 </body>
 </html>

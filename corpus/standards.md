@@ -30,6 +30,8 @@ Le reste de l'explication garde son rôle : **Ce que tu vois** (avant la théori
 
 Référence complète : [`opus-sonnet/fondations-oscillations-ondes/explication.html`](../opus-sonnet/fondations-oscillations-ondes/explication.html) (modules 06, 14, 15).
 
+**Prototype « cours interactif » (2026-10-13, à juger).** [`opus-sonnet/fondations-langage/explication.html`](../opus-sonnet/fondations-langage/explication.html) garde les sept rubriques et leur contenu, mais change la forme : jetons et thème LABO (`labo/labo.css`, `labo/cours.css`), sommaire collant qui suit la lecture, et, dans le module 01, des composants de `labo/cours.js` : scènes de la planche intégrées au texte (`figure.labo`, mode `?embed` de `planche.js`), calculs vivants aux nombres réglables (`.calc`), questions vérifiées (`.quiz`, réponse chiffrée ou choix), exemple chiffré pas à pas (`ol.pas-a-pas`), termes du glossaire avec bulle (`a.terme` vers `#def-…`). Les modules 02 et 03 ont la nouvelle mise en forme, pas encore les composants. Les autres explications restent au format ci-dessus.
+
 Les showcases ne suivent pas ce plan : leur explication porte sur leur phénomène, et renvoie aux fondations pour la théorie de base.
 
 ## 3. Taille des pages de fondations : un chapitre par module
