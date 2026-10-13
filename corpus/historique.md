@@ -21,9 +21,13 @@ Ce fichier garde la mémoire du projet et dit quels documents sont historiques. 
 | 2026-10-07 | **Fondations 24 · L'onde électromagnétique.** Un chapitre de quatre étapes ; moteur écrit et testé dans la session de construction (`prompts/moteurs/onde-electromagnetique.js`), page et explication déléguées à des sous-agents, selon `prompts/SESSION-FONDATION.md`. |
 | 2026-10-07 | **Fondations 26 · 27 · Atomes, noyaux et lumière (première moitié).** Chapitre 26 (quatre étapes) et explication des deux modules ; le chapitre 27 suivra. Moteur verrouillé `prompts/moteurs/atomes.js`, avec une table des nucléides recopiée de NUBASE2020 et AME2020. |
 | 2026-10-06 | **Fondations 34 · L'énergie du vivant.** Deuxième page construite au standard d'une page à un module, avec un moteur verrouillé (`prompts/moteurs/energie-biologique.js`) ; le module 34, candidat au découpage, tient en une page de quatre étapes et laisse le mécanisme de la respiration au showcase 02. |
-
 | 2026-10-06 | **Fondations 31 · Acide-base, redox et électrochimie** (« Protons et électrons qui passent »). Un chapitre, quatre étapes numérotées (pH, tampons, redox, pile). Moteur écrit et testé avant la page, versionné dans `prompts/moteurs/acide-base-redox.js`. |
 | 2026-10-06 | **Fondations 25 · Optique.** Construite avant le module 24 ; premier découpage en lots parallèles contre un contrat d'interface (coquille et étapes 1-2, étapes 3-4 en fragment, explication). |
+| 2026-10-10 | **Fusion des fondations 25, 30, 31 et 34** (PR n° 34 à 36 et branches associées) : conflits du corpus résolus, moteurs et tests versionnés dans `prompts/moteurs/`, 28 modèles. La planche 30 est migrée au gabarit LABO (coque repliée). Les pages 25, 31 et 34 restent des planches autonomes, sans la coque `labo/` : voir [`standards.md`](standards.md) §3. |
+| 2026-10-10 | **Vague 1** (PR n° 37, commit `eb51013`) : sept fondations (08 chaos, 09 Fourier, 35 ADN → protéine, 38 muscle et circulation, 41·42 local → collectif, 47 gravité comme géométrie, 48 quantique) et le chapitre 27 de la page Atomes. 35 modèles. Moteurs et tests versionnés ; validation scientifique et visuelle de la vague **non faite** à la fusion. |
+| 2026-10-10 | **Lots de délégation** (PR n° 38) : 14 lots pour confier des pages à un exécutant externe (ChatGPT, Codex) avec `prompts/lots/lots.mjs`. Huit de ces lots visaient des pages que la vague 1 a construites entre-temps : voir [`prompts/lots/LISEZ-MOI.md`](../prompts/lots/LISEZ-MOI.md). |
+| 2026-10-10 | **Catalogue de la vague 1** (PR n° 39 et 40, branche `codex/add-wave-one-catalog`) : les sept fondations et le chapitre 27 sont inscrits dans `corpus/` et sur l'accueil, pour essai. |
+| 2026-10-13 | **Mise à jour de la documentation** : README, feuille de route, lots, standards et guide de vérification alignés sur l'état réel de `main` (commit `3f2faab`) ; `HANDOFF-CODEX.md` classé historique. |
 
 Le projet a commencé par des phénomènes, pas par une carte. Les fondations sont apparues parce que les showcases ambitieux (supernova, collisions d'étoiles à neutrons) supposaient trop de préalables pour être réexpliqués à chaque fois.
 
@@ -64,7 +68,7 @@ Le 2026-10-04, l'accueil a été branché sur `corpus/*.json` (plus aucune liste
 
 | Document | Statut | Remarque |
 |---|---|---|
-| `README.md` | **actuel** (réécrit le 2026-10-02) | L'ancien README décrivait un « banc d'essai » « pas versionné », « huit planches » sans la réplication, et un dossier `astra/03-neurone/` absent du dépôt. Son contenu utile (qui a construit quoi) est repris dans les fiches de [`modeles.md`](modeles.md) et ci-dessous. |
+| `README.md` | **actuel** (réécrit le 2026-10-02, mis à jour le 2026-10-13) | L'ancien README décrivait un « banc d'essai » « pas versionné », « huit planches » sans la réplication, et un dossier `astra/03-neurone/` absent du dépôt. Son contenu utile (qui a construit quoi) est repris dans les fiches de [`modeles.md`](modeles.md) et ci-dessous. |
 | `corpus/` | **actuel**, source de vérité | |
 | `prompts/00-direction-artistique.md` | actuel pour le style, historique pour le reste | Charte visuelle toujours appliquée (palette, typographie, motion). Son introduction parle encore de « cinq pages » de la série « L'invisible en mouvement ». |
 | `prompts/01-…` à `09-…`, `prompts/fondations-*.md` des pages construites | **historiques** | Briefs de construction : ils disent ce qui a été demandé, pas forcément ce qui existe. Les écarts relevés sont mineurs (titres d'actes raccourcis dans 07 et 09 ; planche 04 plus riche que son brief). Les chemins locaux qui restaient dans `fondations-rotation-gravitation.md` et `fondations-relativite-restreinte.md` ont été retirés le 2026-10-04 (l'historique git les contient encore). |

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // lots.mjs — délégation de lots à un exécutant externe (ChatGPT, Codex). Zéro dépendance.
 //
-//   node docs/lots/lots.mjs liste
-//   node docs/lots/lots.mjs prompt <lot> [--stdout]      assemble le prompt et le copie dans le presse-papiers
-//   node docs/lots/lots.mjs recevoir <lot> <zip|dossier> [--appliquer] [--ecraser]
+//   node prompts/lots/lots.mjs liste
+//   node prompts/lots/lots.mjs prompt <lot> [--stdout]      assemble le prompt et le copie dans le presse-papiers
+//   node prompts/lots/lots.mjs recevoir <lot> <zip|dossier> [--appliquer] [--ecraser]
 //
 // Un lot est un fichier `<lot>.md` à côté de ce script. Ses directives, en tête de fichier :
 //   @titre:    nom court
