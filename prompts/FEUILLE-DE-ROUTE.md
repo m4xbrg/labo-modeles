@@ -1,10 +1,10 @@
 # Feuille de route : les planches qui restent à faire
 
-Rédigée le 2026-10-06, à partir de `corpus/` (état au 2026-10-04, 18 modèles). Ce fichier dit **ce qu'il reste à construire et dans quel ordre** ; `corpus/` reste la source de vérité sur ce qui existe. Quand une production est fusionnée, on coche sa ligne ici et on met le corpus à jour (voir [`SESSION-FONDATION.md`](SESSION-FONDATION.md), « Corpus »).
+Rédigée le 2026-10-06 à partir de `corpus/` (alors 18 modèles), **mise à jour le 2026-10-13** (35 modèles, `main` au commit `3f2faab`). Ce fichier dit **ce qu'il reste à construire et dans quel ordre** ; `corpus/` reste la source de vérité sur ce qui existe. Quand une production est fusionnée, on coche sa ligne ici et on met le corpus à jour (voir [`SESSION-FONDATION.md`](SESSION-FONDATION.md), « Corpus »).
 
 ## En une phrase
 
-Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondations** (≈ 20 ADN), organisées en sept vagues qui suivent les chaînes de préalables, plus une piste parallèle de **mise au standard** des pages existantes. Chacune a un brief complet, prêt à coller dans une session.
+Sur les 23 pages de fondations prévues, **17 sont construites** et **6 restent** (36, 39, 43·44, 45, 49, 50), avec le module 07 (hasard) à compléter. Quatre de ces six pages ont leurs préalables prêts ; les deux autres (39, 45) attendent respectivement 36 et 43·44. Chacune a un brief complet, prêt à coller dans une session. Il reste aussi un peu de mise au standard sur les pages existantes (voir plus bas).
 
 ## Comment c'est organisé
 
@@ -21,28 +21,30 @@ Pour que les 50 modules soient couverts, il faut **23 nouvelles pages de fondati
 | 1 · D | [x] `magnetisme-induction` | 23 | 4 | 0,8 | [écrit](fondations-magnetisme-induction.md), construite le 2026-10-06 | 21, 22 |
 | 1 · D | [x] `onde-electromagnetique` | 24 | 4 | 0,8 | [écrit](fondations-onde-electromagnetique.md), construite le 2026-10-07 | 15, 21, 23 |
 | 1 · D | [x] `optique` | 25 | 4 | 0,8 | [écrit](fondations-optique.md), construite le 2026-10-06 | 15, 24 |
-| 2 · E | [ ] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md) ; chapitre 26 construit le 2026-10-07, chapitre 27 à faire | 21, 24, 46 |
+| 2 · E | [x] `atomes-spectres` | 26 · 27 | 4 + 3 | 1,2 | [écrit](fondations-atomes-spectres.md) ; chapitre 26 construit le 2026-10-07, chapitre 27 le 2026-10-10 (vague 1) | 21, 24, 46 |
 | 2 · E | [x] `molecules-mole` | 28 · 29 | 4 + 3 | 1,1 | [écrit](fondations-molecules-mole.md), construite le 2026-10-06 | 21, 27 |
 | 2 · E | [x] `reactions-chimiques` | 30 | 4 | 0,8 | [écrit](fondations-reactions-chimiques.md), construite le 2026-10-06 | 17, 28, 29 |
 | 2 · E | [x] `acide-base-redox` | 31 | 4 | 0,8 | [écrit](fondations-acide-base-redox.md), construite le 2026-10-06 | 22, 29, 30 |
 | 3 · F | [x] `bioelectricite` | 33 | 4 | 0,7 | [écrit](fondations-bioelectricite.md), construite le 2026-10-07 | 22, 32, 31 |
 | 3 · F | [x] `energie-biologique` | 34 | 4 | 0,8 | [écrit](fondations-energie-biologique.md), construite le 2026-10-06 | 30, 31, 32 |
-| 3 · F | [ ] `information-genetique` | 35 | 4 | 0,8 | [écrit](fondations-information-genetique.md) | 28, 32, 34 |
+| 3 · F | [x] `information-genetique` | 35 | 4 | 0,8 | [écrit](fondations-information-genetique.md), construite le 2026-10-10 (vague 1) | 28, 32, 34 |
 | 3 · F | [ ] `genome-variation` | 36 | 4 | 0,8 | [écrit](fondations-genome-variation.md) | 35, 07 |
 | 3 · F | [x] `signalisation-homeostasie` | 37 | 4 | 0,8 | [écrit](fondations-signalisation-homeostasie.md), construite le 2026-10-07 | 04, 30, 34, 35 |
-| 4 · G | [ ] `physiologie-circulation` | 38 | 4 | 0,9 | [écrit](fondations-physiologie-circulation.md) | 20, 33, 34 |
+| 4 · G | [x] `physiologie-circulation` | 38 | 4 | 0,9 | [écrit](fondations-physiologie-circulation.md), construite le 2026-10-10 (vague 1) | 20, 33, 34 |
 | 4 · G | [ ] `immunite-coagulation` | 39 | 4 | 0,8 | [écrit](fondations-immunite-coagulation.md) | 36, 37 |
 | 5 · I-J | [ ] `rayonnement-etoiles` | 43 · 44 | 3 + 4 | 1,2 | [écrit](fondations-rayonnement-etoiles.md) | 13, 17, 26, 27 |
-| 5 · I-J | [ ] `relativite-generale` | 47 | 4 | 0,9 | [écrit](fondations-relativite-generale.md) | 13, 46 |
+| 5 · I-J | [x] `relativite-generale` | 47 | 4 | 0,9 | [écrit](fondations-relativite-generale.md), construite le 2026-10-10 (vague 1) | 13, 46 |
 | 5 · I-J | [ ] `cosmologie` | 45 | 4 | 0,9 | [écrit](fondations-cosmologie.md) | 13, 24, 27, 43 |
-| 6 · K | [ ] `quantique` | 48 | 4 | 0,9 | [écrit](fondations-quantique.md) | 06, 07, 15 |
+| 6 · K | [x] `quantique` | 48 | 4 | 0,9 | [écrit](fondations-quantique.md), construite le 2026-10-10 (vague 1) | 06, 07, 15 |
 | 6 · K | [ ] `etats-quantiques` | 49 | 4 | 0,9 | [écrit](fondations-etats-quantiques.md) | 48, 27 |
 | 6 · K | [ ] `spin-intrication` | 50 | 4 | 0,8 | [écrit](fondations-spin-intrication.md) | 48, 25 |
-| 7 · H | [ ] `populations-emergence` | 41 · 42 | 4 + 4 | 1,2 | [écrit](fondations-populations-emergence.md) | 04, 05, 07, 40 |
-| parallèle · A | [ ] `chaos` | 08 | 4 | 0,8 | [écrit](fondations-chaos.md) | 04, 14 |
-| parallèle · A | [ ] `signaux-fourier` | 09 | 4 | 0,7 | [écrit](fondations-signaux-fourier.md) | 06, 15, 22 |
+| 7 · H | [x] `populations-emergence` | 41 · 42 | 4 + 4 | 1,2 | [écrit](fondations-populations-emergence.md), construite le 2026-10-10 (vague 1) | 04, 05, 07, 40 |
+| parallèle · A | [x] `chaos` | 08 | 4 | 0,8 | [écrit](fondations-chaos.md), construite le 2026-10-10 (vague 1) | 04, 14 |
+| parallèle · A | [x] `signaux-fourier` | 09 | 4 | 0,7 | [écrit](fondations-signaux-fourier.md), construite le 2026-10-10 (vague 1) | 06, 15, 22 |
 
-Total : 23 pages, 105 étapes, ≈ 20 ADN. À la fin, les 50 modules sont couverts en `full`.
+Total prévu : 23 pages, 105 étapes, ≈ 20 ADN. Au 2026-10-13, 42 modules sur 50 sont couverts en `full` ; 07, 36 et 44 le sont en partie ; 39, 43, 45, 49 et 50 n'ont aucune page. Les six pages restantes y mettent fin, sauf le module 07, qui demande un complément dans *Systèmes, croissance et hasard*.
+
+**À construire maintenant** (préalables prêts) : `genome-variation` (36), `rayonnement-etoiles` (43·44), `etats-quantiques` (49), `spin-intrication` (50). **Ensuite** : `immunite-coagulation` (39, après 36) et `cosmologie` (45, après 43·44). Chaque page peut aussi être confiée à un exécutant externe avec [`lots/`](lots/LISEZ-MOI.md). Les pages construites par la vague 1 (PR n° 37) attendent encore une validation scientifique et visuelle (voir `corpus/standards.md` §3).
 
 ### Pourquoi cet ordre
 
@@ -57,7 +59,20 @@ Total : 23 pages, 105 étapes, ≈ 20 ADN. À la fin, les 50 modules sont couver
 
 ## Piste parallèle : mettre les pages existantes au standard
 
-Neuf des pages construites avant `corpus/standards.md` n'en respectent pas encore la navigation (un chapitre par module, 2 à 4 étapes) ; *Rotation, gravitation et orbites*, *Matière, chaleur et transport* et *Courant et circuits* sont déjà conformes. Le détail est dans le tableau du §3 de `standards.md` ; en résumé, avec la page de préalables en plus :
+**Fait.** La migration au gabarit LABO (PR n° 27, 2026-10-06) a mis les pages construites avant `corpus/standards.md` à la règle d'un chapitre par module et 2 à 4 étapes, et les 6 showcases au gabarit. Le tableau ci-dessous est **conservé comme trace** de ce qui avait été demandé ; il n'est plus à faire, sauf les points de la liste « Reste à faire » juste en dessous.
+
+**Reste à faire.**
+
+| Page | À faire |
+|---|---|
+| Systèmes, croissance et hasard (04·05·07) | **Compléter 07** (probabilités conditionnelles, loi binomiale, théorème central limite) pour le faire passer en `full`. |
+| Optique (25), Protons et électrons qui passent (31), L'énergie du vivant (34) | **Charger la coque commune** (`labo/labo.css`, `planche-etapes.css`, `planche.js`) et passer aux couches Observer / Manipuler / Comprendre, sans toucher au moteur ni à la scène. Recette : [`labo/GABARIT.md`](../labo/GABARIT.md), « Migrer une planche existante ». |
+| Préalables (`opus-sonnet/prealables.html`) | Ajouter la supernova et les pages de fondations. |
+| Vague 1 (08, 09, 35, 38, 41·42, 47, 48, chapitre 27) | Validation scientifique et visuelle, avec [`outils/qa/`](../outils/qa/README.md) et la relecture des captures. |
+
+### Tableau d'origine (2026-10-06, fait)
+
+Le détail est dans le tableau du §3 de `standards.md` ; en résumé, avec la page de préalables en plus :
 
 | Page | À faire |
 |---|---|
@@ -98,4 +113,5 @@ Les fondations ne sont pas une fin : elles rendent les showcases moins lourds. A
 | | |
 |---|---|
 | Briefs écrits | 23 (toutes les vagues et la piste A) |
-| Construites depuis cette feuille de route | 2 (23 · magnétisme et induction ; 28 · 29 · molécules et mole) |
+| Construites depuis cette feuille de route | 17 sur 23 (au 2026-10-13) |
+| Restent | 6 : 36, 39, 43·44, 45, 49, 50 |

@@ -96,3 +96,17 @@ Les planches de `opus-sonnet/` ont leur propre simulation (canvas ou SVG), souve
 Max préfère les planches en plein écran. `planche.js` replie donc la coque d'une planche à étapes en **une seule barre** (LABO, retour, titre court, codes d'étape avec le titre en infobulle, couches O · M · C, Infos, thème). Le titre complet, la signature et l'indice des couches vont dans un **tiroir** qu'ouvre le bouton « Infos » ou la touche **I** (Échap le referme). L'écran est bord à bord et prend toute la hauteur restante. Rien à changer dans les pages : le HTML de la coque reste celui de la recette, `planche.js` le réarrange au chargement en déplaçant les éléments, sans les recréer.
 
 **Observer** : la lecture, la pause, la frise du temps, la vitesse et les gestes centraux (Stimuler, Lâcher) **restent visibles** ; seuls les réglages se masquent (`#tools`, `.couche-lire`). Ne pas cacher toute la barre `.controls` en Observer.
+
+## Pièges déjà rencontrés
+
+Relevés pendant la migration des planches (2026-10-04 à 07) ; ils valent pour toute nouvelle planche.
+
+1. **Ordre des feuilles de style.** `labo.css` AVANT le `<style>` de la page, `planche-etapes.css` APRÈS. Sinon `labo.css` écrase les jetons de l’écran (`--positif`, `--negatif`, `--energie`, `--trait`) et la simulation change de couleurs en thème clair. La coque utilise `--filet`, pas `--trait`.
+2. **`planche.js` doit être inclus** en fin de page. Sans lui : couches sans indice et écran trop haut.
+3. **Touches.** `<body class="labo-etapes" data-mode="observer" data-touches="omc">` : les chiffres servent aux étapes, les couches passent sur O, M, C. Vérifier qu’aucune touche de la page n’utilise déjà o, m ou c ; sinon choisir d’autres lettres dans `data-touches`.
+4. **Réserve d’en-tête.** L’ancien titre superposé à la scène réservait 90 à 130 px en haut du dessin (`headH()`, `top = 108`, `headRect()`…). Une fois le titre sorti de la scène, réduire cette réserve (16 à 36 px) et vérifier sur capture que rien ne remonte sous le bord.
+5. **Regrouper sans toucher à la physique.** Un bouton d’étape à deux index (`data-a` et `data-b`) et une bascule « Scène » dans les contrôles. Le marquage de l’étape courante doit tester `data-a` **ou** `data-b`.
+6. **Graphes du panneau masqués en Observer.** Un canvas caché a une taille nulle : le redimensionner quand sa couche réapparaît (`ResizeObserver` ou `Planche.surMode`).
+7. **LaTeX et regex.** Ne jamais les écrire par un heredoc shell (les barres obliques inverses sont corrompues) : écrire un fichier, puis l’exécuter.
+8. **Navigateur intégré masqué.** `requestAnimationFrame` s’y arrête et une simulation paraît figée. Tester en headless (voir [`outils/qa/`](../outils/qa/README.md)) avant de conclure à un bug.
+9. **PR empilées.** Ne pas supprimer la branche de base d’une PR dont une autre dépend (`gh pr merge --delete-branch` a fermé une PR empilée le 2026-10-04).

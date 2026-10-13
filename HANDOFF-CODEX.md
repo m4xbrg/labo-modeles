@@ -1,5 +1,7 @@
 # Handoff : migration des planches LABO au gabarit (pour Codex)
 
+> **Document historique (2026-10-13).** Ce handoff est terminé : la branche `claude/labo-migration` est fusionnée dans `main` (PR n° 27), les 6 showcases et les fondations d'alors sont migrés, et la documentation du §3.3 a été mise à jour. **Ne pas exécuter le prompt du §7.** Ce qui reste utile a été repris ailleurs : la recette et les pièges dans [`labo/GABARIT.md`](labo/GABARIT.md), la vérification dans [`outils/qa/README.md`](outils/qa/README.md), l'état et la suite dans [`README.md`](README.md) et [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md). Le texte ci-dessous est gardé tel quel, comme trace.
+
 Rédigé le 2026-10-06 par Claude Opus 5.5, qui s'arrête à la limite de session. Tu reprends ce travail dans le dépôt `labo-modeles`, sur la branche **`claude/labo-migration`** (poussée sur GitHub). Réponds à Max en français.
 
 ## 1. Le contexte en cinq lignes
