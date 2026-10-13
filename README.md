@@ -46,7 +46,6 @@ Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 202
 **Points d'attention connus.**
 
 - La vague 1 n'a pas encore été relue page par page (science et rendu).
-- Trois pages (*Optique*, *Protons et électrons qui passent*, *L'énergie du vivant*) n'utilisent pas la coque commune de `labo/` : pas de couches Observer / Manipuler / Comprendre, et `outils/qa` ne les mesure pas. Leur migration est ouverte.
 - Les `as_of` des fichiers `corpus/*.json` sont en retard sur `main` (voir [`corpus/README.md`](corpus/README.md)).
 
 ## Où est la source de vérité
