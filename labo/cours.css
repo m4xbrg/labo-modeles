@@ -116,6 +116,27 @@ figure.labo figcaption a:hover{color:var(--encre)}
 .calc .verdict-oui{color:var(--induit)}
 .calc .verdict-non{color:var(--positif)}
 
+/* Calcul accompagné d'un dessin : texte à gauche, figure à droite */
+.calc.avec-figure{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:6px 22px;align-items:center}
+.calc.avec-figure > .calc-t{grid-column:1 / -1}
+.calc.avec-figure > .figure{grid-column:2;grid-row:2 / span 6;align-self:start}
+.calc.avec-figure > p{grid-column:1}
+.plan,.trace{display:block;width:100%;height:auto;overflow:visible}
+.plan .grille line{stroke:var(--filet);stroke-width:.05}
+.plan .axe,.trace .axe{stroke:var(--encre-3);stroke-width:.08}
+.trace .axe{stroke-width:1}
+.plan g line{stroke-width:.22;stroke-linecap:round}
+.plan .v-a line{stroke:var(--phenomene)} .plan .v-a polygon{fill:var(--phenomene)}
+.plan .v-b line{stroke:var(--champ-b)} .plan .v-b polygon{fill:var(--champ-b)}
+.plan .v-r line{stroke:var(--energie)} .plan .v-r polygon{fill:var(--energie)}
+.plan .v-c line{stroke:var(--positif);stroke-dasharray:.35 .3} .plan .v-c polygon{fill:var(--positif)}
+.plan .v-rail{stroke:var(--encre-2);stroke-width:.35;stroke-linecap:round}
+.trace .courbe{fill:none;stroke:var(--encre);stroke-width:1.6}
+.trace .sec{stroke:var(--phenomene);stroke-width:1.6}
+.trace .tan{stroke:var(--energie);stroke-width:1.2;stroke-dasharray:4 3}
+.trace .pt{fill:var(--phenomene)}
+@media (max-width:640px){ .calc.avec-figure{grid-template-columns:1fr} .calc.avec-figure > .figure{grid-column:1;grid-row:auto;max-width:220px} }
+
 /* ---------- Questions (prédire, se tester) ---------- */
 .quiz{border:1px solid var(--filet);padding:14px 18px;margin:12px 0 16px;scroll-margin-top:90px}
 .quiz .q{margin:0 0 10px;font-weight:500}

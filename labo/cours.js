@@ -7,7 +7,8 @@
        … <output data-expr="V0 + Q*t" data-dec="1"></output> … </div>
        → nombres qu'on fait glisser (ou flèches du clavier) ; les sorties se recalculent. Une sortie sans
          data-dec reçoit le texte (HTML) que renvoie l'expression. Aussi <input type="range" data-nom="e">.
-         Aides disponibles dans les expressions : fmt, sci, mant, ordre, sup, log10, sqrt, abs, min, max, round.
+         Aides disponibles dans les expressions : fmt, fmtS, sci, mant, ordre, sup, log10, sqrt, abs, min, max, round,
+         hypot, cosd, sind, atan2d (en degrés), et deux dessins : plan([[x0, y0, x1, y1, 'a'], …]) et trace({ f, x, y, seg, pts }).
    <div class="quiz" data-reponse="25" data-tol="0.1" data-unite="m/s"><p class="q">…</p><div class="corr">…</div></div>
    <div class="quiz"><p class="q">…</p><ul class="choix"><li>…</li><li data-bon>…</li></ul><div class="corr">…</div></div>
    <ol class="pas-a-pas"> → une étape à la fois, bouton « Étape suivante ».
@@ -39,7 +40,39 @@ function sci(x, sig = 2){
   return `${fmt(a, sig - 1)} × 10${sup(e)}`;
 }
 const ordre = x => Math.round(Math.log10(Math.abs(x)));
-const AIDES = { fmt, sci, mant, ordre, sup, log10: Math.log10, sqrt: Math.sqrt, abs: Math.abs, min: Math.min, max: Math.max, round: Math.round, PI: Math.PI };
+const RAD = Math.PI / 180;
+const r2 = x => +x.toFixed(3);
+/** Petit plan de vecteurs, en SVG : plan([[x0, y0, x1, y1, 'a'], …], R). Classes : a (phénomène), b, r (résultante),
+    c (composante, pointillée), rail (trait épais sans flèche). Le y monte, comme en physique. */
+function plan(vs, R = 10){
+  const s = [`<svg class="plan" viewBox="${-R - 1} ${-R - 1} ${2 * R + 2} ${2 * R + 2}" role="img" aria-label="Plan des vecteurs"><g class="grille">`];
+  for (let i = -R; i <= R; i++) s.push(`<line x1="${i}" y1="${-R}" x2="${i}" y2="${R}"/><line x1="${-R}" y1="${i}" x2="${R}" y2="${i}"/>`);
+  s.push(`</g><line class="axe" x1="${-R}" y1="0" x2="${R}" y2="0"/><line class="axe" x1="0" y1="${-R}" x2="0" y2="${R}"/>`);
+  vs.forEach(([x0, y0, x1, y1, k = 'a']) => {
+    const X0 = r2(x0), Y0 = r2(-y0), X1 = r2(x1), Y1 = r2(-y1), L = Math.hypot(X1 - X0, Y1 - Y0);
+    if (k === 'rail'){ s.push(`<line class="v-rail" x1="${X0}" y1="${Y0}" x2="${X1}" y2="${Y1}"/>`); return; }
+    if (L < 0.05) return;
+    const ux = (X1 - X0) / L, uy = (Y1 - Y0) / L, t = Math.min(0.9, L * 0.4), w = t * 0.55;
+    const bx = X1 - ux * t, by = Y1 - uy * t;
+    s.push(`<g class="v-${k}"><line x1="${X0}" y1="${Y0}" x2="${r2(bx)}" y2="${r2(by)}"/>` +
+      `<polygon points="${X1},${Y1} ${r2(bx - uy * w)},${r2(by + ux * w)} ${r2(bx + uy * w)},${r2(by - ux * w)}"/></g>`);
+  });
+  return s.join('') + '</svg>';
+}
+/** Petite courbe en SVG : trace({ f, x: [a, b], y: [c, d], seg: [[x0, y0, x1, y1, 'cls']], pts: [[x, y]] }) */
+function trace(o){
+  const W = 220, H = 150, m = 12, [xa, xb] = o.x, [ya, yb] = o.y;
+  const X = x => r2(m + (x - xa) / (xb - xa) * (W - 2 * m)), Y = y => r2(H - m - (y - ya) / (yb - ya) * (H - 2 * m));
+  const p = []; for (let i = 0; i <= 60; i++){ const x = xa + (xb - xa) * i / 60; p.push(X(x) + ',' + Y(o.f(x))); }
+  const s = [`<svg class="trace" viewBox="0 0 ${W} ${H}" role="img" aria-label="Graphe"><line class="axe" x1="${m}" y1="${Y(Math.max(ya, 0))}" x2="${W - m}" y2="${Y(Math.max(ya, 0))}"/><line class="axe" x1="${X(Math.max(xa, 0))}" y1="${m}" x2="${X(Math.max(xa, 0))}" y2="${H - m}"/>`,
+    `<polyline class="courbe" points="${p.join(' ')}"/>`];
+  (o.seg || []).forEach(([x0, y0, x1, y1, k = 'sec']) => s.push(`<line class="${k}" x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}"/>`));
+  (o.pts || []).forEach(([x, y]) => s.push(`<circle class="pt" cx="${X(x)}" cy="${Y(y)}" r="3"/>`));
+  return s.join('') + '</svg>';
+}
+const AIDES = { fmt, sci, mant, ordre, sup, plan, trace, log10: Math.log10, sqrt: Math.sqrt, abs: Math.abs, min: Math.min, max: Math.max, round: Math.round, hypot: Math.hypot, PI: Math.PI,
+  cosd: d => Math.cos(d * RAD), sind: d => Math.sin(d * RAD), atan2d: (y, x) => Math.atan2(y, x) / RAD,
+  fmtS: (x, d = 1) => (x > 0.5 * 10 ** -d ? '+' : '') + fmt(x, d) };
 const num = s => parseFloat(String(s).replace(/[\s ]/g, '').replace(',', '.').replace('−', '-'));
 
 /* ---------- scènes intégrées ---------- */

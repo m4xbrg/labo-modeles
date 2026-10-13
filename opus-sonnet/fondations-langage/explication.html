@@ -39,8 +39,26 @@
         <li><a href="#m01-suite">Où ça resservira</a></li>
         <li><a href="#m01-test">Teste-toi</a></li>
       </ol></li>
-    <li><a href="#m02"><b>02</b>Vecteurs</a></li>
-    <li><a href="#m03"><b>03</b>Changement et accumulation</a></li>
+    <li><a href="#m02"><b>02</b>Vecteurs</a>
+      <ol>
+        <li><a href="#m02-intuition">Intuition</a></li>
+        <li><a href="#m02-defs">Définitions</a></li>
+        <li><a href="#m02-relations">Relations clés</a></li>
+        <li><a href="#m02-exemple">Exemple chiffré</a></li>
+        <li><a href="#m02-pieges">Pièges fréquents</a></li>
+        <li><a href="#m02-suite">Où ça resservira</a></li>
+        <li><a href="#m02-test">Teste-toi</a></li>
+      </ol></li>
+    <li><a href="#m03"><b>03</b>Changement et accumulation</a>
+      <ol>
+        <li><a href="#m03-intuition">Intuition</a></li>
+        <li><a href="#m03-defs">Définitions</a></li>
+        <li><a href="#m03-relations">Relations clés</a></li>
+        <li><a href="#m03-exemple">Exemple chiffré</a></li>
+        <li><a href="#m03-pieges">Pièges fréquents</a></li>
+        <li><a href="#m03-suite">Où ça resservira</a></li>
+        <li><a href="#m03-test">Teste-toi</a></li>
+      </ol></li>
     <li><a href="#simplifie">Ce que les labos simplifient</a></li>
     <li><a href="#chiffres">Les chiffres à retenir</a></li>
   </ol>
@@ -54,8 +72,8 @@
   <p class="mode-emploi">Chaque module suit le même plan : l’intuition, les mots, les relations, un exemple, les pièges, puis trois questions pour te tester. Les nombres <span class="var" style="cursor:default;border-bottom-style:dashed">soulignés</span> se règlent en les faisant glisser, et les termes <a class="terme" href="#def-ordre">pointillés</a> montrent leur définition au survol.</p>
   <div class="cartes">
     <a class="carte" href="#m01"><b>MODULE 01</b><span>Mesure, échelles et représentation scientifique</span><small>≈ 15 min · 3 scènes</small></a>
-    <a class="carte" href="#m02"><b>MODULE 02</b><span>Vecteurs et géométrie des quantités</span><small>≈ 12 min</small></a>
-    <a class="carte" href="#m03"><b>MODULE 03</b><span>Changement et accumulation</span><small>≈ 12 min</small></a>
+    <a class="carte" href="#m02"><b>MODULE 02</b><span>Vecteurs et géométrie des quantités</span><small>≈ 15 min · 2 scènes</small></a>
+    <a class="carte" href="#m03"><b>MODULE 03</b><span>Changement et accumulation</span><small>≈ 15 min · 2 scènes</small></a>
   </div>
 </header>
 
@@ -225,37 +243,80 @@
       <a href="index.html?etape=02.1">02.1 Flèche</a><a href="index.html?etape=02.1&amp;scene=2">02.1 Composantes</a><a href="index.html?etape=02.2">02.2 Addition</a><a href="index.html?etape=02.2&amp;scene=2">02.2 Projection</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Certaines grandeurs se disent avec un seul nombre : 20 °C, 70 kg, 3 s. D’autres ont aussi une direction : « 5 m » ne dit pas où l’on arrive, seulement qu’on arrive quelque part sur un cercle de 5 m de rayon. Le vecteur est la flèche qui lève l’ambiguïté : sa longueur donne la grandeur, son orientation donne la direction. Deux informations, donc deux façons équivalentes de le décrire : par sa longueur et son angle, ou par ses deux « pattes » le long des axes. Additionner des flèches, c’est les mettre bout à bout, et projeter une flèche, c’est mesurer son ombre sur une direction choisie.</p>
+    <h4 data-n="1" id="m02-intuition">Intuition</h4>
+    <p>Certaines grandeurs se disent avec un seul nombre : 20 °C, 70 kg, 3 s. D’autres ont aussi une direction : « 5 m » ne dit pas où l’on arrive, seulement qu’on arrive quelque part sur un cercle de 5 m de rayon.</p>
+    <figure class="labo" data-src="index.html?embed&amp;etape=02.1" data-h="420" data-titre="Une distance, une flèche">
+      <figcaption><span><b>02.1</b>Une distance de 5 m et une flèche de 5 m. Fais tourner la flèche par sa pointe : le nombre ne change pas, le point d’arrivée si.</span></figcaption>
+    </figure>
+    <p>Le <a class="terme" href="#def-vecteur">vecteur</a> est la flèche qui lève l’ambiguïté : sa longueur donne la grandeur, son orientation donne la direction. Deux informations, donc deux façons équivalentes de le décrire : par sa <a class="terme" href="#def-norme">norme</a> et son angle, ou par ses deux « pattes » le long des axes, les <a class="terme" href="#def-composantes">composantes</a>. Additionner des flèches, c’est les mettre bout à bout, et projeter une flèche, c’est mesurer son ombre sur une direction choisie.</p>
 
-    <h4 data-n="2">Définitions</h4>
+    <h4 data-n="2" id="m02-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Scalaire</dt><dd>Grandeur décrite par un nombre et une unité : température, masse, durée, énergie.</dd></div>
-      <div><dt>Vecteur \(\vec A\)</dt><dd>Grandeur décrite par une norme, une direction et un sens : déplacement, vitesse, force, champ électrique.</dd></div>
-      <div><dt>Norme (magnitude) \(\lvert\vec A\rvert\)</dt><dd>Longueur de la flèche, toujours positive, dans l’unité du vecteur.</dd></div>
-      <div><dt>Angle \(\theta\)<span class="u">rad ou °</span></dt><dd>Orientation de la flèche, mesurée depuis l’axe \(+x\), dans le sens antihoraire.</dd></div>
-      <div><dt>Composantes \(A_x,\,A_y\)</dt><dd>Les deux parts de la flèche le long des axes. Elles ont un signe : positives vers \(+x\) ou \(+y\), négatives sinon. Même unité que \(\vec A\).</dd></div>
-      <div><dt>Résultante \(\vec R\)</dt><dd>Somme de plusieurs vecteurs.</dd></div>
-      <div><dt>Projection \(A_\parallel\)</dt><dd>Part d’un vecteur le long d’une direction donnée, comptée avec son signe.</dd></div>
-      <div><dt>Produit scalaire \(\vec A\cdot\vec B\)</dt><dd>Nombre qui mesure combien deux vecteurs pointent dans le même sens : \(\lvert\vec A\rvert\,\lvert\vec B\rvert\cos\theta\).</dd></div>
+      <div id="def-scalaire"><dt>Scalaire</dt><dd>Grandeur décrite par un nombre et une unité : température, masse, durée, énergie.</dd></div>
+      <div id="def-vecteur"><dt>Vecteur \(\vec A\)</dt><dd>Grandeur décrite par une norme, une direction et un sens : déplacement, vitesse, force, champ électrique.</dd></div>
+      <div id="def-norme"><dt>Norme (magnitude) \(\lvert\vec A\rvert\)</dt><dd>Longueur de la flèche, toujours positive, dans l’unité du vecteur.</dd></div>
+      <div id="def-angle"><dt>Angle \(\theta\)<span class="u">rad ou °</span></dt><dd>Orientation de la flèche, mesurée depuis l’axe \(+x\), dans le sens antihoraire.</dd></div>
+      <div id="def-composantes"><dt>Composantes \(A_x,\,A_y\)</dt><dd>Les deux parts de la flèche le long des axes. Elles ont un signe : positives vers \(+x\) ou \(+y\), négatives sinon. Même unité que \(\vec A\).</dd></div>
+      <div id="def-resultante"><dt>Résultante \(\vec R\)</dt><dd>Somme de plusieurs vecteurs.</dd></div>
+      <div id="def-projection"><dt>Projection \(A_\parallel\)</dt><dd>Part d’un vecteur le long d’une direction donnée, comptée avec son signe.</dd></div>
+      <div id="def-scalaire-produit"><dt>Produit scalaire \(\vec A\cdot\vec B\)</dt><dd>Nombre qui mesure combien deux vecteurs pointent dans le même sens : \(\lvert\vec A\rvert\,\lvert\vec B\rvert\cos\theta\).</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m02-relations">Relations clés</h4>
     <div class="relation">\[ A_x = \lvert\vec A\rvert\cos\theta, \qquad A_y = \lvert\vec A\rvert\sin\theta \]
       <p>De la norme et de l’angle aux composantes. C’est la trigonométrie du triangle rectangle dont la flèche est l’hypoténuse.</p></div>
+    <div class="calc avec-figure">
+      <p class="calc-t">À toi : oriente la flèche</p>
+      <output class="figure" data-expr="plan([[0, 0, N*cosd(th), 0, 'c'], [N*cosd(th), 0, N*cosd(th), N*sind(th), 'c'], [0, 0, N*cosd(th), N*sind(th), 'a']], 10)"></output>
+      <p>Norme <span class="var" data-nom="N" data-val="8" data-min="1" data-max="10" data-pas="0.5" data-dec="1" data-unite="m" data-label="Norme"></span>, angle <span class="var" data-nom="th" data-val="30" data-min="-180" data-max="180" data-pas="5" data-dec="0" data-unite="°" data-label="Angle"></span>.</p>
+      <p>A<sub>x</sub> = |A| cos θ = <output class="fort" data-expr="fmtS(N*cosd(th), 2) + ' m'"></output></p>
+      <p>A<sub>y</sub> = |A| sin θ = <output class="fort" data-expr="fmtS(N*sind(th), 2) + ' m'"></output></p>
+      <p class="note">Les deux pattes pointillées sont les composantes. Au-delà de 90°, A<sub>x</sub> devient négative : la flèche pointe vers la gauche.</p>
+    </div>
+
     <div class="relation">\[ \lvert\vec A\rvert = \sqrt{A_x^{2} + A_y^{2}}, \qquad \theta = \operatorname{atan2}(A_y,\,A_x) \]
       <p>Des composantes à la norme : le théorème de Pythagore. Pour l’angle, tenir compte des signes de \(A_x\) et \(A_y\) donne le bon quadrant ; un simple \(\arctan(A_y/A_x)\) ne distingue pas \((3;4)\) de \((-3;-4)\).</p></div>
+    <div class="quiz">
+      <p class="q">\(\vec A = (-3\,;\,-4)\) m. Quel est son angle \(\theta\), mesuré depuis \(+x\) ?</p>
+      <ul class="choix">
+        <li>\(+53°\), puisque \(\arctan(-4/-3) = \arctan(4/3)\)</li>
+        <li data-bon>\(-127°\) : la flèche pointe en bas à gauche</li>
+        <li>\(+127°\) : la flèche pointe en haut à gauche</li>
+      </ul>
+      <div class="corr"><p>Les deux composantes sont négatives : la flèche est dans le quadrant en bas à gauche. \(\arctan(4/3) \approx 53°\) donne la direction opposée ; il faut retirer 180°, soit \(\theta \approx -127°\) (ou 233°). C’est ce que fait \(\operatorname{atan2}\).</p></div>
+    </div>
+
     <div class="relation">\[ R_x = A_x + B_x, \qquad R_y = A_y + B_y \]
       <p>On additionne les composantes, jamais les normes. La somme des normes n’est atteinte que si les deux flèches pointent dans le même sens ; on a toujours \(\lvert\vec A + \vec B\rvert \le \lvert\vec A\rvert + \lvert\vec B\rvert\).</p></div>
+    <figure class="labo large" data-src="index.html?embed&amp;etape=02.2&amp;panneau=1" data-h="460" data-titre="Addition de deux vecteurs">
+      <figcaption><span><b>02.2</b>Tire la pointe de A ou de B : R<sub>x</sub> et R<sub>y</sub> se recalculent à droite. Compare |R| à |A| + |B|, puis aligne les deux flèches.</span></figcaption>
+    </figure>
+
     <div class="relation">\[ k\,\vec A = (k A_x,\; k A_y), \qquad -\vec A = (-A_x,\,-A_y) \]
       <p>Multiplier par un nombre étire ou comprime la flèche ; un nombre négatif la retourne. Soustraire, c’est ajouter l’opposé.</p></div>
-    <div class="relation">\[ A_\parallel = \vec A\cdot\hat u = \lvert\vec A\rvert\cos\alpha, \qquad \vec A\cdot\vec B = A_x B_x + A_y B_y \]
-      <p>La projection sur la direction du vecteur unitaire \(\hat u\), à l’angle \(\alpha\) de \(\vec A\). Le produit scalaire se calcule indifféremment avec les angles ou avec les composantes. À 90° la projection est nulle : la partie perpendiculaire n’agit pas sur la direction choisie.</p></div>
+    <div class="calc avec-figure">
+      <p class="calc-t">À toi : multiplie \(\vec A = (3\,;\,2)\) m</p>
+      <output class="figure" data-expr="plan([[0, 0, 3*k, 2*k, 'a'], [0, 0, 3, 2, 'b']], 10)"></output>
+      <p>Facteur <span class="var" data-nom="k" data-val="1.5" data-min="-3" data-max="3" data-pas="0.5" data-dec="1" data-label="Facteur k"></span> : \(k\vec A\) = (<output data-expr="fmt(3*k, 1)"></output> ; <output data-expr="fmt(2*k, 1)"></output>) m.</p>
+      <p>Sa norme vaut |k| × |A| = <output class="fort" data-expr="fmt(abs(k) * sqrt(13), 2) + ' m'"></output></p>
+      <p><output class="phrase" data-expr="k === 0 ? 'k = 0 : la flèche disparaît, c’est le vecteur nul.' : k &lt; 0 ? 'k négatif : la flèche se retourne.' : abs(k) &lt; 1 ? 'k entre 0 et 1 : la flèche raccourcit, sans changer de direction.' : 'k plus grand que 1 : la flèche s’allonge, sans changer de direction.'"></output></p>
+    </div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <div class="relation">\[ A_\parallel = \vec A\cdot\hat u = \lvert\vec A\rvert\cos\alpha, \qquad \vec A\cdot\vec B = A_x B_x + A_y B_y \]
+      <p>La <a class="terme" href="#def-projection">projection</a> sur la direction du vecteur unitaire \(\hat u\), à l’angle \(\alpha\) de \(\vec A\). Le produit scalaire se calcule indifféremment avec les angles ou avec les composantes. À 90° la projection est nulle : la partie perpendiculaire n’agit pas sur la direction choisie.</p></div>
+    <div class="calc avec-figure">
+      <p class="calc-t">À toi : tire le wagon</p>
+      <output class="figure" data-expr="plan([[-10, 0, 10, 0, 'rail'], [F*cosd(al), 0, F*cosd(al), F*sind(al), 'c'], [0, 0, F*cosd(al), 0, 'r'], [0, 0, F*cosd(al), F*sind(al), 'a']], 10)"></output>
+      <p>Une force de <span class="var" data-nom="F" data-val="8" data-min="1" data-max="10" data-pas="0.5" data-dec="1" data-unite="N" data-label="Force"></span> tire à <span class="var" data-nom="al" data-val="30" data-min="0" data-max="180" data-pas="5" data-dec="0" data-unite="°" data-label="Angle avec le rail"></span> du rail (horizontal).</p>
+      <p>F<sub>∥</sub> = |F| cos α = <output class="fort" data-expr="fmtS(F*cosd(al), 2) + ' N'"></output></p>
+      <p>F<sub>⊥</sub> = |F| sin α = <output data-expr="fmt(F*sind(al), 2) + ' N'"></output>, reprise par le rail.</p>
+      <p><output class="phrase" data-expr="abs(al - 90) &lt; 1 ? 'Perpendiculaire : F∥ = 0, le wagon ne bouge pas.' : al &gt; 90 ? 'Au-delà de 90°, F∥ est négative : la force freine le wagon.' : 'La flèche jaune, l’ombre de F sur le rail, est la seule part qui fait avancer.'"></output></p>
+    </div>
+
+    <h4 data-n="4" id="m02-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Deux déplacements : \(\vec A = (4\,;\,3)\) m puis \(\vec B = (3\,;\,-2)\) m. Une force de 50 N tire un wagon sur un rail orienté à 20° de la force.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Normes : \(\lvert\vec A\rvert = \sqrt{16 + 9} = 5\) m ; \(\lvert\vec B\rvert = \sqrt{9 + 4} \approx 3{,}61\) m.</li>
         <li>Résultante : \(\vec R = (4 + 3\,;\,3 - 2) = (7\,;\,1)\) m, donc \(\lvert\vec R\rvert = \sqrt{49 + 1} = \sqrt{50} \approx 7{,}07\) m, à \(\arctan(1/7) \approx 8{,}1°\) au-dessus de l’axe \(+x\).</li>
         <li>La somme des normes vaudrait \(5 + 3{,}61 = 8{,}61\) m : c’est plus que la vraie distance, puisque les deux flèches ne sont pas alignées.</li>
@@ -263,7 +324,7 @@
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m02-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Additionner les normes : 3 m puis 4 m à angle droit font 5 m, pas 7 m.</li>
       <li>Oublier le signe d’une composante : une composante négative n’est pas une erreur, elle indique le sens.</li>
@@ -273,7 +334,7 @@
       <li>Croire qu’un vecteur est attaché à un endroit : on peut le translater sans le changer, tant qu’on garde sa norme et son orientation.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m02-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>10</b><span>Les forces s’additionnent comme des vecteurs ; la résultante fixe l’accélération.</span></li>
       <li><b>11</b><span>Le travail d’une force est le produit scalaire de la force et du déplacement.</span></li>
@@ -282,13 +343,20 @@
       <li><b>21</b><span>Le champ électrique total est la somme vectorielle des champs de chaque charge (planche <a href="../04-champ-electrique/index.html">Champ électrique</a>).</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Un vecteur de norme 10 m fait un angle de 30° avec l’axe \(+x\). Quelles sont ses composantes ?</summary>
-      <p>\(A_x = 10\cos 30° \approx 8{,}66\) m et \(A_y = 10\sin 30° = 5{,}00\) m. Vérification : \(\sqrt{8{,}66^{2} + 5^{2}} = \sqrt{100} = 10\) m.</p></details>
-    <details><summary>Additionne \(\vec A = (2\,;\,-1)\) m et \(\vec B = (-5\,;\,4)\) m. Quelle est la norme de la résultante ?</summary>
-      <p>\(\vec R = (-3\,;\,3)\) m, donc \(\lvert\vec R\rvert = \sqrt{9 + 9} = \sqrt{18} \approx 4{,}24\) m. La flèche pointe en haut à gauche, à 135° de l’axe \(+x\).</p></details>
-    <details><summary>Une force de 30 N fait 60° avec le rail. Quelle part fait avancer le wagon ?</summary>
-      <p>\(F_\parallel = 30\cos 60° = 15\) N. La part perpendiculaire, \(30\sin 60° \approx 26\) N, est reprise par le rail et ne fait pas avancer le wagon.</p></details>
+    <h4 data-n="7" id="m02-test">Teste-toi</h4>
+    <div class="quiz" data-reponse="8.66" data-tol="0.05" data-unite="m" data-dec="2">
+      <p class="q">Un vecteur de norme 10 m fait un angle de 30° avec l’axe \(+x\). Que vaut sa composante \(A_x\) ?</p>
+      <div class="corr"><p>\(A_x = 10\cos 30° \approx 8{,}66\) m et \(A_y = 10\sin 30° = 5{,}00\) m. Vérification : \(\sqrt{8{,}66^{2} + 5^{2}} = \sqrt{100} = 10\) m.</p></div>
+    </div>
+    <div class="quiz" data-reponse="4.24" data-tol="0.05" data-unite="m" data-dec="2">
+      <p class="q">Additionne \(\vec A = (2\,;\,-1)\) m et \(\vec B = (-5\,;\,4)\) m. Quelle est la norme de la résultante ?</p>
+      <div class="corr"><p>\(\vec R = (-3\,;\,3)\) m, donc \(\lvert\vec R\rvert = \sqrt{9 + 9} = \sqrt{18} \approx 4{,}24\) m. La flèche pointe en haut à gauche, à 135° de l’axe \(+x\).</p>
+        <a class="labo-lien" href="index.html?etape=02.2">Vérifier dans le labo ↗</a></div>
+    </div>
+    <div class="quiz" data-reponse="15" data-tol="0.1" data-unite="N" data-dec="0">
+      <p class="q">Une force de 30 N fait 60° avec le rail. Quelle part fait avancer le wagon ?</p>
+      <div class="corr"><p>\(F_\parallel = 30\cos 60° = 15\) N. La part perpendiculaire, \(30\sin 60° \approx 26\) N, est reprise par le rail et ne fait pas avancer le wagon.</p></div>
+    </div>
   </section>
 
   <!-- ===================== Module 03 ===================== -->
@@ -300,46 +368,86 @@
       <a href="index.html?etape=03.1">03.1 Pente</a><a href="index.html?etape=03.2">03.2 Aire</a><a href="index.html?etape=01.3&amp;scene=2">01.3 Pente d’un débit</a><a href="index.html?etape=01.4">01.4 Aire sous un débit</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Un mouvement se raconte à trois niveaux. La position dit où l’on est. La vitesse dit à quel rythme la position change. L’accélération dit à quel rythme la vitesse change. Chaque niveau est le « rythme de changement » du précédent : c’est la dérivée, la pente du graphe. À l’inverse, si l’on connaît le rythme, on retrouve ce qui s’est accumulé en additionnant de petites tranches : c’est l’intégrale, l’aire sous le graphe. Pente et aire sont deux gestes inverses, et ils valent pour n’importe quelle grandeur, pas seulement le mouvement : un débit et un volume, un courant et une charge.</p>
+    <h4 data-n="1" id="m03-intuition">Intuition</h4>
+    <p>Un mouvement se raconte à trois niveaux. La position dit où l’on est. La <a class="terme" href="#def-vitesse">vitesse</a> dit à quel rythme la position change. L’<a class="terme" href="#def-acceleration">accélération</a> dit à quel rythme la vitesse change. Chaque niveau est le « rythme de changement » du précédent : c’est la <a class="terme" href="#def-derivee">dérivée</a>, la pente du graphe.</p>
+    <figure class="labo large" data-src="index.html?embed&amp;etape=03.1" data-h="540" data-titre="Trois graphes, un mouvement">
+      <figcaption><span><b>03.1</b>Un chariot et ses trois graphes, alignés sur le même temps. Glisse la tête de lecture jusqu’au sommet de x(t) : la vitesse s’annule, l’accélération non.</span></figcaption>
+    </figure>
+    <p>À l’inverse, si l’on connaît le rythme, on retrouve ce qui s’est accumulé en additionnant de petites tranches : c’est l’<a class="terme" href="#def-integrale">intégrale</a>, l’aire sous le graphe. Pente et aire sont deux gestes inverses, et ils valent pour n’importe quelle grandeur, pas seulement le mouvement : un débit et un volume, un courant et une charge.</p>
 
-    <h4 data-n="2">Définitions</h4>
+    <h4 data-n="2" id="m03-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Position \(x(t)\)<span class="u">m</span></dt><dd>Où se trouve l’objet sur l’axe, à l’instant \(t\), par rapport à une origine choisie.</dd></div>
-      <div><dt>Déplacement \(\Delta x\)<span class="u">m</span></dt><dd>Changement de position, \(x(t_2) - x(t_1)\). Il a un signe ; ce n’est pas la distance parcourue.</dd></div>
-      <div><dt>Vitesse moyenne \(\bar v\)<span class="u">m/s</span></dt><dd>Déplacement divisé par la durée : \(\Delta x/\Delta t\). C’est la pente de la sécante.</dd></div>
-      <div><dt>Vitesse \(v(t)\)<span class="u">m/s</span></dt><dd>Vitesse à un instant précis : la pente de la tangente à \(x(t)\). Son signe donne le sens du mouvement.</dd></div>
-      <div><dt>Accélération \(a(t)\)<span class="u">m/s²</span></dt><dd>Rythme de changement de la vitesse : la pente de \(v(t)\).</dd></div>
-      <div><dt>Dérivée</dt><dd>Pente locale d’une courbe, obtenue en rétrécissant l’intervalle \(\Delta t\) vers zéro.</dd></div>
-      <div><dt>Intégrale</dt><dd>Somme d’une infinité de tranches infiniment minces : l’aire sous une courbe, avec son signe.</dd></div>
-      <div><dt>Mouvement uniforme</dt><dd>Vitesse constante, accélération nulle.</dd></div>
+      <div id="def-position"><dt>Position \(x(t)\)<span class="u">m</span></dt><dd>Où se trouve l’objet sur l’axe, à l’instant \(t\), par rapport à une origine choisie.</dd></div>
+      <div id="def-deplacement"><dt>Déplacement \(\Delta x\)<span class="u">m</span></dt><dd>Changement de position, \(x(t_2) - x(t_1)\). Il a un signe ; ce n’est pas la distance parcourue.</dd></div>
+      <div id="def-vmoy"><dt>Vitesse moyenne \(\bar v\)<span class="u">m/s</span></dt><dd>Déplacement divisé par la durée : \(\Delta x/\Delta t\). C’est la pente de la sécante.</dd></div>
+      <div id="def-vitesse"><dt>Vitesse \(v(t)\)<span class="u">m/s</span></dt><dd>Vitesse à un instant précis : la pente de la tangente à \(x(t)\). Son signe donne le sens du mouvement.</dd></div>
+      <div id="def-acceleration"><dt>Accélération \(a(t)\)<span class="u">m/s²</span></dt><dd>Rythme de changement de la vitesse : la pente de \(v(t)\).</dd></div>
+      <div id="def-derivee"><dt>Dérivée</dt><dd>Pente locale d’une courbe, obtenue en rétrécissant l’intervalle \(\Delta t\) vers zéro.</dd></div>
+      <div id="def-integrale"><dt>Intégrale</dt><dd>Somme d’une infinité de tranches infiniment minces : l’aire sous une courbe, avec son signe.</dd></div>
+      <div id="def-uniforme"><dt>Mouvement uniforme</dt><dd>Vitesse constante, accélération nulle.</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m03-relations">Relations clés</h4>
     <div class="relation">\[ v = \frac{\dd x}{\dd t} = \lim_{\Delta t\to 0}\frac{\Delta x}{\Delta t}, \qquad a = \frac{\dd v}{\dd t} = \frac{\dd^{2}x}{\dd t^{2}} \]
       <p>Les deux dérivées. Sur un graphe, la vitesse est la pente de \(x(t)\) et l’accélération la pente de \(v(t)\). Quand \(\Delta t\) rétrécit, la sécante se confond avec la tangente.</p></div>
+    <div class="calc avec-figure">
+      <p class="calc-t">À toi : rétrécis Δt</p>
+      <output class="figure" data-expr="trace({ f: t =&gt; 3*t*t, x: [0, 3.3], y: [0, 33], seg: [[1, 0, 3, 24, 'tan'], [2, 12, 2 + dt, 3*(2 + dt)**2, 'sec']], pts: [[2, 12], [2 + dt, 3*(2 + dt)**2]] })"></output>
+      <p>La position suit \(x(t) = 3t^2\). Entre \(t = 2\) s et \(t = 2 + \Delta t\), avec \(\Delta t\) = <span class="var" data-nom="dt" data-val="1" data-valeurs="1;0.5;0.2;0.1;0.01;0.001" data-noms="1 s;0,5 s;0,2 s;0,1 s;0,01 s;0,001 s" data-label="Intervalle Δt"></span> :</p>
+      <p>vitesse moyenne \(\Delta x/\Delta t\) = <output class="fort" data-expr="fmt((3*(2 + dt)**2 - 12) / dt, 3) + ' m/s'"></output></p>
+      <p class="note">La sécante (couleur du domaine) se couche sur la tangente pointillée, de pente 12 m/s : c’est la vitesse à \(t = 2\) s.</p>
+    </div>
+
     <div class="relation">\[ \Delta x = \int_{0}^{t} v\,\dd t, \qquad \Delta v = \int_{0}^{t} a\,\dd t \]
-      <p>Les deux intégrales. L’aire sous \(v(t)\) est le déplacement (m/s × s = m) ; l’aire sous \(a(t)\) est le changement de vitesse (m/s² × s = m/s). Orange au-dessus de zéro, bleu au-dessous dans la simulation : l’aire sous l’axe compte en négatif.</p></div>
+      <p>Les deux intégrales. L’aire sous \(v(t)\) est le <a class="terme" href="#def-deplacement">déplacement</a> (m/s × s = m) ; l’aire sous \(a(t)\) est le changement de vitesse (m/s² × s = m/s). Orange au-dessus de zéro, bleu au-dessous dans la simulation : l’aire sous l’axe compte en négatif.</p></div>
+    <figure class="labo large" data-src="index.html?embed&amp;etape=03.2" data-h="540" data-titre="L’aire sous la vitesse">
+      <figcaption><span><b>03.2</b>Lance la lecture : l’aire sous v(t) suit le déplacement Δx, l’aire sous a(t) suit Δv. Choisis « Aller-retour » : l’aire bleue efface l’orange.</span></figcaption>
+    </figure>
+
     <div class="relation">\[ x(t) \xrightarrow{\ \text{pente}\ } v(t) \xrightarrow{\ \text{pente}\ } a(t), \qquad a(t) \xrightarrow{\ \text{aire}\ } \Delta v, \quad v(t) \xrightarrow{\ \text{aire}\ } \Delta x \]
       <p>La pente fait descendre d’un niveau, l’aire fait monter. Les deux se défont l’une l’autre, à une constante près : la valeur de départ, \(x_0\) ou \(v_0\).</p></div>
+    <div class="quiz">
+      <p class="q">Le chariot est au sommet de la courbe \(x(t)\). Que peut-on dire ?</p>
+      <ul class="choix">
+        <li>\(v = 0\) et \(a = 0\) : il est à l’arrêt</li>
+        <li data-bon>\(v = 0\), mais \(a\) peut ne pas être nulle</li>
+        <li>\(v\) est maximale, puisque \(x\) l’est</li>
+      </ul>
+      <div class="corr"><p>Au sommet, la pente de \(x(t)\) est nulle : \(v = 0\). Mais \(v\) passe de positive à négative, elle change : \(a\) est négative. C’est le demi-tour du lancer vertical.</p></div>
+    </div>
+
     <div class="relation">\[ v = v_0 + a\,t, \qquad x = x_0 + v_0\,t + \tfrac{1}{2}\,a\,t^{2} \]
       <p>Cas d’une accélération constante, obtenu en intégrant deux fois. La position est alors une parabole. La simulation les applique palier par palier.</p></div>
+    <div class="calc">
+      <p class="calc-t">À toi : règle le mouvement</p>
+      <p>Départ à <span class="var" data-nom="v0" data-val="4" data-min="-6" data-max="6" data-pas="0.5" data-dec="1" data-unite="m/s" data-label="Vitesse initiale"></span>, accélération constante <span class="var" data-nom="a" data-val="-0.5" data-min="-2" data-max="2" data-pas="0.25" data-dec="2" data-unite="m/s²" data-label="Accélération"></span>, pendant <span class="var" data-nom="t" data-val="8" data-min="1" data-max="10" data-pas="1" data-dec="0" data-unite="s" data-label="Durée"></span>.</p>
+      <p>Vitesse finale \(v\) = <output class="fort" data-expr="fmtS(v0 + a*t, 2) + ' m/s'"></output> · déplacement \(\Delta x\) = <output class="fort" data-expr="fmtS(v0*t + a*t*t/2, 2) + ' m'"></output></p>
+      <p class="note">Contrôle par l’aire : vitesse moyenne (v₀ + v) / 2 = <output data-expr="fmt((2*v0 + a*t) / 2, 2)"></output> m/s, fois <output data-expr="fmt(t, 0)"></output> s. <output class="phrase" data-expr="a === 0 ? 'a = 0 : la vitesse ne change pas.' : (v0 + a*t) * v0 &lt; 0 ? 'La vitesse change de signe en route : le chariot fait demi-tour.' : a * v0 &lt; 0 ? 'a et v de signes opposés : le chariot ralentit.' : 'a et v de même signe : le chariot accélère.'"></output></p>
+    </div>
+
     <div class="relation">\[ v^{2} = v_0^{2} + 2\,a\,\Delta x \]
       <p>Même cas, sans le temps : utile quand on connaît la distance de freinage et non la durée.</p></div>
+    <div class="calc">
+      <p class="calc-t">À toi : freine</p>
+      <p>Une voiture roule à <span class="var" data-nom="kmh" data-val="90" data-min="30" data-max="130" data-pas="10" data-dec="0" data-unite="km/h" data-label="Vitesse"></span>, soit <output data-expr="fmt(kmh / 3.6, 1) + ' m/s'"></output>, et freine à <span class="var" data-nom="d" data-val="7" data-min="3" data-max="9" data-pas="0.5" data-dec="1" data-unite="m/s²" data-label="Décélération"></span>.</p>
+      <p>Avec \(v = 0\) : \(\Delta x = v_0^2 / (2\,\lvert a\rvert)\) = <output class="fort" data-expr="fmt((kmh/3.6)**2 / (2*d), 1) + ' m'"></output> de freinage.</p>
+      <p class="note">La distance suit le carré de la vitesse : passe de 50 à 100 km/h, elle est multipliée par quatre, pas par deux.</p>
+    </div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
-      <p>Réglage « Freinage » du laboratoire D : départ en \(x_0 = -8\) m avec \(v_0 = 4\) m/s, accélération \(-0{,}5\) m/s² pendant 8 s, puis 0 pendant 2 s.</p>
-      <ol>
+    <h4 data-n="4" id="m03-exemple">Exemple chiffré</h4>
+    <div class="cas">
+      <p>Réglage « Freinage » du laboratoire D : départ en \(x_0 = -8\) m avec \(v_0 = 4\) m/s, accélération \(-0{,}5\) m/s² pendant 8 s, puis 0 pendant 2 s. Où est le chariot à la fin ?</p>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Vitesse après 8 s : \(v = 4 + (-0{,}5)(8) = 0\) m/s. Le chariot s’arrête.</li>
         <li>Position après 8 s : \(x = -8 + 4(8) + \tfrac12(-0{,}5)(8)^{2} = -8 + 32 - 16 = 8\) m.</li>
         <li>Contrôle par l’aire : \(v(t)\) est un triangle de base 8 s et de hauteur 4 m/s, d’aire \(\tfrac12 \times 8 \times 4 = 16\) m, donc \(x = -8 + 16 = 8\) m. La vitesse moyenne est \(16/8 = 2\) m/s, la moyenne de 4 et 0.</li>
         <li>Contrôle sans le temps : \(v^{2} = v_0^{2} + 2a\,\Delta x\) donne \(0 = 16 - 2(0{,}5)\,\Delta x\), soit \(\Delta x = 16\) m.</li>
         <li>De 8 s à 10 s, \(a = 0\) et \(v = 0\) : le chariot reste en \(x = 8\) m.</li>
       </ol>
+      <a class="labo-lien" href="index.html?etape=03.2">Le refaire dans le labo : préréglage « Freinage » ↗</a>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m03-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Croire qu’une accélération nulle veut dire « immobile » : la vitesse est simplement constante, éventuellement non nulle.</li>
       <li>Croire qu’une accélération positive veut dire « va plus vite » : si \(a\) et \(v\) ont des signes opposés, le chariot ralentit.</li>
@@ -349,23 +457,35 @@
       <li>Utiliser \(x = x_0 + v_0 t + \tfrac12 a t^{2}\) quand l’accélération change : la formule suppose \(a\) constante, il faut découper en paliers.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m03-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>04</b><span>Une équation d’évolution relie un taux de changement à l’état du système : c’est une dérivée qui dépend de la valeur actuelle (planche <a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a>).</span></li>
       <li><b>10</b><span>La deuxième loi de Newton relie la force résultante à l’accélération : tout le laboratoire D est la cinématique dont elle a besoin (planche <a href="../fondations-forces-energie/index.html">Forces, énergie et conservation</a>).</span></li>
       <li><b>11</b><span>La puissance est le rythme de changement de l’énergie, l’impulsion est l’aire sous la force dans le temps.</span></li>
-      <li><b>22</b><span>Le courant est la pente de la charge, \(I = \dd q/\dd t\) ; la charge accumulée est l’aire sous \(I(t)\).</span></li>
       <li><b>16</b><span>Les flux et les gradients sont des dérivées et des intégrales dans l’espace plutôt que dans le temps.</span></li>
+      <li><b>22</b><span>Le courant est la pente de la charge, \(I = \dd q/\dd t\) ; la charge accumulée est l’aire sous \(I(t)\).</span></li>
       <li><b>46</b><span>La relativité restreinte repose sur une définition précise de la position et de la vitesse dans un référentiel.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Sur un graphe \(x(t)\), la courbe est une droite qui descend. Que valent \(v\) et \(a\) ?</summary>
-      <p>La pente est constante et négative : la vitesse est constante et négative, le mobile recule à rythme régulier. La vitesse ne change pas, donc l’accélération est nulle.</p></details>
-    <details><summary>Une position suit \(x(t) = 3t^{2}\) (en m, avec \(t\) en s). Quelles sont la vitesse et l’accélération à \(t = 2\) s ?</summary>
-      <p>\(v = \dd x/\dd t = 6t = 12\) m/s et \(a = \dd v/\dd t = 6\) m/s², constante. On retrouve la forme \(x = \tfrac12 a t^{2}\) avec \(a = 6\) m/s².</p></details>
-    <details><summary>Le réglage « Ralentir, s’arrêter, repartir » donne \(a = -1{,}5 ; 0 ; 0 ; +1{,}5 ; 0\) m/s² sur cinq paliers de 2 s, avec \(x_0 = -8\) m et \(v_0 = 3\) m/s. Où est le chariot à \(t = 10\) s ?</summary>
-      <p>Palier 1 : \(v\) passe de 3 à 0, déplacement \(\tfrac12 \times 3 \times 2 = 3\) m. Paliers 2 et 3 : arrêt. Palier 4 : \(v\) passe de 0 à 3 m/s, déplacement 3 m. Palier 5 : \(v = 3\) m/s pendant 2 s, soit 6 m. Total : \(3 + 3 + 6 = 12\) m, donc \(x = -8 + 12 = 4\) m.</p></details>
+    <h4 data-n="7" id="m03-test">Teste-toi</h4>
+    <div class="quiz">
+      <p class="q">Sur un graphe \(x(t)\), la courbe est une droite qui descend. Que valent \(v\) et \(a\) ?</p>
+      <ul class="choix">
+        <li>\(v\) diminue et \(a\) est négative</li>
+        <li data-bon>\(v\) est constante et négative, \(a = 0\)</li>
+        <li>\(v = 0\), puisque la droite ne courbe pas</li>
+      </ul>
+      <div class="corr"><p>La pente est constante et négative : la vitesse est constante et négative, le mobile recule à rythme régulier. La vitesse ne change pas, donc l’accélération est nulle.</p></div>
+    </div>
+    <div class="quiz" data-reponse="12" data-tol="0.05" data-unite="m/s" data-dec="0">
+      <p class="q">Une position suit \(x(t) = 3t^{2}\) (en m, avec \(t\) en s). Quelle est la vitesse à \(t = 2\) s ?</p>
+      <div class="corr"><p>\(v = \dd x/\dd t = 6t = 12\) m/s et \(a = \dd v/\dd t = 6\) m/s², constante. On retrouve la forme \(x = \tfrac12 a t^{2}\) avec \(a = 6\) m/s². C’est la tangente du calcul « rétrécis Δt » plus haut.</p></div>
+    </div>
+    <div class="quiz" data-reponse="4" data-tol="0.05" data-unite="m" data-dec="0">
+      <p class="q">Le réglage « Ralentir, s’arrêter, repartir » donne \(a = -1{,}5 ; 0 ; 0 ; +1{,}5 ; 0\) m/s² sur cinq paliers de 2 s, avec \(x_0 = -8\) m et \(v_0 = 3\) m/s. Où est le chariot à \(t = 10\) s ?</p>
+      <div class="corr"><p>Palier 1 : \(v\) passe de 3 à 0, déplacement \(\tfrac12 \times 3 \times 2 = 3\) m. Paliers 2 et 3 : arrêt. Palier 4 : \(v\) passe de 0 à 3 m/s, déplacement 3 m. Palier 5 : \(v = 3\) m/s pendant 2 s, soit 6 m. Total : \(3 + 3 + 6 = 12\) m, donc \(x = -8 + 12 = 4\) m.</p>
+        <a class="labo-lien" href="index.html?etape=03.2">Vérifier dans le labo ↗</a></div>
+    </div>
   </section>
 
   <h2 id="simplifie"><span class="n">3</span>Ce que les laboratoires simplifient</h2>
