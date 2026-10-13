@@ -133,7 +133,7 @@ Exemple : `<iframe src="../fondations-langage/index.html?embed&etape=02.1&scene=
 
 En mode intégré, les touches qui changent d'étape ou de couche (chiffres, lettres de couche, I, F) sont neutralisées : l'étape reste celle qu'a choisie l'auteur. Les commandes propres à la page (← → ou boutons Précédent / Suivant sur certaines planches de la vague 1) restent actives. La molette ne va à la scène qu'après un clic dedans ; avant, elle fait défiler la page qui accueille l'iframe, et un avis le dit. Styles : fin de `planche-etapes.css` (`html.labo-embed`) ; `theme.js` pose la classe dès le `<head>` pour éviter un éclair de la coque.
 
-Vérifié le 2026-10-13 sur Langage scientifique, Oscillations et ondes, Une particule, des amplitudes (vague 1) et La mitose, à 694 et 360 px de large. Les trois pages sans coque commune (Optique, Protons et électrons, L'énergie du vivant) n'ont pas ce mode.
+Vérifié le 2026-10-13 sur Langage scientifique, Oscillations et ondes, Une particule, des amplitudes (vague 1) et La mitose, à 694 et 360 px de large. Depuis la PR n° 42, Optique, Protons et électrons et L'énergie du vivant chargent la coque commune et ont donc aussi ce mode (vérifié sur Optique).
 
 ## Pièges déjà rencontrés
 
