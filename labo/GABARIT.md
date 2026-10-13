@@ -97,6 +97,26 @@ Max préfère les planches en plein écran. `planche.js` replie donc la coque d'
 
 **Observer** : la lecture, la pause, la frise du temps, la vitesse et les gestes centraux (Stimuler, Lâcher) **restent visibles** ; seuls les réglages se masquent (`#tools`, `.couche-lire`). Ne pas cacher toute la barre `.controls` en Observer.
 
+### Fiche d'étape (prototype du 2026-10-13, *Langage scientifique* seulement)
+
+Essai pour remplacer les couches Observer / Manipuler / Comprendre, jugées peu claires : la page s'ouvrait sur un panneau vide, et deux navigations (étapes, couches) se croisaient. Ici, plus de couches : tout est visible, et le panneau devient une **fiche** lue de haut en bas, une par scène.
+
+| Rubrique | Contenu |
+|---|---|
+| En-tête | Code et rang de l'étape, titre, bascule de scène quand l'étape en regroupe deux (remplace la bascule « Scène » des contrôles). |
+| Regarde | Ce qu'il faut remarquer, en une ou deux phrases. |
+| Prédis | Une question avant de toucher : réponse chiffrée (virgule acceptée, tolérance) ou choix, puis correction. |
+| Essaie | Deux ou trois gestes précis, **cochés d'eux-mêmes** quand l'état de la simulation les vérifie. Une étape dont tous les essais sont faits reçoit un point dans la barre. |
+| Lectures | Le panneau du toy, inchangé (mesures et équations déjà calculées en direct). |
+| Pourquoi | L'explication, la relation clé en KaTeX et, si le toy ne la montre pas déjà, une **équation vivante** calculée avec les valeurs de la scène. Définitions et piège fréquent en replis. |
+| Suite | Étape précédente et suivante, lien vers la théorie complète du module. |
+
+**Focus** (bouton de la barre ou touche **F**) masque la fiche : c'est le seul usage d'Observer qu'on garde. Les titres d'étape restent visibles pour l'étape en cours.
+
+**Brancher une page.** `<body class="labo-etapes labo-fiche" data-mode="fiche">`, sans `div.modes` ; charger `labo/fiche.css` après `planche-etapes.css` et `labo/fiche.js` avant la coquille de la page. Chaque toy publie son état (`FX.etat = { st }`) ; la coquille appelle `Fiche.montre(n)` à chaque changement de scène et expose `window.allerScene`. Le contenu des fiches est écrit dans la page (`FICHES`, une par scène) ; le format est décrit en tête de `labo/fiche.js`. `planche.js` accepte désormais une coque sans onglets de couches.
+
+Statut : prototype à juger avant de toucher aux autres pages et à `corpus/standards.md`.
+
 ## Pièges déjà rencontrés
 
 Relevés pendant la migration des planches (2026-10-04 à 07) ; ils valent pour toute nouvelle planche.

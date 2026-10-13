@@ -125,9 +125,10 @@ body.labo-etapes[data-mode=observer] #toyPanel #mEq{display:none!important}
 }
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -168,15 +169,6 @@ body.labo-etapes[data-mode=observer] #toyPanel #mEq{display:none!important}
   </div></div>
 </nav>
 
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène seule. Les touches 1 à 8 changent d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : saisis une flèche, change une valeur, bascule la scène."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
-
 <div class="app">
   <main class="scene" id="scene">
     <div id="stage"></div>
@@ -189,7 +181,7 @@ body.labo-etapes[data-mode=observer] #toyPanel #mEq{display:none!important}
     <section class="kbd couche-lire">
       <p class="eyebrow">Clavier</p>
       <ul class="hints" id="hints">
-        <li><kbd>1</kbd>–<kbd>8</kbd> aller à l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>1</kbd>–<kbd>8</kbd> aller à l'étape · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
     <nav class="liens">
@@ -640,6 +632,7 @@ const FX = (() => {
         ll: { lin: false, u: 1, anim: null, maxLog: Math.log10(2) },
         pr: { inst: 'mm', len: 7.34, shown: 7.34, reveal: false },
       };
+      FX.etat = { st };   // lu par la fiche d'étape (labo/fiche.js)
       const style = document.createElement('style');
       style.textContent = `
         .ec-pre{display:grid;grid-template-columns:repeat(9,1fr);gap:0;border:1px solid var(--trait);font:400 11px var(--mono)}
@@ -1285,6 +1278,7 @@ const FX = (() => {
         h: { t: [0], q: [0], v: [V3] },
         qNow: 0, hover: null, drag: false,
       };
+      FX.etat = { st, P };
       let hb = 100;
       const refreshHead = () => { try { hb = FX.headRect().bottom; } catch (e) { hb = 100; } };
       const cv = FX.canvas(scene, signal, () => refreshHead());
@@ -1876,6 +1870,7 @@ const FX = (() => {
         A: [4, 3], B: [3, -2], k: 0, joined: false, para: false, kAnim: null,   // modes 2-3
         F: [5, 5], phi: 20, phase: 0, fAnim: null,           // mode 4
       };
+      FX.etat = { st };
       const g = { ox: 0, oy: 0, s: 20, w: 0, h: 0 };
 
       /* ---------- DOM : panneau ---------- */
@@ -2419,6 +2414,7 @@ const FX = (() => {
       const { scene, panel, controls, signal } = ctx;
       const S = { x0: 0, v0: 4, acc: [-1, -1, -1, -1, -1], t: 4, playing: false, pente: false, aire: false,
         sDt: Math.log(0.5) / Math.log(0.025), dragA: -1, scrub: false, hoverA: -1, hoverHead: false };
+      FX.etat = { S, at: t => at(t) };
       const segs = []; let zeros = [];
       const tgt = { x: [0, 1], v: [0, 1], trk: [0, 1] }, view = { x: [0, 1], v: [0, 1], trk: [0, 1], a: [-3.6, 3.6] };
       let first = true;
@@ -2870,6 +2866,273 @@ const FX = (() => {
 })();
 </script>
 
+<script src="../../labo/fiche.js"></script>
+<script>
+/* ============ Fiches d'étape (prototype) : une par scène, dans l'ordre de SC (coquille, plus bas) ============
+   Regarde → Prédis → Essaie → Lectures (panneau du toy) → Pourquoi. Les essais se cochent d'eux-mêmes en lisant
+   FX.etat, que chaque toy publie à son montage. Mode d'emploi : labo/fiche.js. */
+(() => {
+  'use strict';
+  const tx = (v, d = 1) => FX.fmt(v, d).replace(',', '{,}').replace('−', '-').replace(/ /g, '\\,');
+  const sciT = (x, sig = 2) => {
+    let e = Math.floor(Math.log10(Math.abs(x))), m = x / 10 ** e;
+    if (Math.abs(+m.toFixed(sig - 1)) >= 10) { e += 1; m = x / 10 ** e; }
+    return String.raw`${tx(m, sig - 1)}\times 10^{${e}}`;
+  };
+  const GRAD = { cm: [1, 0], mm: [0.1, 1], pied: [0.01, 2] };
+  const pareil = (a, b) => a.length === b.length && a.every((x, i) => Math.abs(x - b[i]) < 1e-9);
+  const instant = (mem, cle, val) => { if (!(cle in mem)) mem[cle] = val; return mem[cle]; };   // valeur à l'arrivée sur la scène
+
+  const FICHES = [
+    /* 0 · 01.1 Zoom */ {
+      scene: 'Zoom', titre: 'Un cran, c’est ×10',
+      regarde: 'Tous les objets sont centrés au même point et dessinés à leur vraie taille relative. À chaque cran de ×10, un objet entre dans le champ pendant qu’un autre déborde.',
+      prediction: { q: 'Combien de crans de ×10 séparent une bactérie (2 µm) d’un humain (1,7 m) ?', reponse: 6, tol: 0.5, unite: 'crans',
+        explication: '1,7 ÷ (2 × 10⁻⁶) ≈ 8,5 × 10⁵, et log₁₀(8,5 × 10⁵) ≈ 5,9 : environ six crans. Vérifie en partant de la bactérie et en comptant les ×10.' },
+      essais: [
+        { t: 'Amène le champ à 1 mm, soit 10⁻³ m.', fait: ({ st }) => st.mode === 'zoom' && Math.abs(st.logL + 3) < 0.12 },
+        { t: 'Trouve l’échelle où la Terre remplit le champ.', fait: ({ st }) => st.mode === 'zoom' && st.logL > 6.95 && st.logL < 7.35 },
+        { t: 'Va jusqu’à l’orbite de Neptune, vers 10¹³ m.', fait: ({ st }) => st.mode === 'zoom' && st.logL > 12.8 },
+      ],
+      pourquoi: 'Les tailles de la nature vont d’un atome à une orbite : on les compare en facteurs de dix, pas en différences. Trois crans font un préfixe (µm → mm → m → km), et le nombre de crans entre deux tailles est le logarithme décimal de leur rapport.',
+      relation: String.raw`\text{crans} = \log_{10}\frac{x_2}{x_1}`,
+      vivant: ({ st }) => {
+        if (st.mode !== 'zoom') return '';
+        const L = 10 ** st.logL, r = Math.log10(L / 1.7);
+        return String.raw`\log_{10}\frac{L}{1{,}7\ \mathrm{m}} = \log_{10}\frac{${sciT(L)}\ \mathrm{m}}{1{,}7\ \mathrm{m}} = ${tx(r, 1)}`;
+      },
+      defs: [['Préfixe', 'Raccourci pour une puissance de mille : n = 10⁻⁹, µ = 10⁻⁶, m = 10⁻³, k = 10³, M = 10⁶.'],
+             ['Notation scientifique', 'a × 10ⁿ avec 1 ≤ a &lt; 10 : les chiffres d’un côté, la puissance de dix de l’autre.'],
+             ['Ordre de grandeur', 'La puissance de dix la plus proche : 7,5 µm est de l’ordre de 10⁻⁵ m.']],
+      piege: 'Lire 10⁻⁶ m comme « un peu plus petit » que 10⁻⁵ m : c’est dix fois plus petit. Un cran est un facteur, pas un ajout.',
+    },
+    /* 1 · 01.1 Linéaire ou log */ {
+      scene: 'Linéaire ou log', titre: 'Un axe qui multiplie',
+      regarde: 'Les quinze objets du zoom, posés sur un seul axe. En linéaire, chaque graduation ajoute la même longueur ; en logarithmique, chaque graduation multiplie par 10.',
+      prediction: { q: 'Sur un axe linéaire qui va jusqu’à l’orbite de Neptune, où sera la Terre ?',
+        choix: ['Vers le milieu de l’axe', 'Vers le premier quart', 'Collée contre zéro'], bonne: 2,
+        explication: 'La Terre (1,3 × 10⁷ m) fait un millionième de l’axe (9 × 10¹² m) : moins d’un millième de pixel. Passe en linéaire pour le voir.' },
+      suivi: ({ st }, mem) => { if (st.ll.lin) mem.vuLin = true; },
+      essais: [
+        { t: 'Passe l’axe en linéaire.', fait: ({ st }) => st.ll.lin },
+        { t: 'En linéaire, règle la borne max pour que l’humain soit au milieu de l’axe.', fait: ({ st }) => st.ll.lin && Math.abs(st.ll.maxLog - Math.log10(3.4)) < 0.08 },
+        { t: 'Repasse en logarithmique : tout réapparaît.', fait: ({ st }, mem) => mem.vuLin && !st.ll.lin },
+      ],
+      pourquoi: 'Sur un axe logarithmique, des distances égales veulent dire des rapports égaux. C’est l’outil des grandeurs qui couvrent plusieurs ordres de grandeur : le pH, les décibels, la magnitude des étoiles, et une bonne partie des planches de LABO.',
+      relation: String.raw`\log_{10} 10 = 1,\quad \log_{10} 100 = 2,\quad \log_{10} 1000 = 3`,
+      defs: [['Échelle linéaire', 'Des longueurs égales sur l’axe pour des différences égales (+1, +1…).'],
+             ['Échelle logarithmique', 'Des longueurs égales pour des rapports égaux (×10, ×10…).'],
+             ['Décade', 'L’intervalle entre deux puissances de dix successives.']],
+      piege: 'Lire des différences sur un axe log : de 10 à 100 et de 100 à 1000, l’écart à l’écran est le même, mais le premier ajoute 90 et le second 900.',
+    },
+    /* 2 · 01.2 Précision */ {
+      scene: 'Précision', titre: 'Mesurer, c’est choisir une graduation',
+      regarde: 'Un objet posé contre une règle. La lecture s’arrête à la plus petite graduation ; ce qui reste au-delà est l’incertitude.',
+      prediction: { q: 'Avec la règle graduée au millimètre, quelle incertitude faut-il écrire ?', reponse: 0.05, tol: 0.001, unite: 'cm',
+        explication: 'La moitié de la plus petite graduation : ½ × 0,1 cm = 0,05 cm.' },
+      suivi: ({ st }, mem) => { (mem.inst = mem.inst || new Set()).add(st.pr.inst); instant(mem, 'len0', st.pr.len); },
+      essais: [
+        { t: 'Mesure avec les trois instruments.', fait: (e, mem) => mem.inst && mem.inst.size === 3 },
+        { t: 'Révèle la vraie longueur : l’écart reste-t-il sous l’incertitude ?', fait: ({ st }) => st.pr.reveal },
+        { t: 'Tire un autre objet (touche N).', fait: ({ st }, mem) => st.pr.len !== mem.len0 },
+      ],
+      pourquoi: 'Une mesure est un intervalle : la valeur lue, plus ou moins ce que l’instrument ne distingue plus. Le nombre de chiffres écrits est une promesse : 7,30 cm affirme qu’on connaît le dixième de millimètre. L’incertitude relative permet de comparer des mesures de tailles différentes.',
+      relation: String.raw`x = x_{\text{lu}} \pm \Delta x,\qquad \delta = \frac{\Delta x}{\lvert x\rvert}`,
+      vivant: ({ st }) => {
+        if (st.mode !== 'prec') return '';
+        const [g, d] = GRAD[st.pr.inst], r = Math.round(st.pr.len / g + 1e-9) * g, u = g / 2;
+        return String.raw`\delta = \frac{${tx(u, d + 1)}\ \mathrm{cm}}{${tx(r, d)}\ \mathrm{cm}} \approx ${tx(100 * u / r, 2)}\ \%`;
+      },
+      defs: [['Incertitude Δx', 'Demi-largeur de l’intervalle où se trouve la vraie valeur, dans l’unité de x.'],
+             ['Incertitude relative δ', 'Δx divisée par la valeur : sans unité, souvent en %.'],
+             ['Chiffres significatifs', 'Les chiffres qui portent une information : 7,30 en a trois, 7,3 en a deux.']],
+      piege: 'Écrire plus de chiffres que l’instrument n’en donne : « 7,342 cm » lu sur une règle au millimètre ne veut rien dire.',
+    },
+    /* 3 · 01.3 Proportionnalité */ {
+      scene: 'Proportionnalité', titre: 'Une droite qui part de zéro',
+      regarde: 'Le robinet coule à débit constant Q. Le volume V(t) trace une droite qui part de l’origine.',
+      prediction: { q: 'À Q = 5 L/min, le réservoir contient 15 L après 3 min. Combien après 6 min ?', reponse: 30, tol: 0.1, unite: 'L',
+        explication: 'Le temps double, le volume double : V = Q t = 5 × 6 = 30 L.' },
+      suivi: ({ P }, mem) => { instant(mem, 'Q0', P.prop.Q); instant(mem, 't10', P.prop.t1); },
+      essais: [
+        { t: 'Change le débit Q : la droite pivote autour de l’origine.', fait: ({ P }, mem) => P.prop.Q !== mem.Q0 },
+        { t: 'Déplace le repère t₁ en cliquant sur le graphe : V ÷ t ne change pas.', fait: ({ P }, mem) => P.prop.t1 !== mem.t10 },
+      ],
+      pourquoi: 'Proportionnel veut dire : doubler l’un double l’autre. Sur le graphe, c’est une droite qui passe par l’origine, et le rapport V ÷ t est le même partout. Ce rapport constant est la pente, ici le débit.',
+      relation: String.raw`V = Q\,t \quad\Longleftrightarrow\quad \frac{V}{t} = Q`,
+      defs: [['Proportionnalité', 'Relation y = k x : une droite qui passe par l’origine.'],
+             ['Débit Q', 'Volume qui passe par unité de temps, en L/min.']],
+      piege: 'Croire que toute droite est une proportionnalité : il faut aussi qu’elle passe par l’origine. C’est la scène suivante.',
+    },
+    /* 4 · 01.3 Pente */ {
+      scene: 'Pente', titre: 'La pente est un débit',
+      regarde: 'Le réservoir part maintenant d’un volume V₀. La droite est décalée vers le haut, mais elle monte toujours au même rythme.',
+      prediction: { q: 'V₀ = 30 L et Q = 6 L/min. Combien de litres après 5 min ?', reponse: 60, tol: 0.1, unite: 'L',
+        explication: 'V = V₀ + Q t = 30 + 6 × 5 = 60 L. Doubler le temps ne double plus le volume : la relation est affine.' },
+      essais: [
+        { t: 'Mets V₀ à 0 : la droite redevient proportionnelle.', fait: ({ P }) => P.pente.V0 === 0 },
+        { t: 'Donne un débit négatif : la pente descend, le réservoir se vide.', fait: ({ P }) => P.pente.Q < 0 },
+      ],
+      pourquoi: 'La pente, c’est ce qui change par unité de l’axe horizontal : ΔV ÷ Δt, en L/min. Elle ne dépend pas d’où part la droite. Une droite qui ne passe pas par l’origine est affine : linéaire, mais pas proportionnelle.',
+      relation: String.raw`\text{pente} = \frac{\Delta V}{\Delta t},\qquad V = V_0 + Q\,t`,
+      defs: [['Pente', 'Variation verticale ÷ variation horizontale. Unité : celle de l’axe vertical sur celle de l’axe horizontal.'],
+             ['Relation affine', 'y = y₀ + k x : une droite, qui ne passe pas forcément par l’origine.']],
+      piege: 'Lire la hauteur quand on demande la pente : un réservoir très plein peut se remplir très lentement.',
+    },
+    /* 5 · 01.4 Aire */ {
+      scene: 'Aire', titre: 'L’aire est un volume',
+      regarde: 'Le graphe montre maintenant le débit Q(t). Chaque tranche Q × Δt est un petit volume ; leur somme, l’aire sous la courbe, est l’eau ajoutée.',
+      prediction: { q: '4 L/min pendant 3 min, puis −2 L/min pendant 2 min. Quel volume net a été ajouté ?', reponse: 8, tol: 0.1, unite: 'L',
+        explication: '4 × 3 − 2 × 2 = 12 − 4 = 8 L. L’aire sous l’axe compte négativement.' },
+      suivi: ({ st }, mem) => { if (st.qNow > 0) mem.pos = true; if (st.qNow < 0) mem.neg = true; },
+      essais: [
+        { t: 'Fais couler un débit négatif : l’aire passe sous l’axe et le niveau baisse.', fait: ({ st }) => st.qNow < 0 },
+        { t: 'Après avoir rempli puis vidé, ramène le réservoir à 50 L : l’aire nette est nulle.',
+          fait: ({ st }, mem) => mem.pos && mem.neg && Math.abs(st.h.v[st.h.v.length - 1] - 50) < 1.5 },
+      ],
+      pourquoi: 'L’aire sous la courbe d’un taux est la quantité accumulée. Les unités le disent : L/min × min = L. C’est l’opération inverse de la pente : la pente de V(t) redonne Q(t).',
+      relation: String.raw`\Delta V = \text{aire sous } Q(t) \approx \sum_i Q_i\,\Delta t_i`,
+      defs: [['Aire sous la courbe', 'Produit des deux axes, cumulé tranche par tranche ; son unité est le produit des unités des axes.']],
+      piege: 'Oublier le signe : l’aire sous l’axe retire du volume au lieu d’en ajouter.',
+    },
+    /* 6 · 01.4 Non linéaire */ {
+      scene: 'Non linéaire', titre: 'Une pente qui change',
+      regarde: 'Un réservoir qui se vide par un trou : plus il est plein, plus l’eau sort vite. V(t) n’est plus une droite.',
+      prediction: { q: 'À quel moment la courbe V(t) descend-elle le plus vite ?',
+        choix: ['Au début, quand le réservoir est plein', 'Au milieu de la vidange', 'À la fin, juste avant d’être vide'], bonne: 0,
+        explication: 'Le débit de sortie croît avec √V : réservoir plein, pression forte, pente la plus raide (−25 L/min). À la fin, la courbe est presque plate.' },
+      suivi: ({ st }, mem) => { if (!st.playing && st.t < 1) mem.debut = true; if (!st.playing && st.t > 6) mem.fin = true; },
+      essais: [
+        { t: 'Mets en pause et glisse la sonde au début de la courbe.', fait: (e, mem) => mem.debut },
+        { t: 'Puis vers la fin : compare les deux pentes.', fait: (e, mem) => mem.debut && mem.fin },
+      ],
+      pourquoi: 'Sur une courbe, la pente change d’un point à l’autre. On la lit avec la tangente, la droite qui touche la courbe à cet instant. C’est l’idée de la dérivée, au cœur du module 03.',
+      relation: String.raw`Q = -k\sqrt{V}`,
+      piege: 'Prendre la pente moyenne (V final − V initial) ÷ durée pour la pente à un instant donné.',
+    },
+    /* 7 · 02.1 Scalaire ou vecteur */ {
+      scene: 'Scalaire ou vecteur', titre: 'Une flèche, pas un nombre',
+      regarde: 'Une distance de 5 m, et une flèche de 5 m qu’on fait tourner. Le même nombre mène à des points d’arrivée différents.',
+      prediction: { q: '« Je marche 5 m. » Peut-on dire où j’arrive ?',
+        choix: ['Oui, à 5 m du départ', 'Non : il manque la direction'], bonne: 1,
+        explication: 'On sait seulement qu’on arrive sur un cercle de 5 m de rayon. Pour un point précis, il faut une direction : c’est un vecteur.' },
+      suivi: ({ st }, mem) => { instant(mem, 'P0', st.P.slice()); },
+      essais: [
+        { t: 'Fais tourner la flèche : la distance ne change pas.', fait: ({ st }, mem) => st.fixed && !pareil(st.P, mem.P0) },
+        { t: 'Libère la longueur et fais sortir la flèche du cercle.', fait: ({ st }) => !st.fixed && Math.hypot(...st.P) > 5.3 },
+      ],
+      pourquoi: 'Un scalaire est un nombre avec une unité : température, masse, durée, énergie. Un vecteur a en plus une direction : déplacement, vitesse, force, champ. On le dessine par une flèche, dont la longueur est la norme.',
+      relation: String.raw`\vec A \;=\; \lvert\vec A\rvert \text{ (norme)} \;+\; \text{une direction}`,
+      defs: [['Scalaire', 'Grandeur entièrement décrite par un nombre et une unité.'],
+             ['Vecteur', 'Grandeur qui a une norme et une direction.'],
+             ['Norme', 'La longueur de la flèche, toujours positive.']],
+      piege: 'Additionner des normes comme des nombres : 3 m vers l’est puis 4 m vers le nord ne font pas 7 m de déplacement, mais 5 m.',
+    },
+    /* 8 · 02.1 Composantes */ {
+      scene: 'Composantes', titre: 'Deux ombres sur les axes',
+      regarde: 'La flèche A se projette sur les deux axes. Ses composantes Ax et Ay sont ses ombres sur x et sur y, avec un signe.',
+      prediction: { q: 'A = (3 ; 4) m. Quelle est sa norme ?', reponse: 5, tol: 0.05, unite: 'm',
+        explication: '√(3² + 4²) = √25 = 5 m : le théorème de Pythagore sur le triangle des composantes.' },
+      essais: [
+        { t: 'Place la pointe de A en (3 ; 4) et vérifie ta prédiction.', fait: ({ st }) => pareil(st.A, [3, 4]) },
+        { t: 'Donne à A une composante x négative.', fait: ({ st }) => st.A[0] < 0 },
+        { t: 'Rends Ay nulle : la flèche est horizontale.', fait: ({ st }) => st.A[1] === 0 && st.A[0] !== 0 },
+      ],
+      pourquoi: 'Les composantes décrivent la flèche avec deux nombres signés. La norme et l’angle en sont une autre description, équivalente. On passe de l’une à l’autre par le cosinus, le sinus et Pythagore.',
+      relation: String.raw`A_x = \lvert\vec A\rvert\cos\theta,\qquad A_y = \lvert\vec A\rvert\sin\theta`,
+      defs: [['Composante', 'La projection signée d’un vecteur sur un axe.'],
+             ['Angle θ', 'Mesuré depuis l’axe +x, positif vers le haut.']],
+      piege: 'Oublier le signe d’une composante : une flèche qui pointe vers la gauche a Ax &lt; 0.',
+    },
+    /* 9 · 02.2 Addition */ {
+      scene: 'Addition', titre: 'Bout à bout',
+      regarde: 'B part de la pointe de A. La résultante R va du départ de A jusqu’à l’arrivée de B.',
+      prediction: { q: 'A = (4 ; 3) m et B = (3 ; −2) m. Que vaut la composante Rx ?', reponse: 7, tol: 0.05, unite: 'm',
+        explication: 'On additionne composante par composante : R = (4 + 3 ; 3 − 2) = (7 ; 1) m.' },
+      essais: [
+        { t: 'Aligne A et B dans le même sens : alors |R| = |A| + |B|.', fait: ({ st }) => {
+          const [ax, ay] = st.A, [bx, by] = st.B, nA = Math.hypot(ax, ay), nB = Math.hypot(bx, by);
+          return nA > 0 && nB > 0 && Math.abs(ax * by - ay * bx) < 1e-6 * (1 + nA * nB) && ax * bx + ay * by > 0; } },
+        { t: 'Rends la résultante nulle : B = −A.', fait: ({ st }) => st.A[0] + st.B[0] === 0 && st.A[1] + st.B[1] === 0 && Math.hypot(...st.A) > 0 },
+      ],
+      pourquoi: 'On additionne des vecteurs composante par composante. Les normes, elles, ne s’additionnent pas : |R| est au plus |A| + |B|, et n’y est égale que si les flèches sont alignées et de même sens.',
+      relation: String.raw`R_x = A_x + B_x,\qquad R_y = A_y + B_y,\qquad \lvert\vec R\rvert \le \lvert\vec A\rvert + \lvert\vec B\rvert`,
+      defs: [['Résultante', 'La somme de plusieurs vecteurs : la flèche qui va du départ du premier à l’arrivée du dernier.']],
+      piege: 'Additionner les normes. Deux forces de 10 N opposées donnent une résultante nulle, pas 20 N.',
+    },
+    /* 10 · 02.2 Projection */ {
+      scene: 'Projection', titre: 'La part qui compte',
+      regarde: 'Une force F tire un wagon sur un rail. Seule la part de F le long du rail le fait avancer ; l’autre part presse le wagon contre le rail.',
+      prediction: { q: 'Une force de 30 N fait 60° avec le rail. Quelle part fait avancer le wagon ?', reponse: 15, tol: 0.2, unite: 'N',
+        explication: '30 × cos 60° = 30 × 0,5 = 15 N.' },
+      essais: [
+        { t: 'Mets F perpendiculaire au rail : le wagon ne bouge plus.', fait: ({ st }) => {
+          const u = [Math.cos(st.phi * Math.PI / 180), Math.sin(st.phi * Math.PI / 180)];
+          return Math.hypot(...st.F) > 1 && Math.abs(st.F[0] * u[0] + st.F[1] * u[1]) < 0.1; } },
+        { t: 'Fais reculer le wagon.', fait: ({ st }) => {
+          const u = [Math.cos(st.phi * Math.PI / 180), Math.sin(st.phi * Math.PI / 180)];
+          return st.F[0] * u[0] + st.F[1] * u[1] < -0.1; } },
+      ],
+      pourquoi: 'Projeter, c’est garder la part d’un vecteur dans une direction donnée ; le cosinus de l’angle fait le tri. Ça resservira pour le travail d’une force (module 11) et sur tous les plans inclinés.',
+      relation: String.raw`F_\parallel = \lvert\vec F\rvert\cos\alpha = \vec F\cdot\hat u`,
+      defs: [['Projection', 'La composante d’un vecteur le long d’une direction choisie (ici, le rail).'],
+             ['Vecteur unitaire û', 'Une flèche de norme 1 qui indique seulement la direction.']],
+      piege: 'Prendre le sinus au lieu du cosinus : l’angle doit être mesuré depuis la direction sur laquelle on projette.',
+    },
+    /* 11 · 03.1 Pente */ {
+      scene: 'Pente', titre: 'La pente raconte la vitesse',
+      regarde: 'Un chariot, et trois graphes alignés sur le même temps : x(t), v(t), a(t). Chacun est la pente du précédent.',
+      prediction: { q: 'Au moment où le chariot fait demi-tour, que vaut sa vitesse ?',
+        choix: ['Elle est maximale', 'Elle est nulle', 'Elle change de signe sans passer par zéro'], bonne: 1,
+        explication: 'Au demi-tour, x(t) atteint un sommet : sa pente est nulle, donc v = 0 un instant. L’accélération, elle, n’est pas nulle.' },
+      suivi: ({ S }, mem) => { instant(mem, 't0', S.t); if (S.t !== mem.t0) mem.bouge = true; },
+      essais: [
+        { t: 'Place la tête de lecture au sommet de x(t) et lis v.', fait: ({ S, at }, mem) => mem.bouge && S.t > 0.1 && Math.abs(at(S.t).v) < 0.06 },
+        { t: 'Mets tous les paliers de a à zéro : x(t) devient une droite.', fait: ({ S }) => S.acc.every(a => a === 0) },
+        { t: 'Choisis « Freinage » : a et v de signes opposés, le chariot ralentit.', fait: ({ S }) => S.v0 === 4 && pareil(S.acc, [-0.5, -0.5, -0.5, -0.5, 0]) },
+      ],
+      pourquoi: 'La vitesse est la pente de la position, l’accélération est la pente de la vitesse. Quand la sécante rétrécit, elle se confond avec la tangente : c’est la dérivée. Là où x atteint un sommet, sa pente est nulle.',
+      relation: String.raw`v = \frac{\mathrm{d}x}{\mathrm{d}t},\qquad a = \frac{\mathrm{d}v}{\mathrm{d}t}`,
+      defs: [['Vitesse v', 'Taux de variation de la position, en m/s ; son signe est le sens du mouvement en 1D.'],
+             ['Accélération a', 'Taux de variation de la vitesse, en m/s².'],
+             ['Tangente', 'La droite qui touche la courbe en un point ; sa pente est la dérivée en ce point.']],
+      piege: 'Croire que v = 0 implique a = 0 : au demi-tour, le chariot est arrêté un instant mais continue d’accélérer.',
+    },
+    /* 12 · 03.2 Aire */ {
+      scene: 'Aire', titre: 'L’aire raconte le déplacement',
+      regarde: 'Le même mouvement, lu dans l’autre sens : l’aire sous v(t) est le déplacement, l’aire sous a(t) est la variation de vitesse.',
+      prediction: { q: 'v₀ = 3 m/s et a = 0 pendant 4 s. Quel déplacement ?', reponse: 12, tol: 0.1, unite: 'm',
+        explication: 'Un rectangle sous v(t) : 3 m/s × 4 s = 12 m.' },
+      suivi: ({ S }, mem) => { instant(mem, 'cfg', S.v0 + '|' + S.acc.join()); if (S.playing) mem.joue = true; },
+      essais: [
+        { t: 'Lance la lecture jusqu’au bout : l’aire sous v suit Δx à chaque instant.', fait: ({ S }, mem) => mem.joue && S.t >= 9.99 },
+        { t: 'Change les paliers pour que le chariot finisse derrière son départ : aire nette négative.',
+          fait: ({ S, at }, mem) => (S.v0 + '|' + S.acc.join()) !== mem.cfg && at(10).x < S.x0 - 0.5 },
+      ],
+      pourquoi: 'Accumuler, c’est additionner des tranches v × Δt : l’aire sous la vitesse. L’aire sous l’axe compte négativement, puisque le chariot revient en arrière. Pente et aire sont des opérations inverses.',
+      relation: String.raw`\Delta x = \int_0^t v\,\mathrm{d}t,\qquad \Delta v = \int_0^t a\,\mathrm{d}t`,
+      defs: [['Déplacement Δx', 'x(t) − x₀ : peut être négatif ou nul.'],
+             ['Distance parcourue', 'La longueur totale du trajet, toujours positive.']],
+      piege: 'Confondre déplacement et distance parcourue : un aller-retour a un déplacement nul mais une distance non nulle.',
+    },
+  ];
+
+  const segs = [...document.querySelectorAll('#stepper .seg')];
+  Fiche.init({
+    fiches: FICHES,
+    etapes: segs.map(b => {
+      const code = b.querySelector('b').textContent;
+      return { code, titre: b.querySelector('span').textContent, mod: +code.slice(0, 2),
+               scenes: [b.dataset.a, b.dataset.b].filter(x => x !== undefined).map(Number) };
+    }),
+    etat: () => FX.etat,
+    aller: n => window.allerScene(n),
+    k: (t, repli, bloc) => FX.k(t, repli, bloc),
+    theorie: mod => `explication.html#m${String(mod).padStart(2, '0')}`,
+  });
+})();
+</script>
+
 <script>
 /* ============ Coquille : étapes, montage et démontage des toys ============ */
 (() => {
@@ -2940,6 +3203,7 @@ const FX = (() => {
     const m2 = String(s.mod).padStart(2, '0');
     $('#eyebrow').innerHTML = `Module <b>${m2}</b> · étape ${s.rang} sur ${s.nb}`;
     $('#lienComprendre').href = `explication.html#m${m2}`; $('#numTheorie').textContent = m2;
+    if (window.Fiche) Fiche.montre(n);
     if (push) history.replaceState(null, '', '#' + t.id);
   }
 
@@ -2953,6 +3217,7 @@ const FX = (() => {
     const k = +e.key; if (k >= 1 && k <= etapes.length) { go(etapes[k - 1]); e.preventDefault(); }
   });
   addEventListener('hashchange', () => { const n = SC.findIndex(s => '#' + s.toy === location.hash); if (n >= 0) go(n, false); });
+  window.allerScene = n => go(n);
   const n0 = SC.findIndex(s => '#' + s.toy === location.hash);
   go(n0 >= 0 ? n0 : 0, false);
 })();

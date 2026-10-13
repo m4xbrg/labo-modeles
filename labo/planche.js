@@ -64,20 +64,20 @@ const app = document.body.classList.contains('labo-etapes') && $('.app');
 const ajuste = () => { if (!app || innerWidth <= 860) return; document.body.style.setProperty('--chrome', Math.round(app.getBoundingClientRect().top + scrollY) + 'px'); };
 if (app){
   const barre = $('.barre'), titre = $('.titre'), chap = $('.chapitres'), modes = $('.modes'), liste = modes && modes.querySelector('[role=tablist]');
-  if (barre && titre && chap && liste){
+  if (barre && titre && chap){   // sans couches (fiche d'étape, labo/fiche.js), la liste d'onglets manque
     barre.classList.add('compacte');
     const court = document.createElement('p'); court.className = 'titre-court';
     court.textContent = (titre.querySelector('h1') || {}).textContent || '';
     (barre.querySelector('.ou') || barre).append(court);
     const centre = document.createElement('div'); centre.className = 'centre';
-    centre.append(chap, liste);
+    centre.append(chap); if (liste) centre.append(liste);
     barre.insertBefore(centre, barre.querySelector('.droite'));
     // le titre de chaque étape passe en infobulle (le texte du bouton est masqué dans la barre)
     chap.querySelectorAll('.seg').forEach(s => { if (!s.title) s.title = s.textContent.trim(); });
     const infos = document.createElement('button'); infos.type = 'button'; infos.className = 'bascule-theme infos';
     infos.setAttribute('aria-expanded', 'false'); infos.title = 'Titre, signature et aide (I)'; infos.textContent = 'Infos';
     const tiroir = document.createElement('div'); tiroir.className = 'tiroir'; tiroir.id = 'tiroir';
-    tiroir.append(titre, modes); barre.after(tiroir); infos.setAttribute('aria-controls', 'tiroir');
+    tiroir.append(titre); if (modes) tiroir.append(modes); barre.after(tiroir); infos.setAttribute('aria-controls', 'tiroir');
     const droite = barre.querySelector('.droite') || barre; droite.prepend(infos);
     const bascule = ouvrir => {
       const o = ouvrir === undefined ? !document.body.classList.contains('coque-ouverte') : ouvrir;

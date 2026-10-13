@@ -1,0 +1,118 @@
+/* LABO — fiche d'étape (prototype). Voir labo/fiche.js. À charger après planche-etapes.css.
+   Le panneau devient une fiche lue de haut en bas ; plus de couches, tout est visible. */
+
+/* ---------- Plus de couches : la barre montre le titre de l'étape en cours ---------- */
+.labo-fiche .barre.compacte .seg[aria-current="step"] span{display:inline;max-width:none;margin-left:6px;font-size:13px}
+.labo-fiche .barre.compacte .seg{position:relative}
+.labo-fiche .barre.compacte .seg.fiche-fini::after{content:"";position:absolute;right:2px;top:3px;width:5px;height:5px;border-radius:50%;background:var(--induit)}
+.labo-fiche .fx-modes{display:none!important}        /* la bascule de scène est dans la fiche */
+
+/* ---------- Panneau ---------- */
+.labo-fiche .app{grid-template-columns:minmax(0,1fr) 372px}
+.labo-fiche .panel{gap:0;padding:0;overflow-y:auto;scrollbar-width:thin}
+.labo-fiche .panel > section:first-child,     /* surtitre « Module NN · étape k » : repris par la fiche */
+.labo-fiche .panel > .liens,
+.labo-fiche .panel > .kbd{display:none}            /* les raccourcis passent dans le repli « Clavier » */
+.labo-fiche #toyPanel{padding:0 20px 4px 22px;gap:12px}
+.labo-fiche #toyPanel div:has(> .eyebrow),
+.labo-fiche #vHead,.labo-fiche #mHead{display:none}   /* le titre et le texte du toy : la fiche les remplace */
+
+.fiche-haut,.fiche-bas{display:flex;flex-direction:column}
+.fiche-tete{padding:18px 20px 14px 22px;border-bottom:1px solid var(--filet)}
+.fiche-ou{font:400 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--encre-3);margin:0 0 8px}
+.fiche-ou b{color:var(--encre);font-weight:500}
+.labo-fiche .fiche-tete h2{font:500 22px/1.15 var(--sans);letter-spacing:-.02em;margin:0;color:var(--encre)}
+.fiche-scenes{display:flex;gap:0;margin-top:12px;border:1px solid var(--filet);width:max-content;max-width:100%}
+.fiche-scenes button{background:none;border:0;padding:6px 11px;font:400 12px var(--mono);color:var(--encre-3);cursor:pointer}
+.fiche-scenes button + button{border-left:1px solid var(--filet)}
+.fiche-scenes button[aria-pressed="true"]{color:var(--encre);background:var(--papier-2)}
+.fiche-scenes button:hover{color:var(--encre)}
+
+.fiche-s{padding:14px 20px 14px 22px;border-bottom:1px solid var(--filet)}
+.fiche-s h3,.fiche-lab{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3);margin:0 0 8px;display:flex;justify-content:space-between}
+.fiche-s p{margin:0;font-size:14.5px;line-height:1.5;color:var(--encre)}
+.fiche-s p + p{margin-top:8px}
+.fiche-lab{padding:16px 20px 0 22px;margin-bottom:10px}
+.fiche-compte{letter-spacing:.04em;color:var(--encre-3)}
+.fiche-s .m,.fiche-s em{font-family:var(--math);font-style:italic;font-size:1.08em}
+
+/* Prédis */
+.fiche-predi{background:var(--papier-2)}
+.fiche-rep{margin-top:10px}
+.fiche-num{display:flex;align-items:center;gap:8px}
+.fiche-num input{width:96px;padding:6px 8px;border:1px solid var(--encre-3);background:var(--papier);color:var(--encre);font:500 14px var(--mono);border-radius:2px}
+.fiche-num input:focus{outline:1.5px solid var(--encre);outline-offset:1px}
+.fiche-num span{font:400 12px var(--mono);color:var(--encre-2)}
+.fiche-num button,.fiche-choix button{font:400 12px var(--mono);padding:6px 10px;border:1px solid var(--encre);background:var(--papier);color:var(--encre);cursor:pointer;border-radius:2px}
+.fiche-num button.voir{border-color:var(--filet);color:var(--encre-3);margin-left:auto}
+.fiche-num button:disabled,.fiche-choix button:disabled{cursor:default;opacity:.55}
+.fiche-choix{display:flex;flex-direction:column;gap:5px}
+.fiche-choix button{text-align:left;font:400 13.5px var(--sans);border-color:var(--filet)}
+.fiche-choix button:not(:disabled):hover{border-color:var(--encre)}
+.fiche-choix button.choisi{border-color:var(--positif);opacity:1}
+.fiche-choix button.bonne{border-color:var(--induit);opacity:1;box-shadow:inset 3px 0 0 var(--induit)}
+.fiche-retour{margin-top:10px!important;font-size:13.5px!important}
+.fiche-retour:empty{display:none}
+.fiche-retour b{font-weight:500}
+.fiche-retour.juste b{color:var(--induit)}
+.fiche-retour.faux b{color:var(--positif)}
+
+/* Essaie */
+.fiche-essais{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.fiche-essais li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--encre)}
+.fiche-essais .coche{flex:none;width:14px;height:14px;margin-top:3px;border:1.5px solid var(--encre-3);border-radius:50%;position:relative}
+.fiche-essais li.fait{color:var(--encre-2)}
+.fiche-essais li.fait .coche{border-color:var(--induit);background:var(--induit)}
+.fiche-essais li.fait .coche::after{content:"";position:absolute;left:3.5px;top:1px;width:3px;height:6px;border:solid var(--papier);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.fiche-essais li.vient .coche{animation:fiche-pop .5s var(--ease)}
+@keyframes fiche-pop{0%{transform:scale(.6)}60%{transform:scale(1.25)}100%{transform:none}}
+
+/* Lectures : le panneau du toy, plus compact */
+.labo-fiche #toyPanel .val{font-size:16px}
+.labo-fiche #toyPanel .eq{background:var(--papier-2);color:var(--encre);border-left-color:var(--encre-3)}
+.labo-fiche #toyPanel .note{font-size:11.5px}
+
+/* Pourquoi */
+.fiche-pourquoi{border-top:1px solid var(--filet);margin-top:14px}
+.fiche-rel{margin-top:10px;padding:8px 12px;border-left:2px solid var(--encre);background:var(--papier-2);overflow-x:auto;overflow-y:hidden}
+.fiche-rel .katex-display{margin:0}
+.fiche-rel .katex{font-size:1.02em}
+.fiche-vivant{border-left-color:var(--energie)}
+.fiche-vivant:empty{display:none}
+.fiche-vivant::before{content:"avec tes valeurs";display:block;font:400 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--encre-3);margin-bottom:2px}
+.fiche-pli{border-bottom:1px solid var(--filet);padding:0 20px 0 22px}
+.fiche-pli summary{cursor:pointer;padding:11px 0;font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--encre-2);list-style:none}
+.fiche-pli summary::-webkit-details-marker{display:none}
+.fiche-pli summary::before{content:"+";display:inline-block;width:14px;color:var(--encre-3)}
+.fiche-pli[open] summary::before{content:"−"}
+.fiche-pli > p,.fiche-pli dl{margin:0 0 12px;font-size:14px;line-height:1.5}
+.fiche-pli dt{font-weight:500;margin-top:6px}
+.fiche-pli dd{margin:0;color:var(--encre-2)}
+
+/* Suite */
+.fiche-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 20px 0 22px}
+.fiche-pas{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:9px 11px;border:1px solid var(--filet);background:var(--papier);color:var(--encre);font:400 13px var(--sans);cursor:pointer;border-radius:2px}
+.fiche-pas span{font:400 11px var(--mono);color:var(--encre-3)}
+.fiche-pas.suiv{grid-column:2;align-items:flex-end;text-align:right;border-color:var(--encre)}
+.fiche-pas:hover{border-color:var(--encre)}
+.fiche-theorie{margin:10px 20px 4px 22px;font:400 13px var(--sans);color:var(--encre-2);text-decoration:none;display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--filet)}
+.fiche-theorie:hover{color:var(--encre)}
+.fiche-clavier{padding:6px 20px 18px 22px;font:400 11px var(--mono);color:var(--encre-3)}
+.fiche-clavier summary{cursor:pointer;list-style:none;padding:6px 0}
+.fiche-clavier summary::-webkit-details-marker{display:none}
+.labo-fiche .hints{color:var(--encre-3)}
+.labo-fiche .hints kbd{color:var(--encre);border-color:var(--filet)}
+
+/* ---------- Focus : la scène seule ---------- */
+.labo-fiche .focus[aria-pressed="true"]{color:var(--encre);border-color:var(--encre)}
+body.labo-fiche.fiche-focus .app{grid-template-columns:minmax(0,1fr) 0}
+body.labo-fiche.fiche-focus .panel{display:none}
+
+@media (max-width:860px){
+  .labo-fiche .app{grid-template-columns:none}
+  .labo-fiche .panel{padding:0}
+  .labo-fiche .barre.compacte .seg[aria-current="step"] span{display:none}
+  .fiche-tete,.fiche-s,.fiche-lab,.fiche-pli,.fiche-nav,.fiche-clavier,.labo-fiche #toyPanel{padding-left:var(--gouttiere);padding-right:var(--gouttiere)}
+  .fiche-theorie{margin-left:var(--gouttiere);margin-right:var(--gouttiere)}
+}
+@media (prefers-reduced-motion:reduce){ .fiche-essais li.vient .coche{animation:none} }
