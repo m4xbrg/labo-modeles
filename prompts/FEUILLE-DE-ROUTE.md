@@ -66,7 +66,6 @@ Total prévu : 23 pages, 105 étapes, ≈ 20 ADN. Au 2026-10-13, 42 modules sur 
 | Page | À faire |
 |---|---|
 | Systèmes, croissance et hasard (04·05·07) | **Compléter 07** (probabilités conditionnelles, loi binomiale, théorème central limite) pour le faire passer en `full`. |
-| Optique (25), Protons et électrons qui passent (31), L'énergie du vivant (34) | **Charger la coque commune** (`labo/labo.css`, `planche-etapes.css`, `planche.js`) et passer aux couches Observer / Manipuler / Comprendre, sans toucher au moteur ni à la scène. Recette : [`labo/GABARIT.md`](../labo/GABARIT.md), « Migrer une planche existante ». |
 | Préalables (`opus-sonnet/prealables.html`) | Ajouter la supernova et les pages de fondations. |
 | Vague 1 (08, 09, 35, 38, 41·42, 47, 48, chapitre 27) | Validation scientifique et visuelle, avec [`outils/qa/`](../outils/qa/README.md) et la relecture des captures. |
 

@@ -20,7 +20,7 @@ const captures = process.argv[3] !== 'sans-captures';
       const base = await p.evaluate(() => {
         const q = s => document.querySelector(s);
         const app = q('.app'), ctr = q('.controls');
-        return { coque: !!(q('header.barre') && q('.titre h1') && q('dl.sig') && q('nav.chapitres') && q('.modes [role=tab]')),
+        return { coque: !!(q('header.barre') && q('.titre h1') && q('dl.sig') && q('nav.chapitres') && q('[role=tablist] [role=tab]')),
           classe: document.body.classList.contains('labo-etapes'), touches: document.body.dataset.touches,
           chapitres: [...document.querySelectorAll('.chap')].map(c => (c.querySelector('.chap-t b')?.textContent || '?') + ':' + c.querySelectorAll('.seg').length),
           debord: document.documentElement.scrollWidth - innerWidth,
