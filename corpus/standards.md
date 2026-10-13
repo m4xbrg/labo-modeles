@@ -36,7 +36,7 @@ Les showcases ne suivent pas ce plan : leur explication porte sur leur phénomè
 
 La navigation d'une page de fondations est organisée en **chapitres = modules canoniques**, avec **2 à 4 étapes par chapitre**. Une page à trois modules a donc 6 à 12 étapes ; une page à un module, 2 à 4. Une même barre d'étapes partout, sans onglets imbriqués.
 
-État au 2026-10-13 (`main` au commit `3f2faab`) : les 35 pages respectent la règle de 2 à 4 étapes par chapitre, et les 6 showcases ont migré. Les scènes regroupées restent accessibles depuis leurs commandes. **Réserve :** trois pages (*Optique*, *Protons et électrons qui passent*, *L’énergie du vivant*) sont conformes en nombre d’étapes mais ne chargent pas la coque commune (`labo/labo.css`, `planche-etapes.css`, `planche.js`) : elles ont leur propre mise en page et pas de couches Observer / Manipuler / Comprendre. Les migrer au gabarit est un chantier ouvert (voir [`prompts/FEUILLE-DE-ROUTE.md`](../prompts/FEUILLE-DE-ROUTE.md)). « Conforme, gabarit LABO » ci-dessous veut dire : coque commune chargée.
+État au 2026-10-13 (`main` au commit `3f2faab`) : les 35 pages respectent la règle de 2 à 4 étapes par chapitre, et les 6 showcases ont migré. Les scènes regroupées restent accessibles depuis leurs commandes. Les trois dernières pages qui avaient leur propre mise en page (*Optique*, *Protons et électrons qui passent*, *L’énergie du vivant*) ont reçu la coque commune (`labo/labo.css`, `planche-etapes.css`, `planche.js`) le 2026-10-13. « Conforme, gabarit LABO » ci-dessous veut dire : coque commune chargée.
 
 | Page | Chapitres (modules canoniques) | Étapes par chapitre | Total | État |
 |---|---|---|---|---|
@@ -59,9 +59,9 @@ La navigation d'une page de fondations est organisée en **chapitres = modules c
 | Signaux et équilibres du vivant | 37 | 4 | 4 | Conforme ; liaison, cascade, glycémie et boucles à retard. Ajout du 2026-10-07. |
 | D’un gradient à une tension | 33 | 4 | 4 | Conforme, gabarit LABO ; couverture partielle complémentaire au showcase Neurone. Ajoutée le 2026-10-07. |
 | Réactions : vitesse et équilibre | 30 | 4 | 4 | Conforme, gabarit LABO et coque repliée ; couches V/M/K, O orientation, C catalyseur, N injection, I Infos. Migrée le 2026-10-10. |
-| Protons et électrons qui passent | 31 | 4 | 4 | Conforme en nombre ; pH, tampons et titrage, redox, pile et électrolyse. **Coque commune non chargée.** |
-| Optique : la lumière qui tourne | 25 | 4 | 4 | Conforme en nombre ; un chapitre et des sous-scènes en bascule, table d’optique autonome. **Coque commune non chargée.** |
-| L’énergie du vivant | 34 | 4 | 4 | Conforme en nombre ; couplage, enzymes, bilan de la respiration et photosynthèse. **Coque commune non chargée.** |
+| Protons et électrons qui passent | 31 | 4 | 4 | Conforme, gabarit LABO ; pH, tampons et titrage, redox, pile et électrolyse. Couches O/M/C. Migrée le 2026-10-13. |
+| Optique : la lumière qui tourne | 25 | 4 | 4 | Conforme, gabarit LABO ; un chapitre et des sous-scènes en bascule, table d’optique autonome. Couches O/M/C ; « inverser » passe de I à S (I ouvre le tiroir Infos). Migrée le 2026-10-13. |
+| L’énergie du vivant | 34 | 4 | 4 | Conforme, gabarit LABO ; couplage, enzymes, bilan de la respiration et photosynthèse. Couches O/A/K (C et M restent aux commandes de la scène) ; « inhibiteur » passe de I à H. Migrée le 2026-10-13. |
 | Stabilité, bifurcations et chaos | 08 | 4 | 4 | Vague 1 (PR n° 37) ; nombre d’étapes recensé, validation visuelle à poursuivre. |
 | Un signal, des fréquences | 09 | 4 | 4 | Vague 1 (PR n° 37) ; nombre d’étapes recensé, validation visuelle à poursuivre. |
 | Du local au collectif | 41 · 42 | 4 + 4 | 8 | Vague 1 (PR n° 37) ; nombre d’étapes recensé, validation visuelle à poursuivre. |

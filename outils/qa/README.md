@@ -31,7 +31,7 @@ Le premier argument est la liste des **dossiers** de `opus-sonnet/`, séparés p
 
 Limites :
 
-- Il **suppose la coque commune** (`header.barre`, `nav.chapitres`, couches). Sur une page qui ne la charge pas (aujourd'hui *Optique*, *Protons et électrons qui passent* et *L'énergie du vivant*), il ne mesure rien d'utile.
+- Il **suppose la coque commune** (`header.barre`, `nav.chapitres`, couches) : sur une page qui ne la charge pas, il ne mesure rien d'utile. Au 2026-10-13, toutes les pages construites la chargent.
 - Il contient un traitement propre à `03-neurone` (attendre que la caméra entre dans la synapse).
 - Il ne juge pas la justesse scientifique : celle-là se vérifie dans les tests de moteurs et par relecture.
 
