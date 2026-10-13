@@ -117,6 +117,24 @@ Essai pour remplacer les couches Observer / Manipuler / Comprendre, jugées peu 
 
 Statut : prototype à juger avant de toucher aux autres pages et à `corpus/standards.md`.
 
+### Lien vers une étape et mode intégré (2026-10-13)
+
+`planche.js` lit deux familles de paramètres d'URL, sur **toutes** les planches qui chargent la coque.
+
+| Paramètre | Effet |
+|---|---|
+| `?etape=01.3` | Ouvre l'étape dont le code est affiché dans la barre. Aussi `?etape=3` (rang, 1 = première), et `?etape=48.2` sur une page qui numérote ses étapes « 1 2 3 » si 48 est son `data-module`. Choisie après le `load`, pour passer après l'initialisation propre de la page. |
+| `&scene=2` | Seconde scène d'une étape à deux scènes (`data-b`), si la page expose `window.allerScene` (Langage scientifique). |
+| `?embed` | Mode intégré, pour une iframe : la scène et sa barre de contrôles seules, à toute largeur (la grille de bureau est forcée, sans mise en page mobile). Couches : Manipuler par défaut. Un lien « Ouvrir la planche ↗ » mène à la planche complète, à la même étape. |
+| `&panneau=1` | Garde le panneau de lecture à droite (masqué sous 520 px). Sur une page à fiche, seules les lectures restent. |
+| `&controles=0` | Retire la barre de contrôles : scène seule. |
+
+Exemple : `<iframe src="../fondations-langage/index.html?embed&etape=02.1&scene=2&panneau=1" height="440" loading="lazy" title="Composantes d'un vecteur"></iframe>`.
+
+En mode intégré, les touches qui changent d'étape ou de couche (chiffres, lettres de couche, I, F) sont neutralisées : l'étape reste celle qu'a choisie l'auteur. Les commandes propres à la page (← → ou boutons Précédent / Suivant sur certaines planches de la vague 1) restent actives. La molette ne va à la scène qu'après un clic dedans ; avant, elle fait défiler la page qui accueille l'iframe, et un avis le dit. Styles : fin de `planche-etapes.css` (`html.labo-embed`) ; `theme.js` pose la classe dès le `<head>` pour éviter un éclair de la coque.
+
+Vérifié le 2026-10-13 sur Langage scientifique, Oscillations et ondes, Une particule, des amplitudes (vague 1) et La mitose, à 694 et 360 px de large. Les trois pages sans coque commune (Optique, Protons et électrons, L'énergie du vivant) n'ont pas ce mode.
+
 ## Pièges déjà rencontrés
 
 Relevés pendant la migration des planches (2026-10-04 à 07) ; ils valent pour toute nouvelle planche.

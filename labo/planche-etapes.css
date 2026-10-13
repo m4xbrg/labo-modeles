@@ -146,3 +146,29 @@ body.labo-etapes.coque-ouverte .tiroir{display:block}
   .labo-etapes .barre.compacte .retour{display:none}
   .labo-etapes .barre.compacte .centre{flex-direction:column;align-items:stretch;gap:6px}
 }
+
+/* ---------- Mode intégré (?embed, labo/planche.js) ----------
+   La scène et ses contrôles seuls, à toute largeur : on force la grille de bureau même dans une
+   iframe étroite (sinon la page passerait en mise en page mobile, scène à 62 vh et panneau dessous).
+   La seconde colonne garde sa place dans la grille mais tombe à 0, ce qui marche aussi pour les
+   pages qui nomment leurs zones (grid-template-areas). */
+html.labo-embed,html.labo-embed body{height:100%;overflow:hidden}
+html.labo-embed .barre,html.labo-embed .tiroir,html.labo-embed .titre,html.labo-embed .chapitres,
+html.labo-embed .modes,html.labo-embed .suite,html.labo-embed body > footer{display:none!important}
+html.labo-embed body.labo-etapes .app{display:grid!important;grid-template-columns:minmax(0,1fr) 0!important;grid-template-rows:minmax(0,1fr) auto!important;
+  height:100vh!important;height:100dvh!important;min-height:0!important;margin:0!important;border:0!important}
+html.labo-embed body.labo-etapes .scene{grid-column:1!important;grid-row:1!important;height:auto!important;min-height:0!important;order:0}
+html.labo-embed body.labo-etapes .controls{grid-column:1/-1!important;grid-row:2!important;order:0}
+html.labo-embed body.labo-etapes .panel{display:none!important}
+html.labo-embed.embed-panneau body.labo-etapes .app{grid-template-columns:minmax(0,1fr) clamp(220px,32%,320px)!important}
+html.labo-embed.embed-panneau body.labo-etapes .panel{display:flex!important;grid-column:2!important;grid-row:1!important;border-top:0;overflow-y:auto}
+html.labo-embed.embed-sans-controles body.labo-etapes .controls{display:none!important}
+html.labo-embed.embed-sans-controles body.labo-etapes .app{grid-template-rows:minmax(0,1fr) 0!important}
+.embed-ouvrir{position:fixed;top:8px;right:8px;z-index:20;font:400 11px/1 var(--mono);letter-spacing:.04em;color:var(--encre);background:var(--papier);
+  border:1px solid var(--filet);border-radius:20px;padding:6px 10px;text-decoration:none;opacity:.85}
+.embed-ouvrir:hover{opacity:1;border-color:var(--encre)}
+html.labo-embed.embed-panneau .embed-ouvrir{right:calc(clamp(220px,32%,320px) + 8px)}
+.embed-avis{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;margin:0;padding:8px 12px;font:400 12px var(--mono);
+  color:var(--encre);background:var(--papier);border:1px solid var(--filet);opacity:0;pointer-events:none;transition:opacity .25s}
+.embed-avis.on{opacity:.95}
+@media (max-width:520px){ html.labo-embed.embed-panneau body.labo-etapes .panel{display:none!important} html.labo-embed.embed-panneau body.labo-etapes .app{grid-template-columns:minmax(0,1fr) 0!important} html.labo-embed.embed-panneau .embed-ouvrir{right:8px} }

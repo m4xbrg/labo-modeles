@@ -19,6 +19,8 @@ function applique(v){
   dispatchEvent(new CustomEvent('labo-theme'));
 }
 applique(lit());
+// planche intégrée (?embed) : poser la classe dès le <head>, avant le premier rendu (planche.js fait le reste)
+if (/[?&]embed(=|&|$)/.test(location.search)) document.documentElement.classList.add('labo-embed');
 document.addEventListener('DOMContentLoaded', () => {
   applique(lit());
   document.querySelectorAll('[data-theme-bascule]').forEach(b => b.addEventListener('click', () => {
