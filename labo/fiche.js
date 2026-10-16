@@ -1,6 +1,8 @@
-/* LABO — fiche d'étape (prototype, 2026-10-13). Remplace les couches Observer / Manipuler / Comprendre
-   par une fiche lue de haut en bas dans le panneau : Regarde → Prédis → Essaie → Lectures (le panneau
-   du toy, inchangé) → Pourquoi → étape suivante. Activée par <body class="labo-etapes labo-fiche">.
+/* LABO — fiche d'étape. Gabarit standard des planches depuis le 2026-10-15 (prototype du 2026-10-13 sur
+   Langage scientifique) : voir labo/GABARIT.md et corpus/standards.md §4. Remplace les couches
+   Observer / Manipuler / Comprendre par une fiche lue de haut en bas dans le panneau : Regarde → Prédis →
+   Essaie → Lectures (le panneau de la page, inchangé) → Pourquoi → étape suivante.
+   Activée par <body class="labo-etapes labo-fiche" data-mode="fiche">.
 
    La page fournit le contenu et deux crochets :
      Fiche.init({
@@ -11,6 +13,11 @@
        aller:  i => …,                     // ouvrir la scène i (la page garde sa navigation)
        k:      (tex, repli, bloc) => html,  // rendu KaTeX de la page
        theorie: mod => 'explication.html#m01',
+       // facultatifs
+       lectures: '#toyPanel',              // élément (ou sélecteur) du panneau qui devient « Lectures »
+       theorieTexte: E => '…',             // libellé du lien de fin ; défaut : « Théorie complète du module NN »,
+                                           // ou « Comprendre ce qui se passe » si l'étape n'a pas de mod (showcase)
+       toucheFocus: 'f',                   // false si la page utilise déjà F ; le bouton Focus reste
      });
      Fiche.montre(i)   // à appeler à chaque changement de scène
 
@@ -32,13 +39,17 @@ const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls)
 
 const haut = el('div', 'fiche-haut'), bas = el('div', 'fiche-bas');
 
+const libelleTheorie = E => O.theorieTexte ? O.theorieTexte(E)
+  : E.mod != null && E.mod !== '' ? `Théorie complète du module ${String(E.mod).padStart(2, '0')}` : 'Comprendre ce qui se passe';
+
 function etapeDe(i) { return O.etapes.findIndex(s => s.scenes.includes(i)); }
 const num = x => parseFloat(String(x).replace(/\s/g, '').replace(',', '.').replace('−', '-'));
 
 function init(opts) {
   O = opts;
-  const panel = $('.panel'), toy = $('#toyPanel');
-  if (!panel || !toy) return;
+  const panel = $('.panel'), lec = O.lectures || '#toyPanel';
+  const toy = typeof lec === 'string' ? $(lec) : lec;
+  if (!panel || !toy) { console.warn('Fiche : panneau ou lectures introuvables (' + lec + ')'); O = null; return; }
   toy.before(haut); toy.after(bas);
   toy.classList.add('fiche-lectures');
   // le clavier passe dans un repli, en bas
@@ -55,9 +66,10 @@ function init(opts) {
     b.addEventListener('click', () => focus());
     droite.prepend(b);
   }
-  addEventListener('keydown', e => {
+  const tf = O.toucheFocus === undefined ? 'f' : O.toucheFocus;
+  if (tf) addEventListener('keydown', e => {
     if (e.target.closest('input:not([type=range]),textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === 'f' || e.key === 'F') focus();
+    if (e.key.toLowerCase() === tf) focus();
   });
 }
 
@@ -108,7 +120,7 @@ function montre(i) {
       ${prev ? `<button type="button" class="fiche-pas" data-s="${prev.scenes[0]}"><span>← ${prev.code}</span>${prev.titre}</button>` : '<span></span>'}
       ${next ? `<button type="button" class="fiche-pas suiv" data-s="${next.scenes[0]}"><span>${next.code} →</span>${next.titre}</button>` : '<span></span>'}
     </nav>
-    <a class="fiche-theorie" href="${O.theorie(E.mod)}">Théorie complète du module ${String(E.mod).padStart(2, '0')} <span aria-hidden="true">→</span></a>`;
+    <a class="fiche-theorie" href="${O.theorie(E.mod)}">${libelleTheorie(E)} <span aria-hidden="true">→</span></a>`;
   bas.querySelectorAll('.fiche-pas').forEach(b => b.addEventListener('click', () => O.aller(+b.dataset.s)));
   bas.querySelectorAll('.fiche-pli').forEach(d => d.addEventListener('toggle', () => { O.ouverts = O.ouverts || {}; O.ouverts[d.querySelector('summary').textContent] = d.open; }));
   if (O.ouverts) bas.querySelectorAll('.fiche-pli').forEach(d => { d.open = !!O.ouverts[d.querySelector('summary').textContent]; });

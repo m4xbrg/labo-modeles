@@ -1,4 +1,4 @@
-/* LABO — cours interactif (prototype du 2026-10-13). Tout est écrit dans le HTML ; ce script
+/* LABO — cours interactif, gabarit standard des explications depuis le 2026-10-15 (corpus/standards.md §2). Tout est écrit dans le HTML ; ce script
    ne fait qu'animer. Sans lui, la page reste lisible : scènes remplacées par un lien, réponses visibles.
 
    <figure class="labo" data-src="index.html?embed&etape=01.1" data-h="420"> + <figcaption>
