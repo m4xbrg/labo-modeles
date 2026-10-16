@@ -18,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#9fe870;
@@ -103,11 +103,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .swap{animation:none}
   #needleG,.tip,.btn,.comprendre{transition:none}
 }
+.labo-fiche #toyPanel{display:grid}
+.labo-fiche #stepText{color:var(--encre-2);margin-bottom:12px}
+.labo-fiche .panel > .gestes{display:none}
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -140,15 +146,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div></div>
 </nav>
 
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène est déjà réglée pour l’étape. 1 à 4 pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les mesures et les réglages apparaissent : déplace les charges, ajoute-en, sonde le champ, ou repars du bac à sable libre."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 21."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
-
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène interactive : charges électriques, lignes de champ, équipotentielles et charge test. Clique pour ajouter une charge, glisse pour la déplacer."></canvas>
@@ -159,10 +156,11 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Module <b>21</b> · étape 1 sur 4</p>
       <h2 id="stepTitle">Le dipôle</h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
     </section>
 
-    <section class="couche-lire">
+    <div id="toyPanel">
+      <p id="stepText" aria-live="polite"></p>
+    <section>
       <p class="eyebrow">Au point sondé</p>
       <div class="meas">
         <div class="row"><span class="lab">|E|</span><span class="val"><b id="mE">—</b><i>N/C</i></span></div>
@@ -176,7 +174,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note">E existe en chaque point, qu'il y ait une charge ou non. Une force n'apparaît que si une charge q est là pour la subir : F = qE. Échelle : 1 px = 1 mm ; la barre en bas à gauche mesure 10 cm.</p>
     </section>
 
-    <section class="couche-lire">
+    <section>
       <p class="eyebrow">Tension entre A et la sonde</p>
       <div class="meas" id="uMeas">
         <div class="row small"><span class="lab">V au point A</span><span class="val"><b id="uA">—</b><i>V</i></span></div>
@@ -187,7 +185,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note" id="uNote">Bouton « Point A » (touche U), puis clic : la tension se lit entre A et la sonde.</p>
     </section>
 
-    <section class="couche-lire">
+    <section>
       <p class="eyebrow">Sources</p>
       <div class="meas">
         <div class="row small"><span class="lab">Charges</span><span class="val"><b id="sN">0</b><i></i></span></div>
@@ -196,7 +194,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </div>
     </section>
 
-    <section class="couche-lire">
+    <section>
       <p class="eyebrow">Charge test</p>
       <div class="meas" id="testMeas">
         <div class="row small"><span class="lab">Vitesse</span><span class="val"><b id="tV">—</b><i>m/s</i></span></div>
@@ -207,20 +205,21 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="note" id="testNote">q = 1 nC, m = 10 mg. Aucune charge test pour l'instant.</p>
     </section>
 
-    <section class="couche-lire">
+    </div>
+    <section class="gestes">
       <p class="eyebrow">Gestes</p>
-      <ul class="hints">
+      <ul class="hints" id="hints">
         <li>Clic : ajouter · Maj+clic : signe opposé</li>
         <li>Glisser : déplacer · double-clic : supprimer</li>
         <li>Molette sur une charge : sa valeur</li>
         <li><kbd>T</kbd> charge test · <kbd>U</kbd> point A (tension)</li>
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps · <kbd>R</kbd> réinitialiser</li>
-        <li><kbd>1</kbd>–<kbd>4</kbd> étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>1</kbd>–<kbd>4</kbd> étape · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m21"><span>Théorie du module <b>21</b></span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre" id="lienTheorie" href="explication.html#m21"><span>Théorie du module <b>21</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -276,6 +275,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div>
 </div>
 
+<script src="../../labo/fiche.js"></script>
 <script>
 (() => {
 'use strict';
@@ -1133,7 +1133,7 @@ document.querySelectorAll('#views .btn').forEach(b => b.addEventListener('click'
 }));
 /* ---------------- Étapes du module 21 ----------------
    Chaque étape règle la scène existante (préréglage, affichages, charge test, point A) ;
-   le bac à sable libre reste accessible en Manipuler (préréglages, affichages, charges). */
+   le bac à sable libre reste accessible dans les contrôles (préréglages, affichages, charges). */
 const VIEWS0 = { lines: false, eq: false, map: false, vec: false, forces: false };
 const STAGES = [
   { t: 'Charges et champ', v: { lines: true, vec: true },
@@ -1163,12 +1163,15 @@ function goStage(k) {
   else { step.key = ''; setStep('etape' + k, g.t, g.x); }
   dirty = true; fast = false;
   syncStages();
+  if (window.Fiche) Fiche.montre(k);
 }
+window.allerScene = n => goStage(n);
 function resetScene() { if (stage >= 0) goStage(stage); else applyPreset(lastPreset); }
 document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => { goStage(+b.dataset.a); e.currentTarget.blur(); }));
 
 document.addEventListener('keydown', e => {
   const t = e.target, tag = t.tagName;
+  if (t.closest('input:not([type=range]),textarea,select,[contenteditable=true]')) return;
   if (tag === 'INPUT' && t.type === 'range') { if (e.key === ' ') return; if (e.key.startsWith('Arrow')) return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); playing = !playing; syncPlay(); }
@@ -1210,6 +1213,99 @@ function frame(now) {
 resize();
 goStage(0);
 syncPlay();
+
+/* Fiches : lecture seule du moteur ; les mesures et les commandes restent celles de la planche. */
+let gestesSonde = 0, gestesSource = 0;
+cv.addEventListener('pointermove', () => gestesSonde++);
+cv.addEventListener('pointerdown', () => gestesSource++);
+const etatFiche = () => ({
+  charges: charges.map(c => ({ ...c })), probe: { ...probe }, ptA: ptA && { ...ptA },
+  views: { ...views }, testSign, pid, W, H, gestesSonde, gestesSource
+});
+const instant = (e, mem) => {
+  // La coque, Focus ou le thème peuvent redimensionner l'écran sans geste de simulation.
+  if (!mem.depart || e.W !== mem.depart.W || e.H !== mem.depart.H) mem.depart = e;
+};
+const sondeBougee = (e, mem) => e.gestesSonde > mem.depart.gestesSonde &&
+  Math.hypot(e.probe.x - mem.depart.probe.x, e.probe.y - mem.depart.probe.y) > 40;
+const defsChamp = [['Champ E', 'Force par coulomb, en N/C ; il est créé par les charges sources.'],
+  ['Potentiel V', 'Énergie potentielle par coulomb, en volts (J/C).']];
+syncArrays();
+const milieuV = pot(W / 2, H / 2); // prédiction au réglage par défaut, calculée avec le moteur
+const fiches = [
+  {
+    titre: 'Charges et champ',
+    regarde: 'Les lignes blanches vont de +3 nC (orange) vers −3 nC (bleu). Les flèches montrent le même champ, point par point ; les lignes se serrent entre les charges.',
+    prediction: { q: 'Au milieu du dipôle initial, dans quel sens pointe le champ ?',
+      choix: ['De la charge positive vers la négative', 'De la négative vers la positive', 'Le champ est nul'], bonne: 0,
+      explication: 'La positive repousse une charge d’essai positive vers la droite ; la négative l’attire aussi vers la droite. Les deux contributions de E s’additionnent.' },
+    suivi: instant,
+    essais: [
+      { t: 'Promène la sonde d’au moins 4 cm et compare |E| dans les Lectures.', fait: sondeBougee },
+      { t: 'Glisse une charge d’au moins 2 cm : les lignes se réorganisent.', fait: (e, m) => e.W === m.depart.W && e.H === m.depart.H && e.gestesSource > m.depart.gestesSource && e.charges.some(c => { const d = m.depart.charges.find(d => d.id === c.id); return d && Math.hypot(c.x-d.x, c.y-d.y) > 20; }) }
+    ],
+    pourquoi: 'Le champ total additionne les contributions de toutes les sources comme des vecteurs. Il existe même sans charge test. La force affichée dans les Lectures est celle que subirait +1 nC au point sondé.',
+    relation: '\\vec E=\\sum_i\\vec E_i,\\qquad \\vec F=q\\vec E',
+    defs: defsChamp, piege: 'Les impulsions sur les lignes indiquent un sens, pas la vitesse d’une particule.'
+  },
+  {
+    titre: 'Potentiel et équipotentielles',
+    regarde: 'La carte orange et bleue donne le potentiel. Les courbes vertes relient les points de même potentiel et coupent les lignes de champ à angle droit.',
+    prediction: { q: 'Au milieu du dipôle initial (+3 nC et −3 nC à égale distance), que vaut V ?',
+      reponse: milieuV, unite: 'V', tol: 0.01,
+      explication: 'Les distances sont égales : k × 3/r et k × (−3)/r se compensent. V = 0 V, alors que le champ n’est pas nul.' },
+    suivi: instant,
+    essais: [
+      { t: 'Désactive « Carte de V » pour isoler les courbes vertes.', fait: (e, m) => m.depart.views.map && !e.views.map },
+      { t: 'Active « Vecteurs » pour comparer E aux équipotentielles.', fait: (e, m) => !m.depart.views.vec && e.views.vec }
+    ],
+    pourquoi: 'Le potentiel est un nombre ; le champ est sa pente orientée vers les potentiels décroissants. Sur une équipotentielle, V ne varie pas : le champ lui est perpendiculaire. Un potentiel nul ne signifie donc pas un champ nul.',
+    relation: '\\vec E=-\\vec\\nabla V',
+    defs: defsChamp, piege: 'Une couleur intense signifie un potentiel élevé en valeur absolue, pas forcément un champ intense.'
+  },
+  {
+    titre: 'Charge test et force',
+    regarde: 'Une charge test positive est déjà lâchée dans le dipôle. Sa trajectoire et ses énergies évoluent ; les flèches jaunes lisent les forces entre les sources.',
+    prediction: { q: 'Au même point, si on lâche −1 nC au lieu de +1 nC, que devient la force initiale ?',
+      choix: ['Même force', 'Même intensité, sens opposé', 'Force nulle'], bonne: 1,
+      explication: 'Le moteur calcule l’accélération avec q/m × E. Remplacer q par −q inverse F = qE et l’accélération, sans changer le champ des sources.' },
+    suivi: instant,
+    essais: [
+      { t: 'Choisis le signe − de la charge test.', fait: (e, m) => e.testSign !== m.depart.testSign },
+      { t: 'Clique « Lâcher une charge test », puis dans une zone libre de la scène.', fait: (e, m) => e.pid > m.depart.pid }
+    ],
+    pourquoi: 'La force est proportionnelle à la charge test et au champ local. Elle change la vitesse, dont la direction peut différer de celle du champ. Dans un champ fixe, la somme des énergies cinétique et potentielle se conserve, aux erreurs numériques près.',
+    relation: '\\vec F=q\\vec E=m\\vec a,\\qquad E_c+qV=\\text{constante}',
+    defs: [['Charge test', 'Ici ±1 nC et 10 mg ; elle ne modifie pas le champ des sources.'], ['Énergie potentielle', 'Ep = qV, en joules.']],
+    piege: 'Une ligne de champ donne la direction de la force sur une charge positive, pas la trajectoire de toute charge.'
+  },
+  {
+    titre: 'Tension entre deux points',
+    regarde: 'A est fixé du côté positif, B est la sonde du côté négatif. La courbe blanche passe par A ; les Lectures comparent V(A), V(B) et leur différence.',
+    prediction: { q: 'Au réglage initial, quel est le signe de U = V(B) − V(A) ?',
+      choix: ['Positif', 'Nul', 'Négatif'], bonne: 2,
+      explication: 'A est plus proche de +3 nC : V(A) > 0. B est son symétrique du côté de −3 nC : V(B) = −V(A). Donc U = −2V(A) < 0.' },
+    suivi: instant,
+    essais: [
+      { t: 'Déplace B d’au moins 4 cm et observe la tension.', fait: sondeBougee },
+      { t: 'Retire A avec « Retirer A », puis « Point A » et un clic pour le placer ailleurs.', fait: (e, m) => e.gestesSource > m.depart.gestesSource && !!e.ptA && !!m.depart.ptA && Math.hypot(e.ptA.x-m.depart.ptA.x, e.ptA.y-m.depart.ptA.y) > 20 }
+    ],
+    pourquoi: 'La tension compare deux potentiels ; le choix du zéro s’élimine dans la différence. Sur l’équipotentielle de A, U est nulle. Le travail à fournir pour déplacer lentement une charge vaut qU ; le travail du champ a le signe opposé.',
+    relation: 'U=V_B-V_A,\\qquad W_{\\mathrm{ext}}=qU',
+    defs: [['Tension U', 'Différence de potentiel V(B) − V(A), en volts.'], ['Travail extérieur', 'Variation d’énergie potentielle qU, pour un déplacement lent.']],
+    piege: 'Un voltmètre a deux pointes : une tension se mesure entre deux points.'
+  }
+];
+Fiche.init({
+  etapes: [...document.querySelectorAll('#stepper .seg')].map((b, i) => ({
+    code: b.querySelector('b').textContent, titre: STAGES[i].t, mod: 21, scenes: [+b.dataset.a]
+  })),
+  fiches, etat: etatFiche, aller: window.allerScene,
+  k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { displayMode: bloc, throwOnError: false }) : repli,
+  theorie: () => 'explication.html#m21'
+});
+Fiche.montre(0);
+
 requestAnimationFrame(frame);
 
 // interface de test (lecture seule, utile pour vérifier la physique)
