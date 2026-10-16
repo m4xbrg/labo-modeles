@@ -1,8 +1,10 @@
-# Migration vers la fiche d'étape et le cours interactif (pour Codex)
+# Migration vers la fiche d'étape et le cours interactif (pour Codex ou une session Claude)
 
-Rédigé le 2026-10-13 par Claude Opus 5.5, après la PR n° 43 (prototype sur *Langage scientifique*). Trois migrations à confier à Codex, **une par conversation**, chacune sur sa propre branche. Les trois peuvent tourner en parallèle : elles ne touchent pas les mêmes fichiers.
+Rédigé le 2026-10-13 par Claude Opus 5.5, après la PR n° 43 (prototype sur *Langage scientifique*) ; mis à jour le 2026-10-15, quand ce format est devenu le **gabarit standard** de LABO (`corpus/standards.md` §4). Une migration par conversation, chacune sur sa propre branche. Plusieurs peuvent tourner en parallèle : elles ne touchent pas les mêmes fichiers. Les trois premières sont prêtes au §7 ; le §7 bis donne un prompt pour n'importe quelle autre page.
 
-**Préalable : la PR n° 43 doit être fusionnée sur `main`.** Elle apporte `labo/fiche.js`, `labo/cours.js` et le mode `?embed` dont tout dépend.
+**Les recettes font foi dans `labo/GABARIT.md`** (sections « La planche à fiche d'étape », « L'explication en cours interactif », « Migrer une page existante », « Vérifier »). Ce document les résume pour un exécutant et ajoute les règles de PR ; en cas d'écart, `GABARIT.md` l'emporte.
+
+**Préalable : `main` contient `labo/fiche.js`, `labo/cours.js`, le mode `?embed` et `outils/qa/conformite.mjs`** (PR n° 43 et PR du gabarit standard).
 
 ## Modèle à choisir dans Codex
 
@@ -23,11 +25,11 @@ La simulation ne change pas : ni moteur, ni calcul, ni couleur de l'écran. On a
 
 1. `<head>` : après `planche-etapes.css`, charger `../../labo/fiche.css`. Si la page ne charge pas KaTeX, ajouter KaTeX 0.16.11 depuis cdnjs comme dans la référence.
 2. `<body class="labo-etapes labo-fiche" data-mode="fiche">` : retirer `data-touches`. Supprimer le bloc `div.modes` (onglets de couches). `planche.js` accepte une coque sans onglets.
-3. **Ce qui était caché selon la couche** (`.couche-lire`, `.couche-comp`, règles CSS sur `data-mode=observer|manipuler|comprendre`) est désormais toujours visible. Si un texte du panneau de la page fait doublon avec la fiche (titre et phrase de l'étape), le masquer par une règle CSS de la page sous `.labo-fiche`, comme la référence masque `#vHead`. Garder mesures, graphes et notes dynamiques : ils deviennent la rubrique « Lectures ».
+3. **Ce qui était caché selon la couche** (`.couche-lire`, `.couche-comp`, règles CSS sur `data-mode=observer|manipuler|comprendre`) est désormais toujours visible : retirer ces classes et ces règles. Si un texte du panneau de la page fait doublon avec la fiche (titre et phrase de l'étape), le masquer par une règle CSS de la page sous `.labo-fiche`, comme la référence masque `#vHead`. Garder mesures, graphes et notes dynamiques : ils deviennent la rubrique « Lectures ». Si la page n'a pas de `#toyPanel`, envelopper ces sections dans un élément (`<div id="lectures">`) et passer `lectures: '#lectures'` à `Fiche.init`.
 4. **Exposer l'état.** Les fonctions `fait`, `suivi` et `vivant` des fiches lisent l'objet que renvoie `etat()`. Dans un script classique, les `let` et `const` de premier niveau d'un script sont visibles par nom depuis un script suivant : `etat: () => ({ st, P })` suffit souvent, sans toucher au moteur. Ne rien écrire dans cet état depuis la fiche.
 5. **Brancher la navigation.** Dans la fonction d'étape de la page (`goStep`, `goAct`…), appeler `if (window.Fiche) Fiche.montre(n)` avec l'index de **scène** (celui de `data-a` / `data-b`), et exposer `window.allerScene = n => goStep(n)` (ou l'équivalent). L'index des fiches est cet index de scène.
 6. **Écrire les fiches** dans un `<script>` placé avant la coquille de la page, avec `Fiche.init({ etapes, fiches, etat, aller, k, theorie })`. Voir le bloc « Fiches d'étape (prototype) » de la référence pour la forme exacte, y compris la construction de `etapes` depuis `#stepper .seg`.
-7. Texte d'aide du clavier : retirer O/M/C, ajouter `F` focus et `I` infos. **Si la page utilise déjà la touche F**, garder sa commande ; le focus reste au bouton de la barre. Le signaler dans la PR.
+7. Texte d'aide du clavier : retirer O/M/C, ajouter `F` focus et `I` infos. **Si la page utilise déjà la touche F**, garder sa commande et passer `toucheFocus: false` ; le focus reste au bouton de la barre. Le signaler dans la PR. Pour un showcase, les étapes n'ont pas de `mod` : le lien de fin devient « Comprendre ce qui se passe » vers `explication.html`.
 
 **Contenu d'une fiche** (en français, tutoiement, ton de la référence) :
 
@@ -68,13 +70,15 @@ Remplacer la mise en page, garder la prose. Partir de `fondations-langage/explic
 Servir la racine en HTTP (`python -m http.server 4350 --directory .`), puis dans `outils/qa/` (une fois `npm install`) :
 
 ```bash
+node conformite.mjs <dossier> --strict       # lecture statique : aucune erreur ✗ acceptée
 node qa_migrees.js <dossier> sans-captures   # puis sans « sans-captures », et regarder les captures
 node qa_theorie.js <dossier>
 ```
 
 Acceptation :
 
-- **Planche** : console propre (le 404 de `favicon.ico` ne compte pas) ; chaque étape s'ouvre et est marquée ; aucun débordement à 375 px ; écran et contrôles dans 1366 × 768 ; aucune commande perdue.
+- **Conformité** : `conformite.mjs <dossier> --strict` sort sans erreur ; sa sortie est collée dans la PR.
+- **Planche** : console propre (le 404 de `favicon.ico` ne compte pas) ; `cochesSansGeste` vaut 0 à chaque étape dans la sortie de `qa_migrees.js` ; chaque étape s'ouvre et est marquée ; aucun débordement à 375 px ; écran et contrôles dans 1366 × 768 ; aucune commande perdue.
 - **Fiches** :
   - un script Playwright jetable (non commité) ouvre chaque scène, vérifie qu'**aucun essai n'est coché au chargement**, puis en réalise **au moins un par scène** en pilotant les vrais contrôles (clic, glisser, touches) et vérifie `.fiche-essais li.fait` ;
   - chaque réponse de « Prédis » est recalculée avec le moteur, et la PR liste les valeurs.
@@ -133,11 +137,25 @@ Vérifie selon le §5 (Playwright compris), commite fichier par fichier, pousse 
 Réponds en français. Termine par : ce qui est fait, valeurs des prédictions recalculées, écarts ou risques, lien de la PR.
 ```
 
-## 8. Après les trois PR
+### Prompt 4 et suivants — n'importe quelle page (§7 bis)
 
-Quand Max les a relues et fusionnées, une session Claude met à jour d'un coup la documentation commune :
+Remplacer `<dossier>` (nom du dossier dans `opus-sonnet/`) et `<court>` (le même sans « fondations- »). Avant d'envoyer, compléter la ligne « Repères » en lisant la page : nom du tableau des étapes et de la fonction d'étape, scènes regroupées (`data-b`), touches déjà prises.
 
-- `corpus/standards.md` : §2 et §3, et le statut des deux formats ;
-- `labo/GABARIT.md` : page de référence et pièges nouveaux remontés par les PR ;
-- `README.md`, `corpus/historique.md`, `prompts/FEUILLE-DE-ROUTE.md` ;
-- les changements de fichiers partagés que les PR auront demandés.
+```text
+Tu travailles dans le dépôt labo-modeles. Lis d'abord prompts/codex/MIGRATION-FICHE-COURS.md en entier, puis labo/GABARIT.md (gabarit standard), corpus/standards.md §1, §2 et §4, l'en-tête de labo/fiche.js et celui de labo/cours.js, et enfin les deux références : opus-sonnet/fondations-langage/index.html et explication.html.
+Vérifie que main contient labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs ; sinon arrête-toi et dis-le. Crée la branche codex/fiche-cours-<court> depuis main à jour.
+Ta mission : migrer opus-sonnet/<dossier>/ vers la fiche d'étape (planche) et le cours interactif (explication), selon les §2 à §6 du document.
+Repères dans index.html : <tableau des étapes et fonction d'étape, scènes regroupées, touches déjà prises>.
+Si c'est un showcase (dossier qui commence par deux chiffres) : une fiche par acte, retour « ← Phénomènes », lien de fin « Comprendre ce qui se passe » ; l'explication prend la forme du cours interactif sur son propre plan, sans les sept rubriques.
+Vérifie selon le §5 (conformite.mjs --strict et Playwright compris), commite fichier par fichier, pousse la branche et ouvre la PR vers main. Ne fusionne pas.
+Réponds en français. Termine par : ce qui est fait, valeurs des prédictions recalculées, écarts ou risques, lien de la PR.
+```
+
+## 8. Après la fusion d'un lot de migrations
+
+Quand Max a relu et fusionné une ou plusieurs migrations, une session Claude met à jour d'un coup la documentation commune (jamais dans les PR de migration, pour éviter les conflits) :
+
+- `corpus/standards.md` §4.5 : régénérer le tableau avec `node outils/qa/conformite.mjs --markdown` ;
+- `corpus/historique.md` : une ligne datée par lot ;
+- `labo/GABARIT.md` : pièges nouveaux remontés par les PR ;
+- les changements de fichiers partagés que les PR auront demandés (dans une PR à part, qui met aussi à jour `GABARIT.md` et l'en-tête du script).
