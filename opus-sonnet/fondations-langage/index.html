@@ -3063,9 +3063,14 @@ const FX = (() => {
     /* 10 · 02.2 Projection */ {
       scene: 'Projection', titre: 'La part qui compte',
       regarde: 'Une force F tire un wagon sur un rail. Seule la part de F le long du rail le fait avancer ; l’autre part presse le wagon contre le rail.',
-      prediction: { q: 'Une force de 30 N fait 60° avec le rail. Quelle part fait avancer le wagon ?', reponse: 15, tol: 0.2, unite: 'N',
-        explication: '30 × cos 60° = 30 × 0,5 = 15 N.' },
+      prediction: { q: 'Au départ, F = (5 ; 5) N, soit |F| ≈ 7,1 N, et fait 25° avec le rail. Quelle part fait avancer le wagon ?', reponse: 6.4, tol: 0.15, unite: 'N',
+        explication: '7,07 × cos 25° ≈ 7,07 × 0,906 ≈ 6,4 N. Le panneau de lectures affiche F∥ : compare.' },
+      suivi: ({ st }, mem) => { instant(mem, 'cfg', st.F.join() + '|' + st.phi); },
       essais: [
+        { t: 'Tourne le rail jusqu’à ce que F fasse 60° avec lui : F∥ tombe à la moitié de |F|.', fait: ({ st }, mem) => {
+          const u = [Math.cos(st.phi * Math.PI / 180), Math.sin(st.phi * Math.PI / 180)], L = Math.hypot(...st.F);
+          if (L < 1 || st.F.join() + '|' + st.phi === mem.cfg) return false;
+          return Math.abs(Math.acos(Math.max(-1, Math.min(1, (st.F[0] * u[0] + st.F[1] * u[1]) / L))) * 180 / Math.PI - 60) < 2.5; } },
         { t: 'Mets F perpendiculaire au rail : le wagon ne bouge plus.', fait: ({ st }) => {
           const u = [Math.cos(st.phi * Math.PI / 180), Math.sin(st.phi * Math.PI / 180)];
           return Math.hypot(...st.F) > 1 && Math.abs(st.F[0] * u[0] + st.F[1] * u[1]) < 0.1; } },
