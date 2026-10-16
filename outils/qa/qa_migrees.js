@@ -29,7 +29,7 @@ const captures = process.argv[3] !== 'sans-captures';
       });
       res[nom] = base;
       if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-observer.png` });
-      if (base.touches) await p.keyboard.press(base.touches[1]);   // pas de couches sur une page à fiche await p.waitForTimeout(250);
+      if (base.touches) { await p.keyboard.press(base.touches[1]); await p.waitForTimeout(250); }   // pas de couches sur une page à fiche
       const segs = await p.$$('.chap .seg');
       res[nom].etapes = [];
       res[nom].mesuresEtapes = [];
@@ -50,12 +50,15 @@ const captures = process.argv[3] !== 'sans-captures';
           debord: document.documentElement.scrollWidth - innerWidth,
           controlesBas: Math.round(document.querySelector('.controls').getBoundingClientRect().bottom),
           sceneHauteur: Math.round(document.querySelector('.scene').getBoundingClientRect().height),
-          mode: document.body.dataset.mode
+          mode: document.body.dataset.mode,
+          // page à fiche : titre de la fiche montrée, et essais déjà cochés sans aucun geste (doit rester 0)
+          fiche: document.querySelector('.fiche-haut h2')?.textContent || undefined,
+          cochesSansGeste: document.body.classList.contains('labo-fiche') ? document.querySelectorAll('.fiche-essais li.fait').length : undefined
         })));
         res[nom].etapes.push(`${i}→${r.cur}|${r.eye}|${r.lien}`);
         if (captures && nom === 'laptop') await p.screenshot({ animations: 'disabled', path: `${OUT}vague-${page}-e${i}.png` });
       }
-      if (base.touches) await p.keyboard.press(base.touches[2]);   // pas de couches sur une page à fiche await p.waitForTimeout(250);
+      if (base.touches) { await p.keyboard.press(base.touches[2]); await p.waitForTimeout(250); }   // pas de couches sur une page à fiche
       res[nom].comprendre = await p.evaluate(() => document.body.dataset.mode);
       res[nom].interactif = await p.evaluate(() => {
         const ctr = document.querySelector('.controls'), app = document.querySelector('.app');
