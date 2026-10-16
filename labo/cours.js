@@ -1,8 +1,10 @@
 /* LABO — cours interactif, gabarit standard des explications depuis le 2026-10-15 (corpus/standards.md §2). Tout est écrit dans le HTML ; ce script
    ne fait qu'animer. Sans lui, la page reste lisible : scènes remplacées par un lien, réponses visibles.
 
-   <figure class="labo" data-src="index.html?embed&etape=01.1" data-h="420"> + <figcaption>
-       → iframe de la planche en mode intégré (labo/planche.js), et lien « Ouvrir à cette étape ↗ ».
+   <figure class="labo" data-src="index.html?embed&etape=01.1" data-h="420">
+     <figcaption>… <a class="ouvrir" href="index.html?etape=01.1">Ouvrir à cette étape ↗</a></figcaption>
+       → iframe de la planche en mode intégré (labo/planche.js) ; le lien a.ouvrir, écrit dans le HTML,
+         reste le seul accès à la scène sans script (créé par le script s'il manque).
    <div class="calc"> … <span class="var" data-nom="Q" data-val="6" data-min="0" data-max="10" data-pas="0.5" data-dec="1">
        … <output data-expr="V0 + Q*t" data-dec="1"></output> … </div>
        → nombres qu'on fait glisser (ou flèches du clavier) ; les sorties se recalculent. Une sortie sans
@@ -86,10 +88,12 @@ $$('figure.labo[data-src]').forEach(f => {
   cadre.append(ifr); f.prepend(cadre);
   const plein = new URL(src, location.href);
   ['embed', 'panneau', 'controles'].forEach(k => plein.searchParams.delete(k));
+  // le lien statique a.ouvrir (écrit dans le HTML, repli sans script) est repris ; sinon on le crée
   let cap = f.querySelector('figcaption');
   if (!cap){ cap = document.createElement('figcaption'); f.append(cap); }
-  const lien = document.createElement('a'); lien.href = plein.href; lien.textContent = 'Ouvrir à cette étape ↗';
-  cap.append(lien);
+  let lien = cap.querySelector('a.ouvrir');
+  if (!lien){ lien = document.createElement('a'); lien.className = 'ouvrir'; lien.textContent = 'Ouvrir à cette étape ↗'; cap.append(lien); }
+  lien.href = plein.href;
 });
 
 /* ---------- calculs vivants ---------- */

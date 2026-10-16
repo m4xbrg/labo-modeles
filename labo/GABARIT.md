@@ -83,7 +83,7 @@ Tout est écrit dans le HTML ; `cours.js` ne fait qu'animer. Sans lui, la page r
 3. « Ce que tu vois » : des `.cartes` dont les liens ouvrent la planche à l'étape (`index.html?etape=NN.k`).
 4. **Fondations : chaque module garde ses sept rubriques et leur prose**, dans l'ordre, avec les ids `mNN-intuition`, `mNN-defs`, `mNN-relations`, `mNN-exemple`, `mNN-pieges`, `mNN-suite`, `mNN-test` (le sommaire les liste). L'en-tête du module relie chaque étape (`p.etapes`, liens `?etape=`).
 5. Par module :
-   - **2 scènes intégrées** : `<figure class="labo" data-src="index.html?embed&amp;etape=NN.k" data-h="440" data-titre="…">` et une `figcaption` qui dit quoi faire ; `&amp;panneau=1` quand les mesures comptent. Hauteur `data-h` entre 400 et 560 ; vérifier chaque URL dans un cadre de 680 px.
+   - **2 scènes intégrées** : `<figure class="labo" data-src="index.html?embed&amp;etape=NN.k" data-h="440" data-titre="…">` et une `figcaption` qui dit quoi faire et se termine par le lien statique `<a class="ouvrir" href="index.html?etape=NN.k">Ouvrir à cette étape ↗</a>` (seul accès à la scène si le script ne tourne pas) ; `&amp;panneau=1` quand les mesures comptent. Hauteur `data-h` entre 400 et 560 ; vérifier chaque URL dans un cadre de 680 px.
    - **2 ou 3 calculs vivants** (`.calc`), chacun attaché à une relation clé ; `plan(...)` pour des vecteurs, `trace(...)` pour une courbe ; une sortie qui est une phrase prend `class="phrase"`.
    - **1 ou 2 questions** dans les relations, et les **3 Teste-toi** en `.quiz` (réponse chiffrée ou choix), correction reprise du texte.
    - **Exemple chiffré** en `ol.pas-a-pas data-montre="0"`.

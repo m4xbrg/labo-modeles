@@ -119,7 +119,10 @@ function explication(dossier, html, showcase, codes) {
   if (morts.length) err.push(`liens internes sans cible : ${morts.map(x => '#' + x).join(', ')}`);
 
   // scènes intégrées : ?embed et étape existante sur la planche
-  const figs = [...html.matchAll(/<figure class="labo[^"]*" data-src="([^"]+)"/g)].map(m => m[1].replace(/&amp;/g, '&'));
+  const blocs = [...html.matchAll(/<figure class="labo[^"]*" data-src="([^"]+)"[\s\S]*?<\/figure>/g)];
+  const figs = blocs.map(m => m[1].replace(/&amp;/g, '&'));
+  for (const m of blocs) if (!/<a class="ouvrir" href="index\.html[^"]*"/.test(m[0]))
+    err.push(`scène intégrée sans lien statique a.ouvrir (repli sans script) : ${m[1].replace(/&amp;/g, '&')}`);
   for (const src of figs) {
     if (!/[?&]embed\b/.test(src)) err.push(`scène intégrée sans ?embed : ${src}`);
     const e = (src.match(/[?&]etape=([^&]+)/) || [])[1];
