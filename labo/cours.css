@@ -1,0 +1,203 @@
+/* LABO — cours interactif (gabarit standard des explications depuis le 2026-10-15).
+   À charger après labo.css. Composants : voir labo/cours.js et la référence
+   opus-sonnet/fondations-langage/explication.html. Même direction que les planches :
+   papier et encre neutres, la couleur appartient au domaine (--phenomene). */
+
+:root{--phenomene:#3a8f86;--col:680px}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--phenomene:#6fd6c8}}
+:root[data-theme=dark]{--phenomene:#6fd6c8}
+
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body.cours{font-size:17px;line-height:1.65;background:var(--papier);color:var(--encre)}
+.cours p{margin:0 0 14px}
+.cours ul,.cours ol{margin:0 0 14px;padding-left:22px}
+.cours li{margin-bottom:6px}
+.cours a{text-underline-offset:3px;text-decoration-thickness:1px}
+.cours strong{font-weight:500}
+.cours .katex{font-size:1.05em}
+.cours .katex-display{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:2px 0;position:relative;margin:.4em 0}
+
+/* ---------- Barre ---------- */
+.cours-barre{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:10px var(--gouttiere);background:var(--papier);border-bottom:1px solid var(--filet)}
+.cours-barre .marque{font-size:14px}
+.cours-barre .retour{font-size:13px;color:var(--encre-2);text-decoration:none;white-space:nowrap}
+.cours-barre .retour:hover{color:var(--encre)}
+.cours-barre .ici{font:500 14px var(--sans);margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cours-barre .ici span{color:var(--encre-3);font-weight:400}
+.cours-avance{position:absolute;left:0;bottom:-1px;height:2px;background:var(--phenomene);width:0;transition:width .15s linear}
+
+/* ---------- Mise en page : sommaire collant à gauche, colonne de lecture ---------- */
+.cours-page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,var(--col)) minmax(0,1fr);column-gap:clamp(24px,4vw,64px);padding:0 var(--gouttiere)}
+.cours-texte{grid-column:2;min-width:0;padding-bottom:120px}
+.cours-sommaire{grid-column:1;justify-self:end;width:210px;position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow-y:auto;padding-top:56px;font-size:13px;scrollbar-width:none}
+.cours-sommaire p{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3);margin:0 0 12px}
+.cours-sommaire ol{list-style:none;margin:0;padding:0}
+.cours-sommaire li{margin:0}
+.cours-sommaire a{display:block;padding:4px 0 4px 12px;border-left:1.5px solid var(--filet);color:var(--encre-3);text-decoration:none;line-height:1.35}
+.cours-sommaire a:hover{color:var(--encre)}
+.cours-sommaire a.ici{color:var(--encre);border-left-color:var(--phenomene)}
+.cours-sommaire a b{font:500 11px var(--mono);margin-right:6px}
+.cours-sommaire ol ol{margin:2px 0 6px}
+.cours-sommaire ol ol a{padding-left:24px;font-size:12px}
+.cours-sommaire li:not(.ouvert) > ol{display:none}
+@media (max-width:1180px){
+  .cours-page{grid-template-columns:minmax(0,1fr) minmax(0,var(--col)) minmax(0,1fr)}
+  .cours-sommaire{display:none}
+}
+
+/* ---------- En-tête ---------- */
+.cours-tete{padding:64px 0 24px}
+.surtitre{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3);margin:0 0 16px}
+.cours-tete h1{font:500 clamp(36px,5.4vw,60px)/1 var(--sans);letter-spacing:-.04em;margin:0 0 18px}
+.cours-tete .lead{font-size:clamp(18px,2vw,21px);line-height:1.45;color:var(--encre-2);margin:0 0 26px;max-width:36em}
+.mode-emploi{font-size:15px;color:var(--encre-2);border-left:2px solid var(--phenomene);padding:2px 0 2px 14px;margin:0 0 30px}
+.cartes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 10px}
+.carte{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border:1px solid var(--filet);text-decoration:none;color:var(--encre);background:var(--papier);transition:border-color .3s var(--ease)}
+.carte:hover{border-color:var(--encre)}
+.carte b{font:500 11px var(--mono);letter-spacing:.08em;color:var(--phenomene)}
+.carte span{font-size:15px;line-height:1.35}
+.carte small{font:400 11.5px var(--mono);color:var(--encre-3)}
+
+/* ---------- Titres ---------- */
+.cours h2{font:500 28px/1.15 var(--sans);letter-spacing:-.02em;margin:80px 0 18px;padding-top:22px;border-top:1px solid var(--encre)}
+.cours h2 .n{display:block;font:400 11px var(--mono);letter-spacing:.14em;color:var(--encre-3);margin-bottom:10px;text-transform:uppercase}
+.module{margin-top:72px;padding-top:24px;border-top:1px solid var(--encre)}
+.module > header{margin-bottom:8px}
+.module .num{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--phenomene);margin:0 0 8px}
+.module h3{font:500 clamp(26px,3.4vw,34px)/1.1 var(--sans);letter-spacing:-.03em;margin:0 0 12px}
+.module .etapes{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:400 12px var(--mono);color:var(--encre-3);margin:0}
+.module .etapes a{color:var(--encre-2);text-decoration:none;border:1px solid var(--filet);padding:3px 8px;border-radius:20px}
+.module .etapes a:hover{color:var(--encre);border-color:var(--encre)}
+.module h4{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--encre-3);margin:44px 0 14px;display:flex;gap:10px;align-items:baseline}
+.module h4::before{content:attr(data-n);color:var(--phenomene)}
+
+/* ---------- Définitions ---------- */
+.defs{border-top:1px solid var(--filet);margin:0 0 16px}
+.defs > div{display:grid;grid-template-columns:minmax(150px,200px) 1fr;gap:16px;padding:10px 0;border-bottom:1px solid var(--filet);align-items:baseline;scroll-margin-top:90px}
+.defs dt{font-weight:500;font-size:15px}
+.defs dd{margin:0;font-size:15.5px;color:var(--encre-2)}
+.defs .u{font:400 12px var(--mono);color:var(--encre-3);margin-left:6px}
+.defs > div:target{background:var(--papier-2);box-shadow:-10px 0 0 var(--papier-2),10px 0 0 var(--papier-2)}
+
+/* Terme du glossaire, avec sa bulle */
+a.terme{color:inherit;text-decoration:underline dotted var(--encre-3);text-decoration-thickness:1.5px;text-underline-offset:4px}
+a.terme:hover{text-decoration-color:var(--phenomene)}
+.bulle{position:absolute;z-index:40;max-width:300px;padding:10px 12px;background:var(--papier);border:1px solid var(--encre);font-size:14px;line-height:1.45;box-shadow:0 6px 24px rgba(0,0,0,.12);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.bulle.on{opacity:1;transform:none}
+.bulle b{display:block;font-weight:500;margin-bottom:2px}
+
+/* ---------- Relations clés ---------- */
+.relation{background:var(--papier-2);border-left:2px solid var(--encre);padding:12px 18px 12px;margin:18px 0 10px}
+.relation p{margin:6px 0 0;font-size:15.5px;color:var(--encre-2)}
+
+/* ---------- Scène intégrée (planche en ?embed) ---------- */
+figure.labo{margin:22px 0 26px}
+figure.labo .cadre{position:relative;border:1px solid var(--filet);background:#0a0d12;overflow:hidden}
+figure.labo iframe{display:block;width:100%;border:0}
+figure.labo figcaption{display:flex;gap:14px;align-items:baseline;justify-content:space-between;margin-top:8px;font-size:14px;color:var(--encre-2);line-height:1.45}
+figure.labo figcaption b{font:500 11px var(--mono);color:var(--phenomene);margin-right:6px;letter-spacing:.06em}
+figure.labo figcaption a{flex:none;font:400 12px var(--mono);color:var(--encre-2);text-decoration:none;white-space:nowrap}
+figure.labo figcaption a:hover{color:var(--encre)}
+@media (min-width:1320px){ figure.labo.large{margin-right:-160px} }
+
+/* ---------- Calcul vivant : nombres qu'on fait glisser ---------- */
+.calc{border:1px solid var(--filet);padding:14px 18px;margin:14px 0 22px;font-size:16px}
+.calc-t{font:500 10.5px/1 var(--mono)!important;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3);margin:0 0 12px!important}
+.calc p{margin:0 0 8px}
+.calc p:last-child{margin-bottom:0}
+.var{display:inline-block;color:var(--phenomene);font:500 .95em var(--mono);border-bottom:1.5px dashed currentColor;cursor:ew-resize;user-select:none;-webkit-user-select:none;touch-action:none;padding:0 1px;line-height:1.2}
+.var:focus-visible{outline:1.5px solid var(--phenomene);outline-offset:2px}
+.var.tire{background:var(--papier-2)}
+.calc output{font:500 .95em var(--mono);color:var(--encre)}
+.calc output.phrase{font:inherit;color:inherit}
+.calc output.fort{background:var(--papier-2);padding:1px 6px}
+.calc .note{font-size:13.5px;color:var(--encre-3)}
+.calc input[type=range]{width:100%;margin:2px 0 12px;accent-color:var(--phenomene)}
+.calc .verdict-oui{color:var(--induit)}
+.calc .verdict-non{color:var(--positif)}
+
+/* Calcul accompagné d'un dessin : texte à gauche, figure à droite */
+.calc.avec-figure{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:6px 22px;align-items:center}
+.calc.avec-figure > .calc-t{grid-column:1 / -1}
+.calc.avec-figure > .figure{grid-column:2;grid-row:2 / span 6;align-self:start}
+.calc.avec-figure > p{grid-column:1}
+.plan,.trace{display:block;width:100%;height:auto;overflow:visible}
+.plan .grille line{stroke:var(--filet);stroke-width:.05}
+.plan .axe,.trace .axe{stroke:var(--encre-3);stroke-width:.08}
+.trace .axe{stroke-width:1}
+.plan g line{stroke-width:.22;stroke-linecap:round}
+.plan .v-a line{stroke:var(--phenomene)} .plan .v-a polygon{fill:var(--phenomene)}
+.plan .v-b line{stroke:var(--champ-b)} .plan .v-b polygon{fill:var(--champ-b)}
+.plan .v-r line{stroke:var(--energie)} .plan .v-r polygon{fill:var(--energie)}
+.plan .v-c line{stroke:var(--positif);stroke-dasharray:.35 .3} .plan .v-c polygon{fill:var(--positif)}
+.plan .v-rail{stroke:var(--encre-2);stroke-width:.35;stroke-linecap:round}
+.trace .courbe{fill:none;stroke:var(--encre);stroke-width:1.6}
+.trace .sec{stroke:var(--phenomene);stroke-width:1.6}
+.trace .tan{stroke:var(--energie);stroke-width:1.2;stroke-dasharray:4 3}
+.trace .pt{fill:var(--phenomene)}
+@media (max-width:640px){ .calc.avec-figure{grid-template-columns:1fr} .calc.avec-figure > .figure{grid-column:1;grid-row:auto;max-width:220px} }
+
+/* ---------- Questions (prédire, se tester) ---------- */
+.quiz{border:1px solid var(--filet);padding:14px 18px;margin:12px 0 16px;scroll-margin-top:90px}
+.quiz .q{margin:0 0 10px;font-weight:500}
+.quiz .q::before{content:"?";display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:10px;border:1px solid var(--phenomene);color:var(--phenomene);font:500 12px var(--mono);vertical-align:2px}
+.quiz-rep{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.quiz-rep input{width:110px;padding:7px 9px;border:1px solid var(--encre-3);background:var(--papier);color:var(--encre);font:500 15px var(--mono);border-radius:2px}
+.quiz-rep .u{font:400 13px var(--mono);color:var(--encre-2)}
+.quiz button{font:400 13px var(--mono);padding:7px 11px;border:1px solid var(--encre);border-radius:2px;color:var(--encre);background:var(--papier)}
+.quiz button.voir{border-color:var(--filet);color:var(--encre-3)}
+.quiz button:disabled{opacity:.55;cursor:default}
+.quiz .choix{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.quiz .choix li{margin:0}
+.quiz .choix button{width:100%;text-align:left;font:400 15px var(--sans);border-color:var(--filet);padding:9px 12px}
+.quiz .choix button:not(:disabled):hover{border-color:var(--encre)}
+.quiz .choix button.choisi{border-color:var(--positif);opacity:1}
+.quiz .choix button.bon{border-color:var(--induit);box-shadow:inset 3px 0 0 var(--induit);opacity:1}
+.quiz .corr{display:none;margin:12px 0 0;padding-top:10px;border-top:1px solid var(--filet);font-size:15.5px;color:var(--encre-2)}
+.quiz.repondu .corr{display:block}
+.quiz .verdict{display:block;font-weight:500;margin-bottom:2px}
+.quiz .verdict.juste{color:var(--induit)}
+.quiz .verdict.faux{color:var(--positif)}
+.quiz .labo-lien{display:inline-block;margin-top:6px;font:400 12.5px var(--mono);color:var(--encre-2)}
+
+/* Réponse repliée (modules pas encore convertis) */
+.module details{border:1px solid var(--filet);margin:0 0 10px}
+.module summary{cursor:pointer;padding:12px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
+.module summary::-webkit-details-marker{display:none}
+.module summary::before{content:"?";font:500 12px var(--mono);color:var(--phenomene);border:1px solid var(--phenomene);width:20px;height:20px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:3px}
+.module details[open] summary::before{content:"\2713"}
+.module details > p{padding:0 16px 4px 48px;color:var(--encre-2)}
+
+/* ---------- Exemple chiffré, pas à pas ---------- */
+.cas{border:1px solid var(--filet);padding:14px 18px;margin:0 0 12px}
+.cas > p:first-child{font-weight:500}
+.pas-a-pas{margin:0 0 6px}
+.pas-a-pas li.cache{display:none}
+.pas-a-pas li.vient{animation:cours-vient .4s var(--ease)}
+@keyframes cours-vient{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.pas-suivant{font:400 12.5px var(--mono);color:var(--encre);border:1px solid var(--encre);padding:6px 10px;border-radius:2px;margin-top:4px}
+.pas-suivant[hidden]{display:none}
+
+/* ---------- Pièges, renvois ---------- */
+.pieges{list-style:none;padding:0!important}
+.pieges li{position:relative;padding-left:28px;margin-bottom:12px}
+.pieges li::before{content:"≠";position:absolute;left:2px;top:0;font:500 16px var(--mono);color:var(--positif)}
+.resert{list-style:none;padding:0!important;display:grid;gap:8px}
+.resert li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:baseline;margin:0}
+.resert li > b{font:500 12px var(--mono);color:var(--phenomene)}
+
+/* ---------- Fin de page ---------- */
+.chiffres{border-top:1px solid var(--filet);margin:0 0 16px}
+.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--filet);align-items:baseline}
+.chiffres b{font:500 16px var(--mono);color:var(--phenomene)}
+.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--encre);color:var(--encre)}
+.cta:hover{background:var(--encre);color:var(--papier)}
+
+@media (max-width:640px){
+  body.cours{font-size:16px}
+  .defs > div,.chiffres div{grid-template-columns:1fr;gap:2px}
+  .cours-barre .retour{display:none}
+  figure.labo figcaption{flex-direction:column;gap:4px}
+  .module .katex:not(.katex-display .katex){display:inline-block;max-width:100%;overflow-x:auto;overflow-y:hidden;vertical-align:middle}
+}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} .pas-a-pas li.vient{animation:none} }

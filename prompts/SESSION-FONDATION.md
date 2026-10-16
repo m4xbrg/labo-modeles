@@ -16,7 +16,7 @@ Lis d'abord, en entier et dans cet ordre :
 2. prompts/SESSION-FONDATION.md, partie 2 « Règles communes » (obligatoire)
 3. prompts/00-direction-artistique.md (charte visuelle)
 4. prompts/<brief>.md (le brief de cette production)
-5. La coquille de référence opus-sonnet/fondations-rotation-gravitation/index.html et la théorie de référence opus-sonnet/fondations-oscillations-ondes/explication.html
+5. labo/GABARIT.md (le gabarit standard : planche à fiche d'étape, explication en cours interactif), puis les deux références, en entier : opus-sonnet/fondations-langage/index.html et opus-sonnet/fondations-langage/explication.html
 6. Les pages que le brief cite dans « Réutilisation », assez pour ne pas reconstruire ce qui existe.
 
 Puis :
@@ -35,6 +35,8 @@ Rapport final (moins de 300 mots) : découpage, allers-retours, tests du moteur 
 
 Elles s'appliquent à chaque brief `fondations-*.md` écrit à partir du 2026-10-06. Un brief peut préciser ; il ne contredit pas ces règles sans le dire.
 
+**Gabarit standard (2026-10-15).** Toute page neuve est une planche à **fiche d'étape** et une explication en **cours interactif** (`corpus/standards.md` §4, `labo/GABARIT.md`). Les briefs écrits avant cette date qui parlent de couches Observer / Manipuler / Comprendre, de touches de couches ou de `theorie.css` sont dépassés sur ce point : ces règles l'emportent. Leur contenu scientifique, lui, reste valable.
+
 ### Fichiers et emplacement
 
 - Dossier : `opus-sonnet/fondations-<slug>/` avec `index.html` (autonome : CSS et JS inline) et `explication.html`. Le slug est donné par le brief.
@@ -43,17 +45,18 @@ Elles s'appliquent à chaque brief `fondations-*.md` écrit à partir du 2026-10
 
 ### Coquille
 
-- Reprendre la coquille de `opus-sonnet/fondations-rotation-gravitation/index.html` : grille scène / panneau / contrôles, titre discret, stepper groupé, infobulle de découverte, clavier, fondu entre étapes, enregistreur, mesures en IBM Plex Mono, note d'honnêteté, `window.__labo`.
-- En-tête (`corpus/standards.md` §1) : `<p class="serie">LABO · Fondations NN · NN</p>` avec les numéros couverts en `full` ou `partial` ; lien `<a class="back" href="../../labo/index.html">&larr; LABO</a>` ; titre d'onglet `Titre — LABO` (explication : `Comprendre … — LABO`).
+- Gabarit standard, section « La planche à fiche d'étape » de `labo/GABARIT.md` : `labo.css` avant le `<style>` de la page, `planche-etapes.css` et `fiche.css` après, `theme.js` ; `<body class="labo-etapes labo-fiche" data-mode="fiche">` ; `header.barre`, `div.titre` (h1, phrase, signature Échelle · Temps · Modèle), `nav.chapitres#stepper`, `aside.panel` avec le conteneur des lectures ; `fiche.js` puis `Fiche.init`, et `planche.js` en dernier. Référence : `opus-sonnet/fondations-langage/index.html`.
+- Dans la scène et le panneau : infobulle de découverte, clavier, fondu entre étapes, mesures en IBM Plex Mono, note d'honnêteté, `window.__labo`.
+- En-tête (`corpus/standards.md` §1) : position `Fondations · NN · NN` dans la barre de la planche, surtitre `LABO · Fondations NN · NN` dans l'explication, avec les numéros couverts en `full` ou `partial` ; lien LABO vers `../../labo/index.html` et retour « ← Fondations » ; titre d'onglet `Titre — LABO` (explication : `Comprendre … — LABO`).
 - Palette : tokens de `00-direction-artistique.md` (`--fond`, `--fond-2`, `--trait`, `--texte`, `--texte-2`, `--positif`, `--negatif`, `--energie`), plus l'`--accent` du brief. `--positif`, `--negatif` et `--energie` gardent leur sens dans toutes les pages. Quand le brief en a besoin : `--champ-b: #8a97f2` (champ magnétique) et `--induit: #45c9a0` (f.é.m. et courant induits), les mêmes que l'accueil LABO en thème sombre.
 
 ### Chapitres et étapes (`corpus/standards.md` §3)
 
 - **Un chapitre par module canonique, 2 à 4 étapes par chapitre.** Une seule barre d'étapes, sans onglets imbriqués.
-- Groupe du stepper : libellé long `Module NN · Titre court`, libellé court `NN`. Boutons numérotés en continu (`<b>1</b><span>Mot</span>`), titre complet en `title`.
-- Clavier : `Espace` pause, `←` `→` étape, `1` à `9` aller à l'étape, `R` réinitialiser l'étape, plus les touches que le brief donne.
+- Un `div.chap` par module (`p.chap-t` avec `<b>NN</b>` et le titre canonique), boutons `.seg` aux codes `NN.k` (`<b>14.2</b><span>Mot</span>`), titre complet en `title`. Deux scènes dans une étape : `data-a` et `data-b`, et une fiche par scène.
+- Clavier : `Espace` pause, `←` `→` étape, `1` à `9` aller à l'étape, `R` réinitialiser l'étape, `F` focus, `I` infos, plus les touches que le brief donne (jamais F ni I).
 - Au plus **trois curseurs par étape**, plus des boutons et des bascules. On règle une valeur là où elle s'affiche quand c'est possible.
-- Chaque étape a : une scène, 1 à 3 phrases dans le panneau, des **statuts** qui réagissent à ce que fait l'étudiant, une **phrase-clé** (encadré `.cle`), une **note d'honnêteté** d'une ligne.
+- Chaque scène a sa **fiche** (Regarde, Prédis, Essaie, Pourquoi, définitions, piège : `labo/GABARIT.md`, « Écrire une fiche »), dont la prédiction est recalculée avec le moteur et dont les essais se cochent d'après l'état. Le panneau de lectures garde des **statuts** qui réagissent à ce que fait l'étudiant, une **phrase-clé** (encadré `.cle`) et une **note d'honnêteté** d'une ligne.
 - Le phénomène vient avant le mot : un terme technique apparaît après que l'étudiant a vu la chose qu'il nomme.
 - Interdits de formulation : intentions prêtées aux objets (« l'électron veut… », « la molécule cherche… », « la cellule décide… »). On écrit ce qui arrive.
 - La dernière étape se termine par deux ou trois **questions ouvertes** vers les modules suivants (cartes sobres, sans réponse), comme la fin de *Cellule, membrane et transport*.
@@ -77,19 +80,21 @@ Elles s'appliquent à chaque brief `fondations-*.md` écrit à partir du 2026-10
 - Responsive jusqu'à 375 px sans défilement horizontal ; sous 861 px : scène, contrôles, panneau empilés. À 1366 × 768, la scène tient dans l'écran.
 - Texte entièrement en français (québécois neutre), sans emoji.
 
-### Explication (`corpus/standards.md` §2)
+### Explication (`corpus/standards.md` §2 et §4.3)
 
+- Forme : **cours interactif** (`labo/GABARIT.md`, « L'explication en cours interactif » ; référence `opus-sonnet/fondations-langage/explication.html`) : 2 scènes intégrées (`?embed`), 2 ou 3 calculs vivants et 1 ou 2 questions par module, Teste-toi en `.quiz`, exemple en `ol.pas-a-pas`, glossaire en `a.terme`.
 - Plan : **Ce que tu vois** · **La théorie, module par module** (sommaire puis une `<section class="module" id="mNN">` par module, sept rubriques : Intuition, Définitions, Relations clés, Exemple chiffré, Pièges fréquents, Où ça resservira, Teste-toi) · **Ce que la simulation simplifie** · **Les chiffres à retenir** · **Seulement introduit ici**.
 - 800 à 1 150 mots de prose par module (formules exclues), 3 à 6 relations, exactement 3 questions dont une calculatoire.
-- `../../labo/theorie.css` et `../../labo/theorie.js` ; `\( … \)` en ligne, `\[ … \]` en bloc, `\dd`, virgule décimale `{,}`, `\lt` et `\gt`.
+- `../../labo/labo.css`, `../../labo/cours.css`, `../../labo/theme.js`, puis `../../labo/theorie.js` et `../../labo/cours.js` en `defer` (plus de `theorie.css`) ; `\( … \)` en ligne, `\[ … \]` en bloc, `\dd`, virgule décimale `{,}`, `\lt` et `\gt`.
 - Chaque brief donne, par module, les relations attendues, un exemple chiffré possible et des pièges. Les chiffres de l'exemple sont recalculés, pas recopiés.
-- L'en-tête de chaque section dit quelles étapes de la planche la portent (`<p class="etapes">Sur la planche : étapes 1 … · 2 …</p>`).
+- L'en-tête de chaque section relie les étapes de la planche qui la portent (`<p class="etapes">Sur la planche : <a href="index.html?etape=NN.1">NN.1 …</a>…</p>`).
 
 ### Vérification
 
+- `node outils/qa/conformite.mjs <dossier> --strict` : aucune erreur.
 - `node --check` sur le JS extrait ; `test.js` sur la page livrée.
-- Navigateur headless (Playwright : Chromium du système en session cloud, `channel: 'msedge'` sur la machine de Max ; ne pas télécharger de navigateur) : console vide sur les deux pages, chaque étape visitée et chaque crochet de test appelé, captures à 1440 × 900, 1366 × 768 et 375 × 812.
-- Explication : toutes les formules KaTeX rendues sans erreur (compter les `.katex-error`), aucun débordement horizontal à 375 px, comptage des mots par module.
+- Navigateur headless (Playwright : Chromium du système en session cloud, `channel: 'msedge'` sur la machine de Max ; ne pas télécharger de navigateur) : console vide sur les deux pages, chaque étape visitée et chaque crochet de test appelé, aucun essai coché sans geste et au moins un essai réalisé par scène, captures à 1440 × 900, 1366 × 768 et 375 × 812.
+- Explication : toutes les formules KaTeX rendues sans erreur (compter les `.katex-error`), aucun débordement horizontal à 375 px, comptage des mots par module ; chaque calcul vivant juste aux bornes de ses curseurs, chaque quiz qui accepte la bonne réponse et refuse une mauvaise, chaque scène intégrée à la bonne étape.
 - Servir la racine du dépôt par HTTP (`python -m http.server`) et ouvrir `/labo/` : la nouvelle page apparaît au bon module, le lien fonctionne.
 
 ### Corpus (dans la même PR)

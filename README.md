@@ -66,7 +66,7 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 ## Organisation du dépôt
 
 - `index.html` : redirection vers l'accueil, `labo/index.html`.
-- `labo/` : l'accueil de LABO (lu dans `corpus/`), la feuille de style commune et le gabarit de planche documenté dans `labo/GABARIT.md`.
+- `labo/` : l'accueil de LABO (lu dans `corpus/`), les feuilles et scripts communs (coque, fiche d'étape, cours interactif) et le gabarit de page documenté dans `labo/GABARIT.md`.
 - `opus-sonnet/` : toutes les planches. Le nom vient du banc d'essai d'origine et reste pour ne pas casser les URL. `prealables.html` est la théorie préalable, chaque sous-dossier un modèle (`index.html` + `explication.html`) ; `index.html`, l'ancien accueil, redirige vers `labo/`.
 - `prompts/` : la charte visuelle commune (`00-direction-artistique.md`, toujours appliquée) et les briefs de construction de chaque page. Les briefs des pages construites sont historiques : ils disent ce qui a été demandé, `corpus/` dit ce qui existe. Pour la suite : [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md) (les pages de fondations qui restent, en sept vagues), [`prompts/SESSION-FONDATION.md`](prompts/SESSION-FONDATION.md) (le prompt de session et les règles communes) et un brief pour chacune de ces pages. `prompts/moteurs/` garde les moteurs physiques verrouillés d'une planche et leurs tests, à copier tels quels dans la page.
 - `prompts/lots/` : 14 lots préparés pour confier des pages à un exécutant externe (ChatGPT, Codex), avec l'outil `lots.mjs`. Huit sont devenus obsolètes ; l'état de chaque lot est dans [`prompts/lots/LISEZ-MOI.md`](prompts/lots/LISEZ-MOI.md).
@@ -75,7 +75,7 @@ Les mêmes données existent en JSON (`corpus/modules.json`, `productions.json`,
 - `HANDOFF-CODEX.md` : passation de la migration au gabarit, **terminée** ; gardée comme trace.
 - `robots.txt`, `.nojekyll` : publication sur GitHub Pages, sans indexation.
 
-Les planches utilisent le [gabarit LABO](labo/GABARIT.md) : coque claire ou sombre, signature Échelle · Temps · Modèle, chapitres et couches Observer / Manipuler / Comprendre. Voir [les standards](corpus/standards.md) pour les chapitres et les étapes.
+**Gabarit standard depuis le 2026-10-15** ([`labo/GABARIT.md`](labo/GABARIT.md), [`corpus/standards.md`](corpus/standards.md) §4) : la planche à **fiche d'étape** (coque claire ou sombre, signature Échelle · Temps · Modèle, chapitres et étapes, puis une fiche par scène : Regarde, Prédis, Essaie, Lectures, Pourquoi) et l'explication en **cours interactif** (sommaire collant, scènes de la planche intégrées au texte, calculs vivants, quiz). Référence : *Langage scientifique*. Toute page neuve suit ce gabarit ; les autres pages, encore à couches Observer / Manipuler / Comprendre, y sont migrées une à une, et `node outils/qa/conformite.mjs` dit où en est chacune.
 
 Les pages sont des fichiers HTML autonomes (CSS et JS inline, polices Google avec repli système), sans étape de build. Les planches à étapes chargent en plus la coque commune de `labo/` (`labo.css`, `planche-etapes.css`, `planche.js`). Pour les voir en local, servir la racine du dépôt (`python -m http.server`) et ouvrir `/labo/` : l'accueil lit `corpus/*.json`, ce qu'un fichier ouvert directement ne peut pas faire.
 

@@ -64,20 +64,20 @@ const app = document.body.classList.contains('labo-etapes') && $('.app');
 const ajuste = () => { if (!app || innerWidth <= 860) return; document.body.style.setProperty('--chrome', Math.round(app.getBoundingClientRect().top + scrollY) + 'px'); };
 if (app){
   const barre = $('.barre'), titre = $('.titre'), chap = $('.chapitres'), modes = $('.modes'), liste = modes && modes.querySelector('[role=tablist]');
-  if (barre && titre && chap && liste){
+  if (barre && titre && chap){   // sans couches (fiche d'étape, labo/fiche.js), la liste d'onglets manque
     barre.classList.add('compacte');
     const court = document.createElement('p'); court.className = 'titre-court';
     court.textContent = (titre.querySelector('h1') || {}).textContent || '';
     (barre.querySelector('.ou') || barre).append(court);
     const centre = document.createElement('div'); centre.className = 'centre';
-    centre.append(chap, liste);
+    centre.append(chap); if (liste) centre.append(liste);
     barre.insertBefore(centre, barre.querySelector('.droite'));
     // le titre de chaque étape passe en infobulle (le texte du bouton est masqué dans la barre)
     chap.querySelectorAll('.seg').forEach(s => { if (!s.title) s.title = s.textContent.trim(); });
     const infos = document.createElement('button'); infos.type = 'button'; infos.className = 'bascule-theme infos';
     infos.setAttribute('aria-expanded', 'false'); infos.title = 'Titre, signature et aide (I)'; infos.textContent = 'Infos';
     const tiroir = document.createElement('div'); tiroir.className = 'tiroir'; tiroir.id = 'tiroir';
-    tiroir.append(titre, modes); barre.after(tiroir); infos.setAttribute('aria-controls', 'tiroir');
+    tiroir.append(titre); if (modes) tiroir.append(modes); barre.after(tiroir); infos.setAttribute('aria-controls', 'tiroir');
     const droite = barre.querySelector('.droite') || barre; droite.prepend(infos);
     const bascule = ouvrir => {
       const o = ouvrir === undefined ? !document.body.classList.contains('coque-ouverte') : ouvrir;
@@ -95,8 +95,70 @@ if (app){
   if (document.fonts) document.fonts.ready.then(ajuste);
 }
 
-const m0 = new URLSearchParams(location.search).get('mode');
-mode(onglets.some(b => b.dataset.m === m0) ? m0 : (document.body.dataset.mode || 'observer'));
+const Q = new URLSearchParams(location.search);
+const EMBED = Q.has('embed');
+const m0 = Q.get('mode');
+// intégrée, une planche montre ses réglages d'emblée : Observer les cacherait
+mode(onglets.some(b => b.dataset.m === m0) ? m0 : EMBED && onglets.some(b => b.dataset.m === 'manipuler') ? 'manipuler' : (document.body.dataset.mode || 'observer'));
+
+/* Ouvrir une étape précise : ?etape=01.3 (code affiché dans la barre) ou ?etape=3 (rang, 1 = première).
+   Une page qui code ses étapes « 1 2 3 » accepte aussi « NN.k » si NN est son data-module.
+   ?scene=2 ouvre la seconde scène d'une étape qui en regroupe deux, si la page expose window.allerScene. */
+function etapeDemandee(v){
+  const segs = [...document.querySelectorAll('#stepper .seg')];
+  const code = s => ((s.querySelector('b') || {}).textContent || '').trim();
+  let s = segs.find(x => code(x) === v);
+  if (!s && /^\d+$/.test(v)) s = segs[+v - 1];
+  const m = !s && /^(\d+)\.(\d+)$/.exec(v);
+  if (m && +m[1] === +document.body.dataset.module) s = segs[+m[2] - 1];
+  return s;
+}
+function ouvreEtape(){
+  const e0 = Q.get('etape'), seg0 = e0 && etapeDemandee(e0);
+  if (!seg0) return;
+  if (Q.get('scene') === '2' && seg0.dataset.b !== undefined && window.allerScene) window.allerScene(+seg0.dataset.b);
+  else if (seg0.getAttribute('aria-current') !== 'step') seg0.click();
+}
+// après le chargement : certaines pages ouvrent leur première étape au « load », ce qui écraserait le choix
+if (Q.has('etape')){
+  if (document.readyState === 'complete') ouvreEtape();
+  else addEventListener('load', () => setTimeout(ouvreEtape, 0));
+}
+
+/* Mode intégré : ?embed. La scène et ses contrôles seuls, pour une iframe (explications, cours).
+   ?panneau=1 garde le panneau de lecture ; ?controles=0 retire la barre de contrôles.
+   Les touches qui changent d'étape ou de couche sont neutralisées : l'étape choisie reste celle de l'auteur.
+   La molette ne va à la scène qu'après un clic dedans ; sinon elle fait défiler la page qui l'accueille.
+   Styles : planche-etapes.css (html.labo-embed). */
+if (EMBED){
+  const html = document.documentElement;
+  html.classList.add('labo-embed');
+  html.classList.toggle('embed-panneau', Q.get('panneau') === '1');
+  html.classList.toggle('embed-sans-controles', Q.get('controles') === '0');
+  // retour vers la planche complète, à la même étape
+  const plein = new URL(location.href);
+  ['embed', 'panneau', 'controles', 'mode'].forEach(k => plein.searchParams.delete(k));
+  const a = document.createElement('a');
+  a.className = 'embed-ouvrir'; a.href = plein.href; a.target = '_top';
+  a.textContent = 'Ouvrir la planche ↗';
+  document.body.append(a);
+  const avis = document.createElement('p'); avis.className = 'embed-avis'; avis.setAttribute('aria-live', 'polite');
+  document.body.append(avis);
+  const bloque = new Set(['i', 'f', ...TOUCHES]);
+  addEventListener('keydown', e => {
+    if (e.target.closest('input,textarea,select')) return;
+    if (/^[0-9]$/.test(e.key) || bloque.has(e.key.toLowerCase())) e.stopImmediatePropagation();
+  }, true);
+  let actif = false, tAvis = 0;
+  addEventListener('pointerdown', () => { actif = true; }, true);
+  html.addEventListener('mouseleave', () => { actif = false; });
+  addEventListener('wheel', e => {
+    if (actif || !e.target.closest('.scene, #stage, canvas')) return;
+    e.stopImmediatePropagation();   // la page parente défile ; la scène n'a rien reçu
+    avis.textContent = 'Clique dans la scène pour utiliser la molette';
+    avis.classList.add('on'); clearTimeout(tAvis); tAvis = setTimeout(() => avis.classList.remove('on'), 1600);
+  }, { capture: true, passive: true });
+}
 
 window.Planche = {
   mode,

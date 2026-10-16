@@ -4,7 +4,7 @@ Rédigée le 2026-10-06 à partir de `corpus/` (alors 18 modèles), **mise à jo
 
 ## En une phrase
 
-Sur les 23 pages de fondations prévues, **17 sont construites** et **6 restent** (36, 39, 43·44, 45, 49, 50), avec le module 07 (hasard) à compléter. Quatre de ces six pages ont leurs préalables prêts ; les deux autres (39, 45) attendent respectivement 36 et 43·44. Chacune a un brief complet, prêt à coller dans une session. Il reste aussi un peu de mise au standard sur les pages existantes (voir plus bas).
+Sur les 23 pages de fondations prévues, **17 sont construites** et **6 restent** (36, 39, 43·44, 45, 49, 50), avec le module 07 (hasard) à compléter. Quatre de ces six pages ont leurs préalables prêts ; les deux autres (39, 45) attendent respectivement 36 et 43·44. Chacune a un brief complet, prêt à coller dans une session. Il reste aussi un peu de mise au standard sur les pages existantes (voir plus bas). **Depuis le 2026-10-15, chaque page neuve est construite dans le gabarit standard** (fiche d'étape et cours interactif, `corpus/standards.md` §4).
 
 ## Comment c'est organisé
 
@@ -65,6 +65,7 @@ Total prévu : 23 pages, 105 étapes, ≈ 20 ADN. Au 2026-10-13, 42 modules sur 
 
 | Page | À faire |
 |---|---|
+| Les 34 pages encore à couches | **Migrer au gabarit standard** (fiche d'étape et cours interactif), une page par branche, avec [`codex/MIGRATION-FICHE-COURS.md`](codex/MIGRATION-FICHE-COURS.md). État page par page : `corpus/standards.md` §4.5, ou `node outils/qa/conformite.mjs`. Ordre proposé : les trois pages dont les prompts sont prêts (Oscillations et ondes, Forces et énergie, Systèmes et hasard), puis les autres fondations, puis les showcases. |
 | Systèmes, croissance et hasard (04·05·07) | **Compléter 07** (probabilités conditionnelles, loi binomiale, théorème central limite) pour le faire passer en `full`. |
 | Préalables (`opus-sonnet/prealables.html`) | Ajouter la supernova et les pages de fondations. |
 | Vague 1 (08, 09, 35, 38, 41·42, 47, 48, chapitre 27) | Validation scientifique et visuelle, avec [`outils/qa/`](../outils/qa/README.md) et la relecture des captures. |
