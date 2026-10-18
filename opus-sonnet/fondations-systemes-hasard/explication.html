@@ -9,129 +9,116 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
-  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
-  --texte:#e8e4dc; --texte-2:#8a93a0;
-  --accent:#d9e58c;
-  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
-  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
-  --ease:cubic-bezier(0.22,1,0.36,1);
-}
-*{box-sizing:border-box}
-html{background:var(--fond)}
-body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
-a{color:var(--accent);text-underline-offset:3px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.wrap{max-width:720px;margin:0 auto;padding:36px 16px 90px}
-.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
-.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
-.top a:hover{color:var(--texte)}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
-h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
-h1 em{color:var(--accent)}
-.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
-h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
-h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
-p{margin:0 0 16px}
-ul{padding-left:20px;margin:0 0 16px}
-li{margin-bottom:8px}
-code,.m{font-family:var(--mono);font-size:.9em;white-space:nowrap}
-.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
-.eq small{display:block;font:400 12px/1.5 var(--mono);color:var(--texte-2);margin-top:4px}
-.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}.dim{color:var(--texte-2)}
-dl{margin:0 0 16px;border-top:1px solid var(--trait)}
-dt{font:500 15px var(--sans);padding-top:12px}
-dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
-.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
-.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
-.chiffres b{font:500 17px var(--mono);color:var(--energie)}
-details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
-summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
-summary::-webkit-details-marker{display:none}
-summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
-details[open] summary::before{content:"\2713"}
-details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
-.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
-.cta:hover{background:var(--accent);color:var(--fond)}
-@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}details p{padding-left:16px}code,.m{white-space:normal}}
-</style>
-<link rel="stylesheet" href="../../labo/theorie.css">
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
 <script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
 </head>
-<body>
-<div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
-  <p class="serie">LABO · Fondations 04 · 05 · 07</p>
-  <h1>Comprendre systèmes, croissance et <em>hasard</em></h1>
-  <p class="lede">Trois idées très générales, qui reviennent partout en science. Un système a un état, et une règle dit à quelle vitesse cet état change, compte tenu de ce qu'il vaut maintenant. Quand ce changement est proportionnel à l'état, on obtient une exponentielle. Et des événements individuels imprévisibles, répétés en grand nombre, produisent des distributions prévisibles. La planche finit là où les trois se rejoignent : des atomes qui se désintègrent au hasard dessinent exactement l'exponentielle du chapitre C.</p>
-
-  <h2><span>1</span>Ce que tu vois</h2>
-  <dl>
-    <dt>Le graphe x(t)</dt>
-    <dd>Le même dans presque toutes les étapes : le temps en secondes vers la droite, l'état vers le haut. Trait plein <span style="color:var(--texte)">blanc cassé</span> pour ce que le système fait, tireté <span class="dim">gris</span> pour une solution exacte ou une prévision théorique.</dd>
-    <dt>La flèche de taux</dt>
-    <dd>La vitesse de changement de l'état, maintenant. <span class="pos">Orange</span> si l'état augmente, <span class="neg">bleue</span> s'il diminue, grise s'il ne bouge pas. Sur le graphe, elle devient un petit segment de tangente : sa pente <em>est</em> le taux.</dd>
-    <dt>La ligne de phase</dt>
-    <dd>L'axe de l'état seul, avec des flèches qui disent où le système va depuis chaque valeur. Un équilibre stable est un point plein <span class="acc">citron</span> ; un équilibre instable, un cercle vide.</dd>
-    <dt>Le paysage et la bille (B1)</dt>
-    <dd>Une image de la rétroaction : dans la <span class="neg">cuvette</span>, la bille revient au fond ; sur le <span class="pos">dôme</span>, elle s'en éloigne. Elle glisse comme dans du miel, sans élan : seule compte la pente là où elle se trouve.</dd>
-    <dt>Les repères <span class="ener">×2</span> et <span class="ener">÷2</span></dt>
-    <dd>Un repère jaune à chaque temps de doublement ou de demi-vie. Ils tombent à intervalles égaux : c'est la signature d'une exponentielle.</dd>
-    <dt>Les histogrammes</dt>
-    <dd>Barres <span class="acc">citron</span> : ce qui a été observé. Trait fin ou tireté : ce que la théorie prévoit. Trait <span class="ener">jaune</span> : la moyenne observée, ou le dernier tirage.</dd>
-  </dl>
-
-  <h2><span>2</span>La théorie, module par module</h2>
-  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
-  <ul class="sommaire">
-    <li><a href="#m04"><b>04</b>Systèmes qui évoluent dans le temps</a></li>
-    <li><a href="#m05"><b>05</b>Exponentielles et logarithmes</a></li>
-    <li><a href="#m07"><b>07</b>Hasard, probabilité et distributions</a></li>
-  </ul>
-
-  <!-- ===================== Module 04 ===================== -->
-  <section class="module" id="m04">
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← Les laboratoires</a>
+  <p class="ici">Systèmes, croissance et hasard <span>· le cours</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire"><p>Sommaire</p><ol>
+<li><a href="#vois">Ce que tu vois</a></li>
+<li><a href="#m04"><b>04</b>Systèmes qui évoluent dans le temps</a><ol><li><a href="#m04-intuition">Intuition</a></li>
+        <li><a href="#m04-defs">Définitions</a></li>
+        <li><a href="#m04-relations">Relations clés</a></li>
+        <li><a href="#m04-exemple">Exemple chiffré</a></li>
+        <li><a href="#m04-pieges">Pièges fréquents</a></li>
+        <li><a href="#m04-suite">Où ça resservira</a></li>
+        <li><a href="#m04-test">Teste-toi</a></li></ol></li>
+<li><a href="#m05"><b>05</b>Exponentielles et logarithmes</a><ol><li><a href="#m05-intuition">Intuition</a></li>
+        <li><a href="#m05-defs">Définitions</a></li>
+        <li><a href="#m05-relations">Relations clés</a></li>
+        <li><a href="#m05-exemple">Exemple chiffré</a></li>
+        <li><a href="#m05-pieges">Pièges fréquents</a></li>
+        <li><a href="#m05-suite">Où ça resservira</a></li>
+        <li><a href="#m05-test">Teste-toi</a></li></ol></li>
+<li><a href="#m07"><b>07</b>Hasard, probabilité et distributions</a><ol><li><a href="#m07-intuition">Intuition</a></li>
+        <li><a href="#m07-defs">Définitions</a></li>
+        <li><a href="#m07-relations">Relations clés</a></li>
+        <li><a href="#m07-exemple">Exemple chiffré</a></li>
+        <li><a href="#m07-pieges">Pièges fréquents</a></li>
+        <li><a href="#m07-suite">Où ça resservira</a></li>
+        <li><a href="#m07-test">Teste-toi</a></li></ol></li>
+<li><a href="#simplifie">Ce que la simulation simplifie</a></li>
+<li><a href="#chiffres">Les chiffres à retenir</a></li>
+<li><a href="#introduit">Seulement introduit ici</a></li>
+</ol></nav><main class="cours-texte">
+<header class="cours-tete">
+<p class="surtitre">LABO · Fondations 04 · 05 · 07</p>
+<h1>Comprendre systèmes, croissance et hasard</h1>
+<p class="lead">Trois idées très générales, qui reviennent partout en science. Un système a un état, et une règle dit à quelle vitesse cet état change, compte tenu de ce qu'il vaut maintenant. Quand ce changement est proportionnel à l'état, on obtient une exponentielle. Et des événements individuels imprévisibles, répétés en grand nombre, produisent des distributions prévisibles. La planche finit là où les trois se rejoignent : des atomes qui se désintègrent au hasard dessinent en moyenne l'exponentielle du chapitre C.</p>
+    <p class="mode-emploi">Les nombres soulignés se règlent par glisser ou avec les flèches du clavier. Les termes pointillés montrent leur définition au survol. Manipule les scènes intégrées, déroule les exemples puis vérifie tes réponses.</p>
+<div class="cartes"><a class="carte" href="#m04"><b>MODULE 04</b><span>Systèmes qui évoluent dans le temps</span><small>2 scènes intégrées · 3 calculs vivants</small></a><a class="carte" href="#m05"><b>MODULE 05</b><span>Exponentielles et logarithmes</span><small>2 scènes intégrées · 3 calculs vivants</small></a><a class="carte" href="#m07"><b>MODULE 07</b><span>Hasard, probabilité et distributions</span><small>2 scènes intégrées · 3 calculs vivants</small></a></div></header>
+<h2 id="vois"><span class="n">1</span>Ce que tu vois</h2><div class="cartes"><a class="carte" href="index.html?etape=04.1"><b>Le graphe x(t)</b><span>Le même dans presque toutes les étapes : le temps en secondes vers la droite, l'état vers le haut. Trait plein <span style="color:var(--texte)">blanc cassé</span> pour ce que le système fait, tireté <span class="dim">gris</span> pour une solution exacte ou une prévision théorique.</span><small>Ouvrir l’étape 04.1 ↗</small></a><a class="carte" href="index.html?etape=04.1"><b>La flèche de taux</b><span>La vitesse de changement de l'état, maintenant. <span class="pos">Orange</span> si l'état augmente, <span class="neg">bleue</span> s'il diminue, grise s'il ne bouge pas. Sur le graphe, elle devient un petit segment de tangente : sa pente <em>est</em> le taux.</span><small>Ouvrir l’étape 04.1 ↗</small></a><a class="carte" href="index.html?etape=04.2"><b>La ligne de phase</b><span>L'axe de l'état seul, avec des flèches qui disent où le système va depuis chaque valeur. Un équilibre stable est un point plein <span class="acc">citron</span> ; un équilibre instable, un cercle vide.</span><small>Ouvrir l’étape 04.2 ↗</small></a><a class="carte" href="index.html?etape=04.3"><b>Le paysage et la bille (B1)</b><span>Une image de la rétroaction : dans la <span class="neg">cuvette</span>, la bille revient au fond ; sur le <span class="pos">dôme</span>, elle s'en éloigne. Elle glisse comme dans du miel, sans élan : seule compte la pente là où elle se trouve.</span><small>Ouvrir l’étape 04.3 ↗</small></a><a class="carte" href="index.html?etape=05.1"><b>Les repères <span class="ener">×2</span> et <span class="ener">÷2</span></b><span>Un repère jaune à chaque temps de doublement ou de demi-vie. Ils tombent à intervalles égaux : c'est la signature d'une exponentielle.</span><small>Ouvrir l’étape 05.1 ↗</small></a><a class="carte" href="index.html?etape=07.1"><b>Les histogrammes</b><span>Barres <span class="acc">citron</span> : ce qui a été observé. Trait fin ou tireté : ce que la théorie prévoit. Trait <span class="ener">jaune</span> : la moyenne observée, ou le dernier tirage.</span><small>Ouvrir l’étape 07.1 ↗</small></a></div>
+<h2 id="theorie"><span class="n">2</span>La théorie, module par module</h2>
+<section class="module" id="m04">
     <header>
       <p class="num">Module 04</p>
       <h3>Systèmes qui évoluent dans le temps</h3>
-      <p class="etapes">Sur la planche : étapes A1 L’état et son taux · A2 Même règle, autres départs · B1 Négatif ou positif ? · B2 La croissance logistique</p>
+      <p class="etapes">Sur la planche : <a href="index.html?etape=04.1">04.1 Taux</a><a href="index.html?etape=04.2">04.2 Départs</a><a href="index.html?etape=04.3">04.3 Boucle</a><a href="index.html?etape=04.4">04.4 Logistique</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Un système, c’est tout ce qui change avec le temps selon une règle : un réservoir qui se vide, une population, une tasse de café, une bille dans un paysage. Pour le décrire, on n’a pas besoin de savoir où il sera : il suffit de savoir où il en est maintenant, son état, et à quelle vitesse cet état change compte tenu de ce qu’il vaut. Cette règle s’appelle une équation différentielle. Elle agit comme une boussole locale : à chaque instant, elle donne la direction du prochain pas. La rétroaction est le cas où l’état influence son propre changement, soit pour se corriger (négative), soit pour s’emballer (positive). Entre les deux se trouvent les équilibres : des états où plus rien ne bouge, mais qui ne se valent pas, car certains rattrapent les perturbations et d’autres les amplifient.</p>
+    <h4 data-n="1" id="m04-intuition">Intuition</h4>
+    <p>Un système, c’est tout ce qui change avec le temps selon une règle : un réservoir qui se vide, une population, une tasse de café, une bille dans un paysage. Pour le décrire, on n’a pas besoin de savoir où il sera : il suffit de savoir où il en est maintenant, <a class="terme" href="#def-etat">son état</a>, et à quelle vitesse cet état change compte tenu de ce qu’il vaut. Cette règle s’appelle <a class="terme" href="#def-regle">une équation différentielle</a>. Elle agit comme une boussole locale : à chaque instant, elle donne la direction du prochain pas. <a class="terme" href="#def-retroaction">La rétroaction</a> est le cas où l’état influence son propre changement, soit pour se corriger (négative), soit pour s’emballer (positive). Entre les deux se trouvent <a class="terme" href="#def-equilibre">les équilibres</a> : des états où plus rien ne bouge, mais qui ne se valent pas, car certains rattrapent les perturbations et d’autres les amplifient.</p>
 
-    <h4 data-n="2">Définitions</h4>
+<figure class="labo large" data-src="index.html?embed&amp;etape=04.1" data-h="500" data-titre="Euler pas à pas">
+      <figcaption><span><b>04.1</b>Change Δt et compare la ligne brisée à la solution exacte.</span><a class="ouvrir" href="index.html?etape=04.1">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <h4 data-n="2" id="m04-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>État \(x\)<span class="u">unité de la grandeur</span></dt><dd>Le plus petit ensemble de nombres qui suffit à prédire la suite une fois la règle connue. Ici, un seul nombre (niveau, population, température, écart).</dd></div>
-      <div><dt>Taux de changement \(\dd x/\dd t\)<span class="u">unité de \(x\) par s</span></dt><dd>Vitesse à laquelle l’état change à cet instant : la pente de la tangente sur le graphe \(x(t)\).</dd></div>
-      <div><dt>Règle \(f(x)\)</dt><dd>Fonction qui donne le taux en fonction de l’état : \(\dd x/\dd t = f(x)\). C’est l’équation différentielle.</dd></div>
-      <div><dt>Condition initiale \(x_0\)</dt><dd>Valeur de départ \(x(0)\). La règle et la condition initiale fixent une seule trajectoire.</dd></div>
-      <div><dt>Équilibre \(x^*\)</dt><dd>État où le taux est nul : \(f(x^*) = 0\). Si le système y est, il y reste.</dd></div>
-      <div><dt>Constante de temps \(\tau\)<span class="u">s</span></dt><dd>Durée caractéristique d’un retour (ou d’une fuite) exponentiel : l’écart est divisé (ou multiplié) par \(\mathrm{e}\) en \(\tau\).</dd></div>
-      <div><dt>Rétroaction négative, positive</dt><dd>Négative : un écart provoque une réponse qui le réduit. Positive : un écart provoque une réponse qui l’augmente.</dd></div>
-      <div><dt>Stabilité</dt><dd>Un équilibre est stable si une petite perturbation s’efface, instable si elle grandit.</dd></div>
-      <div><dt>Taux de croissance \(r\)<span class="u">s⁻¹</span> et capacité \(K\)</dt><dd>Paramètres de la croissance logistique : \(r\) est le taux de croissance sans frein, \(K\) la valeur que le milieu peut soutenir (unité de \(N\)).</dd></div>
+      <div id="def-etat"><dt>État \(x\)<span class="u">unité de la grandeur</span></dt><dd>Le plus petit ensemble de nombres qui suffit à prédire la suite une fois la règle connue. Ici, un seul nombre (niveau, population, température, écart).</dd></div>
+      <div id="def-taux"><dt>Taux de changement \(\dd x/\dd t\)<span class="u">unité de \(x\) par s</span></dt><dd>Vitesse à laquelle l’état change à cet instant : la pente de la tangente sur le graphe \(x(t)\).</dd></div>
+      <div id="def-regle"><dt>Règle \(f(x)\)</dt><dd>Fonction qui donne le taux en fonction de l’état : \(\dd x/\dd t = f(x)\). C’est l’équation différentielle.</dd></div>
+      <div id="def-initiale"><dt>Condition initiale \(x_0\)</dt><dd>Valeur de départ \(x(0)\). La règle et la condition initiale fixent une seule trajectoire.</dd></div>
+      <div id="def-equilibre"><dt>Équilibre \(x^*\)</dt><dd>État où le taux est nul : \(f(x^*) = 0\). Si le système y est, il y reste.</dd></div>
+      <div id="def-tau"><dt>Constante de temps \(\tau\)<span class="u">s</span></dt><dd>Durée caractéristique d’un retour (ou d’une fuite) exponentiel : l’écart est divisé (ou multiplié) par \(\mathrm{e}\) en \(\tau\).</dd></div>
+      <div id="def-retroaction"><dt>Rétroaction négative, positive</dt><dd>Négative : un écart provoque une réponse qui le réduit. Positive : un écart provoque une réponse qui l’augmente.</dd></div>
+      <div id="def-stabilite"><dt>Stabilité</dt><dd>Un équilibre est stable si une petite perturbation s’efface, instable si elle grandit.</dd></div>
+      <div id="def-capacite"><dt>Taux de croissance \(r\)<span class="u">s⁻¹</span> et capacité \(K\)</dt><dd>Paramètres de la croissance logistique : \(r\) est le taux de croissance sans frein, \(K\) la valeur que le milieu peut soutenir (unité de \(N\)).</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m04-relations">Relations clés</h4>
     <div class="relation">\[ \frac{\dd x}{\dd t} = f(x), \qquad x(0) = x_0 \]
       <p>La règle ne dit pas où sera \(x\) : elle dit à quelle vitesse \(x\) change, compte tenu de ce qu’il vaut maintenant. Avec la condition initiale, elle détermine toute la trajectoire.</p></div>
+
     <div class="relation">\[ x(t + \Delta t) \approx x(t) + f\bigl(x(t)\bigr)\,\Delta t \]
       <p>Méthode d’Euler : on calcule le taux, on le suppose constant pendant \(\Delta t\), on fait le pas. Exacte quand \(\Delta t \to 0\), c’est le principe de toute simulation de la série.</p></div>
+<div class="calc"><p class="calc-t">À toi : un pas d’Euler</p>
+    <p>État x = <span class="var" data-nom="xe" data-val="1" data-min="0.5" data-max="9" data-pas="0.1" data-dec="1" data-unite="u" data-label="État x"></span>, pas Δt = <span class="var" data-nom="dte" data-val="1" data-min="0.1" data-max="2" data-pas="0.1" data-dec="1" data-unite="s" data-label="Pas de temps"></span>. La règle est dx/dt = 0,2x.</p>
+    <p>Taux = <output class="fort" data-expr="0.2*xe" data-dec="2"></output> u/s ; nouvel état x + f(x)Δt = <output class="fort" data-expr="xe+0.2*xe*dte" data-dec="3"></output> u.</p>
+    <p>À comparer à la solution exacte x·e<sup>0,2Δt</sup> = <output class="fort" data-expr="xe*Math.exp(0.2*dte)" data-dec="3"></output> u.</p></div>
     <div class="relation">\[ \begin{aligned} \dd x/\dd t = a &\ \Rightarrow\ x = x_0 + a\,t \\ \dd x/\dd t = k\,x &\ \Rightarrow\ x = x_0\,\mathrm{e}^{kt} \\ \dd x/\dd t = -(x - x^*)/\tau &\ \Rightarrow\ x = x^* + (x_0 - x^*)\,\mathrm{e}^{-t/\tau} \end{aligned} \]
       <p>Les trois règles de référence de la planche : taux constant, taux proportionnel à l’état, retour vers une cible.</p></div>
+
     <div class="relation">\[ f'(x^*) \lt 0 \Rightarrow \text{stable}, \qquad f'(x^*) \gt 0 \Rightarrow \text{instable} \]
       <p>Le critère se lit sur le graphe du taux : si \(f\) descend en coupant l’axe, le taux ramène vers \(x^*\) des deux côtés. Près de l’équilibre, l’écart \(e = x - x^*\) évolue comme \(\mathrm{e}^{\mp t/\tau}\) (négative : retour, positive : fuite), avec \(\tau \approx 1/|f'(x^*)|\).</p></div>
+<div class="calc"><p class="calc-t">À toi : un temps de retour</p>
+    <p>Écart initial 0,5 u ; τ = <span class="var" data-nom="tau" data-val="2" data-min="1" data-max="5" data-pas="0.1" data-dec="1" data-unite="s" data-label="Constante de temps"></span>, durée t = <span class="var" data-nom="tf" data-val="2" data-min="0" data-max="10" data-pas="0.5" data-dec="1" data-unite="s" data-label="Durée"></span>.</p>
+    <p>Écart après retour : <output class="fort" data-expr="0.5*Math.exp(-tf/tau)" data-dec="3"></output> u ; après amplification : <output class="fort" data-expr="0.5*Math.exp(tf/tau)" data-dec="3"></output> u.</p>
+    <p class="note">Le calcul d’amplification est sans butée ; la planche sature à |e| = 4.</p></div>
     <div class="relation">\[ \frac{\dd N}{\dd t} = r\,N\Bigl(1 - \frac{N}{K}\Bigr), \qquad \left.\frac{\dd N}{\dd t}\right|_{\max} = \frac{rK}{4}\ \text{ en } N = \frac{K}{2} \]
       <p>Croissance logistique : exponentielle quand \(N\) est petit, saturation vers \(K\) ensuite. Deux équilibres : 0 (instable, \(f'(0) = r\)) et \(K\) (stable, \(f'(K) = -r\)).</p></div>
+<div class="calc avec-figure"><p class="calc-t">À toi : une population et sa capacité</p><output class="figure" data-expr="trace({f:t=&gt;capac/(1+(capac/ninit-1)*Math.exp(-rlog*t)),x:[0,20],y:[0,max(capac,ninit)*1.1],seg:[[0,capac,20,capac,'tan']]})"></output><p>N₀ = <span class="var" data-nom="ninit" data-val="2" data-min="1" data-max="140" data-pas="1" data-dec="0" data-unite="u" data-label="Population initiale"></span>, r = <span class="var" data-nom="rlog" data-val="0.8" data-min="0.2" data-max="1.5" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Taux r"></span>, K = <span class="var" data-nom="capac" data-val="100" data-min="50" data-max="200" data-pas="10" data-dec="0" data-unite="u" data-label="Capacité K"></span>.</p>
+    <p>À t = 5 s : N = <output class="fort" data-expr="capac/(1+(capac/ninit-1)*Math.exp(-rlog*5))" data-dec="2"></output> u. Taux maximal rK/4 = <output class="fort" data-expr="rlog*capac/4" data-dec="2"></output> u/s.</p>
+    <p class="note">Solution logistique exacte ; la planche emploie RK4. Le graphe couvre 0 à 20 s.</p></div>
+    <figure class="labo large" data-src="index.html?embed&amp;etape=04.4" data-h="520" data-titre="Croissance logistique">
+      <figcaption><span><b>04.4</b>Clique pour lancer une population sous ou au-dessus de K ; compare le taux et la trajectoire.</span><a class="ouvrir" href="index.html?etape=04.4">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <div class="quiz" data-reponse="20" data-tol="0.1" data-unite="u/s"><p class="q">Avec r = 0,8 s⁻¹ et K = 100 u, quel est le taux maximal de la croissance logistique ?</p>
+<div class="corr"><p>À N = K/2 = 50 u : rK/4 = 0,8 × 100/4 = 20 u/s.</p></div></div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <h4 data-n="4" id="m04-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Un café à \(90\) °C dans une pièce à \(20\) °C. Hypothèse : refroidissement de Newton, \(\dd T/\dd t = -(T - 20)/\tau\), avec \(\tau = 20\) min.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Taux initial : \(-(90 - 20)/20 = -3{,}5\) °C/min.</li>
         <li>Solution exacte : \(T(t) = 20 + 70\,\mathrm{e}^{-t/20}\). À \(t = 20\) min : \(20 + 70 \times 0{,}368 \approx 45{,}8\) °C. À \(t = 40\) min : \(20 + 70 \times 0{,}135 \approx 29{,}5\) °C.</li>
         <li>Euler avec \(\Delta t = 10\) min : premier pas \(90 - 3{,}5 \times 10 = 55\) °C (exact : \(20 + 70\,\mathrm{e}^{-0{,}5} \approx 62{,}5\) °C), deuxième pas \(55 - 1{,}75 \times 10 = 37{,}5\) °C (exact à 20 min : 45,8 °C). Avec \(\Delta t = 1\) min : \(20 + 70 \times 0{,}95^{20} \approx 45{,}1\) °C, presque exact.</li>
@@ -139,7 +126,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m04-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Croire qu’un équilibre est forcément un état où le système finit. Un équilibre instable existe vraiment (la bille posée pile au sommet du dôme), mais le moindre bruit l’en fait partir.</li>
       <li>Juger les mots : « négative » ne veut pas dire mauvaise. Une rétroaction négative stabilise (thermostat, glycémie) ; une positive amplifie (larsen, avalanche). Seul compte l’effet sur l’écart.</li>
@@ -147,7 +134,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Croire que deux trajectoires de la même règle peuvent se croiser. Avec une seule variable d’état, un état donné n’a qu’un seul avenir.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m04-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>05</b><span>La solution de \(\dd x/\dd t = kx\) est l’exponentielle : le module suivant l’étudie en détail.</span></li>
       <li><b>03</b><span>Le taux de changement est la dérivée, et l’état s’obtient en accumulant les taux.</span></li>
@@ -158,64 +145,83 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>41</b><span>Populations et épidémies : exponentielle, puis logistique.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Sur le graphe du taux \(f(x)\), la courbe coupe l’axe en \(x = 4\) en montant. L’équilibre est-il stable ?</summary>
-      <p>Non. Juste au-dessus de 4, \(f\) est positive : \(x\) augmente et s’éloigne. Juste en dessous, \(f\) est négative : \(x\) diminue et s’éloigne aussi. Pente positive, donc rétroaction positive, donc instable.</p></details>
-    <details><summary>Règle \(\dd x/\dd t = -(x - 20)/5\) (temps en minutes). Depuis \(x = 70\), que donne un pas d’Euler de 1 minute ?</summary>
-      <p>Taux : \(-(70 - 20)/5 = -10\) par minute. Nouvel état : \(70 - 10 \times 1 = 60\). Le système avance vers la cible 20, de plus en plus lentement.</p></details>
-    <details><summary>Le larsen d’un micro est-il une rétroaction positive ou négative ? Pourquoi s’arrête-t-il de croître ?</summary>
-      <p>Positive : le son sorti du haut-parleur rentre dans le micro, est amplifié, ressort plus fort. Il s’arrête quand l’amplificateur sature : une limite physique stoppe l’emballement.</p></details>
+    <h4 data-n="7" id="m04-test">Teste-toi</h4>
+    <div class="quiz"><p class="q">Sur le graphe du taux \(f(x)\), la courbe coupe l’axe en \(x = 4\) en montant. L’équilibre est-il stable ?</p><ul class="choix"><li data-bon>Instable : l’écart est amplifié.</li>
+        <li>Stable : le système revient à 4.</li></ul><div class="corr"><p>Non. Juste au-dessus de 4, \(f\) est positive : \(x\) augmente et s’éloigne. Juste en dessous, \(f\) est négative : \(x\) diminue et s’éloigne aussi. Pente positive, donc rétroaction positive, donc instable.</p></div></div>
+    <div class="quiz" data-reponse="60" data-tol="0.05" data-unite=""><p class="q">Règle \(\dd x/\dd t = -(x - 20)/5\) (temps en minutes). Depuis \(x = 70\), que donne un pas d’Euler de 1 minute ?</p>
+<div class="corr"><p>Taux : \(-(70 - 20)/5 = -10\) par minute. Nouvel état : \(70 - 10 \times 1 = 60\). Le système avance vers la cible 20, de plus en plus lentement.</p></div></div>
+    <div class="quiz"><p class="q">Le larsen d’un micro est-il une rétroaction positive ou négative ? Pourquoi s’arrête-t-il de croître ?</p><ul class="choix"><li data-bon>Positive ; l’amplificateur finit par saturer.</li>
+        <li>Négative ; elle ramène le son au silence.</li></ul><div class="corr"><p>Positive : le son sorti du haut-parleur rentre dans le micro, est amplifié, ressort plus fort. Il s’arrête quand l’amplificateur sature : une limite physique stoppe l’emballement.</p></div></div>
   </section>
 
-  <!-- ===================== Module 05 ===================== -->
-  <section class="module" id="m05">
+<section class="module" id="m05">
     <header>
       <p class="num">Module 05</p>
       <h3>Exponentielles et logarithmes</h3>
-      <p class="etapes">Sur la planche : étapes C1 Pourquoi ça explose · C2 L’échelle logarithmique</p>
+      <p class="etapes">Sur la planche : <a href="index.html?etape=05.1">05.1 Explose</a><a href="index.html?etape=05.2">05.2 Log</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Une croissance linéaire ajoute la même quantité à chaque intervalle de temps. Une croissance exponentielle multiplie par le même facteur. C’est toute la différence, et elle suffit à expliquer l’explosion : au début, les deux courbes se confondent, quelques doublements plus tard elles n’ont plus rien à voir. Une conséquence frappante : le temps pour doubler (ou pour diviser par deux) ne dépend pas de la quantité de départ. Le logarithme est l’opération inverse : l’exponentielle répond à « où serai-je après un temps t ? », le logarithme à « combien de temps, ou combien de multiplications, pour arriver là ? ». Sur une échelle logarithmique, multiplier devient avancer d’un pas constant, ce qui permet de mettre sur un même graphe des valeurs de tailles très différentes.</p>
+    <h4 data-n="1" id="m05-intuition">Intuition</h4>
+    <p>Une croissance linéaire ajoute la même quantité à chaque intervalle de temps. Une <a class="terme" href="#def-taux-exp">croissance exponentielle</a> multiplie par le même facteur. C’est toute la différence, et elle suffit à expliquer l’explosion : au début, les deux courbes se confondent, quelques doublements plus tard elles n’ont plus rien à voir. Une conséquence frappante : <a class="terme" href="#def-doublement">le temps pour doubler</a> (ou pour diviser par deux) ne dépend pas de la quantité de départ. <a class="terme" href="#def-logarithme">Le logarithme</a> est l’opération inverse : l’exponentielle répond à « où serai-je après un temps t ? », le logarithme à « combien de temps, ou combien de multiplications, pour arriver là ? ». Sur <a class="terme" href="#def-echelle-log">une échelle logarithmique</a>, multiplier devient avancer d’un pas constant, ce qui permet de mettre sur un même graphe des valeurs de tailles très différentes.</p>
 
-    <h4 data-n="2">Définitions</h4>
+<figure class="labo large" data-src="index.html?embed&amp;etape=05.1&amp;panneau=1" data-h="480" data-titre="Exponentielle et doublement">
+      <figcaption><span><b>05.1</b>Change k, puis utilise le zoom arrière pour suivre plusieurs doublements.</span><a class="ouvrir" href="index.html?etape=05.1">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <h4 data-n="2" id="m05-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Taux exponentiel \(k\)<span class="u">s⁻¹</span></dt><dd>Fraction de la valeur gagnée (\(k \gt 0\)) ou perdue (\(k \lt 0\)) par unité de temps. Le produit \(kt\) est sans unité.</dd></div>
-      <div><dt>Facteur multiplicatif</dt><dd>Nombre par lequel on multiplie à chaque unité de temps : \(\mathrm{e}^{k}\) par seconde.</dd></div>
-      <div><dt>Nombre \(\mathrm{e}\)</dt><dd>Environ 2,718. Seule base pour laquelle \(\mathrm{e}^{kt}\) a un taux égal à \(k\) fois sa valeur.</dd></div>
-      <div><dt>Temps caractéristique \(\tau\)<span class="u">s</span></dt><dd>Durée pour multiplier ou diviser par \(\mathrm{e}\) : \(\tau = 1/|k|\).</dd></div>
-      <div><dt>Temps de doublement \(T_2\)<span class="u">s</span></dt><dd>Durée pour multiplier par 2 (cas \(k \gt 0\)).</dd></div>
-      <div><dt>Demi-vie \(T_{1/2}\)<span class="u">s</span></dt><dd>Durée pour diviser par 2 (cas \(k \lt 0\)).</dd></div>
-      <div><dt>Logarithme</dt><dd>\(\ln\) est en base \(\mathrm{e}\), \(\log_{10}\) en base 10 (nombre de facteurs 10, donc l’ordre de grandeur), \(\log_2\) compte les doublements. \(\ln x\) est l’exposant \(y\) tel que \(\mathrm{e}^{y} = x\).</dd></div>
-      <div><dt>Échelle logarithmique</dt><dd>Axe où chaque facteur 10 (une décade) occupe la même longueur.</dd></div>
+      <div id="def-taux-exp"><dt>Taux exponentiel \(k\)<span class="u">s⁻¹</span></dt><dd>Fraction de la valeur gagnée (\(k \gt 0\)) ou perdue (\(k \lt 0\)) par unité de temps. Le produit \(kt\) est sans unité.</dd></div>
+      <div id="def-facteur"><dt>Facteur multiplicatif</dt><dd>Nombre par lequel on multiplie à chaque unité de temps : \(\mathrm{e}^{k}\) par seconde.</dd></div>
+      <div id="def-nombre-e"><dt>Nombre \(\mathrm{e}\)</dt><dd>Environ 2,718. Seule base pour laquelle \(\mathrm{e}^{kt}\) a un taux égal à \(k\) fois sa valeur.</dd></div>
+      <div id="def-temps-caracteristique"><dt>Temps caractéristique \(\tau\)<span class="u">s</span></dt><dd>Durée pour multiplier ou diviser par \(\mathrm{e}\) : \(\tau = 1/|k|\).</dd></div>
+      <div id="def-doublement"><dt>Temps de doublement \(T_2\)<span class="u">s</span></dt><dd>Durée pour multiplier par 2 (cas \(k \gt 0\)).</dd></div>
+      <div id="def-demi-vie"><dt>Demi-vie \(T_{1/2}\)<span class="u">s</span></dt><dd>Durée pour diviser par 2 (cas \(k \lt 0\)).</dd></div>
+      <div id="def-logarithme"><dt>Logarithme</dt><dd>\(\ln\) est en base \(\mathrm{e}\), \(\log_{10}\) en base 10 (nombre de facteurs 10, donc l’ordre de grandeur), \(\log_2\) compte les doublements. \(\ln x\) est l’exposant \(y\) tel que \(\mathrm{e}^{y} = x\).</dd></div>
+      <div id="def-echelle-log"><dt>Échelle logarithmique</dt><dd>Axe où chaque facteur 10 (une décade) occupe la même longueur.</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m05-relations">Relations clés</h4>
     <div class="relation">\[ x(t) = x_0\,\mathrm{e}^{kt}, \qquad \frac{\dd x}{\dd t} = k\,x \]
       <p>Croissance (\(k \gt 0\)), décroissance (\(k \lt 0\)) ou constance (\(k = 0\)). Toute autre base revient au même avec un autre \(k\) : \(2^{t/T_2} = \mathrm{e}^{t\ln 2/T_2}\).</p></div>
+<div class="calc avec-figure"><p class="calc-t">À toi : additionner ou multiplier</p><output class="figure" data-expr="trace({f:t=&gt;xinit*Math.exp(kexp*t),x:[0,10],y:[0,1.05*max(xinit,xinit*Math.exp(10*kexp))],seg:[[0,xinit,2,xinit*(1+2*kexp),'tan']]})"></output><p>x₀ = <span class="var" data-nom="xinit" data-val="1" data-min="1" data-max="10" data-pas="0.5" data-dec="1" data-unite="u" data-label="État initial"></span>, k = <span class="var" data-nom="kexp" data-val="0.35" data-min="-0.5" data-max="0.5" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Taux exponentiel"></span>.</p>
+    <p>À 10 s, exponentielle : <output class="fort" data-expr="xinit*Math.exp(10*kexp)" data-dec="3"></output> u ; droite de même pente initiale : <output class="fort" data-expr="xinit*(1+10*kexp)" data-dec="3"></output> u.</p>
+    <p class="note">Le trait est l’exponentielle ; le segment est la tangente initiale, limitée ici aux deux premières secondes.</p></div>
     <div class="relation">\[ \tau = \frac{1}{|k|}, \qquad T_2 = \frac{\ln 2}{k}, \qquad T_{1/2} = \frac{\ln 2}{|k|} \approx 0{,}69\,\tau \]
       <p>Ces durées ne dépendent pas de la valeur de départ. Après \(n\) demi-vies, il reste \(1/2^n\) : dix demi-vies, environ un millième (\(2^{10} = 1024\)).</p></div>
+<div class="calc"><p class="calc-t">À toi : le rythme sans la quantité</p>
+    <p>Taux k = <span class="var" data-nom="ktemps" data-val="0.35" data-min="-1" data-max="1" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Taux pour les durées"></span>.</p>
+    <p><output class="phrase" data-expr="ktemps === 0 ? &#x27;k = 0 : état constant, aucun doublement ni aucune demi-vie finie.&#x27; : (ktemps &gt; 0 ? &#x27;Temps de doublement : &#x27; : &#x27;Demi-vie : &#x27;) + fmt(Math.LN2/abs(ktemps), 3) + &#x27; s ; τ = &#x27; + fmt(1/abs(ktemps), 3) + &#x27; s.&#x27;"></output></p></div>
     <div class="relation">\[ t = \frac{1}{k}\ln\frac{x}{x_0}, \qquad \text{nombre de doublements} = \log_2\frac{x}{x_0} \]
       <p>L’opération inverse : le temps écoulé se lit dans l’exposant, et c’est le logarithme qui va le chercher.</p></div>
+<div class="calc"><p class="calc-t">À toi : retrouver le temps</p>
+    <p>Taux positif k = <span class="var" data-nom="kinv" data-val="0.35" data-min="0.05" data-max="1" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Taux positif"></span>, rapport y/x₀ = <span class="var" data-nom="rapport" data-val="20" data-min="1" data-max="1000" data-pas="1" data-dec="0" data-unite="" data-label="Rapport à atteindre"></span>.</p>
+    <p>t = ln(y/x₀)/k = <output class="fort" data-expr="Math.log(rapport)/kinv" data-dec="3"></output> s ; nombre de doublements = <output class="fort" data-expr="Math.log2(rapport)" data-dec="3"></output>.</p></div>
     <div class="relation">\[ \ln(ab) = \ln a + \ln b, \qquad \ln x = 2{,}303\,\log_{10} x \]
       <p>Le logarithme transforme les produits en sommes. Les logarithmes de bases différentes ne diffèrent que d’un facteur constant.</p></div>
+
     <div class="relation">\[ \log_{10} x = \log_{10} x_0 + \frac{k}{\ln 10}\,t \]
       <p>Sur un axe logarithmique, une exponentielle devient une droite : la pente donne \(k\) (en décades par seconde, \(k/2{,}303\)). Le temps pour multiplier par 10 vaut \(\ln 10/k\).</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=05.2&amp;panneau=1" data-h="480" data-titre="Échelle logarithmique et sonde">
+      <figcaption><span><b>05.2</b>Glisse la sonde jaune, puis compare les échelles linéaire et logarithmique ; lis le temps à droite.</span><a class="ouvrir" href="index.html?etape=05.2">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <div class="quiz"><p class="q">À k = 0,35 s⁻¹, le temps de doublement change-t-il quand x₀ passe de 1 à 10 u ?</p><ul class="choix"><li data-bon>Non, il reste égal à ln 2 / k ≈ 1,98 s.</li>
+        <li>Oui, il est multiplié par 10.</li>
+        <li>Oui, il est divisé par 10.</li></ul><div class="corr"><p>Le rapport x(t)/x₀ vaut e<sup>kt</sup> : le doublement dépend de k seul.</p></div></div>
     <div class="relation">\[ T_2 \approx \frac{70}{p}\ \text{ans, pour une croissance de } p\ \text{ pour cent par an} \]
       <p>Règle de 70, qui vient de \(\ln 2 \approx 0{,}69\). Bonne approximation tant que \(p\) est de quelques pour cent.</p></div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+
+    <h4 data-n="4" id="m05-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Réglage par défaut de la planche : \(x_0 = 1\), \(k = 0{,}35\) s⁻¹.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Facteur par seconde : \(\mathrm{e}^{0{,}35} \approx 1{,}42\). Temps caractéristique : \(\tau = 1/0{,}35 \approx 2{,}86\) s. Temps de doublement : \(T_2 = 0{,}693/0{,}35 \approx 1{,}98\) s, soit environ 2 s.</li>
         <li>Après 10 s : \(x = \mathrm{e}^{3{,}5} \approx 33{,}1\). Une croissance linéaire de même pente initiale donnerait \(x_0(1 + kt) = 1 + 3{,}5 = 4{,}5\) : les deux courbes se sont séparées.</li>
         <li>Temps pour atteindre 1000 : \(t = \ln 1000/0{,}35 \approx 6{,}91/0{,}35 \approx 19{,}7\) s, soit \(19{,}7/1{,}98 \approx 10\) doublements, cohérent avec \(2^{10} \approx 10^3\). Temps pour multiplier par 10 : \(\ln 10/0{,}35 \approx 6{,}6\) s.</li>
-        <li>Décroissance du carbone 14 : \(T_{1/2} = 5\,730\) ans, donc \(k = 0{,}693/5\,730 \approx 1{,}21 \times 10^{-4}\) an⁻¹. Après 10 000 ans, il reste \(2^{-10\,000/5\,730} \approx 0{,}30\), soit 30 % de la quantité initiale.</li>
+        <li>Décroissance du carbone 14 : \(T_{1/2} = 5\,730\) ans, donc \(k = -0{,}693/5\,730 \approx -1{,}21 \times 10^{-4}\) an⁻¹. Après 10 000 ans, il reste \(2^{-10\,000/5\,730} \approx 0{,}30\), soit 30 % de la quantité initiale.</li>
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m05-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Croire que « +10 % par an » double en 10 ans. Il faut \(\ln 2/\ln 1{,}1 \approx 7{,}3\) ans, et la règle de 70 donne bien 7 : l’intérêt s’ajoute à l’intérêt.</li>
       <li>Penser que deux demi-vies font disparaître la quantité. Il en reste le quart, puis le huitième : on ne tombe jamais exactement à zéro.</li>
@@ -225,7 +231,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Tracer le logarithme de zéro ou d’une valeur négative : il n’existe pas, et un axe log ne montre jamais zéro.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m05-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>04</b><span>L’exponentielle est la solution de la règle « taux proportionnel à l’état ». Aucune ne dure : la logistique de B2 prend le relais.</span></li>
       <li><b>01</b><span>Ordres de grandeur et axes logarithmiques : planche Langage scientifique.</span></li>
@@ -236,55 +242,75 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>41</b><span>Épidémies et populations : la phase de croissance exponentielle, puis la saturation.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Une population double toutes les 3 heures. Combien de temps pour qu’elle soit multipliée par 1000 ?</summary>
-      <p>Environ 30 heures : \(1000 \approx 2^{10}\), donc 10 doublements de 3 heures. Exactement : \(\log_2 1000 \approx 9{,}97\) doublements, soit 29,9 h. C’est le logarithme qui répond.</p></details>
-    <details><summary>Il reste 1/8 du carbone 14 dans un os. Quel âge a-t-il ?</summary>
-      <p>\(1/8 = (1/2)^3\) : trois demi-vies, soit \(3 \times 5\,730 = 17\,190\) ans, environ 17 200 ans. Le temps écoulé se lit dans l’exposant.</p></details>
-    <details><summary>Des données forment une droite de pente 0,15 décade par jour sur un axe logarithmique. Quel est le temps de doublement ?</summary>
-      <p>Multiplier par 2 correspond à \(\log_{10} 2 \approx 0{,}301\) décade, donc \(0{,}301/0{,}15 \approx 2{,}0\) jours. Pour multiplier par 10, il faut 1 décade, soit \(1/0{,}15 \approx 6{,}7\) jours.</p></details>
+    <h4 data-n="7" id="m05-test">Teste-toi</h4>
+    <div class="quiz" data-reponse="29.89735285" data-tol="0.2" data-unite="h"><p class="q">Une population double toutes les 3 heures. Combien de temps pour qu’elle soit multipliée par 1000 ?</p>
+<div class="corr"><p>Environ 30 heures : \(1000 \approx 2^{10}\), donc 10 doublements de 3 heures. Exactement : \(\log_2 1000 \approx 9{,}97\) doublements, soit 29,9 h. C’est le logarithme qui répond.</p></div></div>
+    <div class="quiz" data-reponse="17190" data-tol="30" data-unite="ans"><p class="q">Il reste 1/8 du carbone 14 dans un os. Quel âge a-t-il ?</p>
+<div class="corr"><p>\(1/8 = (1/2)^3\) : trois demi-vies, soit \(3 \times 5\,730 = 17\,190\) ans, environ 17 200 ans. Le temps écoulé se lit dans l’exposant.</p></div></div>
+    <div class="quiz" data-reponse="2.00686664" data-tol="0.05" data-unite="jours"><p class="q">Des données forment une droite de pente 0,15 décade par jour sur un axe logarithmique. Quel est le temps de doublement ?</p>
+<div class="corr"><p>Multiplier par 2 correspond à \(\log_{10} 2 \approx 0{,}301\) décade, donc \(0{,}301/0{,}15 \approx 2{,}0\) jours. Pour multiplier par 10, il faut 1 décade, soit \(1/0{,}15 \approx 6{,}7\) jours.</p></div></div>
   </section>
 
-  <!-- ===================== Module 07 ===================== -->
-  <section class="module" id="m07">
+<section class="module" id="m07">
     <header>
       <p class="num">Module 07</p>
       <h3>Hasard, probabilité et distributions</h3>
-      <p class="etapes">Sur la planche : étapes D1 Un lancer, beaucoup de lancers · D2 Marche aléatoire et distribution · D3 La désintégration</p>
+      <p class="etapes">Sur la planche : <a href="index.html?etape=07.1">07.1 Dé</a><a href="index.html?etape=07.2">07.2 Marche</a><a href="index.html?etape=07.3">07.3 Atomes</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Un événement individuel peut être imprévisible alors que la répétition de beaucoup d’événements est très prévisible. Personne ne sait quelle face donnera le prochain lancer d’un dé, mais la proportion de 6 sur mille lancers est presque connue d’avance. La probabilité mesure cette régularité. Autour d’elle, deux nombres résument un grand nombre de résultats : la moyenne (où ils se placent) et l’écart-type (à quel point ils s’étalent). La distribution donne le tableau complet. Comme on n’observe jamais qu’un échantillon fini, les résultats fluctuent autour de la prévision, de moins en moins en proportion quand l’échantillon grossit. Enfin, quand beaucoup de petits effets aléatoires s’additionnent, une forme revient presque toujours : la cloche.</p>
+    <h4 data-n="1" id="m07-intuition">Intuition</h4>
+    <p>Un événement individuel peut être imprévisible alors que la répétition de beaucoup d’événements est très prévisible. Personne ne sait quelle face donnera le prochain lancer d’un dé, mais la proportion de 6 sur mille lancers est presque connue d’avance. <a class="terme" href="#def-probabilite">La probabilité</a> mesure cette régularité. Autour d’elle, deux nombres résument un grand nombre de résultats : <a class="terme" href="#def-esperance">la moyenne</a> (où ils se placent) et <a class="terme" href="#def-ecart-type">l’écart-type</a> (à quel point ils s’étalent). <a class="terme" href="#def-distribution">La distribution</a> donne le tableau complet. Comme on n’observe jamais qu’un échantillon fini, les résultats fluctuent autour de la prévision, de moins en moins en proportion quand l’échantillon grossit. Enfin, quand beaucoup de petits effets aléatoires s’additionnent, une forme revient presque toujours : la cloche.</p>
 
-    <h4 data-n="2">Définitions</h4>
+<figure class="labo large" data-src="index.html?embed&amp;etape=07.1&amp;panneau=1" data-h="540" data-titre="Fréquences et moyenne du dé">
+      <figcaption><span><b>07.1</b>Ajoute des paquets de 1 000 lancers ; compare la moyenne observée à 3,5.</span><a class="ouvrir" href="index.html?etape=07.1">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <h4 data-n="2" id="m07-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Issue, événement</dt><dd>Une issue est un résultat possible d’une expérience aléatoire ; un événement est un ensemble d’issues (« obtenir un nombre pair »).</dd></div>
-      <div><dt>Probabilité \(p\)</dt><dd>Nombre entre 0 (impossible) et 1 (certain). Les probabilités de toutes les issues font 1.</dd></div>
-      <div><dt>Fréquence observée</dt><dd>Proportion de fois où l’événement est arrivé sur \(n\) essais. Elle fluctue, puis se rapproche de \(p\) : c’est la loi des grands nombres.</dd></div>
-      <div><dt>Moyenne, espérance \(\mu\)</dt><dd>Moyenne observée : somme des résultats divisée par leur nombre. Espérance : sa valeur théorique, somme des issues pondérées par leurs probabilités. Même unité que le résultat.</dd></div>
-      <div><dt>Variance \(\sigma^2\)<span class="u">unité au carré</span></dt><dd>Moyenne des carrés des écarts à la moyenne.</dd></div>
-      <div><dt>Écart-type \(\sigma\)</dt><dd>Racine de la variance, dans la même unité que les résultats.</dd></div>
-      <div><dt>Distribution</dt><dd>Probabilité de chaque résultat possible. L’histogramme en est l’image observée.</dd></div>
-      <div><dt>Échantillon, fluctuation</dt><dd>Un échantillon est un nombre fini d’observations ; la fluctuation est l’écart, d’un échantillon à l’autre, par rapport à la prévision.</dd></div>
-      <div><dt>Taux de désintégration \(\lambda\)<span class="u">s⁻¹</span></dt><dd>Probabilité par seconde qu’un noyau intact se désintègre, quel que soit son âge.</dd></div>
+      <div id="def-issue"><dt>Issue, événement</dt><dd>Une issue est un résultat possible d’une expérience aléatoire ; un événement est un ensemble d’issues (« obtenir un nombre pair »).</dd></div>
+      <div id="def-probabilite"><dt>Probabilité \(p\)</dt><dd>Nombre entre 0 (impossible) et 1 (certain). Les probabilités de toutes les issues font 1.</dd></div>
+      <div id="def-frequence"><dt>Fréquence observée</dt><dd>Proportion de fois où l’événement est arrivé sur \(n\) essais. Elle fluctue, puis se rapproche de \(p\) : c’est la loi des grands nombres.</dd></div>
+      <div id="def-esperance"><dt>Moyenne, espérance \(\mu\)</dt><dd>Moyenne observée : somme des résultats divisée par leur nombre. Espérance : sa valeur théorique, somme des issues pondérées par leurs probabilités. Même unité que le résultat.</dd></div>
+      <div id="def-variance"><dt>Variance \(\sigma^2\)<span class="u">unité au carré</span></dt><dd>Moyenne des carrés des écarts à la moyenne.</dd></div>
+      <div id="def-ecart-type"><dt>Écart-type \(\sigma\)</dt><dd>Racine de la variance, dans la même unité que les résultats.</dd></div>
+      <div id="def-distribution"><dt>Distribution</dt><dd>Probabilité de chaque résultat possible. L’histogramme en est l’image observée.</dd></div>
+      <div id="def-echantillon"><dt>Échantillon, fluctuation</dt><dd>Un échantillon est un nombre fini d’observations ; la fluctuation est l’écart, d’un échantillon à l’autre, par rapport à la prévision.</dd></div>
+      <div id="def-lambda"><dt>Taux de désintégration \(\lambda\)<span class="u">s⁻¹</span></dt><dd>Probabilité par seconde qu’un noyau intact se désintègre, quel que soit son âge.</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m07-relations">Relations clés</h4>
     <div class="relation">\[ \mu = \sum_i x_i\,p_i, \qquad \sigma^2 = \sum_i (x_i - \mu)^2\,p_i = \langle x^2\rangle - \mu^2 \]
       <p>Moyenne théorique et variance d’une distribution. Pour un dé : \(\mu = 3{,}5\), \(\sigma^2 = 35/12\), \(\sigma \approx 1{,}71\).</p></div>
+
     <div class="relation">\[ \sigma_{\text{freq}} = \sqrt{\frac{p\,(1 - p)}{n}} \]
       <p>Largeur typique de la fréquence observée après \(n\) essais. Quatre fois plus d’essais pour être deux fois plus précis.</p></div>
+<div class="calc"><p class="calc-t">À toi : la précision des lancers</p>
+    <p>n = <span class="var" data-nom="nlancers" data-val="1000" data-min="100" data-max="10000" data-pas="100" data-dec="0" data-unite="lancers" data-label="Nombre de lancers"></span> d’un dé équilibré.</p>
+    <p>Fréquence de 6 attendue : 16,67 % ; dispersion σ<sub>freq</sub> = <output class="fort" data-expr="100*sqrt((1/6)*(5/6)/nlancers)" data-dec="3"></output> points. Moyenne attendue : 3,5 ; σ de la moyenne = <output class="fort" data-expr="sqrt((35/12)/nlancers)" data-dec="4"></output>.</p>
+    <p class="note">Une bande à deux σ couvre environ 95 % des échantillons à effectif fixé, pas tous les tirages ni toute une trajectoire.</p></div>
     <div class="relation">\[ \sigma_{\text{somme}} = \sqrt{n}\,\sigma, \qquad \sigma_{\text{moyenne}} = \frac{\sigma}{\sqrt{n}} \]
       <p>Les variances de pas indépendants s’additionnent. Pour une marche de pas \(\pm 1\), \(\sigma = \sqrt{n}\) après \(n\) pas. La moyenne de \(n\) mesures est \(\sqrt{n}\) fois plus précise.</p></div>
+<div class="calc"><p class="calc-t">À toi : étaler le nuage</p>
+    <p>Après n = <span class="var" data-nom="npas" data-val="100" data-min="1" data-max="400" data-pas="1" data-dec="0" data-unite="pas" data-label="Nombre de pas"></span>, la largeur typique σ = √n vaut <output class="fort" data-expr="sqrt(npas)" data-dec="2"></output> pas. Deux fois plus large demanderait <output class="fort" data-expr="4*npas" data-dec="0"></output> pas.</p>
+    <p class="note">La planche s’arrête à 400 pas. Les exemples à 900 et 3 600 pas ci-dessous prolongent la même loi par le calcul.</p></div>
     <div class="relation">\[ \varphi(x) = \frac{1}{\sigma\sqrt{2\pi}}\,\mathrm{e}^{-(x - \mu)^2/(2\sigma^2)} \]
       <p>La cloche (loi normale). Une somme de nombreux petits effets aléatoires indépendants lui ressemble presque toujours (théorème central limite, seulement aperçu ici) : environ 68 % des valeurs à moins de \(1\sigma\) de la moyenne, 95 % à moins de \(2\sigma\).</p></div>
+
     <div class="relation">\[ \frac{\dd N}{\dd t} = -\lambda N \ \Rightarrow\ N(t) = N_0\,\mathrm{e}^{-\lambda t}, \qquad T_{1/2} = \frac{\ln 2}{\lambda} \]
       <p>Chaque noyau intact a la probabilité \(\lambda\,\dd t\) de partir pendant \(\dd t\), sans mémoire : le nombre de départs attendu est \(\lambda N\,\dd t\). Le hasard individuel dessine l’exponentielle collective, avec des fluctuations relatives en \(1/\sqrt{N}\).</p></div>
+<div class="calc"><p class="calc-t">À toi : compter les demi-vies</p>
+    <p>N₀ = <span class="var" data-nom="nat" data-val="400" data-min="25" data-max="2500" data-pas="25" data-dec="0" data-unite="atomes" data-label="Nombre initial d’atomes"></span>, h = <span class="var" data-nom="nvies" data-val="2" data-min="0" data-max="6" data-pas="0.5" data-dec="1" data-unite="demi-vies" data-label="Nombre de demi-vies"></span> (T½ = 2 s).</p>
+    <p>Fraction attendue q = 2<sup>−h</sup> = <output class="fort" data-expr="100*2**(-nvies)" data-dec="2"></output> % ; nombre moyen N₀q = <output class="fort" data-expr="nat*2**(-nvies)" data-dec="2"></output> ; dispersion σ = <output class="fort" data-expr="sqrt(nat*2**(-nvies)*(1-2**(-nvies)))" data-dec="2"></output> atomes.</p>
+    <p class="note">Les nombres décimaux décrivent une moyenne sur beaucoup de relances, pas un compte individuel.</p></div>
+    <figure class="labo large" data-src="index.html?embed&amp;etape=07.3&amp;panneau=1" data-h="520" data-titre="Désintégration collective">
+      <figcaption><span><b>07.3</b>Compare 25, 400 puis 2 500 atomes : la dispersion relative se réduit. Relance pour comparer les échantillons.</span><a class="ouvrir" href="index.html?etape=07.3">Ouvrir à cette étape ↗</a></figcaption>
+    </figure>
+    <div class="quiz" data-reponse="4" data-tol="0.01" data-unite=""><p class="q">Après 100 pas, le nuage a une largeur typique de 10 pas. Par quel facteur multiplier le nombre de pas pour doubler cette largeur ?</p>
+<div class="corr"><p>σ = √n : doubler σ demande de multiplier n par 4, soit 400 pas.</p></div></div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <h4 data-n="4" id="m07-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Les trois étapes de la planche, avec leurs valeurs par défaut.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Dé : \(\mu = (1 + 2 + 3 + 4 + 5 + 6)/6 = 3{,}5\). Variance : \((6{,}25 + 2{,}25 + 0{,}25 + 0{,}25 + 2{,}25 + 6{,}25)/6 = 35/12 \approx 2{,}92\), donc \(\sigma \approx 1{,}71\).</li>
         <li>Sur \(n = 600\) lancers, on attend \(100\) fois le 6. La fréquence a pour écart-type \(\sqrt{(1/6)(5/6)/600} \approx 1{,}5\) %, soit environ \(\pm 9\) lancers sur le décompte (\(\sqrt{600 \times 5/36} \approx 9{,}1\)). Obtenir entre 91 et 109 six est donc normal.</li>
         <li>Marche aléatoire : après \(n = 900\) pas, \(\sigma = \sqrt{900} = 30\) pas, et pour étaler le nuage deux fois plus (\(\sigma = 60\)), il faut \(3\,600\) pas.</li>
@@ -292,7 +318,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m07-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Croire que le hasard « se rattrape » : après dix 6 de suite, le suivant a toujours une chance sur six. Le dé n’a pas de mémoire ; la loi des grands nombres dilue les écarts, elle ne les compense pas.</li>
       <li>Prendre la moyenne pour un résultat possible ou typique : 3,5 n’est jamais obtenu en un lancer.</li>
@@ -301,7 +327,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Déduire le comportement individuel de la loi collective. Elle dit combien d’atomes partiront, jamais lequel : un atome vieux de mille ans a la même probabilité de partir qu’un atome tout neuf.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m07-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>04</b><span>La loi de désintégration est la règle « taux proportionnel à l’état » issue de probabilités individuelles.</span></li>
       <li><b>05</b><span>La demi-vie et l’exponentielle de D3 sont celles du module 05.</span></li>
@@ -312,16 +338,15 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>48</b><span>En mécanique quantique, le résultat d’une mesure individuelle est imprévisible, sa distribution est prédite exactement.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Tu lances une pièce 100 fois et obtiens 58 piles. La pièce est-elle truquée ?</summary>
-      <p>Pas de quoi conclure. L’écart-type de la fréquence vaut \(\sqrt{0{,}25/100} = 5\) % : 58 % est à 1,6 \(\sigma\) de 50 %, ce qui arrive environ une fois sur dix avec une pièce honnête. Pour trancher, il faut beaucoup plus de lancers.</p></details>
-    <details><summary>Pour que le nuage de D2 soit deux fois plus large, combien de pas faut-il ?</summary>
-      <p>Quatre fois plus, puisque \(\sigma = \sqrt{n}\). C’est pourquoi la diffusion est efficace sur un micromètre et désespérément lente sur un mètre.</p></details>
-    <details><summary>Un sondage de 1000 personnes donne une marge d’environ \(\pm 3\) points. Combien de personnes pour la diviser par deux ?</summary>
-      <p>La marge (deux \(\sigma\), au pire \(p = 1/2\)) vaut \(2\sqrt{0{,}25/1000} \approx 3{,}2\) points et varie comme \(1/\sqrt{n}\). La diviser par deux demande quatre fois plus de monde : 4000 personnes (marge d’environ 1,6 point).</p></details>
+    <h4 data-n="7" id="m07-test">Teste-toi</h4>
+    <div class="quiz"><p class="q">Tu lances une pièce 100 fois et obtiens 58 piles. La pièce est-elle truquée ?</p><ul class="choix"><li data-bon>Non : cet écart reste compatible avec une pièce honnête.</li>
+        <li>Oui : tout écart à 50 piles prouve une triche.</li></ul><div class="corr"><p>Pas de quoi conclure. L’écart-type de la fréquence vaut \(\sqrt{0{,}25/100} = 5\) % : 58 % est à 1,6 \(\sigma\) de 50 %, ce qui arrive environ une fois sur dix avec une pièce honnête. Pour trancher, il faut beaucoup plus de lancers.</p></div></div>
+    <div class="quiz" data-reponse="4" data-tol="0.01" data-unite="fois plus de pas"><p class="q">Pour que le nuage de D2 soit deux fois plus large, combien de pas faut-il ? Donne le facteur multiplicatif.</p>
+<div class="corr"><p>Quatre fois plus, puisque \(\sigma = \sqrt{n}\). C’est pourquoi la diffusion est efficace sur un micromètre et désespérément lente sur un mètre.</p></div></div>
+    <div class="quiz" data-reponse="4000" data-tol="10" data-unite="personnes"><p class="q">Un sondage de 1000 personnes donne une marge d’environ \(\pm 3\) points. Combien de personnes pour la diviser par deux ?</p>
+<div class="corr"><p>La marge (deux \(\sigma\), au pire \(p = 1/2\)) vaut \(2\sqrt{0{,}25/1000} \approx 3{,}2\) points et varie comme \(1/\sqrt{n}\). La diviser par deux demande quatre fois plus de monde : 4000 personnes (marge d’environ 1,6 point).</p></div></div>
   </section>
-
-  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <h2 id="simplifie"><span class="n">3</span>Ce que la simulation simplifie</h2>
   <ul>
     <li><strong>Une seule variable d'état.</strong> Tous les systèmes du module 4 sont décrits par un nombre. Avec deux variables ou plus, on obtient des oscillations (planche Oscillations), des cycles proie-prédateur ou du chaos, qui demandent un plan de phase et non une ligne.</li>
     <li><strong>Unités génériques.</strong> En A, x est en « unités » et le temps en secondes de simulation : c'est la forme de la règle qui compte, pas le phénomène.</li>
@@ -333,7 +358,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <li><strong>Temps discret en D3.</strong> Les atomes sont testés tous les 0,05 s, avec la probabilité exacte qui redonne la bonne demi-vie. Une vraie désintégration a lieu en temps continu.</li>
   </ul>
 
-  <h2><span>4</span>Les chiffres à retenir</h2>
+  <h2 id="chiffres"><span class="n">4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
     <div><b>e ≈ 2,718</b><span>la base naturelle ; e⁻¹ ≈ 37 % : il reste 37 % après un temps τ, et 5 % après 3 τ.</span></div>
     <div><b>T½ ≈ 0,69 τ</b><span>demi-vie et temps de doublement valent ln 2 / |k| ; « règle de 70 » : p % par an double en ≈ 70/p ans.</span></div>
@@ -343,10 +368,11 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <div><b>≈ 45 µm en 1 s</b><span>étalement typique (√(2Dt)) d'une petite molécule qui diffuse dans l'eau (D ≈ 10⁻⁹ m²/s). En 1 h, seulement 3 mm : la diffusion est rapide de près, lente de loin.</span></div>
   </div>
 
-  <h2><span>5</span>Seulement introduit ici</h2>
+  <h2 id="introduit"><span class="n">5</span>Seulement introduit ici</h2>
   <p>Ces notions sont effleurées et méritent leur propre étude : la <strong>théorie formelle des équations différentielles</strong> (existence et unicité, méthodes de résolution, systèmes à plusieurs variables, plans de phase), les <strong>méthodes numériques</strong> au-delà d'Euler et leur erreur, les <strong>séries de Taylor</strong> qui définissent e^x et justifient la linéarisation près d'un équilibre, le <strong>chaos</strong> et les <strong>attracteurs</strong>, la <strong>loi normale</strong> et le <strong>théorème central limite</strong> énoncés rigoureusement, les <strong>statistiques inférentielles</strong> (intervalles de confiance, tests d'hypothèses) et les <strong>méthodes de Monte Carlo</strong>.</p>
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</main>
 </div>
 </body>
 </html>
