@@ -16,8 +16,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#d6c4ff;
@@ -44,6 +46,13 @@ a{color:inherit}
 .tip b{font-weight:500;display:block}.tip span{color:var(--texte-2)}
 
 .panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+#lectures{display:flex;flex-direction:column;gap:16px;padding:0 20px 4px 22px}
+.labo-fiche #status{color:var(--encre-2)}
+.labo-fiche #eyebrow,.labo-fiche #stepTitle,.labo-fiche #stepText{display:none}
+/* Dans le cadre du cours, les mesures restent lisibles avant les enregistreurs. */
+html.labo-embed #lectures{padding:14px 8px 4px;gap:12px}
+html.labo-embed #lectures > section:last-child{order:-1}
+html.labo-embed #lectures .row{flex-wrap:wrap;gap:2px 8px}
 .eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
 .eyebrow b{color:var(--accent);font-weight:500}
 h2{font:400 27px/1.1 var(--serif);margin:0 0 8px}
@@ -129,9 +138,10 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 }
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -168,15 +178,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div></div>
 </nav>
 
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : pousse le bloc, change une masse, lance une collision."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
-
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Paillasse de mécanique : un bloc ou des chariots avec leurs forces, vitesses, quantités de mouvement et énergies dessinés en flèches et en barres."></canvas>
@@ -184,14 +185,15 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
+    <div id="lectures">
     <section>
       <p class="eyebrow" id="eyebrow">Module <b>10</b> · étape 1 sur 3</p>
       <h2 id="stepTitle">Inertie</h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
-      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="status" id="status" aria-live="off"></p>
     </section>
 
-    <section class="couche-lire">
+    <section>
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de la paillasse en fonction du temps."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -199,21 +201,22 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <p class="leg" id="leg2"></p>
     </section>
 
-    <section class="couche-lire">
+    <section>
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section class="kbd couche-lire">
+    </div>
+    <section class="kbd">
       <p class="eyebrow">Clavier</p>
-      <ul class="hints">
+      <ul class="hints" id="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>6</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>A</kbd> / <kbd>D</kbd> pousser (étapes 10.1 et 11.1) · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>A</kbd> / <kbd>D</kbd> pousser (étapes 10.1 et 11.1) · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m10"><span>Théorie du module <b id="numTheorie">10</b></span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre" id="lienTheorie" href="explication.html#m10"><span>Théorie du module <b id="numTheorie">10</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -1170,6 +1173,7 @@ function enterAct(n, restart) {
   hideTip(); syncTools(); buildMeas(n);
   if (n === 2 || n >= 4) { if (restart) setPlay(true); }
   sizePanelCanvases();
+  if (window.Fiche) Fiche.montre(n);
 }
 function updateUI(n) {
   uiAct = n;
@@ -1318,6 +1322,7 @@ function tick(now) {
   if (now - lastRead > 100) { readouts(); lastRead = now; }
 }
 
+window.allerScene = n => goAct(n);
 window.__labo = {
   Phys,
   get act() { return act; },
@@ -1337,6 +1342,139 @@ resize();
 resetPrm(1); resetPrm(2); resetPrm(3); resetPrm(4); resetPrm(5);
 enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
+})();
+</script>
+<script src="../../labo/fiche.js"></script>
+<script>
+/* Fiches d'étape : lecture seule de l'état publié par la paillasse.
+   La navigation les montre dans enterAct, après le fondu et l'arrivée du nouvel état. */
+(() => {
+  'use strict';
+  const instant = (mem, cle, val) => { if (!(cle in mem)) mem[cle] = val; return mem[cle]; };
+  const config = p => [p.m1, p.m2, p.v1, p.v2, p.e].join('|');
+  const apres = e => e.s.contact && e.s.t > e.s.c1 + 0.002;
+  const FICHES = [
+    {
+      titre: 'La vitesse ne s’épuise pas',
+      regarde: 'Le bloc est au repos sur un rail sans frottement. Le poids et la normale se compensent ; les graduations révèlent ensuite le mouvement, même quand la caméra suit le bloc.',
+      prediction: { q: 'Au départ, v = 0 et aucune force horizontale n’agit. Sans toucher aux commandes, quelle sera la vitesse après 1 s ?',
+        reponse: 0, tol: 0.01, unite: 'm/s',
+        explication: 'ΣF = 0, donc a = 0 et v = v₀ + a t = 0 + 0 × 1 = 0 m/s. Après une poussée, le même principe conservera une vitesse non nulle.' },
+      suivi: ({ a }, mem) => { instant(mem, 'v0', a.v); if (a.Fapp > 0) mem.droite = true; if (a.Fapp < 0) mem.gauche = true; },
+      essais: [
+        { t: 'Maintiens « Pousser → », puis relâche : laisse le bloc glisser au moins une demi-seconde.',
+          fait: ({ a }, mem) => mem.droite && a.v > mem.v0 + 0.1 && a.Fapp === 0 && a.tRel > 0.5 },
+        { t: 'Pousse ensuite vers la gauche jusqu’à faire repartir le bloc à gauche.',
+          fait: ({ a }, mem) => mem.gauche && a.v < Math.min(-0.1, mem.v0 - 0.1) },
+      ],
+      pourquoi: 'Une force résultante change la vitesse ; elle n’est pas nécessaire pour la maintenir. Sans frottement, relâcher la poussée annule l’accélération, pas la vitesse. L’immobilité est un cas particulier du mouvement à vitesse constante.',
+      relation: String.raw`\sum\vec F=\vec 0\ \Rightarrow\ \vec a=\vec 0,\quad \vec v=\text{constante}`,
+      defs: [['Inertie', 'Résistance d’un corps à un changement de vitesse, mesurée par sa masse.'], ['Résultante', 'Somme vectorielle des forces exercées sur un même corps.']],
+      piege: 'Croire qu’il faut une force pour entretenir le mouvement. Dans la vie courante, elle sert souvent à compenser le frottement.',
+    },
+    {
+      titre: 'Deux forces, une résultante',
+      regarde: 'Les forces horizontales se dessinent bout à bout. La flèche lilas est leur résultante ; l’accélération mesurée est la pente de la vitesse.',
+      prediction: { q: 'Au réglage initial, F₁ = 4 N, F₂ = 0 N et m = 2 kg, sans frottement. Quelle accélération ?',
+        reponse: 2, tol: 0.02, unite: 'm/s²', explication: 'ΣF = 4 − 0 = 4 N, puis a = ΣF/m = 4/2 = 2 m/s². Le moteur donne aussi Δv = 2 m/s sur 1 s.' },
+      suivi: ({ prm }, mem) => { instant(mem, 'forces', [prm.F1, prm.F2].join('|')); instant(mem, 'masse', prm.mA); },
+      essais: [
+        { t: 'Équilibre les deux forces à une valeur non nulle et clique « v = 3 m/s » : le bloc glisse sans accélérer.',
+          fait: ({ prm, a }, mem) => [prm.F1, prm.F2].join('|') !== mem.forces && !prm.fricA && prm.F1 === prm.F2 && prm.F1 > 0 && Math.abs(a.Fnet) < 0.01 && Math.abs(a.v - 3) < 0.02 },
+        { t: 'Change la masse en gardant une résultante non nulle : compare a mesurée à ΣF/m.',
+          fait: ({ prm, a }, mem) => prm.mA !== mem.masse && Math.abs(a.Fnet) > 0.1 && Math.abs(a.a - a.Fnet / a.m) < 0.01 },
+      ],
+      pourquoi: 'Les deux forces agissent sur le même bloc : il faut les additionner avec leur sens. Seule la résultante fixe l’accélération ; une masse plus grande répond moins à la même force. Le frottement, si tu l’actives, fait lui aussi partie de cette somme.',
+      relation: String.raw`\sum F_x=F_1-F_2+f_x=m a_x`,
+      defs: [['Masse m', 'Mesure de l’inertie, en kg ; elle ne dépend pas du lieu.'], ['Accélération a', 'Taux de variation de la vitesse, en m/s².']],
+      piege: 'Confondre vitesse et accélération : une résultante nulle laisse possible une vitesse de 3 m/s.',
+    },
+    {
+      titre: 'Même force, deux corps',
+      regarde: 'Un ressort comprimé sépare deux chariots au repos. Ses forces sont égales et opposées ; les quantités de mouvement se compensent à chaque instant.',
+      prediction: { q: 'Avec les deux masses initiales de 1 kg, le ressort comprimé de 0,12 m (k = 300 N/m) est relâché. Quelle sera la vitesse du chariot 2 une fois le ressort détendu ?',
+        reponse: 1.4696871849, tol: 0.03, unite: 'm/s',
+        explication: 'Le ressort contient ½ × 300 × 0,12² = 2,16 J. Par symétrie, v₁ = −v₂ et K₁ + K₂ = 2 × ½ × 1 × v₂² : v₂ = √2,16 ≈ 1,47 m/s. Le moteur donne 1,469687 m/s.' },
+      suivi: ({ prm }, mem) => { instant(mem, 'masses', [prm.m1r, prm.m2r].join('|')); },
+      essais: [
+        { t: 'Clique « Relâcher » et avance jusqu’à la fin : p₁ + p₂ reste nul.',
+          fait: e => apres(e) && Math.abs(e.s.v1) > 0.1 && Math.abs(e.s.pTot) < 0.001 },
+        { t: 'Change une masse pour les rendre différentes, puis relâche : le plus léger part plus vite.',
+          fait: (e, mem) => [e.prm.m1r, e.prm.m2r].join('|') !== mem.masses && e.pb.m1 !== e.pb.m2 && apres(e) && (e.pb.m1 - e.pb.m2) * (Math.abs(e.s.v1) - Math.abs(e.s.v2)) < 0 },
+      ],
+      pourquoi: 'Les forces de la paire agissent sur deux corps différents : elles ne s’annulent pas sur chacun. La même force donne une accélération plus grande au chariot léger. Sur l’ensemble isolé, les impulsions opposées gardent la quantité de mouvement totale nulle.',
+      relation: String.raw`\vec F_{1\to2}=-\vec F_{2\to1},\qquad m_1v_1+m_2v_2=0`,
+      defs: [['Action-réaction', 'Forces de même intensité et de sens opposés, exercées sur deux corps différents.'], ['Quantité de mouvement p', 'Produit m v, en kg·m/s, signé selon le sens en une dimension.']],
+      piege: 'Croire que le plus lourd reçoit une plus grande force : ce sont les accélérations qui diffèrent.',
+    },
+    {
+      titre: 'L’énergie change de forme',
+      regarde: 'Le chariot est retenu en hauteur. Le jaune plein représente son énergie cinétique, les hachures l’énergie de hauteur et le jaune pâle la chaleur produite.',
+      prediction: { q: 'Au départ, m = 2 kg, v = 0 et h ≈ 1,0797 m au-dessus du zéro choisi. Quelle énergie potentielle U ?',
+        reponse: 21.1837662331, tol: 0.1, unite: 'J',
+        explication: 'U = mgh = 2 × 9,81 × 1,079702662 ≈ 21,184 J, et K = 0. Sans poussée ni frottement, K + U gardera cette valeur pendant le mouvement.' },
+      suivi: ({ b, prm }, mem) => { instant(mem, 's0', b.s); instant(mem, 'fric0', prm.fricB); instant(mem, 'chaleur0', b.Eth); },
+      essais: [
+        { t: 'Clique « Lâcher » : vois U se transformer en K sans changer leur somme.',
+          fait: ({ b, s }, mem) => !b.held && Math.abs(b.s - mem.s0) > 0.05 && s.K > 0.1 && s.Eth < 0.001 && Math.abs(s.W) < 0.001 && Math.abs(s.balance) < 0.02 },
+        { t: 'Active le frottement et laisse rouler : une part de l’énergie devient chaleur.',
+          fait: ({ b, prm }, mem) => prm.fricB !== mem.fric0 && prm.fricB && !b.held && b.Eth > mem.chaleur0 + 0.05 },
+      ],
+      pourquoi: 'Le travail du poids échange énergie potentielle et énergie cinétique. Le frottement transforme une part de cette énergie en chaleur ; une poussée apporte du travail depuis l’extérieur. Le bilan affiché compte ces transferts sans faire disparaître d’énergie.',
+      relation: String.raw`K+U+E_{\mathrm{th}}-W_{\mathrm{ext}}=E_0`,
+      defs: [['Énergie cinétique K', 'Énergie du mouvement, ½ m v², en J.'], ['Énergie potentielle U', 'Énergie liée à la position ; son zéro est un choix.'], ['Travail W', 'Énergie transférée par une force sur un déplacement, en J.']],
+      piege: 'Dire que le frottement détruit de l’énergie : il la convertit en agitation microscopique.',
+    },
+    {
+      titre: 'Un choc, deux bilans',
+      regarde: 'Deux chariots de même masse se rencontrent. Le contact est ralenti : l’énergie passe par les pare-chocs comprimés, tandis que la quantité de mouvement totale reste constante.',
+      prediction: { q: 'Au réglage « Égales, élastique », m₁ = m₂ = 1 kg, v₁ = 1,2 m/s, v₂ = 0 et e = 1. Quelle vitesse aura le chariot 2 après le choc ?',
+        reponse: 1.2000002823, tol: 0.02, unite: 'm/s',
+        explication: 'Deux masses égales échangent leurs vitesses lors d’un choc élastique : v₁′ ≈ 0 et v₂′ ≈ 1,2 m/s. Σp = 1,2 kg·m/s et K = 0,72 J avant comme après, à l’erreur numérique près.' },
+      suivi: ({ pb }, mem) => { instant(mem, 'e0', pb.e); if (pb.tp > pb.c1 + 0.002) mem.apres = true; },
+      essais: [
+        { t: 'Lance le choc élastique et avance après le contact : le premier s’arrête, le second repart.',
+          fait: e => apres(e) && e.pb.e === 1 && e.pb.m1 === e.pb.m2 && Math.abs(e.s.v1) < 0.01 && e.s.v2 > 0.1 },
+        { t: 'Choisis « Collées (e = 0) » et observe après le contact : les vitesses deviennent égales.',
+          fait: (e, mem) => e.pb.e !== mem.e0 && e.pb.e === 0 && apres(e) && Math.abs(e.s.v1 - e.s.v2) < 0.001 && e.s.Eth > 0.01 },
+      ],
+      pourquoi: 'Les impulsions du contact sont égales et opposées : elles transfèrent de la quantité de mouvement entre les chariots. À e = 1, l’énergie stockée pendant la compression revient au mouvement. À e = 0, les chariots gardent une vitesse commune et une part de K devient chaleur et déformation.',
+      relation: String.raw`m_1v_1+m_2v_2=m_1v_1'+m_2v_2',\qquad e=-\frac{v_1'-v_2'}{v_1-v_2}`,
+      defs: [['Impulsion', 'Aire sous F(t), égale à la variation de p, en N·s.'], ['Restitution e', 'Rapport des vitesses relatives après et avant le choc : 1 élastique, 0 collé.']],
+      piege: 'Imposer la conservation de l’énergie cinétique à tous les chocs : seule la quantité de mouvement se conserve pour tout choc isolé.',
+    },
+    {
+      titre: 'À toi : collision libre',
+      regarde: 'Les masses, les vitesses et la restitution sont libres. Les barres de p sont signées ; celles de l’énergie additionnent mouvement, compression et dissipation.',
+      prediction: { q: 'Au départ : m₁ = 2 kg, m₂ = 1 kg, v₁ = 1,5 m/s, v₂ = −0,5 m/s et e = 0,60. Combien d’énergie cinétique sera convertie en chaleur après le choc ?',
+        reponse: 0.8533324776, tol: 0.02, unite: 'J',
+        explication: 'µ = 2 × 1/(2 + 1) = 2/3 kg et vrel = 1,5 − (−0,5) = 2 m/s. La perte vaut (1 − 0,60²) × ½ × (2/3) × 2² ≈ 0,85333 J. Σp reste 2,5 kg·m/s ; K passe de 2,375 à 1,52167 J.' },
+      suivi: ({ prm }, mem) => { instant(mem, 'cfg0', config(prm.ps)); },
+      essais: [
+        { t: 'Obtiens une collision qui restitue toute l’énergie cinétique : règle e, lance, puis observe après le contact.',
+          fait: (e, mem) => config(e.prm.ps) !== mem.cfg0 && e.pb.e === 1 && apres(e) && e.pb.Etot > 0.01 && Math.abs(e.s.K1 + e.s.K2 - e.pb.Etot) < 0.001 && Math.abs(e.s.Eth) < 0.001 },
+        { t: 'Obtiens une collision où les deux chariots repartent ensemble à une vitesse non nulle.',
+          fait: (e, mem) => config(e.prm.ps) !== mem.cfg0 && e.pb.e === 0 && apres(e) && Math.abs(e.s.v1 - e.s.v2) < 0.001 && Math.abs(e.s.v1) > 0.05 && e.s.Eth > 0.01 },
+      ],
+      pourquoi: 'Dans le système isolé des deux chariots, Σp reste la même pour tous les réglages. La restitution fixe la part d’énergie du mouvement relatif rendue après le contact. Les défis demandent une vraie collision : des chariots qui s’éloignent sans se toucher ne les valident pas.',
+      relation: String.raw`K_{\text{avant}}-K_{\text{après}}=(1-e^2)\frac{\mu}{2}(v_1-v_2)^2,\quad\mu=\frac{m_1m_2}{m_1+m_2}`,
+      defs: [['Système isolé', 'Ensemble sur lequel la force extérieure résultante est nulle.'], ['Masse réduite µ', 'm₁m₂/(m₁ + m₂), en kg : la masse associée au mouvement relatif.']],
+      piege: 'Confondre énergie totale et énergie cinétique : la chaleur complète le bilan quand e est inférieur à 1.',
+    },
+  ];
+  Fiche.init({
+    fiches: FICHES,
+    etapes: [...document.querySelectorAll('#stepper .seg')].map(b => {
+      const code = b.querySelector('b').textContent;
+      return { code, titre: b.querySelector('span').textContent, mod: +code.slice(0, 2), scenes: [+b.dataset.a] };
+    }),
+    etat: () => { const l = window.__labo; return { a: l.a, b: l.b, pb: l.pb, prm: l.prm, s: l.state }; },
+    aller: n => window.allerScene(n),
+    lectures: '#lectures',
+    k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+    theorie: mod => `explication.html#m${mod}`,
+  });
+  Fiche.montre(window.__labo.act);
 })();
 </script>
 <script src="../../labo/planche.js"></script>
