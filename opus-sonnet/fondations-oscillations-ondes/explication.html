@@ -9,127 +9,153 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
-  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
-  --texte:#e8e4dc; --texte-2:#8a93a0;
-  --accent:#8fe3d1;
-  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
-  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
-  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
-  --ease:cubic-bezier(0.22,1,0.36,1);
-}
-*{box-sizing:border-box}
-html{background:var(--fond)}
-body{margin:0;background:var(--fond);color:var(--texte);font:16px/1.7 var(--sans);-webkit-font-smoothing:antialiased}
-a{color:var(--accent);text-underline-offset:3px}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.wrap{max-width:720px;margin:0 auto;padding:36px 20px 90px}
-.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:400 12px var(--mono);margin-bottom:60px}
-.top a{color:var(--texte-2);text-decoration:none;transition:color .3s var(--ease)}
-.top a:hover{color:var(--texte)}
-.serie{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 14px}
-h1{font:400 clamp(38px,7vw,64px)/1 var(--serif);margin:0 0 20px;letter-spacing:-.005em}
-h1 em{color:var(--accent)}
-.lede{font-size:18px;color:var(--texte);opacity:.88;margin:0 0 10px;max-width:60ch}
-h2{font:400 32px/1.15 var(--serif);margin:64px 0 14px;padding-top:22px;border-top:1px solid var(--trait)}
-h2 span{font:400 11px var(--mono);letter-spacing:.14em;color:var(--texte-2);display:block;margin-bottom:8px;text-transform:uppercase}
-p{margin:0 0 16px}
-ul{padding-left:20px;margin:0 0 16px}
-li{margin-bottom:8px}
-code,.m{font-family:var(--mono);font-size:.9em}
-.eq{font:400 17px/1.5 var(--mono);background:var(--fond-2);border-left:2px solid var(--accent);padding:12px 16px;margin:18px 0;overflow-x:auto}
-.pos{color:var(--positif)}.neg{color:var(--negatif)}.acc{color:var(--accent)}.ener{color:var(--energie)}
-dl{margin:0 0 16px;border-top:1px solid var(--trait)}
-dt{font:500 15px var(--sans);padding-top:12px}
-dd{margin:0;padding:2px 0 12px;border-bottom:1px solid var(--trait);color:var(--texte);opacity:.9}
-.chiffres{display:grid;gap:0;border-top:1px solid var(--trait);margin-bottom:16px}
-.chiffres div{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--trait);align-items:baseline}
-.chiffres b{font:500 17px var(--mono);color:var(--energie)}
-details{border:1px solid var(--trait);background:var(--fond-2);margin-bottom:12px}
-summary{cursor:pointer;padding:14px 16px;font-weight:500;list-style:none;display:flex;gap:12px}
-summary::-webkit-details-marker{display:none}
-summary::before{content:"?";font:500 13px var(--mono);color:var(--accent);border:1px solid var(--accent);width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center;margin-top:2px}
-details[open] summary::before{content:"\2713"}
-details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
-.cta{display:inline-flex;gap:10px;margin-top:40px;text-decoration:none;font:500 14px var(--sans);padding:12px 16px;border:1px solid var(--accent);color:var(--accent);transition:background .35s var(--ease),color .35s var(--ease)}
-.cta:hover{background:var(--accent);color:var(--fond)}
-@media (max-width:560px){.chiffres div{grid-template-columns:1fr;gap:2px}h2{font-size:28px}}
-</style>
-<link rel="stylesheet" href="../../labo/theorie.css">
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
 <script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
 </head>
-<body>
-<div class="wrap">
-  <nav class="top"><a href="index.html">&larr; Retour à la simulation</a><a href="../../labo/index.html">LABO</a></nav>
-  <p class="serie">LABO · Fondations 06 · 14 · 15</p>
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← La planche</a>
+  <p class="ici">Oscillations et ondes <span>· le cours</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire">
+    <p>Sommaire</p>
+    <ol>
+    <li><a href="#vois">Ce que tu vois</a></li>
+    <li><a href="#m06"><b>06</b>Sinusoïdes, cycles et phase</a>
+    <ol>
+    <li><a href="#m06-intuition">Intuition</a></li>
+    <li><a href="#m06-defs">Définitions</a></li>
+    <li><a href="#m06-relations">Relations clés</a></li>
+    <li><a href="#m06-exemple">Exemple chiffré</a></li>
+    <li><a href="#m06-pieges">Pièges fréquents</a></li>
+    <li><a href="#m06-suite">Où ça resservira</a></li>
+    <li><a href="#m06-test">Teste-toi</a></li>
+    </ol>
+    </li>
+    <li><a href="#m14"><b>14</b>Oscillateurs et résonance</a>
+    <ol>
+    <li><a href="#m14-intuition">Intuition</a></li>
+    <li><a href="#m14-defs">Définitions</a></li>
+    <li><a href="#m14-relations">Relations clés</a></li>
+    <li><a href="#m14-exemple">Exemple chiffré</a></li>
+    <li><a href="#m14-pieges">Pièges fréquents</a></li>
+    <li><a href="#m14-suite">Où ça resservira</a></li>
+    <li><a href="#m14-test">Teste-toi</a></li>
+    </ol>
+    </li>
+    <li><a href="#m15"><b>15</b>Ondes</a>
+    <ol>
+    <li><a href="#m15-intuition">Intuition</a></li>
+    <li><a href="#m15-defs">Définitions</a></li>
+    <li><a href="#m15-relations">Relations clés</a></li>
+    <li><a href="#m15-exemple">Exemple chiffré</a></li>
+    <li><a href="#m15-pieges">Pièges fréquents</a></li>
+    <li><a href="#m15-suite">Où ça resservira</a></li>
+    <li><a href="#m15-test">Teste-toi</a></li>
+    </ol>
+    </li>
+    <li><a href="#simplifie">Ce que la simulation simplifie</a></li>
+    <li><a href="#chiffres">Les chiffres à retenir</a></li>
+    <li><a href="#introduit">Seulement introduit ici</a></li>
+    </ol>
+    </nav>
+<main class="cours-texte">
+<header class="cours-tete">
+  <p class="surtitre">LABO · Fondations 06 · 14 · 15</p>
   <h1>Comprendre les oscillations et les <em>ondes</em></h1>
-  <p class="lede">Cette planche ne montre pas un phénomène : elle montre un langage. Un cycle, une phase, un oscillateur, une onde. Les mêmes outils décrivent un ressort, une corde de guitare et la lumière, et tu les manipules ici sur dix paillasses qui gardent le même cadran, le même oscilloscope et les mêmes mesures.</p>
+  <p class="lead">Cette planche ne montre pas un phénomène : elle montre un langage. Un cycle, une phase, un oscillateur, une onde. Les mêmes outils décrivent un ressort, une corde de guitare et la lumière, et tu les manipules ici sur dix paillasses qui gardent le même cadran, le même oscilloscope et les mêmes mesures.</p>
 
-  <h2><span>1</span>Ce que tu vois</h2>
-  <dl>
-    <dt><span class="acc">Le cadran de phase</span></dt>
-    <dd>Un point tourne sur un cercle à la pulsation ω = 2πf. Sa hauteur est y = A sin φ. L'arc rempli est la phase : une position dans le cycle, pas une durée. Aux chapitres B et C, le même cadran montre l'état de l'oscillateur ou celui d'une perle de la corde.</dd>
-    <dt><span class="acc">L'oscilloscope déroulant</span></dt>
-    <dd>La trace garde en mémoire les derniers instants : le présent est au bord gauche, le passé s'éloigne vers la droite. Trait fin plein pour la première oscillation, tireté pour la seconde, trait fort pour une somme.</dd>
-    <dt>Les rangées A, f, T, φ</dt>
-    <dd>Amplitude, fréquence, période, phase, toujours dans cet ordre. Quand tu changes f, T = 1/f se met à jour avec elle.</dd>
-    <dt><span class="acc">Le ressort</span> et <span class="ener">la masse</span></dt>
-    <dd>Le ressort luit en vert d'eau quand il emmagasine de l'énergie potentielle ; la masse luit en jaune quand elle va vite. Les jauges de droite donnent les deux parts, et leur somme en contour.</dd>
-    <dt>La corde</dt>
-    <dd>Une ligne lisse portée par des perles, <span class="pos">orange</span> au-dessus du repos, <span class="neg">bleu</span> au-dessous. La perle témoin, soulignée d'un tireté, monte et descend sur place. La règle de 1 m fait foi pour les longueurs ; l'échelle verticale est exagérée deux fois.</dd>
-    <dt>Les observateurs du chapitre D3</dt>
-    <dd>Deux carrés immobiles qui comptent les fronts reçus et s'allument à chaque arrivée.</dd>
-  </dl>
 
-  <h2><span>2</span>La théorie, module par module</h2>
+  <p class="mode-emploi">Les nombres soulignés se règlent en les faisant glisser ou avec les flèches du clavier. Les termes pointillés ouvrent leur définition. Manipule les scènes, puis réponds aux questions avant de lire leur correction.</p>
+  <div class="cartes"><a class="carte" href="#m06"><b>MODULE 06</b><span>Sinusoïdes, cycles et phase</span><small>2 scènes intégrées · calculs et questions</small></a><a class="carte" href="#m14"><b>MODULE 14</b><span>Oscillateurs et résonance</span><small>2 scènes intégrées · calculs et questions</small></a><a class="carte" href="#m15"><b>MODULE 15</b><span>Ondes</span><small>2 scènes intégrées · calculs et questions</small></a></div>
+</header>
+  <h2 id="vois"><span class="n">1</span>Ce que tu vois</h2>
+<div class="cartes">
+<a class="carte" href="index.html?etape=06.1"><b><span class="acc">Le cadran de phase</span></b><span>Un point tourne sur un cercle à la pulsation ω = 2πf. Sa hauteur est y = A sin φ. L'arc rempli est la phase : une position dans le cycle, pas une durée. Aux chapitres B et C, le même cadran montre l'état de l'oscillateur ou celui d'une perle de la corde.</span></a>
+<a class="carte" href="index.html?etape=06.2"><b><span class="acc">L'oscilloscope déroulant</span></b><span>La trace garde en mémoire les derniers instants : le présent est au bord gauche, le passé s'éloigne vers la droite. Trait fin plein pour la première oscillation, tireté pour la seconde, trait fort pour une somme.</span></a>
+<a class="carte" href="index.html?etape=06.1"><b>Les rangées A, f, T, φ</b><span>Amplitude, fréquence, période, phase, toujours dans cet ordre. Quand tu changes f, T = 1/f se met à jour avec elle.</span></a>
+<a class="carte" href="index.html?etape=14.1"><b><span class="acc">Le ressort</span> et <span class="ener">la masse</span></b><span>Le ressort luit en vert d'eau quand il emmagasine de l'énergie potentielle ; la masse luit en jaune quand elle va vite. Les jauges de droite donnent les deux parts, et leur somme en contour.</span></a>
+<a class="carte" href="index.html?etape=15.1"><b>La corde</b><span>Une ligne lisse portée par des perles, <span class="pos">orange</span> au-dessus du repos, <span class="neg">bleu</span> au-dessous. La perle témoin, soulignée d'un tireté, monte et descend sur place. La règle de 1 m fait foi pour les longueurs ; l'échelle verticale est exagérée deux fois.</span></a>
+<a class="carte" href="index.html?etape=15.4"><b>Les observateurs du chapitre D3</b><span>Deux carrés immobiles qui comptent les fronts reçus et s'allument à chaque arrivée.</span></a>
+</div>
+
+  <h2 id="theorie"><span class="n">2</span>La théorie, module par module</h2>
   <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
-  <ul class="sommaire">
-    <li><a href="#m06"><b>06</b>Sinusoïdes, cycles et phase</a></li>
-    <li><a href="#m14"><b>14</b>Oscillateurs et résonance</a></li>
-    <li><a href="#m15"><b>15</b>Ondes</a></li>
-  </ul>
 
   <!-- ===================== Module 06 ===================== -->
   <section class="module" id="m06">
     <header>
       <p class="num">Module 06</p>
       <h3>Sinusoïdes, cycles et phase</h3>
-      <p class="etapes">Sur la planche : étapes A1 Un cycle · A2 Déphasage</p>
+      <p class="etapes">Sur la planche : étapes <a href="index.html?etape=06.1">A1 Un cycle</a> · <a href="index.html?etape=06.2">A2 Déphasage</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Tout ce qui revient à l’identique, encore et encore, se décrit par un cycle : un point sur une roue, la marée, la tension du secteur, une corde qui vibre. Le cycle le plus simple est celui d’un point qui tourne à vitesse constante sur un cercle. Sa hauteur, tracée dans le temps, dessine une sinusoïde. Retenir le cercle plutôt que la courbe est le bon réflexe : la phase n’est qu’un angle sur ce cercle, et un déphasage, l’écart entre deux points qui tournent ensemble. Pourquoi le sinus plutôt qu’une autre forme ? Parce que c’est la réponse naturelle de tout système rappelé vers son équilibre par une force proportionnelle à l’écart (module 14), et parce que toute forme périodique se décompose en sinus (module 09). Apprendre à lire un sinus, c’est apprendre à lire une bonne part de la physique.</p>
+    <h4 data-n="1" id="m06-intuition">Intuition</h4>
+    <p>Tout ce qui revient à l’identique, encore et encore, se décrit par un cycle : un point sur une roue, la marée, la tension du secteur, une corde qui vibre. Le cycle le plus simple est celui d’un point qui tourne à vitesse constante sur un cercle. Sa hauteur, tracée dans le temps, dessine une sinusoïde. Retenir le cercle plutôt que la courbe est le bon réflexe : la <a class="terme" href="#def-phase">phase</a> n’est qu’un angle sur ce cercle, et un déphasage, l’écart entre deux points qui tournent ensemble. Pourquoi le sinus plutôt qu’une autre forme ? Parce que c’est la réponse naturelle de tout système rappelé vers son équilibre par une force proportionnelle à l’écart (module 14), et parce que toute forme périodique se décompose en sinus (module 09). Apprendre à lire un sinus, c’est apprendre à lire une bonne part de la physique.</p>
 
-    <h4 data-n="2">Définitions</h4>
+    <h4 data-n="2" id="m06-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Amplitude \(A\)</dt><dd>Écart maximal à la position de repos. Même unité que la grandeur qui oscille.</dd></div>
-      <div><dt>Période \(T\)<span class="u">s</span></dt><dd>Durée d’un cycle complet.</dd></div>
-      <div><dt>Fréquence \(f\)<span class="u">Hz</span></dt><dd>Nombre de cycles par seconde : \(f = 1/T\).</dd></div>
-      <div><dt>Pulsation \(\omega\)<span class="u">rad/s</span></dt><dd>Vitesse angulaire du point sur le cercle : \(\omega = 2\pi f\).</dd></div>
-      <div><dt>Phase \(\varphi(t)\)<span class="u">rad ou °</span></dt><dd>Position dans le cycle à l’instant \(t\) : \(\varphi(t) = \omega t + \varphi_0\). Un tour complet vaut \(2\pi\) rad, soit 360°.</dd></div>
-      <div><dt>Déphasage \(\Delta\varphi\)</dt><dd>Écart de phase entre deux oscillations de même fréquence. À 90°, elles sont en <em>quadrature</em> ; à 180°, en <em>opposition de phase</em>.</dd></div>
-      <div><dt>Radian<span class="u">rad</span></dt><dd>Angle qui intercepte sur le cercle un arc égal au rayon. Un tour vaut \(2\pi \approx 6{,}28\) rad. C’est l’unité naturelle des formules : avec elle, la vitesse du point vaut simplement \(A\omega\).</dd></div>
-      <div><dt>Valeur efficace \(y_{\text{eff}}\)</dt><dd>Pour une grandeur sinusoïdale, \(A/\sqrt2\) : la valeur constante qui produirait la même puissance moyenne (module 22).</dd></div>
+      <div id="def-amplitude"><dt>Amplitude \(A\)</dt><dd>Écart maximal à la position de repos. Même unité que la grandeur qui oscille.</dd></div>
+      <div id="def-periode"><dt>Période \(T\)<span class="u">s</span></dt><dd>Durée d’un cycle complet.</dd></div>
+      <div id="def-frequence"><dt>Fréquence \(f\)<span class="u">Hz</span></dt><dd>Nombre de cycles par seconde : \(f = 1/T\).</dd></div>
+      <div id="def-pulsation"><dt>Pulsation \(\omega\)<span class="u">rad/s</span></dt><dd>Vitesse angulaire du point sur le cercle : \(\omega = 2\pi f\).</dd></div>
+      <div id="def-phase"><dt>Phase \(\varphi(t)\)<span class="u">rad ou °</span></dt><dd>Position dans le cycle à l’instant \(t\) : \(\varphi(t) = \omega t + \varphi_0\). Un tour complet vaut \(2\pi\) rad, soit 360°.</dd></div>
+      <div id="def-dephasage"><dt>Déphasage \(\Delta\varphi\)</dt><dd>Écart de phase entre deux oscillations de même fréquence. À 90°, elles sont en <em>quadrature</em> ; à 180°, en <em>opposition de phase</em>.</dd></div>
+      <div id="def-radian"><dt>Radian<span class="u">rad</span></dt><dd>Angle qui intercepte sur le cercle un arc égal au rayon. Un tour vaut \(2\pi \approx 6{,}28\) rad. C’est l’unité naturelle des formules : avec elle, la vitesse du point vaut simplement \(A\omega\).</dd></div>
+      <div id="def-efficace"><dt>Valeur efficace \(y_{\text{eff}}\)</dt><dd>Pour une grandeur sinusoïdale, \(A/\sqrt2\) : la valeur constante qui produirait la même puissance moyenne (module 22).</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m06-relations">Relations clés</h4>
     <div class="relation">\[ y(t) = A\sin(\omega t + \varphi_0), \qquad \omega = 2\pi f = \frac{2\pi}{T} \]
       <p>La sinusoïde est la projection du point qui tourne. Tout le reste en découle.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=06.1" data-h="520" data-titre="Le cercle et le sinus">
+    <figcaption><span><b>06.1</b>Change f : lis la durée d’un tour sur la trace.</span>
+    <a class="ouvrir" href="index.html?etape=06.1">Ouvrir à cette étape ↗</a>
+    </figcaption>
+    </figure>
+    <div class="calc avec-figure">
+    <p class="calc-t">À toi : règle le rythme</p><output class="figure" data-expr="trace({ f: t =&gt; amp*Math.sin(2*PI*freq*t), x: [0,4], y: [-2,2] })"></output>
+    <p>Fréquence <span class="var" data-nom="freq" data-val="0.5" data-min="0.25" data-max="2" data-pas="0.05" data-dec="2" data-unite="Hz" data-label="Fréquence"></span>, amplitude <span class="var" data-nom="amp" data-val="1" data-min="0.5" data-max="2" data-pas="0.1" data-dec="2" data-unite="u.a." data-label="Amplitude"></span>.</p>
+    <p>T = 1/f = <output class="fort" data-expr="1/freq" data-dec="3"></output> s ; ω = 2πf = <output class="fort" data-expr="2*PI*freq" data-dec="3"></output> rad/s.</p>
+    <p class="note">La courbe montre y(t) pendant quatre secondes, avec une phase initiale nulle.</p>
+    </div>
     <div class="relation">\[ \Delta t = \frac{\Delta\varphi}{2\pi}\,T \]
-      <p>Un déphasage est un décalage dans le temps, mesuré en fraction de période : 90° de retard, c’est un quart de période.</p></div>
+      <p>Un <a class="terme" href="#def-dephasage">déphasage</a> est un décalage dans le temps, mesuré en fraction de période : 90° de retard, c’est un quart de période.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=06.2" data-h="520" data-titre="Deux oscillations déphasées">
+    <figcaption><span><b>06.2</b>Règle Δφ à 180°, puis à 360° ; compare le cadran et les crêtes.</span>
+    <a class="ouvrir" href="index.html?etape=06.2">Ouvrir à cette étape ↗</a>
+    </figcaption>
+    </figure>
+    <div class="quiz" data-reponse="0.5" data-tol="0.02" data-unite="s">
+    <p class="q">À f = 0,50 Hz, combien de secondes représentent 90° de déphasage ?</p>
+    <div class="corr">
+    <p>Un quart de T = 2 s : Δt = 0,50 s.</p>
+    </div>
+    </div>
     <div class="relation">\[ \frac{\dd y}{\dd t} = A\omega\cos(\omega t + \varphi_0) = A\omega\sin\!\left(\omega t + \varphi_0 + \tfrac{\pi}{2}\right) \]
-      <p>La vitesse est elle-même une sinusoïde, en avance de 90° et d’amplitude \(A\omega\) : elle est maximale quand \(y\) passe par zéro, nulle aux extrêmes (module 03).</p></div>
+      <p>La vitesse est elle-même une sinusoïde, en avance de 90° et d’<a class="terme" href="#def-amplitude">amplitude</a> \(A\omega\) : elle est maximale quand \(y\) passe par zéro, nulle aux extrêmes (module 03).</p></div>
     <div class="relation">\[ A\sin(\omega t) + A\sin(\omega t + \Delta\varphi) = 2A\cos\frac{\Delta\varphi}{2}\,\sin\!\left(\omega t + \frac{\Delta\varphi}{2}\right) \]
       <p>Deux sinusoïdes de même fréquence donnent encore une sinusoïde de même fréquence : on met les flèches tournantes bout à bout. Amplitude \(2A\) en phase, nulle en opposition (étape A2).</p></div>
+<div class="calc avec-figure">
+    <p class="calc-t">À toi : additionne deux oscillations</p><output class="figure" data-expr="trace({ f: t =&gt; amp*(Math.sin(PI*t)+Math.sin(PI*t+deph*PI/180)), x: [0,4], y: [-4,4] })"></output>
+    <p>Chaque signal a une amplitude <span class="var" data-nom="amp" data-val="1" data-min="0.5" data-max="2" data-pas="0.1" data-dec="2" data-unite="u.a." data-label="Amplitude de chaque signal"></span> et une fréquence de 0,50 Hz. Déphasage <span class="var" data-nom="deph" data-val="90" data-min="0" data-max="360" data-pas="15" data-dec="0" data-unite="°" data-label="Déphasage"></span>.</p>
+    <p>Amplitude de la somme : <output class="fort" data-expr="2*amp*abs(cosd(deph/2))" data-dec="3"></output> u.a. ; décalage Δt = <output class="fort" data-expr="deph/360*2" data-dec="3"></output> s.</p>
+    <p class="note">La courbe est la somme instantanée : retrouve l’annulation à 180°.</p>
+    </div>
     <div class="relation">\[ \langle y \rangle = 0, \qquad y_{\text{eff}} = \sqrt{\langle y^2 \rangle} = \frac{A}{\sqrt2} \]
       <p>Sur un cycle complet, un sinus est autant positif que négatif : sa moyenne est nulle. Son carré ne l’est jamais, et sa moyenne vaut \(A^2/2\). C’est pour cela qu’une tension alternative se caractérise par sa valeur efficace.</p></div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <h4 data-n="4" id="m06-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Le réseau électrique nord-américain oscille à \(f = 60\) Hz.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Période : \(T = 1/60 \approx 16{,}7\) ms ; pulsation : \(\omega = 2\pi \cdot 60 \approx 377\) rad/s.</li>
         <li>En triphasé, les trois tensions sont décalées de 120°, soit \(\Delta t = \tfrac{120}{360}\,T = T/3 \approx 5{,}6\) ms.</li>
         <li>Une tension de crête \(A = 170\) V varie au plus vite au passage par zéro, à \(A\omega \approx 170 \times 377 \approx 6{,}4 \times 10^4\) V/s.</li>
@@ -138,7 +164,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m06-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Confondre fréquence et pulsation : \(\omega = 2\pi f\). Un facteur \(2\pi \approx 6{,}3\) se perd très vite.</li>
       <li>Calculer un sinus en degrés alors que la formule attend des radians, ou l’inverse.</li>
@@ -148,7 +174,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Additionner les amplitudes de deux signaux déphasés : 3 V et 4 V en quadrature donnent \(\sqrt{3^2 + 4^2} = 5\) V, pas 7 V.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m06-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>14</b><span>La solution d’un oscillateur sans frottement est exactement cette sinusoïde.</span></li>
       <li><b>15</b><span>Une onde, c’est une phase qui dépend aussi de la position : \(kx - \omega t\).</span></li>
@@ -158,13 +184,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>48</b><span>La phase quantique est un angle du même genre, porté par une amplitude complexe.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Une oscillation a une fréquence de 2 Hz. Que valent sa période et sa pulsation ?</summary>
-      <p>\(T = 1/f = 0{,}5\) s et \(\omega = 2\pi f = 4\pi \approx 12{,}6\) rad/s.</p></details>
-    <details><summary>Deux signaux de 50 Hz sont décalés de 5 ms. Quel est leur déphasage ?</summary>
-      <p>\(T = 20\) ms, donc 5 ms est un quart de période : \(\Delta\varphi = 90°\), soit \(\pi/2\) rad. Ils sont en quadrature.</p></details>
-    <details><summary>À quel endroit du cycle la vitesse du point est-elle maximale ?</summary>
-      <p>Au passage par la position de repos (\(y = 0\)) : la dérivée est en \(\cos\), maximale quand le \(\sin\) est nul. Aux extrêmes, la vitesse est nulle.</p></details>
+    <h4 data-n="7" id="m06-test">Teste-toi</h4>
+    <div class="quiz"><p class="q">Une oscillation a une fréquence de 2 Hz. Que valent sa période et sa pulsation ?</p><ul class="choix"><li>T = 2 s ; ω ≈ 3,14 rad/s</li><li data-bon>T = 0,50 s ; ω ≈ 12,6 rad/s</li><li>T = 0,50 s ; ω = 2 rad/s</li></ul><div class="corr">
+      <p>\(T = 1/f = 0{,}5\) s et \(\omega = 2\pi f = 4\pi \approx 12{,}6\) rad/s.</p></div></div>
+    <div class="quiz" data-reponse="90" data-tol="0.5" data-unite="°"><p class="q">Deux signaux de 50 Hz sont décalés de 5 ms. Quel est leur déphasage ?</p><div class="corr">
+      <p>\(T = 20\) ms, donc 5 ms est un quart de <a class="terme" href="#def-periode">période</a> : \(\Delta\varphi = 90°\), soit \(\pi/2\) rad. Ils sont en quadrature.</p></div></div>
+    <div class="quiz"><p class="q">À quel endroit du cycle la vitesse du point est-elle maximale ?</p><ul class="choix"><li data-bon>Au passage par la position de repos</li><li>À l’écart maximal</li><li>La vitesse est constante</li></ul><div class="corr">
+      <p>Au passage par la position de repos (\(y = 0\)) : la dérivée est en \(\cos\), maximale quand le \(\sin\) est nul. Aux extrêmes, la vitesse est nulle.</p></div></div>
   </section>
 
   <!-- ===================== Module 14 ===================== -->
@@ -172,41 +198,75 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <header>
       <p class="num">Module 14</p>
       <h3>Oscillateurs et résonance</h3>
-      <p class="etapes">Sur la planche : étapes B1 Échange · B2 Pertes · B3 Résonance</p>
+      <p class="etapes">Sur la planche : étapes <a href="index.html?etape=14.1">B1 Échange</a> · <a href="index.html?etape=14.2">B2 Pertes</a> · <a href="index.html?etape=14.3">B3 Résonance</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Un système oscille quand deux choses sont réunies : une force qui le ramène vers l’équilibre, et une inertie qui l’emporte au-delà. La masse au bout d’un ressort en est le modèle : elle repasse par le repos à pleine vitesse, dépasse, est freinée, repart. Son énergie passe sans cesse d’un réservoir à l’autre, du ressort comprimé (potentielle) à la masse en mouvement (cinétique). Un frottement vide peu à peu les réservoirs ; une poussée périodique peut les remplir, surtout si elle arrive au bon rythme : c’est la résonance. Le même schéma revient partout où une grandeur est rappelée vers l’équilibre par une force proportionnelle à l’écart : pendule aux petits angles, molécule qui vibre, circuit électrique, immeuble qui oscille sous le vent.</p>
+    <h4 data-n="1" id="m14-intuition">Intuition</h4>
+    <p>Un système oscille quand deux choses sont réunies : une force qui le ramène vers l’équilibre, et une inertie qui l’emporte au-delà. La masse au bout d’un ressort en est le modèle : elle repasse par le repos à pleine vitesse, dépasse, est freinée, repart. Son énergie passe sans cesse d’un réservoir à l’autre, du ressort comprimé (potentielle) à la masse en mouvement (cinétique). Un <a class="terme" href="#def-frottement">frottement</a> vide peu à peu les réservoirs ; une poussée périodique peut les remplir, surtout si elle arrive au bon rythme : c’est la résonance. Le même schéma revient partout où une grandeur est rappelée vers l’équilibre par une force proportionnelle à l’écart : pendule aux petits angles, molécule qui vibre, circuit électrique, immeuble qui oscille sous le vent.</p>
 
-    <h4 data-n="2">Définitions</h4>
+    <h4 data-n="2" id="m14-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Raideur \(k\)<span class="u">N/m</span></dt><dd>Force de rappel par mètre d’allongement du ressort.</dd></div>
-      <div><dt>Pulsation propre \(\omega_0\)<span class="u">rad/s</span></dt><dd>Rythme naturel de l’oscillateur sans frottement : \(\omega_0 = \sqrt{k/m}\).</dd></div>
-      <div><dt>Frottement \(b\)<span class="u">kg/s</span></dt><dd>Coefficient d’une force de frottement proportionnelle à la vitesse, \(-b\,v\).</dd></div>
-      <div><dt>Amortissement \(\beta\)<span class="u">s⁻¹</span></dt><dd>\(\beta = b/2m\) : l’amplitude décroît comme \(\mathrm{e}^{-\beta t}\).</dd></div>
-      <div><dt>Facteur de qualité \(Q\)</dt><dd>\(Q = \omega_0/2\beta\) : grand quand les pertes sont faibles. Il fixe la finesse de la résonance.</dd></div>
-      <div><dt>Forçage \(\Omega\)<span class="u">rad/s</span></dt><dd>Pulsation de la poussée périodique \(F_0\cos(\Omega t)\) imposée de l’extérieur.</dd></div>
-      <div><dt>Régimes</dt><dd>Selon \(\beta\) comparé à \(\omega_0\) : pseudo-périodique (\(\beta \lt \omega_0\), oscille en s’amortissant), critique (\(\beta = \omega_0\), retour le plus rapide sans dépasser), apériodique (\(\beta \gt \omega_0\), retour lent sans osciller).</dd></div>
+      <div id="def-raideur"><dt>Raideur \(k\)<span class="u">N/m</span></dt><dd>Force de rappel par mètre d’allongement du ressort.</dd></div>
+      <div id="def-propre"><dt>Pulsation propre \(\omega_0\)<span class="u">rad/s</span></dt><dd>Rythme naturel de l’oscillateur sans frottement : \(\omega_0 = \sqrt{k/m}\).</dd></div>
+      <div id="def-frottement"><dt>Frottement \(b\)<span class="u">kg/s</span></dt><dd>Coefficient d’une force de frottement proportionnelle à la vitesse, \(-b\,v\).</dd></div>
+      <div id="def-amortissement"><dt>Amortissement \(\beta\)<span class="u">s⁻¹</span></dt><dd>\(\beta = b/2m\) : l’amplitude décroît comme \(\mathrm{e}^{-\beta t}\).</dd></div>
+      <div id="def-qualite"><dt>Facteur de qualité \(Q\)</dt><dd>\(Q = \omega_0/2\beta\) : grand quand les pertes sont faibles. Il fixe la finesse de la résonance.</dd></div>
+      <div id="def-forcage"><dt>Forçage \(\Omega\)<span class="u">rad/s</span></dt><dd>Pulsation de la poussée périodique \(F_0\cos(\Omega t)\) imposée de l’extérieur.</dd></div>
+      <div id="def-regimes"><dt>Régimes</dt><dd>Selon \(\beta\) comparé à \(\omega_0\) : pseudo-périodique (\(\beta \lt \omega_0\), oscille en s’amortissant), critique (\(\beta = \omega_0\), retour le plus rapide sans dépasser), apériodique (\(\beta \gt \omega_0\), retour lent sans osciller).</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m14-relations">Relations clés</h4>
     <div class="relation">\[ F = -k\,x \]
       <p>Loi de Hooke : la force de rappel est proportionnelle au déplacement et de sens opposé. C’est elle qui rend l’oscillation sinusoïdale.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=14.1" data-h="520" data-titre="Échange entre ressort et masse">
+    <figcaption><span><b>14.1</b>Glisse la masse puis lâche-la : suis les jauges Ec, Ep et leur somme.</span>
+    <a class="ouvrir" href="index.html?etape=14.1">Ouvrir à cette étape ↗</a>
+    </figcaption>
+    </figure>
+    <div class="calc">
+    <p class="calc-t">À toi : change le rythme propre</p>
+    <p>Masse <span class="var" data-nom="masse" data-val="0.5" data-min="0.2" data-max="2" data-pas="0.05" data-dec="2" data-unite="kg" data-label="Masse"></span>, raideur <span class="var" data-nom="raideur" data-val="20" data-min="5" data-max="50" data-pas="1" data-dec="0" data-unite="N/m" data-label="Raideur"></span>.</p>
+    <p>ω₀ = √(k/m) = <output class="fort" data-expr="sqrt(raideur/masse)" data-dec="3"></output> rad/s ; f₀ = <output class="fort" data-expr="sqrt(raideur/masse)/(2*PI)" data-dec="3"></output> Hz ; T₀ = <output class="fort" data-expr="2*PI/sqrt(raideur/masse)" data-dec="3"></output> s.</p>
+    </div>
     <div class="relation">\[ m\,\ddot x + b\,\dot x + k\,x = F_0\cos(\Omega t) \]
       <p>Deuxième loi de Newton (module 10) appliquée à la masse : inertie, frottement, rappel, poussée.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=14.3&amp;panneau=1" data-h="520" data-titre="Forçage et résonance"><figcaption><span><b>14.3</b>Amène Ω/ω₀ vers 1 et attends plusieurs cycles ; compare la mesure à la courbe.</span><a class="ouvrir" href="index.html?etape=14.3&amp;panneau=1">Ouvrir à cette étape ↗</a></figcaption></figure>
     <div class="relation">\[ x(t) = A\cos(\omega_0 t + \varphi_0), \qquad E = \tfrac12 m v^2 + \tfrac12 k x^2 = \tfrac12 k A^2 \]
-      <p>Sans frottement ni poussée : un sinus à la pulsation propre, et une énergie totale constante qui s’échange deux fois par période.</p></div>
+      <p>Sans frottement ni poussée : un sinus à la <a class="terme" href="#def-propre">pulsation propre</a>, et une énergie totale constante qui s’échange deux fois par période.</p></div>
     <div class="relation">\[ \omega_0 = \sqrt{\frac{g}{\ell}} \qquad \text{(pendule simple, petits angles)} \]
-      <p>Pour un petit angle, \(\sin\theta \approx \theta\) et le pendule devient un oscillateur harmonique : sa période ne dépend ni de la masse ni de l’amplitude. À 30°, l’écart à cette formule n’est encore que de 1,7 %.</p></div>
+      <p>Pour un petit angle, \(\sin\theta \approx \theta\) et le pendule devient un oscillateur harmonique : sa période ne dépend ni de la masse ni de l’<a class="terme" href="#def-amplitude">amplitude</a>. À 30°, l’écart à cette formule n’est encore que de 1,7 %.</p></div>
     <div class="relation">\[ x(t) = A_0\,\mathrm{e}^{-\beta t}\cos(\omega_d t + \varphi_0), \qquad \omega_d = \sqrt{\omega_0^2 - \beta^2} \]
       <p>Avec un frottement faible (\(\beta \lt \omega_0\)) : l’oscillation continue, un peu plus lente, sous une enveloppe exponentielle (module 05).</p></div>
+<div class="calc avec-figure">
+    <p class="calc-t">À toi : suis l’enveloppe</p><output class="figure" data-expr="trace({ f: t =&gt; amp0*Math.exp(-beta*t), x: [0,10], y: [0,15], pts: [[duree,amp0*Math.exp(-beta*duree)]] })"></output>
+    <p>Amplitude initiale <span class="var" data-nom="amp0" data-val="10" data-min="1" data-max="15" data-pas="1" data-dec="0" data-unite="cm" data-label="Amplitude initiale"></span>, amortissement <span class="var" data-nom="beta" data-val="0.3" data-min="0" data-max="1.5" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Amortissement"></span>, durée <span class="var" data-nom="duree" data-val="5" data-min="0" data-max="10" data-pas="0.5" data-dec="1" data-unite="s" data-label="Durée"></span>.</p>
+    <p>Enveloppe A₀e<sup>−βt</sup> = <output class="fort" data-expr="amp0*Math.exp(-beta*duree)" data-dec="3"></output> cm.</p>
+    <p class="note">Le tracé est le facteur exponentiel de l’enveloppe, pour t de 0 à 10 s ; la position continue d’osciller à l’intérieur.</p>
+    </div>
     <div class="relation">\[ A(\Omega) = \frac{F_0/m}{\sqrt{(\omega_0^2 - \Omega^2)^2 + (2\beta\Omega)^2}} \]
       <p>Régime permanent forcé : l’amplitude culmine près de \(\Omega = \omega_0\) ; le pic est d’autant plus haut et étroit que \(Q\) est grand. Le retard de la masse sur la force passe de 0° (forçage lent) à 90° (résonance) puis 180° (forçage rapide).</p></div>
+<div class="calc avec-figure">
+    <p class="calc-t">À toi : parcours la résonance</p><output class="figure" data-expr="trace({ f: r =&gt; 0.4/sqrt((40-40*r*r)**2+(2*beta*r*sqrt(40))**2), x: [0.2,2.5], y: [0,0.22], pts: [[rapport,0.4/sqrt((40-40*rapport**2)**2+(2*beta*rapport*sqrt(40))**2)]] })"></output>
+    <p>m = 0,50 kg, k = 20 N/m, F₀ = 0,20 N ; rapport Ω/ω₀ = <span class="var" data-nom="rapport" data-val="0.6" data-min="0.2" data-max="2.5" data-pas="0.01" data-dec="2" data-unite="" data-label="Rapport de pulsations"></span>, β = <span class="var" data-nom="beta" data-val="0.25" data-min="0.15" data-max="1.5" data-pas="0.05" data-dec="2" data-unite="s⁻¹" data-label="Amortissement"></span>.</p>
+    <p>Amplitude permanente = <output class="fort" data-expr="0.4/sqrt((40-40*rapport**2)**2+(2*beta*rapport*sqrt(40))**2)" data-dec="4"></output> m ; Q = <output class="fort" data-expr="sqrt(40)/(2*beta)" data-dec="2"></output>.</p>
+    <p class="note">Le graphe donne l’amplitude permanente en fonction de Ω/ω₀. Le point suit le rapport choisi.</p>
+    </div>
+    <div class="quiz">
+    <p class="q">Sans frottement, où la vitesse de la masse est-elle maximale ?</p>
+    <ul class="choix">
+    <li>Aux extrêmes</li>
+    <li data-bon>À la position de repos</li>
+    <li>Elle est constante</li>
+    </ul>
+    <div class="corr">
+    <p>À x = 0, Ep = 0 : toute l’énergie mécanique est cinétique.</p>
+    </div>
+    </div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <h4 data-n="4" id="m14-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Une masse \(m = 0{,}5\) kg au bout d’un ressort \(k = 200\) N/m, lâchée à \(A = 5\) cm.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>\(\omega_0 = \sqrt{200/0{,}5} = 20\) rad/s, donc \(f_0 = 20/2\pi \approx 3{,}2\) Hz et \(T \approx 0{,}31\) s.</li>
         <li>Énergie : \(E = \tfrac12 \cdot 200 \cdot 0{,}05^2 = 0{,}25\) J. Vitesse maximale : \(v_{\max} = \omega_0 A = 1\) m/s, et l’on vérifie \(\tfrac12 \cdot 0{,}5 \cdot 1^2 = 0{,}25\) J.</li>
         <li>Avec \(b = 0{,}4\) kg/s : \(\beta = 0{,}4\) s⁻¹ et \(Q = 20/0{,}8 = 25\). L’amplitude est divisée par \(\mathrm{e}\) en \(1/\beta = 2{,}5\) s, soit environ \(Q/\pi \approx 8\) oscillations.</li>
@@ -214,7 +274,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m14-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Croire que la fréquence dépend de l’amplitude. Pour un oscillateur harmonique, non : c’est ce qui fait les bonnes horloges. Mais ce n’est vrai que dans le domaine linéaire (petits allongements, petits angles d’un pendule).</li>
       <li>Penser qu’à la résonance la force pousse quand la masse est au plus loin. Elle est en phase avec la <em>vitesse</em>, pas avec la position : déphasage de 90°.</li>
@@ -224,7 +284,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Croire que le meilleur amortisseur est le plus fort : au-delà du régime critique, le retour au repos ralentit. Une suspension de voiture vise le voisinage du critique.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m14-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>22</b><span>Circuit RLC : même équation, avec \(L \leftrightarrow m\), \(1/C \leftrightarrow k\) et \(R \leftrightarrow b\).</span></li>
       <li><b>15</b><span>Une onde stationnaire est la résonance d’une onde qui fait des allers-retours.</span></li>
@@ -232,13 +292,13 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>49</b><span>L’oscillateur harmonique quantique a des niveaux d’énergie régulièrement espacés.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>Si on quadruple la masse sans toucher au ressort, que devient la fréquence propre ?</summary>
-      <p>Elle est divisée par deux : \(f_0 = \frac{1}{2\pi}\sqrt{k/m}\) et \(\sqrt{4} = 2\). Un oscillateur plus lourd est plus lent.</p></details>
-    <details><summary>Un diapason à 440 Hz a un facteur de qualité de 10⁴. Combien de temps faut-il pour que son amplitude soit divisée par e ?</summary>
-      <p>Environ \(Q/\pi \approx 3\,200\) oscillations, soit \(3\,200/440 \approx 7\) s. C’est pour cela qu’un diapason sonne longtemps.</p></details>
-    <details><summary>Pourquoi l’amplitude à la résonance reste-t-elle finie ?</summary>
-      <p>Parce que les pertes grandissent avec la vitesse : à grande amplitude, le frottement retire par cycle exactement l’énergie que la force apporte. Plus \(Q\) est grand, plus cet équilibre est atteint haut.</p></details>
+    <h4 data-n="7" id="m14-test">Teste-toi</h4>
+    <div class="quiz"><p class="q">Si on quadruple la masse sans toucher au ressort, que devient la fréquence propre ?</p><ul class="choix"><li>Elle double</li><li data-bon>Elle est divisée par deux</li><li>Elle reste constante</li></ul><div class="corr">
+      <p>Elle est divisée par deux : \(f_0 = \frac{1}{2\pi}\sqrt{k/m}\) et \(\sqrt{4} = 2\). Un oscillateur plus lourd est plus lent.</p></div></div>
+    <div class="quiz" data-reponse="7.2343155950861515" data-tol="0.35" data-unite="s"><p class="q">Un diapason à 440 Hz a un facteur de qualité de 10⁴. Combien de temps faut-il pour que son amplitude soit divisée par e ?</p><div class="corr">
+      <p>Environ \(Q/\pi \approx 3\,200\) oscillations, soit \(3\,200/440 \approx 7\) s. C’est pour cela qu’un diapason sonne longtemps.</p></div></div>
+    <div class="quiz"><p class="q">Pourquoi l’amplitude à la résonance reste-t-elle finie ?</p><ul class="choix"><li>L’énergie injectée disparaît</li><li>La force finit par s’arrêter</li><li data-bon>Les pertes compensent l’apport à chaque cycle</li></ul><div class="corr">
+      <p>Parce que les pertes grandissent avec la vitesse : à grande amplitude, le frottement retire par cycle exactement l’énergie que la force apporte. Plus \(Q\) est grand, plus cet équilibre est atteint haut.</p></div></div>
   </section>
 
   <!-- ===================== Module 15 ===================== -->
@@ -246,42 +306,72 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <header>
       <p class="num">Module 15</p>
       <h3>Ondes</h3>
-      <p class="etapes">Sur la planche : étapes C1 Impulsion · C2 Onde · D1 Somme · D2 Modes · D3 Doppler</p>
+      <p class="etapes">Sur la planche : étapes <a href="index.html?etape=15.1">C1 Impulsion</a> · <a href="index.html?etape=15.1&amp;scene=2">C2 Onde</a> · <a href="index.html?etape=15.2">D1 Somme</a> · <a href="index.html?etape=15.3">D2 Modes</a> · <a href="index.html?etape=15.4">D3 Doppler</a></p>
     </header>
 
-    <h4 data-n="1">Intuition</h4>
-    <p>Une onde transporte une perturbation et de l’énergie, pas de la matière. Sur une corde, chaque perle monte et descend sur place, comme un oscillateur du module 14, mais avec un retard qui grandit avec la distance : la phase dépend à la fois du temps et de la position. Deux ondes qui se croisent s’additionnent puis repartent intactes ; une onde qui se réfléchit sur elle-même peut former une figure immobile, l’onde stationnaire. Il en existe deux grandes familles : les ondes <em>transversales</em>, où le milieu bouge perpendiculairement à la propagation (corde, lumière), et les ondes <em>longitudinales</em>, où il bouge dans le même sens (son dans l’air, fait de compressions et de détentes).</p>
+    <h4 data-n="1" id="m15-intuition">Intuition</h4>
+    <p>Une onde transporte une perturbation et de l’énergie, pas de la matière. Sur une corde, chaque perle monte et descend sur place, comme un oscillateur du module 14, mais avec un retard qui grandit avec la distance : la <a class="terme" href="#def-phase">phase</a> dépend à la fois du temps et de la position. Deux ondes qui se croisent s’additionnent puis repartent intactes ; une onde qui se réfléchit sur elle-même peut former une figure immobile, l’onde stationnaire. Il en existe deux grandes familles : les ondes <em>transversales</em>, où le milieu bouge perpendiculairement à la propagation (corde, lumière), et les ondes <em>longitudinales</em>, où il bouge dans le même sens (son dans l’air, fait de compressions et de détentes).</p>
 
-    <h4 data-n="2">Définitions</h4>
+    <h4 data-n="2" id="m15-defs">Définitions</h4>
     <dl class="defs">
-      <div><dt>Célérité \(c\)<span class="u">m/s</span></dt><dd>Vitesse à laquelle la perturbation avance. Elle dépend du milieu, pas de la source.</dd></div>
-      <div><dt>Longueur d’onde \(\lambda\)<span class="u">m</span></dt><dd>Distance entre deux points dans le même état de vibration, à un instant donné.</dd></div>
-      <div><dt>Nombre d’onde \(k\)<span class="u">rad/m</span></dt><dd>\(k = 2\pi/\lambda\) : l’équivalent spatial de la pulsation.</dd></div>
-      <div><dt>Superposition</dt><dd>Le déplacement total est la somme des déplacements de chaque onde.</dd></div>
-      <div><dt>Nœud, ventre</dt><dd>Dans une onde stationnaire : points immobiles (nœuds), points d’amplitude maximale (ventres).</dd></div>
-      <div><dt>Mode \(n\)</dt><dd>Une des façons de vibrer qu’autorisent les bords ; le mode \(n\) compte \(n\) ventres.</dd></div>
-      <div><dt>Intensité \(I\)<span class="u">W/m²</span></dt><dd>Puissance transportée par l’onde à travers un mètre carré perpendiculaire à sa direction.</dd></div>
-      <div><dt>Transversale, longitudinale</dt><dd>Selon que le milieu vibre perpendiculairement à la propagation, ou dans sa direction.</dd></div>
+      <div id="def-celerite"><dt>Célérité \(c\)<span class="u">m/s</span></dt><dd>Vitesse à laquelle la perturbation avance. Elle dépend du milieu, pas de la source.</dd></div>
+      <div id="def-longueur"><dt>Longueur d’onde \(\lambda\)<span class="u">m</span></dt><dd>Distance entre deux points dans le même état de vibration, à un instant donné.</dd></div>
+      <div id="def-nombre-onde"><dt>Nombre d’onde \(k\)<span class="u">rad/m</span></dt><dd>\(k = 2\pi/\lambda\) : l’équivalent spatial de la pulsation.</dd></div>
+      <div id="def-superposition"><dt>Superposition</dt><dd>Le déplacement total est la somme des déplacements de chaque onde.</dd></div>
+      <div id="def-noeud"><dt>Nœud, ventre</dt><dd>Dans une onde stationnaire : points immobiles (nœuds), points d’amplitude maximale (ventres).</dd></div>
+      <div id="def-mode"><dt>Mode \(n\)</dt><dd>Une des façons de vibrer qu’autorisent les bords ; le mode \(n\) compte \(n\) ventres.</dd></div>
+      <div id="def-intensite"><dt>Intensité \(I\)<span class="u">W/m²</span></dt><dd>Puissance transportée par l’onde à travers un mètre carré perpendiculaire à sa direction.</dd></div>
+      <div id="def-transversale"><dt>Transversale, longitudinale</dt><dd>Selon que le milieu vibre perpendiculairement à la propagation, ou dans sa direction.</dd></div>
     </dl>
 
-    <h4 data-n="3">Relations clés</h4>
+    <h4 data-n="3" id="m15-relations">Relations clés</h4>
     <div class="relation">\[ y(x,t) = A\sin(kx - \omega t + \varphi_0), \qquad c = \lambda f = \frac{\omega}{k} \]
       <p>Onde progressive vers les \(x\) croissants. En un point fixe, on retrouve le sinus du module 06 ; à un instant fixé, une sinusoïde dans l’espace.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=15.1&amp;scene=2&amp;panneau=1" data-h="520" data-titre="Une onde périodique">
+    <figcaption><span><b>15.1</b>Change la fréquence de la main, puis glisse la perle témoin : compare λ et le retard.</span>
+    <a class="ouvrir" href="index.html?etape=15.1&amp;scene=2&amp;panneau=1">Ouvrir à cette étape ↗</a>
+    </figcaption>
+    </figure>
+    <div class="calc avec-figure">
+    <p class="calc-t">À toi : espace les crêtes</p><output class="figure" data-expr="trace({ f: x =&gt; Math.sin(2*PI*freq*x/celerite), x: [0,2*celerite/freq], y: [-1.2,1.2] })"></output>
+    <p>Célérité <span class="var" data-nom="celerite" data-val="0.5" data-min="0.1" data-max="1" data-pas="0.05" data-dec="2" data-unite="m/s" data-label="Célérité"></span>, fréquence <span class="var" data-nom="freq" data-val="1" data-min="0.5" data-max="3" data-pas="0.05" data-dec="2" data-unite="Hz" data-label="Fréquence"></span>.</p>
+    <p>λ = c/f = <output class="fort" data-expr="celerite/freq" data-dec="3"></output> m ; k = 2π/λ = <output class="fort" data-expr="2*PI*freq/celerite" data-dec="3"></output> rad/m.</p>
+    <p class="note">Profil à un instant fixé, amplitude 1 u.a., sur deux longueurs d’onde.</p>
+    </div>
     <div class="relation">\[ \frac{\partial^2 y}{\partial t^2} = c^2\,\frac{\partial^2 y}{\partial x^2}, \qquad c = \sqrt{\frac{T}{\mu}} \]
-      <p>Équation d’onde d’une corde tendue (tension \(T\), masse linéique \(\mu\)), valable aux petits angles. Elle est linéaire : c’est ce qui permet la superposition.</p></div>
+      <p>Équation d’onde d’une corde tendue (tension \(T\), masse linéique \(\mu\)), valable aux petits angles. Elle est linéaire : c’est ce qui permet la <a class="terme" href="#def-superposition">superposition</a>.</p></div>
+<figure class="labo large" data-src="index.html?embed&amp;etape=15.3" data-h="520" data-titre="Les modes de la corde"><figcaption><span><b>15.3</b>Choisis le mode 2 puis « Décomposer » ; attends que les nœuds et ventres se dessinent.</span><a class="ouvrir" href="index.html?etape=15.3">Ouvrir à cette étape ↗</a></figcaption></figure>
     <div class="relation">\[ y_1 + y_2 \;\text{ a pour amplitude }\; 2A\left|\cos\frac{\Delta\varphi}{2}\right| \]
-      <p>Deux ondes de même amplitude et de même fréquence : interférence constructive à \(\Delta\varphi = 0\) (amplitude \(2A\)), destructive à \(\Delta\varphi = 180°\) (amplitude nulle).</p></div>
+      <p>Deux ondes de même <a class="terme" href="#def-amplitude">amplitude</a> et de même fréquence : interférence constructive à \(\Delta\varphi = 0\) (amplitude \(2A\)), destructive à \(\Delta\varphi = 180°\) (amplitude nulle).</p></div>
     <div class="relation">\[ A\sin(kx - \omega t) + A\sin(kx + \omega t) = 2A\sin(kx)\cos(\omega t), \qquad f_n = n\,\frac{c}{2L} \]
-      <p>Une onde et son retour forment une onde stationnaire. Sur une corde fixée aux deux bouts, seuls les modes de fréquence \(f_n\) tiennent ; deux nœuds voisins sont à \(\lambda/2\).</p></div>
+      <p>Une onde et son retour forment une onde stationnaire. Sur une corde fixée aux deux bouts, seuls les modes de <a class="terme" href="#def-frequence">fréquence</a> \(f_n\) tiennent ; deux nœuds voisins sont à \(\lambda/2\).</p></div>
+<div class="calc avec-figure">
+    <p class="calc-t">À toi : choisis un mode</p><output class="figure" data-expr="trace({ f: x =&gt; Math.sin(mode*PI*x), x: [0,1], y: [-1.2,1.2] })"></output>
+    <p>Pour c = 0,50 m/s et L = 1 m, mode <span class="var" data-nom="mode" data-val="1" data-min="1" data-max="4" data-pas="1" data-dec="0" data-unite="" data-label="Mode"></span>.</p>
+    <p>fₙ = nc/(2L) = <output class="fort" data-expr="mode*.5/2" data-dec="3"></output> Hz ; λₙ = 2L/n = <output class="fort" data-expr="2/mode" data-dec="3"></output> m ; espacement des nœuds = <output class="fort" data-expr="1/mode" data-dec="3"></output> m.</p>
+    <p class="note">Forme d’un mode idéal au maximum de son écart, en unités arbitraires.</p>
+    </div>
     <div class="relation">\[ f' = \frac{f}{1 - v_s/c}\ \text{(devant)}, \qquad f' = \frac{f}{1 + v_s/c}\ \text{(derrière)} \]
       <p>Effet Doppler pour une source qui avance à \(v_s\) dans un milieu au repos, observateur immobile : les fronts se tassent devant, s’étirent derrière.</p></div>
+<div class="calc">
+    <p class="calc-t">À toi : écoute la source mobile</p>
+    <p>Source à <span class="var" data-nom="freq" data-val="1" data-min="1" data-max="1000" data-pas="1" data-dec="0" data-unite="Hz" data-label="Fréquence émise"></span>, rapport vₛ/c = <span class="var" data-nom="vitesse" data-val="0.5" data-min="0" data-max="0.8" data-pas="0.05" data-dec="2" data-unite="" data-label="Rapport de vitesses"></span>.</p>
+    <p>Devant : <output class="fort" data-expr="freq/(1-vitesse)" data-dec="3"></output> Hz ; derrière : <output class="fort" data-expr="freq/(1+vitesse)" data-dec="3"></output> Hz.</p>
+    <p class="note">Milieu au repos, observateurs immobiles et source plus lente que l’onde.</p>
+    </div>
+    <div class="quiz" data-reponse="0.25" data-tol="0.02" data-unite="m">
+    <p class="q">Pour c = 0,50 m/s et f = 2 Hz, quelle est λ ?</p>
+    <div class="corr">
+    <p>λ = c/f = 0,50/2 = 0,25 m.</p>
+    </div>
+    </div>
     <div class="relation">\[ I \propto A^2, \qquad I = \frac{P}{4\pi r^2}\ \ \text{(source ponctuelle, en 3D)} \]
       <p>L’énergie d’une onde va comme le carré de l’amplitude : doubler l’amplitude quadruple l’intensité. Depuis une source ponctuelle de puissance \(P\), cette puissance s’étale sur une sphère : à deux fois la distance, quatre fois moins d’intensité.</p></div>
 
-    <h4 data-n="4">Exemple chiffré</h4>
-    <div class="exemple">
+    <h4 data-n="4" id="m15-exemple">Exemple chiffré</h4>
+    <div class="cas">
       <p>Une corde de guitare de longueur vibrante \(L = 0{,}65\) m joue un la à \(f_1 = 110\) Hz.</p>
-      <ol>
+      <ol class="pas-a-pas" data-montre="0">
         <li>Vitesse de l’onde sur la corde : \(c = 2Lf_1 = 2 \times 0{,}65 \times 110 = 143\) m/s ; longueur d’onde du mode 1 : \(\lambda_1 = 2L = 1{,}30\) m.</li>
         <li>Le troisième mode vibre à \(f_3 = 3f_1 = 330\) Hz, avec deux nœuds intermédiaires.</li>
         <li>Dans l’air, ce son a une longueur d’onde \(\lambda = 343/110 \approx 3{,}1\) m : même fréquence, autre milieu, autre \(\lambda\).</li>
@@ -290,7 +380,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       </ol>
     </div>
 
-    <h4 data-n="5">Pièges fréquents</h4>
+    <h4 data-n="5" id="m15-pieges">Pièges fréquents</h4>
     <ul class="pieges">
       <li>Confondre la célérité \(c\) de l’onde et la vitesse des perles, \(\partial y/\partial t\) : la forme avance, la matière oscille sur place.</li>
       <li>Croire qu’une fréquence plus haute va plus vite. Dans un milieu non dispersif, \(c\) est fixée par le milieu ; c’est \(\lambda\) qui raccourcit.</li>
@@ -300,7 +390,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li>Croire que le son transporte l’air de la source à l’oreille : chaque molécule oscille sur place, de bien moins d’un millimètre ; seule la perturbation voyage.</li>
     </ul>
 
-    <h4 data-n="6">Où ça resservira</h4>
+    <h4 data-n="6" id="m15-suite">Où ça resservira</h4>
     <ul class="resert">
       <li><b>05</b><span>La planche Ondes et interférences fait la même addition en deux dimensions.</span></li>
       <li><b>24</b><span>La lumière obéit à la même équation d’onde, avec \(c = 1/\sqrt{\mu_0\varepsilon_0}\).</span></li>
@@ -310,16 +400,16 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
       <li><b>45</b><span>Le décalage vers le rouge des galaxies, cousin du Doppler.</span></li>
     </ul>
 
-    <h4 data-n="7">Teste-toi</h4>
-    <details><summary>À 180°, la corde de D1 ne bouge plus. Où est passée l’énergie des deux ondes ?</summary>
-      <p>Il n’y en a pas : deux ondes identiques en opposition de phase, qui vont dans le même sens sur la même corde, font exactement une corde au repos. Si deux mains au même bout essayaient de les produire, chacune annulerait le travail de l’autre. Avec deux sources séparées dans l’espace (planche 05), l’énergie se redistribue vers les franges claires.</p></details>
-    <details><summary>Sur la même corde, on divise la fréquence par deux. Que deviennent \(c\) et \(\lambda\) ?</summary>
-      <p>\(c\) ne change pas (il dépend de la tension et de la masse linéique) ; \(\lambda = c/f\) double.</p></details>
-    <details><summary>Une source de 1 Hz avance à \(v_s = 0{,}5\,c\). Quelle fréquence mesure un observateur devant, puis derrière ?</summary>
-      <p>Devant : \(1/(1 - 0{,}5) = 2\) Hz. Derrière : \(1/(1 + 0{,}5) \approx 0{,}67\) Hz. La source émet toujours à 1 Hz.</p></details>
+    <h4 data-n="7" id="m15-test">Teste-toi</h4>
+    <div class="quiz"><p class="q">À 180°, la corde de D1 ne bouge plus. Où est passée l’énergie des deux ondes ?</p><ul class="choix"><li>La corde stocke une énergie cachée</li><li data-bon>La corde est au repos : le travail des deux excitations s’annule</li><li>L’énergie mécanique a été transformée en chaleur</li></ul><div class="corr">
+      <p>Il n’y en a pas : deux ondes identiques en opposition de phase, qui vont dans le même sens sur la même corde, font exactement une corde au repos. Si deux mains au même bout essayaient de les produire, chacune annulerait le travail de l’autre. Avec deux sources séparées dans l’espace (planche 05), l’énergie se redistribue vers les franges claires.</p></div></div>
+    <div class="quiz"><p class="q">Sur la même corde, on divise la fréquence par deux. Que deviennent \(c\) et \(\lambda\) ?</p><ul class="choix"><li>c et λ sont divisées par deux</li><li data-bon>c reste la même et λ double</li><li>c double et λ reste la même</li></ul><div class="corr">
+      <p>\(c\) ne change pas (il dépend de la tension et de la masse linéique) ; \(\lambda = c/f\) double.</p></div></div>
+    <div class="quiz"><p class="q">Une source de 1 Hz avance à \(v_s = 0{,}5\,c\). Quelle fréquence mesure un observateur devant, puis derrière ?</p><ul class="choix"><li data-bon>Devant : 2 Hz ; derrière : environ 0,67 Hz</li><li>Devant : 0,50 Hz ; derrière : 1,50 Hz</li><li>Les deux reçoivent 1 Hz</li></ul><div class="corr">
+      <p>Devant : \(1/(1 - 0{,}5) = 2\) Hz. Derrière : \(1/(1 + 0{,}5) \approx 0{,}67\) Hz. La source émet toujours à 1 Hz.</p></div></div>
   </section>
 
-  <h2><span>3</span>Ce que la simulation simplifie</h2>
+  <h2 id="simplifie"><span class="n">3</span>Ce que la simulation simplifie</h2>
   <ul>
     <li><strong>Ressort idéal :</strong> sans masse, parfaitement linéaire, valable pour de petits déplacements (approximation harmonique). Un vrai ressort trop étiré cesse d'obéir à Hooke.</li>
     <li><strong>Frottement visqueux :</strong> force exactement proportionnelle à la vitesse. Le frottement sec et la traînée de l'air se comportent autrement.</li>
@@ -332,7 +422,7 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <li><strong>Illustratif :</strong> les lueurs, la traîne du portrait de phase et les fondus entre étapes n'ont pas de contrepartie physique.</li>
   </ul>
 
-  <h2><span>4</span>Les chiffres à retenir</h2>
+  <h2 id="chiffres"><span class="n">4</span>Les chiffres à retenir</h2>
   <div class="chiffres">
     <div><b>82 à 330 Hz</b><span>fréquence fondamentale d'une corde de guitare, avec une vitesse d'onde de 100 à 400 m/s.</span></div>
     <div><b>343 m/s</b><span>vitesse du son dans l'air à 20 °C.</span></div>
@@ -341,11 +431,12 @@ details p{padding:0 16px 4px 50px;margin:0 0 14px;opacity:.9}
     <div><b>400 à 700 nm</b><span>longueurs d'onde de la lumière visible, du violet au rouge.</span></div>
   </div>
 
-  <h2><span>5</span>Seulement introduit ici</h2>
+  <h2 id="introduit"><span class="n">5</span>Seulement introduit ici</h2>
   <p>Ces notions ne sont qu'effleurées et méritent leur propre étude : le <strong>sur-amortissement</strong> (si β dépasse ω₀, la masse revient sans osciller), la <strong>dispersion</strong>, les <strong>ondes en deux et trois dimensions</strong>, le <strong>Doppler avec observateur mobile</strong>, le <strong>mur du son</strong> et l'<strong>analyse de Fourier</strong>.</p>
 
 
   <a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">&rarr;</span></a>
+</main>
 </div>
 </body>
 </html>
