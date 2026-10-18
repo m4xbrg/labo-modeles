@@ -1413,12 +1413,15 @@ requestAnimationFrame(frame);
       prediction: { q: 'Au départ, m = 2 kg, v = 0 et h ≈ 1,0797 m au-dessus du zéro choisi. Quelle énergie potentielle U ?',
         reponse: 21.1837662331, tol: 0.1, unite: 'J',
         explication: 'U = mgh = 2 × 9,81 × 1,079702662 ≈ 21,184 J, et K = 0. Sans poussée ni frottement, K + U gardera cette valeur pendant le mouvement.' },
-      suivi: ({ b, prm }, mem) => { instant(mem, 's0', b.s); instant(mem, 'fric0', prm.fricB); instant(mem, 'chaleur0', b.Eth); },
+      suivi: ({ b, prm }, mem) => {
+        instant(mem, 's0', b.s); instant(mem, 'fric0', prm.fricB); instant(mem, 'chaleur0', b.Eth);
+        if (prm.fricB !== mem.fric0) mem.frottementChange = true;
+      },
       essais: [
-        { t: 'Clique « Lâcher » : vois U se transformer en K sans changer leur somme.',
+        { t: 'Sans frottement, clique « Lâcher » : vois U se transformer en K sans changer leur somme.',
           fait: ({ b, s }, mem) => !b.held && Math.abs(b.s - mem.s0) > 0.05 && s.K > 0.1 && s.Eth < 0.001 && Math.abs(s.W) < 0.001 && Math.abs(s.balance) < 0.02 },
         { t: 'Active le frottement et laisse rouler : une part de l’énergie devient chaleur.',
-          fait: ({ b, prm }, mem) => prm.fricB !== mem.fric0 && prm.fricB && !b.held && b.Eth > mem.chaleur0 + 0.05 },
+          fait: ({ b, prm }, mem) => mem.frottementChange && prm.fricB && !b.held && b.Eth > mem.chaleur0 + 0.05 },
       ],
       pourquoi: 'Le travail du poids échange énergie potentielle et énergie cinétique. Le frottement transforme une part de cette énergie en chaleur ; une poussée apporte du travail depuis l’extérieur. Le bilan affiché compte ces transferts sans faire disparaître d’énergie.',
       relation: String.raw`K+U+E_{\mathrm{th}}-W_{\mathrm{ext}}=E_0`,
@@ -1431,12 +1434,12 @@ requestAnimationFrame(frame);
       prediction: { q: 'Au réglage « Égales, élastique », m₁ = m₂ = 1 kg, v₁ = 1,2 m/s, v₂ = 0 et e = 1. Quelle vitesse aura le chariot 2 après le choc ?',
         reponse: 1.2000002823, tol: 0.02, unite: 'm/s',
         explication: 'Deux masses égales échangent leurs vitesses lors d’un choc élastique : v₁′ ≈ 0 et v₂′ ≈ 1,2 m/s. Σp = 1,2 kg·m/s et K = 0,72 J avant comme après, à l’erreur numérique près.' },
-      suivi: ({ pb }, mem) => { instant(mem, 'e0', pb.e); if (pb.tp > pb.c1 + 0.002) mem.apres = true; },
+      suivi: ({ pb }, mem) => { instant(mem, 'rec0', pb.rec); },
       essais: [
         { t: 'Lance le choc élastique et avance après le contact : le premier s’arrête, le second repart.',
           fait: e => apres(e) && e.pb.e === 1 && e.pb.m1 === e.pb.m2 && Math.abs(e.s.v1) < 0.01 && e.s.v2 > 0.1 },
         { t: 'Choisis « Collées (e = 0) » et observe après le contact : les vitesses deviennent égales.',
-          fait: (e, mem) => e.pb.e !== mem.e0 && e.pb.e === 0 && apres(e) && Math.abs(e.s.v1 - e.s.v2) < 0.001 && e.s.Eth > 0.01 },
+          fait: (e, mem) => e.pb.rec !== mem.rec0 && e.pb.e === 0 && apres(e) && Math.abs(e.s.v1 - e.s.v2) < 0.001 && e.s.Eth > 0.01 },
       ],
       pourquoi: 'Les impulsions du contact sont égales et opposées : elles transfèrent de la quantité de mouvement entre les chariots. À e = 1, l’énergie stockée pendant la compression revient au mouvement. À e = 0, les chariots gardent une vitesse commune et une part de K devient chaleur et déformation.',
       relation: String.raw`m_1v_1+m_2v_2=m_1v_1'+m_2v_2',\qquad e=-\frac{v_1'-v_2'}{v_1-v_2}`,
