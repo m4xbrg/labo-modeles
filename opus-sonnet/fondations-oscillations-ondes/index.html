@@ -15,9 +15,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#8fe3d1;
@@ -150,11 +152,15 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 @media (max-width:640px){.head{max-width:90%}.seg.ch0{margin-left:6px}.seg b{font-size:12px}.btn{padding:7px 9px}input[type=range]{width:96px}.rv{min-width:44px}}
 @media (prefers-reduced-motion:reduce){.lien2{transition:none}}
 
+/* La fiche reprend le titre ; les mesures et graphes restent les lectures. */
+.labo-fiche #toyPanel{display:flex;flex-direction:column;gap:12px}
+.labo-fiche #tools .grp:has(#bVoyI){display:none}
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -196,15 +202,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div></div>
 </nav>
 
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change une valeur, glisse la masse ou la perle témoin."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
-
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène de la paillasse en cours : cadran de phase, oscilloscope, ressort et masse, ou corde tendue, selon l'étape."></canvas>
@@ -215,31 +212,34 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Chapitre <b>A</b> · étape 1 sur 10</p>
       <h2 id="stepTitle">Un cycle</h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
+      <p id="stepText" aria-live="polite"></p>
     </section>
 
-    <section class="couche-lire">
+    <div id="toyPanel">
+    <section>
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section id="secBox" class="couche-lire" hidden>
+    <section id="secBox" hidden>
       <p class="eyebrow" id="secEye"></p>
       <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe secondaire de l'étape."></canvas></div>
       <p class="leg" id="secLeg"></p>
     </section>
 
-    <section class="kbd couche-lire">
+      <a class="lien2" id="lien05" href="../05-ondes-interferences/index.html" hidden><span>La même chose en deux dimensions</span><span aria-hidden="true">&rarr;</span></a>
+    </div>
+
+    <section class="kbd">
       <p class="eyebrow">Clavier</p>
-      <ul class="hints">
+      <ul class="hints" id="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="lien2" id="lien05" href="../05-ondes-interferences/index.html" hidden><span>La même chose en deux dimensions</span><span aria-hidden="true">&rarr;</span></a>
-      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m06"><span>Théorie du module <b id="numTheorie">06</b></span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre" id="lienTheorie" href="explication.html#m06"><span>Théorie du module <b id="numTheorie">06</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -330,6 +330,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div>
 </div>
 
+<script src="../../labo/fiche.js"></script>
 <script>
 (() => {
 'use strict';
@@ -1151,6 +1152,8 @@ function initStep(i, keepParams) {
   else if (i === 7) { D1.th = 0; }
   else if (i === 9) { restartD3(); DP.acc = 0; physics(3); }
   syncUI(); updateUI(i); readoutsReset();
+  /* Le fondu initialise la scène ici : la fiche lit alors son état d’arrivée. */
+  if (window.Fiche) Fiche.montre(i);
 }
 function readoutsReset() { buildRows(); readouts(); }
 const secCfg = { 2: ['Énergies en fonction du temps', 128], 3: ['Énergies et pertes', 128], 4: ['Courbe de résonance', 190], 6: ['Perle témoin et main', 120] };
@@ -1293,7 +1296,7 @@ for (let n = 1; n <= 4; n++) $('#bN' + n).addEventListener('click', e => { setMo
 $('#bDec').addEventListener('click', e => { P.dec = !P.dec; syncUI(); e.currentTarget.blur(); });
 $('#bFast').addEventListener('click', e => { speedMul = speedMul > 1 ? 1 : 4; syncUI(); e.currentTarget.blur(); });
 addEventListener('keydown', e => {
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input:not([type=range]),textarea,select')) return;
   const tag_ = e.target && e.target.tagName, isRange = tag_ === 'INPUT';
   if (e.key === ' ' || e.code === 'Space') { if (tag_ === 'BUTTON' || isRange || tag_ === 'A' || tag_ === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
   if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goStep(idx + (e.key === 'ArrowRight' ? 1 : -1)); return; }
@@ -1340,6 +1343,166 @@ window.__fondations = {
   doppler: () => { const m = measD3(); return { t: DP.t, fFront: m.f, fBack: m.b, fFrontTheory: m.ft, fBackTheory: m.bt, nFront: DP.front.length, nBack: DP.back.length }; },
   d1: () => { const d = P.dphD * D2R; return { dphi: P.dphD, ampSum: 2 * Math.abs(Math.cos(d / 2)) }; }
 };
+
+/* ---------------- Fiches : lecture seule de l’état de chaque scène ---------------- */
+const instant = (mem, cle, val) => { if (!(cle in mem)) mem[cle] = val; return mem[cle]; };
+const change = (e, mem, cle) => mem.depart && e.P[cle] !== mem.depart[cle];
+const FICHES = [
+  {
+    scene: 'Un cycle', titre: 'Un tour, une période',
+    regarde: 'Le point tourne régulièrement sur le cadran. Sa hauteur dessine le sinus : une crête revient à chaque tour.',
+    prediction: { q: 'Au départ, f = 0,50 Hz. Combien de secondes dure un tour ?', reponse: 2, tol: 0.02, unite: 's', explication: 'T = 1/f = 1/0,50 = 2,00 s. Deux secondes séparent deux crêtes.' },
+    essais: [
+      { t: 'Monte f à 1 Hz : une période dure maintenant 1 s.', fait: (e, mem) => change(e, mem, 'f') && Math.abs(e.P.f - 1) < 0.001 },
+      { t: 'Descends f à 0,25 Hz : le tour dure 4 s.', fait: (e, mem) => change(e, mem, 'f') && Math.abs(e.P.f - 0.25) < 0.001 },
+    ],
+    pourquoi: 'La fréquence compte les cycles par seconde ; la période mesure les secondes par cycle. Doubler la fréquence divise la période par deux. La phase indique où se trouve le point dans ce cycle.',
+    relation: String.raw`T = \frac1f,\qquad \omega = 2\pi f`,
+    vivant: ({ P }) => String.raw`\omega = 2\pi\times ${fmt(P.f, 2).replace(',', '{,}')} = ${fmt(TAU * P.f, 2).replace(',', '{,}')}\ \mathrm{rad/s}`,
+    defs: [['Période T', 'Durée d’un cycle complet, en secondes.'], ['Fréquence f', 'Nombre de cycles par seconde, en hertz.'], ['Phase', 'Position dans le cycle à un instant donné.']],
+    piege: 'Confondre fréquence et pulsation : ω = 2πf. Un facteur 2π se perd très vite.',
+  },
+  {
+    scene: 'Déphasage', titre: 'Un angle, un décalage',
+    regarde: 'Les deux points tournent au même rythme. Leurs crêtes restent décalées : l’écart angulaire du cadran devient un écart de temps sur la trace.',
+    prediction: { q: 'À f = 0,50 Hz, le second signal a 90° d’avance. Quelle est la durée du décalage ?', reponse: 0.5, tol: 0.01, unite: 's', explication: 'T = 1/0,50 = 2 s ; Δt = (90/360) × 2 = 0,50 s, un quart de période.' },
+    essais: [
+      { t: 'Règle Δφ à 180° : quand l’un monte, l’autre descend.', fait: (e, mem) => change(e, mem, 'dph') && e.P.dph === 180 },
+      { t: 'Règle Δφ à 360° : les deux traces se superposent.', fait: (e, mem) => change(e, mem, 'dph') && e.P.dph === 360 },
+    ],
+    pourquoi: 'Le déphasage mesure une fraction de tour, donc une fraction de période. À 90°, les oscillations sont en quadrature ; à 180°, en opposition. Un tour entier ramène au même état.',
+    relation: String.raw`\Delta t = \frac{\Delta\varphi}{360^\circ}\,T`,
+    defs: [['Déphasage Δφ', 'Écart de phase entre deux oscillations de même fréquence.'], ['Radian', 'Angle qui intercepte un arc égal au rayon : un tour vaut 2π rad.']],
+    piege: 'Prendre la phase pour une durée : 90° ne dit rien en secondes tant qu’on ne connaît pas T.',
+  },
+  {
+    scene: 'Échange', titre: 'Deux réserves, une énergie',
+    regarde: 'Le ressort luit quand la masse est loin du repos ; la masse luit quand elle va vite. La jauge totale reste plate pendant l’échange.',
+    prediction: { q: 'Au lâcher, k = 20 N/m, x₀ = 0,10 m et v = 0. Quelle énergie totale est disponible ?', reponse: 0.1, tol: 0.002, unite: 'J', explication: 'Ec = 0 et Ep = ½kx₀² = ½ × 20 × 0,10² = 0,100 J, soit 100 mJ. La somme reste constante.' },
+    essais: [
+      { t: 'Monte la masse à 2 kg : le mouvement ralentit.', fait: (e, mem) => change(e, mem, 'm') && e.P.m === 2 },
+      { t: 'Monte la raideur à 40 N/m : le mouvement accélère.', fait: (e, mem) => change(e, mem, 'k') && e.P.k === 40 },
+    ],
+    pourquoi: 'La force de rappel ramène la masse vers l’équilibre, puis son inertie l’emporte au-delà. Sans frottement, l’énergie passe du ressort à la masse et revient sans perte. Le rythme propre dépend du rapport k/m.',
+    relation: String.raw`E = \tfrac12mv^2 + \tfrac12kx^2 = \tfrac12kA^2,\qquad \omega_0 = \sqrt{k/m}`,
+    defs: [['Raideur k', 'Force de rappel par mètre d’allongement, en N/m.'], ['Pulsation propre ω₀', 'Rythme naturel de l’oscillateur sans frottement, en rad/s.']],
+    piege: 'Croire que la fréquence dépend de l’amplitude : dans le domaine harmonique, elle dépend de k et de m.',
+  },
+  {
+    scene: 'Pertes', titre: 'L’énergie devient chaleur',
+    regarde: 'L’oscillation rétrécit et le portrait de phase s’enroule en spirale. La chaleur monte pendant que l’énergie mécanique baisse.',
+    prediction: { q: 'Au départ, β = 0,30 s⁻¹. Après combien de secondes le facteur exponentiel de l’enveloppe est-il divisé par e ?', reponse: 1 / 0.3, tol: 0.04, unite: 's', explication: 'e^(−βt) = e⁻¹ quand βt = 1 : t = 1/0,30 ≈ 3,33 s. Ce temps caractérise l’enveloppe, pas une période.' },
+    essais: [
+      { t: 'Mets β à 0 : les pertes cessent.', fait: (e, mem) => change(e, mem, 'b2') && e.P.b2 === 0 },
+      { t: 'Monte β à 1 s⁻¹ et clique sur « Lâcher » pour revoir la décroissance.', fait: (e, mem) => change(e, mem, 'b2') && e.P.b2 === 1 && e.O.t < mem.tempsPrecedent },
+    ],
+    suivi: ({ O }, mem) => { mem.tempsPrecedent = Math.max(mem.tempsPrecedent || 0, O.t); },
+    pourquoi: 'Le frottement retire de l’énergie mécanique et la convertit en chaleur. Le bilan mécanique plus chaleur reste égal à l’énergie initiale. Le coefficient β fixe le rythme de décroissance de l’enveloppe.',
+    relation: String.raw`\beta = \frac{b}{2m},\qquad A(t)\propto \mathrm e^{-\beta t}`,
+    defs: [['Amortissement β', 'β = b/2m : l’amplitude décroît comme e^(−βt).'], ['Facteur de qualité Q', 'Q = ω₀/2β : grand quand les pertes sont faibles.']],
+    piege: 'Dire que le frottement détruit l’énergie : il la convertit en chaleur.',
+  },
+  {
+    scene: 'Résonance', titre: 'Pousser au bon rythme',
+    regarde: 'Une force périodique entretient le mouvement. Le point jaune mesure la réponse après chaque cycle ; le cercle vide indique le régime permanent attendu.',
+    prediction: { q: 'Avec les réglages initiaux (m = 0,50 kg, k = 20 N/m, F₀ = 0,20 N, β = 0,25 s⁻¹, Ω/ω₀ = 0,60), quelle amplitude permanente prévoit la courbe ?', reponse: 0.015582260656050189, tol: 0.0005, unite: 'm', explication: 'ω₀² = 20/0,50 = 40 ; Ω = 0,60√40. A = 0,40 / √[(40 − 14,4)² + (0,50 × 0,60√40)²] ≈ 0,0156 m. Le point mesuré converge après le transitoire.' },
+    essais: [
+      { t: 'Amène Ω/ω₀ à 1 : la réponse grandit près de la résonance.', fait: (e, mem) => change(e, mem, 'ratio') && Math.abs(e.P.ratio - 1) < 0.001 },
+      { t: 'Monte β à 1 s⁻¹ : le pic devient plus bas et plus large.', fait: (e, mem) => change(e, mem, 'b3') && e.P.b3 === 1 },
+    ],
+    pourquoi: 'La poussée apporte de l’énergie et le frottement en retire. Près du rythme propre, la force travaille efficacement avec la vitesse. Le régime permanent s’établit quand l’apport compense les pertes.',
+    relation: String.raw`A(\Omega)=\frac{F_0/m}{\sqrt{(\omega_0^2-\Omega^2)^2+(2\beta\Omega)^2}}`,
+    defs: [['Forçage Ω', 'Pulsation de la poussée périodique imposée de l’extérieur.'], ['Facteur de qualité Q', 'Q = ω₀/2β : il fixe la finesse de la résonance.']],
+    piege: 'À la résonance, la force est en phase avec la vitesse, pas avec la position : celle-ci est en retard de 90°.',
+  },
+  {
+    scene: 'Impulsion', titre: 'La forme voyage',
+    regarde: 'Une bosse avance le long de la corde, tandis que la perle témoin monte et descend sur place. Au bout fixe, la bosse revient inversée.',
+    prediction: { q: 'La corde mesure 1 m et la célérité vaut 0,50 m/s. Quel est le temps de parcours d’une perturbation d’un bout à l’autre ?', reponse: 2, tol: 0.02, unite: 's', explication: 'Δt = L/c = 1/0,50 = 2 s, comptés depuis le passage de la perturbation au bout gauche ; la main produit une impulsion de durée finie.' },
+    essais: [
+      { t: 'Clique sur « Envoyer une impulsion » et suis la perle témoin.', fait: (e, mem) => e.Str.pulses.length > mem.pulses0 },
+      { t: 'Passe au bout libre : la réflexion garde le même signe.', fait: (e, mem) => change(e, mem, 'free') },
+    ],
+    pourquoi: 'Une onde transporte une perturbation et de l’énergie ; les perles restent autour de leur position de repos. La célérité dépend du milieu. La condition au bord décide du signe de la réflexion.',
+    relation: String.raw`\Delta t = L/c,\qquad c = \sqrt{T/\mu}`,
+    defs: [['Célérité c', 'Vitesse à laquelle la perturbation avance, en m/s.'], ['Superposition', 'Le déplacement total est la somme des déplacements de chaque onde.']],
+    piege: 'Confondre la célérité de l’onde et la vitesse des perles : la forme avance, la matière oscille sur place.',
+  },
+  {
+    scene: 'Onde périodique', titre: 'Un cycle, une longueur d’onde',
+    regarde: 'La main impose un sinus et le bout droit absorbe l’onde. La perle témoin refait le cycle de la main, avec un retard.',
+    prediction: { q: 'Au départ, f = 1 Hz et c = 0,50 m/s. Quelle longueur sépare deux crêtes ?', reponse: 0.5, tol: 0.01, unite: 'm', explication: 'λ = c/f = 0,50/1 = 0,50 m. Pendant une période de 1 s, une crête avance de 0,50 m.' },
+    essais: [
+      { t: 'Monte la fréquence de la main à 2 Hz : λ est divisée par deux.', fait: (e, mem) => change(e, mem, 'fc') && Math.abs(e.P.fc - 2) < 0.001 },
+      { t: 'Glisse la perle témoin le long de la corde : son retard change.', fait: (e, mem) => change(e, mem, 'xw2') && Math.abs(e.P.xw2 - mem.depart.xw2) > 0.05 },
+    ],
+    pourquoi: 'La fréquence est imposée par la main, la célérité par la corde. Leur rapport fixe l’espacement des crêtes. Plus la perle est loin de la main, plus le même mouvement arrive tard.',
+    relation: String.raw`c = \lambda f,\qquad \Delta t = x/c,\qquad k = 2\pi/\lambda`,
+    defs: [['Longueur d’onde λ', 'Distance entre deux points dans le même état de vibration, à un instant donné.'], ['Nombre d’onde k', 'k = 2π/λ, en rad/m : l’équivalent spatial de la pulsation.']],
+    piege: 'Croire qu’une fréquence plus haute va plus vite : dans ce milieu non dispersif, c reste fixe et λ raccourcit.',
+  },
+  {
+    scene: 'Somme', titre: 'Deux ondes, une résultante',
+    regarde: 'Le trait fort est la somme des deux traits fins. Les flèches tournantes se mettent bout à bout : leur résultante fixe l’amplitude de la corde.',
+    prediction: { q: 'Au départ, Δφ = 0° et chaque onde a une amplitude normalisée de 1. Quelle amplitude a leur somme ?', reponse: 2, tol: 0.02, unite: 'u.a.', explication: 'A somme = 2A|cos(Δφ/2)| = 2 × 1 × cos 0° = 2. L’intensité relative vaut alors 2² = 4.' },
+    essais: [
+      { t: 'Règle Δφ à 180° : la corde reste au repos.', fait: (e, mem) => change(e, mem, 'dphD') && e.P.dphD === 180 },
+      { t: 'Règle Δφ à 90° : l’amplitude devient √2 fois celle d’une onde.', fait: (e, mem) => change(e, mem, 'dphD') && e.P.dphD === 90 },
+    ],
+    pourquoi: 'Les déplacements s’additionnent à chaque point. En phase, ils se renforcent ; en opposition, ils s’annulent partout dans cette scène sans bords. La somme reste sinusoïdale à la même fréquence.',
+    relation: String.raw`A_{\rm somme}=2A\left|\cos(\Delta\varphi/2)\right|,\qquad I\propto A^2`,
+    defs: [['Superposition', 'Le déplacement total est la somme des déplacements de chaque onde.'], ['Intensité I', 'Puissance transportée par mètre carré perpendiculaire à la propagation.']],
+    piege: 'Sur la même corde, deux ondes identiques en opposition qui vont dans le même sens font une corde au repos ; avec des sources séparées, l’énergie peut se redistribuer ailleurs.',
+  },
+  {
+    scene: 'Modes', titre: 'Une onde et son retour',
+    regarde: 'Les réflexions construisent des nœuds et des ventres. Certains rythmes entretiennent une grande amplitude : les modes propres de la corde.',
+    prediction: { q: 'L = 1 m et c = 0,50 m/s. Quelle est la longueur d’onde du premier mode, réglé à f₁ = 0,25 Hz ?', reponse: 2, tol: 0.02, unite: 'm', explication: 'f₁ = c/(2L) = 0,25 Hz ; λ₁ = c/f₁ = 0,50/0,25 = 2 m. Une demi-longueur d’onde tient sur la corde.' },
+    essais: [
+      { t: 'Choisis le mode 2 : la fréquence passe à 0,50 Hz.', fait: (e, mem) => change(e, mem, 'fs') && e.P.fs === 0.5 },
+      { t: 'Active « Décomposer » pour distinguer l’onde aller et le retour.', fait: (e, mem) => change(e, mem, 'dec') },
+    ],
+    pourquoi: 'L’onde réfléchie s’ajoute à l’onde incidente. Les bords fixes imposent les fréquences qui peuvent résonner. Le mode n possède n ventres et deux nœuds voisins sont espacés de λ/2.',
+    relation: String.raw`f_n=n\frac{c}{2L},\qquad \lambda_n=\frac{2L}{n}`,
+    defs: [['Nœud, ventre', 'Points immobiles et points d’amplitude maximale d’une onde stationnaire.'], ['Mode n', 'Une des façons de vibrer autorisées par les bords ; le mode n compte n ventres.']],
+    piege: 'Croire qu’une fréquence plus haute va plus vite : dans un milieu non dispersif, c est fixée par le milieu ; c’est λ qui raccourcit.',
+  },
+  {
+    scene: 'Doppler', titre: 'Compter les fronts reçus',
+    regarde: 'La source émet régulièrement en avançant. Les fronts se resserrent devant elle et s’écartent derrière ; les deux observateurs les reçoivent à des rythmes différents.',
+    prediction: { q: 'Au départ, la source émet à 1 Hz et avance à v/c = 0,50. Quelle fréquence reçoit l’observateur devant ?', reponse: 2, tol: 0.02, unite: 'Hz', explication: 'f′ devant = f/(1 − v/c) = 1/(1 − 0,50) = 2 Hz. Derrière : 1/(1 + 0,50) ≈ 0,67 Hz. La source émet toujours à 1 Hz.' },
+    essais: [
+      { t: 'Mets v/c à 0 : les deux observateurs reçoivent 1 Hz.', fait: (e, mem) => change(e, mem, 'vc') && e.P.vc === 0 },
+      { t: 'Monte v/c à 0,80 : compare les fréquences théoriques devant et derrière.', fait: (e, mem) => change(e, mem, 'vc') && Math.abs(e.P.vc - 0.8) < 0.001 },
+    ],
+    pourquoi: 'Chaque front part de la position qu’occupe la source au moment de l’émission. Devant, l’écart entre fronts diminue ; derrière, il augmente. C’est la fréquence reçue qui change, sans changer celle de la source.',
+    relation: String.raw`f'_{\rm devant}=\frac{f}{1-v/c},\qquad f'_{\rm derriere}=\frac{f}{1+v/c}`,
+    defs: [['Célérité c', 'Vitesse de la perturbation dans le milieu au repos.'], ['Fréquence f', 'Nombre de cycles émis par seconde.']],
+    piege: 'Penser que la source change de fréquence dans l’effet Doppler : elle émet toujours f.',
+  },
+];
+FICHES.forEach(f => {
+  const suivi = f.suivi;
+  f.suivi = (e, mem) => {
+    instant(mem, 'depart', { ...e.P });
+    instant(mem, 'pulses0', e.Str.pulses.length);
+    if (suivi) suivi(e, mem);
+  };
+});
+window.allerScene = n => goStep(n);
+Fiche.init({
+  fiches: FICHES,
+  etapes: [...document.querySelectorAll('#stepper .seg')].map(b => {
+    const code = b.querySelector('b').textContent;
+    return { code, titre: b.querySelector('span').textContent, mod: +code.slice(0, 2),
+      scenes: [b.dataset.a, b.dataset.b].filter(x => x !== undefined).map(Number) };
+  }),
+  etat: () => ({ P, O, Str }),
+  aller: n => window.allerScene(n),
+  k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+  theorie: mod => `explication.html#m${String(mod).padStart(2, '0')}`,
+});
+
 
 resize();
 initStep(0, false);
