@@ -15,9 +15,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="../../labo/labo.css">
 <style>
-:root{
+:root, :root[data-theme], :root:not([data-theme]){
   --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
   --texte:#e8e4dc; --texte-2:#8a93a0;
   --accent:#d9e58c;
@@ -137,9 +139,10 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 }
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -181,14 +184,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </div></div>
 </nav>
 
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change la règle, un départ, le nombre de lancers ou d’atomes."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module de l’étape."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
+
 
 <div class="app">
   <main class="scene" id="scene">
@@ -200,33 +196,35 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <section>
       <p class="eyebrow" id="eyebrow">Module <b>04</b> · étape 1 sur 4</p>
       <h2 id="stepTitle"></h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
-      <p class="cle couche-comp" id="stepKey"></p>
-      <p class="eq couche-comp" id="eq"></p>
+      <p id="stepText" aria-live="polite"></p>
+      <p class="cle" id="stepKey"></p>
     </section>
 
-    <section class="couche-lire">
+    <div id="toyPanel">
+    <p class="eq" id="eq"></p>
+    <section>
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section id="secBox" class="couche-lire" hidden>
+    <section id="secBox" hidden>
       <p class="eyebrow" id="secEye"></p>
       <div class="scopeBox"><canvas id="sec" role="img" aria-label="Graphe du taux en fonction de l'état."></canvas></div>
       <p class="leg" id="secLeg"></p>
     </section>
 
-    <section class="kbd couche-lire">
+    <a class="lien2" id="lien07" href="../07-matiere-chaleur/index.html" hidden><span>La même chose avec des molécules</span><span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <section class="kbd">
       <p class="eyebrow">Clavier</p>
-      <ul class="hints">
+      <ul class="hints" id="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>9</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
 
     <nav class="liens">
-      <a class="lien2" id="lien07" href="../07-matiere-chaleur/index.html" hidden><span>La même chose avec des molécules</span><span aria-hidden="true">&rarr;</span></a>
-      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m04"><span>Théorie du module <b id="numTheorie">04</b></span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre" id="lienTheorie" href="explication.html#m04"><span>Théorie du module <b id="numTheorie">04</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -322,6 +320,158 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </div>
   </div>
 </div>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+/* Fiches d’étape : état lu après l’entrée effective dans la scène, même pendant un fondu. */
+(() => {
+  'use strict';
+  const instant = (mem, cle, val) => { if (!(cle in mem)) mem[cle] = val; return mem[cle]; };
+  const change = (mem, cle, val) => val !== instant(mem, cle, val);
+  const fiches = [
+    {
+      titre: 'L’état et son taux',
+      regarde: 'La flèche orange donne le taux à l’état courant. Chaque segment suit cette tangente pendant un pas ; le tireté montre la solution exacte.',
+      prediction: { q: 'Au départ, x₀ = 1 u, le taux vaut 0,2x et Δt = 1 s. Quel état donne le premier pas d’Euler ?', reponse: 1.2, tol: 0.01, unite: 'u',
+        explication: 'Le taux initial vaut 0,2 × 1 = 0,2 u/s. Euler donne 1 + 0,2 × 1 = 1,2 u ; la valeur exacte à 1 s serait exp(0,2) ≈ 1,2214 u.' },
+      essais: [
+        { t: 'Change Δt pour comparer la ligne brisée au tireté.', fait: ({ P }, m) => change(m, 'dt', P.dtE) },
+        { t: 'Déplace x₀ avec le curseur ou la poignée du graphe.', fait: ({ P }, m) => change(m, 'x0', P.x0A) },
+      ],
+      pourquoi: 'La règle donne un taux local, pas directement un état futur. Euler garde ce taux pendant Δt puis le recalcule au nouvel état. Réduire le pas rapproche la ligne brisée de la solution exacte.',
+      relation: String.raw`x_{n+1}=x_n+f(x_n)\,\Delta t`,
+      defs: [['État x', 'Le nombre qui décrit le système, ici en unités génériques u.'], ['Taux de changement', 'La pente de x(t), en u/s.']],
+      piege: 'Un grand pas ne suit plus la courbe : la tangente n’est valable que localement.',
+    },
+    {
+      titre: 'Même règle, autres départs',
+      regarde: 'Chaque petit trait donne le taux possible à cet endroit. Les deux départs initiaux, 2 et 7 u, suivent la même règle sans se croiser.',
+      prediction: { q: 'Avec la règle initiale dx/dt = 0,2x, quel est le taux au départ de la trajectoire x₀ = 7 u ?', reponse: 1.4, tol: 0.01, unite: 'u/s',
+        explication: 'Le taux est f(7) = 0,2 × 7 = 1,4 u/s. La trajectoire partie de 2 u commence à 0,4 u/s : même règle, deux taux locaux.' },
+      essais: [
+        { t: 'Clique dans le champ pour ajouter un départ différent.', fait: (e, m) => change(m, 'traj', e.traj) && e.nbTraj > 2 },
+        { t: 'Change de règle avec « Retour vers une cible » ou « Taux constant ».', fait: ({ P }, m) => change(m, 'rule', P.rule) },
+      ],
+      pourquoi: 'L’état initial choisit la trajectoire parmi celles que permet la règle. Pour ces règles à une variable, un état donné a un seul avenir : deux trajectoires ne se croisent pas. Une cible stable ramène les départs vers la même valeur.',
+      relation: String.raw`\frac{\mathrm{d}x}{\mathrm{d}t}=f(x),\qquad x(0)=x_0`,
+      defs: [['Condition initiale x₀', 'Valeur de départ qui choisit la trajectoire.'], ['Équilibre x*', 'Un état où f(x*) = 0.']],
+      piege: 'La règle seule ne fixe pas une trajectoire : il faut aussi le départ.',
+    },
+    {
+      titre: 'Un écart corrigé ou amplifié',
+      regarde: 'À gauche, la bille revient au fond de la cuvette ; à droite, elle quitte le sommet du dôme. Le signe du taux change le destin du même écart.',
+      prediction: { q: 'Sans bruit, e₀ = 0,5 u et τ = 2 s. Quel écart reste à gauche après 2 s ?', reponse: 0.18393972, tol: 0.01, unite: 'u',
+        explication: 'En une durée τ, l’écart est multiplié par e⁻¹ : 0,5 × e⁻¹ ≈ 0,184 u. À droite il vaut 0,5 × e ≈ 1,359 u, avant la butée.' },
+      essais: [
+        { t: 'Change τ : compare la vitesse de retour et de fuite.', fait: ({ P }, m) => change(m, 'tau', P.tauB) },
+        { t: 'Bascule « Bruit » pour perturber les deux systèmes.', fait: ({ P }, m) => change(m, 'noise', P.noise) },
+      ],
+      pourquoi: 'Une rétroaction négative réduit l’écart à l’équilibre ; une positive l’amplifie. Le temps τ fixe le rythme du retour ou de la fuite. La butée rappelle qu’une amplification rencontre une limite physique.',
+      relation: String.raw`\frac{\mathrm{d}e}{\mathrm{d}t}=\mp\frac e\tau,\qquad e(t)=e_0\,\mathrm{e}^{\mp t/\tau}`,
+      defs: [['Rétroaction', 'Influence de l’état sur son propre taux de changement.'], ['Constante de temps τ', 'Durée pour diviser ou multiplier l’écart par e.']],
+      piege: '« Négative » ne veut pas dire mauvaise : elle stabilise. Une rétroaction positive amplifie.',
+    },
+    {
+      titre: 'La croissance rencontre une limite',
+      regarde: 'Les départs types vont vers K = 100 u, même depuis au-dessus. Le graphe du taux est orange sous K et bleu au-delà.',
+      prediction: { q: 'Au réglage r = 0,8 s⁻¹ et K = 100 u, quel taux maximal atteint la croissance, à N = 50 u ?', reponse: 20, tol: 0.1, unite: 'u/s',
+        explication: 'rN(1 − N/K) = 0,8 × 50 × (1 − 50/100) = 20 u/s. À K, le taux devient nul.' },
+      essais: [
+        { t: 'Change r : la cible K reste la même, le rythme change.', fait: ({ P }, m) => change(m, 'r', P.r) },
+        { t: 'Clique dans l’un des graphes pour lancer un nouveau départ.', fait: (e, m) => change(m, 'depart', e.departLG) },
+      ],
+      pourquoi: 'Le facteur rN amplifie une petite population. Le facteur 1 − N/K freine cette croissance puis la rend négative au-delà de K. Le taux est maximal à K/2 ; K est un équilibre stable.',
+      relation: String.raw`\frac{\mathrm{d}N}{\mathrm{d}t}=rN\left(1-\frac NK\right),\qquad f_{\max}=\frac{rK}{4}`,
+      defs: [['Capacité K', 'Valeur de population que le milieu peut soutenir.'], ['Stabilité', 'Une petite perturbation s’efface au cours du temps.']],
+      piege: 'K n’est pas une barrière infranchissable : un départ supérieur à K redescend vers elle.',
+    },
+    {
+      titre: 'Multiplier à chaque seconde',
+      regarde: 'Le trait plein s’écarte de la droite en tireté : l’un multiplie, l’autre ajoute. Les repères de doublement restent espacés du même temps.',
+      prediction: { q: 'Avec x₀ = 1 u et k = 0,35 s⁻¹, combien de temps faut-il pour doubler ?', reponse: 1.98042052, tol: 0.03, unite: 's',
+        explication: '2 = e^(0,35t), donc t = ln 2 / 0,35 ≈ 1,9804 s. Ce temps ne dépend pas de x₀.' },
+      essais: [
+        { t: 'Donne à k une valeur négative : les repères deviennent des demi-vies.', fait: ({ P }, m) => change(m, 'k', P.kC) && P.kC < 0 },
+        { t: 'Clique « Zoom arrière ×10 » pour agrandir le cadre.', fait: ({ P }, m) => change(m, 'zoom', P.zoom) && P.zoom > 0 },
+      ],
+      pourquoi: 'Un taux proportionnel à la quantité donne un facteur multiplicatif constant par seconde. Le logarithme extrait le temps de l’exposant. Un taux négatif produit la même loi en décroissance.',
+      relation: String.raw`x(t)=x_0\mathrm{e}^{kt},\qquad T_2=\frac{\ln 2}{k}\quad(k>0)`,
+      defs: [['Exponentielle', 'Évolution qui multiplie par le même facteur sur des durées égales.'], ['Doublement T₂', 'Durée pour multiplier par deux.']],
+      piege: 'Une exponentielle ajoute des quantités de plus en plus grandes, pas une quantité constante.',
+    },
+    {
+      titre: 'Le logarithme retrouve le temps',
+      regarde: 'L’exponentielle devient une droite sur l’axe logarithmique. La sonde jaune relie un niveau à l’instant où la courbe l’atteint.',
+      prediction: { q: 'Au départ, x₀ = 1 u, k = 0,35 s⁻¹ et la sonde vaut 20 u. À quel instant ce niveau est-il atteint ?', reponse: 8.55923507, tol: 0.05, unite: 's',
+        explication: 't = ln(20/1) / 0,35 ≈ 8,5592 s. L’axe log change la représentation, pas ce temps.' },
+      essais: [
+        { t: 'Bascule l’échelle vers « Linéaire » pour comparer les formes.', fait: ({ P }, m) => change(m, 'log', P.log) },
+        { t: 'Glisse la sonde jaune à un autre niveau.', fait: (e, m) => change(m, 'probe', e.probe) },
+      ],
+      pourquoi: 'Le logarithme transforme une multiplication en addition. Sur l’axe log, une exponentielle avance donc de la même distance à chaque seconde. La pente vaut k/ln 10 en décades par seconde.',
+      relation: String.raw`t=\frac{\ln(y/x_0)}{k},\qquad \log_{10}x=\log_{10}x_0+\frac{k}{\ln 10}\,t`,
+      defs: [['Logarithme', 'Exposant nécessaire pour atteindre un rapport donné.'], ['Décade', 'Un facteur dix, représenté par une distance fixe sur l’axe log.']],
+      piege: 'Une droite sur axe log n’est pas une croissance linéaire. Le logarithme de zéro n’existe pas.',
+    },
+    {
+      titre: 'Beaucoup de lancers, une moyenne',
+      regarde: 'Les fréquences fluctuent autour de 1/6. Quand le nombre de lancers grandit, l’entonnoir théorique se resserre ; le prochain lancer reste imprévisible.',
+      prediction: { q: 'Vers quelle moyenne tend un dé équilibré sur 1 000 lancers ? Donne la tendance, pas le résultat d’un lancer.', reponse: 3.5, tol: 0.22,
+        explication: 'L’espérance vaut (1 + 2 + 3 + 4 + 5 + 6)/6 = 3,5. Sur 1 000 lancers, l’écart-type de la moyenne vaut √(35/12 000) ≈ 0,054 ; la tolérance ±0,22 couvre environ quatre écarts-types, sans garantie pour un tirage.' },
+      essais: [
+        { t: 'Ajoute au moins 1 000 lancers (×1000) : moyenne à moins de quatre écarts-types de 3,5. Si besoin, ajoute des lancers.',
+          fait: (e, m) => e.dice.n >= instant(m, 'n', e.dice.n) + 1000 && Math.abs(e.dice.mean - 3.5) <= 4 * Math.sqrt(35 / (12 * e.dice.n)) },
+        { t: 'Bascule « Lancer en continu » pour prolonger l’échantillon.', fait: ({ P }, m) => change(m, 'cont', P.cont) },
+      ],
+      pourquoi: 'L’espérance décrit la moyenne d’un grand nombre de tirages. Les fluctuations de cette moyenne diminuent comme 1/√n, alors que l’étalement des résultats individuels reste le même. Une bande statistique n’est jamais une garantie.',
+      relation: String.raw`\mu=3{,}5,\qquad \sigma_{\bar x}=\sqrt{\frac{35}{12n}}`,
+      defs: [['Espérance μ', 'Moyenne théorique des issues pondérées par leur probabilité.'], ['Fluctuation', 'Écart aléatoire d’un échantillon à la prévision.']],
+      piege: 'Le hasard ne se rattrape pas : même après dix 6, le prochain lancer garde une probabilité 1/6 de donner 6.',
+    },
+    {
+      titre: 'Un nuage qui s’étale comme √n',
+      regarde: 'Le marcheur jaune zigzague au hasard. L’ensemble dessine une cloche centrée près de zéro, dont la largeur augmente avec le nombre de pas.',
+      prediction: { q: 'Pour les 1 000 marcheurs initiaux, quel écart-type de position attend-on après 100 pas de ±1 ?', reponse: 10, tol: 1, unite: 'pas',
+        explication: 'Chaque pas a une variance 1 ; les variances s’ajoutent : σ² = 100, donc σ = 10 pas. Pour 1 000 marcheurs, l’écart-type estimé fluctue d’environ 10/√(2 × 999) ≈ 0,22 pas : ±1 est une marge large.' },
+      essais: [
+        { t: 'Change le nombre de marcheurs pour comparer les histogrammes.', fait: ({ P }, m) => change(m, 'M', P.M) },
+        { t: 'Clique « Nouvel échantillon », puis laisse au moins 60 pas : σ/√n doit être près de 1 (tolérance de quatre écarts-types d’estimation). Réessaie si besoin.',
+          fait: (e, m) => change(m, 'echantillon', e.echantillon) && e.walk.n >= 60 && Math.abs(e.walk.sd / Math.sqrt(e.walk.n) - 1) <= 4 / Math.sqrt(2 * (e.walk.M - 1)) },
+      ],
+      pourquoi: 'Les pas indépendants ont des signes imprévisibles mais leurs variances s’ajoutent. Le déplacement moyen reste nul, la largeur typique croît comme √n. Deux fois plus large demande quatre fois plus de pas.',
+      relation: String.raw`\langle x\rangle=0,\qquad \sigma_x^2=n,\qquad \sigma_x=\sqrt n`,
+      defs: [['Variance σ²', 'Moyenne des carrés des écarts à la moyenne.'], ['Écart-type σ', 'Racine de la variance, ici en pas.']],
+      piege: '√n décrit la largeur du nuage, pas la position exacte d’un marcheur.',
+    },
+    {
+      titre: 'Une demi-vie collective',
+      regarde: 'Les atomes disparaissent individuellement sans ordre prévisible. Leur total suit en moyenne le tireté exponentiel, avec des écarts visibles d’un échantillon à l’autre.',
+      prediction: { q: 'Avec 400 atomes et une demi-vie de 2 s, combien attend-on d’atomes intacts à 4 s, en moyenne sur beaucoup de relances ?', reponse: 100, tol: 26, unite: 'atomes',
+        explication: 'Deux demi-vies donnent q = (1/2)² = 1/4, donc 400 × 1/4 = 100. Un échantillon fluctue avec σ = √(400 × 1/4 × 3/4) ≈ 8,66 atomes ; la marge ±26 est proche de trois σ, sans certitude.' },
+      essais: [
+        { t: 'Change le nombre initial d’atomes pour comparer la dispersion relative.', fait: ({ P }, m) => change(m, 'N0', P.N0) },
+        { t: 'Après ce changement, laisse passer au moins une demi-vie : compare N au nombre attendu, avec une marge de quatre σ (au moins 4 atomes). Relance si besoin.',
+          fait: (e, m) => change(m, 'N0', e.P.N0) && e.decay.t >= 2 && e.decay.t <= 6 && Math.abs(e.decay.N - e.decay.expected) <= Math.max(4, 4 * Math.sqrt(e.decay.expected * (1 - e.decay.expected / e.decay.N0))) },
+      ],
+      pourquoi: 'Chaque noyau intact a la même probabilité de partir, quel que soit son âge. La fraction attendue est divisée par deux à chaque demi-vie. Le nombre observé fluctue autour de cette loi ; augmenter l’effectif réduit les fluctuations relatives.',
+      relation: String.raw`\mathbb E[N(t)]=N_0\,2^{-t/T_{1/2}},\qquad \sigma_N=\sqrt{N_0q(1-q)}`,
+      defs: [['Demi-vie T½', 'Durée pour diviser par deux le nombre moyen d’atomes intacts.'], ['Taux λ', 'Taux instantané de désintégration, en s⁻¹.']],
+      piege: 'La loi collective prédit un nombre moyen, jamais quel atome partira ni un compte exact.',
+    },
+  ];
+  Fiche.init({
+    fiches,
+    etapes: [...document.querySelectorAll('#stepper .seg')].map(b => {
+      const code = b.querySelector('b').textContent;
+      return { code, titre: b.querySelector('span').textContent, mod: +code.slice(0, 2), scenes: [+b.dataset.a] };
+    }),
+    etat: () => window.etatFiche(),
+    aller: n => window.allerScene(n),
+    k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+    theorie: mod => `explication.html#m${String(mod).padStart(2, '0')}`,
+  });
+})();
+</script>
 
 <script>
 (() => {
@@ -1002,6 +1152,7 @@ function initStep(i) {
   else if (i === 7) { resetWK(); WK.yD = 10; }
   else if (i === 8) resetDC(true);
   syncUI(); updateUI(i); buildRows(); readouts();
+  if (window.Fiche) Fiche.montre(i);
 }
 const secCfg = { 1: ['Graphe du taux : dx/dt en fonction de x', 150] };
 function sizeSec() {
@@ -1146,7 +1297,7 @@ $('#bClrD').addEventListener('click', e => { resetD1(); blur(e); });
 $('#bNew').addEventListener('click', e => { resetWK(); blur(e); });
 $('#bRelance').addEventListener('click', e => { resetDC(false); blur(e); });
 addEventListener('keydown', e => {
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input:not([type=range]),textarea,select,[contenteditable=true]')) return;
   const tg = e.target && e.target.tagName, isRange = tg === 'INPUT';
   if (e.key === ' ' || e.code === 'Space') { if (tg === 'BUTTON' || isRange || tg === 'A' || tg === 'SUMMARY') return; e.preventDefault(); setPlay(!playing); return; }
   if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isRange) { e.preventDefault(); goStep(idx + (e.key === 'ArrowRight' ? 1 : -1)); return; }
@@ -1201,6 +1352,13 @@ window.__fondations = {
   expo: () => { const k = P.kC; return { x0: P.x0C, k, t: CC.t, x: cx(CC.t), T2: k > 0 ? LN2 / k : null, Thalf: k < 0 ? LN2 / -k : null, tau: k !== 0 ? 1 / Math.abs(k) : null, log: P.log }; },
   dice, walk, decay
 };
+
+/* La fiche lit cet instantané ; elle ne modifie jamais le moteur. */
+window.allerScene = n => goStep(n);
+window.etatFiche = () => ({ P: { ...P }, evo: window.__fondations.evo(), fb: window.__fondations.fb(),
+  logi: window.__fondations.logi(), expo: window.__fondations.expo(), dice: dice(), walk: walk(), decay: decay(),
+  traj: TR.map(t => [t.t0, t.x0].join(':')).join('|'), nbTraj: TR.length,
+  departLG: lgCur ? lgCur.N0 : null, probe: CC.probe, echantillon: WK.y[0] });
 
 resize();
 initStep(0);
