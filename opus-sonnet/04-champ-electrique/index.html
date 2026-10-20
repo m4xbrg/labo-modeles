@@ -933,9 +933,10 @@ const READ = {
 
 /* ---------------- Préréglages ---------------- */
 function mk(x, y, q) { charges.push({ id: nid++, x, y, q }); }
+let scenario = 0;                      // compte les préréglages appliqués : lu par les fiches
 function applyPreset(name) {
   charges = []; parts = []; selected = null; T = 0; ptA = null; armA = false; pathA = new Path2D(); syncArmA();
-  lastPreset = name;
+  lastPreset = name; scenario++;
   const mx = W / 2, my = H / 2;
   if (name === 'dipole') { const s = Math.min(240, Math.max(110, W * 0.27)); mk(mx - s / 2, my, 3); mk(mx + s / 2, my, -3); }
   else if (name === 'identiques') { const s = Math.min(240, Math.max(110, W * 0.27)); mk(mx - s / 2, my, 3); mk(mx + s / 2, my, 3); }
@@ -1170,7 +1171,7 @@ function goStage(k) {
   if (window.Fiche) Fiche.montre(k);
 }
 window.allerScene = k => goStage(k);
-window.etatChamp = () => ({ charges: charges.map(c => ({ ...c })), probe: { ...probe }, ptA: ptA && { ...ptA }, views: { ...views }, pid, dernierSigne: parts.at(-1)?.sg, playing });
+window.etatChamp = () => ({ charges: charges.map(c => ({ ...c })), probe: { ...probe }, ptA: ptA && { ...ptA }, views: { ...views }, pid, testSign, dernierSigne: parts.at(-1)?.sg, playing, W, H, scenario });
 function resetScene() { if (stage >= 0) goStage(stage); else applyPreset(lastPreset); }
 document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => { goStage(+b.dataset.a); e.currentTarget.blur(); }));
 
@@ -1229,7 +1230,14 @@ window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); fiel
 <script>
 (() => {
   // Instantanés : aucun mouvement spontané de la charge test ne valide un geste.
-  const suivi = (e, mem) => { if (!mem.depart) mem.depart = e; };
+  // On repart de l'état courant quand la scène change sans geste à valider : redimensionnement (coque,
+  // Focus, thème) qui recadre les charges, ou préréglage réappliqué (Réinitialiser, R, même étape,
+  // boutons de préréglage) qui crée des charges aux identifiants neufs. Fiche.montre ne remet pas mem
+  // à zéro quand la scène reste la même.
+  const suivi = (e, mem) => {
+    const d = mem.depart;
+    if (!d || e.W !== d.W || e.H !== d.H || e.scenario !== d.scenario) mem.depart = e;
+  };
   const deplace = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) > 20;
   const sonde = (e, mem) => mem.depart && deplace(e.probe, mem.depart.probe);
   const bougeCharge = (e, mem) => mem.depart && e.charges.some(c => {
@@ -1243,7 +1251,7 @@ window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); fiel
   const s = Math.min(240, Math.max(110, w * 0.27));
   const va = moteur.pot(w / 2 - s * 0.25, h / 2 - 46);
   const vb = moteur.pot(w / 2 + s * 0.25, h / 2 + 46);
-  const nf = x => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2 }).format(x);
+  const nf = x => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2 }).format(x).replace('-', '−');
   const fiches = [
     {
       titre: 'Charges et champ',
@@ -1280,7 +1288,7 @@ window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); fiel
         choix: ['Elle garde son sens', 'Elle s’inverse, avec la même intensité', 'Elle devient nulle'], bonne: 1,
         explication: 'Le moteur applique a = (q/m)E : changer seulement le signe de q inverse chaque composante de F = qE. Le champ des sources reste identique.' },
       suivi,
-      essais: [ { t: 'Bascule lecture/pause pour examiner les énergies.', fait: (e, m) => m.depart && e.playing !== m.depart.playing },
+      essais: [ { t: 'Choisis le signe − de la charge test.', fait: (e, m) => m.depart && e.testSign !== m.depart.testSign },
         { t: 'Choisis − puis « Lâcher une charge test » et clique loin des sources pour une nouvelle charge négative.', fait: (e, m) => m.depart && e.pid > m.depart.pid && e.dernierSigne === -1 } ],
       pourquoi: 'La force dépend de la charge test, contrairement au champ créé par les sources. La charge accélère selon F = ma et échange énergie cinétique et énergie potentielle. Sa vitesse conserve une mémoire du mouvement : elle ne suit pas forcément une ligne de champ.',
       relation: String.raw`\vec F=q\vec E=m\vec a,\qquad E_c+qV=\text{constante}`,
