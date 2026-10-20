@@ -1343,6 +1343,8 @@ const FX = (() => {
         setPlaying(!st.playing);
       }
       const endTime = () => st.mode === 'non' ? 8 : TMAX; // la vidange se termine à 8 min
+      /* Réinitialiser (bouton, R) : le temps repart de 0 et les essais de la fiche repartent d'un état neuf */
+      function relancer() { reset(); if (window.Fiche) Fiche.relance(); }
       function reset() {
         st.t = 0; st.h = { t: [0], q: [0], v: [V3] }; st.qNow = 0;
         setPlaying(!FX.reduced);
@@ -1362,7 +1364,7 @@ const FX = (() => {
         const gp = group('Temps');
         ui.play = btn(ICON.pause, 'Pause (Espace)', togglePlay, 'ico');
         gp.appendChild(ui.play);
-        gp.appendChild(btn(ICON.reset, 'Réinitialiser (R)', reset, 'ico'));
+        gp.appendChild(btn(ICON.reset, 'Réinitialiser (R)', relancer, 'ico'));
         ui.tl = document.createElement('span'); ui.tl.className = 'rv'; ui.tl.style.minWidth = '86px'; gp.appendChild(ui.tl);
         if (id === 'prop') {
           slider(group('Débit Q'), 'Débit Q en litres par minute', 1, 10, 0.5, () => P.prop.Q, v => P.prop.Q = v, 'L/min');
@@ -1764,7 +1766,7 @@ const FX = (() => {
         if (FX.typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
         const tg = e.target, onBtn = tg.tagName === 'BUTTON', onRng = tg.tagName === 'INPUT', k = e.key;
         if (k === ' ' || k === 'Spacebar') { if (onBtn || onRng) return; togglePlay(); e.preventDefault(); }
-        else if (k === 'r' || k === 'R') { reset(); }
+        else if (k === 'r' || k === 'R') { relancer(); }
         else if ((k === 'ArrowUp' || k === 'ArrowDown') && !onRng) { nudgeQ(k === 'ArrowUp' ? 0.5 : -0.5); e.preventDefault(); }
         else if ((k === 'ArrowLeft' || k === 'ArrowRight') && !onRng) {
           const d = k === 'ArrowRight' ? 0.25 : -0.25;
@@ -2593,7 +2595,7 @@ const FX = (() => {
       addEventListener('keydown', e => {
         if (e.ctrlKey || e.metaKey || e.altKey || FX.typing(e)) return;
         if (e.key === ' ' || e.code === 'Space') { togglePlay(); e.preventDefault(); }
-        else if (e.key === 'r' || e.key === 'R') { S.t = 0; S.playing = false; syncControls(); }
+        else if (e.key === 'r' || e.key === 'R') { S.t = 0; S.playing = false; syncControls(); if (window.Fiche) Fiche.relance(); }
         else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && e.target.tagName !== 'INPUT') {
           S.playing = false; setT(Math.round((S.t + (e.key === 'ArrowRight' ? 0.1 : -0.1)) * 100) / 100); syncControls(); e.preventDefault();
         }
@@ -2601,7 +2603,7 @@ const FX = (() => {
       addEventListener('keyup', e => { if (e.code === 'Space' && e.target.tagName === 'BUTTON') e.preventDefault(); }, { signal });
 
       $('#bPlay').addEventListener('click', togglePlay, { signal });
-      $('#bRst').addEventListener('click', () => { S.t = 0; S.playing = false; syncControls(); }, { signal });
+      $('#bRst').addEventListener('click', () => { S.t = 0; S.playing = false; syncControls(); if (window.Fiche) Fiche.relance(); }, { signal });
       $('#bPente').addEventListener('click', () => { S.pente = !S.pente; syncControls(); renderHead(); }, { signal });
       $('#bAire').addEventListener('click', () => { S.aire = !S.aire; syncControls(); renderHead(); }, { signal });
       sDt.addEventListener('input', () => { S.sDt = +sDt.value; syncControls(); }, { signal });

@@ -58,7 +58,7 @@ Le panneau devient une **fiche** lue de haut en bas, une par scène.
 4. **Chapitres** : fondation, un `div.chap` par module canonique (`p.chap-t` avec `<b>NN</b>` et le titre canonique), 2 à 4 boutons `.seg` aux codes `NN.k` ; showcase, un seul chapitre et ses actes (`I`, `II`… ou `1`, `2`…). Deux scènes dans une étape : un bouton à deux index, `data-a` et `data-b`.
 5. `aside.panel` contient le conteneur des **lectures** (`#toyPanel` dans la référence ; sinon envelopper les sections de mesures dans un élément et le passer en option `lectures`) et, s'il y a lieu, `#hints` (aide du clavier, rangée dans un repli « Clavier »).
 6. **Exposer l'état.** Les fonctions des fiches lisent l'objet que renvoie `etat()`. Dans un script classique, les `let` et `const` de premier niveau sont visibles par nom depuis un script suivant : `etat: () => ({ st, P })` suffit souvent, sans toucher au moteur. La fiche ne modifie jamais cet état.
-7. **Brancher la navigation.** Dans la fonction d'étape de la page (`goStep`, `goAct`…), appeler `if (window.Fiche) Fiche.montre(n)` avec l'index de **scène** (celui de `data-a` / `data-b`), et exposer `window.allerScene = n => goStep(n)`.
+7. **Brancher la navigation.** Dans la fonction d'étape de la page (`goStep`, `goAct`…), appeler `if (window.Fiche) Fiche.montre(n)` avec l'index de **scène** (celui de `data-a` / `data-b`), et exposer `window.allerScene = n => goStep(n)`. Si cette même fonction sert aussi à **remettre la scène en cours à zéro** (bouton Réinitialiser, touche R, clic sur l'étape en cours, préréglage), l'appel devient `if (window.Fiche) { Fiche.relance(); Fiche.montre(n); }` (voir « Réinitialiser la scène sans la quitter »).
 8. **Écrire les fiches** dans un `<script>` placé après `<script src="../../labo/fiche.js">` et avant la coquille de la page : `Fiche.init({ etapes, fiches, etat, aller, k, theorie })`. La référence construit `etapes` depuis `#stepper .seg` ; le format complet d'une fiche est en tête de `labo/fiche.js`.
 9. Aide du clavier : retirer O/M/C, ajouter `F` focus et `I` infos. Si la page utilise déjà F, passer `toucheFocus: false` (Focus reste au bouton) et le dire dans la PR.
 10. En fin de `<body>`, `../../labo/planche.js` : **dernier script**.
@@ -73,6 +73,26 @@ En français, tutoiement, ton de la référence.
 - **Prédis** : les valeurs citées sont celles du **réglage par défaut** de la scène ; la réponse est **recalculée avec le moteur** (Node ou console), jamais de tête ; l'explication refait le calcul. Hasard : porter sur une tendance (moyenne, √n, demi-vie) avec une tolérance qui tient compte de la dispersion.
 - **Essaie** : des gestes que les contrôles permettent réellement. Chaque `fait` devient vrai **seulement après une action** : comparer à la valeur d'arrivée gardée dans `mem` (aide `instant` de la référence). Pas d'essai vrai au chargement, ni d'essai qu'aucune commande n'atteint. Un bac à sable propose des défis vérifiés sur l'état.
 - **Pourquoi** : 2 à 4 phrases, puis `relation` (TeX). `vivant` seulement si le panneau ne montre pas déjà ce calcul.
+
+### Réinitialiser la scène sans la quitter
+
+`Fiche.montre(i)` ne fait rien quand `i` est déjà la scène en cours : la fiche n'est pas reconstruite et les essais cochés restent cochés. Conséquence : **`mem` n'est pas remis à zéro quand la page réapplique la même scène** (Réinitialiser, touche R, clic sur l'étape en cours, préréglage). Un essai qui compare l'état à un instantané pris au premier passage (`instant(mem, 'v0', …)`, `mem.depart = e`) compare alors à un départ périmé :
+
+- **coché sans geste** : le reset remet les valeurs par défaut alors que l'instantané gardait celles d'une visite précédente (réglages modifiés, puis retour sur la scène) ; l'essai « change X » se coche au simple appui sur Réinitialiser ;
+- **impossible à atteindre** : le reset recrée des objets aux identifiants neufs (préréglage du champ électrique) ou remet des compteurs à zéro, et la comparaison ne peut plus devenir vraie.
+
+Relevé le 2026-10-20 sur Le champ électrique (essai « glisse une charge »), puis par audit des planches à fiche : *Systèmes et hasard* (les six premières scènes) et *Forces et énergie* (« Deux forces, une résultante »).
+
+**Règle.** Partout où la page remet la scène en état de départ **sans changer d'index**, appeler `Fiche.relance()` au même endroit : elle jette `mem` (`suivi` le remplit de nouveau à l'image suivante, à partir de l'état tel qu'il est alors). Elle ne touche ni à la fiche, ni à la prédiction, ni aux essais déjà cochés.
+
+```js
+// la fonction d'étape sert aussi au reset : relancer AVANT de montrer
+if (window.Fiche) { Fiche.relance(); Fiche.montre(n); }
+// un reset propre à un jouet, qui ne passe pas par la fonction d'étape
+function reset() { …; if (window.Fiche) Fiche.relance(); }
+```
+
+À la place d'un compteur de scénario dans l'état exposé (`scenario++` dans `applyPreset`, lu par `suivi`), préférer `Fiche.relance()` dans la fonction qui applique le préréglage. Si le reset change des réglages tout de suite mais n'applique la scène qu'après un fondu (`resetStep()` puis `initStep()`), relancer **avant la première modification** : pendant le fondu, la fiche lit déjà les nouveaux réglages. Ne relancer **qu'au moment où l'état est vraiment remis à zéro** (pas sur un simple retour de la même étape qui ne touche à rien) et pas à chaque image. Au test : après Réinitialiser, aucun essai ne se coche seul, et chacun reste réalisable avec les vrais contrôles (le script Playwright de « Vérifier », point 4, le fait avec un reset au milieu).
 
 ## L'explication en cours interactif
 
@@ -108,7 +128,7 @@ Servir la racine du dépôt par HTTP (`python -m http.server 4350 --directory .`
 1. `node outils/qa/conformite.mjs <dossier> --strict` : aucune erreur (`✗`). Lecture statique de l'ordre des feuilles et des scripts, de la coque, du branchement de la fiche, des chapitres, des rubriques, des quiz, des ids et des scènes intégrées.
 2. `node outils/qa/qa_migrees.js <dossier>` : chaque étape s'ouvre et est marquée, `cochesSansGeste` vaut 0 partout, console propre (le 404 de `favicon.ico` ne compte pas), aucun débordement à 375 px, écran et contrôles dans 1366 × 768. **Regarder les captures.**
 3. `node outils/qa/qa_theorie.js <dossier>` : aucune erreur KaTeX ni LaTeX brut, aucun débordement à 1440 et 375 px.
-4. Un script Playwright jetable (non commité) réalise **au moins un essai par scène** avec les vrais contrôles et vérifie `.fiche-essais li.fait` ; chaque calcul vivant donne des valeurs justes aux bornes de ses curseurs ; chaque quiz accepte la bonne réponse et refuse une mauvaise ; chaque URL d'embed ouvre la bonne étape.
+4. Un script Playwright jetable (non commité) réalise **au moins un essai par scène** avec les vrais contrôles et vérifie `.fiche-essais li.fait`, **y compris après un Réinitialiser** (aucun essai coché par le reset seul, chaque essai encore réalisable ensuite, y compris en revenant sur la scène après avoir déplacé les curseurs) ; chaque calcul vivant donne des valeurs justes aux bornes de ses curseurs ; chaque quiz accepte la bonne réponse et refuse une mauvaise ; chaque URL d'embed ouvre la bonne étape.
 5. Thèmes clair et sombre lisibles ; `prefers-reduced-motion` ralentit sans figer le sujet.
 
 ## Lien vers une étape et mode intégré
@@ -149,6 +169,7 @@ Relevés pendant les migrations (2026-10-04 à 07) et le prototype de la fiche (
 10. **Iframes hors écran** : elles chargent tard. Faire défiler jusqu'à elles avant de mesurer.
 11. **`?etape=` est appliqué après le `load`.** Si la page ouvre sa première étape plus tard (minuterie), le signaler au lieu de modifier `planche.js`.
 12. **PR empilées.** Ne pas supprimer la branche de base d'une PR dont une autre dépend (`gh pr merge --delete-branch` a fermé une PR empilée le 2026-10-04).
+13. **`mem` survit à un reset de la même scène.** `Fiche.montre(i)` sort tout de suite quand `i` est la scène en cours : appeler `Fiche.relance()` avant lui dans la fonction d'étape, et dans tout reset propre à un jouet (section « Réinitialiser la scène sans la quitter »).
 
 ## Format hérité
 
