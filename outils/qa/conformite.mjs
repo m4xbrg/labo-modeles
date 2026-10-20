@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PLANCHES = path.join(RACINE, 'opus-sonnet');
+const modeles = JSON.parse(readFileSync(path.join(RACINE, 'corpus/models.json'), 'utf8')).models;
 const args = process.argv.slice(2);
 const md = args.includes('--markdown'), strict = args.includes('--strict');
 const filtre = args.filter(a => !a.startsWith('--')).flatMap(a => a.split(',')).filter(Boolean);
@@ -164,7 +165,9 @@ if (inconnus.length) { console.error(`Dossiers introuvables dans opus-sonnet/ : 
 let echec = false;
 const lignes = [];
 for (const d of dossiers) {
-  const showcase = /^\d\d-/.test(d);
+  // Le numéro historique ne donne pas le type : 04, 06 et 07 sont des fondations.
+  const modele = modeles.find(m => m.path === `opus-sonnet/${d}/index.html`);
+  const showcase = modele ? modele.type === 'showcase' : /^\d\d-/.test(d);
   const P = planche(d, lire(path.join(PLANCHES, d, 'index.html')), showcase);
   const htmlE = lire(path.join(PLANCHES, d, 'explication.html'));
   const E = htmlE ? explication(d, htmlE, showcase, P.codes) : { format: 'absente', err: [], avert: [], mods: [] };
