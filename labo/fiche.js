@@ -42,6 +42,8 @@
    juste avant Fiche.montre(i), ou seule si la page n'appelle pas montre à cet endroit :
      if (window.Fiche) { Fiche.relance(); Fiche.montre(i); }      // dans la fonction d'étape
      function reset() { …; if (window.Fiche) Fiche.relance(); }   // reset propre à un jouet
+   Si le reset change des réglages tout de suite et n'applique la scène qu'après un fondu, relancer avant la
+   première modification : pendant le fondu, la fiche lit déjà les nouveaux réglages.
    relance() ne remet à zéro que mem : la fiche, la prédiction et les essais déjà cochés ne bougent pas, et
    mem se remplit de nouveau à l'image suivante, à partir de l'état tel qu'il est alors. */
 (() => {

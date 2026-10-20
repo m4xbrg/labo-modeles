@@ -92,7 +92,7 @@ if (window.Fiche) { Fiche.relance(); Fiche.montre(n); }
 function reset() { …; if (window.Fiche) Fiche.relance(); }
 ```
 
-À la place d'un compteur de scénario dans l'état exposé (`scenario++` dans `applyPreset`, lu par `suivi`), préférer `Fiche.relance()` dans la fonction qui applique le préréglage. Ne relancer **qu'au moment où l'état est vraiment remis à zéro** (pas sur un simple retour de la même étape qui ne touche à rien) et pas à chaque image. Au test : après Réinitialiser, aucun essai ne se coche seul, et chacun reste réalisable avec les vrais contrôles (le script Playwright de « Vérifier », point 4, le fait avec un reset au milieu).
+À la place d'un compteur de scénario dans l'état exposé (`scenario++` dans `applyPreset`, lu par `suivi`), préférer `Fiche.relance()` dans la fonction qui applique le préréglage. Si le reset change des réglages tout de suite mais n'applique la scène qu'après un fondu (`resetStep()` puis `initStep()`), relancer **avant la première modification** : pendant le fondu, la fiche lit déjà les nouveaux réglages. Ne relancer **qu'au moment où l'état est vraiment remis à zéro** (pas sur un simple retour de la même étape qui ne touche à rien) et pas à chaque image. Au test : après Réinitialiser, aucun essai ne se coche seul, et chacun reste réalisable avec les vrais contrôles (le script Playwright de « Vérifier », point 4, le fait avec un reset au milieu).
 
 ## L'explication en cours interactif
 
