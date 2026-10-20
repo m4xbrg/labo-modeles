@@ -1153,7 +1153,7 @@ function initStep(i, keepParams) {
   else if (i === 9) { restartD3(); DP.acc = 0; physics(3); }
   syncUI(); updateUI(i); readoutsReset();
   /* Le fondu initialise la scène ici : la fiche lit alors son état d’arrivée. */
-  if (window.Fiche) Fiche.montre(i);
+  if (window.Fiche) { Fiche.relance(); Fiche.montre(i); }   /* Réinitialiser réapplique la même scène : mem repart de zéro */
 }
 function readoutsReset() { buildRows(); readouts(); }
 const secCfg = { 2: ['Énergies en fonction du temps', 128], 3: ['Énergies et pertes', 128], 4: ['Courbe de résonance', 190], 6: ['Perle témoin et main', 120] };

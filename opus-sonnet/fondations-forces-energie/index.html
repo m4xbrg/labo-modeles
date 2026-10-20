@@ -1173,7 +1173,7 @@ function enterAct(n, restart) {
   hideTip(); syncTools(); buildMeas(n);
   if (n === 2 || n >= 4) { if (restart) setPlay(true); }
   sizePanelCanvases();
-  if (window.Fiche) Fiche.montre(n);
+  if (window.Fiche) { Fiche.relance(); Fiche.montre(n); }   /* Réinitialiser réapplique la même scène : mem repart de zéro */
 }
 function updateUI(n) {
   uiAct = n;

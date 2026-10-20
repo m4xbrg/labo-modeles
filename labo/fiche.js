@@ -20,6 +20,7 @@
        toucheFocus: 'f',                   // false si la page utilise déjà F ; le bouton Focus reste
      });
      Fiche.montre(i)   // à appeler à chaque changement de scène
+     Fiche.relance()   // à appeler quand la page remet la MÊME scène à son état de départ (voir plus bas)
 
    Une fiche :
      regarde    : html, ce qu'il faut remarquer (1 ou 2 phrases).
@@ -27,9 +28,22 @@
                   { q, choix: ['…', '…'], bonne: 1, explication }      choix
      essais     : [{ t: html, fait: (e, mem) => bool }]  cochés d'eux-mêmes quand fait() devient vrai.
      suivi      : (e, mem) => …   appelée à chaque image, pour retenir ce qui s'est passé (mem est
-                  remis à zéro à chaque visite de la scène).
+                  remis à zéro à chaque visite de la scène, et à chaque Fiche.relance()).
      pourquoi   : html.  relation : TeX statique.  vivant : e => TeX (recalculé, rendu si le texte change).
-     defs       : [[terme, définition], …].  piege : html. */
+     defs       : [[terme, définition], …].  piege : html.
+
+   Remettre la scène à zéro : montre(i) sort tout de suite quand i est déjà la scène en cours (la fiche
+   n'est pas reconstruite, les essais cochés restent cochés). mem n'est donc PAS remis à zéro quand la page
+   réapplique la même scène : Réinitialiser, touche R, clic sur l'étape en cours, préréglage. Les essais qui
+   comparent l'état à un instantané gardé dans mem (instant(mem, 'v0', …), mem.depart = e) comparent alors à
+   un départ périmé : un essai se coche sans geste (le reset remet les valeurs par défaut, différentes de
+   celles du premier passage) ou ne peut plus l'être (identifiants d'objets recréés, compteurs remis à zéro).
+   Règle : partout où la page remet la scène en état de départ SANS changer d'index, appeler Fiche.relance()
+   juste avant Fiche.montre(i), ou seule si la page n'appelle pas montre à cet endroit :
+     if (window.Fiche) { Fiche.relance(); Fiche.montre(i); }      // dans la fonction d'étape
+     function reset() { …; if (window.Fiche) Fiche.relance(); }   // reset propre à un jouet
+   relance() ne remet à zéro que mem : la fiche, la prédiction et les essais déjà cochés ne bougent pas, et
+   mem se remplit de nouveau à l'image suivante, à partir de l'état tel qu'il est alors. */
 (() => {
 'use strict';
 let O = null, cur = -1, mem = {}, faits = new Set(), boucle = 0;
@@ -131,6 +145,10 @@ function montre(i) {
   if (!boucle) boucle = requestAnimationFrame(tick);
 }
 
+/* La page vient de remettre la scène en cours à son état de départ : l'instantané d'arrivée gardé dans mem
+   n'est plus le bon. On le jette ; suivi() le reprendra à l'image suivante. Les essais cochés restent cochés. */
+function relance() { mem = {}; }
+
 function prediction(p, S) {
   const box = $('.fiche-rep', haut), retour = $('.fiche-retour', haut);
   const montrer = (juste, donnee) => {
@@ -189,5 +207,5 @@ function tick() {
   }
 }
 
-window.Fiche = { init, montre, focus };
+window.Fiche = { init, montre, relance, focus };
 })();

@@ -1152,7 +1152,7 @@ function initStep(i) {
   else if (i === 7) { resetWK(); WK.yD = 10; }
   else if (i === 8) resetDC(true);
   syncUI(); updateUI(i); buildRows(); readouts();
-  if (window.Fiche) Fiche.montre(i);
+  if (window.Fiche) { Fiche.relance(); Fiche.montre(i); }   /* Réinitialiser réapplique la même scène : mem repart de zéro */
 }
 const secCfg = { 1: ['Graphe du taux : dx/dt en fonction de x', 150] };
 function sizeSec() {
