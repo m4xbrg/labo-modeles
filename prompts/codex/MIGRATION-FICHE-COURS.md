@@ -4,7 +4,7 @@ Rédigé le 2026-10-13 par Claude Opus 5.5, après la PR n° 43 (prototype sur *
 
 **Les recettes font foi dans `labo/GABARIT.md`** (sections « La planche à fiche d'étape », « L'explication en cours interactif », « Migrer une page existante », « Vérifier »). Ce document les résume pour un exécutant et ajoute les règles de PR ; en cas d'écart, `GABARIT.md` l'emporte.
 
-**Préalable : `main` contient `labo/fiche.js`, `labo/cours.js`, le mode `?embed` et `outils/qa/conformite.mjs`** (PR n° 43 et PR du gabarit standard).
+**Préalable : le dépôt contient `labo/fiche.js`, `labo/cours.js`, le mode `?embed` et `outils/qa/conformite.mjs`.** Cela se vérifie par la présence des fichiers, jamais par un numéro de PR (un environnement cloud ne voit pas les PR).
 
 ## Modèle à choisir dans Codex
 
@@ -105,7 +105,7 @@ Acceptation :
 
 ```text
 Tu travailles dans le dépôt labo-modeles. Lis d'abord prompts/codex/MIGRATION-FICHE-COURS.md en entier, puis labo/GABARIT.md (sections « Fiche d'étape » et « Lien vers une étape et mode intégré »), corpus/standards.md §1 et §2, l'en-tête de labo/fiche.js et celui de labo/cours.js, et enfin les deux références : opus-sonnet/fondations-langage/index.html et explication.html.
-Vérifie que main contient la PR n° 43 (labo/fiche.js et labo/cours.js existent) ; sinon arrête-toi et dis-le. Crée la branche codex/fiche-cours-oscillations-ondes depuis main à jour.
+Vérifie que labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs existent dans le dépôt ; sinon arrête-toi et dis-le. Ne cherche aucune PR et ne t'arrête pas sur un numéro de PR : seuls ces fichiers comptent. Crée la branche codex/fiche-cours-oscillations-ondes depuis main à jour.
 Ta mission : migrer opus-sonnet/fondations-oscillations-ondes/ vers la fiche d'étape (planche) et le cours interactif (explication), selon les §2 à §6 du document.
 Repères dans index.html : le tableau STEPS (vers la ligne 518) et goStep(n, immediate, keep) (vers la ligne 1176). Dix scènes pour neuf étapes : l'étape 15.1 regroupe deux scènes (data-a="5" data-b="6", impulsion ou onde périodique), il faut donc deux fiches pour elle. Cette explication est la référence historique du format de théorie (corpus/standards.md §2) : sa prose ne change pas, seule la forme change.
 Idées de calculs vivants, à confirmer contre le texte : T = 1/f et ω = 2πf ; somme de deux oscillations déphasées ; ω₀ = √(k/m) ; λ = v/f ; fréquence perçue par effet Doppler. Utilise trace(...) pour dessiner une sinusoïde ou une enveloppe amortie quand c'est utile.
@@ -117,7 +117,7 @@ Réponds en français. Termine par : ce qui est fait, valeurs des prédictions r
 
 ```text
 Tu travailles dans le dépôt labo-modeles. Lis d'abord prompts/codex/MIGRATION-FICHE-COURS.md en entier, puis labo/GABARIT.md (sections « Fiche d'étape » et « Lien vers une étape et mode intégré »), corpus/standards.md §1 et §2, l'en-tête de labo/fiche.js et celui de labo/cours.js, et enfin les deux références : opus-sonnet/fondations-langage/index.html et explication.html.
-Vérifie que main contient la PR n° 43 (labo/fiche.js et labo/cours.js existent) ; sinon arrête-toi et dis-le. Crée la branche codex/fiche-cours-forces-energie depuis main à jour.
+Vérifie que labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs existent dans le dépôt ; sinon arrête-toi et dis-le. Ne cherche aucune PR et ne t'arrête pas sur un numéro de PR : seuls ces fichiers comptent. Crée la branche codex/fiche-cours-forces-energie depuis main à jour.
 Ta mission : migrer opus-sonnet/fondations-forces-energie/ vers la fiche d'étape (planche) et le cours interactif (explication), selon les §2 à §6 du document.
 Repères dans index.html : le tableau ACTS (vers la ligne 1146) et goAct(n, restart) (vers la ligne 1185) ; six étapes, une scène chacune (10.1 à 10.3, 11.1 à 11.3). L'étape 11.3 « À toi : collision libre » est déjà un bac à sable : ses essais doivent proposer des défis (par exemple obtenir une collision où toute l'énergie cinétique est conservée, ou une où les deux chariots repartent ensemble), vérifiés sur l'état.
 Idées de calculs vivants, à confirmer contre le texte : ΣF = m·a avec une résultante de deux forces (plan(...) pour les flèches) ; travail W = F·d·cos θ et énergie cinétique ½mv² ; quantité de mouvement avant et après une collision, élastique ou parfaitement inélastique, avec l'énergie perdue.
@@ -129,7 +129,7 @@ Réponds en français. Termine par : ce qui est fait, valeurs des prédictions r
 
 ```text
 Tu travailles dans le dépôt labo-modeles. Lis d'abord prompts/codex/MIGRATION-FICHE-COURS.md en entier, puis labo/GABARIT.md (sections « Fiche d'étape » et « Lien vers une étape et mode intégré »), corpus/standards.md §1 et §2, l'en-tête de labo/fiche.js et celui de labo/cours.js, et enfin les deux références : opus-sonnet/fondations-langage/index.html et explication.html.
-Vérifie que main contient la PR n° 43 (labo/fiche.js et labo/cours.js existent) ; sinon arrête-toi et dis-le. Crée la branche codex/fiche-cours-systemes-hasard depuis main à jour.
+Vérifie que labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs existent dans le dépôt ; sinon arrête-toi et dis-le. Ne cherche aucune PR et ne t'arrête pas sur un numéro de PR : seuls ces fichiers comptent. Crée la branche codex/fiche-cours-systemes-hasard depuis main à jour.
 Ta mission : migrer opus-sonnet/fondations-systemes-hasard/ vers la fiche d'étape (planche) et le cours interactif (explication), selon les §2 à §6 du document.
 Repères dans index.html : le tableau STEPS (vers la ligne 491) et goStep(n, immediate) (vers la ligne 1024) ; neuf étapes, une scène chacune (04.1 à 04.4, 05.1 et 05.2, 07.1 à 07.3). Le hasard (07) est tiré au sort : un essai ou une prédiction qui dépend d'un tirage doit porter sur une tendance (moyenne sur beaucoup de lancers, √n de la marche aléatoire, demi-vie) avec une tolérance qui tient compte de la dispersion, jamais sur un résultat exact.
 Idées de calculs vivants, à confirmer contre le texte : un pas d'Euler x(t + Δt) = x + f(x)·Δt ; temps de doublement ln 2 / r ; croissance logistique et capacité K ; écart typique √n d'une marche aléatoire ; demi-vie et fraction restante après n demi-vies. Utilise trace(...) pour dessiner l'exponentielle ou la logistique.
@@ -143,7 +143,7 @@ Remplacer `<dossier>` (nom du dossier dans `opus-sonnet/`) et `<court>` (le mêm
 
 ```text
 Tu travailles dans le dépôt labo-modeles. Lis d'abord prompts/codex/MIGRATION-FICHE-COURS.md en entier, puis labo/GABARIT.md (gabarit standard), corpus/standards.md §1, §2 et §4, l'en-tête de labo/fiche.js et celui de labo/cours.js, et enfin les deux références : opus-sonnet/fondations-langage/index.html et explication.html.
-Vérifie que main contient labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs ; sinon arrête-toi et dis-le. Crée la branche codex/fiche-cours-<court> depuis main à jour.
+Vérifie que labo/fiche.js, labo/cours.js et outils/qa/conformite.mjs existent dans le dépôt ; sinon arrête-toi et dis-le. Ne cherche aucune PR et ne t'arrête pas sur un numéro de PR : seuls ces fichiers comptent. Crée la branche codex/fiche-cours-<court> depuis main à jour.
 Ta mission : migrer opus-sonnet/<dossier>/ vers la fiche d'étape (planche) et le cours interactif (explication), selon les §2 à §6 du document.
 Repères dans index.html : <tableau des étapes et fonction d'étape, scènes regroupées, touches déjà prises>.
 Si c'est un showcase (dossier qui commence par deux chiffres) : une fiche par acte, retour « ← Phénomènes », lien de fin « Comprendre ce qui se passe » ; l'explication prend la forme du cours interactif sur son propre plan, sans les sept rubriques.
