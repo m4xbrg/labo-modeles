@@ -1,7 +1,7 @@
 /* LABO — habillage de l’accueil et des planches.
    AUCUNE donnée de vérité ici : numéros, titres, domaines, statuts et liens viennent de
    ../corpus/*.json (voir corpus.js). Ce fichier ne dit que comment montrer les choses :
-   couleur d'un domaine, petite formule d'en-tête, pictogramme animé, textes des phénomènes,
+   couleur d'un domaine, petite formule d'en-tête, pictogramme animé (dessiné par microviz.js), textes des phénomènes,
    et les planches maquettes. Une entrée absente a un rendu par défaut : rien ne casse
    quand le corpus gagne un module ou un modèle.
 
@@ -24,18 +24,18 @@ window.LaboPresentation = {
     K: { c: '#6b5fa8', sous: 'Amplitudes et mesures' },
   },
 
-  // Par module : [formule ou ordre de grandeur, pictogramme (clé de VIZ dans index.html), couleur propre]
+  // Par module : [formule ou ordre de grandeur, pictogramme (clé de VIZ dans microviz.js), couleur propre]
   MODULES: {
-    1: ['10⁻¹⁰ → 10¹³ m'], 2: ['a + b · |a|'], 3: ['v = dx/dt'], 4: ['dx/dt = f(x)'], 5: ['t½ = ln2 / λ'],
-    6: ['T = 1/f', 'phase'], 7: ['σ ∝ √n', 'hasard'], 8: ['x* stable ?'], 9: ['Σ aₙ sin(nωt)'],
-    10: ['ΣF = ma'], 11: ['Σp = cte'], 12: ['L = Iω'], 13: ['v = √(GM/r)', 'orbite'], 14: ['ω₀ = √(k/m)'], 15: ['λ = v/f', 'onde'],
-    16: ['∇·F · ∇×F'], 17: ['PV = NkT', 'gaz'], 18: ['ΔS ≥ 0'], 19: ['J = −D ∇c', 'diffusion'], 20: ['Q = A·v'],
-    21: ['F = qE'], 22: ['τ = RC'], 23: ['ε = −N dΦ/dt', 'fil', '#3b4fb8'], 24: ['c = 1/√(μ₀ε₀)', 'em', '#3b4fb8'], 25: ['n₁ sin θ₁ = n₂ sin θ₂', null, '#3f6fa8'],
-    26: ['~10⁻¹⁵ m'], 27: ['E = hf'], 28: ['~0,1 nm'], 29: ['n = m/M'], 30: ['k = A e^(−Ea/RT)'], 31: ['pH = −log[H⁺]'],
-    32: ['~10 µm'], 33: ['~100 mV · ms'], 34: ['ATP · ~1 µm'], 35: ['ADN → ARN → protéine'], 36: ['~2 nm'], 37: ['boucle de rétroaction'],
-    38: ['~1 m · ~1 s'], 39: ['jours'], 40: ['~10⁴ générations'], 41: ['dN/dt = rN(1 − N/K)'], 42: ['règles locales'],
-    43: ['λ_max T = b'], 44: ['~10¹⁰ ans'], 45: ['v = H₀ d'], 46: ['γ = 1/√(1 − v²/c²)'], 47: ['~10⁻⁹ Δt/t'],
-    48: ['|ψ|²'], 49: ['~1 nm'], 50: ['↑ ou ↓'],
+    1: ['10⁻¹⁰ → 10¹³ m', 'echelle'], 2: ['a + b · |a|', 'vecteur'], 3: ['v = dx/dt', 'tangente'], 4: ['dx/dt = f(x)', 'flot'], 5: ['t½ = ln2 / λ', 'demivie'],
+    6: ['T = 1/f', 'phase'], 7: ['σ ∝ √n', 'hasard'], 8: ['x* stable ?', 'cobweb'], 9: ['Σ aₙ sin(nωt)', 'fourier'],
+    10: ['ΣF = ma', 'force'], 11: ['Σp = cte', 'choc'], 12: ['L = Iω', 'patineur'], 13: ['v = √(GM/r)', 'orbite'], 14: ['ω₀ = √(k/m)', 'ressort'], 15: ['λ = v/f', 'onde'],
+    16: ['∇·F · ∇×F', 'champ'], 17: ['PV = NkT', 'gaz'], 18: ['ΔS ≥ 0', 'palier'], 19: ['J = −D ∇c', 'diffusion'], 20: ['Q = A·v', 'debit'],
+    21: ['F = qE', 'dipole'], 22: ['τ = RC', 'rc'], 23: ['ε = −N dΦ/dt', 'fil', '#3b4fb8'], 24: ['c = 1/√(μ₀ε₀)', 'em', '#3b4fb8'], 25: ['n₁ sin θ₁ = n₂ sin θ₂', 'refraction', '#3f6fa8'],
+    26: ['~10⁻¹⁵ m', 'noyau'], 27: ['E = hf', 'raies'], 28: ['~0,1 nm', 'liaison'], 29: ['n = m/M', 'mole'], 30: ['k = A e^(−Ea/RT)', 'barriere'], 31: ['pH = −log[H⁺]', 'titrage'],
+    32: ['~10 µm', 'membrane'], 33: ['~100 mV · ms', 'potentiel'], 34: ['ATP · ~1 µm', 'turbine'], 35: ['ADN → ARN → protéine', 'code'], 36: ['~2 nm', 'helice'], 37: ['boucle de rétroaction', 'consigne'],
+    38: ['~1 m · ~1 s', 'pouls'], 39: ['jours', 'immun'], 40: ['~10⁴ générations', 'derive'], 41: ['dN/dt = rN(1 − N/K)', 'logistique'], 42: ['règles locales', 'automate'],
+    43: ['λ_max T = b', 'planck'], 44: ['~10¹⁰ ans', 'etoile'], 45: ['v = H₀ d', 'hubble'], 46: ['γ = 1/√(1 − v²/c²)', 'lumiere'], 47: ['~10⁻⁹ Δt/t', 'geodesique'],
+    48: ['|ψ|²', 'paquet'], 49: ['~1 nm', 'tunnel'], 50: ['↑ ou ↓', 'spin'],
   },
 
   // Planches maquettes (pas des modèles) : module → page dans labo/

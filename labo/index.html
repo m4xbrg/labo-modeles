@@ -176,6 +176,7 @@ footer p + p{margin-top:8px}
 
 <script src="corpus.js?v=2026-10-10"></script>
 <script src="presentation.js"></script>
+<script src="microviz.js"></script>
 <script>
 // ---------- Données : tout vient de ../corpus/*.json (corpus.js) ; l'habillage de presentation.js ----------
 const PR = window.LaboPresentation;
@@ -233,113 +234,12 @@ function rendPhenomenes(C){
   if (C.date) document.getElementById('maj').textContent = 'Mis à jour ' + C.date;
 }
 
-window.LaboCorpus.charge().then(C => { rendIndex(C); rendPhenomenes(C); activeViz(); }).catch(err => {
+window.LaboCorpus.charge().then(C => { rendIndex(C); rendPhenomenes(C); LaboMicroViz.active(); }).catch(err => {
   console.warn('LABO : corpus illisible', err);
   document.getElementById('compte').textContent = 'Corpus illisible : ouvrir cette page par un serveur (GitHub Pages, ou python -m http.server à la racine du dépôt).';
 });
 
-// ---------- Microvisualisations : statiques, elles s'animent seulement au survol ----------
-const NS = 'http://www.w3.org/2000/svg';
 const calme = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const el = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); return e; };
-let alea = 7; const rnd = () => (alea = (alea * 16807) % 2147483647) / 2147483647;
-
-const VIZ = {
-  onde(svg){
-    const p = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.3});
-    svg.append(el('line',{x1:0,x2:128,y1:18,y2:18,stroke:'var(--trait)','stroke-width':1}), p);
-    return t => { let d=''; for (let x=0;x<=128;x+=2){ const y = 18 - 11*Math.sin(x/128*Math.PI*4 - t*3)*Math.exp(-x/260); d += (x?'L':'M')+x+' '+y.toFixed(2); } p.setAttribute('d',d); };
-  },
-  phase(svg){
-    const cx=18, R=13;
-    svg.append(el('circle',{cx,cy:18,r:R,fill:'none',stroke:'var(--trait)'}));
-    const ray = el('line',{x1:cx,y1:18,stroke:'var(--encre-3)','stroke-width':1});
-    const dot = el('circle',{r:2.4,fill:'var(--c)'});
-    const tr = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.2});
-    const h = el('line',{stroke:'var(--c)','stroke-width':.8,'stroke-dasharray':'2 2',opacity:.6});
-    svg.append(ray,tr,h,dot);
-    return t => {
-      const a = t*1.6, x = cx+R*Math.cos(a), y = 18-R*Math.sin(a);
-      ray.setAttribute('x2',x); ray.setAttribute('y2',y); dot.setAttribute('cx',x); dot.setAttribute('cy',y);
-      h.setAttribute('x1',x); h.setAttribute('y1',y); h.setAttribute('x2',40); h.setAttribute('y2',y);
-      let d=''; for (let i=0;i<=88;i+=2){ d += (i?'L':'M')+(40+i)+' '+(18-R*Math.sin(a - i/14)).toFixed(2); } tr.setAttribute('d',d);
-    };
-  },
-  orbite(svg){
-    svg.append(el('ellipse',{cx:64,cy:18,rx:46,ry:13,fill:'none',stroke:'var(--trait)'}),
-               el('circle',{cx:64+46*0.55,cy:18,r:3.2,fill:'var(--encre)'}));
-    const p = el('circle',{r:2.2,fill:'var(--c)'}); svg.append(p);
-    const f = 46*0.55; // foyer
-    return t => { // anomalie : approximation suffisante pour un pictogramme
-      const M = t*1.2; let E = M; for (let i=0;i<5;i++) E = M + .55*Math.sin(E);
-      p.setAttribute('cx', 64 + 46*Math.cos(E)); p.setAttribute('cy', 18 + 13*Math.sin(E)); };
-  },
-  gaz(svg){
-    svg.append(el('rect',{x:.5,y:.5,width:127,height:35,fill:'none',stroke:'var(--trait)'}));
-    const P = Array.from({length:18},()=>({x:4+rnd()*120,y:4+rnd()*28,vx:rnd()-.5,vy:rnd()-.5,e:el('circle',{r:1.7,fill:'var(--c)'})}));
-    P.forEach(p => svg.append(p.e));
-    let last = 0;
-    return t => { const dt = Math.min(.05, t-last || 0); last = t;
-      for (const p of P){ p.x += p.vx*dt*90; p.y += p.vy*dt*90;
-        if (p.x<3||p.x>125){p.vx*=-1;p.x=Math.max(3,Math.min(125,p.x));} if (p.y<3||p.y>33){p.vy*=-1;p.y=Math.max(3,Math.min(33,p.y));}
-        p.e.setAttribute('cx',p.x.toFixed(1)); p.e.setAttribute('cy',p.y.toFixed(1)); } };
-  },
-  diffusion(svg){
-    svg.append(el('line',{x1:64,x2:64,y1:0,y2:36,stroke:'var(--trait)','stroke-dasharray':'2 3'}));
-    const P = Array.from({length:22},()=>({x:4+rnd()*30,y:4+rnd()*28,e:el('circle',{r:1.6,fill:'var(--c)'})}));
-    P.forEach(p => svg.append(p.e));
-    const base = P.map(p => ({x:p.x,y:p.y})); let last=0, t0=null;
-    return (t, actif) => { if (!actif){ P.forEach((p,i)=>{p.x=base[i].x;p.y=base[i].y;}); t0=null; }
-      else { const dt = Math.min(.05,t-last||0); for (const p of P){ p.x += (rnd()-.5)*dt*160; p.y += (rnd()-.5)*dt*160;
-        p.x=Math.max(3,Math.min(125,p.x)); p.y=Math.max(3,Math.min(33,p.y)); } }
-      last=t; P.forEach(p=>{p.e.setAttribute('cx',p.x.toFixed(1));p.e.setAttribute('cy',p.y.toFixed(1));}); };
-  },
-  hasard(svg){
-    const bars = []; const N = 15;
-    for (let i=0;i<N;i++){ const b = el('rect',{x:6+i*8,width:5,fill:'var(--c)'}); bars.push(b); svg.append(b); }
-    svg.append(el('line',{x1:0,x2:128,y1:35.5,y2:35.5,stroke:'var(--trait)'}));
-    const g = i => Math.exp(-((i-7)**2)/(2*2.6**2));
-    let n = 0, cts = new Array(N).fill(0);
-    return (t, actif) => {
-      if (!actif){ cts = cts.map((_,i)=>g(i)*30); n = 0; }
-      else { for (let k=0;k<3;k++){ let s=0; for (let j=0;j<14;j++) s += rnd()<.5?1:0; cts[s]=(cts[s]||0)+1; } n++; }
-      const m = Math.max(...cts) || 1; bars.forEach((b,i)=>{ const h = 32*cts[i]/m; b.setAttribute('y',35-h); b.setAttribute('height',h); });
-      if (actif && n>220){ cts.fill(0); n=0; } };
-  },
-  fil(svg){ // fil vu en bout : courant sortant, lignes de champ concentriques
-    const C = [];
-    svg.append(el('line',{x1:0,x2:128,y1:18,y2:18,stroke:'var(--trait)','stroke-dasharray':'1 3'}));
-    for (let i=0;i<4;i++){ const c = el('circle',{cx:64,cy:18,fill:'none',stroke:'var(--c)','stroke-width':1}); C.push(c); svg.append(c); }
-    svg.append(el('circle',{cx:64,cy:18,r:3.4,fill:'var(--papier)',stroke:'var(--encre)','stroke-width':1}), el('circle',{cx:64,cy:18,r:1,fill:'var(--encre)'}));
-    return t => C.forEach((c,i)=>{ const r = 7 + i*8 + 1.2*Math.sin(t*2 - i*.8); c.setAttribute('r',r); c.setAttribute('opacity',(1 - i*.22).toFixed(2)); });
-  },
-  em(svg){
-    const e = el('path',{fill:'none',stroke:'var(--positif)','stroke-width':1.1});
-    const b = el('path',{fill:'none',stroke:'var(--c)','stroke-width':1.1});
-    svg.append(el('line',{x1:0,x2:128,y1:20,y2:20,stroke:'var(--trait)'}), b, e);
-    return t => { let de='',db=''; for (let x=0;x<=128;x+=2){ const s = Math.sin(x/128*Math.PI*4 - t*3);
-      de += (x?'L':'M')+x+' '+(20-13*s).toFixed(2); db += (x?'L':'M')+(x+4*s).toFixed(2)+' '+(20+5*s).toFixed(2); }
-      e.setAttribute('d',de); b.setAttribute('d',db); };
-  },
-};
-
-const vivants = [];
-function activeViz(){ document.querySelectorAll('svg[data-viz]').forEach(svg => {
-  const fab = VIZ[svg.dataset.viz]; if (!fab) return;
-  const f = fab(svg); const ligne = svg.closest('li');
-  const v = { f, actif:false }; vivants.push(v); f(0.35, false);
-  if (calme) return;
-  ligne.addEventListener('pointerenter', () => { v.actif = true; boucle(); });
-  ligne.addEventListener('pointerleave', () => { v.actif = false; });
-  ligne.addEventListener('focusin', () => { v.actif = true; boucle(); });
-  ligne.addEventListener('focusout', () => { v.actif = false; });
-}); }
-let tourne = false;
-function boucle(){ if (tourne) return; tourne = true;
-  const pas = now => { const t = now/1000; let un = false;
-    for (const v of vivants) if (v.actif){ v.f(t, true); un = true; }
-    if (un) requestAnimationFrame(pas); else tourne = false; };
-  requestAnimationFrame(pas); }
 
 // ---------- Fig. 0 : moiré de deux familles de cercles (interférence) ----------
 (() => {
