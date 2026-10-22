@@ -574,7 +574,9 @@ function setRho(v, tout_de_suite) {
 function cloud(on) { lor.cloud = !!on; $('#cloud').setAttribute('aria-pressed', String(lor.cloud)); configCloud(); return state(); }
 function setPrecision(v) { lor.precision = borne(Number(v), 1e-9, 1e-3); $('#precision').value = Math.round(-Math.log10(lor.precision)); sorties(); return state(); }
 
-function state() {
+/* state() garde le champ step du socle (index d'étape, 0 à 3) en plus de scene (0 à 4). */
+function state() { const s = etatScene(); s.step = SCENES[scene].seg; return s; }
+function etatScene() {
   if (scene === 0) { const E = Chaos.pendulumEnergy(pend.s); return { scene, theta: Chaos.angle(pend.s[0]), omega: pend.s[1], energy: E, period: pend.period, reference: Chaos.periodVsAmplitude(0).T, regime: E > 19.62 ? 'rotation' : 'oscillation', damping: pend.damping, small: pend.small }; }
   if (scene === 1) return { scene, trajectoires: bas.chemins.length, destinations: bas.chemins.map(c => c.fin), carte: bas.fait / (bas.nx * bas.ny) };
   if (scene === 2) return { scene, r: log.r, x0: log.x0, x: log.x, generation: log.n, period: Chaos.detectPeriod(log.r, log.x0, 16), lyapunov: Chaos.lyapunovLogistic(log.r, 4000), zoom: log.bif.slice() };
@@ -1046,8 +1048,11 @@ addEventListener('keydown', e => {
 });
 addEventListener('resize', () => { log.refresh = true; });
 
-/* Surface d'essais : lecture de l'état et commandes ; les tests avancent des pas physiques. */
-window.__labo = { moteur: Chaos, get scene() { return scene; }, aller, state, tick: n => { simulate(n); return state(); }, setPlay,
+/* Surface d'essais : le socle de SESSION-FONDATION.md (step, goStep, state, tick, setPlay) et les crochets du brief
+   (magnets(on) ouvre ou quitte la scène Bassins), plus l'accès par scène (scene, aller) ; les tests avancent des pas physiques. */
+window.__labo = { moteur: Chaos, get step() { return SCENES[scene].seg; }, goStep: i => { segAller(i); return SCENES[scene].seg; },
+  get scene() { return scene; }, aller, state, tick: n => { simulate(n); return state(); }, setPlay,
+  magnets: on => { aller(on ? 1 : 0); return state(); },
   launchPendulum, setDamping, smallAngle, testeBassin, setR, setX0, zoom, setOffset, setAngle, relaunch, setRho: v => setRho(v, true), cloud, setPrecision,
   tourne: (dy, dt) => { lor.yaw += dy; lor.tilt = borne(lor.tilt + dt, -1.4, 1.4); ui.rotation += Math.abs(dy) + Math.abs(dt); }, ui };
 window.allerScene = n => aller(n);
@@ -1125,7 +1130,7 @@ const FICHES = [
     suivi: (e, mem) => { instant(mem, 'o0', e.s.offset); instant(mem, 'a0', e.s.angle); },
     pourquoi: 'Les équations sont les mêmes pour les deux pendules, sans aucun hasard. Mais tant que l’écart est petit, il se multiplie à peu près par e chaque 1/λ seconde. La prévision dure donc comme le logarithme de la précision : gagner un facteur mille ne rapporte que ln 1000 ≈ 6,9 temps de Lyapunov.',
     relation: String.raw`\delta(t)\approx\delta_0\,e^{\lambda t},\qquad t_p\approx\frac1\lambda\ln\frac{\Delta}{\delta_0}`,
-    vivant: ({ s }) => s.lambda > .2 ? String.raw`t_p\approx\frac{\ln(0{,}1/${s.offset.toExponential(0).replace('e-', '\\cdot10^{-') + '}'})}{${fmt(s.lambda, 2)}}=${fmt(Math.log(.1 / s.offset) / s.lambda, 1)}\ \mathrm s` : String.raw`\lambda\approx${fmt(s.lambda, 2)}\ \mathrm{s^{-1}}:\ \text{pas de divergence nette}`,
+    vivant: ({ s }) => s.lambda > .2 ? String.raw`t_p\approx\frac{\ln\left(0{,}1/(${s.offset.toExponential(0).replace('e-', '\\cdot10^{-') + '}'})\right)}{${fmt(s.lambda, 2)}}=${fmt(Math.log(.1 / s.offset) / s.lambda, 1)}\ \mathrm s` : String.raw`\lambda\approx${fmt(s.lambda, 2)}\ \mathrm{s^{-1}}:\ \text{pas de divergence nette}`,
     defs: [['Sensibilité aux conditions initiales', 'Un écart minuscule au départ grandit jusqu’à changer l’histoire.'], ['Exposant de Lyapunov λ', 'Taux moyen de croissance logarithmique d’un petit écart.'], ['Temps de Lyapunov', '1/λ : durée pendant laquelle l’écart est multiplié par e.']],
     piege: 'Dire que le système est aléatoire : il est déterministe, mais le long terme dépend d’une précision qu’on n’a jamais.',
   },
