@@ -1,130 +1,220 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
-<link rel="icon" href="data:,"><title>Comprendre la stabilité, les bifurcations et le chaos — LABO</title>
-<meta name="description" content="Théorie du module 08 : espaces des phases, bifurcations, sensibilité aux conditions initiales, attracteur et horizon de prévision.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre la stabilité, les bifurcations et le chaos — LABO</title>
+<meta name="description" content="Théorie du module 08 : espace des phases, équilibres et bassins, bifurcations, sensibilité aux conditions initiales, attracteur de Lorenz et horizon de prévision.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{--fond:#0a0d12;--fond-2:#11161e;--trait:#1f2833;--texte:#e8e4dc;--texte-2:#8a93a0;--accent:#d7a0e8;--positif:#ff8a5b;--negatif:#5bb8ff;--energie:#ffd166;--serif:'Instrument Serif',Georgia,serif;--sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
-*{box-sizing:border-box}html{background:var(--fond)}body{margin:0;color:var(--texte);background:var(--fond);font:16px/1.7 var(--sans)}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.wrap{max-width:790px;margin:0 auto;padding:36px 25px 90px}.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:52px;font:12px var(--mono)}.top a{color:var(--texte-2);text-decoration:none}
-.serie{font:11px var(--mono);letter-spacing:.14em;color:var(--texte-2);text-transform:uppercase}h1{font:400 clamp(38px,6.6vw,63px)/1.08 var(--serif);margin:12px 0 20px}h1 em{color:var(--accent)}.lede{font-size:18px;line-height:1.55}
-h2{font:400 32px/1.15 var(--serif);margin:62px 0 22px;padding-top:21px;border-top:1px solid var(--trait)}h2 span{display:block;font:11px var(--mono);color:var(--texte-2);margin-bottom:9px}
-p{margin:0 0 16px}ul,ol{padding-left:23px}li{margin-bottom:8px}.chiffres{border-top:1px solid var(--trait)}.chiffres>div{display:grid;grid-template-columns:minmax(125px,230px) 1fr;gap:16px;border-bottom:1px solid var(--trait);padding:13px 0}.chiffres b{font:500 16px var(--mono);color:var(--energie)}
-details{margin:12px 0;border:1px solid var(--trait);background:var(--fond-2)}summary{cursor:pointer;padding:12px 16px;font-weight:500}details p{margin:0 0 15px}.cta{display:inline-block;padding:11px 17px;border:1px solid var(--accent);text-decoration:none;margin-top:36px}
-@media(max-width:560px){.wrap{padding:27px 18px 70px}.chiffres>div{grid-template-columns:1fr;gap:3px}h2{font-size:27px}}
-</style>
-<link rel="stylesheet" href="../../labo/theorie.css"><script src="../../labo/theorie.js" defer></script>
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
+<script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
 </head>
-<body>
-<main class="wrap">
-<nav class="top" aria-label="Retour"><a href="index.html">← Retour à la planche</a><a class="back" href="../../labo/index.html">← LABO</a></nav>
-<p class="serie">LABO · Fondations 08</p>
-<h1>Comprendre la stabilité, les bifurcations et le <em>chaos</em></h1>
-<p class="lede">Une règle déterministe ne suffit pas à garantir une prévision durable. Dans une dynamique non linéaire, des conditions de départ presque identiques peuvent conduire à des histoires très différentes, sans que les lois cessent de s'appliquer.</p>
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← La planche</a>
+  <p class="ici">Stabilité, bifurcations et chaos <span>· le cours</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire">
+  <p>Sommaire</p>
+  <ol>
+    <li><a href="#vois">Ce que tu vois</a></li>
+    <li><a href="#m08"><b>08</b>Non-linéarité, stabilité et chaos</a>
+      <ol>
+        <li><a href="#m08-intuition">Intuition</a></li>
+        <li><a href="#m08-defs">Définitions</a></li>
+        <li><a href="#m08-relations">Relations clés</a></li>
+        <li><a href="#m08-exemple">Exemple chiffré</a></li>
+        <li><a href="#m08-pieges">Pièges fréquents</a></li>
+        <li><a href="#m08-suite">Où ça resservira</a></li>
+        <li><a href="#m08-test">Teste-toi</a></li>
+      </ol>
+    </li>
+    <li><a href="#simplifie">Ce que la simulation simplifie</a></li>
+    <li><a href="#chiffres">Les chiffres à retenir</a></li>
+    <li><a href="#introduit">Seulement introduit ici</a></li>
+  </ol>
+</nav>
+<main class="cours-texte">
+<header class="cours-tete">
+  <p class="surtitre">LABO · Fondations 08</p>
+  <h1>Comprendre la stabilité, les bifurcations et le <em>chaos</em></h1>
+  <p class="lead">Une règle exacte ne garantit pas une prévision durable. Dans une dynamique non linéaire, deux départs presque identiques peuvent mener à deux histoires différentes, sans que les lois cessent un instant de s’appliquer. Ce cours suit les quatre étapes de la planche : un pendule et son espace des phases, une règle qui bifurque, deux jumeaux qui divergent, une forme qui organise le désordre.</p>
+  <p class="mode-emploi">Les nombres soulignés se règlent en les faisant glisser ou avec les flèches du clavier. Les termes pointillés ouvrent leur définition. Manipule les scènes, puis réponds aux questions avant de lire leur correction.</p>
+  <div class="cartes"><a class="carte" href="#m08"><b>MODULE 08</b><span>Non-linéarité, stabilité et chaos</span><small>4 scènes intégrées · 3 calculs · 5 questions</small></a></div>
+</header>
 
-<h2><span>1</span>Ce que tu vois</h2>
-<p><strong>Le pendule.</strong> À gauche, une tige rigide décrit le mouvement réel ; à droite, chaque point du portrait des phases indique un angle et une vitesse. La courbe jaune sépare les oscillations des rotations sans frottement. Les deux marqueurs d'équilibre n'ont pas la même stabilité. L'ellipse des petits angles est juste près du bas, mais ne reproduit pas les grands mouvements. La scène facultative des trois aimants remplace le portrait par une carte de bassins : une couleur représente la destination d'un départ.</p>
-<p><strong>La logistique discrète.</strong> La toile d'araignée transforme une valeur en la suivante. Au-dessous, des points persistent après plusieurs centaines de générations. En changeant le paramètre, un point se sépare en deux, puis quatre et huit ; une courte fenêtre de période trois se reforme à l'intérieur du chaos.</p>
-<p><strong>Les trajectoires jumelles.</strong> Deux doubles pendules obéissent aux mêmes équations, mais commencent avec une différence infime. Les traces orange et bleue finissent par se séparer. Le graphe du logarithme de leur distance s'approche d'une droite durant la phase exponentielle, puis sature lorsque les états n'ont plus de proximité.</p>
-<p><strong>Les deux ailes.</strong> La trajectoire de Lorenz parcourt un ensemble borné dessiné dans l'espace de trois variables. La rotation du point de vue ne change pas le calcul. La petite section de Poincaré ne retient que les passages ascendants à travers un plan. Le nuage facultatif matérialise l'étirement de mille départs proches.</p>
-
-<h2><span>2</span>La théorie, module par module</h2>
-<ul class="sommaire"><li><a href="#m08"><b>08</b>Non-linéarité, stabilité et chaos</a></li></ul>
-<section class="module" id="m08">
-<header><p class="num">Module 08</p><h3>Des règles exactes, un avenir limité</h3><p class="etapes">Sur la planche : 1 Équilibres et phases · 2 Bifurcations · 3 Sensibilité · 4 Attracteurs</p></header>
-
-<h4 data-n="1">Intuition</h4>
-<p>Imagine une bille dans un bol : si tu la pousses légèrement, elle revient vers le fond. Place-la sur une crête et le même petit geste l'en éloigne. C'est la différence entre stabilité et instabilité. Mais le mouvement ne se résume pas à un état de repos. La loi amplifie l'incertitude des mesures. Un attracteur révèle alors une organisation globale, même lorsque la position future précise échappe à l'observateur.</p>
-
-<h4 data-n="2">Définitions</h4>
-<dl class="defs">
-<div><dt>État \(\mathbf{x}\)<span class="u">unités des variables</span></dt><dd>Collection minimale de nombres nécessaires pour calculer l'évolution future, par exemple angle et vitesse d'un pendule.</dd></div>
-<div><dt>Temps \(t\)<span class="u">s ou u.t.</span></dt><dd>Durée physique pour les pendules ; unité conventionnelle dans Lorenz, qui n'est pas une horloge météorologique.</dd></div>
-<div><dt>Équilibre \(\mathbf{x}^*\)<span class="u">unités de l'état</span></dt><dd>État qui demeure inchangé quand les équations évoluent ; la stabilité concerne ce qui arrive juste autour.</dd></div>
-<div><dt>Angle \(\theta\), vitesse \(\omega\)<span class="u">rad ; rad/s</span></dt><dd>Position angulaire et sa dérivée temporelle dans le portrait des phases du pendule.</dd></div>
-<div><dt>Gravité \(g\), longueur \(L\)<span class="u">m/s² ; m</span></dt><dd>Accélération pesante choisie et longueur de la tige rigide de l'expérience.</dd></div>
-<div><dt>Amortissement \(c\)<span class="u">s⁻¹</span></dt><dd>Coefficient de freinage proportionnel à la vitesse du pendule simple.</dd></div>
-<div><dt>Population normalisée \(x_n\)<span class="u">sans unité</span></dt><dd>Valeur de la génération entière \(n\) dans l'application logistique discrète.</dd></div>
-<div><dt>Paramètre \(r\)<span class="u">sans unité</span></dt><dd>Coefficient réglable qui détermine la forme de la mise à jour logistique.</dd></div>
-<div><dt>Exposant \(\lambda\)<span class="u">s⁻¹ ; par génération ; u.t.⁻¹</span></dt><dd>Taux moyen d'expansion logarithmique des perturbations, défini pour une dynamique et un choix d'unité temporelle.</dd></div>
-<div><dt>Écart \(\delta_0,\delta(t)\)<span class="u">état normalisé</span></dt><dd>Distance entre deux états dans un même espace des phases, initialement puis après évolution.</dd></div>
-<div><dt>Seuil \(\Delta\), horizon \(t_p\)<span class="u">état normalisé ; s ou u.t.</span></dt><dd>Erreur maximale tolérée et durée approximative avant de la dépasser.</dd></div>
-<div><dt>Rapport \(\delta_F\)<span class="u">sans unité</span></dt><dd>Limite du rapport entre intervalles successifs séparant des doublements de période.</dd></div>
-<div><dt>Jacobienne \(J\)<span class="u">dérivées locales</span></dt><dd>Matrice des dérivées de la dynamique près d'un équilibre à plusieurs variables.</dd></div>
-<div><dt>Lorenz \(\sigma,\rho,\beta\)<span class="u">paramètres sans dimension</span></dt><dd>Paramètres du modèle réduit de convection ; ici 10, variable de 10 à 35, et 8/3.</dd></div>
-</dl>
-
-<h4 data-n="3">Relations clés</h4>
-<div class="relation">\[\dot{\mathbf{x}}=\mathbf{f}(\mathbf{x}),\qquad \mathbf{f}(\mathbf{x}^*)=\mathbf{0}\]<p>L'équation différentielle donne le changement instantané d'un état. Dans le pendule simple, l'état est le couple angle-vitesse et l'accélération dépend de \(\sin\theta\) : la trajectoire n'est pas forcément une ellipse. Un équilibre annule toutes les dérivées.</p></div>
-<div class="relation">\[ \dot\theta=\omega,\quad \dot\omega=-\frac{g}{L}\sin\theta-c\omega\]<p>Le terme de pesanteur ramène vers le bas et la dissipation retire de l'énergie. Près d'un équilibre, le signe de la dérivée en une dimension ou les valeurs propres de la jacobienne en deux dimensions caractérisent la stabilité locale ; une composante réelle positive indique une instabilité.</p></div>
-<div class="relation">\[ x_{n+1}=r x_n(1-x_n),\qquad |f'(x^*)|\lt 1 \]<p>Pour une application discrète, un point fixe attire les départs proches si la valeur absolue de sa dérivée est inférieure à un. À \(r=3\), le point fixe non nul perd cette stabilité : un cycle de période deux apparaît.</p></div>
-<div class="relation">\[\delta(t)\approx\delta_0\,e^{\lambda t}\]<p>Quand \(\lambda\) est positif, un écart initial peut croître exponentiellement pendant une phase de séparation. L'approximation cesse lorsque les trajectoires sont déjà loin : la distance ne peut pas augmenter indéfiniment sur un attracteur borné.</p></div>
-<div class="relation">\[t_p\approx\frac{1}{\lambda}\ln\!\left(\frac{\Delta}{\delta_0}\right)\]<p>La durée de prévision croît seulement comme le logarithme de la précision initiale. Gagner un facteur mille en précision ajoute \(\ln(1000)\approx6{,}908\) temps de Lyapunov \(1/\lambda\), tant que le régime exponentiel s'applique.</p></div>
-<div class="relation">\[\delta_F=\lim_{n\to\infty}\frac{r_n-r_{n-1}}{r_{n+1}-r_n}\approx4{,}669\]<p>Les doublements se rapprochent dans la cascade logistique. Le nombre universel concerne certaines classes de systèmes non linéaires ; le rapport construit à partir des premiers seuils n'est pas exactement sa limite.</p></div>
-
-<h4 data-n="4">Exemple chiffré</h4>
-<div class="exemple">
-<p>Prenons deux états comparés avec une distance initiale sans unité de \(10^{-3}\), un seuil d'erreur acceptable de 1, et un exposant de Lyapunov de 1 s⁻¹. Ces valeurs sont choisies pour le calcul : elles ne constituent pas une prévision météorologique.</p>
-<ol>
-<li>Le rapport vaut 1 000 et son logarithme \(\ln 1000\approx6{,}907755\).</li>
-<li>L'horizon prévu est \(t_p=6{,}907755/1\approx6{,}91\) s. Le régime exponentiel suppose une petite séparation.</li>
-<li>Si la mesure devient mille fois plus précise, l'erreur initiale est \(10^{-6}\). Le nouvel horizon vaut \(\ln(10^6)/1\approx13{,}82\) s.</li>
-<li>Le gain n'est donc que 6,91 s, malgré une précision mille fois meilleure. Pour gagner 20 secondes, il faudrait multiplier la précision par \(e^{20}\), soit environ 485 millions.</li>
-</ol>
-<p>Un deuxième diagnostic porte sur l'équilibre discret. À \(r=2{,}8\), \(x^*=1-1/r=0{,}642857\). La dérivée vaut \(f'(x^*)=2-r=-0{,}8\). Sa valeur absolue est inférieure à 1 : les générations convergent vers ce point en alternant autour de lui. Après \(r=3\), cette condition n'est plus vérifiée et un cycle peut le remplacer.</p>
+<h2 id="vois"><span class="n">1</span>Ce que tu vois</h2>
+<div class="cartes">
+  <a class="carte" href="index.html?etape=08.1"><b><span class="acc">Le portrait de phase</span></b><span>Un point par état : l’angle θ en abscisse, la vitesse ω en ordonnée. La trajectoire mauve s’efface vers le passé ; la courbe dorée en tirets est la séparatrice, frontière entre oscillations et tours complets. À gauche, le pendule lui-même, qu’on peut saisir et lâcher.</span></a>
+  <a class="carte" href="index.html?etape=08.1&amp;scene=2"><b>Les bassins de trois aimants</b><span>Chaque couleur indique l’aimant où finit une masse lâchée sans vitesse à cet endroit. Un clic lâche une masse et dessine son chemin.</span></a>
+  <a class="carte" href="index.html?etape=08.2"><b><span class="acc">La cascade</span></b><span>La toile d’araignée dorée passe d’une génération à la suivante ; à droite, le diagramme de bifurcation montre, pour chaque r, les valeurs où les générations finissent. Le curseur mauve se déplace au doigt ; l’orbite actuelle s’y allume en or.</span></a>
+  <a class="carte" href="index.html?etape=08.3"><b>Les jumeaux</b><span>Deux doubles pendules, <span class="pos">orange</span> et <span class="neg">bleu</span>, dessinés en lumière additive : confondus, ils paraissent blancs. En bas, le logarithme de leur écart et la pente λ en tirets.</span></a>
+  <a class="carte" href="index.html?etape=08.4"><b><span class="acc">Le papillon de Lorenz</span></b><span>Une trajectoire en trois dimensions qu’on fait tourner à la souris, ses deux points fixes C⁺ et C⁻, la section de Poincaré et l’horizon de prévision calculé pour la précision choisie.</span></a>
 </div>
 
-<h4 data-n="5">Pièges fréquents</h4>
-<ul class="pieges">
-<li><strong>« Un système chaotique est aléatoire. »</strong> Faux : ici, aucun tirage au hasard ne gouverne les équations. Une mesure initiale imparfaite suffit à rendre le long terme incertain.</li>
-<li><strong>« Il faut beaucoup de variables pour obtenir le chaos. »</strong> Non : une application discrète unidimensionnelle suffit. En temps continu, un système autonome classique a besoin d'au moins trois dimensions pour ce type de chaos.</li>
-<li><strong>« Le pendule linéarisé est fiable pour tout angle. »</strong> Non : \(\sin\theta\approx\theta\) ne vaut que près de zéro. À 90°, la période exacte dépasse celle des petits angles d'environ 18 %.</li>
-<li><strong>« Un ordinateur parfait pourrait toujours tout prévoir. »</strong> Il ne supprime pas l'incertitude des mesures ou du modèle.</li>
-<li><strong>« L'effet papillon signifie qu'un papillon provoque une tempête. »</strong> Il illustre la sensibilité : une petite différence peut modifier une évolution, pas prouver une cause unique d'un événement météorologique.</li>
-<li><strong>« La forme de l'attracteur prouve une trajectoire périodique. »</strong> Une région bornée et structurée n'implique pas que la même position soit retrouvée dans le même ordre.</li>
-</ul>
+<h2 id="theorie"><span class="n">2</span>La théorie</h2>
+<p>Le module suit le plan commun : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et trois questions pour vérifier.</p>
 
-<h4 data-n="6">Où ça resservira</h4>
-<ul class="resert">
-<li><b>04</b><span><a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a> : équilibre et rétroaction en une dimension.</span></li>
-<li><b>14</b><span><a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a> : période, pendule et approximation des petits angles.</span></li>
-<li><b>37</b><span><a href="../fondations-signalisation-homeostasie/index.html">Signaux et équilibres du vivant</a> : boucles et changements de stabilité.</span></li>
-<li><b>41 · 42</b><span>Populations et systèmes collectifs : quels comportements émergent d'interactions nombreuses ?</span></li>
-<li><b>09</b><span>Signaux : comment reconnaître un comportement chaotique dans un spectre fréquentiel ?</span></li>
-<li><b>ATLAS</b><span>Le double pendule, le problème des trois corps, un billard et les modèles de prévision météorologique approfondissent les mécanismes.</span></li>
-</ul>
+<section class="module" id="m08">
+  <header>
+    <p class="num">Module 08</p>
+    <h3>Des règles exactes, un avenir limité</h3>
+    <p class="etapes">Sur la planche : étapes <a href="index.html?etape=08.1">08.1 Équilibres</a> · <a href="index.html?etape=08.2">08.2 Bifurcations</a> · <a href="index.html?etape=08.3">08.3 Sensibilité</a> · <a href="index.html?etape=08.4">08.4 Attracteurs</a></p>
+  </header>
 
-<h4 data-n="7">Teste-toi</h4>
-<details><summary>Si \(\lambda=0{,}5\) s⁻¹, \(\Delta=1\) et \(\delta_0=10^{-4}\), quel horizon obtiens-tu ?</summary><p>Le rapport est \(10^4\). Donc \(t_p=\ln(10^4)/0{,}5\approx18{,}42\) s. Diviser encore l'erreur par 100 ajouterait \(\ln 100/0{,}5\approx9{,}21\) s, pas cent fois plus de temps.</p></details>
-<details><summary>Pourquoi le passage du pendule près du sommet est-il différent de son passage près du bas ?</summary><p>En bas, une petite déviation produit une accélération de rappel vers l'équilibre. En haut, une petite déviation produit une accélération qui l'en éloigne. La stabilité concerne le voisinage de la position.</p></details>
-<details><summary>Que peux-tu affirmer à propos du futur d'un point si l'attracteur est connu ?</summary><p>Tu peux décrire la région de l'espace des états vers laquelle il reste confiné et certaines statistiques du modèle. Pour un régime chaotique, tu ne peux généralement pas fixer une position précise arbitrairement loin dans le futur à partir de mesures de précision finie.</p></details>
+  <h4 data-n="1" id="m08-intuition">Intuition</h4>
+  <p>Pose une bille au fond d’un bol et pousse-la un peu : elle revient. Pose-la sur le sommet d’une colline et donne-lui la même poussée : elle s’en va. Les deux positions sont des <a class="terme" href="#def-equilibre">équilibres</a>, mais pas de la même espèce. La stabilité ne parle pas de l’état lui-même ; elle parle de ce qui arrive juste à côté.</p>
+  <p>Pour voir tout cela d’un coup d’œil, on cesse de regarder l’objet et on regarde son <a class="terme" href="#def-phases">espace des phases</a> : un plan, ou un espace, où chaque point est un état complet. Pour un pendule, l’angle et la vitesse suffisent ; le futur entier se lit à partir de ce point. Une histoire devient une courbe, un équilibre devient un point, et deux histoires ne peuvent jamais se croiser, sans quoi le même état aurait deux futurs.</p>
+  <p>Le mot clé du module est <em>non linéaire</em>. Dans un système linéaire, doubler la cause double l’effet, et les comportements restent sages : oscillation, croissance, décroissance. Le pendule n’est linéaire qu’aux petits angles, parce que sin θ ≈ θ. Dès qu’on s’en éloigne, sa période change avec l’amplitude, et au-delà d’une énergie critique il cesse d’osciller pour tourner. Une règle encore plus simple, la logistique, suffit à produire tout le répertoire : un point fixe, puis un cycle de deux valeurs, puis quatre, huit, et enfin un comportement qui ne se répète jamais.</p>
+  <p>Ce dernier régime est le <a class="terme" href="#def-chaos">chaos</a>. Il n’a rien d’aléatoire : la règle est exacte et sans tirage. Mais elle étire les écarts. Une erreur de mesure d’un milliardième grandit à peu près exponentiellement, jusqu’à rendre la prévision inutile. Et pourtant tout n’est pas perdu : les trajectoires restent confinées sur une forme, un attracteur, dont on peut décrire la géométrie et les statistiques. On ne sait plus où sera le système ; on sait encore sur quoi il évolue.</p>
+
+  <h4 data-n="2" id="m08-defs">Définitions</h4>
+  <dl class="defs">
+    <div id="def-etat"><dt>État \(\mathbf x\)</dt><dd>Plus petit ensemble de nombres qui suffit à calculer tout le futur, par exemple l’angle et la vitesse d’un pendule.</dd></div>
+    <div id="def-phases"><dt>Espace des phases</dt><dd>Espace dont chaque point est un état. Une trajectoire y est une courbe ; deux trajectoires ne s’y croisent pas.</dd></div>
+    <div id="def-equilibre"><dt>Équilibre \(\mathbf x^*\)</dt><dd>État qui ne change pas : toutes les dérivées y sont nulles. Il est <em>stable</em> si les états voisins y reviennent, <em>instable</em> s’ils s’en éloignent.</dd></div>
+    <div id="def-bassin"><dt>Bassin d’attraction</dt><dd>Ensemble des départs qui finissent sur un même attracteur. Plusieurs bassins se partagent l’espace des phases.</dd></div>
+    <div id="def-param"><dt>Paramètre \(r,\ \rho\)<span class="u">sans unité</span></dt><dd>Nombre réglable, fixe pendant une évolution, qui change la forme de la règle.</dd></div>
+    <div id="def-bifurcation"><dt>Bifurcation</dt><dd>Changement qualitatif du comportement quand un paramètre franchit un seuil : un équilibre perd sa stabilité, un cycle apparaît ou se dédouble.</dd></div>
+    <div id="def-lyapunov"><dt>Exposant de Lyapunov \(\lambda\)<span class="u">s⁻¹, par génération ou par u.t.</span></dt><dd>Taux moyen de croissance logarithmique d’un petit écart entre deux trajectoires. Positif : sensibilité aux conditions initiales.</dd></div>
+    <div id="def-horizon"><dt>Horizon de prévision \(t_p\)<span class="u">s ou u.t.</span></dt><dd>Durée avant qu’une erreur initiale \(\delta_0\) atteigne un seuil toléré \(\Delta\).</dd></div>
+    <div id="def-chaos"><dt>Chaos déterministe</dt><dd>Comportement borné, non périodique, d’une règle sans hasard, dont les trajectoires voisines s’écartent exponentiellement.</dd></div>
+    <div id="def-attracteur"><dt>Attracteur étrange</dt><dd>Attracteur à structure fractale sur lequel la dynamique est chaotique, comme le papillon de Lorenz.</dd></div>
+    <div id="def-feigenbaum"><dt>Constante de Feigenbaum \(\delta_F\)</dt><dd>Limite du rapport entre intervalles successifs de doublement de période : 4,669… pour toute une classe de systèmes.</dd></div>
+  </dl>
+
+  <h4 data-n="3" id="m08-relations">Relations clés</h4>
+  <div class="relation">\[ \dot\theta=\omega,\qquad \dot\omega=-\frac gL\sin\theta-c\,\omega \]
+    <p>La pesanteur rappelle vers le bas, le terme en \(c\) retire de l’énergie. Sans amortissement, l’énergie par unité de masse \(E=\tfrac12L^2\omega^2+gL(1-\cos\theta)\) se conserve, et chaque courbe du portrait est une courbe d’énergie constante. La <a class="terme" href="#def-equilibre">séparatrice</a> correspond à \(E=2gL\) : juste assez pour atteindre le sommet.</p></div>
+  <figure class="labo large" data-src="index.html?embed&amp;etape=08.1" data-h="520" data-titre="Le portrait de phase du pendule">
+    <figcaption><span><b>08.1</b>Clique au-dessus de la séparatrice, puis tout près de ±π : compare un tour complet et un départ presque immobile au sommet.</span>
+    <a class="ouvrir" href="index.html?etape=08.1">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <div class="relation">\[ T(\theta_0)=\frac{2\pi\sqrt{L/g}}{\operatorname{agm}\!\left(1,\cos\frac{\theta_0}{2}\right)} \]
+    <p>Aux petits angles, \(T_0=2\pi\sqrt{L/g}\) ne dépend pas de l’amplitude. Le calcul exact fait intervenir une moyenne arithmético-géométrique : la période s’allonge avec \(\theta_0\) et tend vers l’infini à 180°, car le pendule s’attarde au sommet.</p></div>
+  <div class="calc">
+    <p class="calc-t">À toi : la période d’un grand pendule</p>
+    <p>Amplitude <span class="var" data-nom="A" data-val="90" data-min="5" data-max="175" data-pas="5" data-dec="0" data-unite="°" data-label="Amplitude de départ"></span>, longueur <span class="var" data-nom="L" data-val="1" data-min="0.25" data-max="4" data-pas="0.25" data-dec="2" data-unite="m" data-label="Longueur"></span>.</p>
+    <p>Petits angles : T₀ = <output class="fort" data-expr="2*PI*sqrt(L/9.81)" data-dec="3"></output> s ; période exacte : T = <output class="fort" data-expr="(() =&gt; { let a = 1, b = cosd(A/2); for (let i = 0; i &lt; 30; i++) { const m = (a + b)/2; b = sqrt(a*b); a = m; } return 2*PI*sqrt(L/9.81)/a; })()" data-dec="3"></output> s, soit <output class="fort" data-expr="(() =&gt; { let a = 1, b = cosd(A/2); for (let i = 0; i &lt; 30; i++) { const m = (a + b)/2; b = sqrt(a*b); a = m; } return 100*(1/a - 1); })()" data-dec="1"></output> % de plus.</p>
+    <p class="note">À 90°, l’écart dépasse 18 % : l’approximation des petits angles n’est plus une approximation.</p>
+  </div>
+  <div class="relation">\[ x_{n+1}=r\,x_n(1-x_n),\qquad x^*=1-\frac1r,\qquad f'(x^*)=2-r \]
+    <p>Pour une règle discrète, un point fixe attire ses voisins si \(|f'(x^*)|\lt1\) : chaque génération réduit l’écart. Ici \(|2-r|\lt1\) tant que \(1\lt r\lt3\). À \(r=3\), le point fixe perd sa stabilité et un cycle de deux valeurs le remplace : c’est la première <a class="terme" href="#def-bifurcation">bifurcation</a> de la cascade.</p></div>
+  <div class="calc avec-figure">
+    <p class="calc-t">À toi : le point fixe et sa stabilité</p><output class="figure" data-expr="trace({ f: x =&gt; r*x*(1 - x), x: [0, 1], y: [0, 1], seg: [[0, 0, 1, 1]], pts: [[1 - 1/r, 1 - 1/r]] })"></output>
+    <p>Paramètre <span class="var" data-nom="r" data-val="2.8" data-min="1.2" data-max="3.9" data-pas="0.05" data-dec="2" data-label="Paramètre r"></span>.</p>
+    <p>x* = 1 − 1/r = <output class="fort" data-expr="1 - 1/r" data-dec="3"></output> ; |f′(x*)| = |2 − r| = <output class="fort" data-expr="abs(2 - r)" data-dec="2"></output> : <output class="phrase" data-expr="abs(2 - r) &lt; 1 ? 'le point fixe attire, les générations y convergent.' : 'le point fixe repousse : un cycle ou le chaos prend le relais.'"></output></p>
+    <p class="note">Le point marque x* sur la diagonale, là où la parabole la croise.</p>
+  </div>
+  <div class="quiz" data-reponse="0.6" data-tol="0.005">
+    <p class="q">À r = 2,5, vers quelle valeur convergent les générations ?</p>
+    <div class="corr"><p>\(x^*=1-1/2{,}5=0{,}6\), et \(|f'(x^*)|=|2-2{,}5|=0{,}5\lt1\) : il attire.</p></div>
+  </div>
+  <figure class="labo large" data-src="index.html?embed&amp;etape=08.2" data-h="520" data-titre="La cascade de bifurcations">
+    <figcaption><span><b>08.2</b>Fais glisser le curseur mauve à travers 3, 3,449 et 3,544 : compte les points dorés.</span>
+    <a class="ouvrir" href="index.html?etape=08.2">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <div class="relation">\[ \delta_F=\lim_{n\to\infty}\frac{r_n-r_{n-1}}{r_{n+1}-r_n}\approx4{,}669 \]
+    <p>Les seuils de doublement se resserrent selon un rapport qui tend vers la <a class="terme" href="#def-feigenbaum">constante de Feigenbaum</a>. Le même nombre apparaît dans des systèmes très différents : c’est une propriété de la cascade, pas de la logistique. Avec les trois premiers intervalles, le rapport vaut déjà 4,66.</p></div>
+  <div class="relation">\[ \delta(t)\approx\delta_0\,e^{\lambda t},\qquad t_p\approx\frac1\lambda\ln\frac{\Delta}{\delta_0} \]
+    <p>Tant qu’il reste petit, un écart entre deux trajectoires croît à peu près exponentiellement, au taux \(\lambda\), l’<a class="terme" href="#def-lyapunov">exposant de Lyapunov</a>. L’horizon de prévision ne croît donc que comme le logarithme de la précision : multiplier la précision par mille ajoute \(\ln 1000/\lambda\approx6{,}9/\lambda\), pas mille fois plus de temps. L’approximation cesse quand l’écart devient grand : sur un attracteur borné, il plafonne.</p></div>
+  <figure class="labo large" data-src="index.html?embed&amp;etape=08.3&amp;panneau=1" data-h="520" data-titre="Deux doubles pendules jumeaux">
+    <figcaption><span><b>08.3</b>Regarde ln d monter en ligne droite, puis règle l’écart initial à 10⁻¹² : l’écart devient visible quelques secondes plus tard seulement.</span>
+    <a class="ouvrir" href="index.html?etape=08.3">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <div class="calc">
+    <p class="calc-t">À toi : acheter de la prévision</p>
+    <p>Exposant <span class="var" data-nom="lam" data-val="0.9" data-min="0.1" data-max="3" data-pas="0.1" data-dec="1" data-unite="par unité de temps" data-label="Exposant de Lyapunov"></span>, erreur initiale 10<sup>−<span class="var" data-nom="p" data-val="6" data-min="1" data-max="15" data-pas="1" data-dec="0" data-label="Précision, puissance de dix"></span></sup>, seuil toléré Δ = 1.</p>
+    <p>Horizon : t<sub>p</sub> = <output class="fort" data-expr="p*Math.log(10)/lam" data-dec="1"></output> unités de temps ; avec une erreur mille fois plus petite : <output class="fort" data-expr="(p + 3)*Math.log(10)/lam" data-dec="1"></output>, soit <output class="fort" data-expr="3*Math.log(10)/lam" data-dec="1"></output> de plus.</p>
+    <p class="note">Avec λ ≈ 0,9 et une erreur de 10⁻⁶, on retrouve les 15,5 unités de l’étape 08.4.</p>
+  </div>
+  <div class="quiz" data-reponse="18.42" data-tol="0.1" data-unite="s">
+    <p class="q">λ = 0,5 s⁻¹, Δ = 1 et δ₀ = 10⁻⁴ : quel horizon de prévision ?</p>
+    <div class="corr"><p>\(t_p=\ln(10^4)/0{,}5=9{,}21/0{,}5\approx18{,}4\) s. Diviser encore l’erreur par 100 n’ajouterait que \(\ln100/0{,}5\approx9{,}2\) s.</p></div>
+  </div>
+  <div class="relation">\[ \dot x=\sigma(y-x),\quad \dot y=x(\rho-z)-y,\quad \dot z=xy-\beta z \]
+    <p>Trois variables d’une convection très simplifiée, avec \(\sigma=10\) et \(\beta=8/3\). Au-delà de \(\rho\approx24{,}74\), les points fixes \(C^\pm\) deviennent instables et la trajectoire parcourt un <a class="terme" href="#def-attracteur">attracteur étrange</a> : bornée, jamais périodique, avec \(\lambda\approx0{,}9\) par unité de temps à \(\rho=28\).</p></div>
+  <figure class="labo large" data-src="index.html?embed&amp;etape=08.4" data-h="520" data-titre="L’attracteur de Lorenz">
+    <figcaption><span><b>08.4</b>Allume le nuage de 1 000 départs et attends : il reste confondu une quinzaine d’unités de temps, puis s’étale sur les deux ailes.</span>
+    <a class="ouvrir" href="index.html?etape=08.4">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+
+  <h4 data-n="4" id="m08-exemple">Exemple chiffré</h4>
+  <div class="cas">
+    <p>Deux états sont comparés avec un écart initial \(\delta_0=10^{-3}\), un seuil toléré \(\Delta=1\) et un exposant \(\lambda=1\ \mathrm{s^{-1}}\). Ces valeurs sont choisies pour le calcul, pas pour une prévision météorologique.</p>
+    <ol class="pas-a-pas" data-montre="0">
+      <li>Le rapport à franchir vaut \(\Delta/\delta_0=1000\), et \(\ln1000\approx6{,}91\).</li>
+      <li>L’horizon vaut \(t_p=6{,}91/1\approx6{,}9\) s.</li>
+      <li>Avec une mesure mille fois plus précise, \(\delta_0=10^{-6}\) : \(t_p=\ln(10^6)/1\approx13{,}8\) s.</li>
+      <li>Le gain n’est que de 6,9 s pour une précision mille fois meilleure. Gagner 20 s demanderait une précision \(e^{20}\approx4{,}9\times10^8\) fois meilleure.</li>
+      <li>Même logique pour la logistique à \(r=2{,}8\) : \(x^*=1-1/2{,}8\approx0{,}643\) et \(f'(x^*)=2-2{,}8=-0{,}8\). L’écart à \(x^*\) est multiplié par −0,8 à chaque génération : il diminue en changeant de signe, et la toile d’araignée tourne en spirale vers le point fixe.</li>
+    </ol>
+  </div>
+
+  <h4 data-n="5" id="m08-pieges">Pièges fréquents</h4>
+  <ul class="pieges">
+    <li><strong>« Un système chaotique est aléatoire. »</strong> Non : aucune des règles de la planche ne tire de hasard. C’est la précision finie du départ qui rend le long terme incertain.</li>
+    <li><strong>« Il faut beaucoup de variables pour obtenir le chaos. »</strong> Une règle discrète à une variable suffit. En temps continu, un système autonome a besoin d’au moins trois variables.</li>
+    <li><strong>« Le pendule linéarisé vaut pour tout angle. »</strong> \(\sin\theta\approx\theta\) ne vaut que près du bas : à 90°, la vraie période dépasse celle des petits angles de 18 %.</li>
+    <li><strong>« Un ordinateur parfait pourrait tout prévoir. »</strong> Il ne supprime ni l’incertitude des mesures ni celle du modèle.</li>
+    <li><strong>« L’effet papillon prouve qu’un papillon cause une tempête. »</strong> Il illustre la sensibilité, pas une cause unique.</li>
+    <li><strong>« Une forme reconnaissable prouve un mouvement périodique. »</strong> La trajectoire de Lorenz reste sur une forme sans jamais se refermer.</li>
+  </ul>
+
+  <h4 data-n="6" id="m08-suite">Où ça resservira</h4>
+  <ul class="resert">
+    <li><b>04</b><span><a href="../fondations-systemes-hasard/index.html">Systèmes, croissance et hasard</a> : équilibre et rétroaction en une dimension.</span></li>
+    <li><b>14</b><span><a href="../fondations-oscillations-ondes/index.html">Oscillations et ondes</a> : période, amortissement et approximation des petits angles.</span></li>
+    <li><b>09</b><span><a href="../fondations-signaux-fourier/index.html">Un signal, des fréquences</a> : le spectre d’un signal chaotique est continu, pas fait de raies.</span></li>
+    <li><b>37</b><span><a href="../fondations-signalisation-homeostasie/index.html">Signaux et équilibres du vivant</a> : boucles de rétroaction et changements de stabilité.</span></li>
+    <li><b>41 · 42</b><span><a href="../fondations-populations-emergence/index.html">Du local au collectif</a> : des comportements collectifs qui émergent d’interactions simples.</span></li>
+    <li><b>ATLAS</b><span>Double pendule, problème des trois corps, billards et prévision météorologique approfondissent ces mécanismes.</span></li>
+  </ul>
+
+  <h4 data-n="7" id="m08-test">Teste-toi</h4>
+  <div class="quiz"><p class="q">Pourquoi un petit écart près du sommet du pendule ne se comporte-t-il pas comme près du bas ?</p><ul class="choix"><li>Le frottement est plus fort au sommet</li><li data-bon>Au sommet, la pesanteur pousse l’écart à grandir ; en bas, elle le ramène</li><li>La vitesse est nulle au sommet, donc rien ne bouge</li></ul><div class="corr">
+    <p>En bas, une petite déviation produit une accélération de rappel vers l’équilibre. Au sommet, la même déviation produit une accélération qui l’en éloigne : l’équilibre est instable.</p></div></div>
+  <div class="quiz" data-reponse="7.68" data-tol="0.1" data-unite="s"><p class="q">Avec λ = 0,9 s⁻¹, combien de secondes de prévision gagne-t-on en rendant la mesure 1 000 fois plus précise ?</p><div class="corr">
+    <p>\(\Delta t_p=\ln1000/\lambda=6{,}91/0{,}9\approx7{,}7\) s. Mille fois plus de précision, quelques secondes de plus.</p></div></div>
+  <div class="quiz"><p class="q">L’attracteur d’un système chaotique est connu. Que peux-tu affirmer sur l’état du système dans très longtemps ?</p><ul class="choix"><li>Sa position exacte, puisque les lois sont exactes</li><li data-bon>La région où il se trouvera et des statistiques, pas sa position précise</li><li>Rien du tout</li></ul><div class="corr">
+    <p>Il restera sur l’attracteur, avec des fréquences de passage descriptibles. Avec une mesure de précision finie, sa position précise au-delà de l’horizon de prévision reste inconnue.</p></div></div>
 </section>
 
-<h2><span>3</span>Ce que la simulation simplifie</h2>
+<h2 id="simplifie"><span class="n">3</span>Ce que la simulation simplifie</h2>
 <ul>
-<li><strong>Pendule simple.</strong> Tige rigide, pivot sans frottement sauf amortissement réglé à la main, gravité uniforme de 9,81 m/s² ; le portrait utilise les vraies équations \(\sin\theta\), pas une approximation globale. La superposition bleue est linéarisée séparément.</li>
-<li><strong>Pendule aimanté.</strong> Le plan simule trois pôles attractifs, un rappel central, une attraction adoucie par une hauteur fictive et un freinage. Les couleurs indiquent le résultat numérique après une durée finie, pas une frontière fractale calculée à résolution infinie.</li>
-<li><strong>Logistique.</strong> Le temps avance d'une génération entière à l'autre. Le diagramme élimine 850 itérations puis garde 90 états par valeur de \(r\) ; son apparence dépend de cet échantillonnage et de la résolution à l'écran.</li>
-<li><strong>Double pendule.</strong> Deux masses ponctuelles égales de 1 kg sur deux tiges de 1 m, sans dissipation, intégrées en RK4 à pas fixe de 0,001 s dans l'animation. La distance normalisée mélange angles et vitesses ramenées sur une échelle temporelle ; le graphe n'est donc pas une distance spatiale entre les poids.</li>
-<li><strong>Exposants.</strong> La méthode de Benettin compare deux trajectoires puis renormalise régulièrement leur écart. Les valeurs sont estimées sur un temps fini et changent avec la trajectoire, les paramètres et le pas de calcul. Un exposant positif à durée finie ne démontre pas, seul, un chaos asymptotique.</li>
-<li><strong>Lorenz.</strong> Le système original réduit une convection à trois variables. La trajectoire de référence est un échantillon et les mille états proches forment un nuage numérique ; ce n'est ni le déplacement de molécules ni l'atmosphère terrestre. La section conserve seulement les intersections ascendantes.</li>
+  <li><strong>Pendule simple :</strong> tige rigide sans masse, pivot sans frottement, pesanteur uniforme de 9,81 m/s² ; amortissement réglé à la main. Le portrait utilise la vraie équation en \(\sin\theta\) ; l’ellipse bleue des petits angles est calculée à part.</li>
+  <li><strong>Pendule aimanté :</strong> rappel central, trois pôles adoucis par une hauteur fictive et un freinage. La carte est calculée sur 112 × 86 départs après une durée finie : ses frontières ne sont pas résolues à l’infini.</li>
+  <li><strong>Logistique :</strong> le diagramme écarte 850 générations, puis garde 120 états pour chacune des 640 valeurs de r. Son aspect dépend de cet échantillonnage.</li>
+  <li><strong>Double pendule :</strong> deux masses de 1 kg sur deux tiges de 1 m, sans dissipation, RK4 à pas fixe de 1 ms. La distance combine angles et vitesses : ce n’est pas une distance entre les masses. L’exposant est estimé sur 70 s par la méthode de Benettin ; dans un régime chaotique, la dernière décimale dépend même de l’arithmétique du navigateur.</li>
+  <li><strong>Lorenz :</strong> trois variables d’une convection idéalisée, pas l’atmosphère. Le nuage est formé de 1 000 états tirés dans une boule de rayon 10⁻⁶ ; la section ne garde que les passages ascendants à travers z = ρ − 1.</li>
+  <li><strong>Illustratif :</strong> les lueurs, les traînes qui s’effacent et la lumière additive des jumeaux n’ont pas de contrepartie physique.</li>
 </ul>
 
-<h2><span>4</span>Les chiffres à retenir</h2>
+<h2 id="chiffres"><span class="n">4</span>Les chiffres à retenir</h2>
 <div class="chiffres">
-<div><b>18,03 %</b><span>Allongement exact de la période d'un pendule lâché à 90° par rapport aux petits angles ; 170° donne environ 2,44 fois la période linéaire.</span></div>
-<div><b>3 → 3,44949</b><span>Deux premiers seuils de doublement de période de l'application logistique ; les suivants sont environ 3,54409 puis 3,56441.</span></div>
-<div><b>4,6692</b><span>Constante de Feigenbaum, limite du rapport des intervalles des doublements dans cette classe universelle.</span></div>
-<div><b>≈ 0,906</b><span>Plus grand exposant de Lyapunov classique du système de Lorenz pour \(\sigma=10\), \(\rho=28\), \(\beta=8/3\), par unité de temps du modèle.</span></div>
-<div><b>6,908 τL</b><span>Gain d'horizon approximatif si la précision initiale est multipliée par 1 000 ; \(\tau_L=1/\lambda\).</span></div>
+  <div><b>18 %</b><span>allongement de la période d’un pendule lâché à 90° par rapport aux petits angles ; à 170°, la période dépasse le double.</span></div>
+  <div><b>3 · 3,449 · 3,544</b><span>premiers seuils de doublement de période de la logistique ; la cascade s’accumule vers 3,5699.</span></div>
+  <div><b>4,669</b><span>constante de Feigenbaum, limite du rapport des intervalles entre doublements.</span></div>
+  <div><b>≈ 0,906</b><span>plus grand exposant de Lyapunov de Lorenz pour σ = 10, ρ = 28, β = 8/3, par unité de temps du modèle.</span></div>
+  <div><b>ln 1000 ≈ 6,9</b><span>temps de Lyapunov gagnés quand la précision initiale est multipliée par mille.</span></div>
 </div>
 
-<h2><span>5</span>Seulement introduit ici</h2>
-<p>La jacobienne et ses valeurs propres servent à étudier la stabilité linéaire locale ; elles ne suffisent pas à décrire tous les mouvements non linéaires. La dimension fractale, le théorème KAM, le chaos hamiltonien et les méthodes de contrôle du chaos réclament davantage de théorie. La turbulence, la théorie ergodique, le chaos quantique et les systèmes de dimension infinie ne sont pas traités sur cette planche.</p>
-<a class="cta" href="index.html">Retour à la planche →</a>
+<h2 id="introduit"><span class="n">5</span>Seulement introduit ici</h2>
+<p>La <strong>jacobienne</strong> et ses valeurs propres décrivent la stabilité locale d’un équilibre à plusieurs variables. La <strong>dimension fractale</strong> des attracteurs étranges, le <strong>théorème KAM</strong> et le chaos hamiltonien, le <strong>contrôle du chaos</strong>, la <strong>turbulence</strong> et la théorie ergodique demandent davantage de théorie et ne sont pas traités sur cette planche.</p>
+
+<a class="cta" href="index.html"><span>Retour à la simulation</span><span aria-hidden="true">→</span></a>
 </main>
+</div>
 </body>
 </html>
