@@ -48,8 +48,9 @@ const VIZ = {
     svg.append(el('rect',{x:.5,y:.5,width:127,height:35,fill:'none',stroke:'var(--trait)'}));
     const P = Array.from({length:18},()=>({x:4+rnd()*120,y:4+rnd()*28,vx:rnd()-.5,vy:rnd()-.5,e:el('circle',{r:1.7,fill:'var(--c)'})}));
     P.forEach(p => svg.append(p.e));
-    let last = 0;
-    return t => { const dt = Math.min(.05, t-last || 0); last = t;
+    const base = P.map(p => ({x:p.x,y:p.y,vx:p.vx,vy:p.vy})); let last = 0;
+    return (t, actif) => { if (!actif) P.forEach((p,i)=>Object.assign(p, base[i]));
+      const dt = actif ? Math.min(.05, t-last || 0) : 0; last = t;
       for (const p of P){ p.x += p.vx*dt*90; p.y += p.vy*dt*90;
         if (p.x<3||p.x>125){p.vx*=-1;p.x=Math.max(3,Math.min(125,p.x));} if (p.y<3||p.y>33){p.vy*=-1;p.y=Math.max(3,Math.min(33,p.y));}
         p.e.setAttribute('cx',p.x.toFixed(1)); p.e.setAttribute('cy',p.y.toFixed(1)); } };
@@ -743,10 +744,11 @@ function active(){ document.querySelectorAll('svg[data-viz]').forEach(svg => {
   const f = fab(svg); const ligne = svg.closest('li') || svg;
   const v = { f, actif:false }; vivants.push(v); f(0.35, false);
   if (calme) return;
+  const repos = () => { v.actif = false; f(0.35, false); }; // revenir à l'image fixe
   ligne.addEventListener('pointerenter', () => { v.actif = true; boucle(); });
-  ligne.addEventListener('pointerleave', () => { v.actif = false; });
+  ligne.addEventListener('pointerleave', repos);
   ligne.addEventListener('focusin', () => { v.actif = true; boucle(); });
-  ligne.addEventListener('focusout', () => { v.actif = false; });
+  ligne.addEventListener('focusout', repos);
 }); }
 let tourne = false;
 function boucle(){ if (tourne) return; tourne = true;
