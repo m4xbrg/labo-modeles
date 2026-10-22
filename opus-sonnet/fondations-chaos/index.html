@@ -1,14 +1,19 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<!-- Quatre expériences partagent un même écran d'instrument ; le mauve désigne les trajectoires, jamais l'habillage. -->
-<!-- Le double pendule reste superposé jusqu'à ce que le calcul sépare réellement ses deux évolutions. -->
-<!-- La barre LABO reste compacte ; cartes, graphes et info-bulles décrivent des mesures plutôt qu'un mouvement décoratif. -->
+<!--
+  Note de design (refonte du 2026-10-22).
+  1. Une scène par étape, et une seule chose à regarder : le portrait de phase, la cascade de bifurcations, deux pendules jumeaux, l'attracteur de Lorenz. Plus de cadres dans le cadre ni de pastilles de glossaire sur l'écran : les définitions vivent dans la fiche.
+  2. Le mauve appartient aux trajectoires ; l'or marque ce qui sépare ou ce qui est mesuré (séparatrice, toile d'araignée, état présent). Orange et bleu ne servent qu'aux deux jumeaux : dessinés en lumière additive, ils restent blancs tant qu'ils sont confondus, et la couleur apparaît quand ils divergent.
+  3. Le mouvement est toujours un calcul : le moteur verrouillé de prompts/moteurs/chaos.js (le bloc balisé du premier script) est recopié tel quel, RK4 à pas fixe ; seul le rendu a changé.
+-->
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 <title>Stabilité, bifurcations et chaos — LABO</title>
-<meta name="description" content="Une planche scientifique interactive : espace des phases, logistique discrète, sensibilité et attracteur de Lorenz.">
+<meta name="description" content="Une planche scientifique interactive : espace des phases, bassins, cascade de bifurcations, sensibilité aux conditions initiales et attracteur de Lorenz.">
 <link rel="icon" href="data:,"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="../../labo/labo.css">
 <style>
 :root,:root[data-theme],:root:not([data-theme]){
@@ -17,81 +22,158 @@
   --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;
   --serif:'Instrument Serif',Georgia,serif;--ease:cubic-bezier(.22,1,.36,1)
 }
-*{box-sizing:border-box}body{margin:0;font:15px/1.55 var(--sans)}[hidden]{display:none!important}button,input{font:inherit}button{cursor:pointer}
-.app{display:grid;grid-template-columns:minmax(0,1fr) 326px;grid-template-rows:minmax(0,1fr) auto;min-width:0;overflow:hidden}
-.scene{position:relative;background:var(--fond);color:var(--texte);min-width:0;min-height:0;overflow:hidden}
-#cv{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
-.scene-meta{pointer-events:none;position:absolute;inset:15px 20px auto;display:flex;justify-content:space-between;gap:12px;font:11px/1.45 var(--mono);letter-spacing:.05em;color:var(--texte-2)}
-.scene-meta b{color:var(--accent);font-weight:400;white-space:nowrap}
-.objects{position:absolute;bottom:12px;left:15px;right:15px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
-.object{pointer-events:auto;border:1px solid #34404d;background:#10161dd9;color:#b4b9c2;font:10px/1.2 var(--mono);padding:5px 8px;min-height:27px}
-.object:hover,.object:focus-visible{color:var(--texte);border-color:var(--accent)}
-.tip{position:fixed;z-index:30;max-width:275px;background:#11161e;color:var(--texte);border:1px solid #46505c;padding:10px 12px;font:11px/1.45 var(--mono);pointer-events:none;box-shadow:0 12px 30px #0006}
-.tip b{display:block;color:var(--accent);margin-bottom:3px}.tip span{color:#b1bac5}
-.panel{overflow-y:auto;min-width:0;display:flex;flex-direction:column;gap:12px;padding:19px 14px 14px 22px}
-.panel section{margin:0}.panel h2{font:500 24px/1.14 var(--sans);letter-spacing:-.02em;margin:5px 0 10px;color:var(--encre)}
-.eyebrow{font:11px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--encre-3);margin:0}
-#stepText{font-size:14px;color:var(--encre-2);margin:0}
-.status{font:12px/1.5 var(--mono);color:var(--encre-2);border-left:2px solid var(--accent);padding-left:10px;min-height:36px;margin:10px 0 0}
-.meas{border-top:1px solid var(--filet)}.row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 0;border-bottom:1px solid var(--filet)}
-.lab{font:11px/1.3 var(--mono);color:var(--encre-3)}.val{font:500 12px/1.3 var(--mono);color:var(--encre);text-align:right;font-variant-numeric:tabular-nums}
-.scopeBox{background:var(--fond);border:1px solid var(--filet)}#scope{display:block;width:100%;height:94px}
-.note{font:11px/1.5 var(--mono);color:var(--encre-3)}.cle{border-left:2px solid var(--encre);padding-left:10px;font:13px/1.52 var(--sans);margin:0}
-.liensa{margin-top:auto;display:grid;gap:8px}.comprendre{border:1px solid var(--encre);padding:9px 11px;text-decoration:none;font-size:13px;color:var(--encre)}
-.comprendre:hover{background:var(--encre);color:var(--papier)}.hint{font:10px/1.6 var(--mono);color:var(--encre-3);margin:0}
-.questions{display:grid;gap:6px}.questions div{border-top:1px solid var(--filet);padding-top:5px;font-size:12px;line-height:1.4;color:var(--encre-2)}.questions b{display:block;font:500 11px var(--mono);color:var(--encre)}
-.controls{grid-column:1/-1;background:var(--papier);border-top:1px solid var(--filet);padding:9px 19px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;min-height:61px}
-.grp{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.btn{border:1px solid var(--filet);background:var(--papier);color:var(--encre);font:11px var(--mono);padding:7px 10px;min-height:33px}
-.btn:hover,.btn:focus-visible{border-color:var(--encre)}.btn[aria-pressed=true]{border-color:var(--encre);background:var(--papier-2)}
-.tools{border-top:1px solid var(--filet);width:100%;padding-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:9px 19px}
-.tools [data-act]{display:none}.tools [data-act].active{display:flex}
-.gl,.rv{font:11px/1.2 var(--mono);color:var(--encre-2)}.range{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:11px var(--mono);color:var(--encre-2)}
-.range output{min-width:45px;font-variant-numeric:tabular-nums;color:var(--encre);text-align:right}
-.range input[type=range]{width:clamp(85px,9vw,140px);accent-color:var(--encre)}
-.serie{font:11px var(--mono);letter-spacing:.1em}.labo-etapes .titre h1{font:400 clamp(30px,4.6vh,56px)/1 var(--serif);letter-spacing:-.012em}.labo-etapes .titre h1 em{font-style:italic;color:var(--accent)}
-.labo-etapes .titre{padding-top:12px}.labo-etapes .panel{gap:13px}.labo-etapes .panel .status{color:var(--encre-2)}
-.labo-etapes .cle{color:var(--encre-2)}.labo-etapes .scene{background:var(--fond)}.labo-etapes .objects .object{color:var(--texte-2)}
-@media(max-width:860px){.app{display:flex;flex-direction:column;overflow:visible}.scene{height:clamp(350px,55svh,520px);order:1;flex:none}.controls{order:2;padding:10px 15px!important}.panel{order:3;border-top:1px solid var(--filet);padding:20px var(--gouttiere)!important}.object{font-size:9px}.range input[type=range]{width:96px}}
-@media(max-width:420px){.scene{height:340px}.scene-meta{left:12px;right:12px;font-size:9px}.objects{bottom:7px;left:7px;right:7px;gap:4px}.object{padding:4px 5px;min-height:23px;font-size:8px}.controls .btn{padding:6px 8px}}
-.swap{animation:apparition .38s var(--ease)}@keyframes apparition{from{opacity:.45}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){.swap{animation:none}.labo-etapes .scene{scroll-behavior:auto}}
+*{box-sizing:border-box}
+html,body{margin:0;font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+#cv.vise{cursor:crosshair}#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}
+.panel{grid-column:2;grid-row:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:14px;padding:20px 22px}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--encre-3);margin:0 0 10px}
+.panel h2{font:500 22px/1.15 var(--sans);margin:0 0 8px}
+.meas{border-top:1px solid var(--filet)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:6px 0;border-bottom:1px solid var(--filet)}
+.lab{font:400 11.5px/1.3 var(--mono);color:var(--encre-3)}
+.val{font:500 13px/1.3 var(--mono);color:var(--encre);text-align:right;font-variant-numeric:tabular-nums}
+.scopeBox{background:var(--fond);border:1px solid var(--filet)}
+#scope{display:block;width:100%;height:96px}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--encre-3);margin:0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--encre-3)}
+.hints kbd{font:500 11px var(--mono);color:var(--encre);border:1px solid var(--filet);padding:0 5px;border-radius:2px}
+.liens{margin-top:auto}
+.comprendre{display:flex;justify-content:space-between;text-decoration:none;font:500 14px var(--sans);padding:11px 14px;border:1px solid var(--encre);color:var(--encre)}
+.controls{grid-column:1/-1;grid-row:2;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;padding:9px 22px;min-height:58px}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gl{font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--encre-2)}
+.btn{background:transparent;border:1px solid var(--filet);font:400 12px var(--mono);padding:7px 11px;line-height:1;border-radius:2px;display:inline-flex;align-items:center;gap:7px;min-height:34px;cursor:pointer}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.tools{flex:1 1 auto;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
+.tools [data-s]{display:none}.tools [data-s].on{display:flex}
+input[type=range]{-webkit-appearance:none;appearance:none;width:132px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;margin-top:-6px;border:1.5px solid}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;border:1.5px solid}
+.rv{font:500 12px var(--mono);min-width:52px;color:var(--encre);font-variant-numeric:tabular-nums}
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:10px 16px}
+  .panel{order:3;border-top:1px solid var(--filet);padding:18px 16px}
+  input[type=range]{width:104px}
+}
+@media (hover:none) and (pointer:coarse){.kbd{display:none}}
+/* La fiche reprend le titre de l'étape ; mesures et enregistreur restent les lectures. */
+.labo-fiche #toyPanel{display:flex;flex-direction:column;gap:12px}
 </style>
-<link rel="stylesheet" href="../../labo/planche-etapes.css"><script src="../../labo/theme.js"></script>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-module="08" data-mode="observer" data-touches="omc">
-<header class="barre"><div class="ou"><a class="marque back" href="../../labo/index.html">← LABO</a><a class="retour" href="../../labo/index.html#fondations">Fondations</a></div><div class="droite"><p class="serie">LABO · Fondations 08</p><button class="bascule-theme" data-theme-bascule>Thème auto</button></div></header>
-<div class="titre"><div><h1>Stabilité, bifurcations et <em>chaos</em></h1><p class="lead">Les lois ne changent pas. Pourtant, le futur devient impossible à prévoir.</p></div><dl class="sig"><dt>Échelle</dt><dd>1 m · états abstraits</dd><dt>Temps</dt><dd>s · générations · u.t.</dd><dt>Modèle</dt><dd>Pendules · logistique · Lorenz</dd></dl></div>
-<nav class="chapitres" id="stepper" aria-label="Module 08, quatre étapes"><div class="chap"><p class="chap-t"><b>08</b>Module 08 · Non-linéarité, stabilité et chaos</p><div class="segs">
-<button class="seg" data-step="0" title="08.1 · Équilibres et espace des phases" aria-current="step"><b>1</b><span>Équilibres</span></button>
-<button class="seg" data-step="1" title="08.2 · Bifurcations"><b>2</b><span>Bifurcations</span></button>
-<button class="seg" data-step="2" title="08.3 · Sensibilité aux conditions initiales"><b>3</b><span>Sensibilité</span></button>
-<button class="seg" data-step="3" title="08.4 · Attracteurs étranges"><b>4</b><span>Attracteurs</span></button>
-</div></div></nav>
-<div class="modes"><div role="tablist" aria-label="Couches de la planche">
-<button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder les trajectoires se former, sans modifier les paramètres."><span>O</span>Observer</button>
-<button role="tab" aria-selected="false" data-m="manipuler" data-indice="Changer un paramètre et constater le changement du système."><span>M</span>Manipuler</button>
-<button role="tab" aria-selected="false" data-m="comprendre" data-indice="Relier la forme visible aux équations et aux mesures."><span>C</span>Comprendre</button>
-</div><p class="indice" id="indice">Regarder les trajectoires se former.</p></div>
-<div class="app">
-<main class="scene" id="scene"><canvas id="cv" role="img" aria-label="Visualisation de quatre systèmes non linéaires ; cliquer dans l'espace des phases ou faire tourner l'attracteur selon l'étape."></canvas>
-<div class="scene-meta"><span id="sceneName">PENDULE · θ / ω</span><b id="clock">t = 0,00 s</b></div><div class="objects" id="objects" aria-label="Objets à découvrir"></div></main>
-<aside class="panel" aria-label="Lecture de l'expérience">
-<section><p class="eyebrow" id="eyebrow">MODULE 08 · ÉTAPE 1 / 4</p><h2 id="stepTitle">Le chemin de chaque état</h2><p id="stepText" class="couche-comp"></p><p class="status" id="status" role="status" aria-live="off"></p></section>
-<section class="couche-lire"><p class="eyebrow" id="scopeTitle">ENREGISTREUR</p><div class="scopeBox"><canvas id="scope" role="img" aria-label="Évolution de la mesure principale au cours du temps"></canvas></div></section>
-<section class="couche-lire"><div class="meas" id="meas"></div></section>
-<p class="cle couche-comp" id="key"></p><p class="note" id="honesty"></p>
-<div class="questions couche-comp" id="questions" hidden><div><b>MÉTÉO · ATLAS</b>Pourquoi le climat peut-il être étudié statistiquement alors que la météo dans un mois reste incertaine ?</div><div><b>COLLECTIF · 41, 42</b>Des milliers d'éléments rendent-ils toujours un ensemble plus imprévisible ?</div><div><b>SIGNAL · 09</b>Que verrait-on dans le spectre d'un signal chaotique ?</div></div>
-<nav class="liensa"><a href="explication.html#m08" class="comprendre couche-comp" id="theoryLink">Théorie du module 08 →</a><p class="hint couche-lire">Espace : pause · ← → : étape · 1–4 : accès · R : reprise · O M C : couches · I : infos</p></nav>
-</aside>
-<div class="controls" role="toolbar" aria-label="Commandes de la simulation"><div class="grp"><button class="btn" id="prev" aria-label="Étape précédente">←</button><button class="btn" id="play">Pause</button><button class="btn" id="next" aria-label="Étape suivante">→</button><button class="btn" id="reset">Recommencer</button><span class="gl" id="speedView">Temps ×1</span></div>
-<div class="tools" id="tools">
-<div class="grp" data-act="0"><label class="range">Amortissement <input id="damping" type="range" min="0" max="0.5" step="0.01" value="0"><output id="dampingVal">0,00 s⁻¹</output></label><button class="btn" id="linear" aria-pressed="false">Petits angles : comparer</button><button class="btn" id="magnets" aria-pressed="false">Pendule aimanté</button><button class="btn" id="pendPreset">Équilibre instable</button></div>
-<div class="grp" data-act="1"><label class="range">r <input id="r" type="range" min="2.5" max="4" step="0.0005" value="3.56"><output id="rVal">3,5600</output></label><label class="range">x₀ <input id="x0" type="range" min="0.05" max="0.95" step="0.01" value="0.37"><output id="x0Val">0,37</output></label><button class="btn" id="zoom">Zoom 3,40–3,60</button><button class="btn" id="full">Vue entière</button></div>
-<div class="grp" data-act="2"><label class="range">Écart initial <input id="offset" type="range" min="3" max="12" step="1" value="9"><output id="offsetVal">10⁻⁹ rad</output></label><label class="range">Angle initial <input id="angle" type="range" min="10" max="170" step="5" value="120"><output id="angleVal">120°</output></label><button class="btn" id="relaunch">Relancer les deux</button><button class="btn" id="doubleSpeed">Temps ×3</button></div>
-<div class="grp" data-act="3"><label class="range">ρ <input id="rho" type="range" min="10" max="35" step="0.5" value="28"><output id="rhoVal">28,0</output></label><button class="btn" id="cloud" aria-pressed="false">Nuage de 1 000 départs</button><label class="range">Précision <input id="precision" type="range" min="3" max="9" step="1" value="6"><output id="precisionVal">10⁻⁶</output></label><button class="btn" id="lorenzSpeed">Temps ×1</button></div>
-</div></div>
+<body class="labo-etapes labo-fiche" data-mode="fiche">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 08</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Stabilité, bifurcations et chaos</h1>
+    <p class="lead">Les lois ne changent pas. Pourtant, le futur devient impossible à prévoir.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>1 m · états abstraits</dd>
+    <dt>Temps</dt><dd>s · générations · unités du modèle</dd>
+    <dt>Modèle</dt><dd>pendules idéaux, logistique, Lorenz</dd>
+  </dl>
 </div>
-<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<nav class="chapitres" id="stepper" aria-label="Module 08, quatre étapes">
+  <div class="chap"><p class="chap-t"><b>08</b>Non-linéarité, stabilité et chaos</p><div class="segs">
+    <button class="seg" data-a="0" data-b="1" title="08.1 — Équilibres, espace des phases et bassins"><b>08.1</b><span>Équilibres</span></button>
+    <button class="seg" data-a="2" title="08.2 — Bifurcations"><b>08.2</b><span>Bifurcations</span></button>
+    <button class="seg" data-a="3" title="08.3 — Sensibilité aux conditions initiales"><b>08.3</b><span>Sensibilité</span></button>
+    <button class="seg" data-a="4" title="08.4 — Attracteurs étranges"><b>08.4</b><span>Attracteurs</span></button>
+  </div></div>
+</nav>
+
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène en cours : portrait de phase du pendule, bassins de trois aimants, cascade de la logistique, pendules jumeaux ou attracteur de Lorenz."></canvas>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <section>
+      <p class="eyebrow" id="eyebrow">Module 08 · étape 1 sur 4</p>
+      <h2 id="stepTitle">Le chemin de chaque état</h2>
+    </section>
+    <div id="toyPanel">
+      <section id="scopeSec">
+        <p class="eyebrow" id="scopeTitle">Enregistreur</p>
+        <div class="scopeBox"><canvas id="scope" role="img" aria-label="Évolution de la mesure principale au cours du temps"></canvas></div>
+      </section>
+      <div class="meas" id="meas"></div>
+      <p class="note" id="honesty"></p>
+    </div>
+    <section class="kbd">
+      <p class="eyebrow">Clavier</p>
+      <ul class="hints" id="hints">
+        <li><kbd>Espace</kbd> pause · <kbd>←</kbd><kbd>→</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape</li>
+        <li><kbd>R</kbd> réinitialiser la scène · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
+      </ul>
+    </section>
+    <nav class="liens"><a class="comprendre" href="explication.html#m08"><span>Théorie du module 08</span><span aria-hidden="true">→</span></a></nav>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Commandes de la simulation">
+    <div class="grp">
+      <button class="btn ico" id="prev" title="Étape précédente (←)" aria-label="Étape précédente"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="play" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" hidden><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="next" title="Étape suivante (→)" aria-label="Étape suivante"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="reset" title="Réinitialiser la scène (R)">Réinitialiser</button>
+    </div>
+    <div class="tools" id="tools">
+      <div class="grp" data-s="0">
+        <span class="gl">Amortissement</span><input id="damping" type="range" min="0" max="0.5" step="0.01" value="0" aria-label="Amortissement c en s⁻¹"><span class="rv" id="dampingVal">0,00 s⁻¹</span>
+        <button class="btn" id="linear" aria-pressed="false">Petits angles</button>
+        <button class="btn" id="pendPreset">Équilibre instable</button>
+      </div>
+      <div class="grp" data-s="1">
+        <button class="btn" id="clearPaths">Effacer les trajectoires</button>
+        <span class="gl" id="basinState">Calcul de la carte…</span>
+      </div>
+      <div class="grp" data-s="2">
+        <span class="gl">r</span><input id="r" type="range" min="2.5" max="4" step="0.0005" value="2.8" aria-label="Paramètre r"><span class="rv" id="rVal">2,8000</span>
+        <span class="gl">x₀</span><input id="x0" type="range" min="0.05" max="0.95" step="0.01" value="0.37" aria-label="Valeur de départ x₀"><span class="rv" id="x0Val">0,37</span>
+        <button class="btn" id="zoom" aria-pressed="false">Zoom 3,40–3,60</button>
+        <button class="btn" id="zoom3" aria-pressed="false">Zoom 3,80–3,88</button>
+        <button class="btn" id="full">Vue entière</button>
+      </div>
+      <div class="grp" data-s="3">
+        <span class="gl">Écart initial</span><input id="offset" type="range" min="3" max="12" step="1" value="9" aria-label="Écart initial, puissance de dix"><span class="rv" id="offsetVal">10⁻⁹ rad</span>
+        <span class="gl">Angle</span><input id="angle" type="range" min="10" max="170" step="5" value="120" aria-label="Angle initial en degrés"><span class="rv" id="angleVal">120°</span>
+        <button class="btn" id="relaunch">Relancer les deux</button>
+        <button class="btn" id="doubleSpeed">Temps ×3</button>
+      </div>
+      <div class="grp" data-s="4">
+        <span class="gl">ρ</span><input id="rho" type="range" min="10" max="35" step="0.5" value="28" aria-label="Paramètre ρ"><span class="rv" id="rhoVal">28,0</span>
+        <button class="btn" id="cloud" aria-pressed="false">Nuage de 1 000 départs</button>
+        <span class="gl">Précision</span><input id="precision" type="range" min="3" max="9" step="1" value="6" aria-label="Précision initiale, puissance de dix"><span class="rv" id="precisionVal">10⁻⁶</span>
+        <button class="btn" id="lorenzSpeed">Temps ×1</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* CHAOS-BEGIN */
 const Chaos = (() => {
@@ -312,496 +394,774 @@ const Chaos = (() => {
     lorenzRHS,lorenzStep,lorenzProjection,poincareSection,lyapunovLorenz,forecastHorizon};
 })();
 /* CHAOS-END */
+</script>
+<script>
 (() => {
 'use strict';
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const cv=$('#cv'),ctx=cv.getContext('2d'),scope=$('#scope'),sc=scope.getContext('2d');
-const mouvementReduit=matchMedia('(prefers-reduced-motion: reduce)').matches;
-cv.title=mouvementReduit?'Mouvement ralenti pour réduire la sollicitation visuelle ; les trajectoires restent visibles.':'Cliquer dans l’espace des phases ; glisser pour tourner l’attracteur.';
-const couleurs={fond:'#0a0d12',fond2:'#11161e',trait:'#28333f',texte:'#e8e4dc',sub:'#8a93a0',accent:'#d7a0e8',positif:'#ff8a5b',negatif:'#5bb8ff',energie:'#ffd166'};
-const descriptions=[
-  {titre:'Le chemin de chaque état',texte:'Lance le pendule depuis un point du portrait de phases. Un lieu dans ce diagramme donne à la fois l’angle et la vitesse : toute l’évolution part de là.',cle:'L’espace des phases montre tous les comportements possibles. Les états proches d’un équilibre stable y reviennent ; un équilibre instable les en éloigne.',note:'Pendule rigide idéal, L = 1 m, g = 9,81 m/s² ; aucun frottement au départ.',scene:'PENDULE · ANGLE ET VITESSE'},
-  {titre:'Un bouton change la règle du jeu',texte:'Une génération conduit à la suivante par xₙ₊₁ = r xₙ (1 − xₙ). En balayant r, une valeur devient deux, puis quatre, puis huit.',cle:'Faire varier un paramètre peut produire une succession de doublements de période, puis des trajectoires chaotiques.',note:'Logistique discrète, sans bruit ni immigration ; elle n’est pas la croissance continue du module 04.',scene:'APPLICATION LOGISTIQUE · TEMPS DISCRET'},
-  {titre:'L’écart qui devient visible',texte:'Les deux pendules partent presque confondus. La séparation croît, puis cesse d’être petite : la courbe logarithmique cesse alors de monter en droite.',cle:'Les lois restent déterministes, mais la sensibilité aux conditions initiales limite toute prévision à long terme.',note:'Deux doubles pendules idéaux, tiges et pivots sans masse ni frottement ; intégrateur RK4 à pas fixe.',scene:'DEUX PENDULES · CONDITIONS INITIALES'},
-  {titre:'Une forme malgré l’imprévisibilité',texte:'Tourne la vue à la souris. La trajectoire ne se répète jamais exactement, mais elle reste canalisée sur une forme identifiable.',cle:'Un attracteur chaotique organise les trajectoires : savoir sur quoi elles évolueront ne dit pas où elles seront plus tard.',note:'Lorenz : modèle à trois variables d’une convection très simplifiée, non simulation atmosphérique.',scene:'LORENZ · ATTRACTEUR ET SECTION'}
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const cv = $('#cv'), ctx = cv.getContext('2d'), scope = $('#scope'), sx = scope.getContext('2d');
+const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const PI = Math.PI, TAU = 2 * PI;
+const C = { fond:'#0a0d12', fond2:'#11161e', grille:'#141b24', axe:'#2a3440', texte:'#e8e4dc', sub:'#8a93a0', accent:'#d7a0e8', positif:'#ff8a5b', negatif:'#5bb8ff', energie:'#ffd166' };
+const RGB = Object.fromEntries(Object.entries(C).map(([k, h]) => { const n = parseInt(h.slice(1), 16); return [k, [n >> 16, n >> 8 & 255, n & 255]]; }));
+const rgba = (k, a) => `rgba(${RGB[k][0]},${RGB[k][1]},${RGB[k][2]},${a})`;
+const MONO = '"IBM Plex Mono",ui-monospace,monospace', SERIF = '"Instrument Serif",Georgia,serif';
+const fr = (n, d = 2) => Number.isFinite(n) ? n.toLocaleString('fr-CA', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+const exposant = v => String(v).replace(/-/g, '⁻').replace(/[0-9]/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]);
+const puissance = x => '10' + exposant(Math.round(Math.log10(x)));
+const borne = Chaos.borne;
+
+/* ---------------- Scènes : 0 portrait, 1 bassins, 2 cascade, 3 jumeaux, 4 Lorenz ---------------- */
+const SCENES = [
+  { titre: 'Le chemin de chaque état', seg: 0, nom: 'Portrait de phase', note: 'Pendule rigide idéal, L = 1 m, g = 9,81 m/s² ; amortissement réglable, nul au départ.', enreg: 'Angle θ(t)' },
+  { titre: 'Trois aimants, trois destins', seg: 0, nom: 'Bassins', note: 'Pendule plan rappelé vers le centre, trois pôles adoucis et un freinage : un modèle idéalisé, pas un montage réel.', enreg: '' },
+  { titre: 'Un bouton change la règle du jeu', seg: 1, nom: 'Cascade', note: 'Logistique discrète, sans bruit ni immigration ; elle n’est pas la croissance continue du module 04.', enreg: 'Population xₙ' },
+  { titre: 'L’écart qui devient visible', seg: 2, nom: 'Jumeaux', note: 'Deux doubles pendules idéaux, tiges sans masse, sans frottement ; RK4 à pas fixe de 1 ms.', enreg: 'log₁₀ de la séparation' },
+  { titre: 'Une forme malgré l’imprévisibilité', seg: 3, nom: 'Lorenz', note: 'Lorenz : trois variables d’une convection très simplifiée, pas une simulation de l’atmosphère.', enreg: 'Coordonnée z(t)' },
 ];
-const outils=[
-  [['Pendule','Tige rigide, angle mesuré depuis la verticale basse.'],['Espace des phases','Un point = angle θ et vitesse angulaire ω.'],['Équilibre stable','En bas : retour vers θ = 0 avec amortissement.'],['Équilibre instable','En haut : une perturbation fait partir le pendule.'],['Séparatrice','Courbe frontière entre oscillation et rotation, sans frottement.'],['Bassin','Région des états qui atteignent un même aimant.'],['Aimant','Attracteur local du modèle magnétique simplifié.']],
-  [['Toile d’araignée','Segments verticaux puis horizontaux de x vers f(x).'],['Diagramme de bifurcation','États persistants après élimination du régime transitoire.'],['Fenêtre de période 3','Cycle stable apparaissant dans une région globalement chaotique.']],
-  [['Double pendule','Deux articulations couplées par les équations de Newton.'],['Courbe de séparation','Logarithme de la distance normalisée entre deux états complets.']],
-  [['Attracteur de Lorenz','Lieu de la dynamique après le régime transitoire, dans l’espace (x,y,z).'],['Section de Poincaré','Intersections ascendantes avec le plan z = ρ − 1.']]
-];
-const fr=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('fr-CA',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
-const superscript=v=>String(v).replace(/-/g,'⁻').replace(/[0-9]/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]);
-let step=0,playing=true,acc=0,last=0,width=0,height=0,derniereLecture=0,dernierScope=0;
-let aimantCarte=null,choixAimant=null,vuePhase=null,vueBif=null,vueLorenz=null,magnetLoading=false;
-let angleVue=.6,inclinaison=.36,glisser=null,ancienneSouris=null;
-let pend={s:[Math.PI/2,0],lin:[Math.PI/2,0],damping:0,small:false,magnets:false,t:0,trail:[],series:[],period:null,lastCross:null,amplitude:Math.PI/2};
-let log={r:3.56,x0:.37,x:.37,n:0,history:[],bif:[2.5,4],points:[],progress:.08,refresh:true};
-let double={offset:1e-9,angle:120,speed:3,a:null,b:null,t:0,serie:[],traceA:[],traceB:[],lambda:null,divTime:null,initialE:0};
-let lor={rho:28,precision:1e-6,speed:1,cloud:false,t:0,state:[1,1,1],trail:[],back:[],section:[],points:[],lambda:0};
-const pas=()=>[.004,.04,.001,.01][step];
-const vitesse=()=>[1,1,double.speed,lor.speed][step];
-function dimensions(c,context){
-  const rect=c.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
-  if(rect.width<1||rect.height<1)return [0,0];
-  const W=Math.round(rect.width*dpr),H=Math.round(rect.height*dpr);
-  if(c.width!==W||c.height!==H){c.width=W;c.height=H;}
-  context.setTransform(dpr,0,0,dpr,0,0);
-  return [rect.width,rect.height];
+let scene = 0, playing = true, acc = 0, last = 0, W = 0, H = 0, lecture = 0, trace = 0;
+const ui = { lancers: 0, dernierE: 0, clics: 0, paires: 0, rotation: 0, relances: 0, survol: null };
+
+/* état des cinq jouets */
+const pend = { s: [PI / 2, 0], lin: [PI / 2, 0], damping: 0, small: false, t: 0, trail: [], series: [], period: null, lastCross: null, amplitude: PI / 2, drag: false };
+const bas = { nx: 112, ny: 86, pix: null, fait: 0, chemins: [] };
+const log = { r: 2.8, x0: .37, x: .37, n: 0, history: [], bif: [2.5, 4], points: [], cache: null, reveal: 0, refresh: true };
+const dbl = { offset: 1e-9, angle: 120, speed: 3, a: null, b: null, t: 0, serie: [], traceA: [], traceB: [], lambda: null, divTime: null, initialE: 0 };
+const lor = { rho: 28, precision: 1e-6, speed: 1, cloud: false, t: 0, state: [1, 1, 1], trail: [], back: [], section: [], points: [], lambda: 0, yaw: 0, tilt: .22 };
+const PAS = [.004, .035, .12, .001, .01];
+const vitesse = () => [1, 1, 1, dbl.speed, lor.speed][scene];
+
+/* ---------------- Configuration ---------------- */
+function configPend(theta = PI / 2, omega = 0) {
+  pend.s = [theta, omega]; pend.lin = [theta, omega]; pend.t = 0; pend.trail = [[theta, omega]]; pend.series = []; pend.period = null; pend.lastCross = null;
+  const E = Chaos.pendulumEnergy(pend.s), p = Chaos.PENDULE;
+  pend.amplitude = E < 2 * p.g * p.L ? Math.acos(borne(1 - E / (p.g * p.L), -1, 1)) : null;
 }
-function configurePend(angle=Math.PI/2,omega=0){
-  pend.s=[angle,omega];pend.lin=[angle,omega];pend.t=0;pend.trail=[[angle,omega]];pend.series=[];pend.period=null;pend.lastCross=null;
-  const E=Chaos.pendulumEnergy(pend.s),p=Chaos.PENDULE;
-  pend.amplitude=E<2*p.g*p.L?Math.acos(Chaos.borne(1-E/(p.g*p.L),-1,1)):null;
+function configLog() { log.x = log.x0; log.n = 0; log.history = [log.x]; }
+function configBif() { log.points = Chaos.bifurcation(log.bif[0], log.bif[1], 640, 850, 120); log.refresh = true; log.reveal = 0; }
+function configDouble() {
+  const a = dbl.angle * PI / 180;
+  dbl.a = [a, 0, 0, 0]; dbl.b = [a + dbl.offset, 0, 0, 0]; dbl.t = 0; dbl.serie = []; dbl.traceA = []; dbl.traceB = [];
+  dbl.divTime = null; dbl.initialE = Chaos.doubleEnergy(dbl.a);
+  dbl.lambda = Chaos.lyapunovEstimate(dbl.a, 1e-8, 70).lambda;
 }
-function configLog(){log.x=log.x0;log.n=0;log.history=[log.x];}
-function configDouble(){
-  const a=double.angle*Math.PI/180;
-  double.a=[a,0,0,0];double.b=[a+double.offset,0,0,0];double.t=0;double.serie=[];double.traceA=[];double.traceB=[];
-  double.divTime=null;double.initialE=Chaos.doubleEnergy(double.a);
-  double.lambda=Chaos.lyapunovEstimate(double.a,1e-8,70).lambda;
-}
-function configLorenz(){
-  const p={sigma:10,rho:lor.rho,beta:8/3};
-  let s=[1,1,1];
-  for(let i=0;i<3000;i++)s=Chaos.lorenzStep(s,.01,p);
-  lor.state=s;lor.t=0;lor.trail=[];
-  let r=[1,1,1],back=[];
-  for(let i=0;i<28500;i++){
-    r=Chaos.lorenzStep(r,.01,p);
-    if(i>=1500&&i%4===0)back.push(r);
-  }
-  lor.back=back;lor.section=Chaos.poincareSection(back,lor.rho);
-  lor.lambda=Chaos.lyapunovLorenz(p,160).lambda;
+function configLorenz() {
+  const p = { sigma: 10, rho: lor.rho, beta: 8 / 3 };
+  let s = [1, 1, 1];
+  for (let i = 0; i < 3000; i++) s = Chaos.lorenzStep(s, .01, p);
+  lor.state = s; lor.t = 0; lor.trail = [];
+  let r = [1, 1, 1]; const back = [];
+  for (let i = 0; i < 28500; i++) { r = Chaos.lorenzStep(r, .01, p); if (i >= 1500 && i % 4 === 0) back.push(r); }
+  lor.back = back; lor.section = Chaos.poincareSection(back, lor.rho);
+  lor.lambda = Chaos.lyapunovLorenz(p, 160).lambda;
   configCloud();
 }
-function configCloud(){
-  if(!lor.cloud){lor.points=[];return;}
-  const random=Chaos.mulberry32(91),s=lor.state;
-  lor.points=Array.from({length:1000},()=>{
-    let x=random()*2-1,y=random()*2-1,z=random()*2-1;
-    const n=Math.hypot(x,y,z)||1,r=Math.cbrt(random())*1e-6/n;
-    return [s[0]+x*r,s[1]+y*r,s[2]+z*r];
+function configCloud() {
+  if (!lor.cloud) { lor.points = []; return; }
+  const alea = Chaos.mulberry32(91), s = lor.state; lor.nuageT = lor.t;
+  lor.points = Array.from({ length: 1000 }, () => {
+    const x = alea() * 2 - 1, y = alea() * 2 - 1, z = alea() * 2 - 1, n = Math.hypot(x, y, z) || 1, r = Math.cbrt(alea()) * 1e-6 / n;
+    return [s[0] + x * r, s[1] + y * r, s[2] + z * r];
   });
 }
-function resetScene(){if(step===0)configurePend();else if(step===1)configLog();else if(step===2)configDouble();else configLorenz();updateMeasurements();}
-function setPlay(on){playing=Boolean(on);$('#play').textContent=playing?'Pause':'Reprendre';return playing;}
-function goStep(i){
-  step=Chaos.borne(Math.round(i),0,3);acc=0;
-  $$('.seg[data-step]').forEach((b,j)=>{b.setAttribute('aria-current',j===step?'step':'false');});
-  $$('.tools [data-act]').forEach(x=>x.classList.toggle('active',Number(x.dataset.act)===step));
-  const d=descriptions[step];$('#eyebrow').textContent='MODULE 08 · ÉTAPE '+(step+1)+' / 4';
-  $('#stepTitle').textContent=d.titre;$('#stepText').textContent=d.texte;$('#key').textContent=d.cle;$('#honesty').textContent=d.note;
-  $('#sceneName').textContent=d.scene;$('#questions').hidden=step!==3;
-  $('#objects').replaceChildren();
-  for(const [label,detail] of outils[step]){
-    const b=document.createElement('button');b.type='button';b.className='object';b.textContent=label;b.title=detail;
-    b.addEventListener('pointerenter',e=>showTip(e,label,detail));b.addEventListener('pointerleave',hideTip);
-    b.addEventListener('focus',()=>showTip(null,label,detail,b));b.addEventListener('blur',hideTip);
-    b.addEventListener('click',()=>{showTip(null,label,detail,b);});$('#objects').append(b);
+/* La carte des bassins se calcule par rangées, quelques millisecondes par image. */
+function avanceBassins(budget) {
+  if (!bas.pix) bas.pix = new Int8Array(bas.nx * bas.ny).fill(-1);
+  const t0 = performance.now(), tot = bas.nx * bas.ny;
+  while (bas.fait < tot && performance.now() - t0 < budget) {
+    const i = bas.fait % bas.nx, j = Math.floor(bas.fait / bas.nx);
+    bas.pix[bas.fait] = Chaos.basin(-1.7 + 3.4 * (i + .5) / bas.nx, -1.3 + 2.6 * (j + .5) / bas.ny, { steps: 650 });
+    bas.fait++;
   }
-  $('#tip').hidden=true;$('.scene').classList.remove('swap');void $('.scene').offsetWidth;$('.scene').classList.add('swap');
-  updateMeasurements();return step;
 }
-function simulate(n){
-  n=Math.max(0,Math.min(20000,Math.floor(n)));
-  for(let i=0;i<n;i++){
-    if(step===0){
-      if(pend.magnets)continue;
-      const before=pend.s;
-      pend.s=Chaos.pendulumStep(pend.s,.004,{g:9.81,L:1,damping:pend.damping});
-      if(pend.small)pend.lin=Chaos.pendulumStep(pend.lin,.004,{g:9.81,L:1,damping:pend.damping},true);
-      pend.t+=.004;
-      if(before[0]<0&&pend.s[0]>=0&&pend.s[1]>0){
-        if(pend.lastCross!==null)pend.period=pend.t-pend.lastCross;
-        pend.lastCross=pend.t;
+function resetScene() {
+  if (window.Fiche) Fiche.relance();
+  if (scene === 0) configPend();
+  else if (scene === 1) bas.chemins = [];
+  else if (scene === 2) configLog();
+  else if (scene === 3) configDouble();
+  else configLorenz();
+  lectures();
+}
+
+/* ---------------- Navigation ---------------- */
+function setPlay(on) { playing = !!on; $('#icPause').hidden = !playing; $('#icPlay').hidden = playing; $('#play').setAttribute('aria-label', playing ? 'Pause' : 'Lecture'); }
+function aller(n) {
+  scene = borne(Math.round(n), 0, 4); acc = 0; ui.survol = null;
+  $$('#stepper .seg').forEach(b => b.setAttribute('aria-current', (+b.dataset.a === scene || +b.dataset.b === scene) ? 'step' : 'false'));
+  $$('.tools [data-s]').forEach(g => g.classList.toggle('on', +g.dataset.s === scene));
+  const S = SCENES[scene];
+  $('#eyebrow').textContent = `Module 08 · étape ${S.seg + 1} sur 4`; $('#stepTitle').textContent = S.titre;
+  $('#honesty').textContent = S.note; $('#scopeSec').hidden = !S.enreg; $('#scopeTitle').textContent = 'Enregistreur · ' + S.enreg;
+  cv.className = scene === 4 ? 'grab' : (scene <= 2 ? 'vise' : '');
+  if (window.Fiche) Fiche.montre(scene);
+  sorties(); lectures();
+}
+const segAller = i => { const segs = $$('#stepper .seg'); const s = segs[borne(i, 0, segs.length - 1)]; aller(+s.dataset.a); };
+const segCourant = () => SCENES[scene].seg;
+
+/* ---------------- Simulation ---------------- */
+function simulate(n) {
+  n = Math.max(0, Math.min(20000, Math.floor(n)));
+  for (let i = 0; i < n; i++) {
+    if (scene === 0) {
+      if (pend.drag) return;
+      const avant = pend.s, p = { g: 9.81, L: 1, damping: pend.damping };
+      pend.s = Chaos.pendulumStep(pend.s, .004, p);
+      if (pend.small) pend.lin = Chaos.pendulumStep(pend.lin, .004, p, true);
+      pend.t += .004;
+      if (avant[0] < 0 && pend.s[0] >= 0 && pend.s[1] > 0) { if (pend.lastCross !== null) pend.period = pend.t - pend.lastCross; pend.lastCross = pend.t; }
+      if (i % 2 === 0) { pend.trail.push(pend.s.slice()); if (pend.trail.length > 1400) pend.trail.shift(); }
+      if (i % 4 === 0) { pend.series.push(Chaos.angle(pend.s[0])); if (pend.series.length > 700) pend.series.shift(); }
+    } else if (scene === 1) {
+      for (const c of bas.chemins) if (!c.fini) {
+        c.s = Chaos.rk4(Chaos.magneticRHS, c.s, .035, {}); c.pts.push([c.s[0], c.s[1]]);
+        if (c.pts.length >= 650) c.fini = true;
       }
-      if(i%2===0){pend.trail.push(pend.s.slice());if(pend.trail.length>1550)pend.trail.shift();}
-      if(i%4===0){pend.series.push({t:pend.t,y:Chaos.angle(pend.s[0])});if(pend.series.length>800)pend.series.shift();}
-    }else if(step===1){
-      log.x=Chaos.logisticMap(log.r,log.x);log.n++;
-      log.history.push(log.x);if(log.history.length>95)log.history.shift();
-      log.progress=Math.min(1,log.progress+.004);
-    }else if(step===2){
-      double.a=Chaos.doubleStep(double.a,.001);double.b=Chaos.doubleStep(double.b,.001);double.t+=.001;
-      if(i%10===0){
-        const d=Chaos.separation(double.a,double.b);
-        double.serie.push({t:double.t,d});
-        if(double.serie.length>6000)double.serie.shift();
-        if(double.divTime===null&&d>.1)double.divTime=double.t;
+    } else if (scene === 2) {
+      log.x = Chaos.logisticMap(log.r, log.x); log.n++;
+      log.history.push(log.x); if (log.history.length > 120) log.history.shift();
+    } else if (scene === 3) {
+      dbl.a = Chaos.doubleStep(dbl.a, .001); dbl.b = Chaos.doubleStep(dbl.b, .001); dbl.t += .001;
+      if (i % 10 === 0) {
+        const d = Chaos.separation(dbl.a, dbl.b);
+        dbl.serie.push({ t: dbl.t, d }); if (dbl.serie.length > 6000) dbl.serie.shift();
+        if (dbl.divTime === null && d > .1) dbl.divTime = dbl.t;
       }
-      if(i%16===0){
-        double.traceA.push(Chaos.doublePositions(double.a));double.traceB.push(Chaos.doublePositions(double.b));
-        if(double.traceA.length>170){double.traceA.shift();double.traceB.shift();}
+      if (i % 12 === 0) {
+        dbl.traceA.push(Chaos.doublePositions(dbl.a)); dbl.traceB.push(Chaos.doublePositions(dbl.b));
+        if (dbl.traceA.length > 220) { dbl.traceA.shift(); dbl.traceB.shift(); }
       }
-    }else{
-      const p={sigma:10,rho:lor.rho,beta:8/3};
-      lor.state=Chaos.lorenzStep(lor.state,.01,p);lor.t+=.01;
-      if(i%2===0){lor.trail.push(lor.state);if(lor.trail.length>1700)lor.trail.shift();}
-      if(lor.cloud)for(let j=0;j<lor.points.length;j++)lor.points[j]=Chaos.lorenzStep(lor.points[j],.01,p);
+    } else {
+      const p = { sigma: 10, rho: lor.rho, beta: 8 / 3 };
+      lor.state = Chaos.lorenzStep(lor.state, .01, p); lor.t += .01;
+      if (i % 2 === 0) { lor.trail.push(lor.state); if (lor.trail.length > 900) lor.trail.shift(); }
+      if (lor.cloud) for (let j = 0; j < lor.points.length; j++) lor.points[j] = Chaos.lorenzStep(lor.points[j], .01, p);
     }
   }
 }
-const tick=n=>{simulate(n);return state();};
-function launchPendulum(theta,omega){
-  if(!Number.isFinite(theta)||!Number.isFinite(omega))throw new RangeError('Lancement : valeurs finies attendues');
-  pend.magnets=false;$('#magnets').setAttribute('aria-pressed','false');configurePend(theta,omega);return state();
+
+/* ---------------- Actions (commandes et crochets de test) ---------------- */
+function launchPendulum(theta, omega) {
+  if (!Number.isFinite(theta) || !Number.isFinite(omega)) throw new RangeError('Lancement : valeurs finies attendues');
+  configPend(theta, omega); ui.lancers++; ui.dernierE = Chaos.pendulumEnergy(pend.s); return state();
 }
-function setDamping(d){pend.damping=Chaos.borne(Number(d)||0,0,.5);$('#damping').value=pend.damping;updateOutputs();return state();}
-function smallAngle(on){pend.small=Boolean(on);$('#linear').setAttribute('aria-pressed',String(pend.small));pend.lin=pend.s.slice();return state();}
-function magnets(on){
-  pend.magnets=Boolean(on);$('#magnets').setAttribute('aria-pressed',String(pend.magnets));
-  if(pend.magnets&&!aimantCarte&&!magnetLoading){
-    magnetLoading=true;
-    setTimeout(()=>{aimantCarte=Chaos.basinMap(42,{steps:650});magnetLoading=false;},0);
-  }
+function setDamping(d) { pend.damping = borne(Number(d) || 0, 0, .5); $('#damping').value = pend.damping; sorties(); return state(); }
+function smallAngle(on) { pend.small = !!on; $('#linear').setAttribute('aria-pressed', String(pend.small)); pend.lin = pend.s.slice(); return state(); }
+function testeBassin(x, y) {
+  const fin = Chaos.basin(x, y, { steps: 650 });
+  for (const c of bas.chemins) if (Math.hypot(c.x - x, c.y - y) < .1 && c.fin !== fin) { ui.paires++; break; }
+  bas.chemins.push({ x, y, fin, s: [x, y, 0, 0], pts: [[x, y]], fini: false });
+  if (bas.chemins.length > 12) bas.chemins.shift();
+  ui.clics++; return fin;
+}
+function setR(r) { log.r = borne(Number(r), 2.5, 4); $('#r').value = log.r; configLog(); sorties(); return state(); }
+function setX0(x) { log.x0 = borne(Number(x), .05, .95); $('#x0').value = log.x0; configLog(); sorties(); return state(); }
+function zoom(r1, r2) {
+  if (!Number.isFinite(r1) || !Number.isFinite(r2) || r1 < 2.5 || r2 > 4 || r2 - r1 < .001) throw new RangeError('Zoom : plage incorrecte');
+  log.bif = [r1, r2]; configBif(); sorties(); return state();
+}
+function setOffset(d) { dbl.offset = borne(Number(d), 1e-12, 1e-3); $('#offset').value = Math.round(-Math.log10(dbl.offset)); configDouble(); sorties(); return state(); }
+function setAngle(deg) { dbl.angle = borne(Number(deg), 10, 170); $('#angle').value = dbl.angle; configDouble(); sorties(); return state(); }
+function relaunch() { configDouble(); ui.relances++; return state(); }
+let attenteRho = 0;
+function setRho(v, tout_de_suite) {
+  lor.rho = borne(Number(v), 10, 35); $('#rho').value = lor.rho; sorties();
+  clearTimeout(attenteRho);
+  if (tout_de_suite) configLorenz(); else attenteRho = setTimeout(configLorenz, 140);
   return state();
 }
-function setR(r){log.r=Chaos.borne(Number(r),2.5,4);$('#r').value=log.r;configLog();updateOutputs();return state();}
-function setX0(x){log.x0=Chaos.borne(Number(x),.05,.95);$('#x0').value=log.x0;configLog();updateOutputs();return state();}
-function zoom(r1,r2){
-  if(!Number.isFinite(r1)||!Number.isFinite(r2)||r1<2.5||r2>4||r2-r1<.001)throw new RangeError('Zoom : plage incorrecte');
-  log.bif=[r1,r2];log.points=Chaos.bifurcation(r1,r2,500,850,90);log.progress=.15;log.refresh=true;
-  return state();
+function cloud(on) { lor.cloud = !!on; $('#cloud').setAttribute('aria-pressed', String(lor.cloud)); configCloud(); return state(); }
+function setPrecision(v) { lor.precision = borne(Number(v), 1e-9, 1e-3); $('#precision').value = Math.round(-Math.log10(lor.precision)); sorties(); return state(); }
+
+/* state() garde le champ step du socle (index d'étape, 0 à 3) en plus de scene (0 à 4). */
+function state() { const s = etatScene(); s.step = SCENES[scene].seg; return s; }
+function etatScene() {
+  if (scene === 0) { const E = Chaos.pendulumEnergy(pend.s); return { scene, theta: Chaos.angle(pend.s[0]), omega: pend.s[1], energy: E, period: pend.period, reference: Chaos.periodVsAmplitude(0).T, regime: E > 19.62 ? 'rotation' : 'oscillation', damping: pend.damping, small: pend.small }; }
+  if (scene === 1) return { scene, trajectoires: bas.chemins.length, destinations: bas.chemins.map(c => c.fin), carte: bas.fait / (bas.nx * bas.ny) };
+  if (scene === 2) return { scene, r: log.r, x0: log.x0, x: log.x, generation: log.n, period: Chaos.detectPeriod(log.r, log.x0, 16), lyapunov: Chaos.lyapunovLogistic(log.r, 4000), zoom: log.bif.slice() };
+  if (scene === 3) return { scene, time: dbl.t, offset: dbl.offset, angle: dbl.angle, separation: Chaos.separation(dbl.a, dbl.b), lambda: dbl.lambda, divergenceTime: dbl.divTime,
+    energyDrift: Math.abs(Chaos.doubleEnergy(dbl.a) - dbl.initialE) / Math.max(1, Math.abs(dbl.initialE)) };
+  const lt = Math.max(0, lor.lambda), h = Chaos.forecastHorizon(lt, lor.precision);
+  return { scene, rho: lor.rho, lambda: lor.lambda, precision: lor.precision, horizon: h, lyapunovTimes: h === null ? null : lt * h, cloud: lor.cloud, time: lor.t, regime: lor.rho < 24.74 ? 'vers un équilibre' : 'attracteur chaotique' };
 }
-function setOffset(d){double.offset=Chaos.borne(Number(d),1e-12,1e-3);$('#offset').value=Math.round(-Math.log10(double.offset));configDouble();updateOutputs();return state();}
-function setAngle(deg){double.angle=Chaos.borne(Number(deg),10,170);$('#angle').value=double.angle;configDouble();updateOutputs();return state();}
-function relaunch(){configDouble();return state();}
-function setRho(v){lor.rho=Chaos.borne(Number(v),10,35);$('#rho').value=lor.rho;configLorenz();updateOutputs();return state();}
-function cloud(on){lor.cloud=Boolean(on);$('#cloud').setAttribute('aria-pressed',String(lor.cloud));configCloud();return state();}
-function setPrecision(v){lor.precision=Chaos.borne(Number(v),1e-9,1e-3);$('#precision').value=Math.round(-Math.log10(lor.precision));updateOutputs();return state();}
-function state(){
-  if(step===0){const E=Chaos.pendulumEnergy(pend.s);return {step,theta:Chaos.angle(pend.s[0]),omega:pend.s[1],energy:E,period:pend.period,reference:Chaos.periodVsAmplitude(0).T,regime:E>19.62?'rotation':'oscillation',damping:pend.damping,magnets:pend.magnets,attractor:choixAimant};}
-  if(step===1)return {step,r:log.r,x0:log.x0,x:log.x,generation:log.n,period:Chaos.detectPeriod(log.r,log.x0,16),lyapunov:Chaos.lyapunovLogistic(log.r,4000),thresholds:Chaos.SEUILS.slice()};
-  if(step===2)return {step,time:double.t,offset:double.offset,angle:double.angle,separation:Chaos.separation(double.a,double.b),lambda:double.lambda,divergenceTime:double.divTime,energy:Chaos.doubleEnergy(double.a),energyDrift:Math.abs(Chaos.doubleEnergy(double.a)-double.initialE)/Math.max(1,Math.abs(double.initialE)),gain:double.angle>=50&&double.lambda>0?Math.log(10)/double.lambda:null};
-  const lt=Math.max(0,lor.lambda),h=Chaos.forecastHorizon(lt,lor.precision);
-  return {step,rho:lor.rho,lambda:lor.lambda,precision:lor.precision,horizon:h,lyapunovTimes:h===null?null:lt*h,cloud:lor.cloud,points:lor.points.length,time:lor.t,regime:lor.rho<24.74?'vers un équilibre':'attracteur complexe'};
+
+/* ---------------- Lectures du panneau ---------------- */
+function sorties() {
+  $('#dampingVal').textContent = fr(pend.damping, 2) + ' s⁻¹';
+  $('#rVal').textContent = fr(log.r, 4); $('#x0Val').textContent = fr(log.x0, 2);
+  $('#offsetVal').textContent = puissance(dbl.offset) + ' rad'; $('#angleVal').textContent = fr(dbl.angle, 0) + '°';
+  $('#rhoVal').textContent = fr(lor.rho, 1); $('#precisionVal').textContent = puissance(lor.precision);
+  $('#doubleSpeed').textContent = 'Temps ×' + dbl.speed; $('#lorenzSpeed').textContent = 'Temps ×' + lor.speed;
+  $('#zoom').setAttribute('aria-pressed', String(log.bif[0] === 3.4)); $('#zoom3').setAttribute('aria-pressed', String(log.bif[0] === 3.8));
 }
-function updateOutputs(){
-  $('#dampingVal').textContent=fr(pend.damping,2)+' s⁻¹';
-  $('#rVal').textContent=fr(log.r,4);$('#x0Val').textContent=fr(log.x0,2);
-  $('#offsetVal').textContent='10'+superscript(-Math.round(-Math.log10(double.offset)))+' rad';
-  $('#angleVal').textContent=fr(double.angle,0)+'°';$('#rhoVal').textContent=fr(lor.rho,1);
-  $('#precisionVal').textContent='10'+superscript(Math.round(Math.log10(lor.precision)));
-  $('#speedView').textContent=step===1?'Générations · pas discret':'Temps ×'+fr(vitesse(),0);
-  $('#doubleSpeed').textContent='Temps ×'+fr(double.speed,0);$('#lorenzSpeed').textContent='Temps ×'+fr(lor.speed,0);
-  $('#zoom').setAttribute('aria-pressed',String(log.bif[0]!==2.5));
-}
-function updateMeasurements(){
-  updateOutputs();const s=state();let rows=[],status='',legende='';
-  if(step===0){
-    const tp=pend.amplitude===null?null:Chaos.periodVsAmplitude(pend.amplitude).T;
-    if(pend.magnets){
-      rows=[['Bassin sélectionné',choixAimant===null?'cliquer sur la carte':'aimant '+(choixAimant+1)],['Aimants','3 attracteurs locaux'],['Grille','42 × 29 états']];
-      status=magnetLoading?'Calcul des bassins en cours…':'Deux départs voisins peuvent aboutir à deux aimants différents ; une frontière découpée les sépare.';
-    }else{
-      rows=[['Angle θ',fr(s.theta*180/Math.PI,2)+' °'],['Vitesse ω',fr(s.omega,2)+' rad/s'],['Énergie / masse',fr(s.energy,3)+' J/kg'],['Mouvement',s.regime],['Période observée',pend.period?fr(pend.period,3)+' s':'mesure en cours'],['Période petits angles',fr(s.reference,3)+' s'],['Période intégrale',tp?fr(tp,3)+' s':'rotation']];
-      status=Math.abs(Chaos.angle(pend.s[0])-Math.PI)<.12&&Math.abs(pend.s[1])<.8?'Près du sommet : équilibre instable ; le plus petit écart peut grandir.':pend.damping>0?'Avec amortissement, les oscillations gagnent le bassin de l’équilibre bas.':s.regime==='rotation'?'Énergie supérieure à la séparatrice : le pendule peut tourner entièrement.':'Le portrait révèle une trajectoire fermée autour de l’équilibre du bas.';
-    }
-    legende='ANGLE θ(t)';$('#clock').textContent='t = '+fr(pend.t,2)+' s';
-  }else if(step===1){
-    const p=s.period;
-    rows=[['Commande r',fr(log.r,4)],['Génération n',String(log.n)],['Valeur xₙ',fr(log.x,5)],['Cycle détecté',p===null?'irrégulier / trop long':String(p)],['Exposant λ',fr(s.lyapunov,4)+' / génération'],['Doublements r₁…r₄','3 · 3,44949 · 3,54409 · 3,56441'],['Rapport vers δ',fr((Chaos.SEUILS[2]-Chaos.SEUILS[1])/(Chaos.SEUILS[3]-Chaos.SEUILS[2]),3)+' ≈ 4,669']];
-    status=log.r>=3.8283&&log.r<3.85?'Au milieu d’une région chaotique : une fenêtre de période 3.':p===null&&s.lyapunov>0?'Sensibilité croissante : les générations se dispersent sur un ensemble structuré.':p===1?'Le système revient vers un seul point fixe.':'Une seule commande change le cycle : 2, 4, 8… puis des bifurcations resserrées.';
-    $('#clock').textContent='n = '+log.n;legende='POPULATION xₙ';
-  }else if(step===2){
-    rows=[['Temps physique',fr(double.t,2)+' s'],['Séparation normalisée',s.separation.toExponential(3)],['Écart initial',double.offset.toExponential(0)+' rad'],['Exposant Benettin',fr(double.lambda,3)+' s⁻¹'],['Divergence mesurée',double.divTime===null?'pas encore':fr(double.divTime,2)+' s'],['Gain si δ₀ ÷ 10',s.gain===null?'non pertinent':fr(s.gain,2)+' s'],['Dérive d’énergie',s.energyDrift.toExponential(2)+' relative']];
-    status=double.angle<45?'À faible énergie, les deux états restent proches sur la durée montrée ; l’exposant fini tend vers zéro.':s.separation<.0001?'Deux départs presque identiques : les couleurs restent confondues.':s.separation<.2?'L’écart suit une phase de croissance approximativement exponentielle.':'Les deux chemins divergent : réduire l’erreur initiale mille fois ne gagne que quelques temps caractéristiques.';
-    $('#clock').textContent='t = '+fr(double.t,2)+' s';legende='log₁₀ SÉPARATION';
-  }else{
-    rows=[['Commande ρ',fr(lor.rho,1)],['Régime étudié',s.regime],['Lyapunov maximal',fr(lor.lambda,3)+' / u.t.'],['Précision initiale',lor.precision.toExponential(0)],['Horizon estimé',s.horizon===null?'non applicable':fr(s.horizon,2)+' u.t.'],['En temps de Lyapunov',s.lyapunovTimes===null?'—':fr(s.lyapunovTimes,2)+' τL'],['Points du nuage',String(lor.points.length)]];
-    status=lor.cloud?'Impossible de prévoir la position de chaque point ; le nuage reste dans la même région de l’espace.':lor.rho<24.74?'À cette valeur de ρ, les trajectoires étudiées gagnent un point fixe.':'La trajectoire passe d’une aile à l’autre : une structure persiste sans périodicité simple.';
-    $('#clock').textContent='t = '+fr(lor.t,2)+' u.t.';legende='COORDONNÉE z(t)';
+function lectures() {
+  const s = state(); let rows = [];
+  const tot = bas.nx * bas.ny;
+  $('#basinState').textContent = bas.fait < tot ? `Calcul de la carte… ${Math.round(100 * bas.fait / tot)} %` : 'Carte : ' + bas.nx + ' × ' + bas.ny + ' départs';
+  if (scene === 0) {
+    const tp = pend.amplitude === null ? null : Chaos.periodVsAmplitude(pend.amplitude).T;
+    rows = [['Angle θ', fr(s.theta * 180 / PI, 1) + ' °'], ['Vitesse ω', fr(s.omega, 2) + ' rad/s'], ['Énergie / masse', fr(s.energy, 2) + ' J/kg'], ['Séparatrice 2gL', '19,62 J/kg'],
+      ['Mouvement', s.regime], ['Période mesurée', pend.period ? fr(pend.period, 3) + ' s' : 'en cours'], ['Période exacte', tp ? fr(tp, 3) + ' s' : '—'], ['Petits angles 2π√(L/g)', fr(s.reference, 3) + ' s']];
+  } else if (scene === 1) {
+    const n = bas.chemins.length, noms = ['mauve', 'bleu', 'or'];
+    rows = [['Carte', bas.fait < bas.nx * bas.ny ? 'calcul : ' + Math.round(100 * s.carte) + ' %' : bas.nx + ' × ' + bas.ny + ' départs'], ['Trajectoires', String(n)],
+      ['Dernière destination', n ? 'aimant ' + noms[bas.chemins[n - 1].fin] : 'clique sur la carte'], ['Voisins séparés', String(ui.paires)]];
+  } else if (scene === 2) {
+    const p = s.period;
+    rows = [['r', fr(log.r, 4)], ['Génération n', String(log.n)], ['xₙ', fr(log.x, 4)], ['Cycle', p === null ? 'aucun (≤ 16)' : 'période ' + p],
+      ['Exposant λ', fr(s.lyapunov, 3) + ' / génération'], ['Point fixe 1 − 1/r', fr(1 - 1 / log.r, 4)], ['Seuils r₁ … r₄', '3 · 3,4495 · 3,5441 · 3,5644']];
+  } else if (scene === 3) {
+    rows = [['Temps', fr(dbl.t, 2) + ' s'], ['Séparation', s.separation.toExponential(2).replace('.', ',')], ['Écart initial', puissance(dbl.offset) + ' rad'], ['Exposant λ (Benettin)', fr(dbl.lambda, 3) + ' s⁻¹'],
+      ['Écart visible (> 0,1)', dbl.divTime === null ? 'pas encore' : 't = ' + fr(dbl.divTime, 2) + ' s'], ['Dérive d’énergie', s.energyDrift.toExponential(1).replace('.', ',')]];
+  } else {
+    rows = [['ρ', fr(lor.rho, 1)], ['Régime', s.regime], ['Exposant λ', fr(lor.lambda, 3) + ' / u.t.'], ['Précision initiale', puissance(lor.precision)],
+      ['Horizon ln(1/δ₀)/λ', s.horizon === null ? 'sans objet' : fr(s.horizon, 2) + ' u.t.'], ['Temps', fr(lor.t, 1) + ' u.t.']];
   }
-  $('#status').textContent=status;$('#scopeTitle').textContent='ENREGISTREUR · '+legende;
-  $('#meas').innerHTML=rows.map(([k,v])=>`<div class="row"><span class="lab">${k}</span><span class="val">${v}</span></div>`).join('');
+  $('#meas').innerHTML = rows.map(([k, v]) => `<div class="row"><span class="lab">${k}</span><span class="val">${v}</span></div>`).join('');
 }
-function fond(w,h){
-  ctx.fillStyle=couleurs.fond;ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='#1a232c';ctx.lineWidth=1;
-  for(let x=0;x<w;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-  for(let y=0;y<h;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+
+/* ---------------- Dessin : outils ---------------- */
+function taille(c, context) {
+  const r = c.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (r.width < 1 || r.height < 1) return [0, 0];
+  const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  context.setTransform(dpr, 0, 0, dpr, 0, 0); return [r.width, r.height];
 }
-function texte(val,x,y,color=couleurs.sub,size=11,align='left'){
-  ctx.save();ctx.fillStyle=color;ctx.font=`${size}px "IBM Plex Mono",ui-monospace,monospace`;ctx.textAlign=align;ctx.fillText(val,x,y);ctx.restore();
+function texte(t, x, y, coul = C.sub, taille = 11, align = 'left', police = MONO) {
+  ctx.fillStyle = coul; ctx.font = `${taille}px ${police}`; ctx.textAlign = align; ctx.textBaseline = 'alphabetic'; ctx.fillText(t, x, y);
 }
-function trait(points,color,width=1,alpha=1,pointille=false){
-  if(!points||points.length<2)return;
-  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;if(pointille)ctx.setLineDash([5,6]);
-  ctx.beginPath();ctx.moveTo(points[0][0],points[0][1]);
-  for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);
-  ctx.stroke();ctx.restore();
+function ligne(pts, coul, larg = 1, alpha = 1, tirets = null) {
+  if (!pts || pts.length < 2) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.strokeStyle = coul; ctx.lineWidth = larg; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; if (tirets) ctx.setLineDash(tirets);
+  ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke(); ctx.restore();
 }
-function point(x,y,r,color,plein=true){
-  ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=1.6;plein?ctx.fill():ctx.stroke();
+function lueur(pts, coul, larg, flou, alpha = 1) { ctx.save(); ctx.shadowColor = coul; ctx.shadowBlur = flou; ligne(pts, coul, larg, alpha); ctx.restore(); }
+function point(x, y, r, coul, plein = true, flou = 0) {
+  ctx.save(); if (flou) { ctx.shadowColor = coul; ctx.shadowBlur = flou; }
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = coul; ctx.strokeStyle = coul; ctx.lineWidth = 1.6; plein ? ctx.fill() : ctx.stroke(); ctx.restore();
 }
-function chartRect(x,y,w,h,xTitle='',yTitle=''){
-  ctx.fillStyle='#0b1118';ctx.fillRect(x,y,w,h);ctx.strokeStyle='#3b4652';ctx.lineWidth=1;ctx.strokeRect(x,y,w,h);
-  ctx.strokeStyle='#23303b';
-  for(let i=1;i<5;i++){
-    ctx.beginPath();ctx.moveTo(x+w*i/5,y);ctx.lineTo(x+w*i/5,y+h);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x,y+h*i/5);ctx.lineTo(x+w,y+h*i/5);ctx.stroke();
+/* Une traîne qui s'efface vers le passé : morceaux d'opacité croissante ; coupure si rompre(a, b). */
+function traine(pts, coul, larg, rompre = null, aMin = .05, aMax = .95, flouFin = 0) {
+  const n = pts.length; if (n < 2) return;
+  const parts = Math.min(28, n - 1), pas = (n - 1) / parts;
+  for (let k = 0; k < parts; k++) {
+    const i0 = Math.floor(k * pas), i1 = Math.min(n - 1, Math.floor((k + 1) * pas) + 1), a = aMin + (aMax - aMin) * ((k + 1) / parts) ** 1.6;
+    let seg = [pts[i0]];
+    const dessine = () => { if (k === parts - 1 && flouFin) lueur(seg, coul, larg, flouFin, a); else ligne(seg, coul, larg, a); };
+    for (let i = i0 + 1; i <= i1; i++) { if (rompre && rompre(pts[i - 1], pts[i])) { dessine(); seg = []; } seg.push(pts[i]); }
+    dessine();
   }
-  if(xTitle)texte(xTitle,x+w-7,y+h-8,couleurs.sub,10,'right');
-  if(yTitle)texte(yTitle,x+9,y+15,couleurs.sub,10);
 }
-function ligneArc(x1,y1,x2,y2,color,width=3){trait([[x1,y1],[x2,y2]],color,width);point(x2,y2,Math.max(4,width+1),color);}
-function phaseBounds(w,h){
-  const x0=w*.33;
-  return {x:x0+18,y:52,w:Math.max(80,w-x0-40),h:Math.max(110,h-142)};
-}
-function dessinePendule(w,h){
-  const d=phaseBounds(w,h);vuePhase=d;
-  if(pend.magnets){
-    texte('BASSINS DE TROIS AIMANTS · MODÈLE IDÉALISÉ',20,54,couleurs.accent,12);
-    const rect={x:Math.min(70,w*.10),y:75,w:w-Math.min(140,w*.20),h:h-165};vuePhase=rect;
-    if(!aimantCarte){texte('CALCUL DES DESTINATIONS…',w/2,h/2,couleurs.texte,15,'center');return;}
-    const m=aimantCarte,colors=['#765d76','#315971','#a78050'];
-    for(let j=0;j<m.ny;j++)for(let i=0;i<m.nx;i++){
-      ctx.fillStyle=colors[m.pixels[j*m.nx+i]];
-      ctx.fillRect(rect.x+rect.w*i/m.nx,rect.y+rect.h*j/m.ny,rect.w/m.nx+1,rect.h/m.ny+1);
-    }
-    for(const [i,p] of Chaos.AIMANTS.entries()){
-      const x=rect.x+(p[0]+1.7)/3.4*rect.w,y=rect.y+(p[1]+1.3)/2.6*rect.h;
-      point(x,y,8,couleurs.texte,false);texte('AIMANT '+(i+1),x+13,y+4,couleurs.texte,10);
-    }
-    ctx.strokeStyle='#8e98a2';ctx.strokeRect(rect.x,rect.y,rect.w,rect.h);
-    texte('CLIQUER : TESTER LE BASSIN D’UN POINT',rect.x,rect.y+rect.h+24,couleurs.sub,11);
-    if(ancienneSouris&&ancienneSouris.step===0){point(ancienneSouris.x,ancienneSouris.y,5,couleurs.energie,false);}
-    return;
+/* En mode intégré, le lien « Ouvrir la planche » occupe le coin haut droit : on y descend les étiquettes. */
+const integre = () => document.documentElement.classList.contains('labo-embed') ? 34 : 0;
+function fondEcran(w, h) { ctx.fillStyle = C.fond; ctx.fillRect(0, 0, w, h); }
+
+/* ---------------- Scène 0 : pendule et portrait de phase ---------------- */
+const OM = 8;   // ω affiché de −8 à 8 rad/s
+let zonePortrait = null, zonePendule = null;
+function dessinePortrait(w, h) {
+  const etroit = w < 640, pad = etroit ? 14 : 26;
+  const gauche = etroit ? 0 : borne(w * .27, 190, 300);
+  const P = { x: pad + gauche + (etroit ? 0 : 18), y: pad + 14, w: 0, h: 0 };
+  P.w = w - P.x - pad; P.h = h - P.y - (etroit ? 40 : 46); zonePortrait = P;
+  const X = th => P.x + (th + PI) / TAU * P.w, Y = om => P.y + (OM - om) / (2 * OM) * P.h;
+  /* repères */
+  ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w, P.h); ctx.clip();
+  for (const th of [-PI / 2, PI / 2]) ligne([[X(th), P.y], [X(th), P.y + P.h]], C.grille, 1);
+  for (const om of [-4, 4]) ligne([[P.x, Y(om)], [P.x + P.w, Y(om)]], C.grille, 1);
+  ligne([[P.x, Y(0)], [P.x + P.w, Y(0)]], C.axe, 1); ligne([[X(0), P.y], [X(0), P.y + P.h]], C.axe, 1);
+  /* champ de vitesses : traits courts, sans flèches */
+  const nx = etroit ? 15 : 25, ny = etroit ? 11 : 17;
+  ctx.strokeStyle = rgba('sub', .22); ctx.lineWidth = 1; ctx.beginPath();
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const th = -PI + TAU * (i + .5) / nx, om = -OM + 2 * OM * (j + .5) / ny, [dth, dom] = Chaos.pendulumRHS([th, om], { g: 9.81, L: 1, damping: pend.damping });
+    const vx = dth / TAU * P.w, vy = -dom / (2 * OM) * P.h, n = Math.hypot(vx, vy) || 1, l = Math.min(7, P.w / nx * .32);
+    const x = X(th), y = Y(om); ctx.moveTo(x - vx / n * l, y - vy / n * l); ctx.lineTo(x + vx / n * l, y + vy / n * l);
   }
-  const lx=w*.17,ly=Math.min(h*.26,142),L=Math.min(w*.12,h*.25,122);
-  texte('PENDULE RIGIDE',22,56,couleurs.sub,11);
-  ctx.strokeStyle='#344452';ctx.setLineDash([3,6]);ctx.beginPath();ctx.moveTo(lx,ly-1.22*L);ctx.lineTo(lx,ly+1.25*L);ctx.stroke();ctx.setLineDash([]);
-  const theta=pend.s[0],bx=lx+L*Math.sin(theta),by=ly+L*Math.cos(theta);
-  ctx.beginPath();ctx.arc(lx,ly,L,0,2*Math.PI);ctx.strokeStyle='#2c3946';ctx.lineWidth=1;ctx.stroke();
-  ligneArc(lx,ly,bx,by,couleurs.accent,2.7);point(lx,ly,3,couleurs.texte);
-  texte('θ = '+fr(Chaos.angle(theta)*180/Math.PI,1)+'°',lx,ly+L+34,couleurs.texte,12,'center');
-  texte('ω = '+fr(pend.s[1],2)+' rad/s',lx,ly+L+53,couleurs.sub,10,'center');
-  chartRect(d.x,d.y,d.w,d.h,'θ / rad','ω / rad·s⁻¹');
-  const xx=a=>d.x+(a+Math.PI)/(2*Math.PI)*d.w, yy=v=>d.y+(7-v)/14*d.h;
-  const champs=Chaos.phasePortrait({g:9.81,L:1,damping:pend.damping},{nx:19,ny:13});
-  ctx.save();ctx.beginPath();ctx.rect(d.x,d.y,d.w,d.h);ctx.clip();
-  for(const p of champs){
-    const norm=Math.hypot(p.dx/7,p.dy/14)||1,len=Math.min(8,d.w/50),dx=p.dx/7/norm*len,dy=-p.dy/14/norm*len,x=xx(p.theta),y=yy(p.omega);
-    trait([[x-dx,y-dy],[x+dx,y+dy]],'#677484',.6,.48);
+  ctx.stroke();
+  /* séparatrice */
+  const sep = Chaos.separatrix();
+  for (const cle of ['haut', 'bas']) { ctx.save(); ctx.shadowColor = C.energie; ctx.shadowBlur = 8; ligne(sep.map(p => [X(p.theta), Y(p[cle])]), C.energie, 1.3, .75, [6, 6]); ctx.restore(); }
+  /* petits angles : ellipse linéarisée */
+  if (pend.small) {
+    const k = Math.sqrt(9.81), A = pend.lin[0], B = pend.lin[1], amp = Math.hypot(A, B / k), ph = Math.atan2(-B / k, A), e = [];
+    for (let i = 0; i <= 200; i++) { const t = TAU * i / 200; e.push([X(amp * Math.cos(t + ph)), Y(-amp * k * Math.sin(t + ph))]); }
+    ligne(e, C.negatif, 1.4, .85, [4, 5]);
+    point(X(borne(Chaos.angle(pend.lin[0]), -PI, PI)), Y(pend.lin[1]), 3.5, C.negatif, true, 8);
   }
-  const sep=Chaos.separatrix();
-  trait(sep.map(p=>[xx(p.theta),yy(p.haut)]),couleurs.energie,1.3,.8,true);
-  trait(sep.map(p=>[xx(p.theta),yy(p.bas)]),couleurs.energie,1.3,.8,true);
-  // Sur la représentation périodique de l’angle, une rotation franchit le bord sans traverser le portrait.
-  const trace=pend.trail.map(p=>[xx(Chaos.angle(p[0])),yy(p[1])]);
-  let segment=[];
-  for(const p of trace){
-    if(segment.length&&Math.abs(p[0]-segment[segment.length-1][0])>d.w*.70){trait(segment,couleurs.accent,1.9,.92);segment=[];}
-    segment.push(p);
-  }
-  trait(segment,couleurs.accent,1.9,.92);
-  if(pend.small){
-    const A=pend.lin[0],B=pend.lin[1];
-    const path=[];const k=Math.sqrt(9.81),amp=Math.hypot(A,B/k),phase=Math.atan2(-B/k,A);
-    for(let i=0;i<=240;i++){const t=2*Math.PI*i/240;path.push([xx(amp*Math.cos(t+phase)),yy(-amp*k*Math.sin(t+phase))]);}
-    trait(path,couleurs.negatif,1.4,.9,true);
-  }
-  point(xx(0),yy(0),4,couleurs.texte);point(xx(-Math.PI),yy(0),5,couleurs.texte,false);point(xx(Math.PI),yy(0),5,couleurs.texte,false);
-  point(xx(Chaos.angle(theta)),yy(pend.s[1]),4.8,couleurs.accent);
-  ctx.restore();
-  texte('(-π, 0)',d.x+5,d.y+d.h+20,couleurs.sub,10);
-  texte('(π, 0)',d.x+d.w-5,d.y+d.h+20,couleurs.sub,10,'right');
-  texte('CLIQUER SUR LE PORTRAIT POUR LANCER',d.x,d.y+d.h+39,couleurs.accent,10);
-  texte('● stable',d.x+10,d.y-12,couleurs.texte,10);texte('○ instable',d.x+100,d.y-12,couleurs.texte,10);
-}
-function bifBounds(w,h){return {x:35,y:h*.55,w:w-70,h:Math.max(90,h*.34)};}
-function cacheBif(w,h){
-  const r=bifBounds(w,h);vueBif=r;
-  const dpr=Math.min(window.devicePixelRatio||1,2),off=document.createElement('canvas');off.width=Math.max(1,Math.round(r.w*dpr));off.height=Math.max(1,Math.round(r.h*dpr));
-  const cc=off.getContext('2d');cc.scale(dpr,dpr);cc.fillStyle='#0b1118';cc.fillRect(0,0,r.w,r.h);
-  cc.fillStyle='rgba(232,228,220,.20)';
-  for(const p of log.points){const xx=(p.r-log.bif[0])/(log.bif[1]-log.bif[0])*r.w,yy=(1-p.x)*r.h;cc.fillRect(xx,yy,.78,.78);}
-  log.refresh=false;log.cache=off;log.cacheW=r.w;log.cacheH=r.h;
-}
-function dessineLog(w,h){
-  const top={x:34,y:51,w:w*.56-48,h:h*.43-43},series={x:w*.57+5,y:51,w:w*.43-39,h:h*.43-43};
-  top.h=Math.max(95,top.h);series.h=Math.max(95,series.h);
-  chartRect(top.x,top.y,top.w,top.h,'xₙ','xₙ₊₁');
-  const px=x=>top.x+x*top.w,py=x=>top.y+(1-x)*top.h;
-  const f=Array.from({length:140},(_,i)=>{const x=i/139;return [px(x),py(Chaos.logisticMap(log.r,x))];});
-  trait([[px(0),py(0)],[px(1),py(1)]],'#637180',1.1,.65);
-  trait(f,couleurs.accent,2);
-  const chemin=Chaos.cobweb(log.r,log.x0,Math.min(60,Math.max(9,Math.round(log.n/6))));
-  trait(chemin.map(p=>[px(p.x),py(p.y)]),couleurs.energie,1.2,.9);
-  texte('TOILE D’ARAIGNÉE',top.x+8,top.y+top.h+18,couleurs.sub,10);
-  chartRect(series.x,series.y,series.w,series.h,'n','xₙ');
-  const vals=log.history.length>1?log.history:Chaos.orbit(log.r,log.x0,80);
-  trait(vals.map((v,i)=>[series.x+series.w*i/(vals.length-1),series.y+(1-v)*series.h]),couleurs.negatif,1.3,.95);
-  texte('SÉRIE TEMPORELLE',series.x+8,series.y+series.h+18,couleurs.sub,10);
-  const b=bifBounds(w,h);vueBif=b;chartRect(b.x,b.y,b.w,b.h,'r','états persistants');
-  if(!log.cache||log.refresh||Math.abs((log.cacheW||0)-b.w)>2||Math.abs((log.cacheH||0)-b.h)>2)cacheBif(w,h);
-  ctx.save();ctx.beginPath();ctx.rect(b.x,b.y,b.w*log.progress,b.h);ctx.clip();ctx.drawImage(log.cache,b.x,b.y,b.w,b.h);ctx.restore();
-  ctx.strokeStyle=couleurs.accent;ctx.lineWidth=1.8;const x=b.x+(log.r-log.bif[0])/(log.bif[1]-log.bif[0])*b.w;
-  ctx.beginPath();ctx.moveTo(x,b.y);ctx.lineTo(x,b.y+b.h);ctx.stroke();
-  const t=[3,3.44949,3.54409,3.56441];
-  for(let i=0;i<t.length;i++){
-    if(t[i]<log.bif[0]||t[i]>log.bif[1])continue;
-    const tx=b.x+(t[i]-log.bif[0])/(log.bif[1]-log.bif[0])*b.w;
-    ctx.strokeStyle='#6a5369';ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(tx,b.y);ctx.lineTo(tx,b.y+b.h);ctx.stroke();ctx.setLineDash([]);
-    texte('r'+(i+1),tx+4,b.y+13,couleurs.sub,9);
-  }
-  texte(fr(log.bif[0],2),b.x,b.y+b.h+18,couleurs.sub,10);
-  texte(fr(log.bif[1],2),b.x+b.w,b.y+b.h+18,couleurs.sub,10,'right');
-}
-function dessineDouble(w,h){
-  const x=w*.5,y=Math.max(75,h*.15),length=Math.min(w*.14,h*.25,142);
-  const gauche=Chaos.doublePositions(double.a),droite=Chaos.doublePositions(double.b),toScreen=p=>[x+length*p.x2,y+length*p.y2];
-  ctx.save();ctx.beginPath();ctx.rect(0,45,w,h*.64);ctx.clip();
-  trait(double.traceA.map(toScreen),couleurs.positif,1.8,.35);
-  trait(double.traceB.map(toScreen),couleurs.negatif,1.8,.35);
-  for(const [p,color] of [[gauche,couleurs.positif],[droite,couleurs.negatif]]){
-    const x1=x+p.x1*length,y1=y+p.y1*length,x2=x+p.x2*length,y2=y+p.y2*length;
-    trait([[x,y],[x1,y1],[x2,y2]],color,2.8,.92);
-    point(x1,y1,4,color);point(x2,y2,7,color);
-  }
-  point(x,y,4,couleurs.texte);ctx.restore();
-  texte('TRAJECTOIRE A',16,70,couleurs.positif,11);
-  texte('TRAJECTOIRE B',16,86,couleurs.negatif,11);
-  texte('CONDITIONS IDENTIQUES À '+double.offset.toExponential(0)+' rad PRÈS',16,103,couleurs.sub,9);
-  const c={x:38,y:h*.70,w:w-77,h:h*.20};
-  chartRect(c.x,c.y,c.w,c.h,'temps / s','ln(d)');
-  const T=Math.max(25,Math.ceil(double.t/10)*10),lo=-30,hi=2.2;
-  const serie=double.serie.filter((_,i)=>i%Math.max(1,Math.floor(double.serie.length/1600))===0);
-  ctx.save();ctx.beginPath();ctx.rect(c.x,c.y,c.w,c.h);ctx.clip();
-  trait(serie.map(p=>[c.x+(p.t/T)*c.w,c.y+(hi-Chaos.borne(Math.log(Math.max(1e-16,p.d)),lo,hi))/(hi-lo)*c.h]),couleurs.accent,1.8,.94);
-  ctx.restore();
-  const plus=double.angle>=50&&double.lambda>0?Math.log(1000)/double.lambda:null;
-  texte('λ ≈ '+fr(double.lambda,3)+' s⁻¹ · Benettin',c.x+8,c.y+c.h+18,couleurs.accent,10);
-  if(plus!==null)texte('δ₀ ÷ 1000 → + '+fr(plus,1)+' s',c.x+c.w,c.y+c.h+18,couleurs.sub,10,'right');
-}
-function dessineLorenz(w,h){
-  const etroit=w<600;
-  const box=etroit?{x:18,y:53,w:w-36,h:h-146}:{x:28,y:55,w:w*.77-20,h:h-144};vueLorenz=box;
-  const centreX=box.x+box.w*.51,centreY=box.y+box.h*.51,echelle=Math.min(box.w/56,box.h/56);
-  chartRect(box.x,box.y,box.w,box.h);
-  const proj=p=>{
-    const xy=Chaos.lorenzProjection(p,angleVue,inclinaison);
-    return [centreX+xy.x*echelle,centreY-xy.y*echelle];
-  };
-  ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();
-  trait(lor.back.map(proj),couleurs.accent,1.0,.23);
-  trait(lor.trail.map(proj),couleurs.accent,2,.92);
-  const here=proj(lor.state);point(here[0],here[1],4.5,couleurs.energie);
-  if(lor.cloud){
-    ctx.fillStyle=couleurs.negatif;ctx.globalAlpha=.37;
-    for(const p of lor.points){const [x,y]=proj(p);ctx.fillRect(x-1,y-1,2,2);}
-    ctx.globalAlpha=1;
+  /* trajectoire */
+  traine(pend.trail.map(p => [X(Chaos.angle(p[0])), Y(p[1])]), C.accent, 2, (a, b) => Math.abs(a[0] - b[0]) > P.w * .6, .04, .95, 10);
+  /* équilibres */
+  point(X(0), Y(0), 3.5, C.texte);
+  point(X(-PI) + 1, Y(0), 5, C.texte, false); point(X(PI) - 1, Y(0), 5, C.texte, false);
+  /* état présent */
+  point(X(Chaos.angle(pend.s[0])), Y(pend.s[1]), 5, C.accent, true, 16);
+  point(X(Chaos.angle(pend.s[0])), Y(pend.s[1]), 2, C.texte);
+  /* survol : où partirait le pendule */
+  if (ui.survol && ui.survol.scene === 0 && ui.survol.dans) {
+    point(ui.survol.x, ui.survol.y, 6, rgba('accent', .9), false);
+    texte('lancer d’ici', ui.survol.x + 10, ui.survol.y - 8, C.accent, 10.5);
   }
   ctx.restore();
-  texte('GLISSER POUR TOURNER L’ESPACE (x, y, z)',box.x+9,box.y+box.h+19,couleurs.sub,9);
-  const s=etroit?{x:box.x+box.w-Math.min(136,w*.36),y:box.y+12,w:Math.min(129,w*.32),h:Math.min(120,box.h*.34)}:
-    {x:box.x+box.w+15,y:box.y+20,w:Math.max(86,w-(box.x+box.w)-28),h:Math.min(200,box.h*.46)};
-  chartRect(s.x,s.y,s.w,s.h,'x','y');
-  texte('SECTION',s.x+5,s.y-8,couleurs.texte,10);
-  ctx.save();ctx.beginPath();ctx.rect(s.x,s.y,s.w,s.h);ctx.clip();
-  for(const p of lor.section){const xx=s.x+(p.x+25)/50*s.w,yy=s.y+(25-p.y)/50*s.h;
-    ctx.fillStyle=couleurs.energie;ctx.globalAlpha=.60;ctx.fillRect(xx,yy,2,2);
+  /* graduations */
+  const lab = etroit ? 10 : 11, yb = P.y + P.h + 16;
+  [['−π', -PI], ['−π/2', -PI / 2], ['0', 0], ['π/2', PI / 2], ['π', PI]].forEach(([t, v], i) => texte(t, X(v), yb, C.sub, lab, i === 0 ? 'left' : i === 4 ? 'right' : 'center'));
+  texte('θ', P.x + P.w, yb + 18, C.texte, 17, 'right', SERIF); texte('ω', P.x + 6, P.y + 16, C.texte, 17, 'left', SERIF);
+  texte('+4', P.x + 6, Y(4) - 4, C.sub, 10); texte('−4 rad/s', P.x + 6, Y(-4) - 4, C.sub, 10);
+  texte('stable', X(0) + 8, Y(0) + 15, C.texte, 10.5); texte('instable', X(PI) - 10, Y(0) - 10, C.texte, 10.5, 'right');
+  texte('séparatrice', X(0), Y(2 * Math.sqrt(9.81)) - 8, C.energie, 10.5, 'center');
+  if (!etroit) texte('Clique dans le portrait pour choisir un départ.', P.x, yb + 18, C.sub, 10.5);
+  /* le pendule lui-même */
+  if (etroit) dessinePendule(pad + 44, pad + 50, 34, true);
+  else dessinePendule(pad + gauche / 2, pad + 30 + Math.min(gauche * .42, h * .24), Math.min(gauche * .36, h * .2), false);
+}
+function dessinePendule(cx, cy, L, petit) {
+  zonePendule = { cx, cy, L };
+  if (petit) { ctx.fillStyle = rgba('fond', .82); ctx.fillRect(cx - L - 10, cy - L - 10, 2 * L + 20, 2 * L + 20); }
+  const th = pend.s[0], bx = cx + L * Math.sin(th), by = cy + L * Math.cos(th);
+  ctx.beginPath(); ctx.arc(cx, cy, L, 0, TAU); ctx.strokeStyle = C.grille; ctx.lineWidth = 1; ctx.stroke();
+  ligne([[cx, cy - L - 6], [cx, cy + L + 6]], C.axe, 1, 1, [2, 5]);
+  /* arc de l'angle */
+  const a = Chaos.angle(th);
+  ctx.beginPath(); ctx.arc(cx, cy, L * .32, PI / 2, PI / 2 - a, a > 0); ctx.strokeStyle = rgba('energie', .7); ctx.lineWidth = 1.2; ctx.stroke();
+  lueur([[cx, cy], [bx, by]], C.accent, petit ? 2 : 3, 14);
+  point(cx, cy, petit ? 2.5 : 3.5, C.texte);
+  point(bx, by, petit ? 5 : 10, C.accent, true, 22); point(bx, by, petit ? 2 : 3.5, C.texte);
+  if (petit) return;
+  const y0 = cy + L + 46;
+  texte('θ = ' + fr(a * 180 / PI, 1) + '°', cx, y0, C.texte, 19, 'center');
+  texte('ω = ' + fr(pend.s[1], 2) + ' rad/s', cx, y0 + 21, C.sub, 11.5, 'center');
+  /* jauge : énergie comparée à la séparatrice */
+  const E = Chaos.pendulumEnergy(pend.s), gw = L * 2.1, gx = cx - gw / 2, gy = y0 + 50, f = borne(E / 39.24, 0, 1);
+  ligne([[gx, gy], [gx + gw, gy]], C.axe, 4);
+  ctx.save(); ctx.shadowColor = C.accent; ctx.shadowBlur = 10; ligne([[gx, gy], [gx + gw * f, gy]], E > 19.62 ? C.energie : C.accent, 4); ctx.restore();
+  ligne([[gx + gw / 2, gy - 8], [gx + gw / 2, gy + 8]], C.energie, 1.2);
+  texte('énergie', gx, gy - 10, C.sub, 10); texte('2gL', gx + gw / 2, gy + 22, C.energie, 10, 'center');
+  texte(E > 19.62 ? 'tours complets' : 'oscillation', gx + gw, gy - 10, E > 19.62 ? C.energie : C.accent, 10, 'right');
+  texte('glisse la masse pour la lâcher', cx, gy + 44, C.sub, 10, 'center');
+}
+
+/* ---------------- Scène 1 : bassins des trois aimants ---------------- */
+let zoneCarte = null, carteCv = null;
+const TEINTES = [[215, 160, 232], [91, 184, 255], [255, 209, 102]];
+const sombre = (c, a) => `rgb(${c.map((v, i) => Math.round(v * a + RGB.fond[i] * (1 - a))).join(',')})`;
+function dessineBassins(w, h) {
+  const pad = w < 640 ? 14 : 28, haut = 20, bas_ = 34;
+  const e = Math.min((w - 2 * pad) / 3.4, (h - haut - bas_ - pad) / 2.6), cw = 3.4 * e, ch = 2.6 * e;
+  const R = { x: (w - cw) / 2, y: haut + (h - haut - bas_ - ch) / 2, w: cw, h: ch }; zoneCarte = R;
+  if (!carteCv) { carteCv = document.createElement('canvas'); carteCv.width = bas.nx; carteCv.height = bas.ny; }
+  if (bas.pix) {
+    const g = carteCv.getContext('2d'), img = g.createImageData(bas.nx, bas.ny);
+    for (let k = 0; k < bas.pix.length; k++) {
+      const v = bas.pix[k], c = v < 0 ? RGB.fond2 : TEINTES[v].map((x, i) => Math.round(x * .30 + RGB.fond[i] * .70));
+      img.data.set([c[0], c[1], c[2], 255], 4 * k);
+    }
+    g.putImageData(img, 0, 0);
+    ctx.save(); ctx.imageSmoothingEnabled = false; ctx.drawImage(carteCv, R.x, R.y, R.w, R.h); ctx.restore();
   }
-  ctx.restore();ctx.globalAlpha=1;
-  texte('z = ρ − 1',s.x+4,s.y+s.h+17,couleurs.sub,9);
-  const sideX=s.x+4,startY=s.y+s.h+(etroit?24:52);
-  texte('HORIZON',sideX,startY,couleurs.sub,10);
-  if(lor.lambda>0){const del=Math.log(1/lor.precision);
-    texte(fr(del,2)+' τL',sideX,startY+19,couleurs.accent,15);
-    texte('λ = '+fr(lor.lambda,3),sideX,startY+39,couleurs.sub,10);
-  }else texte('PAS DE CHAOS',sideX,startY+19,couleurs.accent,10);
-}
-function dessineScope(){
-  const [w,h]=dimensions(scope,sc);if(w<=0||h<=0)return;
-  sc.fillStyle='#0a0d12';sc.fillRect(0,0,w,h);
-  sc.strokeStyle='#25313c';sc.lineWidth=1;
-  for(let i=1;i<=4;i++){sc.beginPath();sc.moveTo(0,h*i/5);sc.lineTo(w,h*i/5);sc.stroke();}
-  let vals=[];
-  if(step===0)vals=pend.series.map(p=>p.y/Math.PI);
-  else if(step===1)vals=log.history.map(p=>2*p-1);
-  else if(step===2)vals=double.serie.filter((_,i)=>i%Math.max(1,Math.floor(double.serie.length/300))===0).map(p=>Chaos.borne(Math.log10(Math.max(p.d,1e-12))/8,-1,1));
-  else vals=lor.trail.map(p=>(p[2]-25)/30);
-  if(vals.length<2)return;
-  sc.strokeStyle=couleurs.accent;sc.lineWidth=1.35;sc.beginPath();
-  const subset=vals.slice(-330);subset.forEach((v,i)=>{const x=i/(subset.length-1)*w,y=h/2-v*h*.40;i?sc.lineTo(x,y):sc.moveTo(x,y);});sc.stroke();
-}
-function draw(){
-  const d=dimensions(cv,ctx);width=d[0];height=d[1];if(width===0||height===0)return;
-  fond(width,height);
-  if(step===0)dessinePendule(width,height);else if(step===1)dessineLog(width,height);else if(step===2)dessineDouble(width,height);else dessineLorenz(width,height);
-}
-function showTip(e,title,detail,target){
-  const tip=$('#tip');tip.replaceChildren();const b=document.createElement('b'),span=document.createElement('span');b.textContent=title;span.textContent=detail;tip.append(b,span);tip.hidden=false;
-  const pos=e?{x:e.clientX,y:e.clientY}:target?{x:target.getBoundingClientRect().x,y:target.getBoundingClientRect().y}:null;
-  if(!pos)return;
-  tip.style.left=Math.min(pos.x+12,innerWidth-290)+'px';tip.style.top=Math.max(8,Math.min(pos.y-72,innerHeight-94))+'px';
-}
-function hideTip(){ $('#tip').hidden=true; }
-cv.addEventListener('pointerdown',e=>{
-  if(step!==3)return;
-  glisser={id:e.pointerId,x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);
-});
-cv.addEventListener('pointermove',e=>{
-  const rect=cv.getBoundingClientRect(),x=e.clientX-rect.x,y=e.clientY-rect.y;
-  ancienneSouris={x,y,step};
-  if(step===3&&glisser){angleVue+=(e.clientX-glisser.x)*.006;inclinaison=Chaos.borne(inclinaison+(e.clientY-glisser.y)*.004,-1.15,1.15);glisser.x=e.clientX;glisser.y=e.clientY;hideTip();}
-  else if(step===0&&!pend.magnets&&vuePhase&&x>vuePhase.x&&x<vuePhase.x+vuePhase.w&&y>vuePhase.y&&y<vuePhase.y+vuePhase.h)showTip(e,'Espace des phases','Cliquer ici pour imposer un état initial : position et vitesse.');
-  else if(step===1&&vueBif&&x>vueBif.x&&y>vueBif.y&&y<vueBif.y+vueBif.h)showTip(e,'Diagramme de bifurcation','Les points sont les états persistants après 850 générations.');
-  else hideTip();
-});
-cv.addEventListener('pointerleave',hideTip);
-cv.addEventListener('pointerup',e=>{glisser=null;if(cv.hasPointerCapture(e.pointerId))cv.releasePointerCapture(e.pointerId);});
-cv.addEventListener('click',e=>{
-  const rect=cv.getBoundingClientRect(),x=e.clientX-rect.x,y=e.clientY-rect.y;
-  if(step===0&&vuePhase){const r=vuePhase;
-    if(x<r.x||x>r.x+r.w||y<r.y||y>r.y+r.h)return;
-    if(pend.magnets){const xx=-1.7+3.4*(x-r.x)/r.w,yy=-1.3+2.6*(y-r.y)/r.h;choixAimant=Chaos.basin(xx,yy,{steps:650});}
-    else launchPendulum(-Math.PI+2*Math.PI*(x-r.x)/r.w,7-14*(y-r.y)/r.h);
+  const Xm = x => R.x + (x + 1.7) / 3.4 * R.w, Ym = y => R.y + (y + 1.3) / 2.6 * R.h;
+  /* trajectoires testées */
+  for (const c of bas.chemins) {
+    const coul = `rgb(${TEINTES[c.fin].join(',')})`;
+    traine(c.pts.map(p => [Xm(p[0]), Ym(p[1])]), coul, 1.6, null, .25, .95, c.fini ? 0 : 10);
+    point(Xm(c.x), Ym(c.y), 3, C.texte);
+    if (!c.fini) point(Xm(c.s[0]), Ym(c.s[1]), 4, coul, true, 14);
   }
-  if(step===1&&vueBif){const r=vueBif;if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)setR(log.bif[0]+(log.bif[1]-log.bif[0])*(x-r.x)/r.w);}
-});
-$$('.seg[data-step]').forEach(b=>b.addEventListener('click',()=>goStep(+b.dataset.step)));
-$('#prev').addEventListener('click',()=>goStep(step-1));$('#next').addEventListener('click',()=>goStep(step+1));
-$('#play').addEventListener('click',()=>setPlay(!playing));$('#reset').addEventListener('click',resetScene);
-$('#damping').addEventListener('input',e=>setDamping(e.target.value));$('#linear').addEventListener('click',()=>smallAngle(!pend.small));
-$('#magnets').addEventListener('click',()=>magnets(!pend.magnets));$('#pendPreset').addEventListener('click',()=>launchPendulum(Math.PI-1e-5,0));
-$('#r').addEventListener('input',e=>setR(e.target.value));$('#x0').addEventListener('input',e=>setX0(e.target.value));
-$('#zoom').addEventListener('click',()=>{zoom(3.4,3.6);setR(3.56);});$('#full').addEventListener('click',()=>zoom(2.5,4));
-$('#offset').addEventListener('input',e=>setOffset(10**(-Number(e.target.value))));$('#angle').addEventListener('input',e=>setAngle(e.target.value));
-$('#relaunch').addEventListener('click',relaunch);$('#doubleSpeed').addEventListener('click',()=>{double.speed=double.speed===3?8:double.speed===8?1:3;updateOutputs();});
-$('#rho').addEventListener('input',e=>setRho(e.target.value));$('#cloud').addEventListener('click',()=>cloud(!lor.cloud));
-$('#precision').addEventListener('input',e=>setPrecision(10**(-Number(e.target.value))));
-$('#lorenzSpeed').addEventListener('click',()=>{lor.speed=lor.speed===1?3:lor.speed===3?6:1;updateOutputs();});
-addEventListener('keydown',e=>{
-  if(e.target.closest('input,textarea,select')||e.altKey||e.metaKey||e.ctrlKey)return;
-  if(e.key===' '){e.preventDefault();setPlay(!playing);}
-  else if(e.key==='ArrowLeft'){e.preventDefault();goStep(step-1);}
-  else if(e.key==='ArrowRight'){e.preventDefault();goStep(step+1);}
-  else if(/^[1-4]$/.test(e.key))goStep(Number(e.key)-1);
-  else if(e.key.toLowerCase()==='r')resetScene();
-});
-// Les échantillons conservent leur horloge propre. La vitesse de dessin n'affecte pas le pas RK4.
-function frame(t){
-  if(!last)last=t;
-  const dt=Math.min(.06,(t-last)/1000);last=t;
-  if(playing){
-    acc+=dt*vitesse()*(mouvementReduit?.35:1);
-    const n=Math.min(600,Math.floor(acc/pas()));
-    if(n){simulate(n);acc=Math.max(0,acc-n*pas());}
+  Chaos.AIMANTS.forEach(([x, y], i) => {
+    const coul = `rgb(${TEINTES[i].join(',')})`;
+    point(Xm(x), Ym(y), 9, coul, false, 16); point(Xm(x), Ym(y), 3, coul, true);
+  });
+  if (ui.survol && ui.survol.scene === 1 && ui.survol.dans) point(ui.survol.x, ui.survol.y, 5, C.texte, false);
+  const tot = bas.nx * bas.ny;
+  texte(bas.fait < tot ? `Calcul des destinations… ${Math.round(100 * bas.fait / tot)} %` : 'Chaque couleur : l’aimant où finit un départ immobile placé là. Clique pour lâcher la masse.', R.x, R.y + R.h + 22, C.sub, 10.5);
+}
+
+/* ---------------- Scène 2 : la cascade logistique ---------------- */
+let zoneBif = null, glisseR = false;
+function cacheBif(R) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1), off = document.createElement('canvas');
+  off.width = Math.max(1, Math.round(R.w * dpr)); off.height = Math.max(1, Math.round(R.h * dpr));
+  const g = off.getContext('2d'); g.scale(dpr, dpr); g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(232,222,240,.16)';
+  for (const p of log.points) g.fillRect((p.r - log.bif[0]) / (log.bif[1] - log.bif[0]) * R.w, (1 - p.x) * R.h, .9, .9);
+  log.cache = off; log.cw = R.w; log.ch = R.h; log.refresh = false;
+}
+function dessineCascade(w, h, dt) {
+  const etroit = w < 760, pad = etroit ? 14 : 26;
+  let T, S, B;
+  if (etroit) {
+    const s = Math.min((w - 3 * pad) / 2, h * .36);
+    T = { x: pad, y: pad + 6, w: s, h: s }; S = { x: pad * 2 + s, y: pad + 6, w: w - 3 * pad - s, h: s };
+    B = { x: pad, y: T.y + s + 34, w: w - 2 * pad, h: h - T.y - s - 34 - 34 };
+  } else {
+    const s = Math.min(w * .30, h * .58);
+    T = { x: pad, y: pad + 8, w: s, h: s }; S = { x: pad, y: T.y + s + 40, w: s, h: Math.min(120, Math.max(60, h - T.y - s - 40 - 40)) };
+    B = { x: pad + s + 54, y: pad + 8, w: w - (pad + s + 54) - pad, h: h - pad - 8 - 44 };
   }
-  draw();
-  if(t-derniereLecture>190){updateMeasurements();derniereLecture=t;}
-  if(t-dernierScope>95){dessineScope();dernierScope=t;}
+  zoneBif = B;
+  /* toile d'araignée */
+  const px = x => T.x + x * T.w, py = x => T.y + (1 - x) * T.h;
+  ligne([[T.x, T.y + T.h], [T.x + T.w, T.y + T.h]], C.axe, 1); ligne([[T.x, T.y], [T.x, T.y + T.h]], C.axe, 1);
+  ligne([[px(0), py(0)], [px(1), py(1)]], C.axe, 1, 1, [3, 4]);
+  lueur(Array.from({ length: 121 }, (_, i) => [px(i / 120), py(Chaos.logisticMap(log.r, i / 120))]), C.accent, 2, 10);
+  const H_ = log.history, toile = [[px(H_[0]), py(0)]];
+  for (let i = 0; i < H_.length - 1; i++) toile.push([px(H_[i]), py(H_[i + 1])], [px(H_[i + 1]), py(H_[i + 1])]);
+  traine(toile.slice(-90), C.energie, 1.1, null, .08, .9);
+  const xn = H_[H_.length - 1]; point(px(xn), py(xn), 4, C.energie, true, 12);
+  if (log.r > 1) point(px(1 - 1 / log.r), py(1 - 1 / log.r), 4, C.texte, false);
+  texte('xₙ₊₁ = r xₙ (1 − xₙ)', T.x + 8, T.y + 14, C.sub, 10.5);
+  texte('xₙ', T.x + T.w, T.y + T.h + 15, C.sub, 10.5, 'right');
+  /* série temporelle */
+  ligne([[S.x, S.y + S.h], [S.x + S.w, S.y + S.h]], C.axe, 1); ligne([[S.x, S.y], [S.x, S.y + S.h]], C.axe, 1);
+  if (log.r > 1) ligne([[S.x, S.y + (1 / log.r) * S.h], [S.x + S.w, S.y + (1 / log.r) * S.h]], rgba('texte', .25), 1, 1, [2, 4]);
+  const v = H_.slice(-40), sp = v.map((x, i) => [S.x + 6 + (S.w - 12) * i / 39, S.y + (1 - x) * S.h]);
+  ligne(sp, rgba('accent', .5), 1);
+  sp.forEach((p, i) => point(p[0], p[1], i === sp.length - 1 ? 3.5 : 1.8, i === sp.length - 1 ? C.energie : C.accent));
+  texte('xₙ, une génération après l’autre', S.x, S.y + S.h + 15, C.sub, 10.5);
+  texte('1', S.x - 5, S.y + 8, C.sub, 10, 'right'); texte('0', S.x - 5, S.y + S.h, C.sub, 10, 'right');
+  /* diagramme de bifurcation */
+  if (!log.cache || log.refresh || Math.abs(log.cw - B.w) > 2 || Math.abs(log.ch - B.h) > 2) cacheBif(B);
+  log.reveal = Math.min(1, log.reveal + dt * (reduit ? 3 : 1.1));
+  ctx.save(); ctx.beginPath(); ctx.rect(B.x, B.y, B.w * log.reveal, B.h); ctx.clip(); ctx.drawImage(log.cache, B.x, B.y, B.w, B.h); ctx.restore();
+  ligne([[B.x, B.y + B.h], [B.x + B.w, B.y + B.h]], C.axe, 1);
+  const Xr = r => B.x + (r - log.bif[0]) / (log.bif[1] - log.bif[0]) * B.w;
+  [[3, 'r₁'], [3.449489742783178, 'r₂'], [3.544090359551922, 'r₃'], [3.564407266095, 'r₄'], [3.8284, 'période 3']].forEach(([r, t], i) => {
+    if (r < log.bif[0] || r > log.bif[1]) return;
+    const x = Xr(r); ligne([[x, B.y + B.h], [x, B.y + B.h + 5]], C.sub, 1);
+    if (i < 3 || log.bif[1] - log.bif[0] < .5 || i === 4) texte(t, x, B.y + B.h + 17, C.sub, 10, 'center');
+  });
+  texte(fr(log.bif[0], 2), B.x, B.y + B.h + 32, C.sub, 10); texte(fr(log.bif[1], 2), B.x + B.w, B.y + B.h + 32, C.sub, 10, 'right');
+  texte('r', B.x + B.w / 2, B.y + B.h + 32, C.texte, 16, 'center', SERIF);
+  texte('états persistants après 850 générations', B.x + B.w, B.y + 12, C.sub, 10.5, 'right');
+  /* curseur r et orbite actuelle */
+  if (log.r >= log.bif[0] && log.r <= log.bif[1]) {
+    const x = Xr(log.r);
+    lueur([[x, B.y], [x, B.y + B.h]], C.accent, 1.4, 10, .9);
+    const orb = [];
+    for (const y of Chaos.orbit(log.r, log.x0, 700).slice(-64)) if (!orb.some(o => Math.abs(o - y) < 2e-3)) orb.push(y);
+    for (const y of orb) point(x, B.y + (1 - y) * B.h, orb.length > 16 ? 1.8 : 3, C.energie, true, orb.length > 16 ? 0 : 6);
+    texte('r = ' + fr(log.r, 4), borne(x, B.x + 40, B.x + B.w - 40), B.y - 4, C.accent, 11, 'center');
+  }
+  if (ui.survol && ui.survol.scene === 2 && ui.survol.dans && !glisseR) ligne([[ui.survol.x, B.y], [ui.survol.x, B.y + B.h]], rgba('texte', .35), 1, 1, [2, 4]);
+}
+
+/* ---------------- Scène 3 : deux doubles pendules ---------------- */
+function dessineJumeaux(w, h) {
+  const etroit = w < 640, pad = etroit ? 14 : 26;
+  const strip = { x: pad, w: w - 2 * pad, h: Math.max(70, h * .2) }; strip.y = h - strip.h - 34;
+  const L = Math.min(w * .19, (strip.y - pad - 20) * .44), cx = w / 2, cy = pad + 18 + (strip.y - pad - 30 - 2 * L) / 2;
+  const scr = p => [cx + L * p.x2, cy + L * p.y2];
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  traine(dbl.traceA.map(scr), C.positif, 1.6, null, .03, .55);
+  traine(dbl.traceB.map(scr), C.negatif, 1.6, null, .03, .55);
+  for (const [s, coul] of [[dbl.a, C.positif], [dbl.b, C.negatif]]) {
+    const p = Chaos.doublePositions(s), x1 = cx + L * p.x1, y1 = cy + L * p.y1, x2 = cx + L * p.x2, y2 = cy + L * p.y2;
+    lueur([[cx, cy], [x1, y1], [x2, y2]], coul, 2.6, 12, .85);
+    point(x1, y1, 4.5, coul, true, 10); point(x2, y2, 8, coul, true, 18);
+  }
+  ctx.restore();
+  point(cx, cy, 3.5, C.texte);
+  /* légende */
+  point(pad + 5, pad + 10, 4, C.positif); texte('A', pad + 15, pad + 14, C.texte, 11);
+  point(pad + 38, pad + 10, 4, C.negatif); texte('B', pad + 48, pad + 14, C.texte, 11);
+  texte('même départ, à ' + puissance(dbl.offset) + ' rad près', pad, pad + 32, C.sub, 10.5);
+  texte('confondus, ils paraissent blancs', pad, pad + 48, C.sub, 10.5);
+  const yd = pad + 14 + integre();
+  if (dbl.divTime !== null) texte('écart visible à t = ' + fr(dbl.divTime, 1) + ' s', w - pad, yd, C.energie, 11.5, 'right');
+  texte('t = ' + fr(dbl.t, 1) + ' s', w - pad, yd + (dbl.divTime !== null ? 18 : 0), C.sub, 11, 'right');
+  /* ln d en fonction du temps */
+  const T = Math.max(30, Math.ceil(dbl.t / 10) * 10), lo = -30, hi = 3;
+  const X = t => strip.x + t / T * strip.w, Y = v => strip.y + (hi - borne(v, lo, hi)) / (hi - lo) * strip.h;
+  ligne([[strip.x, strip.y + strip.h], [strip.x + strip.w, strip.y + strip.h]], C.axe, 1);
+  ligne([[strip.x, Y(Math.log(.1))], [strip.x + strip.w, Y(Math.log(.1))]], rgba('energie', .5), 1, 1, [3, 5]);
+  texte('écart visible', strip.x + strip.w, Y(Math.log(.1)) - 5, rgba('energie', .8), 10, 'right');
+  if (dbl.lambda > 0) ligne([[X(0), Y(Math.log(dbl.offset))], [X(T), Y(Math.log(dbl.offset) + dbl.lambda * T)]], rgba('texte', .3), 1, 1, [2, 5]);
+  const pas = Math.max(1, Math.floor(dbl.serie.length / 900));
+  lueur(dbl.serie.filter((_, i) => i % pas === 0).map(p => [X(p.t), Y(Math.log(Math.max(1e-16, p.d)))]), C.accent, 1.8, 8);
+  texte('ln d', strip.x, strip.y - 6, C.sub, 10.5);
+  texte('pente λ ≈ ' + fr(dbl.lambda, 2) + ' s⁻¹ (tiretés)', strip.x + 46, strip.y - 6, C.sub, 10.5);
+  texte('0', strip.x, strip.y + strip.h + 16, C.sub, 10); texte(T + ' s', strip.x + strip.w, strip.y + strip.h + 16, C.sub, 10, 'right');
+}
+
+/* ---------------- Scène 4 : l'attracteur de Lorenz ---------------- */
+let glisse = null;
+function projLorenz(cx, cy, e) {
+  const cY = Math.cos(lor.yaw), sY = Math.sin(lor.yaw), cT = Math.cos(lor.tilt), sT = Math.sin(lor.tilt), z0 = lor.rho - 3;
+  return p => { const x = p[0], y = p[1], z = p[2] - z0, X = cY * x - sY * y, D = sY * x + cY * y; return [cx + X * e, cy - (cT * z + sT * D) * e]; };
+}
+function dessineLorenz(w, h) {
+  const etroit = w < 760, pad = etroit ? 14 : 26;
+  const cote = etroit ? Math.min(118, w * .32) : Math.min(190, w * .2);
+  const A = etroit ? { x: pad, y: pad, w: w - 2 * pad, h: h - 2 * pad - 20 } : { x: pad, y: pad, w: w - cote - 3 * pad, h: h - 2 * pad - 20 };
+  const echelle = Math.max(lor.rho, 20) * 2.1, e = Math.min(A.w / (echelle * 1.15), A.h / echelle);
+  const pr = projLorenz(A.x + A.w / 2, A.y + A.h / 2, e);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, etroit ? w : A.x + A.w + pad, h); ctx.clip();
+  ligne(lor.back.map(pr), C.accent, 1, .13);
+  if (lor.rho > 1) {
+    const q = Math.sqrt(8 / 3 * (lor.rho - 1));
+    for (const [sg, t] of [[1, 'C⁺'], [-1, 'C⁻']]) { const [x, y] = pr([sg * q, sg * q, lor.rho - 1]); point(x, y, 4, C.texte, false); texte(t, x + 8, y + 4, C.sub, 10); }
+  }
+  traine(lor.trail.map(pr), C.accent, 1.9, null, .05, 1, 12);
+  const [hx, hy] = pr(lor.state); point(hx, hy, 4.5, C.energie, true, 16);
+  if (lor.cloud && lor.points.length) {
+    /* Le nuage part dans une boule de 10⁻⁶ : tant qu'il tient dans un pixel, un anneau le signale. */
+    let ex = 0; const ecran = lor.points.map(pr), [x0, y0] = ecran[0];
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba('negatif', .6);
+    for (const [x, y] of ecran) { ctx.fillRect(x - 1.1, y - 1.1, 2.2, 2.2); ex = Math.max(ex, Math.abs(x - x0), Math.abs(y - y0)); }
+    ctx.restore();
+    if (ex < 10) {
+      const t = lor.t - (lor.nuageT ?? 0), h = Chaos.forecastHorizon(Math.max(0, lor.lambda), 1e-6, 1);
+      ctx.save(); ctx.setLineDash([3, 4]); ctx.strokeStyle = C.negatif; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(x0, y0, 16 + 3 * Math.sin(performance.now() / 300), 0, TAU); ctx.stroke(); ctx.restore();
+      const gauche = x0 > A.x + A.w * .6, tx = gauche ? x0 - 26 : x0 + 26, al = gauche ? 'right' : 'left';
+      texte('1 000 départs, encore confondus', tx, y0 - 4, C.negatif, 11, al);
+      if (h) texte('ils s’écartent vers ' + fr(h, 0) + ' u.t. (là : ' + fr(t, 1) + ')', tx, y0 + 12, C.sub, 10.5, al);
+    }
+  }
+  ctx.restore();
+  texte('glisse pour tourner l’espace (x, y, z)', A.x, h - pad, C.sub, 10.5);
+  /* section de Poincaré */
+  const S = { x: w - pad - cote, y: pad + (etroit ? 14 : 24) + integre(), w: cote, h: cote };
+  if (etroit) { ctx.fillStyle = rgba('fond', .85); ctx.fillRect(S.x - 6, S.y - 20, S.w + 12, S.h + 26); }
+  ctx.strokeStyle = C.axe; ctx.lineWidth = 1; ctx.strokeRect(S.x + .5, S.y + .5, S.w, S.h);
+  texte('section z = ρ − 1', S.x, S.y - 7, C.sub, 10);
+  ctx.save(); ctx.beginPath(); ctx.rect(S.x, S.y, S.w, S.h); ctx.clip(); ctx.fillStyle = rgba('energie', .7);
+  for (const p of lor.section) ctx.fillRect(S.x + (p.x + 25) / 50 * S.w - .8, S.y + (25 - p.y) / 50 * S.h - .8, 1.6, 1.6);
+  ctx.restore();
+  if (!etroit) {
+    texte('x', S.x + S.w, S.y + S.h + 14, C.sub, 10, 'right'); texte('y', S.x - 4, S.y + 10, C.sub, 10, 'right');
+    const s = state(), y0 = S.y + S.h + 50;
+    texte('horizon de prévision', S.x, y0, C.sub, 10.5);
+    texte(s.horizon === null ? '—' : fr(s.horizon, 1) + ' u.t.', S.x, y0 + 26, C.accent, 22);
+    texte('erreur de ' + puissance(lor.precision) + ' au départ', S.x, y0 + 46, C.sub, 10.5);
+    texte('λ = ' + fr(lor.lambda, 3) + ' par u.t.', S.x, y0 + 62, C.sub, 10.5);
+  }
+}
+
+/* ---------------- Enregistreur du panneau ---------------- */
+function enregistreur() {
+  const [w, h] = taille(scope, sx); if (!w || !h) return;
+  sx.fillStyle = C.fond; sx.fillRect(0, 0, w, h);
+  sx.strokeStyle = C.grille; sx.lineWidth = 1;
+  for (let i = 1; i <= 3; i++) { sx.beginPath(); sx.moveTo(0, h * i / 4); sx.lineTo(w, h * i / 4); sx.stroke(); }
+  let v = [];
+  if (scene === 0) v = pend.series.map(p => p / PI);
+  else if (scene === 2) v = log.history.map(p => 2 * p - 1);
+  else if (scene === 3) { const pas = Math.max(1, Math.floor(dbl.serie.length / 300)); v = dbl.serie.filter((_, i) => i % pas === 0).map(p => borne((Math.log10(Math.max(p.d, 1e-13)) + 6) / 7, -1, 1)); }
+  else if (scene === 4) v = lor.trail.map(p => (p[2] - lor.rho + 3) / 25);
+  if (v.length < 2) return;
+  const sub = v.slice(-320);
+  sx.save(); sx.shadowColor = C.accent; sx.shadowBlur = 6; sx.strokeStyle = C.accent; sx.lineWidth = 1.4; sx.beginPath();
+  sub.forEach((y, i) => { const X = i / (sub.length - 1) * w, Y = h / 2 - y * h * .42; i ? sx.lineTo(X, Y) : sx.moveTo(X, Y); }); sx.stroke(); sx.restore();
+}
+
+/* ---------------- Boucle ---------------- */
+function dessine(dt) {
+  [W, H] = taille(cv, ctx); if (!W || !H) return;
+  fondEcran(W, H);
+  if (scene === 0) dessinePortrait(W, H);
+  else if (scene === 1) dessineBassins(W, H);
+  else if (scene === 2) dessineCascade(W, H, dt);
+  else if (scene === 3) dessineJumeaux(W, H);
+  else dessineLorenz(W, H);
+}
+function frame(t) {
+  if (!last) last = t;
+  const dt = Math.min(.06, (t - last) / 1000); last = t;
+  if (scene === 1 && bas.fait < bas.nx * bas.ny) avanceBassins(10);
+  if (playing) {
+    acc += dt * vitesse() * (reduit ? .35 : 1);
+    const n = Math.min(600, Math.floor(acc / PAS[scene]));
+    if (n) { simulate(n); acc = Math.max(0, acc - n * PAS[scene]); }
+  }
+  dessine(dt);
+  if (t - lecture > 200) { lectures(); lecture = t; }
+  if (t - trace > 90) { enregistreur(); trace = t; }
   requestAnimationFrame(frame);
 }
-// Surface d'essais en lecture seule, sauf les crochets demandés : les tests avancent des pas physiques.
-window.__labo={moteur:Chaos,get step(){return step;},goStep,state,tick,setPlay,
-  launchPendulum,setDamping,smallAngle,magnets,setR,setX0,zoom,setOffset,setAngle,relaunch,setRho,cloud,setPrecision};
-configurePend();configLog();configDouble();configLorenz();log.points=Chaos.bifurcation(2.5,4,500,850,90);
-updateOutputs();goStep(0);requestAnimationFrame(frame);
+
+/* ---------------- Pointeur ---------------- */
+const local = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+const dans = (R, x, y) => R && x >= R.x && x <= R.x + R.w && y >= R.y && y <= R.y + R.h;
+const prendMasse = (x, y) => { if (!zonePendule) return false; const { cx, cy, L } = zonePendule, th = pend.s[0]; return Math.hypot(x - cx - L * Math.sin(th), y - cy - L * Math.cos(th)) < 22; };
+cv.addEventListener('pointerdown', e => {
+  const [x, y] = local(e);
+  if (scene === 0 && prendMasse(x, y)) { pend.drag = true; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
+  else if (scene === 2 && dans(zoneBif, x, y)) { glisseR = true; cv.setPointerCapture(e.pointerId); setR(log.bif[0] + (log.bif[1] - log.bif[0]) * (x - zoneBif.x) / zoneBif.w); e.preventDefault(); }
+  else if (scene === 4) { glisse = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); cv.className = 'grabbing'; e.preventDefault(); }
+});
+cv.addEventListener('pointermove', e => {
+  const [x, y] = local(e);
+  if (scene === 0 && pend.drag) { const { cx, cy } = zonePendule; const th = Math.atan2(x - cx, y - cy); pend.s = [th, 0]; pend.trail = [[th, 0]]; return; }
+  if (scene === 2 && glisseR) { setR(log.bif[0] + (log.bif[1] - log.bif[0]) * borne((x - zoneBif.x) / zoneBif.w, 0, 1)); return; }
+  if (scene === 4 && glisse) {
+    const dx = e.clientX - glisse.x, dy = e.clientY - glisse.y; lor.yaw += dx * .006; lor.tilt = borne(lor.tilt + dy * .005, -1.4, 1.4);
+    ui.rotation += Math.abs(dx * .006) + Math.abs(dy * .005); glisse = { x: e.clientX, y: e.clientY }; return;
+  }
+  const zone = scene === 0 ? zonePortrait : scene === 1 ? zoneCarte : scene === 2 ? zoneBif : null;
+  ui.survol = { scene, x, y, dans: dans(zone, x, y) };
+});
+cv.addEventListener('pointerleave', () => { ui.survol = null; });
+const lache = e => {
+  if (cv.hasPointerCapture && cv.hasPointerCapture(e.pointerId)) cv.releasePointerCapture(e.pointerId);
+  if (pend.drag) { pend.drag = false; launchPendulum(pend.s[0], 0); }
+  glisseR = false; if (glisse) { glisse = null; cv.className = 'grab'; }
+};
+cv.addEventListener('pointerup', lache); cv.addEventListener('pointercancel', lache);
+cv.addEventListener('click', e => {
+  const [x, y] = local(e);
+  if (scene === 0 && dans(zonePortrait, x, y) && !prendMasse(x, y)) {
+    const P = zonePortrait; launchPendulum(-PI + TAU * (x - P.x) / P.w, OM - 2 * OM * (y - P.y) / P.h);
+  } else if (scene === 1 && dans(zoneCarte, x, y)) {
+    const R = zoneCarte; testeBassin(-1.7 + 3.4 * (x - R.x) / R.w, -1.3 + 2.6 * (y - R.y) / R.h);
+  }
+});
+
+/* ---------------- Commandes ---------------- */
+$$('#stepper .seg').forEach(b => b.addEventListener('click', () => {
+  const n = +b.dataset.a;
+  if (scene === n || scene === +b.dataset.b) return; aller(n);
+}));
+$('#prev').addEventListener('click', () => segAller(segCourant() - 1));
+$('#next').addEventListener('click', () => segAller(segCourant() + 1));
+$('#play').addEventListener('click', () => setPlay(!playing)); $('#reset').addEventListener('click', resetScene);
+$('#damping').addEventListener('input', e => setDamping(e.target.value)); $('#linear').addEventListener('click', () => smallAngle(!pend.small));
+$('#pendPreset').addEventListener('click', () => launchPendulum(PI - 1e-4, 0));
+$('#clearPaths').addEventListener('click', () => { bas.chemins = []; });
+$('#r').addEventListener('input', e => setR(e.target.value)); $('#x0').addEventListener('input', e => setX0(e.target.value));
+$('#zoom').addEventListener('click', () => zoom(3.4, 3.6)); $('#zoom3').addEventListener('click', () => zoom(3.8, 3.88)); $('#full').addEventListener('click', () => zoom(2.5, 4));
+$('#offset').addEventListener('input', e => setOffset(10 ** (-Number(e.target.value)))); $('#angle').addEventListener('input', e => setAngle(e.target.value));
+$('#relaunch').addEventListener('click', relaunch);
+$('#doubleSpeed').addEventListener('click', () => { dbl.speed = dbl.speed === 3 ? 8 : dbl.speed === 8 ? 1 : 3; sorties(); });
+$('#rho').addEventListener('input', e => setRho(e.target.value)); $('#cloud').addEventListener('click', () => cloud(!lor.cloud));
+$('#precision').addEventListener('input', e => setPrecision(10 ** (-Number(e.target.value))));
+$('#lorenzSpeed').addEventListener('click', () => { lor.speed = lor.speed === 1 ? 3 : lor.speed === 3 ? 6 : 1; sorties(); });
+addEventListener('keydown', e => {
+  if (e.target.closest('input,textarea,select') || e.altKey || e.metaKey || e.ctrlKey) return;
+  if (document.documentElement.classList.contains('labo-embed') && /^[1-4]$/.test(e.key)) return;
+  if (e.key === ' ') { e.preventDefault(); setPlay(!playing); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); segAller(segCourant() - 1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); segAller(segCourant() + 1); }
+  else if (/^[1-4]$/.test(e.key)) segAller(+e.key - 1);
+  else if (e.key.toLowerCase() === 'r') resetScene();
+});
+addEventListener('resize', () => { log.refresh = true; });
+
+/* Surface d'essais : le socle de SESSION-FONDATION.md (step, goStep, state, tick, setPlay) et les crochets du brief
+   (magnets(on) ouvre ou quitte la scène Bassins), plus l'accès par scène (scene, aller) ; les tests avancent des pas physiques. */
+window.__labo = { moteur: Chaos, get step() { return SCENES[scene].seg; }, goStep: i => { segAller(i); return SCENES[scene].seg; },
+  get scene() { return scene; }, aller, state, tick: n => { simulate(n); return state(); }, setPlay,
+  magnets: on => { aller(on ? 1 : 0); return state(); },
+  launchPendulum, setDamping, smallAngle, testeBassin, setR, setX0, zoom, setOffset, setAngle, relaunch, setRho: v => setRho(v, true), cloud, setPrecision,
+  tourne: (dy, dt) => { lor.yaw += dy; lor.tilt = borne(lor.tilt + dt, -1.4, 1.4); ui.rotation += Math.abs(dy) + Math.abs(dt); }, ui };
+window.allerScene = n => aller(n);
+window.__chaos = { etat: () => ({ s: state(), ui: { ...ui } }) };
+
+configPend(); configLog(); configBif(); configDouble(); configLorenz();
+setPlay(true); sorties();
+window.__demarre = () => { aller(0); requestAnimationFrame(frame); };
+})();
+</script>
+<script src="../../labo/fiche.js"></script>
+<script>
+/* ---------------- Fiches : lecture seule de l'état de chaque scène ---------------- */
+(() => {
+const instant = (mem, cle, val) => { if (!(cle in mem)) mem[cle] = val; return mem[cle]; };
+const fmt = (n, d = 2) => Number(n).toLocaleString('fr-CA', { minimumFractionDigits: d, maximumFractionDigits: d }).replace(',', '{,}');
+const FICHES = [
+  {
+    scene: 'Portrait', titre: 'Le chemin de chaque état',
+    regarde: 'Chaque point du portrait est un état complet : un angle et une vitesse. Le pendule parti à 90° y trace une boucle fermée autour de l’équilibre du bas ; la séparatrice dorée sépare les oscillations des tours complets.',
+    prediction: { q: 'Le pendule part à 90° sans vitesse. Sa période, comparée aux 2,01 s des petits angles (2π√(L/g)), est :', choix: ['la même, 2,01 s', 'plus longue, environ 2,37 s', 'plus courte, environ 1,7 s'], bonne: 1,
+      explication: 'Aux petits angles, T₀ = 2π√(1/9,81) = 2,006 s. Mais la force de rappel vaut mg sin θ, plus faible que mg θ aux grands angles : le retour est plus lent. Le calcul exact (intégrale elliptique) donne 2,368 s à 90°, 18 % de plus. Le panneau affiche les deux.' },
+    essais: [
+      { t: 'Clique au-dessus de la séparatrice : le pendule fait des tours complets.', fait: (e, mem) => e.ui.lancers > mem.l0 && e.s.regime === 'rotation' },
+      { t: 'Clique sur « Équilibre instable » : immobile au sommet… puis il bascule.', fait: (e, mem) => e.ui.lancers > mem.l0 && Math.abs(e.ui.dernierE - 19.62) < .05 },
+      { t: 'Monte l’amortissement : la boucle devient une spirale vers le centre.', fait: (e, mem) => e.s.damping > 0 && e.s.damping !== mem.d0 },
+    ],
+    suivi: (e, mem) => { instant(mem, 'l0', e.ui.lancers); instant(mem, 'd0', e.s.damping); },
+    pourquoi: 'L’état présent fixe tout le futur : deux trajectoires du portrait ne se croisent jamais. En bas, une petite déviation crée une force qui ramène ; au sommet, la même déviation crée une force qui éloigne. Avec de l’amortissement, l’énergie diminue et toutes les boucles s’enroulent vers l’équilibre stable.',
+    relation: String.raw`\dot\theta=\omega,\qquad \dot\omega=-\frac gL\sin\theta-c\,\omega,\qquad E_{\rm sep}=2gL`,
+    defs: [['Espace des phases', 'Plan (θ, ω) : un point donne l’état complet, une courbe donne une histoire.'], ['Équilibre stable', 'Les états voisins y reviennent ; instable : ils s’en éloignent.'], ['Séparatrice', 'Trajectoire limite entre oscillation et rotation, d’énergie 2gL par unité de masse.']],
+    piege: 'Croire que sin θ ≈ θ vaut partout : l’ellipse bleue des petits angles n’est juste que près du bas.',
+  },
+  {
+    scene: 'Bassins', titre: 'Trois aimants, trois destins',
+    regarde: 'Chaque couleur marque l’aimant où finit une masse lâchée sans vitesse à cet endroit. Près des aimants, les régions sont larges ; ailleurs, les couleurs s’emmêlent en bandes de plus en plus fines.',
+    prediction: { q: 'Deux départs à quelques millimètres l’un de l’autre, dans une zone où les couleurs s’entrelacent, finissent :', choix: ['toujours sur le même aimant', 'parfois sur deux aimants différents', 'au centre, entre les aimants'], bonne: 1,
+      explication: 'Les lois sont les mêmes pour les deux départs, mais la frontière entre deux bassins passe entre eux : chacun suit son chemin vers un aimant différent. Plus on regarde finement la frontière, plus elle se replie.' },
+    essais: [
+      { t: 'Clique sur la carte : la trajectoire rejoint l’aimant de sa couleur.', fait: (e, mem) => e.ui.clics > mem.c0 },
+      { t: 'Trouve deux départs voisins (écart sous 0,1) qui finissent sur deux aimants différents.', fait: (e, mem) => e.ui.paires > mem.p0 },
+    ],
+    suivi: (e, mem) => { instant(mem, 'c0', e.ui.clics); instant(mem, 'p0', e.ui.paires); },
+    pourquoi: 'Un équilibre stable attire toute une région de départs : son bassin. Avec plusieurs attracteurs, l’espace des états se partage entre leurs bassins. Près des frontières, une incertitude minuscule sur le départ suffit à changer la destination, sans que la règle change.',
+    relation: String.raw`\ddot{\mathbf r}=-k\,\mathbf r-b\,\dot{\mathbf r}+\sum_{i=1}^{3}\mathbf F_i(\mathbf r)`,
+    defs: [['Attracteur', 'Ensemble vers lequel se rapprochent les états d’une région.'], ['Bassin d’attraction', 'Ensemble des départs qui finissent sur un même attracteur.']],
+    piege: 'Imaginer que l’imprévisibilité exige du hasard : ici tout est déterministe, seule la précision du départ manque.',
+  },
+  {
+    scene: 'Cascade', titre: 'Un bouton change la règle du jeu',
+    regarde: 'À gauche, la toile d’araignée passe d’une génération à la suivante. À droite, chaque colonne du diagramme montre où les générations finissent pour une valeur de r : une branche, puis deux, quatre, huit… puis un nuage.',
+    prediction: { q: 'À r = 2,8, vers quelle valeur les générations convergent-elles ?', reponse: 1 - 1 / 2.8, tol: .01,
+      explication: 'Le point fixe vérifie x* = r x*(1 − x*), donc x* = 1 − 1/r = 1 − 1/2,8 ≈ 0,643. Il attire parce que |f′(x*)| = |2 − r| = 0,8 < 1 : la toile d’araignée tourne en spirale vers lui.' },
+    essais: [
+      { t: 'Passe r au-delà de 3 : deux valeurs alternent (période 2).', fait: (e, mem) => e.s.r !== mem.r0 && e.s.period === 2 },
+      { t: 'Trouve un cycle de période 4.', fait: (e, mem) => e.s.r !== mem.r0 && e.s.period === 4 },
+      { t: 'Cherche la fenêtre de période 3, vers r ≈ 3,83, au milieu du chaos.', fait: (e, mem) => e.s.r !== mem.r0 && e.s.period === 3 },
+    ],
+    suivi: (e, mem) => { instant(mem, 'r0', e.s.r); },
+    pourquoi: 'Quand r augmente, le point fixe perd sa stabilité à r = 3 : un cycle de deux valeurs le remplace, puis se dédouble à son tour. Les doublements se rapprochent selon un rapport universel, 4,669, puis le comportement devient chaotique. Des fenêtres de régularité réapparaissent au milieu.',
+    relation: String.raw`x_{n+1}=r\,x_n(1-x_n),\qquad x^*=1-\frac1r,\qquad |f'(x^*)|=|2-r|`,
+    vivant: ({ s }) => String.raw`r=${fmt(s.r, 3)}:\quad x^*=${fmt(1 - 1 / s.r, 3)},\quad |f'(x^*)|=${fmt(Math.abs(2 - s.r), 3)}\ ${Math.abs(2 - s.r) < 1 ? '\\lt' : '\\gt'}\ 1`,
+    defs: [['Bifurcation', 'Changement qualitatif du comportement quand un paramètre franchit un seuil.'], ['Doublement de période', 'Un cycle de n valeurs devient un cycle de 2n valeurs.'], ['Constante de Feigenbaum', 'δ ≈ 4,669 : limite du rapport des intervalles entre doublements successifs.']],
+    piege: 'Prendre le nuage du diagramme pour du bruit : chaque point est calculé exactement, sans tirage au hasard.',
+  },
+  {
+    scene: 'Jumeaux', titre: 'L’écart qui devient visible',
+    regarde: 'Deux doubles pendules partent avec un milliardième de radian d’écart. Superposés, leurs couleurs s’additionnent en blanc ; quand l’écart grandit, l’orange et le bleu se séparent. En bas, ln d monte presque en ligne droite, puis plafonne.',
+    prediction: { q: 'Si tu mesures l’angle de départ mille fois mieux (10⁻¹² au lieu de 10⁻⁹ rad), l’écart devient visible :', choix: ['mille fois plus tard', 'quelques secondes plus tard seulement', 'jamais'], bonne: 1,
+      explication: 'L’écart croît comme δ₀ e^(λt). Pour atteindre le même seuil en partant mille fois plus petit, il faut ln(1000)/λ de plus : avec l’exposant λ des lectures (entre 0,8 et 1 s⁻¹ à 120°), 7 à 8 s. Mille fois plus de précision n’achète que quelques secondes de prévision.' },
+    essais: [
+      { t: 'Règle l’écart initial à 10⁻¹² et attends : l’écart devient visible plus tard, mais il le devient.', fait: (e, mem) => e.s.offset < 2e-12 && e.s.divergenceTime !== null && e.s.offset !== mem.o0 },
+      { t: 'Baisse l’angle initial à 30° ou moins : à faible énergie, les jumeaux restent ensemble.', fait: (e, mem) => e.s.angle <= 30 && e.s.angle !== mem.a0 },
+    ],
+    suivi: (e, mem) => { instant(mem, 'o0', e.s.offset); instant(mem, 'a0', e.s.angle); },
+    pourquoi: 'Les équations sont les mêmes pour les deux pendules, sans aucun hasard. Mais tant que l’écart est petit, il se multiplie à peu près par e chaque 1/λ seconde. La prévision dure donc comme le logarithme de la précision : gagner un facteur mille ne rapporte que ln 1000 ≈ 6,9 temps de Lyapunov.',
+    relation: String.raw`\delta(t)\approx\delta_0\,e^{\lambda t},\qquad t_p\approx\frac1\lambda\ln\frac{\Delta}{\delta_0}`,
+    vivant: ({ s }) => s.lambda > .2 ? String.raw`t_p\approx\frac{\ln\left(0{,}1/(${s.offset.toExponential(0).replace('e-', '\\cdot10^{-') + '}'})\right)}{${fmt(s.lambda, 2)}}=${fmt(Math.log(.1 / s.offset) / s.lambda, 1)}\ \mathrm s` : String.raw`\lambda\approx${fmt(s.lambda, 2)}\ \mathrm{s^{-1}}:\ \text{pas de divergence nette}`,
+    defs: [['Sensibilité aux conditions initiales', 'Un écart minuscule au départ grandit jusqu’à changer l’histoire.'], ['Exposant de Lyapunov λ', 'Taux moyen de croissance logarithmique d’un petit écart.'], ['Temps de Lyapunov', '1/λ : durée pendant laquelle l’écart est multiplié par e.']],
+    piege: 'Dire que le système est aléatoire : il est déterministe, mais le long terme dépend d’une précision qu’on n’a jamais.',
+  },
+  {
+    scene: 'Lorenz', titre: 'Une forme malgré l’imprévisibilité',
+    regarde: 'La trajectoire passe d’une aile à l’autre sans jamais repasser exactement par le même chemin. Pourtant elle reste sur une forme reconnaissable : l’attracteur. Le carré à droite ne garde que ses passages à travers le plan z = ρ − 1.',
+    prediction: { q: 'Ici λ ≈ 0,89 par unité de temps et l’erreur de départ vaut 10⁻⁶. Combien d’unités de temps avant que l’erreur atteigne 1 ?', reponse: Math.log(1e6) / 0.8896170957666633, tol: .6, unite: 'u.t.',
+      explication: 't_p = ln(1/10⁻⁶)/λ = 13,82/0,890 ≈ 15,5 unités de temps. Avec une erreur de 10⁻⁹, on n’obtient que 23,3 : la précision mille fois meilleure ajoute 7,8 unités, pas mille fois plus.' },
+    essais: [
+      { t: 'Allume le nuage de 1 000 départs : il s’étale, mais reste sur les deux ailes.', fait: (e, mem) => e.s.cloud && !mem.n0 },
+      { t: 'Descends ρ sous 24,74 : la trajectoire finit sur un point fixe C⁺ ou C⁻.', fait: (e, mem) => e.s.rho < 24.74 && e.s.rho !== mem.r0 },
+      { t: 'Fais tourner l’attracteur en glissant : vu de côté, il est presque plat.', fait: (e, mem) => e.ui.rotation > mem.rot0 + .8 },
+    ],
+    suivi: (e, mem) => { instant(mem, 'n0', e.s.cloud); instant(mem, 'r0', e.s.rho); instant(mem, 'rot0', e.ui.rotation); },
+    pourquoi: 'Un attracteur étrange organise le chaos : on sait sur quelle forme la trajectoire évoluera, pas où elle sera dans longtemps. Les départs voisins s’étirent le long de l’attracteur puis se replient, comme une pâte qu’on pétrit. Sous ρ ≈ 24,74, les points fixes redeviennent attractifs et le chaos disparaît.',
+    relation: String.raw`\dot x=\sigma(y-x),\quad \dot y=x(\rho-z)-y,\quad \dot z=xy-\beta z`,
+    defs: [['Attracteur étrange', 'Attracteur à structure fractale sur lequel la dynamique est chaotique.'], ['Section de Poincaré', 'Points où la trajectoire traverse un plan dans un sens donné.']],
+    piege: 'Croire qu’une forme reconnaissable prouve un mouvement périodique : la trajectoire ne se referme jamais.',
+  },
+];
+Fiche.init({
+  fiches: FICHES,
+  etapes: [...document.querySelectorAll('#stepper .seg')].map(b => ({
+    code: b.querySelector('b').textContent, titre: b.querySelector('span').textContent, mod: 8,
+    scenes: [b.dataset.a, b.dataset.b].filter(x => x !== undefined).map(Number) })),
+  etat: () => window.__chaos.etat(),
+  aller: n => window.allerScene(n),
+  k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+  theorie: () => 'explication.html#m08',
+});
+window.__demarre();
 })();
 </script>
 <script src="../../labo/planche.js"></script>
