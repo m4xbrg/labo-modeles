@@ -120,14 +120,14 @@ Les couches Observer / Manipuler / Comprendre étaient peu claires : la page s'o
 
 ### 4.5 État de la migration
 
-Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-15, sur la branche qui fait de ce gabarit le standard. Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
+Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-22, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation* et *Systèmes, croissance et hasard* (PR n° 45 à 50). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
 
 | Page | Dossier | Planche | Explication | État |
 |---|---|---|---|---|
 | La mitose | `01-mitose` | Couches O/M/C | Ancien format | À migrer |
 | La respiration cellulaire | `02-respiration` | Couches O/M/C | Ancien format | À migrer |
 | Le neurone | `03-neurone` | Couches O/M/C | Ancien format | À migrer |
-| Le champ électrique | `04-champ-electrique` | Couches O/M/C | Ancien format | À migrer |
+| Le champ électrique | `04-champ-electrique` | Fiche d’étape | Cours interactif | Au standard |
 | Ondes et interférences | `05-ondes-interferences` | Couches O/M/C | Ancien format | À migrer |
 | Courant et circuits | `06-courant-circuits` | Couches O/M/C | Ancien format | À migrer |
 | Matière, chaleur et transport | `07-matiere-chaleur` | Couches O/M/C | Ancien format | À migrer |
@@ -141,14 +141,14 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-15, sur la b
 | L’énergie du vivant | `fondations-energie-biologique` | Couches O/M/C | Ancien format | À migrer |
 | Évolution et génétique des populations | `fondations-evolution-populations` | Couches O/M/C | Ancien format | À migrer |
 | Fondations | `fondations-flux-fluides` | Couches O/M/C | Ancien format | À migrer |
-| Forces, énergie et conservation | `fondations-forces-energie` | Couches O/M/C | Ancien format | À migrer |
+| Forces, énergie et conservation | `fondations-forces-energie` | Fiche d’étape | Cours interactif | Au standard |
 | De l’ADN à la protéine | `fondations-information-genetique` | Couches O/M/C | Ancien format | À migrer |
 | Langage scientifique | `fondations-langage` | Fiche d’étape | Cours interactif | Au standard |
 | Magnétisme et induction | `fondations-magnetisme-induction` | Couches O/M/C | Ancien format | À migrer |
 | Molécules et mole | `fondations-molecules-mole` | Couches O/M/C | Ancien format | À migrer |
 | L'onde électromagnétique | `fondations-onde-electromagnetique` | Couches O/M/C | Ancien format | À migrer |
 | Optique : la lumière qui tourne | `fondations-optique` | Couches O/M/C | Ancien format | À migrer |
-| Oscillations et ondes | `fondations-oscillations-ondes` | Couches O/M/C | Ancien format | À migrer |
+| Oscillations et ondes | `fondations-oscillations-ondes` | Fiche d’étape | Cours interactif | Au standard |
 | Muscle, cœur et échanges | `fondations-physiologie-circulation` | Couches O/M/C | Ancien format | À migrer |
 | Du local au collectif | `fondations-populations-emergence` | Couches O/M/C | Ancien format | À migrer |
 | Une particule, des amplitudes | `fondations-quantique` | Couches O/M/C | Ancien format | À migrer |
@@ -158,6 +158,6 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-15, sur la b
 | Rotation, gravitation et orbites | `fondations-rotation-gravitation` | Couches O/M/C | Ancien format | À migrer |
 | Signaux et équilibres du vivant | `fondations-signalisation-homeostasie` | Couches O/M/C | Ancien format | À migrer |
 | Un signal, des fréquences | `fondations-signaux-fourier` | Couches O/M/C | Ancien format | À migrer |
-| Systèmes, croissance et hasard | `fondations-systemes-hasard` | Couches O/M/C | Ancien format | À migrer |
+| Systèmes, croissance et hasard | `fondations-systemes-hasard` | Fiche d’étape | Cours interactif | Au standard |
 
-1 page(s) sur 35 au standard.
+5 page(s) sur 35 au standard.
