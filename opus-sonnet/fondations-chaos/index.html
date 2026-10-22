@@ -458,7 +458,7 @@ function configLorenz() {
 }
 function configCloud() {
   if (!lor.cloud) { lor.points = []; return; }
-  const alea = Chaos.mulberry32(91), s = lor.state;
+  const alea = Chaos.mulberry32(91), s = lor.state; lor.nuageT = lor.t;
   lor.points = Array.from({ length: 1000 }, () => {
     const x = alea() * 2 - 1, y = alea() * 2 - 1, z = alea() * 2 - 1, n = Math.hypot(x, y, z) || 1, r = Math.cbrt(alea()) * 1e-6 / n;
     return [s[0] + x * r, s[1] + y * r, s[2] + z * r];
@@ -595,6 +595,8 @@ function sorties() {
 }
 function lectures() {
   const s = state(); let rows = [];
+  const tot = bas.nx * bas.ny;
+  $('#basinState').textContent = bas.fait < tot ? `Calcul de la carte… ${Math.round(100 * bas.fait / tot)} %` : 'Carte : ' + bas.nx + ' × ' + bas.ny + ' départs';
   if (scene === 0) {
     const tp = pend.amplitude === null ? null : Chaos.periodVsAmplitude(pend.amplitude).T;
     rows = [['Angle θ', fr(s.theta * 180 / PI, 1) + ' °'], ['Vitesse ω', fr(s.omega, 2) + ' rad/s'], ['Énergie / masse', fr(s.energy, 2) + ' J/kg'], ['Séparatrice 2gL', '19,62 J/kg'],
@@ -650,6 +652,8 @@ function traine(pts, coul, larg, rompre = null, aMin = .05, aMax = .95, flouFin 
     dessine();
   }
 }
+/* En mode intégré, le lien « Ouvrir la planche » occupe le coin haut droit : on y descend les étiquettes. */
+const integre = () => document.documentElement.classList.contains('labo-embed') ? 34 : 0;
 function fondEcran(w, h) { ctx.fillStyle = C.fond; ctx.fillRect(0, 0, w, h); }
 
 /* ---------------- Scène 0 : pendule et portrait de phase ---------------- */
@@ -861,8 +865,9 @@ function dessineJumeaux(w, h) {
   point(pad + 38, pad + 10, 4, C.negatif); texte('B', pad + 48, pad + 14, C.texte, 11);
   texte('même départ, à ' + puissance(dbl.offset) + ' rad près', pad, pad + 32, C.sub, 10.5);
   texte('confondus, ils paraissent blancs', pad, pad + 48, C.sub, 10.5);
-  if (dbl.divTime !== null) texte('écart visible à t = ' + fr(dbl.divTime, 1) + ' s', w - pad, pad + 14, C.energie, 11.5, 'right');
-  texte('t = ' + fr(dbl.t, 1) + ' s', w - pad, pad + (dbl.divTime !== null ? 32 : 14), C.sub, 11, 'right');
+  const yd = pad + 14 + integre();
+  if (dbl.divTime !== null) texte('écart visible à t = ' + fr(dbl.divTime, 1) + ' s', w - pad, yd, C.energie, 11.5, 'right');
+  texte('t = ' + fr(dbl.t, 1) + ' s', w - pad, yd + (dbl.divTime !== null ? 18 : 0), C.sub, 11, 'right');
   /* ln d en fonction du temps */
   const T = Math.max(30, Math.ceil(dbl.t / 10) * 10), lo = -30, hi = 3;
   const X = t => strip.x + t / T * strip.w, Y = v => strip.y + (hi - borne(v, lo, hi)) / (hi - lo) * strip.h;
@@ -896,12 +901,26 @@ function dessineLorenz(w, h) {
     for (const [sg, t] of [[1, 'C⁺'], [-1, 'C⁻']]) { const [x, y] = pr([sg * q, sg * q, lor.rho - 1]); point(x, y, 4, C.texte, false); texte(t, x + 8, y + 4, C.sub, 10); }
   }
   traine(lor.trail.map(pr), C.accent, 1.9, null, .05, 1, 12);
-  if (lor.cloud) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba('negatif', .55); for (const p of lor.points) { const [x, y] = pr(p); ctx.fillRect(x - .9, y - .9, 1.8, 1.8); } ctx.restore(); }
   const [hx, hy] = pr(lor.state); point(hx, hy, 4.5, C.energie, true, 16);
+  if (lor.cloud && lor.points.length) {
+    /* Le nuage part dans une boule de 10⁻⁶ : tant qu'il tient dans un pixel, un anneau le signale. */
+    let ex = 0; const ecran = lor.points.map(pr), [x0, y0] = ecran[0];
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rgba('negatif', .6);
+    for (const [x, y] of ecran) { ctx.fillRect(x - 1.1, y - 1.1, 2.2, 2.2); ex = Math.max(ex, Math.abs(x - x0), Math.abs(y - y0)); }
+    ctx.restore();
+    if (ex < 10) {
+      const t = lor.t - (lor.nuageT ?? 0), h = Chaos.forecastHorizon(Math.max(0, lor.lambda), 1e-6, 1);
+      ctx.save(); ctx.setLineDash([3, 4]); ctx.strokeStyle = C.negatif; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(x0, y0, 16 + 3 * Math.sin(performance.now() / 300), 0, TAU); ctx.stroke(); ctx.restore();
+      const gauche = x0 > A.x + A.w * .6, tx = gauche ? x0 - 26 : x0 + 26, al = gauche ? 'right' : 'left';
+      texte('1 000 départs, encore confondus', tx, y0 - 4, C.negatif, 11, al);
+      if (h) texte('ils s’écartent vers ' + fr(h, 0) + ' u.t. (là : ' + fr(t, 1) + ')', tx, y0 + 12, C.sub, 10.5, al);
+    }
+  }
   ctx.restore();
   texte('glisse pour tourner l’espace (x, y, z)', A.x, h - pad, C.sub, 10.5);
   /* section de Poincaré */
-  const S = etroit ? { x: w - pad - cote, y: pad + 14, w: cote, h: cote } : { x: w - pad - cote, y: pad + 24, w: cote, h: cote };
+  const S = { x: w - pad - cote, y: pad + (etroit ? 14 : 24) + integre(), w: cote, h: cote };
   if (etroit) { ctx.fillStyle = rgba('fond', .85); ctx.fillRect(S.x - 6, S.y - 20, S.w + 12, S.h + 26); }
   ctx.strokeStyle = C.axe; ctx.lineWidth = 1; ctx.strokeRect(S.x + .5, S.y + .5, S.w, S.h);
   texte('section z = ρ − 1', S.x, S.y - 7, C.sub, 10);
