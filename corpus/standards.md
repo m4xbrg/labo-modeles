@@ -120,7 +120,7 @@ Les couches Observer / Manipuler / Comprendre étaient peu claires : la page s'o
 
 ### 4.5 État de la migration
 
-Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation*, *Systèmes, croissance et hasard* (PR n° 45 à 50) et *Stabilité, bifurcations et chaos* (PR n° 55). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
+Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation*, *Systèmes, croissance et hasard* (PR n° 45 à 50), *Stabilité, bifurcations et chaos* (PR n° 55) et *Un signal, des fréquences* (PR n° 57). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
 
 | Page | Dossier | Planche | Explication | État |
 |---|---|---|---|---|
@@ -157,7 +157,7 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après l
 | Relativité restreinte | `fondations-relativite-restreinte` | Couches O/M/C | Ancien format | À migrer |
 | Rotation, gravitation et orbites | `fondations-rotation-gravitation` | Couches O/M/C | Ancien format | À migrer |
 | Signaux et équilibres du vivant | `fondations-signalisation-homeostasie` | Couches O/M/C | Ancien format | À migrer |
-| Un signal, des fréquences | `fondations-signaux-fourier` | Couches O/M/C | Ancien format | À migrer |
+| Un signal, des fréquences | `fondations-signaux-fourier` | Fiche d’étape | Cours interactif | Au standard |
 | Systèmes, croissance et hasard | `fondations-systemes-hasard` | Fiche d’étape | Cours interactif | Au standard |
 
-6 page(s) sur 35 au standard.
+7 page(s) sur 35 au standard.
