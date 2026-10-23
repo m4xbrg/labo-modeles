@@ -120,7 +120,7 @@ Les couches Observer / Manipuler / Comprendre étaient peu claires : la page s'o
 
 ### 4.5 État de la migration
 
-Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-22, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation* et *Systèmes, croissance et hasard* (PR n° 45 à 50). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
+Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation*, *Systèmes, croissance et hasard* (PR n° 45 à 50), *Stabilité, bifurcations et chaos* (PR n° 55) et *Un signal, des fréquences* (PR n° 57). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
 
 | Page | Dossier | Planche | Explication | État |
 |---|---|---|---|---|
@@ -137,10 +137,10 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-22, après l
 | Atomes, noyaux et lumière | `fondations-atomes-spectres` | Couches O/M/C | Ancien format | À migrer |
 | D’un gradient à une tension | `fondations-bioelectricite` | Couches O/M/C | Ancien format | À migrer |
 | Cellule, membrane et transport | `fondations-cellule-membrane` | Couches O/M/C | Ancien format | À migrer |
-| Stabilité, bifurcations et chaos | `fondations-chaos` | Couches O/M/C | Ancien format | À migrer |
+| Stabilité, bifurcations et chaos | `fondations-chaos` | Fiche d’étape | Cours interactif | Au standard |
 | L’énergie du vivant | `fondations-energie-biologique` | Couches O/M/C | Ancien format | À migrer |
 | Évolution et génétique des populations | `fondations-evolution-populations` | Couches O/M/C | Ancien format | À migrer |
-| Fondations | `fondations-flux-fluides` | Couches O/M/C | Ancien format | À migrer |
+| Flux, gradients, champs et fluides | `fondations-flux-fluides` | Couches O/M/C | Ancien format | À migrer |
 | Forces, énergie et conservation | `fondations-forces-energie` | Fiche d’étape | Cours interactif | Au standard |
 | De l’ADN à la protéine | `fondations-information-genetique` | Couches O/M/C | Ancien format | À migrer |
 | Langage scientifique | `fondations-langage` | Fiche d’étape | Cours interactif | Au standard |
@@ -157,7 +157,7 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-22, après l
 | Relativité restreinte | `fondations-relativite-restreinte` | Couches O/M/C | Ancien format | À migrer |
 | Rotation, gravitation et orbites | `fondations-rotation-gravitation` | Couches O/M/C | Ancien format | À migrer |
 | Signaux et équilibres du vivant | `fondations-signalisation-homeostasie` | Couches O/M/C | Ancien format | À migrer |
-| Un signal, des fréquences | `fondations-signaux-fourier` | Couches O/M/C | Ancien format | À migrer |
+| Un signal, des fréquences | `fondations-signaux-fourier` | Fiche d’étape | Cours interactif | Au standard |
 | Systèmes, croissance et hasard | `fondations-systemes-hasard` | Fiche d’étape | Cours interactif | Au standard |
 
-5 page(s) sur 35 au standard.
+7 page(s) sur 35 au standard.
