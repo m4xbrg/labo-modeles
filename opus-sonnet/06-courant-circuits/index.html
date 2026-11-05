@@ -114,11 +114,18 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .swap{animation:none}
   .tip,.btn,.comprendre,.seg{transition:none}
 }
+.labo-fiche .panel > .tete,.labo-fiche .panel > .eq-doublon{display:none}
+.labo-fiche #lecturesCirc{padding:0 20px 4px 22px;display:grid;gap:16px}
+.labo-fiche #lecturesCirc .val{font-size:15px}
+.labo-fiche #lecturesCirc .row.big .val{font-size:18px}
 </style>
 <link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 <script src="../../labo/theme.js"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
@@ -144,21 +151,12 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 
 <nav class="chapitres" id="stepper" aria-label="Chapitres et étapes : un chapitre par module">
   <div class="chap"><p class="chap-t"><b>22</b>Courant et circuits dynamiques</p><div class="segs">
-    <button class="seg" data-a="1" title="22.1 — Une boucle, un courant"><b>22.1</b><span>Une boucle</span></button>
-    <button class="seg" data-a="2" title="22.2 — Le condensateur se charge"><b>22.2</b><span>Charge</span></button>
-    <button class="seg" data-a="3" title="22.3 — Le condensateur se décharge"><b>22.3</b><span>Décharge</span></button>
-    <button class="seg" data-a="4" title="22.4 — Bobine et oscillation"><b>22.4</b><span>Bobine</span></button>
+    <button class="seg" data-a="0" title="22.1 — Une boucle, un courant"><b>22.1</b><span>Une boucle</span></button>
+    <button class="seg" data-a="1" title="22.2 — Le condensateur se charge"><b>22.2</b><span>Charge</span></button>
+    <button class="seg" data-a="2" title="22.3 — Le condensateur se décharge"><b>22.3</b><span>Décharge</span></button>
+    <button class="seg" data-a="3" data-b="4" title="22.4 — Bobine et oscillation"><b>22.4</b><span>Bobine</span></button>
   </div></div>
 </nav>
-
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder d’abord : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change la tension, la résistance ou la capacité, bascule l’inverseur."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, l’équation de l’étape et la théorie du module 22."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
 
 <div class="app">
   <main class="scene" id="scene">
@@ -167,35 +165,33 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   </main>
 
   <aside class="panel" aria-label="Panneau de lecture">
-    <section>
+    <section class="tete">
       <p class="eyebrow" id="eyebrow">Module <b>22</b> · étape 1 sur 4</p>
       <h2 id="stepTitle">Une boucle, un courant</h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
-      <p class="flash couche-comp" id="flash">La moitié de l’énergie fournie par la pile a chauffé la résistance.</p>
+      <p id="stepText" aria-live="polite"></p>
     </section>
 
-    <section class="couche-lire">
-      <p class="eyebrow">Mesures</p>
-      <div class="meas" id="meas"></div>
-      <p class="note" id="note"></p>
-    </section>
+    <div id="lecturesCirc">
+      <section>
+        <p class="eyebrow">Mesures</p>
+        <div class="meas" id="meas"></div>
+        <p class="flash" id="flash">La moitié de l’énergie fournie par la pile a chauffé la résistance.</p>
+        <p class="note" id="note"></p>
+      </section>
+    </div>
 
-    <section class="couche-comp">
+    <section class="eq-doublon">
       <p class="eyebrow">Équation de l’étape</p>
       <p class="eq" id="eq"></p>
     </section>
 
-    <section class="kbd couche-lire">
+    <section class="kbd" id="hints">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape</li>
-        <li><kbd>R</kbd> réinitialiser l'étape · <kbd>S</kbd> inverseur · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>R</kbd> réinitialiser · <kbd>S</kbd> inverseur · <kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
       </ul>
     </section>
-
-    <nav class="liens">
-      <a class="comprendre couche-comp" id="lienTheorie" href="explication.html#m22"><span>Théorie du module <b id="numTheorie">22</b></span><span aria-hidden="true">&rarr;</span></a>
-    </nav>
   </aside>
 
   <div class="controls" role="toolbar" aria-label="Contrôles">
@@ -211,9 +207,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       <div class="grp" id="gR1"><span class="gl">R</span><input type="range" id="rR1" min="10" max="200" step="5" value="60" aria-label="Résistance en ohms"><span class="rv" id="vR1"></span></div>
       <div class="grp" id="gR2" hidden><span class="gl">R</span><input type="range" id="rR2" min="2" max="20" step="0.5" value="10" aria-label="Résistance en kilohms"><span class="rv" id="vR2"></span></div>
       <div class="grp" id="gC2" hidden><span class="gl">C</span><input type="range" id="rC2" min="50" max="500" step="10" value="100" aria-label="Capacité en microfarads"><span class="rv" id="vC2"></span></div>
-      <div class="grp" id="gMode" hidden><span class="gl">Circuit</span>
-        <button class="btn" id="bRL" aria-pressed="true">RL</button>
-        <button class="btn" id="bLC" aria-pressed="false">LC amorti</button></div>
       <div class="grp" id="gRrl" hidden><span class="gl">R</span><input type="range" id="rRrl" min="5" max="50" step="1" value="10" aria-label="Résistance en ohms (circuit RL)"><span class="rv" id="vRrl"></span></div>
       <div class="grp" id="gRlc" hidden><span class="gl">R</span><input type="range" id="rRlc" min="0" max="30" step="1" value="1" aria-label="Résistance en ohms (circuit LC)"><span class="rv" id="vRlc"></span></div>
       <div class="grp" id="gSw" hidden><span class="gl" id="swGl">Inverseur</span><button class="btn" id="bSw" title="Basculer l'inverseur (S)"><span id="swLab">charge</span></button></div>
@@ -259,13 +252,18 @@ function si(v, unit, sig, plus) {
   sig = sig || 3;
   if (Math.abs(v) < 1e-12) return '0 ' + unit;
   const a = Math.abs(v);
-  const pr = a >= 1e3 ? [1e3, 'k'] : a >= 1 ? [1, ''] : a >= 1e-3 ? [1e-3, 'm'] : [1e-6, 'µ'];
-  const x = v / pr[0];
-  let dec = Math.max(0, sig - 1 - Math.floor(Math.log10(Math.abs(x)) + 1e-9));
-  let s = num(x, dec);
-  if (Math.abs(Number(s.replace('−','-').replace(/\s/g,'').replace(',', '.'))) >= 1000 && pr[1] === 'm') { return si(v, unit, sig, plus); }
+  /* Préfixe : si l'arrondi donne 1000 (0,9996 A → « 1 000 mA »), on passe au préfixe supérieur. L'ancienne version se
+     rappelait elle-même avec les mêmes arguments : récursion infinie (« Maximum call stack size exceeded »). */
+  const PRE = [[1e-6, '\xb5'], [1e-3, 'm'], [1, ''], [1e3, 'k']];
+  let i = a >= 1e3 ? 3 : a >= 1 ? 2 : a >= 1e-3 ? 1 : 0, s;
+  for (;;) {
+    const x = v / PRE[i][0], dec = Math.max(0, sig - 1 - Math.floor(Math.log10(Math.abs(x)) + 1e-9));
+    s = num(x, dec);
+    if (i < 3 && Math.abs(Number(s.replace('\u2212', '-').replace(/\s/g, '').replace(',', '.'))) >= 1000) { i++; continue; }
+    break;
+  }
   if (plus && v > 0) s = '+' + s;
-  return s + ' ' + pr[1] + unit;
+  return s + '\xa0' + PRE[i][1] + unit;
 }
 
 /* ---------------- État du modèle ---------------- */
@@ -273,6 +271,7 @@ const p = { V1: 6, R1: 60, V0: 6, R2: 10000, C2: 100e-6, Rrl: 10, Lrl: 1, Rlc: 1
 let act = 1, mode = 'RL', sw = 'charge';
 let t = 0, VC = 0, I = 0, qL = 0, Ef = 0, Ed = 0, seg = { t0: 0, a: 0, b: 0, sw: 'charge' };
 let phase = 0, playing = true, dirty = true;
+let nSw = 0;                              // inverseurs basculés ou oscillations relancées (lu par la fiche)
 
 const Rv = () => act === 1 ? p.R1 : act < 4 ? p.R2 : (mode === 'RL' ? p.Rrl : p.Rlc);
 const Cv = () => (act === 2 || act === 3) ? p.C2 : (act === 4 && mode === 'LC' ? p.Clc : 0);
@@ -1002,7 +1001,7 @@ function readouts(force) {
   const done = act === 2 && sw === 'charge' && seg.a === 0 && VC >= 0.99 * p.V0 && Ef > 0 && Math.abs(Ed / Ef - 0.5) < 0.03;
   $('#flash').classList.toggle('on', done);
 }
-const tools = { gV1: [1], gR1: [1], gR2: [2, 3], gC2: [2, 3], gMode: [4], gRrl: [4, 'RL'], gRlc: [4, 'LC'], gSw: [2, 3, 4] };
+const tools = { gV1: [1], gR1: [1], gR2: [2, 3], gC2: [2, 3], gRrl: [4, 'RL'], gRlc: [4, 'LC'], gSw: [2, 3, 4] };
 function syncTools() {
   for (const id in tools) {
     const a = tools[id]; let on = a.includes(act);
@@ -1016,7 +1015,6 @@ function syncTools() {
   $('#rC2').value = Math.round(p.C2 * 1e6); $('#vC2').textContent = si(p.C2, 'F', 3);
   $('#rRrl').value = p.Rrl; $('#vRrl').textContent = si(p.Rrl, 'Ω', 3);
   $('#rRlc').value = p.Rlc; $('#vRlc').textContent = si(p.Rlc, 'Ω', 3);
-  $('#bRL').setAttribute('aria-pressed', mode === 'RL'); $('#bLC').setAttribute('aria-pressed', mode === 'LC');
   $('#swGl').textContent = isLC() ? 'Oscillation' : 'Inverseur';
   $('#swLab').textContent = isLC() ? 'Relancer (S)' : (sw === 'charge' ? 'charge → décharge (S)' : 'décharge → charge (S)');
 }
@@ -1031,10 +1029,11 @@ function updateUI() {
     ? (mode === 'RL' ? 'Ralenti ×10 : 1 s à l’écran = 0,1 s réelle. ' : 'Ralenti ×500 : 1 s à l’écran = 2 ms réelles. ') + 'Pourquoi une bobine réagit ainsi aux variations de courant : c’est l’induction, sujet de la planche <a href="../fondations-magnetisme-induction/index.html">Magnétisme et induction</a>.'
     : act === 1 ? 'Composants idéaux, fils sans résistance. Vitesse des électrons exagérée (la vraie : ~0,1 mm/s).'
     : 'Temps réel (pas de ralenti). Les courbes pointillées montrent ce qui va arriver.';
-  document.querySelectorAll('.seg').forEach(b => { if (+b.dataset.a === act) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  document.querySelectorAll('.seg').forEach(b => { const i = sceneIdx(); if (+b.dataset.a === i || (b.dataset.b !== undefined && +b.dataset.b === i)) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
   $('#bPrev').disabled = act === 1; $('#bNext').disabled = act === 4;
   buildRows(); syncTools(); readouts(true); hideTip();
   uiKey = act + mode;
+  if (window.Fiche) { Fiche.relance(); Fiche.montre(sceneIdx()); }
 }
 
 /* ---------------- Étapes (actes) et paramètres ---------------- */
@@ -1050,9 +1049,9 @@ function goAct(n, restart) {
   fade = -1;
 }
 function setSw(v) {
-  if (isLC()) { initAct(); dirty = true; syncTools(); return; }
+  if (isLC()) { nSw++; initAct(); dirty = true; syncTools(); return; }
   if (!hasSw() || v === sw) return;
-  sw = v; restartSeg();
+  nSw++; sw = v; restartSeg();
   if (isRC()) I = (Vs() - VC) / p.R2;
   buildPath(); syncTools(); dirty = true;
 }
@@ -1138,10 +1137,21 @@ $('#bPlay').addEventListener('click', () => setPlay(!playing));
 $('#bPrev').addEventListener('click', e => { goAct(act - 1); e.currentTarget.blur(); });
 $('#bNext').addEventListener('click', e => { goAct(act + 1); e.currentTarget.blur(); });
 $('#bReset').addEventListener('click', e => { enterAct(act); e.currentTarget.blur(); });
-document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => { goAct(+b.dataset.a); e.currentTarget.blur(); }));
+/* Scènes de la fiche : 0 à 2 = actes I à III, 3 = acte IV en RL, 4 = acte IV en LC. */
+const sceneIdx = () => act < 4 ? act - 1 : (mode === 'RL' ? 3 : 4);
+function goScene(i) {
+  i = clamp(Math.round(i), 0, 4);
+  if (i < 3) { goAct(i + 1); return; }
+  const m = i === 3 ? 'RL' : 'LC';
+  if (act === 4) { setMode(m); return; }
+  mode = m; goAct(4);
+}
+window.allerScene = goScene;
+document.querySelectorAll('.seg').forEach(b => b.addEventListener('click', e => {
+  const i = +b.dataset.a, j = b.dataset.b !== undefined ? +b.dataset.b : -1;
+  goScene(sceneIdx() === i || sceneIdx() === j ? sceneIdx() : i); e.currentTarget.blur();
+}));
 $('#bSw').addEventListener('click', e => { setSw(sw === 'charge' ? 'decharge' : 'charge'); e.currentTarget.blur(); });
-$('#bRL').addEventListener('click', e => { setMode('RL'); e.currentTarget.blur(); });
-$('#bLC').addEventListener('click', e => { setMode('LC'); e.currentTarget.blur(); });
 const bind = (id, key, scale) => $(id).addEventListener('input', e => setParam(key, +e.target.value * scale));
 bind('#rV1', 'V', 1); bind('#rR1', 'R', 1); bind('#rR2', 'R', 1000); bind('#rC2', 'C', 1e-6); bind('#rRrl', 'R', 1); bind('#rRlc', 'R', 1);
 addEventListener('keydown', e => {
@@ -1152,7 +1162,7 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); goAct((pending && fade ? pending : act) + (e.key === 'ArrowRight' ? 1 : -1)); return; }
   if (e.key === 'r' || e.key === 'R') { enterAct(act); return; }
   if (e.key === 's' || e.key === 'S') { if (act >= 2) setSw(sw === 'charge' ? 'decharge' : 'charge'); return; }
-  if (/^[1-4]$/.test(e.key)) goAct(+e.key);
+  if (/^[1-4]$/.test(e.key)) goScene(+e.key - 1);
 });
 document.addEventListener('visibilitychange', () => { last = 0; });
 new ResizeObserver(() => resize()).observe(sceneEl);
@@ -1191,7 +1201,7 @@ window.__circuits = {
   state() {
     const R = Rv(), c = Cv(), l = Lv();
     return { act, t, V: Vv(), R, C: c, L: l, I, VC: VCnow(), q: qNow(), P: Pv(), Uc: Ucv(), Ul: Ulv(), Efournie: Ef, Edissipee: Ed,
-      mode, sw, tau: tauV(), VL: VLnow(), Vs: Vs(), slow: slow(), Etot: Ucv() + Ulv(), T0: T0v(), w0: Math.sqrt(w0sq()), Rcrit: Rcrit(), tseg: t - seg.t0, regime: isLC() ? regimeText() : null };
+      mode, sw, tau: tauV(), VL: VLnow(), Vs: Vs(), slow: slow(), Etot: Ucv() + Ulv(), T0: T0v(), w0: Math.sqrt(w0sq()), Rcrit: Rcrit(), tseg: t - seg.t0, regime: isLC() ? regimeText() : null, p: { ...p }, playing, nSw, scene: sceneIdx() };
   },
   set(o) {
     o = o || {};
@@ -1212,6 +1222,111 @@ resize();
 enterAct(1);
 setPlay(true);
 requestAnimationFrame(frame);
+})();
+</script>
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+  const nf = (x, d = 2) => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: d }).format(x).replace('-', '−');
+  const tex = (x, d = 2) => nf(x, d).replace(',', '{,}').replace(/\u202f|\u00a0/g, '\\,');
+  const etat = () => window.__circuits.state();
+  /* L'état d'arrivée est celui de la scène telle qu'on la découvre ; Fiche.relance() le jette à chaque reset. */
+  const suivi = (e, m) => { if (!m.depart) m.depart = e; if (!e.playing) m.pause = true; };
+  const aChange = (cle) => (e, m) => m.depart && Math.abs(e.p[cle] - m.depart.p[cle]) > 1e-12;
+  const pauseRelance = (e, m) => m.pause && e.playing;
+  const fiches = [
+    {
+      titre: 'Une boucle, un courant', scene: 'Une boucle',
+      regarde: 'Une pile maintient une tension V entre ses bornes ; le même courant I = V/R traverse tous les points de la boucle, et P = V·I est l’énergie convertie en chaleur chaque seconde. Les points bleus sont les électrons, qui vont à l’inverse du courant conventionnel (triangles turquoise).',
+      prediction: { q: 'La pile fait 6 V et la résistance 60 Ω. Quel courant traverse la boucle ?', reponse: 100, unite: 'mA', tol: 5,
+        explication: 'I = V/R = 6 V / 60 Ω = 0,10 A, soit 100 mA. La puissance dissipée est P = V·I = 0,6 W.' },
+      suivi,
+      essais: [
+        { t: 'Double la résistance (curseur R) : le courant est divisé par deux.', fait: (e, m) => m.depart && e.p.R1 >= 1.99 * m.depart.p.R1 },
+        { t: 'Monte la tension de la pile de plus de 1 V : le courant et la puissance augmentent.', fait: (e, m) => m.depart && e.p.V1 > m.depart.p.V1 + 1 },
+        { t: 'Mets en pause, puis relance.', fait: pauseRelance }
+      ],
+      pourquoi: 'Le courant est le même en tout point de la boucle : ce qui change d’un point à l’autre, c’est le potentiel. La résistance ne « consomme » pas de courant, elle convertit de l’énergie électrique en chaleur.',
+      relation: String.raw`V=R\,I,\qquad P=V\,I=R\,I^2=\frac{V^2}{R}`,
+      vivant: e => String.raw`I=\frac{V}{R}=\frac{${tex(e.p.V1)}\ \mathrm{V}}{${tex(e.p.R1)}\ \Omega}=${tex(e.p.V1 / e.p.R1 * 1000)}\ \mathrm{mA}`,
+      defs: [['Courant I', 'Débit de charge, en ampères. Sens conventionnel : du + vers le −, à l’extérieur de la pile.'], ['Tension V', 'Différence de potentiel entre deux points (module 21).'], ['Résistance R', 'Opposition au passage du courant, R = V/I, en ohms.']],
+      piege: 'Le courant n’est pas « consommé » par la résistance : dans une boucle simple, il est le même partout. Ce qui se dissipe, c’est de l’énergie.'
+    },
+    {
+      titre: 'Le condensateur se charge', scene: 'Charge',
+      regarde: 'Des électrons quittent l’armature du haut et s’accumulent sur celle du bas : +Q d’un côté, −Q de l’autre. Le champ entre les armatures s’oppose à la pile : le courant s’essouffle et V_C approche V₀ sans jamais tout à fait l’atteindre. Les courbes pointillées montrent ce qui va arriver.',
+      prediction: { q: 'La pile fait 6 V, R = 10 kΩ et C = 100 µF (τ = 1 s). Quelle tension V_C lit-on au bout d’une constante de temps ?', reponse: 6 * (1 - Math.exp(-1)), unite: 'V', tol: 0.15,
+        explication: 'V_C(τ) = V₀·(1 − e⁻¹) = 6 × 0,632 ≈ 3,79 V : après τ, le condensateur est chargé à 63 % de V₀.' },
+      suivi,
+      essais: [
+        { t: 'Change la capacité C (curseur) : la constante de temps τ = RC change avec elle.', fait: aChange('C2') },
+        { t: 'Change la résistance R : à τ plus grand, la charge est plus lente.', fait: aChange('R2') },
+        { t: 'Bascule l’inverseur (S) en pleine charge : le condensateur commence à se décharger.', fait: (e, m) => m.depart && e.sw === 'decharge' && m.depart.sw === 'charge' }
+      ],
+      pourquoi: 'La vitesse de charge est proportionnelle à ce qu’il reste à charger : c’est une exponentielle. Bilan d’énergie : la pile fournit C·V₀², le condensateur en garde la moitié, la résistance dissipe l’autre moitié, quelle que soit R.',
+      relation: String.raw`V_C(t)=V_0\left(1-\mathrm{e}^{-t/\tau}\right),\qquad \tau=RC`,
+      vivant: e => String.raw`\tau=RC=${tex(e.p.R2 / 1000)}\ \mathrm{k\Omega}\times${tex(e.p.C2 * 1e6, 0)}\ \mu\mathrm{F}=${tex(e.p.R2 * e.p.C2)}\ \mathrm{s}`,
+      defs: [['Capacité C', 'Charge stockée par volt, en farads.'], ['Constante de temps τ', 'Durée caractéristique : τ = RC. Après τ, 63 % ; après 5τ, plus de 99 %.']],
+      piege: 'Doubler R ne réduit pas l’énergie perdue pendant la charge : elle reste ½·C·V₀². Le temps double, mais le courant est deux fois plus faible.'
+    },
+    {
+      titre: 'Le condensateur se décharge', scene: 'Décharge',
+      regarde: 'La pile est sortie du circuit : le condensateur se vide dans la résistance. Le courant change de sens (I < 0) et les électrons repartent à l’envers ; plus V_C diminue, moins il y a de quoi pousser, donc la décharge ralentit.',
+      prediction: { q: 'Avec τ = 1 s, au bout de combien de temps la tension du condensateur est-elle tombée à la moitié de sa valeur initiale ?', reponse: Math.LN2, unite: 's', tol: 0.04,
+        explication: 't½ = τ·ln 2 ≈ 0,69 × 1 s ≈ 0,69 s : la demi-vie d’une décharge exponentielle est ln 2 fois la constante de temps.' },
+      suivi,
+      essais: [
+        { t: 'Recharge à mi-course : bascule l’inverseur vers « charge » (S).', fait: (e, m) => m.depart && e.sw === 'charge' && m.depart.sw === 'decharge' },
+        { t: 'Change la résistance R : la décharge s’accélère ou ralentit.', fait: aChange('R2') },
+        { t: 'Change la capacité C : τ et t½ changent ensemble.', fait: aChange('C2') }
+      ],
+      pourquoi: 'Même exponentielle qu’à la charge, mais descendante. Le courant est négatif parce que le courant conventionnel repart de l’armature chargée, alors que V_C reste positive.',
+      relation: String.raw`V_C(t)=V_0\,\mathrm{e}^{-t/\tau},\qquad t_{1/2}=\tau\ln 2\approx0{,}69\,\tau`,
+      vivant: e => String.raw`t_{1/2}=\tau\ln 2=${tex(e.p.R2 * e.p.C2)}\ \mathrm{s}\times0{,}693=${tex(e.p.R2 * e.p.C2 * Math.LN2)}\ \mathrm{s}`,
+      defs: [['Demi-vie t½', 'Temps pour que V_C tombe de moitié : t½ = τ·ln 2.'], ['Courant négatif', 'Le courant circule dans le sens opposé à celui de la charge.']],
+      piege: 'À la décharge, V_C reste positive tandis que I devient négative : ne pas confondre le signe de la tension et celui du courant.'
+    },
+    {
+      titre: 'Bobine : le circuit RL', scene: 'RL',
+      regarde: 'On ferme l’interrupteur. En RC, c’est la tension du condensateur qui ne peut pas sauter ; ici c’est le courant dans la bobine : elle s’oppose à ses variations, comme une masse s’oppose aux variations de vitesse. Le courant monte avec τ = L/R, et les boucles violettes grandissent avec |I|. Ralenti ×10.',
+      prediction: { q: 'La pile fait 6 V, R = 10 Ω et L = 1 H (τ = 0,1 s). Quel courant traverse la bobine au bout d’une constante de temps ?', reponse: 0.6 * (1 - Math.exp(-1)), unite: 'A', tol: 0.02,
+        explication: 'I(τ) = (V₀/R)·(1 − e⁻¹) = 0,6 A × 0,632 ≈ 0,38 A. Le courant final est V₀/R = 0,6 A.' },
+      suivi,
+      essais: [
+        { t: 'Change la résistance R : la constante de temps τ = L/R change.', fait: aChange('Rrl') },
+        { t: 'Bascule l’inverseur (S) : le courant retombe, la bobine restitue son énergie.', fait: (e, m) => m.depart && e.nSw > m.depart.nSw },
+        { t: 'Mets en pause, puis relance.', fait: pauseRelance }
+      ],
+      pourquoi: 'Au premier instant, le courant est nul et toute la tension de la pile se retrouve aux bornes de la bobine. Au régime établi, la bobine se comporte comme un simple fil : V_L = 0 et I = V₀/R. Pourquoi une bobine réagit ainsi : c’est l’induction (module 23).',
+      relation: String.raw`V_L=L\,\frac{\mathrm{d}I}{\mathrm{d}t},\qquad I(t)=\frac{V_0}{R}\left(1-\mathrm{e}^{-t/\tau}\right),\qquad \tau=\frac{L}{R}`,
+      vivant: e => String.raw`\tau=\frac{L}{R}=\frac{${tex(e.L, 3)}\ \mathrm{H}}{${tex(e.p.Rrl)}\ \Omega}=${tex(e.L / e.p.Rrl, 3)}\ \mathrm{s}`,
+      defs: [['Inductance L', 'Opposition d’une bobine aux variations du courant, en henrys.'], ['Régime établi', 'État où plus rien ne varie : la bobine n’impose plus de tension.']],
+      piege: 'Une bobine ne s’oppose pas au courant lui-même, mais à ses variations : en régime établi, elle se comporte comme un fil.'
+    },
+    {
+      titre: 'Bobine : l’oscillation LC', scene: 'LC amorti',
+      regarde: 'Le condensateur se vide dans la bobine, le courant monte, puis recharge le condensateur à l’envers : l’énergie fait la balançoire entre U_C et U_L, et R la fait fondre. Analogie : C ↔ ressort, L ↔ masse, R ↔ frottement. Ralenti ×500.',
+      prediction: { q: 'Avec L = 10 mH et C = 100 µF, quelle est la période propre T₀ = 2π√(LC) du circuit (sans résistance) ?', reponse: 2 * Math.PI * Math.sqrt(0.01 * 100e-6) * 1000, unite: 'ms', tol: 0.15,
+        explication: 'ω₀ = 1/√(LC) = 1000 rad/s, donc T₀ = 2π/ω₀ ≈ 6,28 ms (f₀ ≈ 159 Hz). La scène est ralentie 500 fois pour qu’on la voie.' },
+      suivi,
+      essais: [
+        { t: 'Règle R au-dessus de la résistance critique (20 Ω) : l’oscillation disparaît.', fait: e => e.p.Rlc > e.Rcrit },
+        { t: 'Mets R à 0 : l’oscillation ne s’amortit plus.', fait: (e, m) => m.depart && e.p.Rlc === 0 && m.depart.p.Rlc !== 0 },
+        { t: 'Relance l’oscillation (S, ou le bouton).', fait: (e, m) => m.depart && e.nSw > m.depart.nSw }
+      ],
+      pourquoi: 'C’est l’oscillateur amorti du module 14 : q joue la position, I la vitesse, L la masse, 1/C la raideur et R le frottement. Sous la résistance critique, l’oscillation s’amortit sous une enveloppe exponentielle ; à R_c, le retour à zéro est le plus rapide sans dépassement ; au-dessus, il est lent.',
+      relation: String.raw`L\ddot q+R\dot q+\frac{q}{C}=0,\qquad \omega_0=\frac{1}{\sqrt{LC}},\qquad R_\mathrm{c}=2\sqrt{\frac{L}{C}}`,
+      vivant: e => String.raw`R_\mathrm{c}=2\sqrt{\frac{L}{C}}=2\sqrt{\frac{${tex(e.L, 3)}}{${tex(e.C * 1e6, 0)}\times10^{-6}}}=${tex(e.Rcrit, 1)}\ \Omega`,
+      defs: [['Pulsation propre ω₀', 'Rythme naturel sans résistance : ω₀ = 1/√(LC), en rad/s.'], ['Résistance critique R_c', 'Valeur de R où l’oscillation disparaît tout juste : 2√(L/C).']],
+      piege: 'Ne pas croire que l’énergie « disparaît » : elle passe de U_C à U_L et inversement, et R la convertit en chaleur à chaque cycle.'
+    }
+  ];
+  const etapes = [...document.querySelectorAll('#stepper .seg')].map(b => ({ code: b.querySelector('b').textContent, titre: b.title.split(' — ')[1] || b.querySelector('span').textContent, mod: 22,
+    scenes: b.dataset.b !== undefined ? [+b.dataset.a, +b.dataset.b] : [+b.dataset.a] }));
+  Fiche.init({ etapes, fiches, lectures: '#lecturesCirc', etat, aller: window.allerScene,
+    k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+    theorie: () => 'explication.html#m22' });
+  Fiche.montre(etat().scene);
 })();
 </script>
 <script src="../../labo/planche.js"></script>

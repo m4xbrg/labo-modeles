@@ -174,6 +174,7 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I Une boucle · II Charge · III Décharge · IV Bobine (RL / LC amorti)
 - **Interaction** : Curseurs de tension, résistance, capacité ; inverseur charge/décharge ; bascule RL / LC amorti.
 - **Notes** : Construite par la production de fondations Électricité mais rangée dans la collection, numéro 06. Le RLC est traité comme un LC amorti, la résonance forcée RLC ne l’est pas.
+- **Gabarit** : fiche d'étape et cours interactif depuis le 2026-11-05 (cinq scènes : l'acte IV regroupe RL et LC amorti). Le débordement de pile du formatage des unités est corrigé ; moteur inchangé.
 
 ### Matière, chaleur et transport
 
