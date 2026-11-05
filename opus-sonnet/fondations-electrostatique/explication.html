@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre l’électrostatique — LABO</title>
+<meta name="description" content="Champ, potentiel, force et tension : la théorie du module 21, avec les quatre expériences de la planche, ses simplifications et les ordres de grandeur à retenir.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
+<script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
+</head>
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← Retour à la planche</a>
+  <p class="ici">Électrostatique <span>· le cours</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire">
+  <p>Sommaire</p><ol>
+    <li><a href="#vois">Ce que tu vois</a></li>
+    <li><a href="#m21"><b>21</b>Électrostatique</a><ol><li><a href="#m21-intuition">Intuition</a></li><li><a href="#m21-defs">Définitions</a></li><li><a href="#m21-relations">Relations clés</a></li><li><a href="#m21-exemple">Exemple chiffré</a></li><li><a href="#m21-pieges">Pièges fréquents</a></li><li><a href="#m21-suite">Où ça resservira</a></li><li><a href="#m21-test">Teste-toi</a></li></ol></li>
+    <li><a href="#simplifie">Ce que la simulation simplifie</a></li>
+    <li><a href="#chiffres">Les chiffres à retenir</a></li>
+    <li><a href="#introduit">Seulement introduit ici</a></li>
+  </ol>
+</nav>
+<main class="cours-texte">
+<header class="cours-tete">
+  <p class="surtitre">LABO · Fondations 21</p>
+  <h1>Comprendre l’électrostatique</h1>
+  <p class="lead">Une charge modifie l'espace autour d'elle, même s'il n'y a rien à cet endroit. Cette modification, c'est le champ. Quatre expériences te permettent de la lire, de l’explorer comme un relief, de la tester avec une petite charge et de mesurer une tension.</p>
+
+  <p class="mode-emploi">Manipule les scènes au fil du texte. Les nombres soulignés se règlent en les faisant glisser ou avec les flèches du clavier ; les termes pointillés ouvrent une définition. Prédis avant de vérifier.</p>
+  <div class="cartes"><a class="carte" href="#m21"><b>MODULE 21</b><span>Électrostatique</span><small>4 étapes · champ, potentiel, force et tension</small></a><a class="carte" href="../04-champ-electrique/index.html"><b>MODÈLE</b><span>Le champ électrique : le bac à sable complet</span><small>place des charges, tout afficher à la fois ↗</small></a></div>
+</header>
+  <h2 id="vois"><span class="n">1</span>Ce que tu vois</h2>
+  <div class="cartes">
+<a class="carte" href="index.html?etape=21.1"><b>21.1 · <span class="pos">Disque orange</span> et <span class="neg">disque bleu</span></b><span>Des charges ponctuelles, positives (orange) ou négatives (bleu). Tu peux les glisser : le champ s’éloigne des positives et va vers les négatives.</span></a>
+<a class="carte" href="index.html?etape=21.1"><b>21.1 · Lignes blanches et flèche de la sonde</b><span>Les lignes de champ ; en chaque point, leur tangente donne la direction de E. La flèche blanche de la sonde est E à cet endroit, avec un petit angle droit vers la courbe pointillée qui passe par là.</span></a>
+<a class="carte" href="index.html?etape=21.2"><b>21.2 · <span class="acc">Courbes vertes</span> et carte de couleur</b><span>Des équipotentielles tous les 40 V, sur une carte du potentiel V : orange où il est positif, bleu où il est négatif. Le champ est la pente de ce relief.</span></a>
+<a class="carte" href="index.html?etape=21.2"><b>21.2 · Coupe et tangente jaune</b><span>Sous la scène, le profil de V le long de la ligne pointillée. La pente de la tangente jaune au point de la sonde est exactement −E<sub>x</sub>.</span></a>
+<a class="carte" href="index.html?etape=21.3"><b>21.3 · <span class="pos">Plaque +</span>, <span class="neg">plaque −</span> et <span class="acc">flèche verte</span></b><span>Un champ uniforme entre deux plaques. La flèche verte est la vitesse v de la charge ; la flèche <span class="ener">jaune</span> est la force F = qE, constante. La charge décrit une parabole.</span></a>
+<a class="carte" href="index.html?etape=21.3"><b>21.3 · <span class="ener">Cible</span></b><span>Un but à toucher en réglant la visée, le signe de la charge, le champ E et la masse. Les pointillés gris sont tes essais précédents.</span></a>
+<a class="carte" href="index.html?etape=21.4"><b>21.4 · Points A et B, voltmètre</b><span>Deux pointes à placer où tu veux. Le boîtier affiche U = V(B) − V(A) ; les pointillés qui passent par A et par B sont leurs équipotentielles. Un défi te demande une tension précise.</span></a>
+  </div>
+
+  <h2 id="theorie"><span class="n">2</span>La théorie, module par module</h2>
+  <p>Chaque module suit le même plan : l’intuition, les définitions, les relations à connaître, un exemple chiffré, les pièges fréquents, où le module resservira, et quelques questions pour vérifier.</p>
+  <ul class="sommaire">
+    <li><a href="#m21"><b>21</b>Électrostatique</a></li>
+  </ul>
+
+  <!-- ===================== Module 21 ===================== -->
+  <section class="module" id="m21">
+    <header>
+      <p class="num">Module 21</p>
+      <h3>Électrostatique</h3>
+      <p class="etapes">Sur la planche : <a href="index.html?etape=21.1">21.1 Lire le champ</a><a href="index.html?etape=21.2">21.2 Potentiel</a><a href="index.html?etape=21.3">21.3 Charge test</a><a href="index.html?etape=21.4">21.4 Tension</a></p>
+    </header>
+
+    <h4 data-n="1" id="m21-intuition">Intuition</h4>
+    <p>Une charge modifie l’espace autour d’elle, même quand il n’y a rien à cet endroit. Cette modification est le <a class="terme" href="#def-champ">champ</a> : en chaque point, il dit quelle poussée une charge d’essai ressentirait. Le <a class="terme" href="#def-potentiel">potentiel</a> est une autre lecture de la même situation. Imagine un relief : le potentiel est l’altitude, le champ est la pente, et la <a class="terme" href="#def-force">force</a> sur une charge est la pente qu’elle sent sous ses pieds. Une charge positive est une colline d’où tout descend, une charge négative est un creux. Les lignes de champ suivent la plus grande pente, les <a class="terme" href="#def-equipotentielle">équipotentielles</a> sont les courbes de niveau, et les deux se coupent toujours à angle droit. Chaque grandeur répond à une question différente, et les confondre est l’erreur la plus fréquente en électricité.</p>
+
+<figure class="labo" data-src="index.html?embed&amp;etape=21.2&amp;panneau=1" data-h="560" data-titre="Potentiel et équipotentielles">
+  <figcaption><span><b>21.2</b>Promène la sonde sur une courbe verte : V reste constant. Observe la tangente jaune dans la coupe : sa pente est −E<sub>x</sub>, forte là où les courbes se serrent.</span><a class="ouvrir" href="index.html?etape=21.2">Ouvrir à cette étape ↗</a></figcaption>
+</figure>
+    <h4 data-n="2" id="m21-defs">Définitions</h4>
+    <dl class="defs">
+      <div id="def-charge"><dt>Charge \(q\)<span class="u">C</span></dt><dd>Grandeur scalaire signée, qui crée un champ et en subit un. Elle se conserve et vient par multiples de \(e = 1{,}6\times10^{-19}\) C.</dd></div>
+      <div id="def-champ"><dt>Champ électrique \(\vec E\)<span class="u">N/C = V/m</span></dt><dd>Vecteur : la force par coulomb en un point, \(\vec E = \vec F/q\). Il existe même là où aucune charge n’est posée.</dd></div>
+      <div id="def-force"><dt>Force \(\vec F\)<span class="u">N</span></dt><dd>Vecteur : la poussée subie par une charge précise placée dans un champ. Pas de charge, pas de force.</dd></div>
+      <div id="def-potentiel"><dt>Potentiel \(V\)<span class="u">V = J/C</span></dt><dd>Scalaire : l’énergie potentielle par coulomb en un point. Il est défini à une constante près : 0 V à l’infini pour des charges ponctuelles, et sur la plaque − entre deux plaques idéales (21.3).</dd></div>
+      <div id="def-tension"><dt>Tension \(U\)<span class="u">V</span></dt><dd>Scalaire : l’écart de potentiel entre deux points, \(U = V_B - V_A\). Elle ne dépend pas du choix du zéro.</dd></div>
+      <div id="def-energie"><dt>Énergie potentielle \(E_p\)<span class="u">J</span></dt><dd>Énergie d’une charge placée en un point : \(E_p = qV\).</dd></div>
+      <div id="def-ligne"><dt>Ligne de champ</dt><dd>Courbe dont la tangente donne la direction de \(\vec E\). Elle part d’une charge positive et finit sur une négative.</dd></div>
+      <div id="def-equipotentielle"><dt>Équipotentielle</dt><dd>Ensemble des points de même potentiel. Elle est perpendiculaire aux lignes de champ.</dd></div>
+      <div id="def-constantes"><dt>Constantes \(k\), \(\varepsilon_0\)<span class="u">N·m²/C², F/m</span></dt><dd>\(k = 1/(4\pi\varepsilon_0) \approx 8{,}99\times10^{9}\) N·m²/C², avec \(\varepsilon_0 \approx 8{,}85\times10^{-12}\) F/m.</dd></div>
+      <div id="def-parametres"><dt>Autres symboles</dt><dd>Distance \(r\), écart des plaques \(d\) (m) ; charge surfacique \(\sigma\) (C/m²) ; masse \(m\) (kg) ; accélération \(\vec a\) (m/s²) ; énergie cinétique \(E_c\), travail \(W\) (J).</dd></div>
+    </dl>
+
+    <h4 data-n="3" id="m21-relations">Relations clés</h4>
+    <div class="relation">\[ E = \frac{k\,|q|}{r^2}, \qquad V = \frac{k\,q}{r}, \qquad \vec F = q\,\vec E \]
+      <p>Loi de Coulomb pour une charge ponctuelle. Le champ s’éloigne d’une charge positive et va vers une négative. Il varie en \(1/r^2\), le potentiel en \(1/r\).</p></div>
+<div class="calc">
+  <p class="calc-t">Une charge isolée : distance et champ</p>
+  <p>Charge q = <span class="var" data-nom="q" data-val="3" data-min="1" data-max="5" data-pas="1" data-dec="0">3</span> nC ; distance r = <span class="var" data-nom="r" data-val="30" data-min="10" data-max="60" data-pas="1" data-dec="0">30</span> cm.</p>
+  <p>E = <output data-expr="8.9875517923*q/(r/100)**2" data-dec="2"></output> N/C ; V = <output data-expr="8.9875517923*q/(r/100)" data-dec="2"></output> V.</p>
+  <output data-expr="trace({f:x=>8.9875517923*q/(x/100)**2,x:[10,60],y:[0,4500],pts:[[r,8.9875517923*q/(r/100)**2]]})"></output>
+  <p class="note">Courbe E(r) pour une charge positive isolée, sans adoucissement numérique. Double r : E est divisé par quatre, V par deux.</p>
+</div>
+<div class="quiz"><p class="q">On double la distance à une charge isolée. Que devient le champ ?</p><ul class="choix"><li>Il est divisé par deux.</li><li data-bon>Il est divisé par quatre.</li><li>Il double.</li></ul><div class="corr">E varie en 1/r² : remplacer r par 2r donne E/4.</div></div>
+
+    <div class="relation">\[ \vec E = \sum_i \vec E_i, \qquad V = \sum_i V_i \]
+      <p>Superposition : les champs s’additionnent comme des vecteurs, les potentiels comme de simples nombres. Déplace une charge et tout est recalculé, car chaque terme de la somme change.</p></div>
+    <div class="relation">\[ E_x = -\frac{\dd V}{\dd x}, \qquad \vec E = -\vec\nabla V \]
+      <p>Le champ est la pente du potentiel, orientée vers les potentiels décroissants. D’où l’unité V/m, et la perpendicularité aux équipotentielles : le long de l’une, \(V\) ne varie pas.</p></div>
+    <div class="relation">\[ W = q\,U = q\,(V_B - V_A) \]
+      <p>Travail à fournir pour amener \(q\) de A à B, quel que soit le chemin. Sur une équipotentielle, il est nul.</p></div>
+<div class="calc">
+  <p class="calc-t">Un voltmètre compare deux points</p>
+  <p>V(A) = <span class="var" data-nom="va" data-val="120" data-min="-200" data-max="200" data-pas="10" data-dec="0">120</span> V ; V(B) = <span class="var" data-nom="vb" data-val="0" data-min="-200" data-max="200" data-pas="10" data-dec="0">0</span> V ; charge transportée q = <span class="var" data-nom="qt" data-val="1" data-min="-3" data-max="3" data-pas="1" data-dec="0">1</span> nC.</p>
+  <p>U = <output data-expr="vb-va" data-dec="0"></output> V ; travail extérieur qU = <output data-expr="qt*(vb-va)" data-dec="0"></output> nJ.</p>
+  <p class="note">Déplacement lent, sans changement d’énergie cinétique. Le travail du champ est l’opposé. Décaler les deux potentiels du même nombre laisse U inchangée.</p>
+</div>
+
+<figure class="labo" data-src="index.html?embed&amp;etape=21.4&amp;panneau=1" data-h="560" data-titre="Tension entre deux points">
+  <figcaption><span><b>21.4</b>Déplace A et B, puis relève le défi : lis la tension demandée. Place les deux pointes sur une même courbe : U tombe à zéro.</span><a class="ouvrir" href="index.html?etape=21.4">Ouvrir à cette étape ↗</a></figcaption>
+</figure>
+<figure class="labo" data-src="index.html?embed&amp;etape=21.3&amp;panneau=1" data-h="560" data-titre="Lancer une charge test">
+  <figcaption><span><b>21.3</b>Vise vers le haut et lance : une parabole. Passe au signe − : la courbure s’inverse. Regarde Ec + qV dans les lectures : elle ne bouge pas.</span><a class="ouvrir" href="index.html?etape=21.3">Ouvrir à cette étape ↗</a></figcaption>
+</figure>
+    <div class="relation">\[ E_c + qV = \text{constante} \]
+      <p>Une charge libre dans un champ fixe gagne de l’énergie cinétique exactement autant qu’elle perd d’énergie potentielle. Avec \(\vec F = q\vec E = m\vec a\), elle accélère en \(a = qE/m\).</p></div>
+    <div class="relation">\[ E = \frac{|U|}{d} =\frac{\sigma}{\varepsilon_0} \]
+      <p>Condensateur plan idéal (deux plaques parallèles de charges opposées, distantes de \(d\), de densité \(\sigma\)) : champ uniforme entre elles, lignes parallèles, équipotentielles également espacées.</p></div>
+
+    <h4 data-n="4" id="m21-exemple">Exemple chiffré</h4>
+    <div class="exemple">
+      <p>Un dipôle : \(+2\) nC en \(x = 0\) et \(-2\) nC en \(x = 20\) cm. On pose \(kq = 8{,}99\times10^{9} \times 2\times10^{-9} = 17{,}98\) N·m²/C.</p>
+      <ol class="pas-a-pas" data-montre="0">
+        <li>Au milieu (\(r = 0{,}10\) m de chaque charge) : chaque charge donne \(17{,}98/0{,}01 \approx 1\,798\) N/C, dirigé vers la charge négative. Les deux s’ajoutent : \(E \approx 3\,596\) N/C, soit environ \(3{,}6\times10^{3}\) N/C. Le potentiel y vaut \(17{,}98/0{,}1 - 17{,}98/0{,}1 = 0\) V : la médiatrice est une équipotentielle, avec pourtant un champ intense.</li>
+        <li>Force sur une charge d’essai de 1 nC : \(F = qE \approx 3{,}6\times10^{-6}\) N. Avec \(m = 10\) mg \(= 10^{-5}\) kg : \(a = F/m \approx 0{,}36\) m/s².</li>
+        <li>Au point \(x = -10\) cm (à 10 cm de la positive, 30 cm de la négative) : \(V = 17{,}98\,(1/0{,}10 - 1/0{,}30) \approx 17{,}98 \times 6{,}67 \approx 120\) V.</li>
+        <li>Tension entre le milieu et ce point : \(U = 120 - 0 = 120\) V. Travail pour y amener 1 nC : \(W = qU = 10^{-9} \times 120 = 1{,}2\times10^{-7}\) J, soit 120 nJ.</li>
+      </ol>
+    </div>
+
+    <h4 data-n="5" id="m21-pieges">Pièges fréquents</h4>
+    <ul class="pieges">
+      <li>Confondre champ et potentiel. Entre deux charges positives identiques, \(E = 0\) au milieu alors que \(V\) y est élevé (un col). Sur la médiatrice d’un dipôle, c’est l’inverse. Ce qui fait la force, c’est la variation de \(V\), pas sa valeur.</li>
+      <li>Croire que le champ dépend de la charge qu’on y pose. Il est créé par les autres charges : changer \(+1\) nC en \(-3\) nC multiplie la force par \(-3\), pas le champ.</li>
+      <li>Chercher « le potentiel d’un point » avec un voltmètre. Il a deux pointes et mesure une différence. Le zéro est un choix, la tension n’en dépend pas.</li>
+      <li>Supposer que la charge d’essai suit la ligne de champ. La ligne donne la direction de la force, pas celle de la vitesse : la charge a de l’inertie et sa trajectoire s’en écarte dès que la ligne se courbe.</li>
+      <li>Croire que deux lignes de champ peuvent se croiser. En un point, le champ n’a qu’une direction. Aux points où \(E = 0\), aucune ligne ne passe.</li>
+      <li>Oublier le signe : \(E_c + qV\) est constante, mais une charge négative gagne de l’énergie cinétique en montant vers les potentiels croissants.</li>
+    </ul>
+
+    <h4 data-n="6" id="m21-suite">Où ça resservira</h4>
+    <ul class="resert">
+      <li><b>22</b><span>La tension d’une pile met les charges en mouvement dans un circuit : <a href="../06-courant-circuits/index.html">planche Courant et circuits</a>. Le condensateur y reprend le champ uniforme de deux plaques.</span></li>
+      <li><b>02</b><span>Superposition des champs : une addition de vecteurs, avec composantes et projections.</span></li>
+      <li><b>13</b><span>Même structure en \(1/r^2\) pour la gravitation, avec un potentiel en \(1/r\) et des orbites.</span></li>
+      <li><b>16</b><span>Champ scalaire (\(V\)), champ vectoriel (\(\vec E\)), gradient : la version générale de \(\vec E = -\vec\nabla V\).</span></li>
+      <li><b>23</b><span>Quand les charges bougent, un champ magnétique apparaît (force de Lorentz, induction).</span></li>
+      <li><b>33</b><span>Une membrane cellulaire est un condensateur : potentiel membranaire et potentiel d’action.</span></li>
+    </ul>
+
+    <h4 data-n="7" id="m21-test">Teste-toi</h4>
+    <div class="quiz" data-reponse="299.5850597433333" data-tol="2" data-unite="N/C"><p class="q">Une charge de 3 nC est isolée. Que valent \(E\) et \(V\) à 30 cm ? Et à 60 cm ? Réponds ici avec E à 30 cm ; calcule aussi les trois autres valeurs avant de vérifier.</p><div class="corr"><p>\(kq = 8{,}99\times10^{9} \times 3\times10^{-9} \approx 27{,}0\) N·m²/C. À 0,30 m : \(E = 27{,}0/0{,}09 \approx 300\) N/C et \(V = 27{,}0/0{,}30 \approx 90\) V. À 0,60 m, la distance double : \(E\) est divisé par 4 (75 N/C) et \(V\) par 2 (45 V).</p></div></div>
+<div class="quiz"><p class="q">Au milieu de deux charges positives identiques, \(|E| = 0\). Le potentiel y est-il nul aussi ?</p><ul class="choix"><li>Oui, E et V s’annulent ensemble.</li><li data-bon>Non, les potentiels positifs s’additionnent.</li></ul><div class="corr"><p>Non, il est même élevé : les deux potentiels positifs s’additionnent. Le champ est nul parce que \(V\) y atteint un col et ne varie pas pour un tout petit pas. \(\vec E\) est la pente de \(V\), pas sa valeur.</p></div></div>
+<div class="quiz"><p class="q">A et B sont sur la même équipotentielle, dans une région où le champ est intense. Que valent la tension \(U\) et le travail pour amener une charge de A à B ?</p><ul class="choix"><li data-bon>U = 0 et W = 0.</li><li>U est nul mais W est non nul.</li><li>U et W sont nécessairement non nuls.</li></ul><div class="corr"><p>\(U = 0\) et \(W = qU = 0\). Le champ y est fort, mais perpendiculaire à l’équipotentielle : il pousse de côté, jamais le long d’un chemin qui reste dessus. Comme le travail ne dépend pas du chemin, il est nul aussi par n’importe quel autre trajet.</p></div></div>
+  </section>
+
+  <h2 id="simplifie"><span class="n">3</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Échelle.</strong> 1 pixel = 1 mm. La scène mesure donc environ un mètre : les valeurs en N/C et en V sont cohérentes avec cette échelle, mais elles changeraient si on la modifiait (E varie en 1/r²).</li>
+    <li><strong>Adoucissement.</strong> Près d’une charge, E tend vers l’infini. On remplace r² par r² + ε² avec ε = 2 mm : le champ reste fini, et le profil de la coupe (21.2) garde un sommet arrondi au lieu d’une pointe infinie.</li>
+    <li><strong>Lignes en coupe.</strong> Les charges sont dans un plan et les lignes dessinées y restent, mais leur nombre est proportionnel à |q| avec des angles réguliers. Dans l’espace réel, la densité de lignes ne représente |E| qu’approximativement ; lis la sonde pour une mesure.</li>
+    <li><strong>Plaques idéales.</strong> En 21.3, le champ est exactement uniforme et les effets de bord sont ignorés : la charge peut sortir par le haut ou le bas sans que le champ change, ce qui n’est vrai que pour des plaques très grandes devant leur écartement. La charge test est trop petite pour perturber les plaques.</li>
+    <li><strong>Électrostatique.</strong> Les charges sont fixes et le champ se met à jour instantanément (en réalité, l’information voyage à la vitesse de la lumière). La charge test ne rayonne pas et n’est pas relativiste. Pas de conducteurs ni de diélectriques.</li>
+    <li><strong>Des sources figées.</strong> Dans ces quatre expériences, les sources sont des préréglages (dipôle, deux charges identiques, quadrupôle) : pour en placer, en retirer ou en régler soi-même, il y a le <a href="../04-champ-electrique/index.html">bac à sable complet</a>.</li>
+  </ul>
+
+  <h2 id="chiffres"><span class="n">4</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>1 nC à 10 cm</b><span>E ≈ 900 N/C et V ≈ 90 V (k·q/r² et k·q/r). Ce sont les valeurs qu'affiche la sonde de la simulation.</span></div>
+    <div><b>≈ 6×10⁹</b><span>électrons en trop pour faire 1 nC (l'électron porte 1,6×10⁻¹⁹ C).</span></div>
+    <div><b>≈ 100 N/C</b><span>champ électrique de l'atmosphère par beau temps, dirigé vers le sol : de l'ordre de 100 V par mètre de hauteur.</span></div>
+    <div><b>≈ 3×10⁶ V/m</b><span>champ à partir duquel l'air devient conducteur et laisse jaillir une étincelle.</span></div>
+    <div><b>≈ 5×10¹¹ N/C</b><span>champ du proton à la distance de l'électron dans l'atome d'hydrogène (0,53×10⁻¹⁰ m).</span></div>
+  </div>
+
+  <h2 id="introduit"><span class="n">5</span>Seulement introduit ici</h2>
+  <p>Le <strong>condensateur plan</strong> ne donne ici qu’un premier aperçu du champ uniforme, entre deux plaques ; son rôle de réserve de charge revient avec les circuits du module 22 (<a href="../06-courant-circuits/index.html">planche Courant et circuits</a>). Les <strong>conducteurs</strong> en équilibre, les <strong>diélectriques</strong> et le <strong>rayonnement</strong> des charges accélérées demandent d’autres modèles.</p>
+
+  <a class="cta" href="index.html"><span>Retour à la planche</span><span aria-hidden="true">&rarr;</span></a>
+</main>
+</div>
+</body>
+</html>

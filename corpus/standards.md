@@ -49,7 +49,7 @@ Ce tableau suit le **découpage** en chapitres et en étapes ; la migration vers
 | Rotation, gravitation et orbites | 12 · 13 | 4 + 3 | 7 | Conforme, gabarit LABO. |
 | Flux, gradients, champs et fluides | 16 · 20 | 3 + 2 | 5 | Conforme ; scènes au choix dans les étapes. |
 | Matière, chaleur et transport | 17 · 18 · 19 | 2 + 3 + 4 | 9 | Conforme, gabarit LABO. |
-| Le champ électrique | 21 | 4 | 4 | Conforme, gabarit LABO. |
+| Électrostatique | 21 | 4 | 4 | Conforme, gabarit LABO ; remplace *Le champ électrique* (2026-11-05), devenu bac à sable à part. |
 | Courant et circuits | 22 | 4 | 4 | Conforme, gabarit LABO. |
 | Cellule, membrane et transport | 32 | 4 | 4 | Conforme ; scènes regroupées. |
 | Évolution et génétique des populations | 40 | 4 | 4 | Conforme ; scènes regroupées. |

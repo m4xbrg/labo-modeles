@@ -13,8 +13,9 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [La mitose](../opus-sonnet/01-mitose/index.html) | showcase | — | 01 · L'invisible en mouvement | 36 (partial) | 2026-09-29 |
 | [La respiration cellulaire](../opus-sonnet/02-respiration/index.html) | showcase | — | 02 · L'invisible en mouvement | 34 (partial) | 2026-09-29 |
 | [Le neurone qui apprend](../opus-sonnet/03-neurone/index.html) | showcase | — | 03 · L'invisible en mouvement | 33 | 2026-09-29 |
-| [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) | sandbox | Électricité fondamentale et circuits | 04 · hors collection | 21 | 2026-09-29 |
+| [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) | sandbox | — | 04 · hors collection | 21 (supporting) | 2026-09-29 |
 | [Ondes et interférences](../opus-sonnet/05-ondes-interferences/index.html) | showcase | — | 05 · hors collection | 15 (partial) | 2026-10-01 |
+| [Électrostatique](../opus-sonnet/fondations-electrostatique/index.html) | foundation | Électricité fondamentale et circuits | — | 21 | 2026-11-05 |
 | [Courant et circuits](../opus-sonnet/06-courant-circuits/index.html) | foundation | Électricité fondamentale et circuits | 06 · hors collection | 22 | 2026-10-01 |
 | [Matière, chaleur et transport](../opus-sonnet/07-matiere-chaleur/index.html) | foundation | Matière microscopique, thermique et transport | 07 · hors collection | 17, 18, 19 | 2026-10-01 |
 | [La réplication de l’ADN](../opus-sonnet/08-replication-adn/index.html) | showcase | — | 08 · L'invisible en mouvement | 36 (partial) | 2026-10-01 |
@@ -90,12 +91,13 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 ### Le champ électrique
 
 - **Identifiant** : `champ-electrique` · **chemin** : [`opus-sonnet/04-champ-electrique/index.html`](../opus-sonnet/04-champ-electrique/index.html) · **explication** : [`explication.html`](../opus-sonnet/04-champ-electrique/explication.html)
-- **Type** : sandbox · **statut** : `built` · **production** : Fondations · Électricité fondamentale et circuits
+- **Type** : sandbox · **statut** : `built` · **production** : aucune (modèle autonome, depuis le 2026-11-05)
 - **Collection** : aucune depuis le 2026-10-04 (numéro historique 04)
-- **Modules** : 21 Électrostatique (`full`), 16 Flux, gradients et champs continus (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
-- **Éléments** : Préréglages : dipôle, deux identiques, condensateur, quadrupôle · Couches : lignes, équipotentielles, carte de V, vecteurs, forces · Charge test · Tension entre deux points A–B
-- **Interaction** : Bac à sable : placer, déplacer, régler des charges ; lâcher une charge test ; sonder E, V et la force.
-- **Notes** : Une des quatre premières planches, prolongée le 2026-10-01 par la production de fondations Électricité (tension, forces de Coulomb, tableau charge / champ / force / potentiel / tension / énergie).
+- **Modules** : 21 Électrostatique (`supporting`), 16 Flux, gradients et champs continus (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
+- **Actes** : I Bac à sable libre
+- **Éléments** : Préréglages : dipôle, deux identiques, condensateur, quadrupôle, scène vide · Couches : lignes, équipotentielles, carte de V, vecteurs, forces · Charges test (jusqu'à 8) · Tension entre un point A et la sonde
+- **Interaction** : Bac à sable libre : placer, déplacer, régler et retirer des charges ; lâcher des charges test ; sonder E, V et la force. Quand on vient de la fondation 21, un lien « Revenir à mon expérience » ramène à l'étape quittée.
+- **Notes** : Une des quatre premières planches (2026-09-29). Il portait la fondation 21 depuis le 2026-10-01 ; le 2026-11-05 il redevient un modèle à part, le bac à sable complet, sous Phénomènes, et la fondation 21 a sa propre page (*Électrostatique*). Moteur et capacités inchangés (inventaire dans `prompts/codex/LOT-21-ECHANGE.md`).
 
 ### Ondes et interférences
 
@@ -151,7 +153,17 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 
 ## Pages de fondations
 
-*Courant et circuits* et *Matière, chaleur et transport* sont des pages de fondations ; elles gardent leurs numéros historiques 06 et 07 mais ne font plus partie de la collection. *Le champ électrique* figure plus haut, comme bac à sable, bien que la production Électricité l'ait prolongé.
+*Courant et circuits* et *Matière, chaleur et transport* sont des pages de fondations ; elles gardent leurs numéros historiques 06 et 07 mais ne font plus partie de la collection. *Le champ électrique* figure plus haut, comme bac à sable autonome ; la fondation 21 est *Électrostatique*, ci-dessous.
+
+### Électrostatique
+
+- **Identifiant** : `fondations-electrostatique` · **chemin** : [`opus-sonnet/fondations-electrostatique/index.html`](../opus-sonnet/fondations-electrostatique/index.html) · **explication** : [`explication.html`](../opus-sonnet/fondations-electrostatique/explication.html)
+- **Type** : foundation · **statut** : `built` · **production** : Fondations · Électricité fondamentale et circuits
+- **Collection** : aucune
+- **Modules** : 21 Électrostatique (`full`), 16 Flux, gradients et champs continus (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
+- **Actes** : 21.1 Lire le champ · 21.2 Explorer le potentiel · 21.3 Lancer une charge test · 21.4 Mesurer une tension
+- **Interaction** : Quatre expériences distinctes, chacune avec ses commandes : sonde et sources (21.1) ; carte, courbes et coupe de potentiel (21.2) ; charge test entre deux plaques, avec visée, signe, champ et masse (21.3) ; deux pointes et voltmètre (21.4). Cible et défi facultatifs. L'état de chaque expérience est gardé pendant la session ; lien vers le bac à sable complet.
+- **Notes** : Construite le 2026-11-05 après la séance de conception avec Codex (une expérience par notion, bac à sable gardé à côté). Hypothèses de 21.3 : plaques idéales, champ uniforme, trajectoire exacte, zéro de V sur la plaque −. Audit physique de Codex et corrections dans `prompts/codex/LOT-21-ECHANGE.md`. **À faire essayer à Max (21.3 d'abord)** ; pas d'extension aux modules 22 à 25 avant ce retour.
 
 ### Courant et circuits
 

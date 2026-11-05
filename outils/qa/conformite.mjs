@@ -165,9 +165,10 @@ if (inconnus.length) { console.error(`Dossiers introuvables dans opus-sonnet/ : 
 let echec = false;
 const lignes = [];
 for (const d of dossiers) {
-  // Le numéro historique ne donne pas le type : 04, 06 et 07 sont des fondations.
+  // Le numéro historique ne donne pas le type : 06 et 07 sont des fondations. 04 (le champ électrique) est un
+  // bac à sable depuis le 2026-11-05 : il suit la forme d'un phénomène (un chapitre, des actes), pas celle d'une fondation.
   const modele = modeles.find(m => m.path === `opus-sonnet/${d}/index.html`);
-  const showcase = modele ? modele.type === 'showcase' : /^\d\d-/.test(d);
+  const showcase = modele ? modele.type !== 'foundation' : /^\d\d-/.test(d);
   const P = planche(d, lire(path.join(PLANCHES, d, 'index.html')), showcase);
   const htmlE = lire(path.join(PLANCHES, d, 'explication.html'));
   const E = htmlE ? explication(d, htmlE, showcase, P.codes) : { format: 'absente', err: [], avert: [], mods: [] };

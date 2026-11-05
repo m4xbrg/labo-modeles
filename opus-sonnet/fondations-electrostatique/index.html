@@ -1,0 +1,1282 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  Fondation 21 · Électrostatique : quatre expériences distinctes, une par notion, chacune avec ses propres commandes.
+  21.1 lire le champ (sources + sonde) · 21.2 explorer le potentiel (carte, courbes, coupe) · 21.3 lancer une charge test
+  dans un champ uniforme (visée, signe, champ, masse, cible) · 21.4 mesurer une tension (deux pointes et un voltmètre).
+  Le bac à sable complet (placer des charges, tout afficher à la fois) est un modèle à part : ../04-champ-electrique/.
+  Couleurs de la série : orange = +, bleu = −, vert oscilloscope = équipotentielles et charge test, jaune = forces.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Électrostatique — LABO</title>
+<meta name="description" content="Lire le champ, explorer le potentiel, lancer une charge test et mesurer une tension : quatre expériences, une par notion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root, :root[data-theme], :root:not([data-theme]){
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#9fe870;
+  --positif:#ff8a5b; --negatif:#5bb8ff; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fond);color:var(--texte);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}
+
+.tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--fond-2);border:1px solid var(--trait);padding:7px 10px;font:400 12px/1.4 var(--mono);color:var(--texte);max-width:250px;opacity:0;transform:translateY(4px);transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:3}
+.tip.on{opacity:1;transform:none}
+
+.panel{grid-column:2;grid-row:1;background:var(--fond-2);border-left:1px solid var(--trait);overflow-y:auto;padding:20px 24px 20px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--texte-2);margin:0 0 10px}
+.meas{display:grid;gap:0;border-top:1px solid var(--trait)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--trait)}
+.lab{font:400 12px var(--mono);color:var(--texte-2)}
+.val{font:500 19px var(--mono);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.val i{font:400 12px var(--mono);color:var(--texte-2);font-style:normal;min-width:26px}
+.row.small .val{font-size:14px}
+.needle{width:22px;height:22px;flex:none;align-self:center}
+.needle line{stroke:var(--texte);stroke-width:1.6;stroke-linecap:round}
+.needle circle{fill:none;stroke:var(--trait);stroke-width:1}
+#needleG{transition:transform .35s var(--ease);transform-origin:11px 11px}
+.note{font:400 11.5px/1.5 var(--mono);color:var(--texte-2);margin:8px 0 0}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono);color:var(--texte-2)}
+.hints kbd{font:500 11px var(--mono);color:var(--texte);border:1px solid var(--trait);padding:0 5px;border-radius:2px}
+
+/* une lecture par expérience : seule celle de l'étape en cours est visible */
+.lec{display:none}
+body[data-e="0"] .lec[data-e="0"],body[data-e="1"] .lec[data-e="1"],body[data-e="2"] .lec[data-e="2"],body[data-e="3"] .lec[data-e="3"]{display:block}
+
+.controls{grid-column:1/-1;grid-row:2;border-top:1px solid var(--trait);background:var(--fond);padding:12px 22px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.controls [data-e]{display:none}
+body[data-e="0"] .controls [data-e~="0"],body[data-e="1"] .controls [data-e~="1"],body[data-e="2"] .controls [data-e~="2"],body[data-e="3"] .controls [data-e~="3"]{display:flex}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--texte-2);margin-right:2px}
+.btn{background:transparent;border:1px solid var(--trait);color:var(--texte);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;transition:border-color .3s var(--ease),color .3s var(--ease),background .3s var(--ease);display:inline-flex;align-items:center;gap:7px;min-height:34px;text-decoration:none}
+.btn:hover{border-color:var(--texte-2)}
+.btn[aria-pressed="true"],.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;border:1px solid currentColor;opacity:.9}
+.btn[aria-pressed="true"] .dot{background:currentColor}
+.sgn{min-width:34px;justify-content:center;font-size:15px}
+.sgn[data-s="1"][aria-pressed="true"]{border-color:var(--positif);color:var(--positif)}
+.sgn[data-s="-1"][aria-pressed="true"]{border-color:var(--negatif);color:var(--negatif)}
+.go{border-color:var(--accent);color:var(--accent)}
+.go:hover{background:var(--accent);color:var(--fond)}
+.sandbox{margin-left:auto}
+input[type=range]{-webkit-appearance:none;appearance:none;width:108px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--texte-2)}
+input[type=range]::-moz-range-track{height:1px;background:var(--texte-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--fond);border:1.5px solid var(--accent)}
+.rv{font:500 12px var(--mono);min-width:62px}
+
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:12px 16px}
+  .panel{order:3;border-left:0;border-top:1px solid var(--trait);padding:20px 16px}
+  input[type=range]{width:96px}
+  .sandbox{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){ #needleG,.tip,.btn{transition:none} }
+.labo-fiche #lectures{padding:0 20px 4px 22px;display:grid;gap:16px}
+.labo-fiche #lectures .val{font-size:16px}
+.labo-fiche #lectures .row.small .val{font-size:14px}
+.labo-fiche .needle line,.labo-fiche .needle path{stroke:var(--encre)}
+.labo-fiche .needle circle{stroke:var(--filet)}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
+<script src="../../labo/theme.js"></script>
+</head>
+<body class="labo-etapes labo-fiche" data-mode="fiche" data-e="0">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Fondations · 21</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+
+<div class="titre">
+  <div>
+    <h1>Électrostatique</h1>
+    <p class="lead">Des charges créent un champ et un potentiel ; une charge test en subit la force, et la tension se lit entre deux points. Quatre expériences, une par notion.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>1 px = 1 mm</dd>
+    <dt>Temps</dt><dd>charge test : ~0,5 à 5 s</dd>
+    <dt>Modèle</dt><dd>charges ponctuelles, champ uniforme entre plaques</dd>
+  </dl>
+</div>
+
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes : le module 21">
+  <div class="chap"><p class="chap-t"><b>21</b>Électrostatique</p><div class="segs">
+    <button class="seg" data-a="0" title="21.1 — Lire le champ"><b>21.1</b><span>Champ</span></button>
+    <button class="seg" data-a="1" title="21.2 — Explorer le potentiel"><b>21.2</b><span>Potentiel</span></button>
+    <button class="seg" data-a="2" title="21.3 — Lancer une charge test"><b>21.3</b><span>Charge test</span></button>
+    <button class="seg" data-a="3" title="21.4 — Mesurer une tension"><b>21.4</b><span>Tension</span></button>
+  </div></div>
+</nav>
+
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène interactive : charges électriques, champ, potentiel, charge test et voltmètre. Glisse la sonde ou les points pour explorer."></canvas>
+    <div class="tip" id="tip"></div>
+  </main>
+
+  <aside class="panel" aria-label="Panneau de lecture">
+    <div id="lectures">
+      <section class="lec" data-e="0">
+        <p class="eyebrow">Au point sondé</p>
+        <div class="meas">
+          <div class="row"><span class="lab">|E|</span><span class="val"><b id="aE">—</b><i>N/C</i></span></div>
+          <div class="row"><span class="lab">Direction de E</span><span class="val">
+            <svg class="needle" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10"/><g id="needleG"><line x1="4" y1="11" x2="17" y2="11"/><path d="M17 11l-4-3M17 11l-4 3" fill="none" stroke="#e8e4dc" stroke-width="1.6" stroke-linecap="round"/></g></svg>
+            <b id="aD">—</b><i>°</i></span></div>
+          <div class="row small"><span class="lab">F sur +1 nC placé ici</span><span class="val"><b id="aF">—</b><i>µN</i></span></div>
+          <div class="row small"><span class="lab">Charges · charge nette</span><span class="val"><b id="aN">—</b><i>nC</i></span></div>
+        </div>
+        <p class="note">E existe en chaque point, qu'il y ait une charge ou non. Une force n'apparaît que si une charge q est là pour la subir : F = qE. La barre en bas à gauche mesure 10 cm.</p>
+      </section>
+
+      <section class="lec" data-e="1">
+        <p class="eyebrow">Au point sondé</p>
+        <div class="meas">
+          <div class="row"><span class="lab">V</span><span class="val"><b id="bV">—</b><i>V</i></span></div>
+          <div class="row small"><span class="lab">Pente −dV/dx le long de la coupe</span><span class="val"><b id="bS">—</b><i>V/m</i></span></div>
+          <div class="row small"><span class="lab">E<sub>x</sub> calculé par les charges</span><span class="val"><b id="bEx">—</b><i>N/C</i></span></div>
+          <div class="row small"><span class="lab">|E|</span><span class="val"><b id="bE">—</b><i>N/C</i></span></div>
+        </div>
+        <p class="note" id="bNote">Le champ est la pente du relief : E<sub>x</sub> = −dV/dx. Les deux lectures du dessus doivent coïncider.</p>
+      </section>
+
+      <section class="lec" data-e="2">
+        <p class="eyebrow">La charge test</p>
+        <div class="meas">
+          <div class="row small"><span class="lab">Accélération a = qE/m</span><span class="val"><b id="cA">—</b><i>m/s²</i></span></div>
+          <div class="row"><span class="lab">Vitesse</span><span class="val"><b id="cV">—</b><i>m/s</i></span></div>
+          <div class="row small"><span class="lab">Énergie cinétique</span><span class="val"><b id="cK">—</b><i>µJ</i></span></div>
+          <div class="row small"><span class="lab">Énergie potentielle qV</span><span class="val"><b id="cU">—</b><i>µJ</i></span></div>
+          <div class="row small"><span class="lab">Somme</span><span class="val"><b id="cS">—</b><i>µJ</i></span></div>
+        </div>
+        <p class="note" id="cNote">Tire sur la flèche verte pour viser, puis « Lancer ».</p>
+      </section>
+
+      <section class="lec" data-e="3">
+        <p class="eyebrow">Le voltmètre</p>
+        <div class="meas">
+          <div class="row small"><span class="lab">V au point A</span><span class="val"><b id="dA">—</b><i>V</i></span></div>
+          <div class="row small"><span class="lab">V au point B</span><span class="val"><b id="dB">—</b><i>V</i></span></div>
+          <div class="row"><span class="lab">U = V<sub>B</sub> − V<sub>A</sub></span><span class="val"><b id="dU">—</b><i>V</i></span></div>
+          <div class="row small"><span class="lab">Travail pour amener +1 nC de A à B</span><span class="val"><b id="dW">—</b><i>µJ</i></span></div>
+        </div>
+        <p class="note" id="dNote">Déplace A et B : la tension ne dépend que de ces deux points.</p>
+      </section>
+    </div>
+
+    <section id="hints">
+      <p class="eyebrow">Gestes</p>
+      <ul class="hints">
+        <li>Clic ou glisser : placer la sonde ou viser</li>
+        <li>21.1 : glisse aussi les charges</li>
+        <li>21.3 : <kbd>Espace</kbd> pause · <kbd>L</kbd> lancer · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps</li>
+        <li><kbd>R</kbd> réinitialiser · <kbd>1</kbd>–<kbd>4</kbd> étape</li>
+        <li><kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
+      </ul>
+    </section>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <!-- 21.1 · 21.2 : la source -->
+    <div class="grp" id="presets" data-e="0 1">
+      <span class="gl">Source</span>
+      <button class="btn" data-p="dipole" aria-pressed="true">Dipôle</button>
+      <button class="btn" data-p="identiques" aria-pressed="false">Deux identiques</button>
+      <button class="btn" data-p="quadrupole" aria-pressed="false">Quadrupôle</button>
+    </div>
+    <!-- 21.1 -->
+    <div class="grp" data-e="0">
+      <button class="btn" id="vVec" aria-pressed="false"><span class="dot" style="color:var(--texte-2)"></span>Flèches</button>
+    </div>
+    <!-- 21.2 -->
+    <div class="grp" data-e="1">
+      <button class="btn" id="vMap" aria-pressed="true"><span class="dot" style="color:var(--positif)"></span>Carte</button>
+      <button class="btn" id="vEq" aria-pressed="true"><span class="dot" style="color:var(--accent)"></span>Courbes</button>
+      <button class="btn" id="vCut" aria-pressed="true"><span class="dot" style="color:var(--texte)"></span>Coupe</button>
+    </div>
+    <!-- 21.3 -->
+    <div class="grp" data-e="2">
+      <button class="btn ico" id="bBack" title="Reculer dans le temps (←)" aria-label="Reculer"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bFwd" title="Avancer (→)" aria-label="Avancer"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn go" id="bLaunch" title="Lancer la charge (L)">Lancer</button>
+      <button class="btn sgn tsgn" data-s="1" aria-pressed="true" aria-label="Charge test positive">+</button>
+      <button class="btn sgn tsgn" data-s="-1" aria-pressed="false" aria-label="Charge test négative">&minus;</button>
+    </div>
+    <div class="grp" data-e="2">
+      <span class="gl">Champ E</span>
+      <input type="range" id="eSl" min="500" max="5000" step="100" value="3000" aria-label="Champ électrique entre les plaques en newtons par coulomb">
+      <span class="rv" id="eV">3000 N/C</span>
+    </div>
+    <div class="grp" data-e="2">
+      <span class="gl">Masse</span>
+      <input type="range" id="mSl" min="2" max="50" step="1" value="10" aria-label="Masse de la charge en milligrammes">
+      <span class="rv" id="mV">10 mg</span>
+    </div>
+    <div class="grp" data-e="2">
+      <button class="btn" id="bPrev" aria-pressed="false" title="Montrer la trajectoire prévue avant le lancer">Prévision</button>
+      <button class="btn" id="bTargetOn" aria-pressed="false" title="Afficher une cible à toucher (facultatif)">Cible</button>
+      <button class="btn" id="bTarget" disabled>Nouvelle cible</button>
+    </div>
+    <!-- 21.4 -->
+    <div class="grp" data-e="3">
+      <button class="btn" id="bSwap">Inverser A / B</button>
+      <button class="btn" id="bDefiOn" aria-pressed="false" title="Demander une tension à lire (facultatif)">Défi</button>
+      <button class="btn" id="bDefi" disabled>Nouveau défi</button>
+    </div>
+    <!-- toutes les étapes -->
+    <div class="grp" data-e="0 1 2 3">
+      <button class="btn" id="bReset" title="Réinitialiser (R)">Réinitialiser</button>
+    </div>
+    <div class="grp sandbox" data-e="0 1 2 3">
+      <a class="btn" id="sandboxLink" href="../04-champ-electrique/index.html" title="Placer des charges, tout afficher à la fois. Ton expérience est gardée : tu pourras y revenir.">Bac à sable complet ↗</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Constantes physiques et échelle ----------------
+   Échelle déclarée : 1 pixel CSS = 1 mm = 1e-3 m.  K = k · 1e-9 : k = 8,9875517923e9 N·m²/C², charges en nC.
+   Adoucissement de Plummer : r² -> r² + ε², ε = 2 mm (évite la singularité).
+   21.3 : champ uniforme E entre deux plaques, charge test q = ±1 nC, masse réglable ; trajectoire exacte
+   (accélération constante), pas d'intégration numérique. */
+const K = 8.9875517923;
+const EPS2 = 2e-3 * 2e-3;
+const QT = 1e-9;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const layer = document.createElement('canvas'), lctx = layer.getContext('2d');
+const mapC = document.createElement('canvas'), mctx = mapC.getContext('2d');
+const sceneEl = $('#scene');
+
+const rootCS = getComputedStyle(document.documentElement);
+const tok = n => rootCS.getPropertyValue(n).trim();
+const C = { fond: tok('--fond'), trait: tok('--trait'), texte: tok('--texte'), texte2: tok('--texte-2'),
+            accent: tok('--accent'), pos: tok('--positif'), neg: tok('--negatif'), ener: tok('--energie') };
+const rgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const RGB = { pos: rgb(C.pos), neg: rgb(C.neg), texte: rgb(C.texte), accent: rgb(C.accent), ener: rgb(C.ener), texte2: rgb(C.texte2) };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const MONO = '"IBM Plex Mono",ui-monospace,Consolas,monospace';
+
+let W = 800, H = 600, dpr = 1;
+let stage = 0, playing = true, pulseT = 0;
+let dirty = true, fast = false, hoverDirty = true, refineTimer = 0;
+
+/* ---------------- Sources (21.1, 21.2, 21.4) ---------------- */
+let charges = [], nid = 1, preset = 'dipole', lastSep = 240;
+const probe = { x: 0, y: 0 };
+let ptA = { x: 0, y: 0 }, ptB = { x: 0, y: 0 };
+let views = { lines: true, vec: false, eq: false, map: false, cut: false };
+let nSwap = 0;
+
+const cx = new Float64Array(64), cy = new Float64Array(64), cqk = new Float64Array(64), cr = new Float64Array(64), cs = new Int8Array(64);
+let NC = 0;
+const radiusOf = q => 8 + 2.2 * Math.abs(q);
+function syncArrays() {
+  NC = charges.length;
+  for (let i = 0; i < NC; i++) {
+    const c = charges[i];
+    cx[i] = c.x; cy[i] = c.y; cqk[i] = K * c.q; cr[i] = radiusOf(c.q); cs[i] = c.q > 0 ? 1 : -1;
+  }
+}
+function mk(x, y, q) { charges.push({ id: nid++, x, y, q }); }
+function sepFor(w) { return Math.min(240, Math.max(110, w * 0.27)); }
+function applySources(name) {
+  charges = []; preset = name;
+  const mx = W / 2, my = H / 2, s = sepFor(W); lastSep = s;
+  if (name === 'dipole') { mk(mx - s / 2, my, 3); mk(mx + s / 2, my, -3); }
+  else if (name === 'identiques') { mk(mx - s / 2, my, 3); mk(mx + s / 2, my, 3); }
+  else if (name === 'quadrupole') { const h = Math.min(120, Math.max(55, Math.min(W, H) * 0.16)); mk(mx - h, my - h, 2); mk(mx + h, my - h, -2); mk(mx + h, my + h, 2); mk(mx - h, my + h, -2); }
+  document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === name)));
+  syncArrays(); dirty = true; fast = false;
+}
+
+/* E = Σ k q (r - ri) / (|r - ri|² + ε²)^(3/2)  [N/C] ;  V = Σ k q / sqrt(|r - ri|² + ε²)  [V] */
+let EX = 0, EY = 0;
+function field(x, y) {
+  let ex = 0, ey = 0;
+  for (let i = 0; i < NC; i++) {
+    const dx = x - cx[i], dy = y - cy[i];
+    const r2 = (dx * dx + dy * dy) * 1e-6 + EPS2;
+    const f = cqk[i] * 1e-3 / (r2 * Math.sqrt(r2));
+    ex += f * dx; ey += f * dy;
+  }
+  EX = ex; EY = ey;
+}
+function pot(x, y) {
+  let v = 0;
+  for (let i = 0; i < NC; i++) {
+    const dx = x - cx[i], dy = y - cy[i];
+    v += cqk[i] / Math.sqrt((dx * dx + dy * dy) * 1e-6 + EPS2);
+  }
+  return v;
+}
+
+/* ---------------- Lignes de champ (RK4 ; graines d'angle fixes) ---------------- */
+let linesPath = new Path2D(), arrowsPath = new Path2D();
+let ux = 0, uy = 0;
+function unit(x, y, s) {
+  field(x, y);
+  const m = Math.hypot(EX, EY);
+  if (m < 1e-9) { ux = uy = 0; return false; }
+  ux = EX / m * s; uy = EY / m * s; return true;
+}
+function trace(sx, sy, sgn, src, quick) {
+  const ds = quick ? 6 : 4, maxSteps = quick ? 700 : 1400;
+  const pts = [sx, sy], arrows = [];
+  let x = sx, y = sy, arc = 0, nextArrow = 46, end = 'out';
+  for (let n = 0; n < maxSteps; n++) {
+    let dx, dy;
+    if (!unit(x, y, sgn)) { end = 'stall'; break; }
+    const k1x = ux, k1y = uy;
+    if (quick) {
+      if (!unit(x + k1x * ds / 2, y + k1y * ds / 2, sgn)) { end = 'stall'; break; }
+      dx = ux; dy = uy;
+    } else {
+      if (!unit(x + k1x * ds / 2, y + k1y * ds / 2, sgn)) { end = 'stall'; break; }
+      const k2x = ux, k2y = uy;
+      if (!unit(x + k2x * ds / 2, y + k2y * ds / 2, sgn)) { end = 'stall'; break; }
+      const k3x = ux, k3y = uy;
+      if (!unit(x + k3x * ds, y + k3y * ds, sgn)) { end = 'stall'; break; }
+      dx = (k1x + 2 * k2x + 2 * k3x + ux) / 6; dy = (k1y + 2 * k2y + 2 * k3y + uy) / 6;
+    }
+    x += dx * ds; y += dy * ds; arc += ds;
+    let hit = -1;
+    for (let i = 0; i < NC; i++) {
+      if (cs[i] === sgn || i === src) continue;
+      const ex = x - cx[i], ey = y - cy[i];
+      if (ex * ex + ey * ey < (cr[i] + 2) * (cr[i] + 2)) { hit = i; break; }
+    }
+    if (hit >= 0) {
+      const ex = x - cx[hit], ey = y - cy[hit], d = Math.hypot(ex, ey) || 1;
+      pts.push(cx[hit] + ex / d * cr[hit] * 0.9, cy[hit] + ey / d * cr[hit] * 0.9);
+      end = 'charge'; break;
+    }
+    pts.push(x, y);
+    if (arc >= nextArrow) { arrows.push(x, y, Math.atan2(dy * sgn, dx * sgn)); nextArrow += 140; }
+    if (x < -60 || x > W + 60 || y < -60 || y > H + 60) { end = 'out'; break; }
+  }
+  return { pts, arrows, end };
+}
+function addLine(L, rev, P, A) {
+  const p = L.pts;
+  if (p.length < 6) return false;
+  if (!rev) {
+    P.moveTo(p[0], p[1]);
+    for (let i = 2; i < p.length; i += 2) P.lineTo(p[i], p[i + 1]);
+  } else {
+    const n = p.length;
+    P.moveTo(p[n - 2], p[n - 1]);
+    for (let i = n - 4; i >= 0; i -= 2) P.lineTo(p[i], p[i + 1]);
+  }
+  const a = L.arrows;
+  for (let i = 0; i < a.length; i += 3) {
+    const x = a[i], y = a[i + 1], t = a[i + 2], c = Math.cos(t), s = Math.sin(t);
+    A.moveTo(x + c * 4.5, y + s * 4.5);
+    A.lineTo(x - c * 3 - s * 3.2, y - s * 3 + c * 3.2);
+    A.lineTo(x - c * 3 + s * 3.2, y - s * 3 - c * 3.2);
+    A.closePath();
+  }
+  return true;
+}
+function buildLines() {
+  const P = new Path2D(), A = new Path2D();
+  for (let i = 0; i < NC; i++) {
+    const n = Math.round(4 * Math.abs(charges[i].q));          /* lignes ∝ |q| : 4 par nC, assez peu pour rester lisible */
+    for (let j = 0; j < n; j++) {
+      const th = 2 * Math.PI * j / n + Math.PI / 2;
+      const sx = cx[i] + Math.cos(th) * cr[i] * 0.95, sy = cy[i] + Math.sin(th) * cr[i] * 0.95;
+      if (cs[i] > 0) addLine(trace(sx, sy, 1, i, fast), false, P, A);
+      else { const L = trace(sx, sy, -1, i, fast); if (L.end === 'out') addLine(L, true, P, A); }
+    }
+  }
+  linesPath = P; arrowsPath = A;
+}
+
+/* ---------------- Grille de potentiel, carte, équipotentielles ---------------- */
+let V = new Float32Array(1), gnx = 1, gny = 1, gcell = 6;
+const DV = 40, NMAX = 25;
+let pathN = new Path2D(), path5 = new Path2D(), path0 = new Path2D(), hoverPath = new Path2D(), pathA = new Path2D(), pathB = new Path2D();
+function computeGrid(cell) {
+  gcell = cell;
+  gnx = Math.ceil(W / cell) + 2; gny = Math.ceil(H / cell) + 2;
+  if (V.length < gnx * gny) V = new Float32Array(gnx * gny);
+  let k = 0;
+  for (let j = 0; j < gny; j++) { const y = j * cell; for (let i = 0; i < gnx; i++) V[k++] = pot(i * cell, y); }
+}
+const A3 = Math.asinh(1000 / 50);
+function renderMap() {
+  mapC.width = gnx; mapC.height = gny;
+  const img = mctx.createImageData(gnx, gny), d = img.data;
+  for (let k = 0, n = gnx * gny; k < n; k++) {
+    const v = V[k], t = Math.asinh(v / 50) / A3, at = Math.min(1, Math.abs(t));
+    const c = t >= 0 ? RGB.pos : RGB.neg;
+    d[k * 4] = c[0]; d[k * 4 + 1] = c[1]; d[k * 4 + 2] = c[2];
+    d[k * 4 + 3] = Math.min(0.86, Math.pow(at, 0.9) * 0.9) * 255;
+  }
+  mctx.putImageData(img, 0, 0);
+}
+let PX = 0, PY = 0;
+function edge(e, i0, j0, a, b, c, d, L) {
+  switch (e) {
+    case 0: PX = (i0 + (L - a) / (b - a)) * gcell; PY = j0 * gcell; break;
+    case 1: PX = (i0 + 1) * gcell; PY = (j0 + (L - b) / (c - b)) * gcell; break;
+    case 2: PX = (i0 + (L - d) / (c - d)) * gcell; PY = (j0 + 1) * gcell; break;
+    default: PX = i0 * gcell; PY = (j0 + (L - a) / (d - a)) * gcell;
+  }
+}
+function seg(P, e1, e2, i0, j0, a, b, c, d, L) {
+  edge(e1, i0, j0, a, b, c, d, L); const x = PX, y = PY;
+  edge(e2, i0, j0, a, b, c, d, L); P.moveTo(x, y); P.lineTo(PX, PY);
+}
+function march(P, i0, j0, a, b, c, d, L) {   /* marching squares : arêtes 0 haut, 1 droite, 2 bas, 3 gauche */
+  const idx = (a > L ? 1 : 0) | (b > L ? 2 : 0) | (c > L ? 4 : 0) | (d > L ? 8 : 0);
+  switch (idx) {
+    case 1: case 14: seg(P, 3, 0, i0, j0, a, b, c, d, L); break;
+    case 2: case 13: seg(P, 0, 1, i0, j0, a, b, c, d, L); break;
+    case 3: case 12: seg(P, 3, 1, i0, j0, a, b, c, d, L); break;
+    case 4: case 11: seg(P, 1, 2, i0, j0, a, b, c, d, L); break;
+    case 6: case 9: seg(P, 0, 2, i0, j0, a, b, c, d, L); break;
+    case 7: case 8: seg(P, 3, 2, i0, j0, a, b, c, d, L); break;
+    case 5: if ((a + b + c + d) / 4 > L) { seg(P, 0, 1, i0, j0, a, b, c, d, L); seg(P, 3, 2, i0, j0, a, b, c, d, L); }
+            else { seg(P, 3, 0, i0, j0, a, b, c, d, L); seg(P, 1, 2, i0, j0, a, b, c, d, L); } break;
+    case 10: if ((a + b + c + d) / 4 > L) { seg(P, 3, 0, i0, j0, a, b, c, d, L); seg(P, 1, 2, i0, j0, a, b, c, d, L); }
+             else { seg(P, 0, 1, i0, j0, a, b, c, d, L); seg(P, 3, 2, i0, j0, a, b, c, d, L); } break;
+  }
+}
+function buildContours() {
+  const PN = new Path2D(), P5 = new Path2D(), P0 = new Path2D();
+  for (let j = 0; j < gny - 1; j++) for (let i = 0; i < gnx - 1; i++) {
+    const a = V[j * gnx + i], b = V[j * gnx + i + 1], d = V[(j + 1) * gnx + i], c = V[(j + 1) * gnx + i + 1];
+    const mn = Math.min(a, b, c, d), mx = Math.max(a, b, c, d);
+    let n0 = Math.ceil(mn / DV), n1 = Math.floor(mx / DV);
+    const nm = stage === 3 ? 10 : NMAX;      /* 21.4 : on laisse le cœur des charges libre, les défis restent dans ±400 V */
+    if (n0 < -nm) n0 = -nm; if (n1 > nm) n1 = nm;
+    for (let n = n0; n <= n1; n++) march(n === 0 ? P0 : (n % 5 === 0 ? P5 : PN), i, j, a, b, c, d, n * DV + 1e-4);
+  }
+  pathN = PN; path5 = P5; path0 = P0;
+}
+function levelPath(L) {
+  const P = new Path2D();
+  for (let j = 0; j < gny - 1; j++) for (let i = 0; i < gnx - 1; i++) {
+    const a = V[j * gnx + i], b = V[j * gnx + i + 1], d = V[(j + 1) * gnx + i], c = V[(j + 1) * gnx + i + 1];
+    if (Math.min(a, b, c, d) <= L && Math.max(a, b, c, d) >= L) march(P, i, j, a, b, c, d, L);
+  }
+  return P;
+}
+function buildHover() {
+  if (stage === 0 || stage === 1) hoverPath = levelPath(pot(probe.x, probe.y));
+  if (stage === 3) { pathA = levelPath(pot(ptA.x, ptA.y)); pathB = levelPath(pot(ptB.x, ptB.y)); }
+}
+
+function arrow(g, x, y, dx, dy, len, head) {
+  const ex = x + dx * len, ey = y + dy * len;
+  g.moveTo(x, y); g.lineTo(ex, ey);
+  g.moveTo(ex, ey); g.lineTo(ex - dx * head - dy * head * 0.55, ey - dy * head + dx * head * 0.55);
+  g.moveTo(ex, ey); g.lineTo(ex - dx * head + dy * head * 0.55, ey - dy * head - dx * head * 0.55);
+}
+function drawLayer() {
+  const g = lctx;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = C.fond; g.fillRect(0, 0, W, H);
+  g.fillStyle = rgba(RGB.texte, 0.07);
+  for (let y = 25; y < H; y += 50) for (let x = 25; x < W; x += 50) g.fillRect(x - 0.5, y - 0.5, 1, 1);
+  if (views.map) { g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(mapC, -gcell / 2, -gcell / 2, gnx * gcell, gny * gcell); }
+  if (views.eq) {
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.lineWidth = 0.9; g.strokeStyle = rgba(RGB.accent, 0.32); g.stroke(pathN);
+    g.lineWidth = 1.1; g.strokeStyle = rgba(RGB.accent, 0.62); g.stroke(path5);
+    g.lineWidth = 1.5; g.strokeStyle = rgba(RGB.accent, 0.85); g.stroke(path0);
+  }
+  if (views.vec) {
+    const sp = 38, E0 = 1000;
+    for (let y = sp / 2; y < H; y += sp) for (let x = sp / 2; x < W; x += sp) {
+      let near = false;
+      for (let i = 0; i < NC; i++) { const dx = x - cx[i], dy = y - cy[i]; if (dx * dx + dy * dy < (cr[i] + 8) * (cr[i] + 8)) { near = true; break; } }
+      if (near) continue;
+      field(x, y);
+      const m = Math.hypot(EX, EY); if (m < 1e-6) continue;
+      const r = m / (m + E0), len = 4 + 24 * r;
+      g.beginPath(); arrow(g, x - EX / m * len / 2, y - EY / m * len / 2, EX / m, EY / m, len, 4);
+      g.lineWidth = 1.2; g.strokeStyle = rgba(RGB.texte, 0.22 + 0.6 * r); g.stroke();
+    }
+  }
+  if (views.lines) {
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.lineWidth = 3.4; g.strokeStyle = rgba(RGB.texte, 0.05); g.stroke(linesPath);
+    g.lineWidth = 1.05; g.strokeStyle = rgba(RGB.texte, 0.5); g.stroke(linesPath);
+    g.fillStyle = rgba(RGB.texte, 0.75); g.fill(arrowsPath);
+  }
+}
+function rebuild() {
+  syncArrays();
+  const rest = Math.min(8, Math.max(4, Math.sqrt(W * H / 45000)));
+  computeGrid(fast ? rest * 1.75 : rest);
+  if (views.map) renderMap();
+  if (views.eq) buildContours();
+  if (views.lines) buildLines();
+  drawLayer();
+  hoverDirty = true; dirty = false;
+}
+
+/* ---------------- 21.3 · Champ uniforme entre deux plaques ----------------
+   Plaque + à gauche, plaque − à droite : E pointe vers la droite. a = sg · qE/m (constante) :
+   x(t) = x0 + vx t + ½ a t², y(t) = y0 + vy t. Positions en px (1 px = 1 mm), accélération en px/s².
+   Hypothèses : plaques idéales (bords ignorés), champ uniforme, charge test sans effet sur les plaques, ni gravité,
+   ni frottement, ni rayonnement. Zéro du potentiel pris sur la plaque −.
+   Changer E, m, le signe, le départ ou la visée prépare un NOUVEL ESSAI à t = 0 : dans ce modèle, le champ ne change
+   pas en plein vol. L'ancien trajet reste en pointillé, avec ses propres paramètres (pas de réécriture du passé).
+   Sorties et cible : position exacte à tout instant ; l'instant d'une frontière ou de la cible est cherché par
+   échantillonnage à 1/120 s puis affiné par dichotomie (une cible effleurée entre deux échantillons peut échapper). */
+const plate = { xl: 0, xr: 0, y0: 18, y1: 0 };
+const shot = { sg: 1, E: 3000, m: 10, x0: 0, y0: 0, vx: 0, vy: -170, t: 0, launched: false, done: false, fresh: '', why: '', hit: false, hits: 0, nLaunch: 0, trails: [] };
+const target = { x: 0, y: 0, r: 20 };
+let showPrev = false, showTarget = false, pathPts = [], tEnd = 0, tHit = Infinity;
+const accPx = () => shot.sg * (QT / (shot.m * 1e-6)) * shot.E * 1000;       /* px/s² */
+const posAt = t => { const a = accPx(); return [shot.x0 + shot.vx * t + 0.5 * a * t * t, shot.y0 + shot.vy * t]; };
+function layoutPlates() { plate.xl = Math.round(W * 0.1); plate.xr = Math.round(W * 0.9); plate.y1 = H - 18; }
+const outside = (x, y) => x >= plate.xr || x <= plate.xl || y < 0 || y > H;
+const inTarget = (x, y) => Math.hypot(x - target.x, y - target.y) < target.r;
+function newTarget() {
+  const gx = plate.xr - plate.xl;
+  let tries = 0;
+  do {
+    target.x = plate.xl + gx * (0.5 + Math.random() * 0.4);
+    target.y = plate.y0 + 40 + Math.random() * (plate.y1 - plate.y0 - 80);
+  } while (++tries < 20 && Math.hypot(target.x - shot.x0, target.y - shot.y0) < 150);
+  shot.hit = false;
+}
+function bisect(lo, hi, f) { for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (f(m)) hi = m; else lo = m; } return hi; }
+function computePath() {
+  pathPts = []; tEnd = 20; tHit = Infinity; shot.why = 'durée maximale (20 s)';
+  const dt = 1 / 120;
+  for (let k = 0; k <= 20 / dt; k++) {
+    const t = k * dt, [x, y] = posAt(t);
+    if (outside(x, y)) {
+      tEnd = bisect(Math.max(0, t - dt), t, m => outside(...posAt(m)));
+      const [ex, ey] = posAt(tEnd);
+      shot.why = ex >= plate.xr ? 'plaque −' : ex <= plate.xl ? 'plaque +' : 'sortie de la scène';
+      break;
+    }
+    if (showTarget && tHit === Infinity && inTarget(x, y)) tHit = k === 0 ? 0 : bisect((k - 1) * dt, t, m => inTarget(...posAt(m)));
+    if (k % 2 === 0) pathPts.push(x, y);
+  }
+  const [xe, ye] = posAt(tEnd); pathPts.push(xe, ye);
+}
+/* garde dans les traces la partie déjà parcourue de l'essai en cours (ou terminé) */
+function archive() {
+  if (!shot.launched) return;
+  const n = Math.min(pathPts.length, Math.ceil(Math.min(shot.t, tEnd) * 60) * 2 + 2);
+  if (n >= 4) shot.trails.push({ pts: pathPts.slice(0, n) });
+  if (shot.trails.length > 4) shot.trails.shift();
+}
+/* tout réglage (E, m, signe, départ, visée) : nouvel essai prêt à t = 0 */
+function changeSetup(fn) {
+  const enVol = shot.launched;
+  archive(); shot.launched = false; shot.t = 0; shot.done = false; shot.hit = false;
+  fn(); shot.fresh = enVol ? 'Réglages modifiés : nouvel essai prêt, appuie sur « Lancer ».' : ''; computePath();
+}
+function resetShot(keepAim, clearTrails) {
+  shot.t = 0; shot.launched = false; shot.done = false; shot.hit = false; shot.fresh = '';
+  if (clearTrails) shot.trails = [];
+  if (!keepAim) { shot.x0 = plate.xl + (plate.xr - plate.xl) * 0.12; shot.y0 = H * 0.62; shot.vx = 0; shot.vy = -170; }
+  computePath(); syncPlay();
+}
+function launch() {
+  archive();
+  shot.t = 0; shot.launched = true; shot.done = false; shot.hit = false; shot.fresh = ''; shot.nLaunch++;
+  playing = true; syncPlay(); computePath();
+}
+function stepTime(dir) {
+  playing = false; syncPlay();
+  if (!shot.launched) return;
+  shot.t = Math.min(tEnd, Math.max(0, shot.t + dir * 0.1)); shot.done = shot.t >= tEnd; checkHit();
+}
+function checkHit() { if (showTarget && !shot.hit && shot.launched && shot.t >= tHit) { shot.hit = true; shot.hits++; } }
+function simAdvance(dt) {
+  if (!shot.launched || shot.done) return;
+  shot.t = Math.min(tEnd, shot.t + dt);
+  checkHit();
+  if (shot.t >= tEnd) shot.done = true;
+}
+
+/* ---------------- 21.4 · Voltmètre et défi facultatif ---------------- */
+const defi = { U: 120, ok: false, done: 0 };
+let defiOn = false;
+const DEFIS = [-240, -160, -120, -80, 80, 120, 160, 240];
+function newDefi() {
+  syncArrays();
+  const u0 = pot(ptB.x, ptB.y) - pot(ptA.x, ptA.y);
+  let n = 0, c;
+  do { c = DEFIS[Math.floor(Math.random() * DEFIS.length)]; } while (++n < 20 && (c === defi.U || Math.abs(c - u0) < 60));
+  defi.U = c; defi.ok = false;
+}
+function evalDefi() {
+  if (!defiOn) { defi.ok = false; return; }
+  syncArrays();
+  const u = pot(ptB.x, ptB.y) - pot(ptA.x, ptA.y), ok = Math.abs(u - defi.U) <= 6;
+  if (ok && !defi.ok) defi.done++;
+  defi.ok = ok;
+}
+
+/* ---------------- Dessin par image ---------------- */
+function glowDisc(x, y, r, col, a) {
+  const g = ctx.createRadialGradient(x, y, r * 0.6, x, y, r * 2.8);
+  g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r * 2.8, 0, 6.2832); ctx.fill();
+}
+function drawGlyph(x, y, s, sign, col, w) {
+  ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - s, y); ctx.lineTo(x + s, y);
+  if (sign > 0) { ctx.moveTo(x, y - s); ctx.lineTo(x, y + s); }
+  ctx.stroke();
+}
+function drawCharges(drag) {
+  for (let i = 0; i < NC; i++) {
+    const c = charges[i], R = cr[i], pos = c.q > 0, col = pos ? RGB.pos : RGB.neg, hex = pos ? C.pos : C.neg;
+    glowDisc(c.x, c.y, R, col, 0.34);
+    if (!reduce) {
+      const amp = 16 + 5 * Math.abs(c.q);
+      for (let k = 0; k < 2; k++) {
+        const ph = ((pulseT / 3.2) + k / 2) % 1, ph2 = ph < 0 ? ph + 1 : ph;
+        const rr = pos ? R + ph2 * amp : R + (1 - ph2) * amp, al = pos ? (1 - ph2) * 0.32 : ph2 * 0.32;
+        ctx.beginPath(); ctx.arc(c.x, c.y, rr, 0, 6.2832); ctx.lineWidth = 1; ctx.strokeStyle = rgba(col, al); ctx.stroke();
+      }
+    }
+    ctx.beginPath(); ctx.arc(c.x, c.y, R, 0, 6.2832);
+    ctx.fillStyle = C.fond; ctx.fill(); ctx.fillStyle = rgba(col, 0.22); ctx.fill();
+    ctx.lineWidth = 1.6; ctx.strokeStyle = hex; ctx.stroke();
+    drawGlyph(c.x, c.y, Math.min(9, 3.5 + Math.abs(c.q) * 0.9), c.q, hex, 1.7);
+    if (drag && c === drag) {
+      ctx.save(); ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.arc(c.x, c.y, R + 6, 0, 6.2832); ctx.lineWidth = 1; ctx.strokeStyle = C.texte; ctx.stroke(); ctx.restore();
+    }
+  }
+}
+function scaleBar() {
+  const bx = 26, by = H - 22;
+  ctx.strokeStyle = C.texte2; ctx.lineWidth = 1; ctx.beginPath();
+  ctx.moveTo(bx, by); ctx.lineTo(bx + 100, by); ctx.moveTo(bx, by - 4); ctx.lineTo(bx, by + 4); ctx.moveTo(bx + 100, by - 4); ctx.lineTo(bx + 100, by + 4); ctx.stroke();
+  ctx.font = '400 11px ' + MONO; ctx.fillStyle = C.texte2; ctx.textAlign = 'left';
+  ctx.fillText('10 cm', bx + 108, by + 4);
+}
+function probeGlyph(p, label) {
+  ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 6.2832); ctx.fillStyle = C.fond; ctx.fill();
+  ctx.lineWidth = 1.6; ctx.strokeStyle = C.accent; ctx.stroke();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 1.8, 0, 6.2832); ctx.fillStyle = C.accent; ctx.fill();
+  if (label) { ctx.font = '500 11px ' + MONO; ctx.fillStyle = C.texte; ctx.textAlign = 'left'; ctx.fillText(label, p.x + 9, p.y - 8); }
+}
+
+/* 21.1 et 21.2 : sonde, équipotentielle locale, E et angle droit */
+function drawProbeField(withVec) {
+  ctx.save(); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(RGB.accent, 0.95); ctx.stroke(hoverPath); ctx.restore();
+  field(probe.x, probe.y);
+  const m = Math.hypot(EX, EY);
+  if (m > 1e-6) {
+    const ex = EX / m, ey = EY / m, len = 22 + 38 * m / (m + 800);
+    ctx.beginPath(); arrow(ctx, probe.x, probe.y, ex, ey, len, 7);
+    ctx.lineWidth = 2.2; ctx.strokeStyle = withVec ? C.texte : rgba(RGB.texte, 0.65); ctx.stroke();
+    ctx.beginPath(); const a = 8, nx = -ey, ny = ex;
+    ctx.moveTo(probe.x + ex * a, probe.y + ey * a); ctx.lineTo(probe.x + ex * a + nx * a, probe.y + ey * a + ny * a); ctx.lineTo(probe.x + nx * a, probe.y + ny * a);
+    ctx.lineWidth = 1; ctx.strokeStyle = rgba(RGB.accent, 0.9); ctx.stroke();
+  }
+  probeGlyph(probe);
+}
+
+/* 21.2 : coupe horizontale à la hauteur de la sonde et profil V(x) dans la bande du bas */
+function stripBox() { const h = Math.round(Math.min(150, H * 0.3)); return { y0: H - h, h }; }
+function drawCut() {
+  const sb = stripBox(), y = probe.y;
+  ctx.save();
+  ctx.setLineDash([6, 5]); ctx.lineWidth = 1.1; ctx.strokeStyle = rgba(RGB.texte, 0.7);
+  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(8,11,16,0.84)'; ctx.fillRect(0, sb.y0, W, sb.h);
+  ctx.strokeStyle = C.trait; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, sb.y0 + 0.5); ctx.lineTo(W, sb.y0 + 0.5); ctx.stroke();
+  const mid = sb.y0 + sb.h / 2, amp = sb.h * 0.38;
+  ctx.strokeStyle = rgba(RGB.texte2, 0.5); ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(0, mid); ctx.lineTo(W, mid); ctx.stroke(); ctx.setLineDash([]);
+  const Y = v => mid - Math.max(-1.15, Math.min(1.15, Math.asinh(v / 50) / A3)) * amp;
+  ctx.beginPath();
+  for (let x = 0; x <= W; x += 2) { const yy = Y(pot(x, y)); if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy); }
+  ctx.lineWidth = 1.8; ctx.strokeStyle = 'rgba(190,160,255,0.95)'; ctx.stroke();
+  const vp = pot(probe.x, y), yp = Y(vp);
+  ctx.setLineDash([2, 4]); ctx.lineWidth = 1; ctx.strokeStyle = rgba(RGB.texte, 0.55);
+  ctx.beginPath(); ctx.moveTo(probe.x, y); ctx.lineTo(probe.x, yp); ctx.stroke(); ctx.setLineDash([]);
+  /* tangente : sa pente est −E_x */
+  const h = 1.5, sl = (pot(probe.x + h, y) - pot(probe.x - h, y)) / (2 * h), dy1 = Y(vp + sl * 40) - Y(vp - sl * 40);
+  ctx.strokeStyle = C.ener; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(probe.x - 40, yp - dy1 / 2); ctx.lineTo(probe.x + 40, yp + dy1 / 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(probe.x, yp, 4, 0, 6.2832); ctx.fillStyle = C.fond; ctx.fill(); ctx.strokeStyle = C.accent; ctx.lineWidth = 1.6; ctx.stroke();
+  ctx.font = '400 11px ' + MONO; ctx.fillStyle = C.texte2; ctx.textAlign = 'left';
+  ctx.fillText('V', 10, sb.y0 + 16); ctx.fillText('0', 10, mid - 4); ctx.textAlign = 'right'; ctx.fillText('x →', W - 10, sb.y0 + sb.h - 8);
+  ctx.fillStyle = C.ener; ctx.textAlign = 'left'; ctx.fillText('pente = −E\u2093', Math.min(W - 110, probe.x + 46), yp + 4);
+  ctx.restore();
+}
+
+/* 21.3 */
+function drawPlates() {
+  const { xl, xr, y1 } = plate, y0 = plate.y0;
+  /* lignes de champ uniformes */
+  const E = shot.E, al = 0.25 + 0.4 * (E - 500) / 4500;
+  ctx.lineWidth = 1.1; ctx.strokeStyle = rgba(RGB.texte, al); ctx.fillStyle = rgba(RGB.texte, al + 0.1);
+  for (let y = y0 + 22; y < y1; y += 44) {
+    ctx.beginPath(); ctx.moveTo(xl + 4, y); ctx.lineTo(xr - 4, y); ctx.stroke();
+    for (let x = xl + 120 - ((pulseT * 40) % 160 || 0); x < xr - 12; x += 160) {
+      if (x < xl + 10) continue; ctx.beginPath(); ctx.moveTo(x + 5, y); ctx.lineTo(x - 3, y - 3.4); ctx.lineTo(x - 3, y + 3.4); ctx.closePath(); ctx.fill();
+    }
+  }
+  const pl = (x, w, col, hex, sign) => {
+    ctx.fillStyle = rgba(col, 0.16); ctx.fillRect(x, y0, w, y1 - y0);
+    ctx.lineWidth = 1.6; ctx.strokeStyle = hex; ctx.strokeRect(x + 0.5, y0 + 0.5, w - 1, y1 - y0 - 1);
+    for (let y = y0 + 22; y < y1; y += 44) drawGlyph(x + w / 2, y, 4.5, sign, hex, 1.6);
+  };
+  pl(xl - 18, 18, RGB.pos, C.pos, 1); pl(xr, 18, RGB.neg, C.neg, -1);
+}
+function drawShot() {
+  /* cible (facultative) */
+  if (showTarget) {
+  ctx.save();
+  const tc = shot.hit ? C.accent : C.ener;
+  glowDisc(target.x, target.y, target.r * 0.6, shot.hit ? RGB.accent : RGB.ener, shot.hit ? 0.5 : 0.22);
+  ctx.lineWidth = 1.6; ctx.strokeStyle = tc;
+  for (const r of [target.r, target.r * 0.62, target.r * 0.24]) { ctx.beginPath(); ctx.arc(target.x, target.y, r, 0, 6.2832); ctx.stroke(); }
+  ctx.restore();
+  }
+  /* tirs précédents */
+  for (const tr of shot.trails) {
+    ctx.beginPath(); const p = tr.pts; if (p.length < 4) continue;
+    ctx.moveTo(p[0], p[1]); for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+    ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(RGB.texte2, 0.4); ctx.setLineDash([2, 4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  /* prévision (facultative) */
+  if (showPrev && !shot.launched) {
+    ctx.beginPath(); ctx.moveTo(pathPts[0], pathPts[1]); for (let i = 2; i < pathPts.length; i += 2) ctx.lineTo(pathPts[i], pathPts[i + 1]);
+    ctx.lineWidth = 1.3; ctx.strokeStyle = rgba(RGB.accent, 0.55); ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  const [px, py] = shot.launched ? posAt(shot.t) : [shot.x0, shot.y0];
+  const a = accPx();
+  /* trajectoire déjà parcourue */
+  if (shot.launched) {
+    ctx.beginPath(); ctx.moveTo(shot.x0, shot.y0);
+    const n = Math.max(2, Math.ceil(shot.t * 60));
+    for (let i = 1; i <= n; i++) { const [x, y] = posAt(Math.min(shot.t, i / 60 * 1)); ctx.lineTo(x, y); }
+    ctx.lineTo(px, py);
+    ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = rgba(RGB.accent, 0.9); ctx.stroke();
+  }
+  const vx = shot.vx + a * (shot.launched ? shot.t : 0), vy = shot.vy;
+  const sp = Math.hypot(vx, vy);
+  if (!shot.launched || !shot.done) {
+    /* vitesse v (vert) */
+    const K1 = 0.55;
+    if (sp > 2) {
+      const ux1 = vx / sp, uy1 = vy / sp, len = Math.min(180, sp * K1);
+      ctx.beginPath(); arrow(ctx, px + ux1 * 9, py + uy1 * 9, ux1, uy1, len, 7);
+      ctx.lineWidth = 2; ctx.strokeStyle = C.accent; ctx.stroke();
+      ctx.font = 'italic 400 15px "Instrument Serif",Georgia,serif'; ctx.fillStyle = C.accent; ctx.textAlign = 'left';
+      ctx.fillText('v', px + ux1 * (len + 16) - 3, py + uy1 * (len + 16) + 4);
+    }
+    /* force F = qE (jaune), même sens que a */
+    const fl = 26 + 30 * (shot.E - 500) / 4500, fs = Math.sign(a) || 1;
+    ctx.beginPath(); arrow(ctx, px + fs * 9, py, fs, 0, fl, 7);
+    ctx.lineWidth = 2; ctx.strokeStyle = C.ener; ctx.stroke();
+    ctx.font = 'italic 400 15px "Instrument Serif",Georgia,serif'; ctx.fillStyle = C.ener; ctx.textAlign = 'left';
+    ctx.fillText('F', px + fs * (fl + 16) - 4, py + 16);
+  }
+  glowDisc(px, py, 7, shot.sg > 0 ? RGB.pos : RGB.neg, 0.4);
+  ctx.beginPath(); ctx.arc(px, py, 7, 0, 6.2832); ctx.fillStyle = C.fond; ctx.fill();
+  ctx.lineWidth = 1.7; ctx.strokeStyle = shot.sg > 0 ? C.pos : C.neg; ctx.stroke();
+  drawGlyph(px, py, 3.6, shot.sg, shot.sg > 0 ? C.pos : C.neg, 1.6);
+  if (shot.done) {
+    ctx.font = '500 12px ' + MONO; ctx.textAlign = 'center'; ctx.fillStyle = shot.hit ? C.accent : C.texte2;
+    ctx.fillText(showTarget && shot.hit ? 'Touché !' : 'Arrivée : ' + shot.why, W / 2, 28);
+  }
+}
+
+/* 21.4 */
+function drawVoltmeter() {
+  const u = pot(ptB.x, ptB.y) - pot(ptA.x, ptA.y);
+  const bw = Math.min(300, W - 40), bh = 74, bx = W / 2 - bw / 2, by = H - bh - 26;
+  ctx.save();
+  /* fils */
+  const wire = (p, tx, col) => {
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    ctx.bezierCurveTo(p.x, p.y + (by - p.y) * 0.7, tx, by - 40, tx, by);
+    ctx.lineWidth = 2.2; ctx.strokeStyle = rgba(col, 0.75); ctx.stroke();
+  };
+  wire(ptA, bx + 2, RGB.texte2); wire(ptB, bx + bw - 2, RGB.texte2);
+  /* boîtier */
+  ctx.fillStyle = '#0d1219'; ctx.fillRect(bx, by, bw, bh);
+  ctx.lineWidth = 1.5; ctx.strokeStyle = defi.ok ? C.accent : C.texte2; ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+  ctx.font = '400 11px ' + MONO; ctx.fillStyle = C.texte2; ctx.textAlign = 'center';
+  ctx.fillText('U = V(B) − V(A)', W / 2, by + 16);
+  ctx.font = '500 26px ' + MONO; ctx.fillStyle = defi.ok ? C.accent : C.texte;
+  ctx.fillText((u < 0 ? '−' : u > 0 ? '+' : '') + Math.abs(Math.round(u)) + ' V', W / 2, by + 46);
+  ctx.font = '400 11px ' + MONO; ctx.fillStyle = defi.ok ? C.accent : C.ener;
+  ctx.fillText(!defiOn ? 'Glisse A et B' : defi.ok ? 'Défi réussi' : 'Défi : lis U = ' + (defi.U > 0 ? '+' : '−') + Math.abs(defi.U) + ' V  (± 6)', W / 2, by + 65);
+  ctx.restore();
+}
+function drawPoints() {
+  ctx.save();
+  ctx.setLineDash([2, 5]); ctx.lineWidth = 1.2; ctx.strokeStyle = rgba(RGB.texte, 0.6); ctx.stroke(pathA);
+  ctx.setLineDash([5, 4]); ctx.strokeStyle = rgba(RGB.accent, 0.8); ctx.stroke(pathB); ctx.setLineDash([]);
+  ctx.restore();
+  for (const [p, l, c] of [[ptA, 'A', C.texte], [ptB, 'B', C.accent]]) {
+    ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 6.2832); ctx.fillStyle = C.fond; ctx.fill();
+    ctx.lineWidth = 1.8; ctx.strokeStyle = c; ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 6.2832); ctx.fillStyle = c; ctx.fill();
+    ctx.font = '500 12px ' + MONO; ctx.fillStyle = c; ctx.textAlign = 'left'; ctx.fillText(l, p.x + 10, p.y - 9);
+  }
+}
+
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (stage === 2) {
+    ctx.fillStyle = C.fond; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = rgba(RGB.texte, 0.07);
+    for (let y = 25; y < H; y += 50) for (let x = 25; x < W; x += 50) ctx.fillRect(x - 0.5, y - 0.5, 1, 1);
+    drawPlates(); drawShot(); scaleBar();
+    return;
+  }
+  ctx.drawImage(layer, 0, 0, W, H);
+  if (stage === 0 && views.lines && !reduce) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 1.9; ctx.strokeStyle = rgba(RGB.texte, 0.55); ctx.setLineDash([9, 151]);
+    for (let k = 0; k < 3; k++) { ctx.lineDashOffset = -(pulseT * 50 + k * 53.33); ctx.stroke(linesPath); }
+    ctx.restore();
+  }
+  drawCharges(stage === 0 ? dragC : null);
+  if (stage === 0) { drawProbeField(true); }
+  else if (stage === 1) { if (views.cut) drawCut(); drawProbeField(false); }
+  else if (stage === 3) { drawPoints(); drawVoltmeter(); }
+  if (stage !== 3) scaleBar();
+}
+
+/* ---------------- Panneau de lecture ---------------- */
+const nf0 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const nf2 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const nf3 = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 3, minimumFractionDigits: 3 });
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const sup = n => String(Math.abs(n)).split('').map(c => SUP[+c]).join('').replace(/^/, n < 0 ? '⁻' : '');
+function fmt(v, sign) {
+  const a = Math.abs(v), s = v < 0 ? '−' : (sign ? '+' : '');
+  if (a < 0.005) return '0';
+  if (a < 10) return s + nf2.format(a);
+  if (a < 100) return s + nf1.format(a);
+  if (a < 100000) return s + nf0.format(a);
+  const e = Math.floor(Math.log10(a)), m = a / Math.pow(10, e);
+  return s + nf2.format(m) + '×10' + sup(e);
+}
+const els = {}; ['aE','aD','aF','aN','bV','bS','bEx','bE','bNote','cA','cV','cK','cU','cS','cNote','dA','dB','dU','dW','dNote','needleG'].forEach(id => els[id] = document.getElementById(id));
+const setT = (el, s) => { if (el._s !== s) { el._s = s; el.textContent = s; } };
+let needleAng = 0;
+const sg0 = v => (v > 0 ? '+' : v < 0 ? '−' : '') + nf3.format(Math.abs(v));
+function updatePanel() {
+  syncArrays();
+  if (stage === 0) {
+    field(probe.x, probe.y);
+    const m = Math.hypot(EX, EY);
+    setT(els.aE, fmt(m, false));
+    if (m > 1e-3) {
+      let ang = Math.atan2(-EY, EX) * 180 / Math.PI; if (ang < 0) ang += 360;
+      setT(els.aD, nf0.format((Math.round(ang) % 360) || 0));
+      const scr = Math.atan2(EY, EX) * 180 / Math.PI;
+      let dlt = scr - (needleAng % 360); dlt = ((dlt + 540) % 360) - 180; needleAng += dlt;
+      els.needleG.style.transform = `rotate(${needleAng}deg)`;
+    } else setT(els.aD, '—');
+    setT(els.aF, fmt(m * 1e-3, false));
+    let Q = 0; for (const c of charges) Q += c.q;
+    setT(els.aN, NC + ' · ' + (Q > 0 ? '+' : Q < 0 ? '−' : '') + Math.abs(Q));
+  } else if (stage === 1) {
+    field(probe.x, probe.y); const m = Math.hypot(EX, EY), ex = EX;
+    const h = 1.5, sl = -(pot(probe.x + h, probe.y) - pot(probe.x - h, probe.y)) / (2 * h * 1e-3);
+    setT(els.bV, fmt(pot(probe.x, probe.y), true)); setT(els.bS, fmt(sl, true)); setT(els.bEx, fmt(ex, true)); setT(els.bE, fmt(m, false));
+  } else if (stage === 2) {
+    const a = accPx() * 1e-3, [px, py] = posAt(shot.launched ? shot.t : 0), t = shot.launched ? shot.t : 0;
+    const vx = shot.vx * 1e-3 + a * t, vy = shot.vy * 1e-3, v = Math.hypot(vx, vy), m = shot.m * 1e-6;
+    const K1 = 0.5 * m * v * v * 1e6, Vp = shot.E * (plate.xr - px) * 1e-3, U = shot.sg * QT * Vp * 1e6;
+    setT(els.cA, (a < 0 ? '−' : '') + nf2.format(Math.abs(a))); setT(els.cV, nf3.format(v));
+    setT(els.cK, nf3.format(K1)); setT(els.cU, sg0(U).replace('+', '')); setT(els.cS, sg0(K1 + U).replace('+', ''));
+    setT(els.cNote, !shot.launched ? (shot.fresh || 'Tire sur la flèche verte pour viser, puis « Lancer ». Glisse la charge pour la déplacer. Changer un réglage prépare un nouvel essai.')
+      : shot.done ? 'Arrivée : ' + shot.why + '. Pendant cet essai, Ec + qV est restée constante : E, m et q fixes, plaques idéales, sans gravité ni frottement.' : 'Ec + qV reste constante pendant l\'essai : l\'énergie change de forme, elle ne se perd pas. Zéro de V : plaque −.');
+  } else {
+    const va = pot(ptA.x, ptA.y), vb = pot(ptB.x, ptB.y), u = vb - va;
+    setT(els.dA, fmt(va, true)); setT(els.dB, fmt(vb, true)); setT(els.dU, fmt(u, true)); setT(els.dW, fmt(u * 1e-3, true));
+    setT(els.dNote, defi.ok ? 'Défi réussi. Clique « Nouveau défi » pour une autre tension.' : Math.abs(u) < 2 ? 'Tension proche de zéro (à moins de 2 V) : A et B sont presque sur une même équipotentielle, même si le champ y est intense.'
+      : (u > 0 ? 'B est à un potentiel plus élevé que A : amener +1 nC de A à B, lentement, demande ce travail extérieur. ' : 'B est à un potentiel plus bas que A : le champ fournit lui-même ce travail si la charge se déplace lentement. ') + 'Il ne dépend que de A et B, pas du chemin.');
+  }
+}
+
+/* ---------------- Interaction ---------------- */
+let dragC = null, dragK = null;
+const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+const clampP = (p, m = 10) => ({ x: Math.min(W - m, Math.max(m, p.x)), y: Math.min(H - m, Math.max(m, p.y)) });
+function hitCharge(p) {
+  for (let i = charges.length - 1; i >= 0; i--) { const c = charges[i]; if (Math.hypot(p.x - c.x, p.y - c.y) <= radiusOf(c.q) + 5) return c; }
+  return null;
+}
+function setProbe(p) {
+  const q = clampP(p), lim = stage === 1 && views.cut ? stripBox().y0 - 6 : H - 10;
+  probe.x = q.x; probe.y = Math.min(lim, q.y); hoverDirty = true;
+}
+function scheduleRefine() { clearTimeout(refineTimer); refineTimer = setTimeout(() => { fast = false; dirty = true; }, 140); }
+function aimFrom(p) {
+  /* viser : le vecteur v va de la charge au pointeur (facteur 1/0,55 : une flèche de 100 px = 182 px/s) */
+  const dx = p.x - shot.x0, dy = p.y - shot.y0, K1 = 0.55;
+  let vx = dx / K1, vy = dy / K1; const sp = Math.hypot(vx, vy), max = 520;
+  if (sp > max) { vx *= max / sp; vy *= max / sp; }
+  shot.vx = vx; shot.vy = vy; computePath();
+}
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  const p = pos(e); cv.classList.add('grabbing');
+  if (stage === 0) {
+    const c = hitCharge(p);
+    if (c) { dragK = 'charge'; dragC = c; } else { dragK = 'probe'; setProbe(p); }
+  } else if (stage === 1) { dragK = 'probe'; setProbe(p); }
+  else if (stage === 2) {
+    if (shot.launched) changeSetup(() => {});
+    if (Math.hypot(p.x - shot.x0, p.y - shot.y0) <= 14) dragK = 'start'; else { dragK = 'aim'; aimFrom(p); }
+  } else if (stage === 3) {
+    dragK = Math.hypot(p.x - ptA.x, p.y - ptA.y) <= Math.hypot(p.x - ptB.x, p.y - ptB.y) ? 'A' : 'B';
+    const t = dragK === 'A' ? ptA : ptB, q = clampP(p); t.x = q.x; t.y = q.y; hoverDirty = true; evalDefi();
+  }
+});
+cv.addEventListener('pointermove', e => {
+  if (!dragK) { cv.className = stage === 0 && hitCharge(pos(e)) ? 'grab' : ''; return; }
+  const p = pos(e);
+  if (dragK === 'charge' && dragC) { const q = clampP(p, 12); dragC.x = q.x; dragC.y = q.y; dirty = true; fast = true; scheduleRefine(); }
+  else if (dragK === 'probe') setProbe(p);
+  else if (dragK === 'start') {
+    const q = { x: Math.min(plate.xr - 20, Math.max(plate.xl + 20, p.x)), y: Math.min(plate.y1 - 10, Math.max(plate.y0 + 10, p.y)) };
+    shot.x0 = q.x; shot.y0 = q.y; computePath();
+  } else if (dragK === 'aim') aimFrom(p);
+  else if (dragK === 'A' || dragK === 'B') { const t = dragK === 'A' ? ptA : ptB, q = clampP(p); t.x = q.x; t.y = q.y; hoverDirty = true; evalDefi(); }
+});
+function endPointer() { dragK = null; dragC = null; cv.classList.remove('grabbing'); }
+cv.addEventListener('pointerup', endPointer); cv.addEventListener('pointercancel', endPointer);
+
+function syncOptional() {
+  $('#bTargetOn').setAttribute('aria-pressed', String(showTarget)); $('#bTarget').disabled = !showTarget;
+  $('#bDefiOn').setAttribute('aria-pressed', String(defiOn)); $('#bDefi').disabled = !defiOn;
+}
+function syncPlay() {
+  $('#icPause').style.display = playing ? '' : 'none'; $('#icPlay').style.display = playing ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+}
+document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('click', () => {
+  applySources(b.dataset.p); if (window.Fiche) Fiche.relance();
+  if (stage === 3) return;
+}));
+$('#vVec').addEventListener('click', e => { views.vec = !views.vec; e.currentTarget.setAttribute('aria-pressed', String(views.vec)); dirty = true; fast = false; });
+$('#vMap').addEventListener('click', e => { views.map = !views.map; e.currentTarget.setAttribute('aria-pressed', String(views.map)); dirty = true; fast = false; });
+$('#vEq').addEventListener('click', e => { views.eq = !views.eq; e.currentTarget.setAttribute('aria-pressed', String(views.eq)); dirty = true; fast = false; });
+$('#vCut').addEventListener('click', e => { views.cut = !views.cut; e.currentTarget.setAttribute('aria-pressed', String(views.cut)); setProbe(probe); });
+document.querySelectorAll('.tsgn').forEach(b => b.addEventListener('click', () => {
+  changeSetup(() => { shot.sg = +b.dataset.s; });
+  document.querySelectorAll('.tsgn').forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.s === shot.sg)));
+}));
+$('#eSl').addEventListener('input', e => { changeSetup(() => { shot.E = +e.target.value; }); $('#eV').textContent = shot.E + ' N/C'; });
+$('#mSl').addEventListener('input', e => { changeSetup(() => { shot.m = +e.target.value; }); $('#mV').textContent = shot.m + ' mg'; });
+$('#bPrev').addEventListener('click', e => { showPrev = !showPrev; e.currentTarget.setAttribute('aria-pressed', String(showPrev)); });
+$('#bTargetOn').addEventListener('click', e => { changeSetup(() => { showTarget = !showTarget; }); syncOptional(); });
+$('#bTarget').addEventListener('click', () => changeSetup(() => newTarget()));
+$('#bDefiOn').addEventListener('click', () => { defiOn = !defiOn; if (defiOn) newDefi(); evalDefi(); syncOptional(); });
+$('#bLaunch').addEventListener('click', launch);
+$('#bPlay').addEventListener('click', () => { playing = !playing; syncPlay(); });
+$('#bBack').addEventListener('click', () => stepTime(-1));
+$('#bFwd').addEventListener('click', () => stepTime(1));
+$('#bSwap').addEventListener('click', () => { const t = { x: ptA.x, y: ptA.y }; ptA.x = ptB.x; ptA.y = ptB.y; ptB.x = t.x; ptB.y = t.y; nSwap++; hoverDirty = true; evalDefi(); });
+$('#bDefi').addEventListener('click', () => { newDefi(); evalDefi(); });
+$('#bReset').addEventListener('click', () => goStage(stage, true));
+
+/* ---------------- Étapes ---------------- */
+const VIEWS = [
+  { lines: true, vec: false, eq: false, map: false, cut: false },
+  { lines: false, vec: false, eq: true, map: true, cut: true },
+  { lines: false, vec: false, eq: false, map: false, cut: false },
+  { lines: false, vec: false, eq: true, map: false, cut: false }
+];
+function syncStages() {
+  document.querySelectorAll('#stepper .seg').forEach(b => { if (+b.dataset.a === stage) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  document.body.dataset.e = String(stage);
+  const sb = $('#sandboxLink'); if (sb) sb.href = '../04-champ-electrique/index.html?retour=fondations-electrostatique&etape=21.' + (stage + 1);
+  $('#vVec').setAttribute('aria-pressed', String(views.vec));
+  $('#vMap').setAttribute('aria-pressed', String(views.map)); $('#vEq').setAttribute('aria-pressed', String(views.eq)); $('#vCut').setAttribute('aria-pressed', String(views.cut));
+}
+/* ---------------- Mémoire de session (aller au bac à sable et revenir) ----------------
+   Un état par expérience, gardé dans sessionStorage (propre à l'onglet) : on le restaure quand on revient sur
+   l'expérience, sauf si Réinitialiser (R) est l'action explicite. Jamais en mode intégré (?embed) : les scènes
+   d'un cours partagent le stockage de leur onglet. Les sources du bac à sable sont un autre état, non transféré. */
+const KEY = 'labo.electrostatique.fondation.v1', embed = /[?&]embed\b/.test(location.search);
+let saved = {}, started = false;
+try { if (!embed) { const o = JSON.parse(sessionStorage.getItem(KEY) || 'null'); if (o && o.v === 1 && o.s) saved = o.s; } } catch (_) {}
+const okN = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
+const okP = p => p && okN(p.x, 0, 4000) && okN(p.y, 0, 4000);
+function captureState(k) {
+  const b = { W, H };
+  if (k === 0) return { ...b, preset, charges: charges.map(c => ({ id: c.id, x: c.x, y: c.y, q: c.q })), probe: { ...probe }, vec: views.vec };
+  if (k === 1) return { ...b, preset, probe: { ...probe }, map: views.map, eq: views.eq, cut: views.cut };
+  if (k === 2) return { ...b, sg: shot.sg, E: shot.E, m: shot.m, x0: shot.x0, y0: shot.y0, vx: shot.vx, vy: shot.vy, showPrev, showTarget, target: { x: target.x, y: target.y }, trails: shot.trails.map(t => t.pts.slice()) };
+  return { ...b, A: { ...ptA }, B: { ...ptB }, defiOn, U: defi.U };
+}
+function restoreState(k, s) {
+  if (!s || !okN(s.W, 100, 5000) || !okN(s.H, 100, 5000)) return false;
+  /* la mise en page de l'écran peut différer un peu d'une visite à l'autre : on remet les points à l'échelle */
+  const kx = W / s.W, ky = H / s.H;
+  if (k === 0 || k === 1) {
+    if (!okP(s.probe) || !['dipole', 'identiques', 'quadrupole'].includes(s.preset)) return false;
+    applySources(s.preset);
+    if (k === 0 && Array.isArray(s.charges) && s.charges.length === charges.length && s.charges.every(c => okP(c) && okN(c.q, -5, 5))) s.charges.forEach((c, i) => { charges[i].x = c.x * kx; charges[i].y = c.y * ky; });
+    probe.x = s.probe.x * kx; probe.y = s.probe.y * ky; setProbe(probe);
+    if (k === 0) views.vec = !!s.vec; else { views.map = !!s.map; views.eq = !!s.eq; views.cut = !!s.cut; }
+  } else if (k === 2) {
+    if (!okN(s.E, 500, 5000) || !okN(s.m, 2, 50) || !okN(s.x0, 0, 4000) || !okN(s.y0, 0, 4000) || !okN(s.vx, -600, 600) || !okN(s.vy, -600, 600) || !okP(s.target) || (s.sg !== 1 && s.sg !== -1)) return false;
+    Object.assign(shot, { sg: s.sg, E: s.E, m: s.m, x0: s.x0 * kx, y0: s.y0 * ky, vx: s.vx, vy: s.vy });
+    showPrev = !!s.showPrev; showTarget = !!s.showTarget; target.x = s.target.x * kx; target.y = s.target.y * ky;
+    shot.trails = (Array.isArray(s.trails) ? s.trails : []).slice(-4).filter(a => Array.isArray(a) && a.length >= 4 && a.length < 4000 && a.every(n => okN(n, -100, 5000))).map(pts => ({ pts: pts.map((n, i) => n * (i % 2 ? ky : kx)) }));
+    resetShot(true);
+  } else {
+    if (!okP(s.A) || !okP(s.B) || !okN(s.U, -1000, 1000)) return false;
+    ptA.x = s.A.x * kx; ptA.y = s.A.y * ky; ptB.x = s.B.x * kx; ptB.y = s.B.y * ky; defiOn = !!s.defiOn; defi.U = s.U; evalDefi();
+  }
+  return true;
+}
+function persist() {
+  if (embed || !started) return;
+  try { saved[stage] = captureState(stage); sessionStorage.setItem(KEY, JSON.stringify({ v: 1, s: saved })); } catch (_) { /* stockage refusé : la page marche sans */ }
+}
+addEventListener('pagehide', persist);
+function defaults(k) {
+  const mx = W / 2, my = H / 2, s = sepFor(W);
+  if (k !== 2) {
+    applySources('dipole');
+    if (k === 0) { probe.x = mx - s * 0.1; probe.y = my - 120; }
+    else if (k === 1) { probe.x = mx + s * 0.9; probe.y = my; }
+    else { ptA.x = mx - s * 0.62; ptA.y = my - 64; ptB.x = mx + s * 0.62; ptB.y = my + 70; defiOn = false; newDefi(); defi.ok = false; }
+    setProbe(probe);
+  } else {
+    shot.sg = 1; shot.E = 3000; shot.m = 10; showPrev = false; showTarget = false; layoutPlates(); resetShot(false, true); newTarget(); computePath();
+  }
+}
+function syncControls2() {
+  $('#eSl').value = shot.E; $('#eV').textContent = shot.E + ' N/C'; $('#mSl').value = shot.m; $('#mV').textContent = shot.m + ' mg';
+  $('#bPrev').setAttribute('aria-pressed', String(showPrev));
+  document.querySelectorAll('.tsgn').forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.s === shot.sg)));
+  syncOptional(); syncPlay();
+}
+function goStage(k, fresh) {
+  if (k < 0 || k > 3) return;
+  if (started && stage !== k) persist();
+  /* la relance précède tout changement : l'état d'arrivée de la fiche redevient celui d'ici */
+  if (window.Fiche) Fiche.relance();
+  stage = k; Object.assign(views, VIEWS[k]);
+  dragK = null; dragC = null;
+  if (fresh) delete saved[k];
+  defaults(k);
+  if (!fresh && !restoreState(k, saved[k])) delete saved[k];
+  if (k === 2) playing = true;
+  started = true;
+  syncStages(); syncControls2(); dirty = true; fast = false; hoverDirty = true;
+  if (window.preparerFicheElec) window.preparerFicheElec(k);
+  if (window.Fiche) Fiche.montre(k);
+}
+window.allerScene = k => goStage(k);
+window.etatElec = () => ({
+  stage, W, H, preset, nSwap, probe: { ...probe }, ptA: { ...ptA }, ptB: { ...ptB }, views: { ...views },
+  charges: charges.map(c => ({ ...c })), sep: lastSep,
+  shot: { sg: shot.sg, E: shot.E, m: shot.m, nLaunch: shot.nLaunch, hits: shot.hits, launched: shot.launched, done: shot.done, x0: shot.x0, y0: shot.y0, vx: shot.vx, vy: shot.vy, t: shot.t, a: accPx() * 1e-3, showPrev, showTarget, fresh: shot.fresh },
+  defi: { U: defi.U, ok: defi.ok, done: defi.done, on: defiOn },
+  U: (syncArrays(), pot(ptB.x, ptB.y) - pot(ptA.x, ptA.y)), VA: pot(ptA.x, ptA.y), VB: pot(ptB.x, ptB.y),
+  E: (syncArrays(), field(probe.x, probe.y), Math.hypot(EX, EY)), Vp: pot(probe.x, probe.y),
+  dmin: Math.min(...charges.map(c => Math.hypot(probe.x - c.x, probe.y - c.y)), 1e9), plateau: { ...plate }, play: playing
+});
+
+document.addEventListener('keydown', e => {
+  const t = e.target, tag = t.tagName;
+  if (t.closest('input:not([type=range]),textarea,select')) return;
+  if (tag === 'INPUT' && t.type === 'range' && (e.key === ' ' || e.key.startsWith('Arrow'))) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (stage === 2 && e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); playing = !playing; syncPlay(); }
+  else if (stage === 2 && e.key === 'ArrowLeft') { e.preventDefault(); stepTime(-1); }
+  else if (stage === 2 && e.key === 'ArrowRight') { e.preventDefault(); stepTime(1); }
+  else if (stage === 2 && (e.key === 'l' || e.key === 'L')) launch();
+  else if (e.key === 'r' || e.key === 'R') goStage(stage, true);
+  else if (e.key >= '1' && e.key <= '4' && tag !== 'INPUT') goStage(+e.key - 1);
+});
+document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => { goStage(+b.dataset.a); e.currentTarget.blur(); }));
+
+/* ---------------- Dimensionnement et boucle ---------------- */
+function resize() {
+  const r = sceneEl.getBoundingClientRect();
+  const nw = Math.max(200, Math.round(r.width)), nh = Math.max(200, Math.round(r.height)), nd = Math.min(2, window.devicePixelRatio || 1);
+  if (nw === W && nh === H && nd === dpr && cv.width) return;
+  const kx = nw / W, ky = nh / H;
+  for (const c of charges) { c.x *= kx; c.y *= ky; }
+  for (const p of [probe, ptA, ptB, target]) { p.x *= kx; p.y *= ky; }
+  shot.x0 *= kx; shot.y0 *= ky;
+  const enVol = shot.launched;
+  W = nw; H = nh; dpr = nd;
+  for (const c of [cv, layer]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  /* Provisoire : 1 px reste 1 mm, donc changer la taille de la fenêtre change la géométrie physique. 21.3 repart d'un
+     nouvel essai (traces effacées) au lieu de garder un bilan d'énergie devenu faux. */
+  layoutPlates(); shot.trails = []; resetShot(true); if (enVol) shot.fresh = 'La fenêtre a changé de taille : nouvel essai prêt, appuie sur « Lancer ».';
+  dirty = true; fast = false;
+}
+new ResizeObserver(resize).observe(sceneEl);
+window.addEventListener('resize', resize);
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  pulseT += dt;
+  if (stage === 2 && playing) simAdvance(dt);
+  if (dirty && stage !== 2) rebuild();
+  if (hoverDirty) { if (stage !== 2) buildHover(); hoverDirty = false; }
+  draw(); updatePanel();
+  requestAnimationFrame(frame);
+}
+resize();
+{ const r = sceneEl.getBoundingClientRect(); W = Math.max(200, Math.round(r.width)); H = Math.max(200, Math.round(r.height)); layoutPlates(); }
+goStage(0);
+syncPlay();
+requestAnimationFrame(frame);
+
+/* interface de test (lecture seule, utile pour vérifier la physique) */
+window.__elec = { field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, size: () => [W, H], charges: () => charges, shot: () => shot, probe: (x, y) => setProbe({ x, y }), go: goStage, pathEnd: () => ({ tEnd, tHit, why: shot.why }) };
+})();
+</script>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+  const nf = x => new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2 }).format(x).replace('-', '−');
+  const tex = x => nf(x).replace(',', '{,}').replace(/\u202f|\u00a0/g, '\\,');
+  const deplace = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) > 20;
+  /* L'état d'arrivée est celui de la scène telle qu'on la découvre ; Fiche.relance() le jette à chaque reset. */
+  const suivi = (e, mem) => { const d = mem.depart; if (!d || e.W !== d.W || e.H !== d.H) mem.depart = e; };
+  const moteur = window.__elec;
+  const fiches = [
+    {
+      titre: 'Lire le champ',
+      regarde: 'Les lignes blanches sortent de la charge positive et arrivent sur la négative. La flèche de la sonde donne la direction de E en son point, même sans charge test.',
+      prediction: { q: 'Avec le dipôle ±3 nC, au milieu exact des deux charges, vers où pointe le champ ?',
+        choix: ['Vers la charge positive', 'Vers la charge négative', 'Le champ est nul'], bonne: 1, explication: '' },
+      suivi,
+      essais: [
+        { t: 'Place la sonde au milieu des deux charges et compare avec ta prédiction.', fait: (e, m) => m.depart && Math.hypot(e.probe.x - e.W / 2, e.probe.y - e.H / 2) < 14 && deplace(e.probe, m.depart.probe) },
+        { t: 'Glisse une des charges de plus de 20 pixels : les lignes se réorganisent.', fait: (e, m) => m.depart && e.charges.some(c => { const a = m.depart.charges.find(x => x.id === c.id); return a && deplace(c, a); }) },
+        { t: 'Choisis « Deux identiques » et trouve le point où le champ s\'annule.', fait: e => e.preset === 'identiques' && e.E < 600 && e.dmin > 40 }
+      ],
+      pourquoi: 'Chaque charge crée son propre champ, qui s\'éloigne d\'une charge positive et se dirige vers une négative. Le champ total est leur somme vectorielle : entre deux charges opposées, les contributions s\'ajoutent ; entre deux charges identiques, elles se retranchent et peuvent s\'annuler.',
+      relation: String.raw`\vec E = \sum_i \frac{k\,q_i}{r_i^{\,2}}\,\hat r_i,\qquad \vec F=q\vec E`,
+      defs: [['Champ électrique', 'Force par coulomb, en N/C ; il existe sans charge test.'], ['Superposition', 'Addition vectorielle des champs créés par chaque source.']],
+      piege: 'Une ligne de champ n\'est pas la trajectoire d\'une charge : elle donne seulement la direction de la force, en chaque point.'
+    },
+    {
+      titre: 'Explorer le potentiel',
+      regarde: 'La carte donne un seul nombre par point, V : orange où il est haut, bleu où il est bas. Les courbes vertes relient les points de même V ; sous la scène, la coupe en montre le profil le long de la ligne pointillée.',
+      prediction: { q: 'Quel potentiel V prédis-tu au milieu exact du dipôle ±3 nC, à égale distance des deux charges ?', reponse: 0, unite: 'V', tol: 1, explication: '' },
+      suivi,
+      essais: [
+        { t: 'Glisse la sonde : observe la tangente jaune dans la coupe, sa pente change avec E.', fait: (e, m) => m.depart && deplace(e.probe, m.depart.probe) },
+        { t: 'Désactive la carte pour isoler les courbes vertes.', fait: (e, m) => m.depart && m.depart.views.map && !e.views.map },
+        { t: 'Trouve un point où V = 0 à plus de 90 pixels de toute charge.', fait: e => e.preset === 'dipole' && Math.abs(e.Vp) < 6 && e.dmin > 90 }
+      ],
+      pourquoi: 'Les potentiels s\'ajoutent comme des nombres signés. Le champ suit la descente la plus raide du potentiel : il est perpendiculaire aux courbes de niveau et fort là où elles se serrent. Un potentiel nul peut donc coexister avec un champ intense.',
+      relation: String.raw`V=\sum_i \frac{k\,q_i}{r_i},\qquad E_x=-\frac{\mathrm{d}V}{\mathrm{d}x}`,
+      defs: [['Potentiel', 'Énergie potentielle par coulomb, en volts (J/C).'], ['Équipotentielle', 'Ensemble des points où V est identique.']],
+      piege: 'La valeur de V ne donne pas l\'intensité du champ : c\'est sa variation dans l\'espace qui compte.'
+    },
+    {
+      titre: 'Lancer une charge test',
+      regarde: 'Entre les plaques, le champ est uniforme. La force F = qE est constante ; la vitesse v, elle, change. Avec une vitesse de départ qui a une composante transverse, la trajectoire est une parabole, comme un projectile dans la pesanteur ; sans elle, la charge file en ligne droite.',
+      prediction: { q: 'Avec E = 3000 N/C, q = 1 nC et m = 10 mg, quelle est l\'accélération de la charge ?', reponse: 0.3, unite: 'm/s²', tol: 0.02, explication: 'a = qE/m = (1×10⁻⁹ C × 3000 N/C) / (1×10⁻⁵ kg) = 0,30 m/s². La force est constante, donc l\'accélération aussi.' },
+      suivi,
+      essais: [
+        { t: 'Vise la flèche verte vers le haut, puis clique « Lancer ».', fait: (e, m) => m.depart && e.shot.nLaunch > m.depart.shot.nLaunch },
+        { t: 'Choisis le signe − puis lance : la courbure s\'inverse.', fait: (e, m) => m.depart && e.shot.sg === -1 && e.shot.nLaunch > m.depart.shot.nLaunch },
+        { t: 'Active « Cible » puis touche-la (ajuste la visée, E ou la masse).', fait: (e, m) => m.depart && e.shot.hits > m.depart.shot.hits }
+      ],
+      pourquoi: 'La force ne dépend que de q et de E ; l\'accélération dépend aussi de la masse. Une charge plus lourde se courbe moins. Pendant un essai, l\'énergie cinétique gagnée est exactement l\'énergie potentielle perdue : Ec + qV reste constante. Changer E, m ou le signe prépare un nouvel essai : le champ ne change pas en plein vol.',
+      relation: String.raw`\vec F=q\vec E=m\vec a,\qquad E_c+qV=\text{constante}`,
+      vivant: e => String.raw`a_x=\frac{qE}{m}=\frac{${e.shot.sg < 0 ? '(-1)' : '1'}\times10^{-9}\cdot ${e.shot.E}}{${e.shot.m}\times10^{-6}}=${tex(e.shot.a)}\ \mathrm{m/s^2}`,
+      defs: [['Charge test', 'Petite charge (1 nC) qui ne perturbe pas les plaques.'], ['Énergie potentielle', 'Produit qV, en joules. Ici, le zéro de V est pris sur la plaque −.'], ['Hypothèses', 'Plaques idéales (bords ignorés), champ uniforme, ni gravité, ni frottement, ni rayonnement.']],
+      piege: 'La charge test ne suit pas une ligne de champ : elle garde la vitesse acquise, donc sa trajectoire se courbe. Et Ec + qV n\'est constante que pour un essai : changer E en plein vol y ajouterait de l\'énergie.'
+    },
+    {
+      titre: 'Mesurer une tension',
+      regarde: 'A et B sont deux points du dipôle. Le voltmètre affiche U = V(B) − V(A). Les courbes vertes sont espacées de 40 V : chaque courbe franchie ajoute ou retranche 40 V.',
+      prediction: { q: 'Avec A et B dans leurs positions de départ, quel est le signe de U = V(B) − V(A) ?', choix: ['Positif', 'Négatif', 'Nul'], bonne: 1, explication: '' },
+      suivi,
+      essais: [
+        { t: 'Déplace B de plus de 20 pixels et regarde varier la tension.', fait: (e, m) => m.depart && deplace(e.ptB, m.depart.ptB) },
+        { t: 'Place A et B à plus de 60 pixels l\'un de l\'autre, sur la même courbe : U devient proche de zéro.', fait: e => Math.abs(e.U) < 2 && Math.hypot(e.ptA.x - e.ptB.x, e.ptA.y - e.ptB.y) > 60 },
+        { t: 'Active « Défi » puis règle B pour lire la tension demandée.', fait: (e, m) => m.depart && e.defi.done > m.depart.defi.done }
+      ],
+      pourquoi: 'Une tension compare deux potentiels et ne dépend pas du choix du zéro. Sur une même équipotentielle, U est nulle (ici, proche de zéro à la précision du dessin) même si le champ est intense. Intervertir A et B change le signe de U, pas sa valeur absolue. Le travail extérieur qU suppose un déplacement lent.',
+      relation: String.raw`U=V_B-V_A,\qquad W_{\mathrm{ext}}=qU`,
+      vivant: e => String.raw`U=V_B-V_A=${tex(e.VB)}-(${tex(e.VA)})=${tex(e.U)}\ \mathrm{V}`,
+      defs: [['Tension', 'Différence de potentiel entre deux points, en volts.']],
+      piege: 'Inverser A et B change le signe de la tension, pas sa valeur absolue.'
+    }
+  ];
+  /* Les réponses viennent du moteur, avec la géométrie de la page : recalculées à l'entrée de l'étape. */
+  window.preparerFicheElec = i => {
+    const [w, h] = moteur.size(), s = Math.min(240, Math.max(110, w * 0.27));
+    if (i === 0) { const e = moteur.field(w / 2, h / 2); fiches[0].prediction.bonne = e[0] > 0 ? 1 : 0;
+      fiches[0].prediction.explication = `Au milieu, le moteur donne Eₓ = ${nf(e[0])} N/C et Eᵧ = ${nf(e[1])} N/C. Les deux contributions pointent vers la charge négative et s'additionnent.`; }
+    if (i === 1) { const v = moteur.pot(w / 2, h / 2); fiches[1].prediction.reponse = v;
+      fiches[1].prediction.explication = `Le moteur calcule V = ${nf(v)} V : deux contributions de même grandeur et de signes opposés s'annulent. Le champ, lui, n'est pas nul.`; }
+    if (i === 3) { const e = window.etatElec(); const u = e.U; fiches[3].prediction.bonne = u < 0 ? 1 : 0;
+      fiches[3].prediction.explication = `Le moteur donne V(A) = ${nf(e.VA)} V et V(B) = ${nf(e.VB)} V, donc U = ${nf(u)} V. B est plus près de la charge négative, donc à un potentiel plus bas.`; }
+  };
+  const etapes = [...document.querySelectorAll('#stepper .seg')].map((b, i) => ({ code: b.querySelector('b').textContent, titre: fiches[i].titre, mod: 21, scenes: [+b.dataset.a] }));
+  Fiche.init({ etapes, fiches, lectures: '#lectures', etat: window.etatElec, aller: window.allerScene,
+    k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+    theorie: () => 'explication.html#m21' });
+  window.preparerFicheElec(0);
+  Fiche.montre(0);
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

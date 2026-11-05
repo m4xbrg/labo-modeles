@@ -52,7 +52,7 @@ function interprete(c){
     membres: col.members.map(id => modeles.get(id)).filter(Boolean),
   }));
   const dansUneCollection = new Set(collections.flatMap(col => col.membres.map(m => m.id)));
-  const showcasesHorsCollection = c.models.models.filter(m => m.type === 'showcase' && !dansUneCollection.has(m.id));
+  const showcasesHorsCollection = c.models.models.filter(m => (m.type === 'showcase' || m.type === 'sandbox') && !dansUneCollection.has(m.id));
   const selectionnees = c.atlas.entries.filter(e => e.status === 'selected');
 
   return {

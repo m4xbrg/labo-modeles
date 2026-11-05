@@ -48,6 +48,7 @@ window.LaboPresentation = {
     'neurone':             { d: 'Une impulsion électrique, puis une synapse qui se renforce à force de répétition.', e: '~100 µm', t: '~2 ms', c: '#c2477f' },
     'replication-adn':     { d: 'Suivre une fourche : un brin se copie d’un trait, l’autre à reculons, par fragments.', e: '~2 nm', t: '30–50 nt/s', c: '#1f9a8e' },
     'supernova':           { d: 'Un cœur de fer s’écroule en une fraction de seconde, puis une onde de choc traverse l’étoile.', e: '~10⁹ km', t: '~0,3 s → 10⁴ ans', c: '#b0453c' },
+    'champ-electrique':    { d: 'Des charges à placer et à déplacer : champ, potentiel, charge test et tension, tout à la fois.', e: '~1 m', t: '~0,1 à 10 s', c: '#e0763f' },
     'ondes-interferences': { d: 'Deux ondes se croisent : ici elles se renforcent, là elles s’annulent.', e: '~1 cm', t: '~0,1 s', c: '#3f6fa8' },
     'double-pendule-et-chaos':  { d: 'Deux tiges, aucune règle cachée, et pourtant aucune prévision possible au-delà de quelques secondes.', e: '~1 m', t: '~10 s', c: '#7a64b0' },
     'barriere-et-effet-tunnel': { d: 'Une particule franchit une barrière qu’elle ne pourrait jamais escalader.', e: '~1 nm', t: '~10⁻¹⁵ s', c: '#55585a' },

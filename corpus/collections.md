@@ -29,7 +29,7 @@ Le 2026-10-04, elle est resserrée à ses **showcases** : des phénomènes suivi
 
 | Modèle | N° historique | Pourquoi |
 |---|---|---|
-| [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) | 04 | bac à sable de la fondation 21 |
+| [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) | 04 | bac à sable autonome, complément de la fondation 21 (*Électrostatique*) |
 | [Ondes et interférences](../opus-sonnet/05-ondes-interferences/index.html) | 05 | showcase hors collection |
 | [Courant et circuits](../opus-sonnet/06-courant-circuits/index.html) | 06 | page de fondations (22) |
 | [Matière, chaleur et transport](../opus-sonnet/07-matiere-chaleur/index.html) | 07 | page de fondations (17·18·19) |
