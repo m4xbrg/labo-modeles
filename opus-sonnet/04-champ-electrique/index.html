@@ -1216,6 +1216,76 @@ goStage(0);
 syncPlay();
 requestAnimationFrame(frame);
 
+/* ---------------- Mémoire de session du bac à sable ----------------
+   Son état est distinct de celui des expériences de la fondation 21 (jamais transféré d'une page à l'autre). Gardé dans
+   sessionStorage (propre à l'onglet), jamais en mode intégré (?embed). Restauré en PAUSE ; les historiques des charges test
+   sont tronqués (600 pas passés, 200 futurs) : le pas arrière reste possible, mais sur un passé limité. Si l'écran a changé
+   de taille, les charges sont remises à l'échelle et les charges test retirées (1 px = 1 mm : leur trajet n'aurait plus de sens). */
+const KEY = 'labo.champ.bacasable.v1', embed = /[?&]embed\b/.test(location.search);
+let restaure = false;
+const okN = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
+const okP = q => q && okN(q.x, -100, 5000) && okN(q.y, -100, 5000);
+const okH = h => h && okN(h.t, 0, 1e6) && okN(h.x, -50, 50) && okN(h.y, -50, 50) && okN(h.vx, -1e4, 1e4) && okN(h.vy, -1e4, 1e4);
+function capture() {
+  return { v: 1, W, H, preset: lastPreset, nid, pid, active: { ...active }, views: { ...views }, timeScale, T, testSign,
+    probe: { x: probe.x, y: probe.y }, ptA: ptA && { x: ptA.x, y: ptA.y },
+    charges: charges.map(c => ({ id: c.id, x: c.x, y: c.y, q: c.q })),
+    parts: parts.map(q => ({ id: q.id, sg: q.sg, hist: q.hist.slice(-600).map(h => ({ ...h })), future: q.future.slice(-200).map(h => ({ ...h })) })) };
+}
+/* true si gardé (ou rien à garder), false si le stockage refuse */
+function persist() {
+  if (embed || !restaure) return true;
+  try { sessionStorage.setItem(KEY, JSON.stringify(capture())); return true; } catch (_) { return false; }
+}
+function restore(s) {
+  if (!s || s.v !== 1 || !okN(s.W, 100, 5000) || !okN(s.H, 100, 5000) || !Array.isArray(s.charges) || s.charges.length > MAXC) return false;
+  if (!s.charges.every(c => okP(c) && okN(c.q, -5, 5) && c.q !== 0 && Number.isInteger(c.id)) || !okP(s.probe)) return false;
+  const meme = Math.abs(s.W - W) <= 1 && Math.abs(s.H - H) <= 1, kx = W / s.W, ky = H / s.H;
+  charges = s.charges.map(c => ({ id: c.id, x: c.x * kx, y: c.y * ky, q: c.q }));
+  nid = okN(s.nid, 1, 1e6) ? s.nid : charges.reduce((m, c) => Math.max(m, c.id), 0) + 1;
+  active = { s: s.active && s.active.s === -1 ? -1 : 1, m: s.active && okN(s.active.m, 1, 5) ? Math.round(s.active.m) : 3 };
+  setViews(s.views || {});
+  probe.x = s.probe.x * kx; probe.y = s.probe.y * ky; probe.in = true;
+  ptA = okP(s.ptA) ? { x: s.ptA.x * kx, y: s.ptA.y * ky } : null; armA = false; armTest = false;
+  timeScale = okN(s.timeScale, 0.1, 2) ? s.timeScale : 1; $('#ts').value = timeScale; $('#tsV').textContent = '×' + nf2.format(timeScale);
+  testSign = s.testSign === -1 ? -1 : 1; document.querySelectorAll('.tsgn').forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.s === testSign)));
+  selected = null; T = 0; pid = okN(s.pid, 1, 1e6) ? s.pid : 1; parts = [];
+  if (meme && Array.isArray(s.parts) && s.parts.length <= 8) {
+    for (const q of s.parts) {
+      if (!q || !Array.isArray(q.hist) || !q.hist.length || !q.hist.every(okH) || !(Array.isArray(q.future) ? q.future : []).every(okH) || !Number.isInteger(q.id)) continue;
+      parts.push({ id: q.id, sg: q.sg === -1 ? -1 : 1, hist: q.hist.map(h => ({ ...h, dead: !!h.dead, why: String(h.why || '') })), future: (q.future || []).map(h => ({ ...h, dead: !!h.dead, why: String(h.why || '') })) });
+    }
+    T = parts.reduce((m, q) => Math.max(m, q.hist[q.hist.length - 1].t), 0);
+  }
+  document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  step.key = '';
+  if (!meme) setStep('adapte', 'Écran de taille différente', 'La taille de l’écran a changé : tes charges sont remises à l’échelle et les charges test sont retirées, car leur trajet dépend de la géométrie (1 px = 1 mm).');
+  else setStep('repris', 'Ton bac à sable est repris', 'Tout est comme tu l’as laissé, en pause. Appuie sur lecture pour relancer le temps.');
+  playing = false; syncPlay(); syncSelUI(); syncArm(); syncArmA(); syncArrays();
+  dirty = true; fast = false; hoverDirty = true;
+  return true;
+}
+(function reprise() {
+  if (embed) { restaure = true; return; }
+  let calme = 0, essais = 0, dernier = '';
+  /* on attend que la coque (planche.js) ait fini de fixer la hauteur de la scène : sinon W et H ne sont pas ceux d'avant */
+  (function attendre() {
+    const r = sceneEl.getBoundingClientRect(), k = Math.round(r.width) + 'x' + Math.round(r.height);
+    calme = k === dernier && Math.round(r.width) === W && Math.round(r.height) === H ? calme + 1 : 0; dernier = k;
+    if (calme >= 3 || ++essais > 60) {
+      try { const s = JSON.parse(sessionStorage.getItem(KEY) || 'null'); if (s) restore(s); } catch (_) { /* état illisible : on garde la scène de départ */ }
+      restaure = true;
+    } else requestAnimationFrame(attendre);
+  })();
+})();
+addEventListener('pagehide', persist);
+const retour = document.getElementById('retourExp');
+if (retour) retour.addEventListener('click', e => {
+  if (persist()) return;
+  e.preventDefault(); window.open(retour.href, '_blank', 'noopener');
+  setStep('echec', 'Sauvegarde impossible', 'Ton bac à sable ne peut pas être gardé : l’expérience s’ouvre dans un autre onglet, et ce bac à sable reste ici.');
+});
+
 // interface de test (lecture seule, utile pour vérifier la physique)
 window.__champ = { charges: () => charges, field: (x, y) => { syncArrays(); field(x, y); return [EX, EY]; }, pot: (x, y) => { syncArrays(); return pot(x, y); }, parts: () => parts, size: () => [W, H], preset: applyPreset, setA: (x, y) => placeA(x, y), probe: (x, y) => setProbe({ x, y }), views: () => views };
 })();

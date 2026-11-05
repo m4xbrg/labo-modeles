@@ -608,7 +608,7 @@ function computePath() {
 function archive() {
   if (!shot.launched) return;
   const n = Math.min(pathPts.length, Math.ceil(Math.min(shot.t, tEnd) * 60) * 2 + 2);
-  if (n >= 4) shot.trails.push({ pts: pathPts.slice(0, n) });
+  if (n >= 4) shot.trails.push({ pts: pathPts.slice(0, n), sg: shot.sg, E: shot.E, m: shot.m, x0: shot.x0, y0: shot.y0, vx: shot.vx, vy: shot.vy });
   if (shot.trails.length > 4) shot.trails.shift();
 }
 /* tout réglage (E, m, signe, départ, visée) : nouvel essai prêt à t = 0 */
@@ -1055,36 +1055,60 @@ function captureState(k) {
   const b = { W, H };
   if (k === 0) return { ...b, preset, charges: charges.map(c => ({ id: c.id, x: c.x, y: c.y, q: c.q })), probe: { ...probe }, vec: views.vec };
   if (k === 1) return { ...b, preset, probe: { ...probe }, map: views.map, eq: views.eq, cut: views.cut };
-  if (k === 2) return { ...b, sg: shot.sg, E: shot.E, m: shot.m, x0: shot.x0, y0: shot.y0, vx: shot.vx, vy: shot.vy, showPrev, showTarget, target: { x: target.x, y: target.y }, trails: shot.trails.map(t => t.pts.slice()) };
+  if (k === 2) return { ...b, sg: shot.sg, E: shot.E, m: shot.m, x0: shot.x0, y0: shot.y0, vx: shot.vx, vy: shot.vy, showPrev, showTarget,
+    target: { x: target.x, y: target.y }, launched: shot.launched, t: shot.t, play: playing,
+    trails: shot.trails.map(r => ({ pts: r.pts.slice(), sg: r.sg, E: r.E, m: r.m, x0: r.x0, y0: r.y0, vx: r.vx, vy: r.vy })) };
   return { ...b, A: { ...ptA }, B: { ...ptB }, defiOn, U: defi.U };
 }
+/* Retourne false (rien restauré), 'exact' (même écran : même instant, en pause) ou 'adapte' (écran différent : points remis
+   à l'échelle, traces effacées, nouvel essai — pas de promesse de reprise identique, 1 px restant 1 mm). */
 function restoreState(k, s) {
   if (!s || !okN(s.W, 100, 5000) || !okN(s.H, 100, 5000)) return false;
-  /* la mise en page de l'écran peut différer un peu d'une visite à l'autre : on remet les points à l'échelle */
-  const kx = W / s.W, ky = H / s.H;
+  /* 21.3 : seule la largeur compte (voir resize) ; ailleurs, largeur et hauteur */
+  const memeW = Math.abs(s.W - W) <= 1, meme = k === 2 ? memeW : memeW && Math.abs(s.H - H) <= 1;
+  const kx = W / s.W, ky = k === 2 && memeW ? 1 : H / s.H;
   if (k === 0 || k === 1) {
     if (!okP(s.probe) || !['dipole', 'identiques', 'quadrupole'].includes(s.preset)) return false;
     applySources(s.preset);
     if (k === 0 && Array.isArray(s.charges) && s.charges.length === charges.length && s.charges.every(c => okP(c) && okN(c.q, -5, 5))) s.charges.forEach((c, i) => { charges[i].x = c.x * kx; charges[i].y = c.y * ky; });
     probe.x = s.probe.x * kx; probe.y = s.probe.y * ky; setProbe(probe);
     if (k === 0) views.vec = !!s.vec; else { views.map = !!s.map; views.eq = !!s.eq; views.cut = !!s.cut; }
-  } else if (k === 2) {
+    return meme ? 'exact' : 'adapte';
+  }
+  if (k === 2) {
     if (!okN(s.E, 500, 5000) || !okN(s.m, 2, 50) || !okN(s.x0, 0, 4000) || !okN(s.y0, 0, 4000) || !okN(s.vx, -600, 600) || !okN(s.vy, -600, 600) || !okP(s.target) || (s.sg !== 1 && s.sg !== -1)) return false;
     Object.assign(shot, { sg: s.sg, E: s.E, m: s.m, x0: s.x0 * kx, y0: s.y0 * ky, vx: s.vx, vy: s.vy });
     showPrev = !!s.showPrev; showTarget = !!s.showTarget; target.x = s.target.x * kx; target.y = s.target.y * ky;
-    shot.trails = (Array.isArray(s.trails) ? s.trails : []).slice(-4).filter(a => Array.isArray(a) && a.length >= 4 && a.length < 4000 && a.every(n => okN(n, -100, 5000))).map(pts => ({ pts: pts.map((n, i) => n * (i % 2 ? ky : kx)) }));
+    const okT = r => r && Array.isArray(r.pts) && r.pts.length >= 4 && r.pts.length < 4000 && r.pts.every(n => okN(n, -100, 5000));
+    /* les traces ne valent que sur la même géométrie : ailleurs, on les efface et on le dit */
+    shot.trails = meme ? (Array.isArray(s.trails) ? s.trails : []).slice(-4).filter(okT).map(r => ({
+      pts: r.pts, sg: r.sg === -1 ? -1 : 1, E: okN(r.E, 500, 5000) ? r.E : null, m: okN(r.m, 2, 50) ? r.m : null,
+      x0: okN(r.x0, 0, 4000) ? r.x0 : null, y0: okN(r.y0, 0, 4000) ? r.y0 : null, vx: okN(r.vx, -600, 600) ? r.vx : null, vy: okN(r.vy, -600, 600) ? r.vy : null })) : [];
     resetShot(true);
-  } else {
-    if (!okP(s.A) || !okP(s.B) || !okN(s.U, -1000, 1000)) return false;
-    ptA.x = s.A.x * kx; ptA.y = s.A.y * ky; ptB.x = s.B.x * kx; ptB.y = s.B.y * ky; defiOn = !!s.defiOn; defi.U = s.U; evalDefi();
+    if (!meme) { if (s.launched) shot.fresh = 'La taille de l’écran a changé : nouvel essai prêt, appuie sur « Lancer ». Les anciennes traces sont effacées.'; return 'adapte'; }
+    if (s.launched && okN(s.t, 0, 20)) {
+      shot.launched = true; shot.t = Math.min(s.t, tEnd); shot.done = shot.t >= tEnd;
+      shot.hit = showTarget && shot.t >= tHit;                    /* sans recompter le point */
+    }
+    return 'exact';
   }
-  return true;
+  if (!okP(s.A) || !okP(s.B) || !okN(s.U, -1000, 1000)) return false;
+  ptA.x = s.A.x * kx; ptA.y = s.A.y * ky; ptB.x = s.B.x * kx; ptB.y = s.B.y * ky; defiOn = !!s.defiOn; defi.U = s.U; evalDefi();
+  return meme ? 'exact' : 'adapte';
 }
+/* Retourne true si l'état est gardé (ou s'il n'y a rien à garder), false si le stockage a refusé. */
 function persist() {
-  if (embed || !started) return;
-  try { saved[stage] = captureState(stage); sessionStorage.setItem(KEY, JSON.stringify({ v: 1, s: saved })); } catch (_) { /* stockage refusé : la page marche sans */ }
+  if (embed || !started) return true;
+  try { saved[stage] = captureState(stage); sessionStorage.setItem(KEY, JSON.stringify({ v: 1, s: saved })); return true; }
+  catch (_) { return false; }
 }
-addEventListener('pagehide', persist);
+addEventListener('pagehide', persist);                 /* filet de secours ; le départ voulu passe par le lien, qui sait si c'est gardé */
+$('#sandboxLink').addEventListener('click', e => {
+  if (persist()) return;
+  e.preventDefault();
+  window.open(e.currentTarget.href, '_blank', 'noopener');
+  avis('Sauvegarde impossible : le bac à sable s’ouvre dans un autre onglet, ton expérience reste ici.');
+});
 function defaults(k) {
   const mx = W / 2, my = H / 2, s = sepFor(W);
   if (k !== 2) {
@@ -1097,6 +1121,10 @@ function defaults(k) {
     shot.sg = 1; shot.E = 3000; shot.m = 10; showPrev = false; showTarget = false; layoutPlates(); resetShot(false, true); newTarget(); computePath();
   }
 }
+function avis(msg) {
+  const a = $('#tip'); a.textContent = msg; a.style.left = '16px'; a.style.top = '16px'; a.style.maxWidth = '360px'; a.classList.add('on');
+  clearTimeout(avis.h); avis.h = setTimeout(() => a.classList.remove('on'), 7000);
+}
 function syncControls2() {
   $('#eSl').value = shot.E; $('#eV').textContent = shot.E + ' N/C'; $('#mSl').value = shot.m; $('#mV').textContent = shot.m + ' mg';
   $('#bPrev').setAttribute('aria-pressed', String(showPrev));
@@ -1105,6 +1133,7 @@ function syncControls2() {
 }
 function goStage(k, fresh) {
   if (k < 0 || k > 3) return;
+  if (!fresh && started && stage === k) return;          /* cliquer l'étape déjà active ne reconstruit rien */
   if (started && stage !== k) persist();
   /* la relance précède tout changement : l'état d'arrivée de la fiche redevient celui d'ici */
   if (window.Fiche) Fiche.relance();
@@ -1112,8 +1141,9 @@ function goStage(k, fresh) {
   dragK = null; dragC = null;
   if (fresh) delete saved[k];
   defaults(k);
-  if (!fresh && !restoreState(k, saved[k])) delete saved[k];
-  if (k === 2) playing = true;
+  let reprise = false;
+  if (!fresh) { reprise = restoreState(k, saved[k]); if (!reprise) delete saved[k]; }
+  if (k === 2) playing = reprise === 'exact' && saved[k] && saved[k].launched ? false : true;   /* un lancer repris revient en pause */
   started = true;
   syncStages(); syncControls2(); dirty = true; fast = false; hoverDirty = true;
   if (window.preparerFicheElec) window.preparerFicheElec(k);
@@ -1150,15 +1180,24 @@ function resize() {
   const nw = Math.max(200, Math.round(r.width)), nh = Math.max(200, Math.round(r.height)), nd = Math.min(2, window.devicePixelRatio || 1);
   if (nw === W && nh === H && nd === dpr && cv.width) return;
   const kx = nw / W, ky = nh / H;
+  /* Seule la hauteur change (une rangée de commandes en plus ou en moins d'une étape à l'autre) : la physique de 21.3
+     ne dépend que de x (champ uniforme, V(x)), donc on ne touche ni à l'essai en cours ni aux traces. */
+  const solo = nw === W && nd === dpr && !!cv.width;
   for (const c of charges) { c.x *= kx; c.y *= ky; }
-  for (const p of [probe, ptA, ptB, target]) { p.x *= kx; p.y *= ky; }
-  shot.x0 *= kx; shot.y0 *= ky;
+  for (const p of [probe, ptA, ptB]) { p.x *= kx; p.y *= ky; }
+  if (!solo) { target.x *= kx; target.y *= ky; shot.x0 *= kx; shot.y0 *= ky; }
   const enVol = shot.launched;
   W = nw; H = nh; dpr = nd;
   for (const c of [cv, layer]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   /* Provisoire : 1 px reste 1 mm, donc changer la taille de la fenêtre change la géométrie physique. 21.3 repart d'un
      nouvel essai (traces effacées) au lieu de garder un bilan d'énergie devenu faux. */
-  layoutPlates(); shot.trails = []; resetShot(true); if (enVol) shot.fresh = 'La fenêtre a changé de taille : nouvel essai prêt, appuie sur « Lancer ».';
+  layoutPlates();
+  if (solo) {
+    const yMax = H - 28; shot.y0 = Math.min(yMax, shot.y0); target.y = Math.min(yMax, target.y);
+    computePath(); if (shot.launched) { shot.t = Math.min(shot.t, tEnd); shot.done = shot.t >= tEnd; }
+  } else {
+    shot.trails = []; resetShot(true); if (enVol) shot.fresh = 'La fenêtre a changé de taille : nouvel essai prêt, appuie sur « Lancer ».';
+  }
   dirty = true; fast = false;
 }
 new ResizeObserver(resize).observe(sceneEl);

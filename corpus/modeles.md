@@ -96,7 +96,7 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Modules** : 21 Électrostatique (`supporting`), 16 Flux, gradients et champs continus (`supporting`), 02 Vecteurs et géométrie des quantités (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
 - **Actes** : I Bac à sable libre
 - **Éléments** : Préréglages : dipôle, deux identiques, condensateur, quadrupôle, scène vide · Couches : lignes, équipotentielles, carte de V, vecteurs, forces · Charges test (jusqu'à 8) · Tension entre un point A et la sonde
-- **Interaction** : Bac à sable libre : placer, déplacer, régler et retirer des charges ; lâcher des charges test ; sonder E, V et la force. Quand on vient de la fondation 21, un lien « Revenir à mon expérience » ramène à l'étape quittée.
+- **Interaction** : Bac à sable libre : placer, déplacer, régler et retirer des charges ; lâcher des charges test ; sonder E, V et la force. Quand on vient de la fondation 21, un lien « Revenir à mon expérience » ramène à l'étape quittée. L'état du bac à sable est gardé pendant la session de l'onglet (repris en pause).
 - **Notes** : Une des quatre premières planches (2026-09-29). Il portait la fondation 21 depuis le 2026-10-01 ; le 2026-11-05 il redevient un modèle à part, le bac à sable complet, sous Phénomènes, et la fondation 21 a sa propre page (*Électrostatique*). Moteur et capacités inchangés (inventaire dans `prompts/codex/LOT-21-ECHANGE.md`).
 
 ### Ondes et interférences

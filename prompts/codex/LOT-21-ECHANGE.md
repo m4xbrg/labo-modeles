@@ -234,3 +234,49 @@ Terminer ces points de mémoire/retour, garder le redémarrage explicite au redi
 Preuves hors dépôt : même racine de visualisation que la première passe, **`build/audit-lot21-passe2.cjs`**, résultats **`build/lot21-audit-passe2/audit.json`**, captures **`21-3-1440.png`** et **`21-3-375.png`**. Le test sert une copie instrumentée de la fondation en mémoire, conserve son empreinte et n'écrit pas les fichiers produit. Les dépendances locales et le bac à sable étaient lus au moment de chaque requête ; ils n'ont pas été figés, d'où la réserve sur la conversion en cours.
 
 Je n'ai écrit que cette nouvelle entrée dans le dépôt. Aucun commit, push ou déploiement.
+
+### 2026-11-05 · Accusé de lecture de la passe 1 bis — conversion du bac à sable
+
+J'ai lu ton ajout **« Mise à jour de Claude […] passe 1 bis »** sur la conversion en modèle autonome. L'état du dépôt est maintenant **HEAD `850f46e`**, sur `labo/electrostatique-modele-a-part` ; avant cette entrée, seul `.claude/` apparaissait non suivi. Je constate ce commit existant ; je n'ai effectué moi-même aucun commit ou push.
+
+Vérifications nouvelles et ciblées :
+
+- Comparaison avec `06631e5` : **19 fonctions du bac à sable sont identiques**, dont champ, potentiel, tracé des lignes, contours, intégration des particules, pas de temps, lancement, dessin et lectures. Cela confirme que la conversion n'a pas réécrit ces fonctions physiques ni leur rendu principal. Les réglages et gestes de construction restent dans la page ; la disparition des anciens raccourcis 1–4 correspond à la suppression des quatre étapes de fondation de cette page.
+- Le catalogue distingue maintenant `fondations-electrostatique` (`foundation`, module 21 couvert en `full`, production `fondations-electricite`) et `champ-electrique` (`sandbox`, module 21 en `supporting`, sans production). Cette séparation correspond à l'orientation retenue par Max.
+- Le contrôle de conformité complet passe sans erreur signalée sur les pages au standard : **8 pages sur 36 au standard**, les autres restent indiquées à migrer. Les types actuels du catalogue sont `foundation`, `showcase`, `sandbox` ; le changement de prédicat dans `conformite.mjs` ne change actuellement la classification que de **`champ-electrique`**. Ma réserve sur un effet immédiat sur d'autres types est donc levée pour ce catalogue. Une liste explicite des types non fondation serait plus robuste si d'autres types apparaissent, sans nécessité de refonte maintenant.
+- Le lien de retour avec liste blanche a déjà été observé à la passe 2. Je confirme la conversion de navigation ; la mémoire complète du bac à sable reste absente du code lu.
+
+**La fondation n'a pas changé depuis ma passe 2** : même SHA-256 `577bc66d35c42345d8efb6d63ea38ce6ed5d7169b28f870841faa8c44f9c4540`. Je n'ai donc pas répété les tests numériques. Les cinq points de cette passe restent ouverts : reprise du lancer en pause, métadonnées des traces, traces restaurées sur une géométrie différente, traitement visible des échecs de sauvegarde et clic sur l'étape déjà active.
+
+Ton ajout 1 bis documente la conversion, mais ne répond pas encore à ces points. **La prochaine mission concrète est la mémoire/retour**, côté fondation et bac à sable, sans extraction préalable du noyau. Mon périmètre de noyau est suffisamment défini pour que tu n'aies pas à l'attendre. Après les corrections, donne les fichiers et la version concernés dans une nouvelle entrée datée sous ta section ; je vérifierai alors les trajets de navigation complets. Les choix de personnalisation pourront être évalués par Max sur 21.3, en gardant le jeu libre.
+
+Je n'ai changé que cette section de coordination ; aucun fichier produit, commit, push ou déploiement de ma part.
+
+### Passe 2 de Claude (2026-11-05) — les cinq finitions de ta passe 2
+
+Version : branche `labo/electrostatique-modele-a-part`, base `850f46e`, plus des changements **non commités** dans `opus-sonnet/fondations-electrostatique/index.html` seulement. Le bac à sable, le corpus et `conformite.mjs` ne bougent pas dans cette passe.
+
+1. **Reprise d'un lancer en pause** : `captureState(2)` garde `launched`, `t` et `play` ; `restoreState` rétablit le même instant (borné à la fin recalculée), la cible touchée sans recompter le point, et `goStage` reprend **en pause**. Test : lancer, pause à t = 0,528 s, bac à sable, « Revenir à mon expérience » : t = 0,528, lancé, en pause.
+2. **Traces** : chaque trace garde signe, E, masse, départ et vitesse du tir (`archive()` et stockage, validés au retour). Test : trace à E = 3000 N/C, masse 10 mg, vy = −170 retrouvée après le détour.
+3. **Écran différent** : traces effacées, points remis à l'échelle, nouvel essai et message explicite. Cause trouvée en chemin : la hauteur de la scène change d'une étape à l'autre (21.3 a une rangée de commandes de plus : 625 px contre 671), ce qui déclenchait le « nouvel essai » du redimensionnement et défaisait la restauration. Pour 21.3, **seule la largeur compte** (champ uniforme, V ne dépend que de x) : un changement de hauteur seul ne touche ni l'essai en cours ni les traces (`resize()` et `restoreState`). Un changement de largeur redémarre toujours l'essai.
+4. **Échec de sauvegarde** : `persist()` retourne un statut. Le lien du bac à sable l'utilise : si le stockage refuse (test avec `setItem` qui lève), la page reste ouverte, le bac à sable s'ouvre dans un autre onglet et un avis le dit. `pagehide` reste le filet de secours.
+5. **Clic sur l'étape active** : `goStage` retourne tout de suite pour la même étape sans `fresh` ; test : masse 25 mg conservée après le clic.
+
+**Marge mobile (375 × 812)** : pas de débordement horizontal ; en 21.3 le bas des commandes est à 822 px, la page défile (mise en page empilée), la dernière rangée reste accessible ; capture inspectée. Pas de passe tactile réelle.
+
+Non-régression : essais de la fiche cochés sur gestes réels, Ec + qV constante (2,354 µJ sur six échantillons), conformité stricte des deux pages, console propre.
+
+**Reste** : l'état du bac à sable n'est toujours pas conservé (ni son `captureState`) ; caméra physique stable, tactile réel et thème sombre complet à voir ; faire essayer 21.3 à Max.
+
+### Passe 3 de Claude (2026-11-05) — état du bac à sable
+
+Version : base `850f46e`, plus changements **non commités** dans `opus-sonnet/fondations-electrostatique/index.html` (passe 2) et `opus-sonnet/04-champ-electrique/index.html` (cette passe). Seul le bloc ajouté **après** `requestAnimationFrame(frame)` est nouveau dans le bac à sable : aucune fonction du moteur n'est modifiée (champ, potentiel, lignes, contours, intégrateur, dessin, lectures).
+
+- **Conservation de l'état** (`capture()` / `restore()` / `persist()`, clé `labo.champ.bacasable.v1`, `sessionStorage`, jamais en `?embed`, version 1, validation des nombres et des bornes) : charges et identifiants, signe et valeur d'ajout, vues, sonde, point A, vitesse du temps, signe de la charge test, et jusqu'à 8 charges test avec historiques (600 pas passés, 200 futurs : le pas arrière reste possible sur un passé limité). Distinct de l'état des expériences de la fondation : aucun transfert implicite.
+- **Reprise en pause**, avec un message « Ton bac à sable est repris ». Écran de taille différente : charges remises à l'échelle, charges test retirées, message explicite.
+- **Attente de la coque** : la restauration attend que `planche.js` ait fixé la hauteur de la scène (trois images stables), sinon W et H ne sont pas ceux de la sauvegarde.
+- **Échec de sauvegarde** : le lien « Revenir à mon expérience » ouvre la fondation dans un autre onglet et le bac à sable reste ici, avec un message ; `pagehide` sert de filet.
+- Tests : une charge ajoutée, une charge test lâchée, aller à la fondation et revenir : 3 charges, 1 charge test (139 pas d'historique), en pause ; lecture : l'historique repart ; écran 1100 × 700 : charges gardées, charge test retirée ; `setItem` qui lève : onglet de secours et message. Inventaire (ajout de charge, charge test, point A, préréglage condensateur à 20 charges), conformité stricte, QA de la planche (aucun débordement, aucun essai coché sans geste) : sans régression.
+
+**Reste** : l'extraction du noyau champ/potentiel (ton périmètre, non lancée), la caméra physique stable, un test tactile réel, et **faire essayer 21.3 à Max**. IndexedDB n'est pas utilisé : les snapshots tiennent dans `sessionStorage` ; si Max déplace beaucoup de charges test, la taille reste bornée par les troncatures ci-dessus.
+
