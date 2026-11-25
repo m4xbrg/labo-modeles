@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comprendre le problème des trois corps — LABO</title>
+<meta name="description" content="Pourquoi trois corps suffisent à rendre la gravitation imprévisible, ce qui reste calculable, et ce que la simulation simplifie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<link rel="stylesheet" href="../../labo/cours.css">
+<script src="../../labo/theme.js"></script>
+<script src="../../labo/theorie.js" defer></script>
+<script src="../../labo/cours.js" defer></script>
+</head>
+<body class="cours">
+<header class="cours-barre">
+  <a class="marque" href="../../labo/index.html">LABO</a>
+  <a class="retour" href="index.html">← Retour à la planche</a>
+  <p class="ici">Les trois corps <span>· ce qui se passe</span></p>
+  <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  <span class="cours-avance" aria-hidden="true"></span>
+</header>
+<div class="cours-page">
+<nav class="cours-sommaire" aria-label="Sommaire">
+  <p>Sommaire</p><ol>
+    <li><a href="#vois">Ce que tu vois</a></li>
+    <li><a href="#deux">De deux à trois</a></li>
+    <li><a href="#special">Les solutions spéciales</a></li>
+    <li><a href="#chaos">L’horizon de prévision</a></li>
+    <li><a href="#ejection">L’éjection</a></li>
+    <li><a href="#triangle">Le triangle et sa stabilité</a></li>
+    <li><a href="#simplifie">Ce que la simulation simplifie</a></li>
+    <li><a href="#chiffres">Les chiffres à retenir</a></li>
+    <li><a href="#test">Teste-toi</a></li>
+    <li><a href="#suite">Pour aller plus loin</a></li>
+  </ol>
+</nav>
+<main class="cours-texte">
+<header class="cours-tete">
+  <p class="surtitre">LABO · Phénomènes</p>
+  <h1>Comprendre le problème des trois corps</h1>
+  <p class="lead">La loi de Newton tient en une ligne. Avec deux corps, elle donne des ellipses, pour toujours. Avec trois, elle donne presque tout : des ballets, des captures, des fuites. Et, le plus souvent, aucun moyen de prévoir loin.</p>
+  <p class="mode-emploi">Manipule les scènes au fil du texte. Les nombres soulignés se règlent en les faisant glisser ou avec les flèches du clavier ; les termes pointillés ouvrent une définition. Prédis avant de vérifier.</p>
+</header>
+
+  <h2 id="vois"><span class="n">1</span>Ce que tu vois</h2>
+  <div class="cartes">
+    <a class="carte" href="index.html?etape=I"><b>I · Le huit</b><span>Trois masses égales sur une même courbe : une solution qui se répète.</span></a>
+    <a class="carte" href="index.html?etape=II"><b>II · Deux mondes jumeaux</b><span>Disques et anneaux : le même système, parti avec un écart infime. Le graphe suit cet écart.</span></a>
+    <a class="carte" href="index.html?etape=III"><b>III · L’éjection</b><span>Les masses 3, 4 et 5 lâchées au repos. L’une finit par partir.</span></a>
+    <a class="carte" href="index.html?etape=IV"><b>IV · Le triangle</b><span>La solution de Lagrange, et le rapport de masses qui décide si elle tient.</span></a>
+    <a class="carte" href="index.html?etape=V"><b>V · À toi</b><span>Positions, vitesses et masses libres.</span></a>
+  </div>
+  <p>Les disques sont les corps ; leur taille croît avec la masse, sans être à l’échelle. Le sillage montre le passé récent, la croix le <a class="terme" href="#def-centre">centre de masse</a>, immobile.</p>
+
+  <h2 id="deux"><span class="n">2</span>De deux à trois</h2>
+  <p>Chaque corps est attiré par les deux autres. Sa masse se simplifie : seule compte celle des voisins.</p>
+  <div class="relation">\[ \ddot{\vec r}_i=\sum_{j\neq i} G\,m_j\,\frac{\vec r_j-\vec r_i}{|\vec r_j-\vec r_i|^3} \]
+    <p>Trois équations vectorielles liées entre elles : la position de chacun dépend, à chaque instant, de celle des deux autres.</p></div>
+  <p>Avec deux corps, on écrit tout en fonction de leur seule séparation, et l’orbite est une conique. Avec trois, les lois de conservation (énergie, quantité de mouvement, moment cinétique) ne suffisent plus : il reste trop d’inconnues. Bruns (1887) puis Poincaré ont montré qu’il n’existe pas d’autre quantité conservée assez simple pour fermer le problème. Sundman a bien donné en 1912 une solution en série, valable presque toujours, mais elle converge si lentement qu’elle ne sert à rien pour calculer.</p>
+  <div class="calc">
+    <p class="calc-t">Deux corps seulement : la durée d’un tour</p>
+    <p>Masse totale M = <span class="var" data-nom="M" data-val="2" data-min="0.5" data-max="10" data-pas="0.5" data-dec="1">2</span> masses solaires ; séparation a = <span class="var" data-nom="a" data-val="0.4" data-min="0.1" data-max="3" data-pas="0.1" data-dec="1">0,4</span> UA.</p>
+    <p>Période T = <output data-expr="sqrt(a**3/M)" data-dec="3"></output> an, soit <output data-expr="2*PI*sqrt(a**3/M)" data-dec="2"></output> unités de la planche.</p>
+    <p class="note">Troisième loi de Kepler, \(T^2 = a^3/M\) en années, unités astronomiques et masses solaires. Par défaut : la paire serrée de la scène V.</p>
+  </div>
+  <dl class="defs">
+    <div id="def-centre"><dt>Centre de masse</dt><dd>Moyenne des positions pondérée par les masses. Sans force extérieure, il avance en ligne droite ; la planche le garde au repos.</dd></div>
+    <div id="def-choregraphie"><dt>Chorégraphie</dt><dd>Mouvement périodique où tous les corps suivent la même courbe, décalés dans le temps.</dd></div>
+    <div id="def-horizon"><dt>Horizon de prévision</dt><dd>Durée après laquelle une petite erreur de départ est devenue plus grande que l’erreur tolérée.</dd></div>
+    <div id="def-binaire"><dt>Binaire</dt><dd>Deux corps liés par la gravité, d’énergie totale négative l’un par rapport à l’autre.</dd></div>
+    <div id="def-troyen"><dt>Astéroïde troyen</dt><dd>Petit corps qui partage l’orbite d’une planète, près d’un sommet de triangle équilatéral formé avec elle et le Soleil.</dd></div>
+  </dl>
+
+  <h2 id="special"><span class="n">3</span>Les solutions spéciales</h2>
+  <p>Pas de formule générale ne veut pas dire pas de solution. Euler (1767) trouve trois corps alignés qui le restent, Lagrange (1772) un triangle équilatéral. En 1993, Moore découvre par le calcul le « huit », une <a class="terme" href="#def-choregraphie">chorégraphie</a> ; Chenciner et Montgomery démontrent son existence en 2000. Depuis, les ordinateurs en ont trouvé des centaines d’autres, dont le « papillon » de la scène V (Šuvakov et Dmitrašinović, 2013).</p>
+  <figure class="labo" data-src="index.html?embed&amp;etape=I" data-h="480" data-titre="Le huit">
+    <figcaption><span><b>I</b>Laisse tourner, puis change la masse d’un corps. Une faible différence déforme la courbe sans la détruire.</span><a class="ouvrir" href="index.html?etape=I">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <div class="quiz" data-reponse="2.11" data-tol="0.05" data-unite="unités"><p class="q">Le huit se referme en 6,326 unités. Au bout de combien de temps B se retrouve-t-il pour la première fois là où se trouvait un autre corps au départ ?</p><div class="corr">Les trois corps sont décalés d’un tiers de période : \(6{,}326/3 = 2{,}109\).</div></div>
+
+  <h2 id="chaos"><span class="n">4</span>L’horizon de prévision</h2>
+  <p>Deux départs presque identiques restent longtemps voisins, puis se séparent brusquement. Chaque rencontre serrée joue le rôle d’une loupe : elle multiplie l’écart. Des multiplications répétées donnent une croissance exponentielle en moyenne.</p>
+  <div class="relation">\[ \delta(t)\approx\delta_0\,e^{\lambda t}\qquad\Rightarrow\qquad t_h\approx\frac{1}{\lambda}\ln\frac{\delta_{\max}}{\delta_0} \]
+    <p>\(\lambda\) mesure la vitesse de séparation. L’<a class="terme" href="#def-horizon">horizon</a> ne croît que comme le logarithme de la précision.</p></div>
+  <figure class="labo" data-src="index.html?embed&amp;etape=II&amp;panneau=1" data-h="540" data-titre="Deux mondes jumeaux">
+    <figcaption><span><b>II</b>Réduis l’écart de départ et regarde de combien la séparation recule.</span><a class="ouvrir" href="index.html?etape=II">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <div class="calc">
+    <p class="calc-t">Gagner de la précision, gagner peu de temps</p>
+    <p>Écart de départ 10 puissance −<span class="var" data-nom="n" data-val="6" data-min="2" data-max="6" data-pas="1" data-dec="0">6</span> UA ; taux λ = <span class="var" data-nom="L" data-val="0.5" data-min="0.1" data-max="1" data-pas="0.02" data-dec="2">0,50</span> par unité de temps.</p>
+    <p>Durée pour que l’écart atteigne 0,1 UA : <output data-expr="Math.log(0.1*10**n)/L" data-dec="1"></output> unités. Un facteur 1 000 de plus ajouterait <output data-expr="Math.log(1000)/L" data-dec="1"></output> unités.</p>
+    <output data-expr="trace({f:x=>min(0,-n+L*x/Math.log(10)),x:[0,40],y:[-7,0.5],pts:[[Math.log(0.1*10**n)/L,-1]]})"></output>
+    <p class="note">λ = 0,50 vient des deux mesures de la scène II : 1 000 fois plus précis fait passer la séparation de 33,7 à 47,4, soit ln(1000)/13,7. Le dessin montre l’exposant de l’écart en fonction du temps ; le point marque 0,1 UA. C’est une pente moyenne : la planche attend d’abord la première rencontre, donc ses valeurs absolues sont plus grandes que celles de cette formule.</p>
+  </div>
+
+  <h2 id="ejection"><span class="n">5</span>L’éjection</h2>
+  <p>En 1913, Burrau pose une question simple : masses 3, 4 et 5 aux coins d’un triangle 3-4-5, lâchées au repos. Il calcule à la main et n’en voit pas la fin. Il faut attendre Szebehely et Peters (1967) et un ordinateur : après de nombreuses rencontres, la masse 3 est éjectée vers \(t = 60\), et les masses 4 et 5 forment une <a class="terme" href="#def-binaire">binaire</a>.</p>
+  <figure class="labo" data-src="index.html?embed&amp;etape=III" data-h="520" data-titre="L’éjection">
+    <figcaption><span><b>III</b>Accélère jusqu’à t = 60, puis recule avec la frise pour revoir la dernière rencontre.</span><a class="ouvrir" href="index.html?etape=III">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <p>L’énergie totale au départ, en unités de la planche, se calcule de tête : les trois corps sont au repos, il n’y a que l’énergie potentielle.</p>
+  <ol class="pas-a-pas" data-montre="0">
+    <li>Distances : A–B = 5, A–C = 4, B–C = 3.</li>
+    <li>Chaque paire donne \(-m_i m_j/r\) : \(-\dfrac{3\times4}{5}=-2{,}4\), \(-\dfrac{3\times5}{4}=-3{,}75\), \(-\dfrac{4\times5}{3}\approx-6{,}667\).</li>
+    <li>Total : \(E\approx-12{,}817\). Cette valeur ne changera plus.</li>
+    <li>Si A part avec une énergie positive, la paire B–C garde une énergie plus basse que \(-12{,}817\).</li>
+    <li>Pour une paire, \(E=-\dfrac{m_B m_C}{2a}\) : son demi-grand axe vérifie donc \(a\lt\dfrac{4\times5}{2\times12{,}817}\approx0{,}78\). La paire est plus serrée que les 3 unités de départ.</li>
+  </ol>
+
+  <h2 id="triangle"><span class="n">6</span>Le triangle et sa stabilité</h2>
+  <p>Au triangle équilatéral, l’attraction totale sur chaque corps vise exactement le centre de masse et grandit en proportion de la distance à ce centre. Une même vitesse de rotation convient alors aux trois.</p>
+  <div class="relation">\[ \omega^2=\frac{G\,(m_A+m_B+m_C)}{a^3} \]
+    <p>\(a\) est le côté du triangle. C’est la loi de Kepler avec la masse totale.</p></div>
+  <div class="relation">\[ \frac{(m_A+m_B+m_C)^2}{m_A m_B+m_A m_C+m_B m_C}\gt27 \]
+    <p>Critère de Routh, pour un triangle en rotation circulaire : s’il n’est pas rempli, une petite poussée grandit.</p></div>
+  <div class="calc">
+    <p class="calc-t">Le triangle tient-il ?</p>
+    <p>A = 1 ; B = C = <span class="var" data-nom="q" data-val="0.1" data-min="0.005" data-max="1" data-pas="0.005" data-dec="3">0,100</span>.</p>
+    <p>R = <output data-expr="(1+2*q)**2/(2*q+q*q)" data-dec="1"></output> : <output class="phrase" data-expr="(1+2*q)**2/(2*q+q*q)&gt;27?'stable':'instable'"></output>.</p>
+  </div>
+  <figure class="labo" data-src="index.html?embed&amp;etape=IV&amp;panneau=1" data-h="540" data-titre="Le triangle de Lagrange">
+    <figcaption><span><b>IV</b>Pousse A avec des masses égales, puis recommence avec B et C très petites.</span><a class="ouvrir" href="index.html?etape=IV">Ouvrir à cette étape ↗</a></figcaption>
+  </figure>
+  <p>Le Soleil est environ mille fois plus massif que Jupiter : R dépasse largement 27. Les <a class="terme" href="#def-troyen">astéroïdes troyens</a> en profitent.</p>
+
+  <h2 id="simplifie"><span class="n">7</span>Ce que la simulation simplifie</h2>
+  <ul>
+    <li><strong>Un plan.</strong> Le mouvement réel est en trois dimensions. Un départ plan reste plan, mais certaines instabilités sortent du plan et n’apparaissent pas ici.</li>
+    <li><strong>Des points.</strong> Ni rayon, ni marées, ni fusion. Sous 0,0001 UA (15 000 km), la planche déclare une collision et s’arrête ; de vraies étoiles se seraient touchées bien avant.</li>
+    <li><strong>Newton seulement.</strong> Pas de relativité : la gravité agit instantanément et aucune énergie ne part en ondes gravitationnelles.</li>
+    <li><strong>Un calcul, pas la vérité.</strong> L’intégrateur (Dormand-Prince, pas adaptatif, sans adoucissement) garde l’énergie à mieux qu’un millionième près, la lecture « dérive » le montre. Mais dans un système chaotique, l’erreur de calcul grandit elle aussi : loin dans le temps, la trajectoire affichée est une trajectoire possible, proche d’un départ très voisin. Vérifié sur la scène II : les temps de séparation sont stables quand on change la précision du calcul pour un écart de départ jusqu’à 10⁻⁶, et ne le sont plus à 10⁻⁸. Le curseur s’arrête donc à 10⁻⁶.</li>
+    <li><strong>L’étiquette « s’échappe ».</strong> Elle apparaît quand un corps s’éloigne avec une énergie positive par rapport à la paire, et à plus de quatre fois la taille de celle-ci. C’est un critère pratique ; il peut s’allumer brièvement à tort.</li>
+  </ul>
+
+  <h2 id="chiffres"><span class="n">8</span>Les chiffres à retenir</h2>
+  <div class="chiffres">
+    <div><b>58 jours</b><span>l’unité de temps de la planche : un an / 2π.</span></div>
+    <div><b>29,8 km/s</b><span>l’unité de vitesse : celle de la Terre sur son orbite.</span></div>
+    <div><b>6,326</b><span>la période du huit, en unités de la planche.</span></div>
+    <div><b>t ≈ 60</b><span>l’éjection de la masse 3, dans le problème de Burrau.</span></div>
+    <div><b>27</b><span>le seuil de Routh pour le triangle de Lagrange.</span></div>
+  </div>
+
+  <h2 id="test"><span class="n">9</span>Teste-toi</h2>
+  <div class="quiz"><p class="q">Le problème des trois corps n’a pas de solution générale simple. Que faut-il en conclure ?</p><ul class="choix"><li>On ne peut rien calculer.</li><li data-bon>On peut calculer pas à pas, mais la prévision a un horizon.</li><li>Le mouvement est aléatoire.</li></ul><div class="corr">La loi est déterministe et s’intègre numériquement. C’est l’amplification des petits écarts qui limite la prévision.</div></div>
+  <div class="quiz" data-reponse="3" data-tol="0.01"><p class="q">Que vaut R pour trois masses égales ?</p><div class="corr">\((3m)^2/(3m^2)=3\) : très loin de 27, le triangle est instable.</div></div>
+  <div class="quiz"><p class="q">Une étoile est éjectée d’un trio. Qu’arrive-t-il à la paire restante ?</p><ul class="choix"><li data-bon>Elle se resserre.</li><li>Elle s’élargit.</li><li>Elle se sépare aussi.</li></ul><div class="corr">L’énergie totale est constante. La fugitive emporte une énergie positive, donc la paire est plus liée, donc plus serrée.</div></div>
+
+  <h2 id="suite"><span class="n">10</span>Pour aller plus loin</h2>
+  <ul>
+    <li>Les orbites à deux corps et le barycentre : <a href="../fondations-rotation-gravitation/explication.html">Rotation, gravitation et orbites</a> (13).</li>
+    <li>Sensibilité, exposants et bassins : <a href="../fondations-chaos/explication.html">Stabilité, bifurcations et chaos</a> (08).</li>
+    <li>Énergie et quantité de mouvement : <a href="../fondations-forces-energie/explication.html">Forces, énergie et conservation</a> (11).</li>
+  </ul>
+  <a class="cta" href="index.html"><span>Retour à la planche</span><span aria-hidden="true">&rarr;</span></a>
+</main>
+</div>
+</body>
+</html>

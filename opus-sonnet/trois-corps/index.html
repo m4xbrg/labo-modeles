@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<!--
+  Note de design.
+  1. Trois points lumineux et leur sillage : le mouvement est entièrement calculé (moteur verrouillé prompts/moteurs/trois-corps.js, copié entre ses marqueurs), jamais scénarisé.
+  2. Tout l'historique calculé est gardé : la frise recule proprement, au lieu de réintégrer à l'envers un système chaotique.
+  3. Le jumeau (scène II) est dessiné en cercles creux de la même couleur : tant qu'on ne distingue pas deux anneaux, la prévision tient.
+-->
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le problème des trois corps — LABO</title>
+<meta name="description" content="Trois masses, une seule loi : le huit, l'effet d'un écart infime, une éjection, le triangle de Lagrange et un bac à sable libre.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../labo/labo.css">
+<style>
+:root, :root[data-theme], :root:not([data-theme]){
+  --fond:#0a0d12; --fond-2:#11161e; --trait:#1f2833;
+  --texte:#e8e4dc; --texte-2:#8a93a0;
+  --accent:#c9b8f5; --energie:#ffd166;
+  --serif:'Instrument Serif','Iowan Old Style','Palatino Linotype',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+button,input{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr) auto;height:100vh;height:100dvh;min-height:560px}
+.scene{grid-column:1;grid-row:1;position:relative;min-height:0;overflow:hidden;background:var(--fond)}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#cv.grab{cursor:grab}#cv.grabbing{cursor:grabbing}
+.panel{grid-column:2;grid-row:1;overflow-y:auto;display:flex;flex-direction:column;min-height:0}
+.eyebrow{font:400 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+.meas{display:grid;gap:0;border-top:1px solid var(--filet)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--filet)}
+.lab{font:400 12px var(--mono)}
+.val{font:500 14px var(--mono);white-space:nowrap}
+.val i{font:400 12px var(--mono);font-style:normal;margin-left:5px}
+.note{font:400 11.5px/1.5 var(--mono);margin:8px 0 0}
+#graphe{display:block;width:100%;height:130px}
+.hints{margin:0;padding:0;list-style:none;font:400 11.5px/1.7 var(--mono)}
+.hints kbd{font:500 11px var(--mono);border:1px solid var(--filet);padding:0 5px;border-radius:2px}
+#lectures{padding:0 20px 4px 22px;display:grid;gap:16px}
+.controls{grid-column:1/-1;grid-row:2;padding:10px 22px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.grp.temps{flex:1 1 220px}
+.grp.temps input{flex:1 1 90px;width:auto;min-width:70px}
+.gl{font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-right:2px}
+.btn{background:transparent;border:1px solid var(--filet);font:400 12px var(--mono);padding:7px 11px;cursor:pointer;line-height:1;border-radius:2px;display:inline-flex;align-items:center;gap:7px;min-height:34px}
+.btn[aria-pressed="true"]{border-color:var(--encre)}
+.btn svg{width:14px;height:14px;display:block;fill:currentColor}
+.ico{padding:7px 9px}
+.pt{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+input[type=range]{-webkit-appearance:none;appearance:none;width:108px;height:24px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--encre-3)}
+input[type=range]::-moz-range-track{height:1px;background:var(--encre-3)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--papier);border:1.5px solid var(--encre);margin-top:-6px}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--papier);border:1.5px solid var(--encre)}
+.rv{font:500 13px var(--mono);min-width:52px}
+[hidden]{display:none!important}
+@media (max-width:860px){
+  .app{display:flex;flex-direction:column;height:auto}
+  .scene{order:1;height:62vh;height:62svh;min-height:380px;flex:none}
+  .controls{order:2;padding:12px 16px}
+  .panel{order:3}
+  .controls input[type=range]{width:84px}
+}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
+<script src="../../labo/theme.js"></script>
+</head>
+<body class="labo-etapes labo-fiche" data-mode="fiche">
+<header class="barre">
+  <div class="ou">
+    <a class="marque" href="../../labo/index.html">LABO</a>
+    <a class="retour" href="../../labo/index.html#phenomenes">← Phénomènes</a>
+  </div>
+  <div class="droite">
+    <p class="pos">Phénomènes</p>
+    <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
+  </div>
+</header>
+<div class="titre">
+  <div>
+    <h1>Le problème des trois corps</h1>
+    <p class="lead">Deux astres tournent pour toujours de la même façon. Ajoute un troisième : la loi reste la même, et la prévision se perd.</p>
+  </div>
+  <dl class="sig">
+    <dt>Échelle</dt><dd>~1 unité astronomique</dd>
+    <dt>Temps</dt><dd>1 unité = 1 an / 2π</dd>
+    <dt>Modèle</dt><dd>trois points, gravité de Newton, plan</dd>
+  </dl>
+</div>
+<nav class="chapitres" id="stepper" aria-label="Chapitre et étapes du phénomène">
+  <div class="chap"><p class="chap-t"><b>Phénomène</b>Les trois corps</p><div class="segs">
+    <button class="seg" data-a="0"><b>I</b><span>Le huit</span></button>
+    <button class="seg" data-a="1"><b>II</b><span>Deux mondes jumeaux</span></button>
+    <button class="seg" data-a="2"><b>III</b><span>L’éjection</span></button>
+    <button class="seg" data-a="3"><b>IV</b><span>Le triangle</span></button>
+    <button class="seg" data-a="4"><b>V</b><span>À toi</span></button>
+  </div></div>
+</nav>
+
+<div class="app">
+  <main class="scene" id="scene">
+    <canvas id="cv" role="img" aria-label="Scène interactive : trois corps en attraction mutuelle et leurs trajectoires. Glisse un corps pour le déplacer, la pointe de sa flèche pour changer sa vitesse."></canvas>
+  </main>
+  <aside class="panel" aria-label="Panneau de lecture">
+    <div id="lectures">
+      <section>
+        <p class="eyebrow" id="gTitre">Distances entre les corps</p>
+        <canvas id="graphe" role="img" aria-label="Graphe des distances ou de l’écart au cours du temps"></canvas>
+        <p class="note" id="gNote"></p>
+      </section>
+      <section class="meas">
+        <div class="row"><span class="lab">Temps</span><span class="val"><b id="mT">0</b><i id="mAn"></i></span></div>
+        <div class="row" id="rEc" hidden><span class="lab">Écart des jumeaux</span><span class="val"><b id="mEc">—</b><i>UA</i></span></div>
+        <div class="row" id="rHo" hidden><span class="lab">Écart &gt; 0,1 UA à</span><span class="val"><b id="mHo">—</b></span></div>
+        <div class="row" id="rRo" hidden><span class="lab">Critère de Routh R</span><span class="val"><b id="mRo">—</b><i id="mRoI"></i></span></div>
+        <div class="row" id="rQ" hidden><span class="lab">Plus grand / plus petit côté</span><span class="val"><b id="mQ">—</b></span></div>
+        <div class="row"><span class="lab">Plus courte distance</span><span class="val"><b id="mD">—</b><i>UA</i></span></div>
+        <div class="row"><span class="lab">Énergie cinétique</span><span class="val"><b id="mC">—</b></span></div>
+        <div class="row"><span class="lab">Énergie potentielle</span><span class="val"><b id="mP">—</b></span></div>
+        <div class="row"><span class="lab">Énergie totale</span><span class="val"><b id="mE">—</b></span></div>
+        <div class="row"><span class="lab">Moment cinétique</span><span class="val"><b id="mL">—</b></span></div>
+        <div class="row"><span class="lab">Dérive de l’énergie</span><span class="val"><b id="mDr">—</b></span></div>
+      </section>
+      <p class="note" id="etatNote" aria-live="polite"></p>
+    </div>
+    <section id="hints">
+      <ul class="hints">
+        <li>Glisser un corps : le déplacer</li>
+        <li>Glisser la pointe de sa flèche : sa vitesse</li>
+        <li>Molette : zoom · double-clic : recadrer</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> temps · <kbd>R</kbd> réinitialiser</li>
+        <li><kbd>F</kbd> focus · <kbd>I</kbd> infos</li>
+      </ul>
+    </section>
+  </aside>
+
+  <div class="controls" role="toolbar" aria-label="Contrôles">
+    <div class="grp">
+      <button class="btn ico" id="bBack" title="Reculer (←)" aria-label="Reculer"><svg viewBox="0 0 14 14"><path d="M11 2v10L5 7zM3 2h1.6v10H3z"/></svg></button>
+      <button class="btn ico" id="bPlay" title="Lecture / pause (Espace)" aria-label="Pause"><svg viewBox="0 0 14 14" id="icPause"><path d="M3 2h3v10H3zM8 2h3v10H8z"/></svg><svg viewBox="0 0 14 14" id="icPlay" style="display:none"><path d="M3 2l9 5-9 5z"/></svg></button>
+      <button class="btn ico" id="bFwd" title="Avancer (→)" aria-label="Avancer"><svg viewBox="0 0 14 14"><path d="M3 2v10l6-5zM9.4 2H11v10H9.4z"/></svg></button>
+      <button class="btn" id="bReset" title="Réinitialiser (R)">Réinitialiser</button>
+    </div>
+    <div class="grp temps"><label class="gl" for="frise">Temps</label><input type="range" id="frise" min="0" max="1" step="0.005" value="0"><span class="rv" id="friseV">0</span></div>
+    <div class="grp"><label class="gl" for="vit">Vitesse</label><input type="range" id="vit" min="-2" max="4" step="1" value="0"><span class="rv" id="vitV">×1</span></div>
+    <div class="grp" data-scenes="0 4"><span id="corps" class="grp" role="group" aria-label="Corps réglé"></span><label class="gl" for="masse">Masse</label><input type="range" id="masse" min="0.05" max="5" step="0.05" value="1"><span class="rv" id="masseV">1</span></div>
+    <div class="grp" data-scenes="1"><label class="gl" for="delta">Écart de départ</label><input type="range" id="delta" min="2" max="6" step="1" value="3"><span class="rv" id="deltaV">10⁻³</span></div>
+    <div class="grp" data-scenes="3"><label class="gl" for="mu">Masses B et C</label><input type="range" id="mu" min="-2.3" max="0" step="0.02" value="0"><span class="rv" id="muV">1</span><button class="btn" id="bPousse">Pousser A</button><button class="btn" id="bTourne" aria-pressed="false">Tourner avec eux</button></div>
+    <div class="grp" data-scenes="4" id="presets" role="group" aria-label="Situation de départ">
+      <button class="btn" data-p="huit">Huit</button><button class="btn" data-p="papillon">Papillon</button><button class="btn" data-p="pythagore">3-4-5</button><button class="btn" data-p="hierarchie">Binaire + 1</button><button class="btn" data-p="hasard">Au hasard</button>
+    </div>
+    <div class="grp"><button class="btn" id="bVit" aria-pressed="false">Vitesses</button><button class="btn" id="bFor" aria-pressed="false">Forces</button><button class="btn" id="bTr" aria-pressed="false">Long sillage</button></div>
+  </div>
+</div>
+
+<script>
+/* TROIS-CORPS-BEGIN */
+/* LABO — moteur « trois corps ». Gravitation newtonienne plane, sans adoucissement.
+   Unités : masse du Soleil, unité astronomique, G = 1 ; l'unité de temps vaut donc un an / 2π.
+   État : Float64Array [x1,y1,x2,y2,x3,y3, vx1,vy1,vx2,vy2,vx3,vy3]. Intégrateur : Dormand-Prince 5(4) à pas adaptatif. */
+const TroisCorps = (() => {
+  'use strict';
+  const COLLISION = 1e-4, HUIT_T = 6.32591398;
+  const PAIRES = [[0, 1], [0, 2], [1, 2]];
+
+  function deriv(s, m, d) {
+    for (let i = 0; i < 6; i++) { d[i] = s[6 + i]; d[6 + i] = 0; }
+    for (let n = 0; n < 3; n++) {
+      const i = PAIRES[n][0], j = PAIRES[n][1];
+      const dx = s[2 * j] - s[2 * i], dy = s[2 * j + 1] - s[2 * i + 1];
+      const r2 = dx * dx + dy * dy, k = 1 / (r2 * Math.sqrt(r2));
+      d[6 + 2 * i] += m[j] * k * dx; d[7 + 2 * i] += m[j] * k * dy;
+      d[6 + 2 * j] -= m[i] * k * dx; d[7 + 2 * j] -= m[i] * k * dy;
+    }
+    return d;
+  }
+  const dist = (s, i, j) => Math.hypot(s[2 * j] - s[2 * i], s[2 * j + 1] - s[2 * i + 1]);
+  const dmin = s => Math.min(dist(s, 0, 1), dist(s, 0, 2), dist(s, 1, 2));
+
+  function energie(s, m) {
+    let c = 0, p = 0;
+    for (let i = 0; i < 3; i++) c += 0.5 * m[i] * (s[6 + 2 * i] ** 2 + s[7 + 2 * i] ** 2);
+    for (const [i, j] of PAIRES) p -= m[i] * m[j] / dist(s, i, j);
+    return { c, p, t: c + p };
+  }
+  function moment(s, m) {
+    let L = 0;
+    for (let i = 0; i < 3; i++) L += m[i] * (s[2 * i] * s[7 + 2 * i] - s[2 * i + 1] * s[6 + 2 * i]);
+    return L;
+  }
+  function centre(s, m) {
+    const M = m[0] + m[1] + m[2], c = [0, 0, 0, 0];
+    for (let i = 0; i < 3; i++) for (let k = 0; k < 2; k++) { c[k] += m[i] * s[2 * i + k] / M; c[2 + k] += m[i] * s[6 + 2 * i + k] / M; }
+    return c;
+  }
+  /* ramène le centre de masse au repos, à l'origine */
+  function recentre(s, m) {
+    const c = centre(s, m);
+    for (let i = 0; i < 3; i++) for (let k = 0; k < 2; k++) { s[2 * i + k] -= c[k]; s[6 + 2 * i + k] -= c[2 + k]; }
+    return s;
+  }
+
+  const A = [[], [1 / 5], [3 / 40, 9 / 40], [44 / 45, -56 / 15, 32 / 9], [19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729],
+    [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656], [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84]];
+  const ER = [71 / 57600, 0, -71 / 16695, 71 / 1920, -17253 / 339200, 22 / 525, -1 / 40];
+  const K = Array.from({ length: 7 }, () => new Float64Array(12)), Y = new Float64Array(12);
+
+  /* Avance `sys` ({ s, m, h }) de T. Renvoie { ok, t, raison } : arrêt propre si deux corps se touchent.
+     Le pas initial vient de sys.h, gardé d'un appel à l'autre. */
+  function avance(sys, T, tol = 1e-12, maxPas = 200000) {
+    const { s, m } = sys;
+    let t = 0, h = sys.h || 1e-3, n = 0;
+    while (t < T - 1e-14) {
+      if (n++ > maxPas) return { ok: false, t, raison: 'calcul' };
+      if (dmin(s) < COLLISION) return { ok: false, t, raison: 'collision' };
+      const dernier = t + h >= T, hh = dernier ? T - t : h;
+      for (let e = 0; e < 7; e++) {
+        for (let i = 0; i < 12; i++) { let v = s[i]; for (let j = 0; j < e; j++) v += hh * A[e][j] * K[j][i]; Y[i] = v; }
+        deriv(Y, m, K[e]);
+      }
+      let err = 0;
+      for (let i = 0; i < 12; i++) {
+        let e = 0; for (let j = 0; j < 7; j++) e += ER[j] * K[j][i];
+        err = Math.max(err, Math.abs(e * hh / (tol * (1 + Math.abs(s[i])))));
+      }
+      const f = Math.min(4, Math.max(0.2, 0.9 * Math.pow(err || 1e-10, -0.2)));
+      if (err <= 1) { s.set(Y); t += hh; if (!dernier || f < 1) h = hh * f; }
+      else { h = hh * f; if (!(h > 1e-14)) return { ok: false, t, raison: 'collision' }; }
+    }
+    sys.h = h;
+    return { ok: true, t };
+  }
+  const cree = (p, m) => ({ s: Float64Array.from(p), m: m.slice(), h: 1e-3 });
+
+  /* ---------- Situations de départ ---------- */
+  function huit() {
+    const x = 0.97000436, y = -0.24308753, vx = -0.93240737, vy = -0.86473146;
+    return cree([x, y, -x, -y, 0, 0, -vx / 2, -vy / 2, -vx / 2, -vy / 2, vx, vy], [1, 1, 1]);
+  }
+  /* Burrau : triangle 3-4-5, chaque masse en face du côté de même longueur, au repos */
+  const pythagore = () => cree([1, 3, -2, -1, 1, -1, 0, 0, 0, 0, 0, 0], [3, 4, 5]);
+  /* triangle équilatéral de côté a, en rotation d'ensemble : exact quelles que soient les masses */
+  function lagrange(m, a = 1.6) {
+    const R = a / Math.sqrt(3), p = [];
+    for (let i = 0; i < 3; i++) { const th = Math.PI / 2 + i * 2 * Math.PI / 3; p.push(R * Math.cos(th), R * Math.sin(th)); }
+    const sys = cree([...p, 0, 0, 0, 0, 0, 0], m), w = Math.sqrt((m[0] + m[1] + m[2]) / a ** 3);
+    recentre(sys.s, m);
+    for (let i = 0; i < 3; i++) { sys.s[6 + 2 * i] = -w * sys.s[2 * i + 1]; sys.s[7 + 2 * i] = w * sys.s[2 * i]; }
+    return sys;
+  }
+  /* binaire serrée (deux masses 1, séparées de 0,4) et un troisième corps lointain */
+  function hierarchie() {
+    const a = 0.4, d = 3, m = [1, 1, 0.5], vb = Math.sqrt(2 / a) / 2, vd = Math.sqrt(2.5 / d);
+    const sys = cree([-a / 2, 0, a / 2, 0, d, 0, 0, -vb, 0, vb, 0, vd], m);
+    recentre(sys.s, m); return sys;
+  }
+  /* « papillon I » de Šuvakov et Dmitrašinović (2013) */
+  function papillon() {
+    const a = 0.30689, b = 0.12551;
+    return cree([-1, 0, 1, 0, 0, 0, a, b, a, b, -2 * a, -2 * b], [1, 1, 1]);
+  }
+  /* Critère de Routh : le triangle de Lagrange est linéairement stable si R = (m1+m2+m3)² / (m1m2+m1m3+m2m3) > 27 */
+  const routh = m => (m[0] + m[1] + m[2]) ** 2 / (m[0] * m[1] + m[0] * m[2] + m[1] * m[2]);
+
+  /* Corps qui s'échappe : énergie positive par rapport au centre de masse des deux autres, qui s'éloigne,
+     et loin de la paire (plus de 4 fois sa séparation). -1 sinon. */
+  function echappe(s, m) {
+    for (let i = 0; i < 3; i++) {
+      const j = (i + 1) % 3, k = (i + 2) % 3, M = m[j] + m[k];
+      const g = n => (m[j] * s[2 * j + n] + m[k] * s[2 * k + n]) / M, gv = n => (m[j] * s[6 + 2 * j + n] + m[k] * s[6 + 2 * k + n]) / M;
+      const x = s[2 * i] - g(0), y = s[2 * i + 1] - g(1), vx = s[6 + 2 * i] - gv(0), vy = s[7 + 2 * i] - gv(1), r = Math.hypot(x, y);
+      if (r > 4 * dist(s, j, k) && x * vx + y * vy > 0 && 0.5 * (vx * vx + vy * vy) - (M + m[i]) / r > 0) return i;
+    }
+    return -1;
+  }
+  /* écart entre deux systèmes : plus grand déplacement d'un corps */
+  const ecart = (a, b) => Math.max(...[0, 1, 2].map(i => Math.hypot(a[2 * i] - b[2 * i], a[2 * i + 1] - b[2 * i + 1])));
+
+  return { COLLISION, HUIT_T, PAIRES, deriv, dist, dmin, energie, moment, centre, recentre, avance, cree, huit, pythagore, lagrange, hierarchie, papillon, routh, echappe, ecart };
+})();
+/* TROIS-CORPS-END */
+</script>
+<script>
+'use strict';
+const T3 = TroisCorps, $ = s => document.querySelector(s);
+const COUL = ['#f0917f', '#74d3c4', '#b7a0f5'], NOM = ['A', 'B', 'C'];
+const PAS = 0.005, TMAX = 300, CALME = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const cv = $('#cv'), cx = cv.getContext('2d'), gr = $('#graphe'), gx = gr.getContext('2d'), sceneEl = $('#scene');
+const nf = (x, d = 2) => (Math.abs(x) < 0.5 * 10 ** -d ? 0 : x).toFixed(d).replace('.', ',').replace('-', '−');
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹', sup = n => String(n).replace('-', '⁻').replace(/\d/g, c => SUP[c]);
+const sci = x => { if (!(x > 0)) return '0'; let e = Math.floor(Math.log10(x)), a = x / 10 ** e; if (a >= 9.95) { a = 1; e++; } return nf(a, 1) + ' × 10' + sup(e); };
+
+/* ---------- état ---------- */
+let W = 600, H = 400, dpr = 1, scene = 0, preset = 'huit', sel = 0;
+let sys = T3.huit(), jum = null, hist = [], hjum = [], k = 0, acc = 0;   // hist[i] : état à t = i·PAS ; k : image montrée
+let fin = null, E0 = 0, playing = true, vit = 1, delta = 3, mu = 0, tourne = false, pousse = false;
+let vues = { v: false, f: false, l: false }, drag = null, zoomMain = false, horizon = null, horizonK = -1;
+let gestes = { edits: 0, presets: 0 }, modifie = false, qmax = 1, qmaxK = 0, escT = null;
+const cam = { x: 0, y: 0, e: 1.6, init: false };
+const t = () => k * PAS, cur = () => hist[k];
+
+/* (re)part de sys : t = 0, historique neuf */
+function lance(nouveau, garde) {
+  sys = nouveau; T3.recentre(sys.s, sys.m); sys.h = 1e-3;
+  hist = [Float64Array.from(sys.s)]; hjum = []; k = 0; acc = 0; fin = null; horizon = null; horizonK = -1; qmax = 1; escT = null;
+  E0 = T3.energie(sys.s, sys.m).t;
+  if (scene === 1) { jum = { s: Float64Array.from(sys.s), m: sys.m.slice(), h: 1e-3 }; jum.s[0] += 10 ** -delta; T3.recentre(jum.s, jum.m); hjum = [Float64Array.from(jum.s)]; }
+  else jum = null;
+  if (!garde) { cam.init = false; zoomMain = false; }
+  syncMasse();
+}
+/* Un pas de plus dans l'historique. Faux si on ne peut plus avancer. */
+function calcule() {
+  if (fin) return false;
+  if (hist.length * PAS >= TMAX) { fin = 'limite'; return false; }
+  let r = T3.avance(sys, PAS);
+  if (r.ok && jum) r = T3.avance(jum, PAS);
+  if (!r.ok) { fin = r.raison; return false; }
+  hist.push(Float64Array.from(sys.s)); if (jum) hjum.push(Float64Array.from(jum.s));
+  const i = hist.length - 1;
+  if (jum && horizon === null && T3.ecart(sys.s, jum.s) > 0.1) { horizon = i * PAS; horizonK = i; }
+  if (scene === 3) { const d = T3.PAIRES.map(([a, b]) => T3.dist(sys.s, a, b)); qmax = Math.max(qmax, Math.max(...d) / Math.min(...d)); }
+  if (i % 20 === 0) { const x = T3.echappe(sys.s, sys.m); if (x < 0) escT = null; else if (!escT) escT = [x, i * PAS]; }
+  return true;
+}
+function va(n) {
+  n = Math.max(0, n);
+  while (hist.length <= n) if (!calcule()) break;
+  k = Math.min(n, hist.length - 1);
+}
+/* copie modifiable de l'état montré : c'est de là que part un geste de l'utilisateur */
+const copie = () => ({ s: Float64Array.from(cur()), m: sys.m.slice(), h: 1e-3 });
+
+function hasard() {
+  const p = [], m = [];
+  for (let i = 0; i < 3; i++) { const a = Math.PI * 2 * (i / 3 + (Math.random() - 0.5) * 0.2), r = 0.7 + Math.random() * 0.7; p.push(r * Math.cos(a), r * Math.sin(a)); m.push(Math.round((0.5 + Math.random() * 1.5) * 20) / 20); }
+  for (let i = 0; i < 6; i++) p.push((Math.random() - 0.5) * 1.1);
+  return T3.cree(p, m);
+}
+const DEPARTS = { huit: T3.huit, papillon: T3.papillon, pythagore: T3.pythagore, hierarchie: T3.hierarchie, hasard, triangle: () => T3.lagrange([1, 10 ** mu, 10 ** mu]) };
+const SCENES = ['huit', 'pythagore', 'pythagore', 'triangle', 'hierarchie'];
+
+function depart(p, garde) {
+  preset = p; pousse = false; modifie = false;
+  if (window.Fiche) Fiche.relance();
+  lance(DEPARTS[p](), garde);
+  document.querySelectorAll('#presets .btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === p)));
+}
+function goScene(n) {
+  if (!SCENES[n]) return;
+  scene = n; delta = 3; mu = 0; tourne = false; sel = 0; vues = { v: n === 4, f: false, l: n === 0 };
+  regleVit([0, 2, 1, 0, 0][n]); playing = true;
+  depart(SCENES[n]);
+  document.querySelectorAll('#stepper .seg').forEach(b => { if (+b.dataset.a === n) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  document.querySelectorAll('[data-scenes]').forEach(g => { g.hidden = !g.dataset.scenes.split(' ').includes(String(n)); });
+  $('#rEc').hidden = $('#rHo').hidden = n !== 1; $('#rRo').hidden = $('#rQ').hidden = n !== 3;
+  $('#gTitre').textContent = n === 1 ? 'Écart des jumeaux (échelle log)' : 'Distances entre les corps';
+  $('#gNote').textContent = n === 1 ? 'Une graduation vaut un facteur 100. Pointillé : 0,1 UA.' : 'AB, AC et BC sur les dernières 20 unités de temps.';
+  sync();
+  if (window.Fiche) Fiche.montre(n);
+}
+window.allerScene = n => goScene(n);
+window.etat3 = () => ({ scene, t: t(), m: sys.m.slice(), delta, horizon: horizon !== null && k >= horizonK ? horizon : null, vit, preset, tourne, pousse, qmax,
+  routh: T3.routh(sys.m), esc: cur() ? T3.echappe(cur(), sys.m) : -1, escT, fin, vues: { ...vues }, edits: gestes.edits, presets: gestes.presets, modifie, sel, playing, s: cur() });
+
+/* ---------- réglages ---------- */
+function regleVit(e) { vit = 2 ** e; $('#vit').value = e; $('#vitV').textContent = '×' + (vit < 1 ? nf(vit, 2) : vit); }
+function syncMasse() {
+  $('#masse').value = sys.m[sel]; $('#masseV').textContent = nf(sys.m[sel], 2);
+  document.querySelectorAll('#corps .btn').forEach((b, i) => b.setAttribute('aria-pressed', String(i === sel)));
+}
+function sync() {
+  $('#icPause').style.display = playing ? '' : 'none'; $('#icPlay').style.display = playing ? 'none' : '';
+  $('#bPlay').setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+  $('#delta').value = delta; $('#deltaV').textContent = '10' + sup(-delta);
+  $('#mu').value = mu; $('#muV').textContent = nf(10 ** mu, 3);
+  $('#bTourne').setAttribute('aria-pressed', String(tourne));
+  for (const [id, c] of [['#bVit', 'v'], ['#bFor', 'f'], ['#bTr', 'l']]) $(id).setAttribute('aria-pressed', String(vues[c]));
+  syncMasse();
+}
+NOM.forEach((n, i) => { const b = document.createElement('button'); b.className = 'btn ico'; b.innerHTML = `<span class="pt" style="background:${COUL[i]}"></span>${n}`; b.addEventListener('click', () => { sel = i; syncMasse(); }); $('#corps').append(b); });
+$('#vit').addEventListener('input', e => regleVit(+e.target.value));
+$('#masse').addEventListener('input', e => { const c = copie(); c.m[sel] = +e.target.value; gestes.edits++; modifie = true; lance(c, true); });
+$('#delta').addEventListener('input', e => { delta = +e.target.value; depart('pythagore', true); sync(); });
+$('#mu').addEventListener('input', e => { mu = +e.target.value; pousse = false; lance(DEPARTS.triangle(), true); sync(); });
+$('#bPousse').addEventListener('click', () => { const c = copie(); c.s[0] += 0.005; pousse = true; gestes.edits++; lance(c, true); });
+$('#bTourne').addEventListener('click', () => { tourne = !tourne; sync(); });
+$('#bVit').addEventListener('click', () => { vues.v = !vues.v; sync(); });
+$('#bFor').addEventListener('click', () => { vues.f = !vues.f; sync(); });
+$('#bTr').addEventListener('click', () => { vues.l = !vues.l; sync(); });
+const jouer = () => { playing = !playing; sync(); }, pasTemps = s => { playing = false; va(k + s * 20); sync(); };
+function reinit() { if (scene === 4 && preset !== 'hasard') depart(preset); else goScene(scene); }
+$('#bPlay').addEventListener('click', jouer); $('#bBack').addEventListener('click', () => pasTemps(-1)); $('#bFwd').addEventListener('click', () => pasTemps(1));
+$('#bReset').addEventListener('click', reinit);
+$('#frise').addEventListener('input', e => { playing = false; va(Math.round(+e.target.value / PAS)); sync(); });
+document.querySelectorAll('#presets .btn').forEach(b => b.addEventListener('click', () => { gestes.presets++; playing = true; depart(b.dataset.p); sync(); }));
+document.querySelectorAll('#stepper .seg').forEach(b => b.addEventListener('click', e => { goScene(+b.dataset.a); e.currentTarget.blur(); }));
+addEventListener('keydown', e => {
+  const x = e.target; if (x.closest('input:not([type=range]),textarea,select') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (x.tagName === 'INPUT' && e.key.startsWith('Arrow')) return;
+  if (e.key === ' ' && x.tagName !== 'BUTTON') { e.preventDefault(); jouer(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); pasTemps(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); pasTemps(1); }
+  else if (e.key.toLowerCase() === 'r') reinit();
+});
+
+/* ---------- repère et caméra ---------- */
+const angle = s => Math.atan2(s[3] - s[1], s[2] - s[0]);
+/* coordonnées physiques → repère montré (tournant ou non) */
+function repere(s, i) {
+  const x = s[2 * i], y = s[2 * i + 1];
+  if (!(tourne && scene === 3)) return [x, y];
+  const a = angle(s) - angle(hist[0]), c = Math.cos(a), d = Math.sin(a);
+  return [c * x + d * y, -d * x + c * y];
+}
+const ech = () => Math.min(W, H) / 2 / cam.e;
+const ecran = ([x, y]) => [W / 2 + (x - cam.x) * ech(), H / 2 - (y - cam.y) * ech()];
+const monde = p => [cam.x + (p.x - W / 2) / ech(), cam.y - (p.y - H / 2) / ech()];
+function camera(dt) {
+  if (zoomMain || drag) return;
+  let r = scene === 0 ? 1.25 : 1.2;
+  const n = Math.min(k, 800);
+  for (let j = 0; j <= n; j += 20) { const s = hist[k - j]; for (let i = 0; i < 3; i++) r = Math.max(r, Math.hypot(s[2 * i], s[2 * i + 1])); }
+  r *= 1.18;
+  if (!cam.init) { cam.x = cam.y = 0; cam.e = r; cam.init = true; return; }
+  const f = 1 - Math.exp(-dt * 1.6); cam.e += (r - cam.e) * f; cam.x *= 1 - f; cam.y *= 1 - f;
+}
+
+/* ---------- dessin ---------- */
+const rayon = m => Math.max(4, 7.5 * Math.cbrt(m));
+const FLECHE_V = 0.42;
+function fleche(a, b, coul, ep = 1.6) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 5) return;
+  const u = (b[0] - a[0]) / L, v = (b[1] - a[1]) / L;
+  cx.strokeStyle = cx.fillStyle = coul; cx.lineWidth = ep;
+  cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0] - u * 6, b[1] - v * 6); cx.stroke();
+  cx.beginPath(); cx.moveTo(b[0], b[1]); cx.lineTo(b[0] - u * 8 - v * 4, b[1] - v * 8 + u * 4); cx.lineTo(b[0] - u * 8 + v * 4, b[1] - v * 8 - u * 4); cx.fill();
+}
+function sillage(h, i, coul, force) {
+  const n = Math.min(k, vues.l ? 4000 : 900), M = 16; cx.lineWidth = 1.5; cx.strokeStyle = coul; cx.lineJoin = 'round';
+  const pasI = n > 2000 ? 2 : 1;
+  for (let b = 0; b < M; b++) {
+    const a0 = Math.floor(n * b / M), a1 = Math.floor(n * (b + 1) / M); if (a1 <= a0) continue;
+    cx.globalAlpha = force * (1 - b / M) ** 1.4; cx.beginPath();
+    for (let j = a0; ; j = Math.min(a1, j + pasI)) { const p = ecran(repere(h[k - j], i)); if (j === a0) cx.moveTo(p[0], p[1]); else cx.lineTo(p[0], p[1]); if (j === a1) break; }
+    cx.stroke();
+  }
+  cx.globalAlpha = 1;
+}
+/* en repère tournant, les flèches tourneraient faux : on ne les montre pas */
+const flechesOk = () => !(tourne && scene === 3);
+const montreV = i => flechesOk() && (vues.v || (!playing && i === sel && (scene === 4 || scene === 0)));
+function pointe(i) { const s = cur(), z = ech(), p = ecran(repere(s, i)); return [p[0] + s[6 + 2 * i] * FLECHE_V * z, p[1] - s[7 + 2 * i] * FLECHE_V * z]; }
+function forces(s) { const d = new Float64Array(12); T3.deriv(s, sys.m, d); return d; }
+
+function dessine() {
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.fillStyle = '#0a0d12'; cx.fillRect(0, 0, W, H);
+  const s = cur(), z = ech();
+  /* centre de masse */
+  const c = ecran([0, 0]); cx.strokeStyle = '#3a4656'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(c[0] - 5, c[1]); cx.lineTo(c[0] + 5, c[1]); cx.moveTo(c[0], c[1] - 5); cx.lineTo(c[0], c[1] + 5); cx.stroke();
+  if (scene === 3) { cx.strokeStyle = '#2a3442'; cx.beginPath(); for (let i = 0; i < 4; i++) { const p = ecran(repere(s, i % 3)); i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]); } cx.stroke(); }
+  if (jum) for (let i = 0; i < 3; i++) sillage(hjum, i, COUL[i], 0.3);
+  for (let i = 0; i < 3; i++) sillage(hist, i, COUL[i], 0.85);
+  if (jum) for (let i = 0; i < 3; i++) { const p = ecran(repere(hjum[k], i)); cx.strokeStyle = COUL[i]; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(p[0], p[1], rayon(sys.m[i]) + 4, 0, 7); cx.stroke(); }
+  if (vues.f && flechesOk()) { const d = forces(s); for (let i = 0; i < 3; i++) { const fx = d[6 + 2 * i] * sys.m[i], fy = d[7 + 2 * i] * sys.m[i], F = Math.hypot(fx, fy), L = 90 * F / (F + 2), p = ecran(repere(s, i)); fleche(p, [p[0] + fx / F * L, p[1] - fy / F * L], '#ffd166'); } }
+  const esc = T3.echappe(s, sys.m);
+  for (let i = 0; i < 3; i++) {
+    const p = ecran(repere(s, i)), r = rayon(sys.m[i]);
+    if (montreV(i)) fleche(p, pointe(i), '#e8e4dc', 1.3);
+    const g = cx.createRadialGradient(p[0], p[1], r * 0.4, p[0], p[1], r * 2.6); g.addColorStop(0, COUL[i] + '66'); g.addColorStop(1, COUL[i] + '00');
+    cx.fillStyle = g; cx.beginPath(); cx.arc(p[0], p[1], r * 2.6, 0, 7); cx.fill();
+    cx.fillStyle = COUL[i]; cx.beginPath(); cx.arc(p[0], p[1], r, 0, 7); cx.fill();
+    cx.font = '500 12px "IBM Plex Mono",monospace'; cx.fillStyle = '#e8e4dc'; cx.textAlign = 'left';
+    cx.fillText(NOM[i] + (esc === i ? ' · s’échappe' : ''), p[0] + r + 6, p[1] - r - 3);
+  }
+  /* échelle et temps */
+  const unites = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100], u = unites.filter(x => x * z < 150).pop() || 0.1;
+  cx.strokeStyle = '#8a93a0'; cx.lineWidth = 1; cx.beginPath(); cx.moveTo(20, H - 22); cx.lineTo(20 + u * z, H - 22); cx.moveTo(20, H - 26); cx.lineTo(20, H - 18); cx.moveTo(20 + u * z, H - 26); cx.lineTo(20 + u * z, H - 18); cx.stroke();
+  cx.fillStyle = '#8a93a0'; cx.font = '400 11px "IBM Plex Mono",monospace'; cx.fillText(String(u).replace('.', ',') + ' UA', 20, H - 32);
+  cx.fillText('t = ' + nf(t(), 1), 20, 26);
+  if (tourne && scene === 3) cx.fillText('repère tournant', 20, 44);
+  if (jum) cx.fillText('anneaux : le jumeau', 20, 44);
+}
+
+/* ---------- graphe et lectures ---------- */
+function graphe() {
+  const w = gr.clientWidth, h = gr.clientHeight; if (!w) return;
+  const pw = Math.round(w * dpr), ph = Math.round(h * dpr); if (gr.width !== pw || gr.height !== ph) { gr.width = pw; gr.height = ph; }
+  const st = getComputedStyle(document.body), encre = st.getPropertyValue('--encre-3').trim() || '#888', filet = st.getPropertyValue('--filet').trim() || '#ccc', fort = st.color;
+  gx.setTransform(dpr, 0, 0, dpr, 0, 0); gx.clearRect(0, 0, w, h); gx.font = '400 10px "IBM Plex Mono",monospace'; gx.fillStyle = encre; gx.lineWidth = 1;
+  const g = 34, b = 16, X0 = g, X1 = w - 4, Y0 = 6, Y1 = h - b;
+  const ligne = (pts, c) => { gx.strokeStyle = c; gx.lineWidth = 1.4; gx.beginPath(); pts.forEach((p, i) => i ? gx.lineTo(p[0], p[1]) : gx.moveTo(p[0], p[1])); gx.stroke(); };
+  if (scene === 1 && jum) {
+    const lo = -7, hi = 1.5, tm = Math.max(10, t()), Y = v => Y1 - (v - lo) / (hi - lo) * (Y1 - Y0), X = v => X0 + v / tm * (X1 - X0);
+    for (let e = -6; e <= 0; e += 2) { gx.strokeStyle = filet; gx.lineWidth = 1; gx.beginPath(); gx.moveTo(X0, Y(e)); gx.lineTo(X1, Y(e)); gx.stroke(); gx.textAlign = 'right'; gx.fillText('10' + sup(e), X0 - 4, Y(e) + 3); }
+    gx.strokeStyle = encre; gx.setLineDash([3, 3]); gx.beginPath(); gx.moveTo(X0, Y(-1)); gx.lineTo(X1, Y(-1)); gx.stroke(); gx.setLineDash([]);
+    const pts = [], q = Math.max(1, Math.ceil(k / 400)); for (let i = 0; i <= k; i += q) pts.push([X(i * PAS), Y(Math.log10(Math.max(1e-7, T3.ecart(hist[i], hjum[i]))))]);
+    ligne(pts, fort); gx.textAlign = 'right'; gx.fillText(nf(tm, 0), X1, h - 3); gx.textAlign = 'left'; gx.fillText('0', X0, h - 3);
+  } else {
+    const n = Math.min(k, 4000), q = Math.max(1, Math.ceil(n / 300)), i0 = k - n; let mx = 0.5;
+    const S = T3.PAIRES.map(([a, c]) => { const l = []; for (let i = i0; i <= k; i += q) { const d = T3.dist(hist[i], a, c); mx = Math.max(mx, d); l.push([i, d]); } return l; });
+    const X = i => X0 + (i - i0) / Math.max(400, n) * (X1 - X0), Y = v => Y1 - v / mx / 1.05 * (Y1 - Y0);
+    for (const v of [0, mx / 2, mx]) { gx.strokeStyle = filet; gx.lineWidth = 1; gx.beginPath(); gx.moveTo(X0, Y(v)); gx.lineTo(X1, Y(v)); gx.stroke(); gx.textAlign = 'right'; gx.fillText(nf(v, 1), X0 - 4, Y(v) + 3); }
+    S.forEach((l, c) => { gx.setLineDash([[], [5, 3], [1.5, 2.5]][c]); ligne(l.map(([i, d]) => [X(i), Y(d)]), fort); }); gx.setLineDash([]);
+    gx.textAlign = 'left'; gx.fillText('— AB   – – AC   ··· BC', X0, h - 3);
+  }
+}
+let tl = 0;
+function lectures(now) {
+  if (now - tl < 90) return; tl = now;
+  const s = cur(), e = T3.energie(s, sys.m), Lz = T3.moment(s, sys.m);
+  $('#mT').textContent = nf(t(), 2); $('#mAn').textContent = '≈ ' + nf(t() / 2 / Math.PI, 2) + ' an';
+  $('#mD').textContent = nf(T3.dmin(s), 3); $('#mC').textContent = nf(e.c, 3); $('#mP').textContent = nf(e.p, 3); $('#mE').textContent = nf(e.t, 3); $('#mL').textContent = nf(Lz, 3);
+  $('#mDr').textContent = sci(Math.abs((e.t - E0) / E0));
+  if (jum) { $('#mEc').textContent = sci(T3.ecart(s, hjum[k])); $('#mHo').textContent = horizon !== null && k >= horizonK ? 't = ' + nf(horizon, 1) : 'pas encore'; }
+  if (scene === 3) { const R = T3.routh(sys.m), d = T3.PAIRES.map(([a, b]) => T3.dist(s, a, b)); $('#mRo').textContent = nf(R, 1); $('#mRoI').textContent = R > 27 ? '> 27 : stable' : '< 27 : instable'; $('#mQ').textContent = nf(Math.max(...d) / Math.min(...d), 2); }
+  const auBout = fin && k === hist.length - 1, x = T3.echappe(s, sys.m);
+  $('#etatNote').textContent = auBout ? (fin === 'collision' ? 'Deux corps se touchent (moins de 0,0001 UA) : le calcul s’arrête là. Recule, déplace un corps ou réinitialise.' : fin === 'limite' ? 'Fin de l’historique (300 unités de temps). Réinitialise pour repartir.' : 'Le passage est trop serré pour continuer le calcul.')
+    : x >= 0 ? `${NOM[x]} a assez d’énergie pour ne plus revenir ; les deux autres restent ensemble.` : '';
+  const tot = Math.max(10, (hist.length - 1) * PAS); $('#frise').max = tot; if (document.activeElement !== $('#frise') || playing) $('#frise').value = t(); $('#friseV').textContent = nf(t(), 1);
+  graphe();
+}
+
+/* ---------- gestes ---------- */
+const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+function touche(p) {
+  if (flechesOk()) for (let i = 0; i < 3; i++) if (montreV(i)) { const q = pointe(i); if (Math.hypot(q[0] - p.x, q[1] - p.y) < 13) return { i, v: true }; }
+  let best = null, bd = 24; for (let i = 0; i < 3; i++) { const q = ecran(repere(cur(), i)), d = Math.hypot(q[0] - p.x, q[1] - p.y); if (d < bd) { bd = d; best = { i, v: false }; } }
+  return best;
+}
+cv.addEventListener('pointerdown', e => {
+  const p = pos(e), h = touche(p); if (!h || !flechesOk()) return;
+  sel = h.i; syncMasse(); drag = { ...h, p0: p, bouge: false, c: copie(), jouait: playing }; playing = false; sync();
+  cv.setPointerCapture(e.pointerId); cv.classList.add('grabbing');
+});
+cv.addEventListener('pointermove', e => {
+  const p = pos(e);
+  if (!drag) { const h = flechesOk() && touche(p); cv.classList.toggle('grab', !!h); return; }
+  if (!drag.bouge && Math.hypot(p.x - drag.p0.x, p.y - drag.p0.y) < 4) return;
+  drag.bouge = true; const w = monde(p), { c, i } = drag;
+  if (drag.v) { c.s[6 + 2 * i] = (w[0] - c.s[2 * i]) / FLECHE_V; c.s[7 + 2 * i] = (w[1] - c.s[2 * i + 1]) / FLECHE_V; }
+  else {
+    /* jamais sur un autre corps : on garde au moins 0,05 UA */
+    let ok = true; for (let j = 0; j < 3; j++) if (j !== i && Math.hypot(w[0] - c.s[2 * j], w[1] - c.s[2 * j + 1]) < 0.05) ok = false;
+    if (ok) { c.s[2 * i] = w[0]; c.s[2 * i + 1] = w[1]; }
+  }
+  hist = [Float64Array.from(c.s)]; hjum = jum ? [Float64Array.from(c.s)] : []; k = 0;
+});
+function lache() {
+  if (!drag) return; const d = drag; drag = null; cv.classList.remove('grabbing');
+  if (d.bouge) {
+    const g = T3.centre(d.c.s, d.c.m); cam.x -= g[0]; cam.y -= g[1];   // l'image ne saute pas quand le centre de masse revient à l'origine
+    gestes.edits++; modifie = true; lance(d.c, true);
+  }
+  playing = d.jouait; sync();
+}
+cv.addEventListener('pointerup', lache); cv.addEventListener('pointercancel', lache);
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomMain = true; cam.e = Math.min(80, Math.max(0.15, cam.e * Math.exp(e.deltaY * 0.0012))); }, { passive: false });
+cv.addEventListener('dblclick', () => { zoomMain = false; });
+
+/* ---------- boucle ---------- */
+function taille() {
+  const r = sceneEl.getBoundingClientRect(); W = Math.max(200, r.width); H = Math.max(200, r.height); dpr = Math.min(2, devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+}
+new ResizeObserver(taille).observe(sceneEl); addEventListener('resize', taille);
+let der = performance.now();
+function image(now) {
+  const dt = Math.min(0.05, (now - der) / 1000); der = now;
+  if (playing && !drag) { acc += dt * vit * (CALME ? 0.5 : 1); const n = Math.floor(acc / PAS); if (n) { acc -= n * PAS; va(k + n); } }
+  camera(dt); dessine(); lectures(now);
+  requestAnimationFrame(image);
+}
+taille(); goScene(0); requestAnimationFrame(image);
+window.__trois = { moteur: T3, etat: window.etat3, va: x => { va(Math.round(x / PAS)); return t(); }, ecran: i => ecran(repere(cur(), i)), pointe };
+</script>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+  const suivi = (e, m) => { if (!m.d) m.d = e; };
+  const PI2 = 2 * Math.PI;
+  const fiches = [
+    { titre: 'Le huit',
+      regarde: 'Trois masses égales se poursuivent sur la même courbe, sans jamais se toucher. Personne ne les guide : chacune ne fait que tomber vers les deux autres.',
+      prediction: { q: 'Un corps fait le tour du huit en 6,33 unités de temps. Combien de temps sépare le passage de deux corps au même endroit ?', reponse: 2.11, tol: 0.06, unite: 'unités', explication: 'Les trois corps sont également espacés dans le temps : 6,33 / 3 = 2,11.' },
+      suivi,
+      essais: [
+        { t: 'Change un peu la masse d’un corps (curseur Masse) et regarde la courbe se déformer.', fait: (e, m) => m.d && e.m.some((x, i) => Math.abs(x - m.d.m[i]) > 0.04) },
+        { t: 'Mets la masse de A à 2 ou plus, accélère, et attends que deux corps soient à plus de 3 UA l’un de l’autre.', fait: (e, m) => m.d && e.edits > m.d.edits && e.m[0] >= 2 && TroisCorps.PAIRES.some(([a, b]) => TroisCorps.dist(e.s, a, b) > 3) },
+        { t: 'Affiche les forces : à chaque instant, leur somme est nulle.', fait: (e, m) => m.d && e.vues.f && !m.d.vues.f } ],
+      pourquoi: 'C’est une <b>chorégraphie</b> : une solution périodique où tous les corps suivent le même chemin. On en connaît beaucoup, mais elles sont isolées dans un océan de mouvements sans répétition. Celle-ci, trouvée numériquement par Moore (1993) et démontrée par Chenciner et Montgomery (2000), résiste même aux petites perturbations.',
+      relation: String.raw`m_i\,\ddot{\vec r}_i=\sum_{j\neq i}\frac{G\,m_i m_j}{|\vec r_j-\vec r_i|^{3}}\,(\vec r_j-\vec r_i)`,
+      defs: [['Chorégraphie', 'Mouvement périodique où tous les corps parcourent la même courbe, décalés dans le temps.'], ['Centre de masse', 'Moyenne des positions pondérée par les masses. Sans force extérieure, il reste immobile ici (petite croix).']],
+      piege: 'Croire que « pas de formule générale » veut dire « aucune solution ». Il y en a une infinité ; ce qui manque, c’est une formule simple valable pour tous les départs.' },
+    { titre: 'Deux mondes jumeaux',
+      regarde: 'Deux copies du même système partent avec un écart d’un millième d’unité sur A. Pendant longtemps, les anneaux restent posés sur les disques. Puis ils s’en vont.',
+      prediction: { q: 'Avec un écart de départ de 10⁻³, les jumeaux se séparent (plus de 0,1 UA) vers t = 34. Et si on connaît le départ mille fois mieux, à 10⁻⁶ ?', choix: ['Vers t = 47', 'Vers t = 34 000', 'Jamais'], bonne: 0, explication: 'Mille fois plus de précision ne fait gagner qu’14 unités environ (33,7 puis 47,4). Chaque facteur 10 <b>ajoute</b> une durée à peu près constante ; il ne la multiplie pas.' },
+      suivi,
+      essais: [
+        { t: 'Choisis un écart de 10⁻⁶ et va jusqu’à la séparation.', fait: (e, m) => m.d && e.delta === 6 && e.horizon !== null },
+        { t: 'Va jusqu’à la séparation avec un écart de 10⁻².', fait: (e, m) => m.d && e.delta === 2 && e.horizon !== null } ],
+      pourquoi: 'À chaque passage serré, un petit écart de position devient un grand écart de direction. L’écart moyen grandit donc de façon à peu près <b>exponentielle</b> : sur l’échelle logarithmique du graphe, il monte en ligne brisée, avec des pics aux rencontres. La loi est parfaitement déterministe ; c’est la connaissance du départ qui s’épuise.',
+      relation: String.raw`\delta(t)\approx\delta_0\,e^{\lambda t}\quad\Rightarrow\quad t_{\text{horizon}}\approx\frac1\lambda\ln\frac{\delta_{\max}}{\delta_0}`,
+      vivant: e => e.horizon ? String.raw`\delta_0=10^{-${e.delta}}\;\Rightarrow\; t_{\text{horizon}}=${e.horizon.toFixed(1).replace('.', '{,}')}` : '',
+      defs: [['Horizon de prévision', 'Durée au bout de laquelle l’écart entre la prévision et la réalité dépasse ce qu’on tolère. Ici : 0,1 UA.']],
+      piege: 'Chaotique ne veut pas dire aléatoire. Le même départ exact redonne toujours le même mouvement.' },
+    { titre: 'L’éjection',
+      regarde: 'Trois masses, 3 (A), 4 (B) et 5 (C), lâchées au repos aux coins d’un triangle 3-4-5. Elles tombent, se frôlent, échangent leurs rôles ; rien ne semble se stabiliser.',
+      prediction: { q: 'L’un des trois finira par partir pour toujours. Lequel ?', choix: ['A, la masse 3', 'B, la masse 4', 'C, la masse 5'], bonne: 0, explication: 'A, la plus légère, est éjectée vers t = 60. Dans une rencontre à trois, l’énergie cinétique tend à se partager, donc la plus légère reçoit souvent la plus grande vitesse. C’est une tendance, pas une loi.' },
+      suivi,
+      essais: [
+        { t: 'Change la vitesse et va jusqu’à l’éjection (vers t = 60).', fait: (e, m) => m.d && e.vit !== m.d.vit && e.esc >= 0 && e.t > 50 },
+        { t: 'Déplace un peu un corps, puis regarde si la fin est la même.', fait: (e, m) => m.d && e.edits > m.d.edits && e.t > 20 } ],
+      pourquoi: 'L’énergie totale est négative et ne change pas. Pour que A parte avec une énergie positive, il faut que B et C se lient plus fort : leur orbite se resserre et paie le départ. Beaucoup de systèmes triples serrés finissent ainsi, en <b>binaire plus fugitive</b>.',
+      relation: String.raw`E=E_{\text{binaire}}+E_{\text{fugitive}},\qquad E_{\text{fugitive}}>0\;\Rightarrow\;E_{\text{binaire}}<E<0`,
+      vivant: e => { const s = e.s; if (!s) return ''; const x = TroisCorps.energie(s, e.m), f = v => v.toFixed(1).replace('.', '{,}'); return String.raw`E=E_c+E_p=${f(x.c)}+(${f(x.p)})=${f(x.t)}`; },
+      defs: [['Système binaire', 'Deux corps liés qui tournent autour de leur centre de masse.'], ['Vitesse d’évasion', 'Vitesse à partir de laquelle un corps s’éloigne sans jamais revenir.']],
+      piege: 'Croire que l’éjection viole la conservation de l’énergie : le gain de la fugitive est exactement payé par la paire restante.' },
+    { titre: 'Le triangle de Lagrange',
+      regarde: 'Un triangle équilatéral qui tourne d’un bloc. C’est une solution exacte, quelles que soient les trois masses. Reste à savoir si elle survit à une poussée.',
+      prediction: { q: 'Avec trois masses égales, on déplace A de 0,005 UA. Que fait le triangle ?', choix: ['Il oscille un peu et tient', 'Il se défait'], bonne: 1, explication: 'Il se défait : R = 3² / 3 = 3, très loin de 27. Vers t = 10, un côté est déjà le double d’un autre.' },
+      suivi,
+      essais: [
+        { t: 'Pousse A avec des masses égales et attends que le triangle se défasse.', fait: e => e.pousse && e.m[1] > 0.95 && e.qmax > 1.5 },
+        { t: 'Réduis B et C jusqu’à R > 27, pousse A, et tiens jusqu’à t = 40.', fait: e => e.pousse && e.routh > 27 && e.t > 40 && e.qmax < 1.5 },
+        { t: 'Passe dans le repère qui tourne avec eux.', fait: (e, m) => m.d && e.tourne && !m.d.tourne } ],
+      pourquoi: 'Au sommet d’un triangle équilatéral, l’attraction des deux autres pointe toujours vers le centre de masse commun : c’est juste ce qu’il faut pour tourner. L’équilibre n’est stable que si une masse domine assez les autres (<b>critère de Routh</b>). C’est le cas du Soleil et de Jupiter : des milliers d’astéroïdes troyens restent près des deux sommets.',
+      relation: String.raw`R=\frac{(m_A+m_B+m_C)^2}{m_A m_B+m_A m_C+m_B m_C}>27`,
+      defs: [['Points L₄ et L₅', 'Les deux sommets de triangle équilatéral formés avec deux gros corps : un petit corps peut y rester.'], ['Repère tournant', 'Repère qui suit la direction de A vers B : le triangle y paraît immobile tant qu’il tient.']],
+      piege: 'Équilibre ne veut pas dire stabilité. Un crayon debout sur sa pointe est en équilibre, lui aussi.' },
+    { titre: 'À toi',
+      regarde: 'Une paire serrée et un troisième corps lointain, ce que font la plupart des étoiles triples durables. Tu peux tout changer : positions, flèches de vitesse, masses.',
+      suivi,
+      essais: [
+        { t: 'Déplace un corps, ou change sa flèche de vitesse.', fait: (e, m) => m.d && e.edits > m.d.edits && e.modifie },
+        { t: 'Défi : provoque une éjection avec un départ que tu as modifié.', fait: e => e.modifie && e.esc >= 0 && e.t > 2 },
+        { t: 'Défi : garde un départ modifié lié, sans éjection ni collision, jusqu’à t = 60.', fait: e => e.modifie && e.t > 60 && e.esc < 0 && e.fin !== 'collision' } ],
+      pourquoi: 'Un système à trois corps tient longtemps quand il se comporte comme deux problèmes à deux corps emboîtés : une binaire serrée, et un corps lointain qui la voit presque comme un seul point. Rapproche le troisième, et l’emboîtement se défait.',
+      relation: String.raw`E=\sum_i \tfrac12 m_i v_i^2-\sum_{i\lt j}\frac{G\,m_i m_j}{r_{ij}}=\text{constante}`,
+      defs: [['Système hiérarchique', 'Deux corps proches et un troisième nettement plus loin (ici, la distance est 7,5 fois plus grande).']],
+      piege: 'Après un geste, le centre de masse est ramené au repos : tes vitesses sont décalées toutes les trois de la même quantité, ce qui ne change rien au mouvement relatif.' }
+  ];
+  const etapes = [...document.querySelectorAll('#stepper .seg')].map((b, i) => ({ code: b.querySelector('b').textContent, titre: fiches[i].titre, scenes: [+b.dataset.a] }));
+  Fiche.init({ etapes, fiches, lectures: '#lectures', etat: window.etat3, aller: window.allerScene,
+    k: (tex, repli, bloc) => window.katex ? katex.renderToString(tex, { throwOnError: false, displayMode: bloc, output: 'html' }) : repli,
+    theorie: () => 'explication.html' });
+  Fiche.montre(0);
+})();
+</script>
+<script src="../../labo/planche.js"></script>
+</body>
+</html>

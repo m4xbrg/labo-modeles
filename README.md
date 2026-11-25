@@ -41,7 +41,7 @@ Le détail, à jour, est dans [`corpus/`](corpus/README.md). En résumé, au 202
 
 **À construire : six pages de fondations.** Génome et variation (36), Immunité et coagulation (39), Rayonnement et étoiles (43·44), Cosmologie (45), États quantiques (49), Spin et intrication (50). Les modules 39, 43, 45, 49 et 50 n'ont aucune page. Quatre de ces pages peuvent démarrer tout de suite, 39 attend 36 et 45 attend 43·44 ; le plan, les briefs et les lots à déléguer sont dans [`prompts/FEUILLE-DE-ROUTE.md`](prompts/FEUILLE-DE-ROUTE.md) et [`prompts/lots/`](prompts/lots/LISEZ-MOI.md).
 
-**Seulement des idées.** L'essentiel de l'Atlas : sur 265 entrées, 16 sont construites, 16 partielles, 67 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 164 restent des idées.
+**Seulement des idées.** L'essentiel de l'Atlas : sur 266 entrées, 17 sont construites, 16 partielles, 67 absorbées dans une fondation, 2 sélectionnées (double pendule, effet tunnel) et 164 restent des idées.
 
 **Points d'attention connus.**
 

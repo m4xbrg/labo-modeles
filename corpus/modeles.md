@@ -4,7 +4,7 @@ Ce fichier ne liste que ce qui s'ouvre dans le dépôt, sur `main`. Un brief, un
 
 Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époque du banc d'essai Opus + Sonnet ; voir [`historique.md`](historique.md)). Chaque modèle est une page `index.html` autonome, avec un `explication.html` « Comprendre ce qui se passe ».
 
-**35 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L’invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) et 26 pages de fondations. Plus trois pages d’appui (accueil, préalables, redirection racine).
+**37 modèles** : 9 planches numérotées 01-09 (dont 5 forment la collection *L’invisible en mouvement*, et 3 sont issues ou prolongées par des productions de fondations) 27 pages de fondations et un showcase autonome sans numéro (*Le problème des trois corps*, 2026-11-24). Plus trois pages d’appui (accueil, préalables, redirection racine).
 
 ## Vue d'ensemble
 
@@ -15,6 +15,7 @@ Toutes les pages vivent dans `opus-sonnet/` (le nom du dossier vient de l'époqu
 | [Le neurone qui apprend](../opus-sonnet/03-neurone/index.html) | showcase | — | 03 · L'invisible en mouvement | 33 | 2026-09-29 |
 | [Le champ électrique](../opus-sonnet/04-champ-electrique/index.html) | sandbox | — | 04 · hors collection | 21 (supporting) | 2026-09-29 |
 | [Ondes et interférences](../opus-sonnet/05-ondes-interferences/index.html) | showcase | — | 05 · hors collection | 15 (partial) | 2026-10-01 |
+| [Le problème des trois corps](../opus-sonnet/trois-corps/index.html) | showcase | — | hors collection | 13, 08, 11 (supporting) | 2026-11-24 |
 | [Électrostatique](../opus-sonnet/fondations-electrostatique/index.html) | foundation | Électricité fondamentale et circuits | — | 21 | 2026-11-05 |
 | [Courant et circuits](../opus-sonnet/06-courant-circuits/index.html) | foundation | Électricité fondamentale et circuits | 06 · hors collection | 22 | 2026-10-01 |
 | [Matière, chaleur et transport](../opus-sonnet/07-matiere-chaleur/index.html) | foundation | Matière microscopique, thermique et transport | 07 · hors collection | 17, 18, 19 | 2026-10-01 |
@@ -108,6 +109,16 @@ Elle reste un showcase autonome. Elle relève du module 36 (copie et division du
 - **Actes** : I Une source · II Impulsions · III Annulation · IV Énergie · V Stationnaire · VI À toi
 - **Interaction** : Longueur d’onde et phase réglables, sources et sonde glissables, vue instantanée ou intensité moyenne.
 - **Notes** : Antérieure aux fondations Oscillations et ondes, qui reprennent le module 15 en entier. Couvre la superposition et les interférences en 2D ; pas de Doppler ni de modes.
+
+### Le problème des trois corps
+
+- **Identifiant** : `trois-corps` · **chemin** : [`opus-sonnet/trois-corps/index.html`](../opus-sonnet/trois-corps/index.html) · **explication** : [`explication.html`](../opus-sonnet/trois-corps/explication.html)
+- **Type** : showcase · **statut** : `built` · **production** : aucune (modèle autonome)
+- **Collection** : aucune
+- **Modules** : 13 Gravitation et orbites (`supporting`), 08 Non-linéarité, stabilité et chaos (`supporting`), 11 Énergie et quantité de mouvement (`supporting`)
+- **Actes** : I Le huit · II Deux mondes jumeaux · III L’éjection · IV Le triangle · V À toi
+- **Interaction** : Corps et flèches de vitesse glissables, masses, frise du temps réversible, jumeau à écart réglable, poussée et repère tournant, préréglages libres.
+- **Notes** : Moteur verrouillé `prompts/moteurs/trois-corps.js` et ses tests. Intégrateur adaptatif sans adoucissement, arrêt à la collision (0,0001 UA). Le curseur d'écart s'arrête à 10⁻⁶ : à 10⁻⁸, le temps de séparation dépend de la précision du calcul. Plan, points, Newton seulement. **À faire essayer à Max.**
 
 ### La réplication de l’ADN
 

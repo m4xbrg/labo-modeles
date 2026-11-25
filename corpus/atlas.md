@@ -10,8 +10,8 @@ Version structurée : [`atlas.json`](atlas.json). Les statuts et les colonnes so
 |---|---|---|---|---|---|---|
 | Liste historique (18 groupes) | 192 | 6 | 12 | 51 | 0 | 123 |
 | Ajouts proposés (2026-10-02) | 69 | 7 | 4 | 16 | 1 | 41 |
-| Sujets de l'histoire du dépôt | 4 | 3 | 0 | 0 | 1 | 0 |
-| **Total** | **265** | **16** | **16** | **67** | **2** | **164** |
+| Sujets de l'histoire du dépôt | 5 | 4 | 0 | 0 | 1 | 0 |
+| **Total** | **266** | **17** | **16** | **67** | **2** | **164** |
 
 La liste historique compte 193 lignes : « Cosmic web » y figure deux fois (groupes 11 et 16) et n'a qu'une entrée de données.
 
@@ -507,3 +507,4 @@ Présents dans le dépôt (planche ou brief) mais absents des deux listes ci-des
 | Neurone qui apprend | `built` | 33 | 21, 32 | Le neurone qui apprend | Une des quatre premières planches ; voir aussi « Potentiel d’action détaillé » et « Plasticité synaptique ». |
 | Courant et circuits | `built` | 22 | 21 | Courant et circuits |  |
 | Double pendule et chaos | `selected` | 08 | 10, 11, 12, 04 | — | Brief de showcase écrit (« 07 · Double pendule et chaos »), rien de construit. |
+| Problème des trois corps | `built` | — | 13, 08, 11 | Le problème des trois corps | Demandé directement par Max le 2026-11-24 ; absent des deux listes. |
