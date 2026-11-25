@@ -151,7 +151,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
-<link rel="stylesheet" href="../../labo/planche-etapes.css">
+
 <style>
 /* Coque LABO ; l’écran conserve sa palette d’origine. */
 /* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
@@ -166,8 +166,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
 </style>
 <script src="../../labo/theme.js"></script>
+<style>
+.labo-fiche .migration-tete,.labo-fiche #cards,.labo-fiche .panel > nav.liens{display:none}
+.labo-fiche .panel{min-width:0}
+.labo-fiche #migration-readings{padding:0 20px 4px 22px}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="vmc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
   <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
   <div class="droite"><p class="pos">Fondations · 24</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
@@ -183,12 +192,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <button class="seg" data-a="3" title="Étape 4 — Ce que l'onde transporte"><b>24.4</b><span>Énergie</span></button>
   </div></div>
 </nav>
-<div class="modes"><div role="tablist" aria-label="Couches de la planche">
-  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>V</span>Observer</button>
-  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>M</span>Manipuler</button>
-  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>C</span>Comprendre</button>
-</div><p class="indice" id="indice"></p></div>
-
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Scène de l'onde électromagnétique : une charge dont on voit le champ se coder en cercles qui grandissent à la vitesse c lorsqu'on la secoue, puis une onde plane où le champ électrique et le champ magnétique avancent ensemble."></canvas>
@@ -196,34 +199,36 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
-    <section>
+    <section class="migration-tete">
       <p class="eyebrow" id="eyebrow">Étape <b>1</b> sur 4</p>
       <h2 id="stepTitle">Secouer une charge</h2>
-      <p id="stepText" aria-live="polite" class="couche-comp"></p>
-      <p class="cle couche-comp" id="cle"></p>
-      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p id="stepText" aria-live="polite" class=""></p>
+      
+      
     </section>
+    <div id="migration-readings"><p class="cle " id="cle"></p><p class="status " id="status" aria-live="off"></p>
 
-    <section id="recSec" class="couche-lire">
+    <section id="recSec" class="">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : position de la charge et champ de rayonnement à la sonde en fonction du temps, ou champ électrique et champ magnétique au même point."></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
 
     <section id="measSec">
-      <div class="meas couche-lire" id="meas"></div>
-      <p class="real couche-comp" id="mReal" hidden></p>
-      <p class="note couche-comp" id="mNote"></p>
+      <div class="meas " id="meas"></div>
+      <p class="real " id="mReal" hidden></p>
+      <p class="note " id="mNote"></p>
     </section>
 
-    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+    </div>
+    <section class="cards " id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
       <div class="card"><b>Matière</b>Pourquoi la lumière ralentit-elle dans le verre, et pourquoi tourne-t-elle à l'entrée ?<small>Module 25 · optique (à venir)</small></div>
       <div class="card"><b>Atomes</b>Pourquoi un gaz chaud n'émet-il que certaines couleurs ?<small>Module 27 · photons et spectres (à venir)</small></div>
       <div class="card"><b>Étoiles</b>Quelle couleur a un objet seulement parce qu'il est chaud ?<small>Module 43 · corps noir (à venir)</small></div>
     </section>
 
-    <section class="kbd couche-lire">
+    <section class="kbd" id="hints">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser l'étape</li>
@@ -231,7 +236,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </ul>
     </section>
 
-    <nav class="liens couche-comp">
+    <nav class="liens ">
       <a class="comprendre" id="lienTheorie" href="explication.html#m24"><span>Lire la théorie · module <b id="numTheorie">24</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
@@ -1428,6 +1433,7 @@ function syncTools() {
   document.querySelectorAll('#tools .grp[data-acts]').forEach(gp => { gp.hidden = !gp.dataset.acts.split(' ').includes(String(act)); });
 }
 function enterAct(n, restart) {
+  if (window.Fiche) Fiche.relance();
   act = n;
   if (n === 0) { if (restart) resetPrm1(); resetS1(); acc = 0; }
   else if (n === 1) { if (restart) resetS2(); }
@@ -1435,6 +1441,7 @@ function enterAct(n, restart) {
   else if (n === 3) { if (restart) resetS4(); }
   hideTip(); syncTools(); buildMeas();
   if (restart) setPlay(true);
+  if (window.Fiche) Fiche.montre(n);
 }
 function updateUI(n) {
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
@@ -1631,6 +1638,24 @@ resize();
 resetPrm1(); resetS2(); resetS3(); resetS4();
 enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
+})();
+</script>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+'use strict';
+const snapshot = () => window.__labo.state();
+window.allerScene = n => window.__labo.goAct(n);
+const instant = (e,m) => { if (!m.depart) m.depart = e; };
+const fiches = [{titre:"Secouer une charge",regarde:"Une charge et sa sonde occupent la scène. Une impulsion ou une oscillation produit une perturbation qui atteint la sonde avec retard.",prediction:{q:"La fréquence initiale est 0,5 Hz et c de scène vaut 100 unités/s. Quelle longueur d’onde donne une oscillation à cette fréquence ?",reponse:100/.5,unite:"unités",tol:2,explication:"La relation λ = c/f donne 100/0,5 = 200 unités de scène. Ce ralenti pédagogique ne représente pas la vitesse réelle de la lumière."},suivi:instant,essais:[{t:"Active l’oscillation de la charge.",fait:(e,m)=>m.depart&&e.osc!==m.depart.osc},{t:"Change la fréquence de l’oscillation.",fait:(e,m)=>m.depart&&Math.abs((e.f)-(m.depart.f))>1e-12},{t:"Isole ou réaffiche la partie qui rayonne.",fait:(e,m)=>m.depart&&e.radOnly!==m.depart.radOnly}],pourquoi:"La sonde reçoit une information provenant de la position passée de la source. Une accélération émet une perturbation ; les variations ne se transmettent pas instantanément.",relation:"\\lambda=\\frac{c}{f},\\qquad t_\\mathrm{retard}=\\frac{r}{c}",defs:[["Retard","Temps de propagation entre source et observation."]],piege:"Le champ à la sonde ne dépend pas seulement de la position actuelle de la charge."},
+{titre:"E et B, ensemble",regarde:"Les deux champs sont perpendiculaires et en phase dans cette onde plane. Ils culminent ensemble et s’annulent ensemble, en avançant dans la même direction.",prediction:{q:"Au préréglage Soleil au sol (1 000 W/m²), quelle amplitude B₀ prévois-tu en µT ?",reponse:window.__labo.moteur.B0from(window.__labo.moteur.E0from(1000))*1e6,unite:"µT",tol:0.08,explication:"Le moteur déduit E₀ de l’intensité, puis B₀ = E₀/c : environ 2,90 µT."},suivi:instant,essais:[{t:"Change l’amplitude électrique E₀.",fait:(e,m)=>m.depart&&Math.abs((e.E0)-(m.depart.E0))>1e-12},{t:"Change la fréquence.",fait:(e,m)=>m.depart&&Math.abs((e.f)-(m.depart.f))>1e-12},{t:"Arrête le temps pour comparer les champs.",fait:(e,m)=>m.depart&&e.frozen!==m.depart.frozen}],pourquoi:"Dans le vide, les champs électrique et magnétique d’une onde plane se propagent ensemble. Leurs amplitudes sont liées par c ; la fréquence et la longueur d’onde décrivent le même rythme dans le temps et dans l’espace.",relation:"E_0=cB_0,\\qquad \\lambda=\\frac{c}{f}",defs:[["Amplitude","Valeur maximale du champ."]],piege:"E et B sont en phase ; ils ne culminent pas à tour de rôle."},
+{titre:"Un seul phénomène, tout le spectre",regarde:"La longueur d’onde situe le rayonnement dans le spectre. Les objets d’échelle et l’énergie d’un photon changent avec elle.",prediction:{q:"Pour le préréglage FM initial, quelle fréquence prévois-tu en MHz ?",reponse:window.__labo.moteur.C/window.__labo.moteur.presets.find(p=>p.id==='fm').lambda/1e6,unite:"MHz",tol:2,explication:"La fréquence se calcule à partir de la longueur d’onde du préréglage : f = c/λ."},suivi:instant,essais:[{t:"Déplace le curseur pour explorer une autre longueur d’onde.",fait:(e,m)=>m.depart&&Math.abs((e.lambda)-(m.depart.lambda))>1e-12},{t:"Choisis un autre préréglage.",fait:(e,m)=>m.depart&&e.preset!==m.depart.preset},{t:"Bascule le curseur de λ vers f.",fait:(e,m)=>m.depart&&e.mode!==m.depart.mode}],pourquoi:"Radio, visible et rayons X sont des ondes électromagnétiques. Une fréquence plus élevée correspond à une longueur d’onde plus courte et à une énergie par photon plus élevée.",relation:"c=\\lambda f,\\qquad E_\\gamma=hf",defs:[["Spectre","Ensemble des fréquences des rayonnements."]],piege:"La puissance d’une source et l’énergie d’un photon sont deux grandeurs différentes."},
+{titre:"Ce que l’onde transporte",regarde:"Une source rayonne dans toutes les directions. La distance règle l’intensité reçue ; la voile propose une autre lecture, par la pression de rayonnement.",prediction:{q:"Avec l’ampoule initiale de 100 W à 1 m, quelle intensité prévoit ce modèle isotrope ?",reponse:window.__labo.moteur.inverseSquare(100,1),unite:"W/m²",tol:0.2,explication:"Le moteur utilise I = P/(4πr²), soit environ 7,96 W/m². Toute la puissance est rayonnée dans ce modèle idéal."},suivi:instant,essais:[{t:"Change la distance à la source.",fait:(e,m)=>m.depart&&Math.abs((e.r)-(m.depart.r))>1e-12},{t:"Change la puissance émise.",fait:(e,m)=>m.depart&&Math.abs((e.P)-(m.depart.P))>1e-12},{t:"Active la voile réfléchissante.",fait:(e,m)=>m.depart&&e.sail!==m.depart.sail}],pourquoi:"À puissance fixée, une source isotrope répartit son énergie sur des sphères de plus en plus grandes. La lumière transporte aussi une quantité de mouvement et peut exercer une pression.",relation:"I=\\frac{P}{4\\pi r^2},\\qquad p_\\mathrm{abs}=\\frac{I}{c}",defs:[["Intensité","Puissance reçue par unité de surface, en W/m²."]],piege:"La loi en 1/r² décrit ici une source isotrope ; elle ne doit pas être appliquée à toute onde plane."}];
+const etapes = [...document.querySelectorAll('#stepper .seg')].map((b,i)=>({code:'24.'+(i+1),titre:fiches[i].titre,mod:24,scenes:[i]}));
+Fiche.init({etapes,fiches,lectures:'#migration-readings',etat:snapshot,aller:window.allerScene,toucheFocus:false,
+k:(tex,repli,bloc)=>window.katex?katex.renderToString(tex,{throwOnError:false,displayMode:bloc,output:'html'}):repli,theorie:()=> 'explication.html#m24'});
+Fiche.montre(window.__labo.step);
 })();
 </script>
 <script src="../../labo/planche.js"></script>
