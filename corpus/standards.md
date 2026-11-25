@@ -84,6 +84,7 @@ Les six showcases suivent le gabarit LABO : un chapitre, leurs actes conservés,
 | La respiration cellulaire | Respiration cellulaire | 4 + vue « Tout le trajet » | Frise `scrub`, oxygène `o2`. |
 | Le neurone qui apprend | Neurone | 2 actes | Impulsion et Synapse ; sous-étapes automatiques et oscilloscope dans la scène. |
 | Ondes et interférences | Ondes et interférences | 6 | Hors collection ; sources, sondes et oscilloscope. |
+| Le problème des trois corps | Les trois corps | 5 | Construit directement au gabarit standard (2026-11-24) ; hors collection ; frise réversible, jumeau. |
 | La réplication de l’ADN | Réplication de l’ADN | 5 | Graphe de la distance à la fourche. |
 | Supernova par effondrement du cœur | Supernova | 8 | Frise logarithmique `tlBox`, sans curseur physique. |
 
@@ -120,7 +121,7 @@ Les couches Observer / Manipuler / Comprendre étaient peu claires : la page s'o
 
 ### 4.5 État de la migration
 
-Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après la fusion des migrations de *Champ électrique*, *Oscillations et ondes*, *Forces, énergie et conservation*, *Systèmes, croissance et hasard* (PR n° 45 à 50), *Stabilité, bifurcations et chaos* (PR n° 55) et *Un signal, des fréquences* (PR n° 57). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
+Généré par `node outils/qa/conformite.mjs --markdown` le 2026-11-24, avec *Courant et circuits*, *Électrostatique*, *Le problème des trois corps* et les migrations de *Magnétisme et induction*, *L’onde électromagnétique* et *Optique* (non encore fusionnées dans `main`). Le régénérer et le recopier ici après la fusion des migrations (pas dans chaque PR de migration, pour éviter les conflits entre migrations parallèles).
 
 | Page | Dossier | Planche | Explication | État |
 |---|---|---|---|---|
@@ -129,7 +130,7 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après l
 | Le neurone | `03-neurone` | Couches O/M/C | Ancien format | À migrer |
 | Le champ électrique | `04-champ-electrique` | Fiche d’étape | Cours interactif | Au standard |
 | Ondes et interférences | `05-ondes-interferences` | Couches O/M/C | Ancien format | À migrer |
-| Courant et circuits | `06-courant-circuits` | Couches O/M/C | Ancien format | À migrer |
+| Courant et circuits | `06-courant-circuits` | Fiche d’étape | Cours interactif | Au standard |
 | Matière, chaleur et transport | `07-matiere-chaleur` | Couches O/M/C | Ancien format | À migrer |
 | La réplication de l'ADN | `08-replication-adn` | Couches O/M/C | Ancien format | À migrer |
 | Supernova par effondrement du cœur | `09-supernova` | Couches O/M/C | Ancien format | À migrer |
@@ -138,16 +139,17 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après l
 | D’un gradient à une tension | `fondations-bioelectricite` | Couches O/M/C | Ancien format | À migrer |
 | Cellule, membrane et transport | `fondations-cellule-membrane` | Couches O/M/C | Ancien format | À migrer |
 | Stabilité, bifurcations et chaos | `fondations-chaos` | Fiche d’étape | Cours interactif | Au standard |
+| Électrostatique | `fondations-electrostatique` | Fiche d’étape | Cours interactif | Au standard |
 | L’énergie du vivant | `fondations-energie-biologique` | Couches O/M/C | Ancien format | À migrer |
 | Évolution et génétique des populations | `fondations-evolution-populations` | Couches O/M/C | Ancien format | À migrer |
 | Flux, gradients, champs et fluides | `fondations-flux-fluides` | Couches O/M/C | Ancien format | À migrer |
 | Forces, énergie et conservation | `fondations-forces-energie` | Fiche d’étape | Cours interactif | Au standard |
 | De l’ADN à la protéine | `fondations-information-genetique` | Couches O/M/C | Ancien format | À migrer |
 | Langage scientifique | `fondations-langage` | Fiche d’étape | Cours interactif | Au standard |
-| Magnétisme et induction | `fondations-magnetisme-induction` | Couches O/M/C | Ancien format | À migrer |
+| Magnétisme et induction | `fondations-magnetisme-induction` | Fiche d’étape | Cours interactif | Au standard |
 | Molécules et mole | `fondations-molecules-mole` | Couches O/M/C | Ancien format | À migrer |
-| L'onde électromagnétique | `fondations-onde-electromagnetique` | Couches O/M/C | Ancien format | À migrer |
-| Optique : la lumière qui tourne | `fondations-optique` | Couches O/M/C | Ancien format | À migrer |
+| L'onde électromagnétique | `fondations-onde-electromagnetique` | Fiche d’étape | Cours interactif | Au standard |
+| Optique : la lumière qui tourne | `fondations-optique` | Fiche d’étape | Cours interactif | Au standard |
 | Oscillations et ondes | `fondations-oscillations-ondes` | Fiche d’étape | Cours interactif | Au standard |
 | Muscle, cœur et échanges | `fondations-physiologie-circulation` | Couches O/M/C | Ancien format | À migrer |
 | Du local au collectif | `fondations-populations-emergence` | Couches O/M/C | Ancien format | À migrer |
@@ -159,5 +161,6 @@ Généré par `node outils/qa/conformite.mjs --markdown` le 2026-10-23, après l
 | Signaux et équilibres du vivant | `fondations-signalisation-homeostasie` | Couches O/M/C | Ancien format | À migrer |
 | Un signal, des fréquences | `fondations-signaux-fourier` | Fiche d’étape | Cours interactif | Au standard |
 | Systèmes, croissance et hasard | `fondations-systemes-hasard` | Fiche d’étape | Cours interactif | Au standard |
+| Le problème des trois corps | `trois-corps` | Fiche d’étape | Cours interactif | Au standard |
 
-7 page(s) sur 35 au standard.
+13 page(s) sur 37 au standard.
