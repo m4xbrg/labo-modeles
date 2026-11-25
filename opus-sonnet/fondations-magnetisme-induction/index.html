@@ -145,7 +145,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
-<link rel="stylesheet" href="../../labo/planche-etapes.css">
+
 <style>
 /* Coque LABO ; l’écran conserve sa palette d’origine. */
 /* Lecture et frise visibles en Observer ; seuls les réglages se masquent (forme plein écran, 2026-10-07). */
@@ -160,8 +160,17 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .labo-etapes .btn.go:hover{background:var(--papier-2);color:var(--encre);border-color:var(--encre)}
 </style>
 <script src="../../labo/theme.js"></script>
+<style>
+.labo-fiche .migration-tete,.labo-fiche #cards,.labo-fiche .panel > nav.liens{display:none}
+.labo-fiche .panel{min-width:0}
+.labo-fiche #migration-readings{padding:0 20px 4px 22px}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omk">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre"><div class="ou"><a class="marque" href="../../labo/index.html">LABO</a>
   <a class="retour" href="../../labo/index.html#fondations">← Fondations</a></div>
   <div class="droite"><p class="pos">Fondations · 23</p><button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button></div>
@@ -177,12 +186,6 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     <button class="seg" data-a="3" title="Acte IV — L’induction freine"><b>23.4</b><span>Le freinage</span></button>
   </div></div>
 </nav>
-<div class="modes"><div role="tablist" aria-label="Couches de la planche">
-  <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarder la scène et choisir une étape."><span>O</span>Observer</button>
-  <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les commandes et les mesures apparaissent."><span>M</span>Manipuler</button>
-  <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Lire les explications et ouvrir la théorie du module."><span>K</span>Comprendre</button>
-</div><p class="indice" id="indice"></p></div>
-
 <div class="app">
   <main class="scene" id="scene">
     <canvas id="cv" role="img" aria-label="Paillasse de magnétisme : aimants, fils, spires et bobines avec leurs lignes de champ et des boussoles ; particules chargées qui tournent dans un champ ; aimant et bobine reliés à un galvanomètre ; rails, tige et tubes où l'induction freine le mouvement."></canvas>
@@ -190,14 +193,15 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
-    <section>
+    <section class="migration-tete">
       <p class="eyebrow" id="eyebrow">Acte <b>I</b> sur IV</p>
       <h2 id="stepTitle">D’où vient le champ</h2>
-      <p id="stepText" aria-live="polite" class="couche-comp"></p>
-      <p class="status couche-lire" id="status" aria-live="off"></p>
+      <p id="stepText" aria-live="polite" class=""></p>
+      
     </section>
+    <div id="migration-readings"><p class="status " id="status" aria-live="off"></p>
 
-    <section class="couche-lire">
+    <section class="">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'acte en fonction du temps, ou du champ en fonction de la distance."></canvas></div>
       <p class="leg" id="leg"></p>
@@ -206,18 +210,19 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </section>
 
     <section>
-      <div class="meas couche-lire" id="meas"></div>
-      <p class="note couche-comp" id="mNote"></p>
+      <div class="meas " id="meas"></div>
+      <p class="note " id="mNote"></p>
     </section>
 
-    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+    </div>
+    <section class="cards " id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
       <div class="card"><b>Lumière</b>Un champ magnétique qui varie fait naître un champ électrique. Un champ électrique qui varie fait-il naître un champ magnétique ?<small><a href="../fondations-onde-electromagnetique/index.html">Module 24 · L’onde électromagnétique</a></small></div>
       <div class="card"><b>Inductance</b>Une bobine sent son propre champ. Que se passe-t-il quand son courant change ?<small><a href="../06-courant-circuits/index.html">Planche Courant et circuits, acte IV</a></small></div>
       <div class="card"><b>Matière</b>D’où vient le champ d’un aimant, sans pile ni fil ?<small>Module 50 · spin (à venir)</small></div>
     </section>
 
-    <section class="kbd couche-lire">
+    <section class="kbd" id="hints">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
         <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> acte · <kbd>1</kbd>–<kbd>4</kbd> aller à l'acte · <kbd>R</kbd> réinitialiser</li>
@@ -225,7 +230,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
       </ul>
     </section>
 
-    <nav class="liens couche-comp">
+    <nav class="liens ">
       <a class="comprendre" id="lienTheorie" href="explication.html#m23"><span>Lire la théorie · module <b id="numTheorie">23</b></span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
@@ -1761,10 +1766,12 @@ function visTools() {
   });
 }
 function enterAct(n, restart) {
+  if (window.Fiche) Fiche.relance();
   act = n; if (restart) resetPrm(n);
   if (n === 0) reset1(); else if (n === 1) { K2.view = null; K2.sw = { th: 0, w: 0 }; K2.srec = []; K2.tsw = 0; launch2(); } else if (n === 2) reset3(); else reset4();
   hideTip(); syncTools(); buildMeas();
   if (restart) setPlay(true);
+  if (window.Fiche) Fiche.montre(n);
 }
 function updateUI(n) {
   document.querySelectorAll('.seg').forEach(s => { if (+s.dataset.a === n) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current'); });
@@ -1962,6 +1969,24 @@ resize();
 for (let i = 0; i < NA; i++) resetPrm(i);
 enterAct(0, true); updateUI(0);
 requestAnimationFrame(frame);
+})();
+</script>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+'use strict';
+const snapshot = () => ({ ...window.__labo.state, prm: { ...window.__labo.prm } });
+window.allerScene = n => window.__labo.goAct(n);
+const instant = (e,m) => { if (!m.depart) m.depart = e; };
+const fiches = [{titre:"D’où vient le champ",regarde:"Chaque petite boussole s’aligne sur le champ à l’endroit où elle se trouve. Aucune ligne ne commence ni ne finit : toutes se referment en passant dans l’aimant.",prediction:{q:"Au départ, un aimant est visible. Si on le coupe en deux, que devient chaque morceau ?",choix:["Un pôle isolé","Un aimant avec deux pôles","Un objet sans champ"],bonne:1,explication:"Chaque morceau reste un aimant ; les lignes de B ne commencent ni ne finissent sur une charge magnétique."},suivi:instant,essais:[{t:"Déplace la sonde pour comparer deux mesures de B.",fait:(e,m)=>m.depart&&Math.hypot(e.probe.x-m.depart.probe.x,e.probe.y-m.depart.probe.y)>.01},{t:"Choisis une autre source : fil, spire ou bobine.",fait:(e,m)=>m.depart&&e.src!==m.depart.src},{t:"Active ou désactive le champ terrestre.",fait:(e,m)=>m.depart&&e.earth!==m.depart.earth}],pourquoi:"Le champ total résulte de la superposition des sources. La boussole en montre la direction locale ; les lignes sont une représentation du champ, pas des trajectoires.",relation:"\\vec B=\\sum_i\\vec B_i",defs:[["Champ B","Champ magnétique, en teslas."],["Boussole","Aiguille qui s’aligne sur le champ local."]],piege:"Un pôle magnétique ne se sépare pas comme une charge électrique."},
+{titre:"Une force qui dévie",regarde:"Un proton tourne dans B. La force dévie sa vitesse sans en modifier la grandeur, tant qu’aucun champ électrique n’agit.",prediction:{q:"Pour le proton initial (1 000 km/s dans 0,1 T), quel rayon prévois-tu, en cm ?",reponse:window.__labo.Mag.gyro(window.__labo.Mag.MP,window.__labo.Mag.QE,1e6,.1,0).r*100,unite:"cm",tol:0.3,explication:"Le moteur donne r = mv/(|q|B), environ 10,44 cm. Sans champ électrique, l’énergie cinétique reste constante."},suivi:instant,essais:[{t:"Change B et compare la courbure.",fait:(e,m)=>m.depart&&e.prm.B2!==m.depart.prm.B2},{t:"Change la vitesse initiale.",fait:(e,m)=>m.depart&&e.prm.v2!==m.depart.prm.v2},{t:"Essaie la variante du fil parcouru par un courant.",fait:(e,m)=>m.depart&&e.seg!==m.depart.seg}],pourquoi:"La force magnétique est perpendiculaire à la vitesse. Elle peut changer sa direction sans fournir de travail. Un champ électrique, si tu l’actives, peut changer l’énergie.",relation:"\\vec F=q\\,\\vec v\\times\\vec B,\\qquad r=\\frac{mv}{|q|B}",defs:[["Rayon","Distance entre la particule et le centre de sa trajectoire circulaire."]],piege:"La direction de la force n’est pas celle de la vitesse."},
+{titre:"Faire varier le flux",regarde:"L’aimant et la bobine sont immobiles au départ. Le flux et la tension induite sont enregistrés l’un sous l’autre : compare leurs formes, pas seulement leurs valeurs.",prediction:{q:"Au repos, l’aimant peut donner un flux non nul. Quelle tension induite prévois-tu tant qu’il reste immobile ?",reponse:0,unite:"V",tol:0.001,explication:"La liaison de flux ne varie pas au repos : sa dérivée temporelle, donc la f.é.m., est nulle."},suivi:instant,essais:[{t:"Change le nombre de spires N.",fait:(e,m)=>m.depart&&e.prm.N3!==m.depart.prm.N3},{t:"Active le va-et-vient de l’aimant.",fait:(e,m)=>m.depart&&e.prm.shuttle!==m.depart.prm.shuttle},{t:"Passe au rotor ou aux deux bobines.",fait:(e,m)=>m.depart&&e.seg!==m.depart.seg}],pourquoi:"La tension dépend de la variation du flux et non de sa seule valeur. Lenz fixe le sens de la réponse : le courant induit s’oppose à la variation qui le produit.",relation:"\\varepsilon=-\\frac{\\mathrm d(N\\Phi)}{\\mathrm dt}",defs:[["Flux","Champ qui traverse une surface, en webers."]],piege:"Un flux important mais constant ne donne aucune tension induite."},
+{titre:"L’induction freine",regarde:"Sur les rails, la tige peut être tirée, lancée ou laissée libre. Le travail fourni se retrouve toujours en énergie cinétique et en chaleur : compare les barres.",prediction:{q:"Avec B = 0,5 T, ℓ = 0,20 m, R = 0,10 Ω et m = 0,05 kg, quelle est la constante de temps de freinage ?",reponse:window.__labo.Mag.rails({B:.5,ell:.2,R:.1,m:.05,F:0,open:false}).tau,unite:"s",tol:0.03,explication:"Le moteur calcule k = B²ℓ²/R = 0,10 kg/s, puis τ = m/k = 0,50 s."},suivi:instant,essais:[{t:"Change la résistance des rails.",fait:(e,m)=>m.depart&&e.prm.R4!==m.depart.prm.R4},{t:"Ouvre le circuit pour comparer le freinage.",fait:(e,m)=>m.depart&&e.prm.open!==m.depart.prm.open},{t:"Passe à l’aimant qui tombe dans un tube.",fait:(e,m)=>m.depart&&e.seg!==m.depart.seg}],pourquoi:"Le mouvement produit une tension puis un courant dans le circuit fermé. La force qui en résulte freine ce mouvement et transforme de l’énergie en chaleur.",relation:"\\varepsilon=B\\ell v,\\qquad Fv=\\varepsilon I=RI^2",defs:[["Freinage induit","Force opposée au mouvement qui crée le courant."]],piege:"L’expérience où Lenz est inversée est une hypothèse volontairement non physique."}];
+const etapes = [...document.querySelectorAll('#stepper .seg')].map((b,i)=>({code:'23.'+(i+1),titre:fiches[i].titre,mod:23,scenes:[i]}));
+Fiche.init({etapes,fiches,lectures:'#migration-readings',etat:snapshot,aller:window.allerScene,
+k:(tex,repli,bloc)=>window.katex?katex.renderToString(tex,{throwOnError:false,displayMode:bloc,output:'html'}):repli,theorie:()=> 'explication.html#m23'});
+Fiche.montre(window.__labo.act);
 })();
 </script>
 <script src="../../labo/planche.js"></script>
