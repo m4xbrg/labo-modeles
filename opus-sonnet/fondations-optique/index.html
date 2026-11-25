@@ -133,7 +133,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   .tip,.btn,.comprendre,.seg{transition:none}
 }
 </style>
-<link rel="stylesheet" href="../../labo/planche-etapes.css">
+
 <script src="../../labo/theme.js"></script>
 <style>
 /* Coque LABO : tout ce qui entoure l'écran suit le thème clair ou sombre ; l'écran d'instrument garde ses couleurs.
@@ -145,15 +145,24 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .labo-etapes .titre{padding-top:12px}.labo-etapes .modes{padding-top:8px}.labo-etapes .sig{gap:4px 18px}
 @media(max-width:860px){.labo-etapes .titre{gap:14px}.labo-etapes .modes{gap:8px}.labo-etapes .sig dd{font-size:11px}}
 </style>
+<style>
+.labo-fiche .migration-tete,.labo-fiche #cards,.labo-fiche .panel > nav.liens{display:none}
+.labo-fiche .panel{min-width:0}
+.labo-fiche #migration-readings{padding:0 20px 4px 22px}
+</style>
+<link rel="stylesheet" href="../../labo/planche-etapes.css">
+<link rel="stylesheet" href="../../labo/fiche.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="labo-etapes" data-mode="observer" data-touches="omc">
+<body class="labo-etapes labo-fiche" data-mode="fiche">
 <header class="barre">
   <div class="ou">
     <a class="marque" href="../../labo/index.html">LABO</a>
     <a class="retour" href="../../labo/index.html#fondations">← Fondations</a>
   </div>
   <div class="droite">
-    <p class="serie">LABO · Fondations 25</p>
+    <p class="pos">Fondations · 25</p>
     <button type="button" class="bascule-theme" data-theme-bascule>Thème auto</button>
   </div>
 </header>
@@ -172,21 +181,12 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 
 <nav class="chapitres" id="stepper" aria-label="Un chapitre, quatre étapes">
   <div class="chap"><p class="chap-t"><b>25</b>Optique</p><div class="segs">
-    <button class="seg" data-a="0" title="Étape 1 : Réfraction et réflexion totale"><b>1</b><span>Réfraction</span></button>
-    <button class="seg" data-a="1" title="Étape 2 : Lentilles et images"><b>2</b><span>Lentilles</span></button>
-    <button class="seg" data-a="2" title="Étape 3 : Couleurs et dispersion"><b>3</b><span>Couleurs</span></button>
-    <button class="seg" data-a="3" title="Étape 4 : Polarisation"><b>4</b><span>Polarisation</span></button>
+    <button class="seg" data-a="0" title="Étape 1 : Réfraction et réflexion totale"><b>25.1</b><span>Réfraction</span></button>
+    <button class="seg" data-a="1" title="Étape 2 : Lentilles et images"><b>25.2</b><span>Lentilles</span></button>
+    <button class="seg" data-a="2" title="Étape 3 : Couleurs et dispersion"><b>25.3</b><span>Couleurs</span></button>
+    <button class="seg" data-a="3" title="Étape 4 : Polarisation"><b>25.4</b><span>Polarisation</span></button>
   </div></div>
 </nav>
-
-<div class="modes">
-  <div role="tablist" aria-label="Couches de la planche">
-    <button role="tab" aria-selected="true" data-m="observer" data-indice="Regarde la table d’optique : la scène tourne seule. ← → pour changer d’étape."><span>O</span>Observer</button>
-    <button role="tab" aria-selected="false" data-m="manipuler" data-indice="Les réglages et les mesures apparaissent : change l’angle, la focale, la couleur."><span>M</span>Manipuler</button>
-    <button role="tab" aria-selected="false" data-m="comprendre" data-indice="Ce qui se passe, en mots, et la théorie du module 25."><span>C</span>Comprendre</button>
-  </div>
-  <p class="indice" id="indice"></p>
-</div>
 
 <div class="app">
   <main class="scene" id="scene">
@@ -195,36 +195,38 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
   <div class="tip" id="tip" role="tooltip"></div>
 
   <aside class="panel" aria-label="Panneau de lecture">
-    <section>
+    <section class="migration-tete">
       <p class="eyebrow" id="eyebrow">Module 25 · étape <b>1</b> sur 4</p>
       <h2 id="stepTitle">Réfraction et réflexion totale</h2>
-      <p id="stepText" class="couche-comp" aria-live="polite"></p>
-      <p class="status" id="status" aria-live="off"></p>
-      <p class="cle couche-comp" id="cle"></p>
+      <p id="stepText" class="" aria-live="polite"></p>
+      
+      
     </section>
+    <div id="migration-readings"><p class="status" id="status" aria-live="off"></p><p class="cle " id="cle"></p>
 
-    <section class="couche-lire">
+    <section class="">
       <p class="eyebrow" id="rEye">Enregistreur</p>
       <div class="scopeBox"><canvas id="scope" role="img" aria-label="Enregistreur : grandeurs de l'étape tracées en fonction de l'angle, de la distance ou de la hauteur d'incidence."></canvas></div>
       <p class="leg" id="leg"></p>
     </section>
 
-    <section class="couche-lire">
+    <section class="">
       <div class="meas" id="meas"></div>
       <p class="note" id="mNote"></p>
     </section>
 
-    <section class="cards couche-comp" id="cards" hidden aria-label="Trois questions ouvertes">
+    </div>
+    <section class="cards " id="cards" hidden aria-label="Trois questions ouvertes">
       <p class="eyebrow" style="margin:0">Trois questions ouvertes</p>
       <div class="card"><b>Ondes</b>Pourquoi la lumière contourne-t-elle un peu les obstacles, et pourquoi le ciel est-il bleu ?<small><a href="../fondations-oscillations-ondes/index.html">Module 15 · ondes</a> · Atlas : diffusion, diffraction</small></div>
       <div class="card"><b>Quantique</b>Que se passe-t-il quand un seul photon arrive sur un polariseur à 45° ?<small>Modules 48 et 50 (à venir)</small></div>
       <div class="card"><b>Cosmos</b>La gravitation peut-elle faire tourner la lumière comme une lentille ?<small>Module 47 (à venir)</small></div>
     </section>
 
-    <section class="kbd couche-lire">
+    <section class="kbd" id="hints">
       <p class="eyebrow">Clavier</p>
       <ul class="hints">
-        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser · <kbd>O</kbd><kbd>M</kbd><kbd>C</kbd> couches</li>
+        <li><kbd>Espace</kbd> pause · <kbd>&larr;</kbd><kbd>&rarr;</kbd> étape · <kbd>1</kbd>–<kbd>4</kbd> aller à l'étape · <kbd>R</kbd> réinitialiser · <kbd>I</kbd> infos</li>
         <li data-steps="0"><kbd>F</kbd> fronts d'onde · <kbd>S</kbd> inverser (sens du rayon) · <kbd>B</kbd> fibre optique</li>
         <li data-steps="1"><kbd>V</kbd> rayons réels / modèle idéal · <kbd>P</kbd> préréglage suivant</li>
         <!-- CLAVIER-3-4 -->
@@ -235,7 +237,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
     </section>
 
     <nav class="liens">
-      <a class="comprendre couche-comp" href="explication.html#m25"><span>Théorie du module 25</span><span aria-hidden="true">&rarr;</span></a>
+      <a class="comprendre " href="explication.html#m25"><span>Théorie du module 25</span><span aria-hidden="true">&rarr;</span></a>
     </nav>
   </aside>
 
@@ -877,9 +879,11 @@ function updateUI(n) {
 function setStatus(t) { const el = $('#status'); if (el.textContent !== t) el.textContent = t; }
 function refresh() { const st = stAt(step); st.sync(); applyTools(); st.read(); setStatus(st.status()); }
 function enterStep(n) {
+  if (window.Fiche) Fiche.relance();
   step = n; stAt(n).init();
   hideTip(); hoverKey = ''; dragKey = '';
   buildMeas(stAt(n)); sizeScope(); refresh();
+  if (window.Fiche) Fiche.montre(n);
 }
 function goStep(n, restart) {
   n = clamp(n, 0, STEPS.length - 1);
@@ -2542,7 +2546,25 @@ enterStep(0); updateUI(0);
 requestAnimationFrame(frame);
 })();
 </script>
+
+<script src="../../labo/fiche.js"></script>
+<script>
+(() => {
+'use strict';
+const snapshot = () => window.__labo.state();
+window.allerScene = n => window.__labo.goStep(n);
+const instant = (e,m) => { if (!m.depart) m.depart = e; };
+const fiches = [{titre:"Réfraction et réflexion totale",regarde:"Un rayon rencontre l’interface air-verre. Les deux rayons et les mesures montrent les parts réfléchie et transmise. Les deux parts font toujours 100 %.",prediction:{q:"Au départ, un rayon arrive de l’air dans le verre (n = 1,5), à 40° de la normale. Quel angle réfracté prévois-tu ?",reponse:window.__labo.moteur.snell(1,1.5,40*Math.PI/180).theta2*180/Math.PI,unite:"°",tol:1,explication:"Le moteur applique n₁ sin θ₁ = n₂ sin θ₂ ; θ₂ vaut environ 25,37°."},suivi:instant,essais:[{t:"Change l’angle du rayon incident.",fait:(e,m)=>m.depart&&Math.abs((e.theta1)-(m.depart.theta1))>1e-12},{t:"Active les fronts d’onde.",fait:(e,m)=>m.depart&&e.fronts!==m.depart.fronts},{t:"Inverse les milieux ou explore la fibre.",fait:(e,m)=>m.depart&&(e.reversed!==m.depart.reversed||e.fiber!==m.depart.fiber)}],pourquoi:"L’indice relie la vitesse dans le milieu à celle dans le vide. Le rayon se rapproche de la normale en entrant dans le milieu le plus réfringent. La réflexion totale ne se produit que dans l’autre sens, au-delà de l’angle critique.",relation:"n_1\\sin\\theta_1=n_2\\sin\\theta_2",defs:[["Normale","Droite perpendiculaire à l’interface."]],piege:"Les angles sont mesurés depuis la normale, pas depuis la surface."},
+{titre:"Lentilles et images",regarde:"Trois rayons partis de la pointe de l’objet se recoupent en un seul point : c’est là que se forme l’image. Ailleurs, l’écran ne montre qu’une tache.",prediction:{q:"Avec f = 100 mm et l’objet initial à 250 mm, où prévois-tu l’image de la lentille mince ?",reponse:window.__labo.moteur.thinLens(100,250,20).dImg,unite:"mm",tol:3,explication:"Le moteur donne 1/di = 1/100 − 1/250, donc di ≈ 166,67 mm : une image réelle."},suivi:instant,essais:[{t:"Change la distance de l’objet.",fait:(e,m)=>m.depart&&Math.abs((e.dObj)-(m.depart.dObj))>1e-12},{t:"Change la focale de la lentille.",fait:(e,m)=>m.depart&&Math.abs((e.f)-(m.depart.f))>1e-12},{t:"Compare avec les rayons réels.",fait:(e,m)=>m.depart&&e.realRays!==m.depart.realRays}],pourquoi:"Une lentille réunit ou écarte les rayons selon sa focale. Une image réelle peut être recueillie sur un écran ; une image virtuelle correspond au croisement des prolongements.",relation:"\\frac1f=\\frac1{d_o}+\\frac1{d_i},\\qquad m=-\\frac{d_i}{d_o}",defs:[["Focale","Distance caractéristique entre lentille et foyer."]],piege:"Une image virtuelle ne se projette pas sur un écran."},
+{titre:"Couleurs et dispersion",regarde:"Les différentes couleurs traversent le prisme selon des indices légèrement différents. L’écart est petit, mais il suffit à les étaler.",prediction:{q:"Avec la lumière blanche initiale et le verre du prisme, quelle couleur est la plus déviée ?",choix:["Le rouge","Le bleu-violet","Toutes de la même façon"],bonne:1,explication:"Dans le verre décrit par la loi de Cauchy du modèle, les courtes longueurs d’onde ont un indice plus élevé et une déviation plus grande."},suivi:instant,essais:[{t:"Change l’angle au sommet du prisme.",fait:(e,m)=>m.depart&&Math.abs((e.apex)-(m.depart.apex))>1e-12},{t:"Active la lumière monochromatique.",fait:(e,m)=>m.depart&&e.mono!==m.depart.mono},{t:"Essaie le second prisme ou la goutte.",fait:(e,m)=>m.depart&&(e.second!==m.depart.second||e.drop!==m.depart.drop)}],pourquoi:"La dispersion correspond à la variation de l’indice avec la longueur d’onde. Le prisme sépare les directions des couleurs ; il ne les crée pas.",relation:"n(\\lambda)=A+\\frac{B}{\\lambda^2}",defs:[["Dispersion","Dépendance de l’indice à la longueur d’onde."]],piege:"Un prisme ne transforme pas une lumière monochromatique en lumière blanche."},
+{titre:"Polarisation",regarde:"Deux polariseurs alignés laissent passer une partie de la lumière naturelle. Tu peux tourner leurs axes, insérer le troisième et explorer la réflexion sur une vitre.",prediction:{q:"Les deux polariseurs sont alignés au départ. Quelle fraction de l’intensité naturelle incidente transmettent-ils ?",reponse:window.__labo.moteur.chain(1,[0,0],true,0).at(-1),unite:"",tol:0.02,explication:"Le premier polariseur transmet la moitié de la lumière naturelle ; le second, aligné, laisse passer cette même moitié."},suivi:instant,essais:[{t:"Tourne le deuxième polariseur.",fait:(e,m)=>m.depart&&Math.abs((e.pol2)-(m.depart.pol2))>1e-12},{t:"Insère le troisième polariseur.",fait:(e,m)=>m.depart&&e.third!==m.depart.third},{t:"Explore le reflet sur une vitre.",fait:(e,m)=>m.depart&&e.glare!==m.depart.glare}],pourquoi:"Un polariseur transmet la composante du champ électrique parallèle à son axe. Après le premier filtre, la lumière est polarisée ; chaque filtre suivant applique la loi de Malus.",relation:"I=I_\\mathrm{avant}\\cos^2\\theta",defs:[["Polarisation","Orientation de la vibration électrique de la lumière."]],piege:"Un filtre supplémentaire peut laisser passer plus de lumière entre deux filtres croisés."}];
+const etapes = [...document.querySelectorAll('#stepper .seg')].map((b,i)=>({code:'25.'+(i+1),titre:fiches[i].titre,mod:25,scenes:[i]}));
+Fiche.init({etapes,fiches,lectures:'#migration-readings',etat:snapshot,aller:window.allerScene,toucheFocus:false,
+k:(tex,repli,bloc)=>window.katex?katex.renderToString(tex,{throwOnError:false,displayMode:bloc,output:'html'}):repli,theorie:()=> 'explication.html#m25'});
+Fiche.montre(window.__labo.step);
+})();
+</script>
 <script src="../../labo/planche.js"></script>
-<script>if (window.Planche) Planche.surMode(() => requestAnimationFrame(() => dispatchEvent(new Event('resize'))));</script>
+
 </body>
 </html>
